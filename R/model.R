@@ -6,14 +6,28 @@
 #' @slot defaultHeight default height of sensor in cm
 #' @slot minValue minimal value
 #' @slot maxValue maximal value
-
+#' @export
 setClass("Sensor",
          slots = c(
            name = "character",
            logger = "character",
-           phycsical = "character",
+           physical = "character",
            units = "character",
            defaultHeight = "numeric",
            minValue = "numeric",
            maxValue = "numeric"
+         ))
+
+#' Class for source file data format
+#' @slot has_header columns separator
+#' @slot separator columns separator
+#' @slot date_column index of date column
+#' @slot date_format format of date
+#' @export
+setClass("DataFormat",
+         slots = c(
+           header = "logical",
+           separator = "character",
+           date_column = "numeric",
+           date_format = "character"
          ))
