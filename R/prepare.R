@@ -34,7 +34,8 @@ prepare.read_logger <- function(filename, serial_number, id_locality, data_forma
     data_format <- model.load_info_from_data(data_format, data_table)
     data_table$date_UTC <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, tz))
     metadata <- new("model.LoggerMetadata",
-                    serial_number = serial_number)
+                    serial_number = serial_number,
+                    id_locality = id_locality)
     list(metadata = metadata,
          sensors_data = .get_sensors_data_list(data_table, data_format))
 }

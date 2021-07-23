@@ -22,7 +22,8 @@ setClass("model.Sensor",
 #' @export
 setClass("model.LoggerMetadata",
          representation(
-           serial_number = "character"
+           serial_number = "character",
+           id_locality = "character"
          ))
 
 #' Class for sensor data
