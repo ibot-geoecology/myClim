@@ -63,6 +63,7 @@ který předá instanci třídy `model.TMS3DataFormat`, podle které se načte s
 Je možné otestovat následujícím způsobem:
 
 ```R
+library(microclim)
 logger_data <- microclim::prepare.read_TMS3_logger("tests/data/data_94184102_0.csv", "94184102", "horní dolní")
 ```
 

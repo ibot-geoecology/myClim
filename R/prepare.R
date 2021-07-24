@@ -1,5 +1,3 @@
-source("R/model.R")
-
 #' TMS3 logger raw data reading
 #'
 #' This function read raw data of TMS3 logger and return data in standard format.
@@ -10,7 +8,7 @@ source("R/model.R")
 #' @return data in standard format
 #' @export
 prepare.read_TMS3_logger <- function(filename, serial_number, id_locality) {
-    prepare.read_logger(filename, serial_number, id_locality, microclim::data.source_data_formats$TMS3, "UTC")
+    prepare.read_logger(filename, serial_number, id_locality, data.source_data_formats$TMS3, "UTC")
 }
 
 #' Logger raw data reading
