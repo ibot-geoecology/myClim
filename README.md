@@ -38,7 +38,7 @@ Případně v RStudiu je možné instalovat v menu Build -> Install and restart.
 # API
 ## model
 
-Soubor `R/model.R`. Obsahuje definice tříd.
+Soubor [R/model.R](R/model.R). Obsahuje definice tříd.
 
 ### model.Sensor
 
@@ -63,7 +63,7 @@ Zděděná třída rozšiřující `model.DataFormat` kvůli detekci formátu da
 
 ## prepare
 
-Soubor `R/prepare.R`. Obsahuje funkce pro parsování dat z loggerů.
+Soubor [R/prepare.R](R/prepare.R). Obsahuje funkce pro parsování dat z loggerů.
 
 ### prepare.read\_TMS3\_logger
 
