@@ -1,5 +1,15 @@
 # Instalace
 
+## Přímá instalce z GitLab
+
+Pokud máte nainstalovanej balíček devtools, tak je možné balíček nainstalovat přimo z GitLab následujícím příkazem.
+
+```R
+devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="5N6cg1k2TNczNj85xf15")
+```
+
+## Lokální instalace
+
 Celý git repozitář je možné klonovat následujícími příkazy. V případě, že se chcete vyhnout příkazové řadce a git,
 tak je možné celý obsah komprimovaný jako zip stáhnout přes tlačítko:
 

@@ -1,7 +1,9 @@
 .PHONY: install, remove
 
+install-gitlab:
+	R -e 'devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="5N6cg1k2TNczNj85xf15")'
+
 install:
-	# R -e 'devtools::install_gitlab("microclimate_r/package", host="git.sorbus.ibot.cas.cz", auth_token="enzNvQ7Y8xofEtY8giGY")'
 	R -e 'install.packages(".", repos = NULL)'
 
 remove:
