@@ -30,7 +30,10 @@ Balíček jsem pojmenoval microclim. Instalaci balíčku je možné provést ná
 za předpokladu, že pracovní adresář je nastavený na adresář, ve kterém se nachází README.md.
 
 ```R
-install.packages(".", repos = NULL)
+install.packages(".", repos = NULL,type="source") # Windows
+
+install.packages(".", repos = NULL) # Unix
+
 ```
 
 Případně v RStudiu je možné instalovat v menu Build -> Install and restart.
