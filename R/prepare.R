@@ -11,14 +11,12 @@ prepare.read_TMS3_logger <- function(filename, serial_number, id_locality) {
     prepare.read_logger(filename, serial_number, id_locality, data.source_data_formats$TMS3, "UTC")
 }
 #' @examples
-#' \dontrun{
 #' install.packages(".", repos = NULL,type="source")
 #' library(microclim)
 #' df<-prepare.read_TMS3_logger("./tests/data/data_94184102_0.csv","94184102","Kocourkov")
 #' T.data<-df$sensors_data$T1
 #' T1.data<-df$sensors_data$T1@data
 #' is(T1.data)
-#' }
 
 #' Logger raw data reading
 #'
