@@ -72,7 +72,7 @@ prepare.read_TMS3_TMS4_logger <- function(filename, serial_number=NULL) {
 #' @examples
 #' install.packages(".", repos = NULL,type="source")
 #' library(microclim)
-#' df<-prepare.read_TMS3_logger("./tests/data/data_94184102_0.csv","94184102","Kocourkov")
+#' df<-prepare.read_TMS3_TMS4_logger("./tests/data/data_94184102_0.csv")
 #' T.data<-df$sensors_data$T1
 #' T1.data<-df$sensors_data$T1@data
 #' is(T1.data)
