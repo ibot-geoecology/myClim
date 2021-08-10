@@ -69,6 +69,13 @@ prepare.read_TMS1_logger <- function(filename, serial_number=NULL) {
 prepare.read_TMS3_TMS4_logger <- function(filename, serial_number=NULL) {
     prepare.read_logger(filename, data.source_data_formats$TMS3_TMS4, serial_number, "UTC")
 }
+#' @examples
+#' install.packages(".", repos = NULL,type="source")
+#' library(microclim)
+#' df<-prepare.read_TMS3_logger("./tests/data/data_94184102_0.csv","94184102","Kocourkov")
+#' T.data<-df$sensors_data$T1
+#' T1.data<-df$sensors_data$T1@data
+#' is(T1.data)
 
 #' Logger raw data reading
 #'
