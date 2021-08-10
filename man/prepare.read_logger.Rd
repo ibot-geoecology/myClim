@@ -4,22 +4,14 @@
 \alias{prepare.read_logger}
 \title{Logger raw data reading}
 \usage{
-prepare.read_logger(
-  filename,
-  serial_number,
-  id_locality,
-  data_format,
-  tz = "UTC"
-)
+prepare.read_logger(filename, data_format, serial_number = NULL, tz = "UTC")
 }
 \arguments{
 \item{filename}{path to source file}
 
-\item{serial_number}{serial number of logger}
-
-\item{id_locality}{id of locality}
-
 \item{data_format}{definition of format source file}
+
+\item{serial_number}{serial number of logger, if is NULL try detect from filename}
 
 \item{tz}{time zone of dates in source data}
 }

@@ -1,3 +1,5 @@
+# classes ================================================================================
+
 #' Class for sensor definition
 #' @slot name name of sensor (T1, T2, T3, TDT, RH, ...)
 #' @slot logger name of logger (TMS3, TMS4 long, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)
@@ -18,12 +20,19 @@ setClass("model.Sensor",
            max_value = "numeric"
          ))
 
-#' Class for logger data
+#' Class for locality metadata
+#' @export
+setClass("model.LocalityMetadata",
+         representation(
+           id = "character"
+         ))
+
+#' Class for logger metadata
 #' @export
 setClass("model.LoggerMetadata",
          representation(
-           serial_number = "character",
-           id_locality = "character"
+           name = "character",
+           serial_number = "character"
          ))
 
 #' Class for sensor data
@@ -54,19 +63,23 @@ setClass("model.DataFormat",
            date_column = "numeric",
            date_format = "character",
            na_strings = "character",
-           columns = "list"
+           columns = "list",
+           filename_serial_number_pattern = "character"
          ),
          prototype(
            has_header = TRUE,
            separator = ";",
            date_column = NA_integer_,
            date_format = NA_character_,
-           na_strings = NA_character_
+           na_strings = NA_character_,
+           filename_serial_number_pattern = NA_character_
          ))
 
 #' Class for source file data format for TMS3 logger
 #' @export
 setClass("model.TMS3DataFormat", contains = "model.DataFormat")
+
+# generics ================================================================================
 
 setGeneric(
   "model.load_info_from_data",
@@ -74,6 +87,15 @@ setGeneric(
     standardGeneric("model.load_info_from_data")
   }
 )
+
+setGeneric(
+  "model.get_serial_number_from_filename",
+  function(object, filename){
+    standardGeneric("model.get_serial_number_from_filename")
+  }
+)
+
+# methods ================================================================================
 
 setMethod(
     "model.load_info_from_data",
@@ -96,5 +118,16 @@ setMethod(
             object@date_format <- "%d.%m.%Y %H:%M"
         }
         object
+    }
+)
+
+setMethod(
+    "model.get_serial_number_from_filename",
+    signature("model.DataFormat"),
+    function(object, filename) {
+        if(is.null(object@filename_serial_number_pattern)) {
+          stop(sprintf("It is not possible identify serial_number from file %s.", filename));
+        }
+        stringr::str_match(filename, object@filename_serial_number_pattern)[1, 2]
     }
 )

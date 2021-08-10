@@ -44,6 +44,10 @@ Soubor [R/model.R](R/model.R). Obsahuje definice tříd.
 
 Třida pro definici sensorů a jejich parametrů. Dávalo by mi smysl ji mít oddělenou od dat z čidel.
 
+### model.LocalityMetadata
+
+Třída pro uložení informací o lokalitě.
+
 ### model.LoggerMetadata
 
 Třída pro uložení informací o loggeru.
@@ -65,6 +69,21 @@ Zděděná třída rozšiřující `model.DataFormat` kvůli detekci formátu da
 
 Soubor [R/prepare.R](R/prepare.R). Obsahuje funkce pro parsování dat z loggerů.
 
+### prepare.read\_files\_by\_csv
+
+Funkce pro načtení dat z více souborů. Funkci se předá csv soubor s tabulkou s popisem souborů.
+
+Je možné otestovat následujícím způsobem:
+
+```R
+library(microclim)
+localities_data <- microclim::prepare.read_files_by_csv("tests/data/files_table.csv")
+```
+
+### prepare.read\_files
+
+### prepare.read\_TMS1\_logger
+
 ### prepare.read\_TMS3\_logger
 
 Funkce pro načtení dat z TMS3 loggeru. Volá univerzální funkci `prepare.read_logger`,
@@ -74,7 +93,7 @@ Je možné otestovat následujícím způsobem:
 
 ```R
 library(microclim)
-logger_data <- microclim::prepare.read_TMS3_logger("tests/data/data_94184102_0.csv", "94184102", "horní dolní")
+logger_data <- microclim::prepare.read_TMS3_logger("tests/data/data_94184102_0.csv")
 ```
 
 ### prepare.read\_logger`
@@ -87,6 +106,8 @@ Proto jsem zvolil následující výstupní formát:
 seznam obsahující dvě položky:
 * `metadata` - instance třídy `model.LoggerMetadata`
 * `sensors_data` - seznam instancí třídy `model.SensorData`
+
+### prepare.functions\_read\_logger`
 
 ## data
 

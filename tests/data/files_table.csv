@@ -1,0 +1,3 @@
+path;locality_id;logger;serial_number
+"tests/data/data_94184102_0.csv";LOC_1;TMS4;
+"tests/data/data_91184101_0.csv";LOC_2;TMS1;
