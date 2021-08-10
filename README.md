@@ -89,14 +89,14 @@ localities_data <- microclim::prepare.read_files_by_csv("tests/data/files_table.
 
 ### prepare.read\_TMS3\_TMS4\_logger
 
-Funkce pro načtení dat z TMS3 loggeru. Volá univerzální funkci `prepare.read_logger`,
+Funkce pro načtení dat z TMS3 a TMS4 loggeru. Volá univerzální funkci `prepare.read_logger`,
 který předá instanci třídy `model.TMS3DataFormat`, podle které se načte správně zdrojový soubor.
 
 Je možné otestovat následujícím způsobem:
 
 ```R
 library(microclim)
-logger_data <- microclim::prepare.read_TMS3_logger("tests/data/data_94184102_0.csv")
+logger_data <- microclim::prepare.read_TMS3_TMS4_logger("tests/data/data_94184102_0.csv")
 ```
 
 ### prepare.read\_logger`
