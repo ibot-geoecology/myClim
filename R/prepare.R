@@ -34,16 +34,16 @@ prepare.read_files <- function(files_table) {
     result
 }
 
-.add_logger_to_locality <- function(current_item, row) {
-    if(is.null(current_item))
+.add_logger_to_locality <- function(current_locality, row) {
+    if(is.null(current_locality))
     {
         metadata <- new("model.LocalityMetadata",
                         id = row$locality_id)
-        current_item <- list(metadata = metadata, loggers=list())
+        current_locality <- list(metadata = metadata, loggers=list())
     }
-    new_index <- length(current_item$loggers) + 1
-    current_item$loggers[[new_index]] <- prepare.functions_read_logger[[row$logger]](row$path, row$serial_number)
-    current_item
+    new_index <- length(current_locality$loggers) + 1
+    current_locality$loggers[[new_index]] <- prepare.functions_read_logger[[row$logger]](row$path, row$serial_number)
+    current_locality
 }
 
 #' TMS1 logger raw data reading
@@ -98,10 +98,11 @@ prepare.read_logger <- function(filename, data_format, serial_number=NULL, tz = 
                              stringsAsFactors = FALSE,
                              na.strings = data_format@na_strings)
     data_format <- model.load_info_from_data(data_format, data_table)
-    data_table$date_UTC <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, tz))
+    datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, tz))
     metadata <- new("model.LoggerMetadata",
                     serial_number = serial_number)
     list(metadata = metadata,
+         datetime = datetime,
          sensors_data = .get_sensors_data_list(data_table, data_format))
 }
 
@@ -109,11 +110,10 @@ prepare.read_logger <- function(filename, data_format, serial_number=NULL, tz = 
     result <- list()
     for(sensor_name in names(data_format@columns))
     {
-        sensor_data <- data.frame(data_table$date_UTC, data_table[data_format@columns[[sensor_name]]])
-        colnames(sensor_data) <- c("date", "value")
+        values <- data_table[[data_format@columns[[sensor_name]]]]
         item <- new("model.SensorData",
                     sensor = sensor_name,
-                    data = sensor_data)
+                    values = values)
         result[[sensor_name]] <- item
     }
     result

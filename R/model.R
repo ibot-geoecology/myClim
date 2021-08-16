@@ -42,7 +42,7 @@ setClass("model.SensorData",
            sensor = "character",
            height = "numeric",
            calibrated = "logical",
-           data = "data.frame"
+           values = "numeric"
          ),
          prototype (
              height = NA_integer_,
