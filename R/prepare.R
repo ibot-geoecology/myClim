@@ -8,7 +8,7 @@
 prepare.read_files_by_csv <- function(csv_with_files_table) {
     files_table <- read.table(csv_with_files_table,
                               header = TRUE,
-                              sep = ";",
+                              sep = ",",
                               stringsAsFactors = FALSE)
     prepare.read_files(files_table)
 }
@@ -42,52 +42,15 @@ prepare.read_files <- function(files_table) {
         current_locality <- list(metadata = metadata, loggers=list())
     }
     new_index <- length(current_locality$loggers) + 1
-    current_locality$loggers[[new_index]] <- prepare.functions_read_logger[[row$logger]](row$path, row$serial_number)
+    current_locality$loggers[[new_index]] <- .functions_read_logger[[row$logger]](row$path, row$serial_number)
     current_locality
 }
 
-#' TMS1 logger raw data reading
-#'
-#' This function read raw data of TMS1 logger and return data in standard format.
-#'
-#' @param filename path to source file
-#' @param serial_number serial number of logger, if is NULL try detect from filename
-#' @return data in standard format
-#' @export
-prepare.read_TMS1_logger <- function(filename, serial_number=NULL) {
-    prepare.read_logger(filename, data.source_data_formats$TMS1, serial_number, "UTC")
+.read_TMS_logger <- function(filename, serial_number=NULL) {
+    .read_logger(filename, data.source_data_formats$TMS, serial_number, "UTC")
 }
 
-#' TMS3/TMS4 logger raw data reading
-#'
-#' This function read raw data of TMS3/TMS4 logger and return data in standard format.
-#'
-#' @param filename path to source file
-#' @param serial_number serial number of logger, if is NULL try detect from filename
-#' @return data in standard format
-#' @export
-prepare.read_TMS3_TMS4_logger <- function(filename, serial_number=NULL) {
-    prepare.read_logger(filename, data.source_data_formats$TMS3_TMS4, serial_number, "UTC")
-}
-#' @examples
-#' install.packages(".", repos = NULL,type="source")
-#' library(microclim)
-#' df<-prepare.read_TMS3_TMS4_logger("./tests/data/data_94184102_0.csv")
-#' T.data<-df$sensors_data$T1
-#' T1.data<-df$sensors_data$T1@data
-#' is(T1.data)
-
-#' Logger raw data reading
-#'
-#' This function read raw data of logger and return data in standard format.
-#'
-#' @param filename path to source file
-#' @param data_format definition of format source file
-#' @param serial_number serial number of logger, if is NULL try detect from filename
-#' @param tz time zone of dates in source data
-#' @return data in standard format
-#' @export
-prepare.read_logger <- function(filename, data_format, serial_number=NULL, tz = "UTC") {
+.read_logger <- function(filename, data_format, serial_number=NULL, tz = "UTC") {
     if(is.null(serial_number) | is.na(serial_number)){
         serial_number <- model.get_serial_number_from_filename(data_format, filename)
     }
@@ -119,7 +82,5 @@ prepare.read_logger <- function(filename, data_format, serial_number=NULL, tz = 
     result
 }
 
-prepare.functions_read_logger <- list(
-    TMS1 = prepare.read_TMS1_logger,
-    TMS3 = prepare.read_TMS3_TMS4_logger,
-    TMS4 = prepare.read_TMS3_TMS4_logger)
+.functions_read_logger <- list(
+    TMS = .read_TMS_logger)

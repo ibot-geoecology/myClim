@@ -1,3 +1,4 @@
+
 # classes ================================================================================
 
 #' Class for sensor definition
@@ -24,14 +25,22 @@ setClass("model.Sensor",
 #' @export
 setClass("model.LocalityMetadata",
          representation(
-           id = "character"
+            id = "character",
+            altitude = "numeric",
+            lat_wgs84 = "numeric",
+            lon_wgs84 = "numeric"
+         ),
+         prototype (
+            altitude = NA_real_,
+            lat_wgs84 = NA_real_,
+            lon_wgs84 = NA_real_
          ))
 
 #' Class for logger metadata
 #' @export
 setClass("model.LoggerMetadata",
          representation(
-           name = "character",
+           type = "character",
            serial_number = "character"
          ))
 
@@ -72,6 +81,7 @@ setClass("model.DataFormat",
            date_column = NA_integer_,
            date_format = NA_character_,
            na_strings = NA_character_,
+           columns = list(),
            filename_serial_number_pattern = NA_character_
          ))
 
@@ -109,17 +119,36 @@ setMethod(
     "model.load_info_from_data",
     signature("model.TMS3DataFormat"),
     function(object, data) {
-        if(grepl("\\d{4}\\.\\d{2}\\.\\d{2} \\d{2}:\\d{2}", data[1, object@date_column], perl = TRUE))
-        {
-            object@date_format <- "%Y.%m.%d %H:%M"
-        }
-        else if(grepl("\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}", data[1, object@date_column], perl = TRUE))
-        {
-            object@date_format <- "%d.%m.%Y %H:%M"
-        }
+        object <- .change_tms_datetime_format(object, data)
+        object <- .change_tms_columns(object, data)
         object
     }
 )
+
+.change_tms_datetime_format <- function(object, data){
+    if(grepl("\\d{4}\\.\\d{2}\\.\\d{2} \\d{2}:\\d{2}", data[1, object@date_column], perl = TRUE))
+    {
+        object@date_format <- "%Y.%m.%d %H:%M"
+    }
+    else if(grepl("\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}", data[1, object@date_column], perl = TRUE))
+    {
+        object@date_format <- "%d.%m.%Y %H:%M"
+    }
+    object
+}
+
+.change_tms_columns <- function(object, data){
+    tms1_columns = list(T1 = 4)
+    tms3_columns = list(T1 = 4, T2 = 5, T3 = 6, moisture = 7)
+    if(data[1, tms3_columns$T2] == -200)
+    {
+        object@columns <- tms1_columns
+    }
+    else {
+        object@columns <- tms3_columns
+    }
+    object
+}
 
 setMethod(
     "model.get_serial_number_from_filename",
