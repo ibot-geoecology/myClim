@@ -87,7 +87,7 @@ setClass("model.DataFormat",
 
 #' Class for source file data format for TMS3 logger
 #' @export
-setClass("model.TMS3DataFormat", contains = "model.DataFormat")
+setClass("model.TMSDataFormat", contains = "model.DataFormat")
 
 # generics ================================================================================
 
@@ -117,7 +117,7 @@ setMethod(
 
 setMethod(
     "model.load_info_from_data",
-    signature("model.TMS3DataFormat"),
+    signature("model.TMSDataFormat"),
     function(object, data) {
         object <- .change_tms_datetime_format(object, data)
         object <- .change_tms_columns(object, data)

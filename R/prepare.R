@@ -47,7 +47,7 @@ prepare.read_files <- function(files_table) {
 }
 
 .read_TMS_logger <- function(filename, serial_number=NULL) {
-    .read_logger(filename, data.source_data_formats$TMS, serial_number, "UTC")
+    .read_logger(filename, microclim::data.source_data_formats$TMS, serial_number, "UTC")
 }
 
 .read_logger <- function(filename, data_format, serial_number=NULL, tz = "UTC") {

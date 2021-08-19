@@ -7,7 +7,7 @@ data.source_data_formats <- list(
                separator = ";",
                date_column = 1
     ),
-    TMS = new("model.TMS3DataFormat",
+    TMS = new("model.TMSDataFormat",
                has_header = FALSE,
                separator = ";",
                date_column = 2,

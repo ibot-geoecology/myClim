@@ -35,25 +35,33 @@ read.get_sensor_values_from_localities <- function(data, sensor, localities) {
     }
     result <- list()
     current_indexes <- rep(1, length(loggers))
-    current_values_function <- function(x) loggers[[x]]$datetime[[current_indexes[[x]]]]
+    current_values_function <- function(x) {
+        if(current_indexes[[x]] == 0) {
+            return(0)
+        }
+        return(loggers[[x]]$datetime[[current_indexes[[x]]]])}
     current_values <- sapply(1:length(current_indexes), current_values_function)
     repeat {
-        value <- min(current_values)
+        value <- min(Filter(function(x){x > 0}, current_values))
         result[[length(result) + 1]] <- value
-        new_index_function <- function(logger_index) {
-            if(current_values[[logger_index]] != value || current_indexes[[logger_index]] == length(loggers[[logger_index]]$datetime)) {
-                return(current_indexes[[logger_index]])
+        changed <- FALSE
+        for(logger_index in 1:length(current_indexes)) {
+            if(current_values[[logger_index]] == value) {
+                if(current_indexes[[logger_index]] == length(loggers[[logger_index]]$datetime)) {
+                    current_indexes[[logger_index]] <- 0
+                }
+                else {
+                    current_indexes[[logger_index]] <- current_indexes[[logger_index]] + 1
+                    changed <- TRUE
+                }
             }
-            return(current_indexes[[logger_index]] + 1)
         }
-        new_indexes <- sapply(1:length(current_indexes), new_index_function)
-        if(all(new_indexes == current_indexes)) {
+        if(!changed) {
             break
         }
-        current_indexes <- new_indexes
         current_values <- sapply(1:length(current_indexes), current_values_function)
     }
-    as.POSIXct(unlist(result), origin="1970-01-01")
+    as.POSIXct(unlist(result), origin="1970-01-01", tz="UTC")
 }
 
 .get_sensor_values_from_localities_series <- function(df, logger, sensor){

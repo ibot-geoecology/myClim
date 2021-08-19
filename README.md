@@ -2,10 +2,19 @@
 
 ## Přímá instalce z GitLab
 
-Pokud máte nainstalovanej balíček devtools, tak je možné balíček nainstalovat přimo z GitLab následujícím příkazem.
+V Linuxu je možné instalovat příkazem `install_gitlab` z balíčku `devtools`. Ve windows se nechová správně. 
 
 ```R
-devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="5N6cg1k2TNczNj85xf15")
+devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="2fmZB-Qg-fbiVvzz2-Lh")
+```
+
+Ve Windows lze instalovat následujícím kódem. 
+
+```R
+destfile <- tempfile(pattern = "microclim", tmpdir = tempdir(), fileext = ".tar.gz")
+download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=destfile)
+install.packages(destfile, repos=NULL, type="source")
+file.remove(destfile)
 ```
 
 ## Lokální instalace
@@ -26,13 +35,12 @@ nebo
 git clone git@git.sorbus.ibot.cas.cz:microclimate_r/microclim.git
 ```
 
-Balíček jsem pojmenoval microclim. Instalaci balíčku je možné provést následujícím příkazem
+Instalaci balíčku je možné provést následujícím příkazem
 za předpokladu, že pracovní adresář je nastavený na adresář, ve kterém se nachází README.md.
 
 ```R
-install.packages(".", repos = NULL,type="source") # Windows
 
-install.packages(".", repos = NULL) # Unix
+install.packages(".", repos = NULL, type="source")
 
 ```
 
