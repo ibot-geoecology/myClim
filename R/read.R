@@ -19,6 +19,8 @@ read.get_sensor_values_from_localities <- function(data, sensor, localities) {
     }
     result
 }
+#' @examples
+#' example_tms_t1_table <- microclim::read.get_sensor_values_from_localities(example_tms_data, "T1", c("LOC_1", "LOC_2"))
 
 .get_loggers_with_sensor_from_localities <- function(data, sensor, localities) {
     result <- c()

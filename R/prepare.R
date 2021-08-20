@@ -9,6 +9,8 @@
 prepare.read_TMS_directory <- function(directory, recursive=TRUE) {
     prepare.read_directory(directory, "TMS", recursive = recursive)
 }
+#' @examples
+#' example_tms_data <- microclim::prepare.read_TMS_directory("examples/data/TMS/")
 
 #' Reading TMS files
 #'
@@ -62,6 +64,8 @@ prepare.read_files_by_csv <- function(csv_with_files_table) {
                               stringsAsFactors = FALSE)
     prepare.read_files_by_table(files_table)
 }
+#' @examples
+#' example_tms_data <- microclim::prepare.read_files_by_csv("examples/data/TMS/files_table.csv")
 
 #' Data files reading
 #'
