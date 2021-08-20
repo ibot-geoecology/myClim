@@ -11,8 +11,8 @@ devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.c
 Ve Windows lze instalovat následujícím kódem. 
 
 ```R
-destfile <- tempfile(pattern = "microclim", tmpdir = tempdir(), fileext = ".tar.gz")
-download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=destfile)
+destfile <- tempfile(pattern = "microclim", tmpdir = tempdir(), fileext = ".zip")
+download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=destfile)
 install.packages(destfile, repos=NULL, type="source")
 file.remove(destfile)
 ```
@@ -46,6 +46,25 @@ install.packages(".", repos = NULL, type="source")
 
 Případně v RStudiu je možné instalovat v menu Build -> Install and restart.
 
+# Formát načtených dat
+
+Zde je struktura
+
+* seznam lokalit - jméno položky je id lokality; každá lokalita je seznam o dvou položkách
+    * `metadata` - instance třídy `model.LocalityMetadata`
+        * `id`
+        * `altitude`
+        * `lat_wgs84`
+        * `lon_wgs84`
+    * `loggers` - seznam loggerů v lokalitě bez jmen; logger je tvořen seznamem o třech položkách
+        * `metadata` - instance třídy `model.LoggerMetadata`
+        * `datetime` - vector data a času ve fromátu POSIXct
+        * `sensors_data` - seznam senzorů patřících pod logger; položky jsou pojmenované; každý senzor je instance třídy `model.SensorData`
+            * `sensor` - název senzoru 
+            * `height` - výška senzoru 
+            * `calibrated` - logický příznak, jestli je kalibrovaný 
+            * `values` - vektor hodnot, který má stejnou délku jako `datetime` 
+
 # API
 ## model
 
@@ -65,16 +84,15 @@ Třída pro uložení informací o loggeru.
 
 ### model.SensorData
 
-Třída pro uložení informací o sensoru včetně dat. Data jsou uložena v `data.frame`,
-který má dva slouce `date` a `value`.
+Třída pro uložení informací o sensoru včetně dat.
 
 ### model.DataFormat
 
-Třída pro dafinici formátu dat, který lezou z konkrétního loggeru.
+Třída pro dafinici formátu dat, které lezou z konkrétního loggeru.
 
-### model.TMS3DataFormat
+### model.TMSDataFormat
 
-Zděděná třída rozšiřující `model.DataFormat` kvůli detekci formátu data.
+Zděděná třída rozšiřující `model.DataFormat` kvůli detekci formátu data a sériového čísla.
 
 ## prepare
 
@@ -91,34 +109,36 @@ library(microclim)
 localities_data <- microclim::prepare.read_files_by_csv("tests/data/files_table.csv")
 ```
 
+### prepare.read\_directory
+
+Funkce hledá csv soubory v zadaném adresáři a parsuje je jako data pro určitý logger. V případě, že jsou data ve špatném formátu,
+tak soubor přeskočí. Funkce vloží všechny loggery do lokality None, protože nemá informace o lokalitách.
+
+### prepare.read\_TMS\_directory
+
+Funkce volá `prepare.read_directory` se specifikovaným TMS loggerem.
+
 ### prepare.read\_files
 
-### prepare.read\_TMS1\_logger
+Funkce načítá zadané soubory a parsuje je jako data pro určitý logger. V případě, že jsou data ve špatném formátu,
+tak soubor přeskočí. Funkce vloží všechny loggery do lokality None, protože nemá informace o lokalitách.
 
-### prepare.read\_TMS3\_TMS4\_logger
+### prepare.read\_TMS\_files
 
-Funkce pro načtení dat z TMS3 a TMS4 loggeru. Volá univerzální funkci `prepare.read_logger`,
-který předá instanci třídy `model.TMS3DataFormat`, podle které se načte správně zdrojový soubor.
+Funkce volá `prepare.read_files` se specifikovaným TMS loggerem.
 
-Je možné otestovat následujícím způsobem:
+### prepare.read\_files\_by\_table
 
-```R
-library(microclim)
-logger_data <- microclim::prepare.read_TMS3_TMS4_logger("tests/data/data_94184102_0.csv")
-```
+Funkce načítá soubory podle data.frame tabulky. Tabulka obsahuje následující sloupce:
 
-### prepare.read\_logger`
+* `path` - cesta k souboru
+* `locality_id` - id lokality do který patří logger
+* `logger` - typ loggeru
+* `serial_number` - sériové číslo loggeru; Nemusí být vyplněno. Když je prázdné, tak se ho funkce snaží načíst z názvu souboru.
 
-Univerzální funkce pro čtení surových dat z loggerů. Jako parametr dostane instanci třídy `model.DataFormat`.
+### prepare.read\_files\_by\_csv
 
-Chtěl jsem, aby S4 objekt obsahoval seznam S4 objektů. pravděpodobně to nejde bez instalace rozšiřujícího balíčku.
-Proto jsem zvolil následující výstupní formát:
-
-seznam obsahující dvě položky:
-* `metadata` - instance třídy `model.LoggerMetadata`
-* `sensors_data` - seznam instancí třídy `model.SensorData`
-
-### prepare.functions\_read\_logger`
+Funkce volá `prepare.read_files_by_table` s tabulkou, kterou načte z csv souboru.
 
 ## data
 
@@ -127,3 +147,13 @@ Soubory rda z adresáře data. O vytvoření dat se starají R soubory z adresá
 ### data.source\_data\_formats
 
 Seznam instancí třídy `model.DataFormat`, které definují jednotlivé vstupní formáty.
+
+# Examples
+
+V adresáři [examples](https://git.sorbus.ibot.cas.cz/microclimate_r/microclim/-/tree/main/examples)
+jsou příklady volání funkcí i s daty. V případě naklonování git repozitáře je možné spustit přímo. 
+
+
+```R
+source("examples/load_tms.R")
+```
