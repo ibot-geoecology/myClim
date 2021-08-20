@@ -12,7 +12,7 @@ Class for sensor definition
 \describe{
 \item{\code{name}}{name of sensor (T1, T2, T3, TDT, RH, ...)}
 
-\item{\code{logger}}{name of logger (TMS3, TMS4 long, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)}
+\item{\code{logger}}{name of logger (TMS, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)}
 
 \item{\code{physical}}{measurement (T, RH, VWC, ...)}
 

@@ -2,16 +2,18 @@
 % Please edit documentation in R/prepare.R
 \name{prepare.read_files}
 \alias{prepare.read_files}
-\title{Data files reading}
+\title{Reading files}
 \usage{
-prepare.read_files(files_table)
+prepare.read_files(files, logger_type)
 }
 \arguments{
-\item{files_table}{data.frame}
+\item{files}{vector of character - files with data}
+
+\item{logger_type}{character - type of logger (TMS)}
 }
 \value{
 data in standard format
 }
 \description{
-This function read raw data from loggers by data.frame with files description
+This function read data files of one logger type. Locality is set None.
 }

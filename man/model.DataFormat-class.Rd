@@ -19,5 +19,11 @@ Class for source file data format
 \item{\code{date_format}}{format of date}
 
 \item{\code{na_strings}}{strings for NA values}
+
+\item{\code{columns}}{list with names and indexes of value columns}
+
+\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from filename}
+
+\item{\code{data_row_pattern}}{character pattern for detecting right file format}
 }}
 

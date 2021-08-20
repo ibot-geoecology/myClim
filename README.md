@@ -2,7 +2,7 @@
 
 ## Přímá instalce z GitLab
 
-V Linuxu je možné instalovat příkazem `install_gitlab` z balíčku `devtools`. Ve windows se nechová správně. 
+V Linuxu je možné instalovat příkazem `install_gitlab` z balíčku `devtools`. Ve Windows se nechová správně. 
 
 ```R
 devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="2fmZB-Qg-fbiVvzz2-Lh")

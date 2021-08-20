@@ -7,3 +7,17 @@ test_that("tms_load_info_from_data", {
     expect_equal(data_format@date_format, "%Y.%m.%d %H:%M")
     expect_equal(data_format@columns, list(T1 = 4, T2 = 5, T3 = 6, moisture = 7))
 })
+
+test_that("get_serial_number_from_filename", {
+    serial_number <- model.get_serial_number_from_filename(data.source_data_formats$TMS, "data_91184101_0.csv")
+    expect_equal(serial_number, "91184101")
+    serial_number <- model.get_serial_number_from_filename(data.source_data_formats$TMS, "data/TMS/data_91184101_0.csv")
+    expect_equal(serial_number, "91184101")
+})
+
+test_that("is_file_in_right_format", {
+    is_ok <- model.is_file_in_right_format(data.source_data_formats$TMS, "data/TMS/data_91184101_0.csv")
+    expect_true(is_ok)
+    is_ok <- model.is_file_in_right_format(data.source_data_formats$TMS, "data/TMS/files_table.csv")
+    expect_false(is_ok)
+})

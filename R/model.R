@@ -1,9 +1,12 @@
+# constants ================================================================================
+
+model.NONE_LOCALITY_ID <- "None"
 
 # classes ================================================================================
 
 #' Class for sensor definition
 #' @slot name name of sensor (T1, T2, T3, TDT, RH, ...)
-#' @slot logger name of logger (TMS3, TMS4 long, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)
+#' @slot logger name of logger (TMS, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)
 #' @slot physical measurement (T, RH, VWC, ...)
 #' @slot units measurument (°C, %, m3/m3, raw, mm, ...)
 #' @slot default_height default height of sensor in cm
@@ -64,6 +67,9 @@ setClass("model.SensorData",
 #' @slot date_column index of date column
 #' @slot date_format format of date
 #' @slot na_strings strings for NA values
+#' @slot columns list with names and indexes of value columns
+#' @slot filename_serial_number_pattern character pattern for detecting serial_number from filename
+#' @slot data_row_pattern character pattern for detecting right file format
 #' @export
 setClass("model.DataFormat",
          representation(
@@ -73,7 +79,8 @@ setClass("model.DataFormat",
            date_format = "character",
            na_strings = "character",
            columns = "list",
-           filename_serial_number_pattern = "character"
+           filename_serial_number_pattern = "character",
+           data_row_pattern = "character"
          ),
          prototype(
            has_header = TRUE,
@@ -85,7 +92,7 @@ setClass("model.DataFormat",
            filename_serial_number_pattern = NA_character_
          ))
 
-#' Class for source file data format for TMS3 logger
+#' Class for source file data format for TMS logger
 #' @export
 setClass("model.TMSDataFormat", contains = "model.DataFormat")
 
@@ -102,6 +109,13 @@ setGeneric(
   "model.get_serial_number_from_filename",
   function(object, filename){
     standardGeneric("model.get_serial_number_from_filename")
+  }
+)
+
+setGeneric(
+  "model.is_file_in_right_format",
+  function(object, filename){
+    standardGeneric("model.is_file_in_right_format")
   }
 )
 
@@ -126,11 +140,11 @@ setMethod(
 )
 
 .change_tms_datetime_format <- function(object, data){
-    if(grepl("\\d{4}\\.\\d{2}\\.\\d{2} \\d{2}:\\d{2}", data[1, object@date_column], perl = TRUE))
+    if(stringr::str_detect(data[1, object@date_column], "\\d{4}\\.\\d{2}\\.\\d{2} \\d{2}:\\d{2}"))
     {
         object@date_format <- "%Y.%m.%d %H:%M"
     }
-    else if(grepl("\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}", data[1, object@date_column], perl = TRUE))
+    else if(stringr::str_detect(data[1, object@date_column], "\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}"))
     {
         object@date_format <- "%d.%m.%Y %H:%M"
     }
@@ -158,5 +172,27 @@ setMethod(
           stop(sprintf("It is not possible identify serial_number from file %s.", filename));
         }
         stringr::str_match(filename, object@filename_serial_number_pattern)[1, 2]
+    }
+)
+
+setMethod(
+    "model.is_file_in_right_format",
+    signature("model.DataFormat"),
+    function(object, filename) {
+        con = file(filename, "r")
+        skip <- object@has_header
+        while (TRUE) {
+            line = readLines(con, n = 1)
+            if ( length(line) == 0 ) {
+                close(con)
+                return(FALSE)
+            }
+            if(skip) {
+              skip <- FALSE
+              next
+            }
+            close(con)
+            return(stringr::str_detect(line, object@data_row_pattern))
+        }
     }
 )

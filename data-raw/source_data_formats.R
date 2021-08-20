@@ -12,7 +12,8 @@ data.source_data_formats <- list(
                separator = ";",
                date_column = 2,
                na_strings = c("NA", " NA"),
-               filename_serial_number_pattern = "data_(\\d+)_\\d+\\.csv"
+               filename_serial_number_pattern = "data_(\\d+)_\\d+\\.csv$",
+               data_row_pattern = "^\\d+;[^;]+;\\d+;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;\\d+;\\d+;\\d+$"
     )
 )
 
