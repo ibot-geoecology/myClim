@@ -15,3 +15,6 @@ data in standard format
 \description{
 This function read raw data from loggers by table saved in CSV file
 }
+\examples{
+example_tms_data <- microclim::prepare.read_files_by_csv("examples/data/TMS/files_table.csv")
+}

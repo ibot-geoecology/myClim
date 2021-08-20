@@ -19,3 +19,6 @@ data in standard format
 \description{
 This function create data.frame with values of sensor
 }
+\examples{
+example_tms_t1_table <- microclim::read.get_sensor_values_from_localities(example_tms_data, "T1", c("LOC_1", "LOC_2"))
+}

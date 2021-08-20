@@ -17,3 +17,6 @@ data in standard format
 \description{
 This function read TMS data files from directory. Locality is set None.
 }
+\examples{
+example_tms_data <- microclim::prepare.read_TMS_directory("examples/data/TMS/")
+}
