@@ -12,9 +12,12 @@ Ve Windows lze instalovat následujícím kódem.
 
 ```R
 destfile <- tempfile(pattern = "microclim", tmpdir = tempdir(), fileext = ".zip")
-download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=destfile)
-install.packages(destfile, repos=NULL, type="source")
+download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=destfile, mode="wb")
+repodir <- file.path(dirname(destfile), unzip(destfile, list=TRUE)$Name[1])
+unzip(destfile, exdir=dirname(destfile))
+install.packages(repodir, repos=NULL, type="source")
 file.remove(destfile)
+unlink(repodir, recursive=TRUE)
 ```
 
 ## Lokální instalace
@@ -45,6 +48,12 @@ install.packages(".", repos = NULL, type="source")
 ```
 
 Případně v RStudiu je možné instalovat v menu Build -> Install and restart.
+
+## Smazání balíčku
+
+```R
+remove.packages("microclim")
+```
 
 # Formát načtených dat
 
