@@ -98,6 +98,7 @@ setClass("model.TMSDataFormat", contains = "model.DataFormat")
 
 # generics ================================================================================
 
+#' @export
 setGeneric(
   "model.load_info_from_data",
   function(object, data){
@@ -105,6 +106,7 @@ setGeneric(
   }
 )
 
+#' @export
 setGeneric(
   "model.get_serial_number_from_filename",
   function(object, filename){
@@ -112,6 +114,7 @@ setGeneric(
   }
 )
 
+#' @export
 setGeneric(
   "model.is_file_in_right_format",
   function(object, filename){
@@ -121,6 +124,7 @@ setGeneric(
 
 # methods ================================================================================
 
+#' @export
 setMethod(
     "model.load_info_from_data",
     signature("model.DataFormat"),
@@ -129,6 +133,7 @@ setMethod(
     }
 )
 
+#' @export
 setMethod(
     "model.load_info_from_data",
     signature("model.TMSDataFormat"),
@@ -164,6 +169,7 @@ setMethod(
     object
 }
 
+#' @export
 setMethod(
     "model.get_serial_number_from_filename",
     signature("model.DataFormat"),
@@ -175,6 +181,7 @@ setMethod(
     }
 )
 
+#' @export
 setMethod(
     "model.is_file_in_right_format",
     signature("model.DataFormat"),
