@@ -117,7 +117,7 @@ Funkce načítá soubory podle data.frame tabulky. Tabulka obsahuje následujíc
 
 Funkce volá `prepare.read_files_by_table` s tabulkou, kterou načte z csv souboru.
 
-## convert
+## read
 
 Soubor [R/read.R](R/read.R) obsahuje funkce pro načítání informací z originálních dat.
 
