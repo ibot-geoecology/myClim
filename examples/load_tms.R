@@ -1,7 +1,7 @@
-# The table in file examples/data/TMS/files_table.csv is used for loading data.
+# The table in the examples/data/TMS/files_table.csv file is used to load data.
 example_tms_data1 <- microclim::prepare.read_files_by_csv("examples/data/TMS/files_table.csv")
-# The function search csv files in examples/data/TMS/ directory and try parse as TMS data.
-# File examples/data/TMS/files_table.csv doesn't contain TMS data. Warning is printed and the file is skipped.
+# The function looks for csv files in the examples/data/TMS/ directory and tries to parse the TMS data.
+# File examples/data/TMS/files_table.csv doesn't contain TMS data. A warning is printed and the file is skipped.
 example_tms_data2 <- microclim::prepare.read_TMS_directory("examples/data/TMS/")
-# The function return table with values of T1 sensor in LOC_1 and LOC_2 localities.
+# The function returns a table with the values of the T1 sensor in the localities LOC_1 and LOC_2.
 example_tms_t1_table <- microclim::read.get_sensor_values_from_localities(example_tms_data1, "T1", c("LOC_1", "LOC_2"))

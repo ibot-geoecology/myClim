@@ -16,7 +16,6 @@ for(item in list.files(subdir, all.files = FALSE, include.dirs = TRUE)){
 }
 unlink(subdir, recursive=TRUE)
 install.packages(".", repos=NULL, type="source")
-library(microclim)
 ```
 
 V RStudiu je možné aktualizovat balíček v menu Build -> Install and restart.
@@ -31,6 +30,7 @@ Stručný popis se nachází v komentářích.
 Spuštění příkladu je možné následujícím kódem:
 
 ```R
+library(microclim)
 source("examples/load_tms.R")
 ```
 
