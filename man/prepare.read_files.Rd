@@ -17,3 +17,6 @@ data in standard format
 \description{
 This function read data files of one logger type. Locality is set None.
 }
+\examples{
+example_tms_data <- microclim::prepare.read_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"), "TMS")
+}

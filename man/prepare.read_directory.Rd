@@ -19,3 +19,6 @@ data in standard format
 \description{
 This function read data files from directory of one logger type. Locality is set None.
 }
+\examples{
+example_tms_data <- microclim::prepare.read_directory("examples/data/TMS/", "TMS")
+}

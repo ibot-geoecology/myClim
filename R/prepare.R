@@ -19,6 +19,8 @@ prepare.read_TMS_directory <- function(directory, recursive=TRUE) {
 #' @param files vector of character - files with data
 #' @return data in standard format
 #' @export
+#' @examples
+#' example_tms_data <- microclim::prepare.read_TMS_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"))
 prepare.read_TMS_files <- function(files) {
     prepare.read_files(files, "TMS")
 }
@@ -32,6 +34,8 @@ prepare.read_TMS_files <- function(files) {
 #' @param recursive logical - recursive search in subdirectories
 #' @return data in standard format
 #' @export
+#' @examples
+#' example_tms_data <- microclim::prepare.read_directory("examples/data/TMS/", "TMS")
 prepare.read_directory <- function(directory, logger_type, recursive=TRUE) {
     files <-list.files(directory, pattern=".+\\.[cC][sS][vV]", recursive=recursive, full.names=TRUE)
     prepare.read_files(files, logger_type)
@@ -45,6 +49,8 @@ prepare.read_directory <- function(directory, logger_type, recursive=TRUE) {
 #' @param logger_type character - type of logger (TMS)
 #' @return data in standard format
 #' @export
+#' @examples
+#' example_tms_data <- microclim::prepare.read_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"), "TMS")
 prepare.read_files <- function(files, logger_type) {
     files_table <- data.frame(path=files, locality_id=model.NONE_LOCALITY_ID, logger=logger_type, serial_number=NA_character_)
     prepare.read_files_by_table(files_table)
