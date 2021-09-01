@@ -8,12 +8,13 @@ model.NONE_LOCALITY_ID <- "None"
 #' @slot name name of sensor (T1, T2, T3, TDT, RH, ...)
 #' @slot logger name of logger (TMS, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)
 #' @slot physical measurement (T, RH, VWC, ...)
-#' @slot units measurument (°C, %, m3/m3, raw, mm, ...)
+#' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
 #' @slot default_height default height of sensor in cm
 #' @slot min_value minimal value
 #' @slot max_value maximal value
-#' @export
-setClass("model.Sensor",
+#' @export model.Sensor
+#' @exportClass model.Sensor
+model.Sensor <- setClass("model.Sensor",
          slots = c(
            name = "character",
            logger = "character",
@@ -25,8 +26,9 @@ setClass("model.Sensor",
          ))
 
 #' Class for locality metadata
-#' @export
-setClass("model.LocalityMetadata",
+#' @export model.LocalityMetadata
+#' @exportClass model.LocalityMetadata
+model.LocalityMetadata <- setClass("model.LocalityMetadata",
          representation(
             id = "character",
             altitude = "numeric",
@@ -40,16 +42,18 @@ setClass("model.LocalityMetadata",
          ))
 
 #' Class for logger metadata
-#' @export
-setClass("model.LoggerMetadata",
+#' @export model.LoggerMetadata
+#' @exportClass model.LoggerMetadata
+model.LoggerMetadata <- setClass("model.LoggerMetadata",
          representation(
            type = "character",
            serial_number = "character"
          ))
 
 #' Class for sensor data
-#' @export
-setClass("model.SensorData",
+#' @export model.SensorData
+#' @exportClass model.SensorData
+model.SensorData <- setClass("model.SensorData",
          representation(
            sensor = "character",
            height = "numeric",
@@ -70,8 +74,9 @@ setClass("model.SensorData",
 #' @slot columns list with names and indexes of value columns
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from filename
 #' @slot data_row_pattern character pattern for detecting right file format
-#' @export
-setClass("model.DataFormat",
+#' @export model.DataFormat
+#' @exportClass model.DataFormat
+model.DataFormat <- setClass("model.DataFormat",
          representation(
            has_header = "logical",
            separator = "character",
@@ -93,8 +98,9 @@ setClass("model.DataFormat",
          ))
 
 #' Class for source file data format for TMS logger
-#' @export
-setClass("model.TMSDataFormat", contains = "model.DataFormat")
+#' @export model.TMSDataFormat
+#' @exportClass model.TMSDataFormat
+model.TMSDataFormat <- setClass("model.TMSDataFormat", contains = "model.DataFormat")
 
 # generics ================================================================================
 
@@ -127,7 +133,7 @@ setGeneric(
 #' @export
 setMethod(
     "model.load_info_from_data",
-    signature("model.DataFormat"),
+    "model.DataFormat",
     function(object, data) {
         object
     }
@@ -136,37 +142,36 @@ setMethod(
 #' @export
 setMethod(
     "model.load_info_from_data",
-    signature("model.TMSDataFormat"),
+    "model.TMSDataFormat",
     function(object, data) {
-        object <- .change_tms_datetime_format(object, data)
-        object <- .change_tms_columns(object, data)
+        object@date_format <- .get_tms_datetime_format(data, object@date_column)
+        object@columns <- .get_tms_columns(data)
         object
     }
 )
 
-.change_tms_datetime_format <- function(object, data){
-    if(stringr::str_detect(data[1, object@date_column], "\\d{4}\\.\\d{2}\\.\\d{2} \\d{2}:\\d{2}"))
+.get_tms_datetime_format <- function(data, date_column){
+    if(stringr::str_detect(data[1, date_column], "\\d{4}\\.\\d{2}\\.\\d{2} \\d{2}:\\d{2}"))
     {
-        object@date_format <- "%Y.%m.%d %H:%M"
+        return("%Y.%m.%d %H:%M")
     }
-    else if(stringr::str_detect(data[1, object@date_column], "\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}"))
+    if(stringr::str_detect(data[1, date_column], "\\d{2}\\.\\d{2}\\.\\d{4} \\d{2}:\\d{2}"))
     {
-        object@date_format <- "%d.%m.%Y %H:%M"
+        return("%d.%m.%Y %H:%M")
     }
-    object
+    return(NA_character_)
 }
 
-.change_tms_columns <- function(object, data){
+.get_tms_columns <- function(data, T2_column){
     tms1_columns = list(T1 = 4)
     tms3_columns = list(T1 = 4, T2 = 5, T3 = 6, moisture = 7)
-    if(data[1, tms3_columns$T2] == -200)
-    {
-        object@columns <- tms1_columns
+    if(data[1, tms3_columns$T2] == -200) {
+        return(tms1_columns)
     }
     else {
-        object@columns <- tms3_columns
+        return(tms3_columns)
     }
-    object
+    return(list())
 }
 
 #' @export

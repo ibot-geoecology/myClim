@@ -3,6 +3,7 @@
 \docType{class}
 \name{model.LocalityMetadata-class}
 \alias{model.LocalityMetadata-class}
+\alias{model.LocalityMetadata}
 \title{Class for locality metadata}
 \description{
 Class for locality metadata

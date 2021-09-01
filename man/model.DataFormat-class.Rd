@@ -3,6 +3,7 @@
 \docType{class}
 \name{model.DataFormat-class}
 \alias{model.DataFormat-class}
+\alias{model.DataFormat}
 \title{Class for source file data format}
 \description{
 Class for source file data format

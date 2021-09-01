@@ -98,7 +98,7 @@ prepare.read_files_by_table <- function(files_table) {
 .add_logger_to_locality <- function(current_locality, row) {
     if(is.null(current_locality))
     {
-        metadata <- new("model.LocalityMetadata",
+        metadata <- model.LocalityMetadata(
                         id = row$locality_id)
         current_locality <- list(metadata = metadata, loggers=list())
     }
@@ -132,7 +132,7 @@ prepare.read_files_by_table <- function(files_table) {
                              na.strings = data_format@na_strings)
     data_format <- model.load_info_from_data(data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, tz))
-    metadata <- new("model.LoggerMetadata",
+    metadata <- model.LoggerMetadata(
                     serial_number = serial_number,
                     type = logger_type)
     list(metadata = metadata,
@@ -145,7 +145,7 @@ prepare.read_files_by_table <- function(files_table) {
     for(sensor_name in names(data_format@columns))
     {
         values <- data_table[[data_format@columns[[sensor_name]]]]
-        item <- new("model.SensorData",
+        item <- model.SensorData(
                     sensor = sensor_name,
                     values = values)
         result[[sensor_name]] <- item

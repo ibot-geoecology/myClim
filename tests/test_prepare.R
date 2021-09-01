@@ -2,7 +2,7 @@ library(testthat)
 library(microclim)
 
 test_that("read_files_by_csv", {
-    data <- prepare.read_files_by_csv("data/TMS/files_table.csv")
+    data <- microclim::prepare.read_files_by_csv("data/TMS/files_table.csv")
     expect_equal(length(data), 3)
     expect_equal(length(data$LOC_1$loggers[[1]]$datetime), 49)
     expect_equal(length(data$LOC_1$loggers[[1]]$sensors_data), 4)
@@ -15,7 +15,7 @@ test_that("read_files_by_csv", {
 })
 
 test_that("read_TMS_directory", {
-    data <- prepare.read_TMS_directory("data/TMS")
+    data <- microclim::prepare.read_TMS_directory("data/TMS")
     expect_equal(length(data), 1)
     expect_equal(length(data$None$loggers), 4)
 })

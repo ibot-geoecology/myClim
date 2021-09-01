@@ -2,12 +2,12 @@ source("R/model.R")
 
 ## code to prepare `source_data_formats` dataset goes here
 data.source_data_formats <- list(
-    HOBO_RH = new("model.DataFormat",
+    HOBO_RH = model.DataFormat(
                has_header = TRUE,
                separator = ";",
                date_column = 1
     ),
-    TMS = new("model.TMSDataFormat",
+    TMS = model.TMSDataFormat(
                has_header = FALSE,
                separator = ";",
                date_column = 2,

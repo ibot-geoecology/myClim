@@ -3,6 +3,7 @@
 \docType{class}
 \name{model.LoggerMetadata-class}
 \alias{model.LoggerMetadata-class}
+\alias{model.LoggerMetadata}
 \title{Class for logger metadata}
 \description{
 Class for logger metadata

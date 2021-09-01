@@ -3,6 +3,7 @@
 \docType{class}
 \name{model.TMSDataFormat-class}
 \alias{model.TMSDataFormat-class}
+\alias{model.TMSDataFormat}
 \title{Class for source file data format for TMS logger}
 \description{
 Class for source file data format for TMS logger

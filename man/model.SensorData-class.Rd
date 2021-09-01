@@ -3,6 +3,7 @@
 \docType{class}
 \name{model.SensorData-class}
 \alias{model.SensorData-class}
+\alias{model.SensorData}
 \title{Class for sensor data}
 \description{
 Class for sensor data
