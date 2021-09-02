@@ -86,7 +86,7 @@ prepare.read_files_by_table <- function(files_table) {
     {
         return(list())
     }
-    result = list()
+    result <- list()
     for(i in 1:nrow(files_table))
     {
         row <- files_table[i, ]

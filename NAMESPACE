@@ -3,6 +3,7 @@
 export(model.DataFormat)
 export(model.LocalityMetadata)
 export(model.LoggerMetadata)
+export(model.NONE_LOCALITY_ID)
 export(model.Sensor)
 export(model.SensorData)
 export(model.TMSDataFormat)
