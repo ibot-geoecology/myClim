@@ -1,8 +1,8 @@
 library(testthat)
 library(microclim)
 
-test_that("read_files_by_csv", {
-    data <- microclim::prepare.read_files_by_csv("data/TMS/files_table.csv")
+test_that("mc_feed_from_csv", {
+    data <- microclim::mc_feed_from_csv("data/TMS/files_table.csv")
     expect_equal(length(data), 3)
     expect_equal(length(data$LOC_1$loggers[[1]]$datetime), 49)
     expect_equal(length(data$LOC_1$loggers[[1]]$sensors_data), 4)
@@ -14,8 +14,8 @@ test_that("read_files_by_csv", {
     expect_equal(length(data$LOC_3$loggers[[1]]$sensors_data), 1)
 })
 
-test_that("read_TMS_directory", {
-    expect_warning(data <- microclim::prepare.read_TMS_directory("data/TMS"))
+test_that("mc_feed_TMS_directory", {
+    expect_warning(data <- microclim::mc_feed_TMS_directory("data/TMS"))
     expect_equal(length(data), 1)
     expect_equal(length(data$None$loggers), 4)
 })

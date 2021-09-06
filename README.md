@@ -34,6 +34,14 @@ library(microclim)
 source("examples/load_tms.R")
 ```
 
+# Testy
+
+Program je pokryt unit testy, které je možné spustit příkazem:
+
+```R
+testthat::test_dir("tests")
+```
+
 # Formát načtených dat
 
 Zde je jednotná struktura, ve kterých si balíček drží načtená data.

@@ -7,9 +7,9 @@
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_data <- microclim::prepare.read_TMS_directory("examples/data/TMS/")
-prepare.read_TMS_directory <- function(directory, recursive=TRUE) {
-    prepare.read_directory(directory, "TMS", recursive = recursive)
+#' example_tms_data <- microclim::mc_feed_TMS_directory("examples/data/TMS/")
+mc_feed_TMS_directory <- function(directory, recursive=TRUE) {
+    mc_feed_directory(directory, "TMS", recursive = recursive)
 }
 
 #' Reading TMS files
@@ -20,9 +20,9 @@ prepare.read_TMS_directory <- function(directory, recursive=TRUE) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_data <- microclim::prepare.read_TMS_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"))
-prepare.read_TMS_files <- function(files) {
-    prepare.read_files(files, "TMS")
+#' example_tms_data <- microclim::mc_feed_TMS_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"))
+mc_feed_TMS_files <- function(files) {
+    mc_feed_files(files, "TMS")
 }
 
 #' Reading files from directory
@@ -35,10 +35,10 @@ prepare.read_TMS_files <- function(files) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_data <- microclim::prepare.read_directory("examples/data/TMS/", "TMS")
-prepare.read_directory <- function(directory, logger_type, recursive=TRUE) {
+#' example_tms_data <- microclim::mc_feed_directory("examples/data/TMS/", "TMS")
+mc_feed_directory <- function(directory, logger_type, recursive=TRUE) {
     files <-list.files(directory, pattern=".+\\.[cC][sS][vV]", recursive=recursive, full.names=TRUE)
-    prepare.read_files(files, logger_type)
+    mc_feed_files(files, logger_type)
 }
 
 #' Reading files
@@ -50,10 +50,10 @@ prepare.read_directory <- function(directory, logger_type, recursive=TRUE) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_data <- microclim::prepare.read_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"), "TMS")
-prepare.read_files <- function(files, logger_type) {
+#' example_tms_data <- microclim::mc_feed_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"), "TMS")
+mc_feed_files <- function(files, logger_type) {
     files_table <- data.frame(path=files, locality_id=model.NONE_LOCALITY_ID, logger=logger_type, serial_number=NA_character_)
-    prepare.read_files_by_table(files_table)
+    mc_feed_from_df(files_table)
 }
 
 #' Data files reading by CSV
@@ -64,13 +64,13 @@ prepare.read_files <- function(files, logger_type) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_data <- microclim::prepare.read_files_by_csv("examples/data/TMS/files_table.csv")
-prepare.read_files_by_csv <- function(csv_with_files_table) {
+#' example_tms_data <- microclim::mc_feed_from_csv("examples/data/TMS/files_table.csv")
+mc_feed_from_csv <- function(csv_with_files_table) {
     files_table <- read.table(csv_with_files_table,
                               header = TRUE,
                               sep = ",",
                               stringsAsFactors = FALSE)
-    prepare.read_files_by_table(files_table)
+    mc_feed_from_df(files_table)
 }
 
 #' Data files reading
@@ -81,7 +81,8 @@ prepare.read_files_by_csv <- function(csv_with_files_table) {
 #'   - columns: path, locality_id, logger, serial_number - can be NA, than try detect
 #' @return data in standard format
 #' @export
-prepare.read_files_by_table <- function(files_table) {
+mc_feed_from_df <- function(files_table) {
+    files_table <- microclim:::.convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {
         return(list())
