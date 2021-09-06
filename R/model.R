@@ -1,7 +1,7 @@
 # constants ================================================================================
 
 #' @export
-model.NONE_LOCALITY_ID <- "None"
+mc_const_NONE_LOCALITY_ID <- "None"
 
 # classes ================================================================================
 
@@ -13,9 +13,9 @@ model.NONE_LOCALITY_ID <- "None"
 #' @slot default_height default height of sensor in cm
 #' @slot min_value minimal value
 #' @slot max_value maximal value
-#' @export model.Sensor
-#' @exportClass model.Sensor
-model.Sensor <- setClass("model.Sensor",
+#' @export mc_Sensor
+#' @exportClass mc_Sensor
+mc_Sensor <- setClass("mc_Sensor",
          slots = c(
            name = "character",
            logger = "character",
@@ -27,9 +27,9 @@ model.Sensor <- setClass("model.Sensor",
          ))
 
 #' Class for locality metadata
-#' @export model.LocalityMetadata
-#' @exportClass model.LocalityMetadata
-model.LocalityMetadata <- setClass("model.LocalityMetadata",
+#' @export mc_LocalityMetadata
+#' @exportClass mc_LocalityMetadata
+mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
          representation(
             id = "character",
             altitude = "numeric",
@@ -43,18 +43,18 @@ model.LocalityMetadata <- setClass("model.LocalityMetadata",
          ))
 
 #' Class for logger metadata
-#' @export model.LoggerMetadata
-#' @exportClass model.LoggerMetadata
-model.LoggerMetadata <- setClass("model.LoggerMetadata",
+#' @export mc_LoggerMetadata
+#' @exportClass mc_LoggerMetadata
+mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
          representation(
            type = "character",
            serial_number = "character"
          ))
 
 #' Class for sensor data
-#' @export model.SensorData
-#' @exportClass model.SensorData
-model.SensorData <- setClass("model.SensorData",
+#' @export mc_SensorData
+#' @exportClass mc_SensorData
+mc_SensorData <- setClass("mc_SensorData",
          representation(
            sensor = "character",
            height = "numeric",
@@ -75,9 +75,9 @@ model.SensorData <- setClass("model.SensorData",
 #' @slot columns list with names and indexes of value columns
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from filename
 #' @slot data_row_pattern character pattern for detecting right file format
-#' @export model.DataFormat
-#' @exportClass model.DataFormat
-model.DataFormat <- setClass("model.DataFormat",
+#' @export mc_DataFormat
+#' @exportClass mc_DataFormat
+mc_DataFormat <- setClass("mc_DataFormat",
          representation(
            has_header = "logical",
            separator = "character",
@@ -99,51 +99,46 @@ model.DataFormat <- setClass("model.DataFormat",
          ))
 
 #' Class for source file data format for TMS logger
-#' @export model.TMSDataFormat
-#' @exportClass model.TMSDataFormat
-model.TMSDataFormat <- setClass("model.TMSDataFormat", contains = "model.DataFormat")
+#' @export mc_TMSDataFormat
+#' @exportClass mc_TMSDataFormat
+mc_TMSDataFormat <- setClass("mc_TMSDataFormat", contains = "mc_DataFormat")
 
 # generics ================================================================================
 
-#' @export
 setGeneric(
-  "model.load_info_from_data",
+  ".model.load_data_format_params_from_data",
   function(object, data){
-    standardGeneric("model.load_info_from_data")
+    standardGeneric(".model.load_data_format_params_from_data")
   }
 )
 
-#' @export
 setGeneric(
-  "model.get_serial_number_from_filename",
+  ".model.get_serial_number_from_filename",
   function(object, filename){
-    standardGeneric("model.get_serial_number_from_filename")
+    standardGeneric(".model.get_serial_number_from_filename")
   }
 )
 
-#' @export
 setGeneric(
-  "model.is_file_in_right_format",
+  ".model.is_file_in_right_format",
   function(object, filename){
-    standardGeneric("model.is_file_in_right_format")
+    standardGeneric(".model.is_file_in_right_format")
   }
 )
 
 # methods ================================================================================
 
-#' @export
 setMethod(
-    "model.load_info_from_data",
-    "model.DataFormat",
+    ".model.load_data_format_params_from_data",
+    "mc_DataFormat",
     function(object, data) {
         object
     }
 )
 
-#' @export
 setMethod(
-    "model.load_info_from_data",
-    "model.TMSDataFormat",
+    ".model.load_data_format_params_from_data",
+    "mc_TMSDataFormat",
     function(object, data) {
         object@date_format <- .get_tms_datetime_format(data, object@date_column)
         object@columns <- .get_tms_columns(data)
@@ -175,10 +170,9 @@ setMethod(
     return(list())
 }
 
-#' @export
 setMethod(
-    "model.get_serial_number_from_filename",
-    signature("model.DataFormat"),
+    ".model.get_serial_number_from_filename",
+    signature("mc_DataFormat"),
     function(object, filename) {
         if(is.null(object@filename_serial_number_pattern)) {
           stop(sprintf("It is not possible identify serial_number from file %s.", filename));
@@ -187,10 +181,9 @@ setMethod(
     }
 )
 
-#' @export
 setMethod(
-    "model.is_file_in_right_format",
-    signature("model.DataFormat"),
+    ".model.is_file_in_right_format",
+    signature("mc_DataFormat"),
     function(object, filename) {
         con = file(filename, "r")
         skip <- object@has_header

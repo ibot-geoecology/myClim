@@ -10,7 +10,7 @@ remove:
 	R -e 'remove.packages("microclim")'
 
 generate:
-	Rscript data-raw/source_data_formats.R
+	Rscript data-raw/mc_data_formats.R
 	R -e 'devtools::document()'
 
 test:

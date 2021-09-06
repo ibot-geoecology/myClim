@@ -1,13 +1,13 @@
 source("R/model.R")
 
 ## code to prepare `source_data_formats` dataset goes here
-data.source_data_formats <- list(
-    HOBO_RH = model.DataFormat(
+mc_data_formats <- list(
+    HOBO_RH = mc_DataFormat(
                has_header = TRUE,
                separator = ";",
                date_column = 1
     ),
-    TMS = model.TMSDataFormat(
+    TMS = mc_TMSDataFormat(
                has_header = FALSE,
                separator = ";",
                date_column = 2,
@@ -17,4 +17,4 @@ data.source_data_formats <- list(
     )
 )
 
-usethis::use_data(data.source_data_formats, overwrite = TRUE)
+usethis::use_data(mc_data_formats, overwrite = TRUE)

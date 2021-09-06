@@ -8,21 +8,21 @@
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_t1_table <- microclim::read.get_sensor_values_from_localities(example_tms_data, "T1", c("LOC_1", "LOC_2"))
-read.get_sensor_values_from_localities <- function(data, sensor, localities) {
-    loggers <- .get_loggers_with_sensor_from_localities(data, sensor, localities)
-    result <- data.frame(datetime=.get_sensor_values_from_localities_datetime(loggers))
+#' example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, "T1", c("LOC_1", "LOC_2"))
+mc_reshape_wideformat <- function(data, sensor, localities) {
+    loggers <- .reshape.get_loggers_with_sensor_from_localities(data, sensor, localities)
+    result <- data.frame(datetime=.reshape.get_sensor_values_from_localities_datetime(loggers))
     for(locality in localities) {
         filtered_loggers <- Filter(function(x) sensor %in% names(x$sensors_data), data[[locality]]$loggers)
         for(logger in filtered_loggers) {
             column_name <- paste(locality, logger$metadata@serial_number, sep="-")
-            result[[column_name]] <- .get_sensor_values_from_localities_series(result, logger, sensor)
+            result[[column_name]] <- .resahpe.get_sensor_values_from_localities_series(result, logger, sensor)
         }
     }
     result
 }
 
-.get_loggers_with_sensor_from_localities <- function(data, sensor, localities) {
+.reshape.get_loggers_with_sensor_from_localities <- function(data, sensor, localities) {
     result <- c()
     for(locality in localities) {
         filtered_loggers <- Filter(function(x) sensor %in% names(x$sensors_data), data[[locality]]$loggers)
@@ -31,7 +31,7 @@ read.get_sensor_values_from_localities <- function(data, sensor, localities) {
     result
 }
 
-.get_sensor_values_from_localities_datetime <- function(loggers){
+.reshape.get_sensor_values_from_localities_datetime <- function(loggers){
     if(length(loggers) == 0) {
         return(c())
     }
@@ -66,7 +66,7 @@ read.get_sensor_values_from_localities <- function(data, sensor, localities) {
     as.POSIXct(unlist(result), origin="1970-01-01", tz="UTC")
 }
 
-.get_sensor_values_from_localities_series <- function(df, logger, sensor){
+.resahpe.get_sensor_values_from_localities_series <- function(df, logger, sensor){
     if(length(df$datetime) == 0)
     {
         return(c())

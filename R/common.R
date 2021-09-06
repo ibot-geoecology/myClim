@@ -1,4 +1,4 @@
-.convert_factors_in_dataframe <- function(dataframe) {
+.common.convert_factors_in_dataframe <- function(dataframe) {
     factor_columns <- sapply(dataframe, is.factor)
     if(!any(factor_columns)) {
         return(dataframe)
