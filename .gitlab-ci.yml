@@ -1,4 +1,4 @@
-image: alpine:latest
+image: git.sorbus.ibot.cas.cz:5050/mikroklima/microclim-docker
 
 pages:
   stage: deploy
