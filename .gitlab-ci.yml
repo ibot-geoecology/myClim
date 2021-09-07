@@ -1,5 +1,3 @@
-image: git.sorbus.ibot.cas.cz:5050/mikroklima/microclim-docker
-
 pages:
   stage: deploy
   script:
