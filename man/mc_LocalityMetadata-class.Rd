@@ -8,3 +8,15 @@
 \description{
 Class for locality metadata
 }
+\section{Slots}{
+
+\describe{
+\item{\code{id}}{name of loacality}
+
+\item{\code{altitude}}{of loacality}
+
+\item{\code{lat_wgs84}}{latitude of locality in WGS-84}
+
+\item{\code{lon_wgs84}}{longitude of locality in WGS-84}
+}}
+

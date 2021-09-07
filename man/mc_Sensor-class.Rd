@@ -17,7 +17,7 @@ Class for sensor definition
 
 \item{\code{physical}}{measurement (T, RH, VWC, ...)}
 
-\item{\code{units}}{measurument (°C, \%, m3/m3, raw, mm, ...)}
+\item{\code{units}}{measurument (°C, \\%, m3/m3, raw, mm, ...)}
 
 \item{\code{default_height}}{default height of sensor in cm}
 

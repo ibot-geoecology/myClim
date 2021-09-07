@@ -17,7 +17,8 @@ mc_feed_directory(directory, logger_type, recursive = TRUE)
 data in standard format
 }
 \description{
-This function read data files from directory of one logger type. Locality is set None.
+This function read csv data files from directory of one logger type.
+If csv file is not in correct format, is skipped. Locality is set None.
 }
 \examples{
 example_tms_data <- microclim::mc_feed_directory("examples/data/TMS/", "TMS")

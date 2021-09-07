@@ -7,12 +7,18 @@
 mc_feed_from_df(files_table)
 }
 \arguments{
-\item{files_table}{data.frame which describe data files
-- columns: path, locality_id, logger, serial_number - can be NA, than try detect}
+\item{files_table}{data.frame which describe data files}
 }
 \value{
 data in standard format
 }
 \description{
-This function read raw data from loggers by data.frame with files description
+This function read raw data from loggers by data.frame with files description.
+Columns of data.frame:
+\itemize{
+\item path - path to file
+\item locality_id
+\item logger
+\item serial_number - can be NA, than try detect
+}
 }

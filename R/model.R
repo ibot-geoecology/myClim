@@ -27,6 +27,10 @@ mc_Sensor <- setClass("mc_Sensor",
          ))
 
 #' Class for locality metadata
+#' @slot id name of loacality
+#' @slot altitude of loacality
+#' @slot lat_wgs84 latitude of locality in WGS-84
+#' @slot lon_wgs84 longitude of locality in WGS-84
 #' @export mc_LocalityMetadata
 #' @exportClass mc_LocalityMetadata
 mc_LocalityMetadata <- setClass("mc_LocalityMetadata",

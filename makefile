@@ -12,9 +12,7 @@ remove:
 generate:
 	Rscript data-raw/mc_data_formats.R
 	R -e 'devtools::document()'
-
-generate-html:
-	R -e 'pkgdown::build_site()'
+	R -e 'Rd2md::ReferenceManual()'
 
 test:
 	R -e 'testthat::test_dir("tests")'

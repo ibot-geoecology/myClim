@@ -27,7 +27,8 @@ mc_feed_TMS_files <- function(files) {
 
 #' Reading files from directory
 #'
-#' This function read data files from directory of one logger type. Locality is set None.
+#' This function read csv data files from directory of one logger type.
+#' If csv file is not in correct format, is skipped. Locality is set None.
 #'
 #' @param directory character
 #' @param logger_type character - type of logger (TMS)
@@ -75,10 +76,14 @@ mc_feed_from_csv <- function(csv_with_files_table) {
 
 #' Data files reading
 #'
-#' This function read raw data from loggers by data.frame with files description
+#' This function read raw data from loggers by data.frame with files description.
+#' Columns of data.frame:
+#' * path - path to file
+#' * locality_id
+#' * logger
+#' * serial_number - can be NA, than try detect
 #'
 #' @param files_table data.frame which describe data files
-#'   - columns: path, locality_id, logger, serial_number - can be NA, than try detect
 #' @return data in standard format
 #' @export
 mc_feed_from_df <- function(files_table) {
