@@ -18,5 +18,7 @@ Class for locality metadata
 \item{\code{lat_wgs84}}{latitude of locality in WGS-84}
 
 \item{\code{lon_wgs84}}{longitude of locality in WGS-84}
+
+\item{\code{user_data}}{list for user data}
 }}
 

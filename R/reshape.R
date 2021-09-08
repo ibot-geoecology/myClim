@@ -3,35 +3,42 @@
 #' This function create data.frame with values of sensor
 #'
 #' @param data all data in standard format
-#' @param sensor name of sensor
-#' @param localities names of localities
+#' @param localities names of localities; if empty then all
+#' @param sensors names of sensors; if empty then all
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, "T1", c("LOC_1", "LOC_2"))
-mc_reshape_wideformat <- function(data, sensor, localities) {
-    loggers <- .reshape.get_loggers_with_sensor_from_localities(data, sensor, localities)
-    result <- data.frame(datetime=.reshape.get_sensor_values_from_localities_datetime(loggers))
+#' example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
+    if(length(localities) == 0) {
+        localities <- names(data)
+    }
+    loggers <- .reshape_get_loggers_with_sensors_from_localities(data, localities, sensors)
+    result <- data.frame(datetime=.reshape_get_datetimes_of_loggers(loggers))
     for(locality in localities) {
-        filtered_loggers <- Filter(function(x) sensor %in% names(x$sensors_data), data[[locality]]$loggers)
+        filtered_loggers <- .reshape_filtered_loggers_from_locality(data, locality, sensors)
         for(logger in filtered_loggers) {
-            column_name <- paste(locality, logger$metadata@serial_number, sep="-")
-            result[[column_name]] <- .resahpe.get_sensor_values_from_localities_series(result, logger, sensor)
+            result <- .reshape_add_wideformat_logger_columns(result, locality, logger, sensors)
         }
     }
     result
 }
 
-.reshape.get_loggers_with_sensor_from_localities <- function(data, sensor, localities) {
+.reshape_filtered_loggers_from_locality <- function(data, locality, sensors)
+{
+    Filter(function(x) length(sensors) == 0 || length(intersect(sensors, names(x$sensors))) > 0, data[[locality]]$loggers)
+}
+
+.reshape_get_loggers_with_sensors_from_localities <- function(data, localities, sensors) {
     result <- c()
     for(locality in localities) {
-        filtered_loggers <- Filter(function(x) sensor %in% names(x$sensors_data), data[[locality]]$loggers)
+        filtered_loggers <- .reshape_filtered_loggers_from_locality(data, locality, sensors)
         result <- c(result, filtered_loggers)
     }
     result
 }
 
-.reshape.get_sensor_values_from_localities_datetime <- function(loggers){
+.reshape_get_datetimes_of_loggers <- function(loggers){
     if(length(loggers) == 0) {
         return(c())
     }
@@ -46,7 +53,6 @@ mc_reshape_wideformat <- function(data, sensor, localities) {
     repeat {
         value <- min(Filter(function(x){x > 0}, current_values))
         result[[length(result) + 1]] <- value
-        changed <- FALSE
         for(logger_index in 1:length(current_indexes)) {
             if(current_values[[logger_index]] == value) {
                 if(current_indexes[[logger_index]] == length(loggers[[logger_index]]$datetime)) {
@@ -54,11 +60,10 @@ mc_reshape_wideformat <- function(data, sensor, localities) {
                 }
                 else {
                     current_indexes[[logger_index]] <- current_indexes[[logger_index]] + 1
-                    changed <- TRUE
                 }
             }
         }
-        if(!changed) {
+        if(all(current_indexes == 0)) {
             break
         }
         current_values <- sapply(1:length(current_indexes), current_values_function)
@@ -66,7 +71,21 @@ mc_reshape_wideformat <- function(data, sensor, localities) {
     as.POSIXct(unlist(result), origin="1970-01-01", tz="UTC")
 }
 
-.resahpe.get_sensor_values_from_localities_series <- function(df, logger, sensor){
+.reshape_add_wideformat_logger_columns <- function(df, locality, logger, sensors) {
+    if(length(sensors) == 0) {
+        sensors <- names(logger$sensors)
+    }
+    for(sensor in sensors) {
+        if(!(sensor %in% names(logger$sensors))){
+            continue
+        }
+        column_name <- paste(locality, logger$metadata@serial_number, sensor, sep="-")
+        df[[column_name]] <- .resahpe_get_sensor_values_from_localities_series(df, logger, sensor)
+    }
+    df
+}
+
+.resahpe_get_sensor_values_from_localities_series <- function(df, logger, sensor){
     if(length(df$datetime) == 0)
     {
         return(c())
@@ -80,7 +99,7 @@ mc_reshape_wideformat <- function(data, sensor, localities) {
         }
         else
         {
-            values[[i]] <- logger$sensors_data[[sensor]]@values[[current_logger_index]]
+            values[[i]] <- logger$sensors[[sensor]]$values[[current_logger_index]]
             current_logger_index <- current_logger_index + 1
         }
     }

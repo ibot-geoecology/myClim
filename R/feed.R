@@ -96,12 +96,12 @@ mc_feed_from_df <- function(files_table) {
     for(i in 1:nrow(files_table))
     {
         row <- files_table[i, ]
-        result[[row$locality_id]] <- .feed.add_logger_to_locality(result[[row$locality_id]], row)
+        result[[row$locality_id]] <- .feed_add_logger_to_locality(result[[row$locality_id]], row)
     }
     result
 }
 
-.feed.add_logger_to_locality <- function(current_locality, row) {
+.feed_add_logger_to_locality <- function(current_locality, row) {
     if(is.null(current_locality))
     {
         metadata <- mc_LocalityMetadata(
@@ -109,7 +109,7 @@ mc_feed_from_df <- function(files_table) {
         current_locality <- list(metadata = metadata, loggers=list())
     }
     new_index <- length(current_locality$loggers) + 1
-    logger <- .feed.functions_read_logger[[row$logger]](row$path, row$serial_number)
+    logger <- .feed_functions_read_logger[[row$logger]](row$path, row$serial_number)
     if(is.null(logger)) {
         warning(sprintf("File %s dosn't have right format. File is skipped.", row$path))
     }
@@ -119,11 +119,11 @@ mc_feed_from_df <- function(files_table) {
     current_locality
 }
 
-.feed.read_TMS_logger <- function(filename, serial_number=NULL) {
-    .feed.read_logger(filename, microclim::mc_data_formats$TMS, "TMS", serial_number, "UTC")
+.feed_read_TMS_logger <- function(filename, serial_number=NULL) {
+    .feed_read_logger(filename, microclim::mc_data_formats$TMS, "TMS", serial_number, "UTC")
 }
 
-.feed.read_logger <- function(filename, data_format, logger_type, serial_number=NULL, tz = "UTC") {
+.feed_read_logger <- function(filename, data_format, logger_type, serial_number=NULL, tz = "UTC") {
     if(is.null(serial_number) | is.na(serial_number)){
         serial_number <- microclim:::.model.get_serial_number_from_filename(data_format, filename)
     }
@@ -143,21 +143,26 @@ mc_feed_from_df <- function(files_table) {
                     type = logger_type)
     list(metadata = metadata,
          datetime = datetime,
-         sensors_data = .feed.get_sensors_data_list(data_table, data_format))
+         sensors_data = .feed_get_sensors(data_table, data_format))
 }
 
-.feed.get_sensors_data_list <- function(data_table, data_format){
+.feed_get_sensors <- function(data_table, data_format){
     result <- list()
     for(sensor_name in names(data_format@columns))
     {
-        values <- data_table[[data_format@columns[[sensor_name]]]]
-        item <- mc_SensorData(
-                    sensor = sensor_name,
-                    values = values)
-        result[[sensor_name]] <- item
+        result[[sensor_name]] <- .feed_get_sensor(data_table, data_format, sensor_name)
     }
     result
 }
 
-.feed.functions_read_logger <- list(
-    TMS = .feed.read_TMS_logger)
+.feed_get_sensor <- function(data_table, data_format, sensor_name){
+    values <- data_table[[data_format@columns[[sensor_name]]]]
+    metadata <- mc_SensorMetadata(sensor = sensor_name)
+    item <- list(metadata = metadata,
+                 values = values,
+                 states = list())
+    item
+}
+
+.feed_functions_read_logger <- list(
+    TMS = .feed_read_TMS_logger)

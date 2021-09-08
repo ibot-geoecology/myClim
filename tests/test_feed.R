@@ -9,9 +9,12 @@ test_that("mc_feed_from_csv", {
     expect_equal(data$LOC_1$loggers[[1]]$metadata@type, "TMS")
     expect_equal(data$LOC_1$loggers[[1]]$metadata@serial_number, "94184102")
     expect_equal(length(data$LOC_2$loggers[[1]]$datetime), 75)
-    expect_equal(length(data$LOC_2$loggers[[1]]$sensors_data), 4)
+    expect_equal(length(data$LOC_2$loggers[[1]]$sensors), 4)
+    expect_equal(class(data$LOC_2$loggers[[1]]$sensors), "list")
+    expect_equal(class(data$LOC_2$loggers[[1]]$sensors$T1), "list")
+    expect_equal(length(data$LOC_2$loggers[[1]]$sensors$T1), 3)
     expect_equal(length(data$LOC_3$loggers[[1]]$datetime), 11)
-    expect_equal(length(data$LOC_3$loggers[[1]]$sensors_data), 1)
+    expect_equal(length(data$LOC_3$loggers[[1]]$sensors), 1)
 })
 
 test_that("mc_feed_TMS_directory", {

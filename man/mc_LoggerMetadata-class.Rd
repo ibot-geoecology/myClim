@@ -8,3 +8,9 @@
 \description{
 Class for logger metadata
 }
+\section{Slots}{
+
+\describe{
+\item{\code{type}}{of logger}
+}}
+

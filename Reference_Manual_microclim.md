@@ -1,6 +1,6 @@
 <!-- toc -->
 
-září 07, 2021
+září 08, 2021
 
 # DESCRIPTION
 
@@ -313,7 +313,7 @@ This function create data.frame with values of sensor
 ## Usage
 
 ```r
-mc_reshape_wideformat(data, sensor, localities)
+mc_reshape_wideformat(data, localities = c(), sensors = c())
 ```
 
 
@@ -322,8 +322,8 @@ mc_reshape_wideformat(data, sensor, localities)
 Argument      |Description
 ------------- |----------------
 `data`     |     all data in standard format
-`sensor`     |     name of sensor
-`localities`     |     names of localities
+`localities`     |     names of localities; if empty then all
+`sensors`     |     names of sensors; if empty then all
 
 
 ## Value
@@ -334,7 +334,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, "T1", c("LOC_1", "LOC_2"))
+example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
 ```
 
 
@@ -348,14 +348,24 @@ Class for sensor definition
 Class for sensor definition
 
 
-# `mc_SensorData-class`
+# `mc_SensorMetadata-class`
 
-Class for sensor data
+Class for sensor metadata
 
 
 ## Description
 
-Class for sensor data
+Class for sensor metadata
+
+
+# `mc_SensorState-class`
+
+Class for state of sensor
+
+
+## Description
+
+Class for state of sensor
 
 
 # `mc_TMSDataFormat-class`

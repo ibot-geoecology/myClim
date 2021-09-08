@@ -11,6 +11,7 @@ remove:
 
 generate:
 	Rscript data-raw/mc_data_formats.R
+	$(RM) NAMESPACE
 	R -e 'devtools::document()'
 	R -e 'Rd2md::ReferenceManual()'
 

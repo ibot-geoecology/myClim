@@ -31,6 +31,7 @@ mc_Sensor <- setClass("mc_Sensor",
 #' @slot altitude of loacality
 #' @slot lat_wgs84 latitude of locality in WGS-84
 #' @slot lon_wgs84 longitude of locality in WGS-84
+#' @slot user_data list for user data
 #' @export mc_LocalityMetadata
 #' @exportClass mc_LocalityMetadata
 mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
@@ -38,15 +39,19 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
             id = "character",
             altitude = "numeric",
             lat_wgs84 = "numeric",
-            lon_wgs84 = "numeric"
+            lon_wgs84 = "numeric",
+            user_data = "list"
          ),
          prototype (
             altitude = NA_real_,
             lat_wgs84 = NA_real_,
-            lon_wgs84 = NA_real_
+            lon_wgs84 = NA_real_,
+            user_data = list()
          ))
 
 #' Class for logger metadata
+#' @slot type of logger
+#' @slot serial_number
 #' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
@@ -55,19 +60,32 @@ mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
            serial_number = "character"
          ))
 
-#' Class for sensor data
-#' @export mc_SensorData
-#' @exportClass mc_SensorData
-mc_SensorData <- setClass("mc_SensorData",
+#' Class for sensor metadata
+#' @export mc_SensorMetadata
+#' @exportClass mc_SensorMetadata
+mc_SensorMetadata <- setClass("mc_SensorMetadata",
          representation(
            sensor = "character",
            height = "numeric",
-           calibrated = "logical",
-           values = "numeric"
+           calibrated = "logical"
          ),
          prototype (
              height = NA_integer_,
              calibrated = FALSE
+         ))
+
+#' Class for state of sensor
+#' @slot tag
+#' @slot start
+#' @slot end
+#' @slot tag
+#' @export mc_SensorState
+#' @exportClass mc_SensorState
+mc_SensorState <- setClass("mc_SensorState",
+         representation(
+           tag = "character",
+           start = "POSIXct",
+           end = "POSIXct"
          ))
 
 #' Class for source file data format

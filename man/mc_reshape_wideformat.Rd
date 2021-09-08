@@ -4,14 +4,14 @@
 \alias{mc_reshape_wideformat}
 \title{Sensor values by localities}
 \usage{
-mc_reshape_wideformat(data, sensor, localities)
+mc_reshape_wideformat(data, localities = c(), sensors = c())
 }
 \arguments{
 \item{data}{all data in standard format}
 
-\item{sensor}{name of sensor}
+\item{localities}{names of localities; if empty then all}
 
-\item{localities}{names of localities}
+\item{sensors}{names of sensors; if empty then all}
 }
 \value{
 data in standard format
@@ -20,5 +20,5 @@ data in standard format
 This function create data.frame with values of sensor
 }
 \examples{
-example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, "T1", c("LOC_1", "LOC_2"))
+example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
 }
