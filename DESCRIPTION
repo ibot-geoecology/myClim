@@ -11,7 +11,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Depends: 
-    R (>= 2.10)
+    R (>= 3.0)
 Imports:
-    stringr
+    stringr,
+    rlang
 Roxygen: list(markdown = TRUE)

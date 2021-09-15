@@ -87,7 +87,7 @@ mc_feed_from_csv <- function(csv_with_files_table) {
 #' @return data in standard format
 #' @export
 mc_feed_from_df <- function(files_table) {
-    files_table <- microclim:::.common.convert_factors_in_dataframe(files_table)
+    files_table <- microclim:::.common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {
         return(list())
@@ -143,7 +143,7 @@ mc_feed_from_df <- function(files_table) {
                     type = logger_type)
     list(metadata = metadata,
          datetime = datetime,
-         sensors_data = .feed_get_sensors(data_table, data_format))
+         sensors = .feed_get_sensors(data_table, data_format))
 }
 
 .feed_get_sensors <- function(data_table, data_format){

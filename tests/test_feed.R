@@ -5,7 +5,7 @@ test_that("mc_feed_from_csv", {
     data <- microclim::mc_feed_from_csv("data/TMS/files_table.csv")
     expect_equal(length(data), 3)
     expect_equal(length(data$LOC_1$loggers[[1]]$datetime), 49)
-    expect_equal(length(data$LOC_1$loggers[[1]]$sensors_data), 4)
+    expect_equal(length(data$LOC_1$loggers[[1]]$sensors), 4)
     expect_equal(data$LOC_1$loggers[[1]]$metadata@type, "TMS")
     expect_equal(data$LOC_1$loggers[[1]]$metadata@serial_number, "94184102")
     expect_equal(length(data$LOC_2$loggers[[1]]$datetime), 75)
