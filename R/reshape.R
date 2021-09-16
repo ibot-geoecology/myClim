@@ -36,16 +36,19 @@ mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensors)
     rows_count <- .reshape_number_of_sensor_values(data)
     result_env <- new.env()
-    result_env$localities <- character(rows_count)
-    result_env$serial_numbers <- character(rows_count)
-    result_env$sensors <- character(rows_count)
-    result_env$datetimes <- numeric(rows_count)
-    result_env$values <- numeric(rows_count)
-    result_env$current_row <- 1
+    result_env$localities <- character()
+    result_env$serial_numbers <- character()
+    result_env$sensors <- character()
+    result_env$datetimes <- numeric()
+    result_env$values <- numeric()
     for(locality in data) {
         for(logger in locality$loggers) {
-            .reshape_add_logger_rows_to_longformat_table(result_env, logger, locality$metadata@id)
+            .reshape_add_logger_rows_to_longformat_table(result_env, logger)
+            count_items <- length(result_env$values) - length(result_env$serial_numbers)
+            result_env$serial_numbers <- c(result_env$serial_numbers, rep(logger$metadata@serial_number, count_items))
         }
+        count_items <- length(result_env$values) - length(result_env$localities)
+        result_env$localities <- c(result_env$localities, rep(locality$metadata@id, count_items))
     }
     data.frame(location=result_env$localities,
                serial_number=result_env$serial_numbers,
@@ -129,19 +132,14 @@ mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
     sum(sapply(data, location_row_count))
 }
 
-.reshape_add_logger_rows_to_longformat_table <- function(result_env, logger, locality_id){
+.reshape_add_logger_rows_to_longformat_table <- function(result_env, logger){
     for(sensor in logger$sensors) {
         if(length(sensor$values) == 0){
             continue
         }
-        for(i in 1:length(sensor$values))
-        {
-            result_env$localities[[result_env$current_row]] <- locality_id
-            result_env$serial_numbers[[result_env$current_row]] <- logger$metadata@serial_number
-            result_env$sensors[[result_env$current_row]] <- sensor$metadata@sensor
-            result_env$datetimes[[result_env$current_row]] <- logger$datetime[[i]]
-            result_env$values[[result_env$current_row]] <- sensor$values[[i]]
-            result_env$current_row <- result_env$current_row + 1
-        }
+        result_env$values <- c(result_env$values, sensor$values)
+        result_env$datetimes <- c(result_env$datetimes, logger$datetime)
+        count_items <- length(result_env$values) - length(result_env$sensors)
+        result_env$sensors <- c(result_env$sensors, rep(sensor$metadata@sensor, count_items))
     }
 }
