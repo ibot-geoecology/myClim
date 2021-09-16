@@ -1,6 +1,6 @@
 <!-- toc -->
 
-září 08, 2021
+září 16, 2021
 
 # DESCRIPTION
 
@@ -18,9 +18,10 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Depends: 
-    R (>= 2.10)
+    R (>= 3.0)
 Imports:
-    stringr
+    stringr,
+    rlang
 Roxygen: list(markdown = TRUE)```
 
 
@@ -300,9 +301,47 @@ Class for logger metadata
 Class for logger metadata
 
 
+# `mc_reshape_longformat`
+
+Longformat of sensor values
+
+
+## Description
+
+This function create data.frame with values of sensor
+
+
+## Usage
+
+```r
+mc_reshape_longformat(data, localities = c(), sensors = c())
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     all data in standard format
+`localities`     |     names of localities; if empty then all
+`sensors`     |     names of sensors; if empty then all
+
+
+## Value
+
+data in standard format
+
+
+## Examples
+
+```r
+example_tms_t1_table <- microclim::mc_reshape_longformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+```
+
+
 # `mc_reshape_wideformat`
 
-Sensor values by localities
+Wideformat of sensor values
 
 
 ## Description

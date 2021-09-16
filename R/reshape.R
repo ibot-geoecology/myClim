@@ -31,9 +31,27 @@ mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+#' example_tms_t1_table <- microclim::mc_reshape_longformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
 mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
-    NULL
+    data <- microclim:::.common_get_filtered_data(data, localities, sensors)
+    rows_count <- .reshape_number_of_sensor_values(data)
+    result_env <- new.env()
+    result_env$localities <- character(rows_count)
+    result_env$serial_numbers <- character(rows_count)
+    result_env$sensors <- character(rows_count)
+    result_env$datetimes <- numeric(rows_count)
+    result_env$values <- numeric(rows_count)
+    result_env$current_row <- 1
+    for(locality in data) {
+        for(logger in locality$loggers) {
+            .reshape_add_logger_rows_to_longformat_table(result_env, logger, locality$metadata@id)
+        }
+    }
+    data.frame(location=result_env$localities,
+               serial_number=result_env$serial_numbers,
+               sensor=result_env$sensors,
+               datetime=as.POSIXct(result_env$datetimes, origin="1970-01-01", tz="UTC"),
+               value=result_env$values)
 }
 
 .reshape_get_datetimes_of_loggers <- function(loggers){
@@ -102,4 +120,28 @@ mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
         }
     }
     values
+}
+
+.reshape_number_of_sensor_values <- function(data){
+    sensor_values_count <- function(sensor) length(sensor$values)
+    logger_row_count <- function(logger) sum(sapply(logger$sensors, sensor_values_count))
+    location_row_count <- function(location) sum(sapply(location$loggers, logger_row_count))
+    sum(sapply(data, location_row_count))
+}
+
+.reshape_add_logger_rows_to_longformat_table <- function(result_env, logger, locality_id){
+    for(sensor in logger$sensors) {
+        if(length(sensor$values) == 0){
+            continue
+        }
+        for(i in 1:length(sensor$values))
+        {
+            result_env$localities[[result_env$current_row]] <- locality_id
+            result_env$serial_numbers[[result_env$current_row]] <- logger$metadata@serial_number
+            result_env$sensors[[result_env$current_row]] <- sensor$metadata@sensor
+            result_env$datetimes[[result_env$current_row]] <- logger$datetime[[i]]
+            result_env$values[[result_env$current_row]] <- sensor$values[[i]]
+            result_env$current_row <- result_env$current_row + 1
+        }
+    }
 }
