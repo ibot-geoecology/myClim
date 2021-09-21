@@ -5,5 +5,7 @@ example_tms_data1 <- microclim::mc_feed_from_csv("examples/data/TMS/files_table.
 example_tms_data2 <- microclim::mc_feed_TMS_directory("examples/data/TMS/")
 # The function returns a wideformat table with the values of the T1, and T2 sensors in the localities LOC_1 and LOC_2.
 example_tms_wideformat_table <- microclim::mc_reshape_wideformat(example_tms_data1, c("LOC_1", "LOC_2"), c("T1", "T2"))
+# The function returns a wideformat table by intervals with the values of the T1 sensor in all localities.
+example_tms_wideformat_interval_table <- microclim::mc_reshape_wideformat(example_tms_data1, sensors="T1")
 # The function returns a longformat table with the values of the T1, and T2 sensors in the localities LOC_1 and LOC_2.
 example_tms_longformat_table <- microclim::mc_reshape_longformat(example_tms_data1, c("LOC_1", "LOC_2"), c("T1", "T2"))
