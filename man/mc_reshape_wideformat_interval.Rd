@@ -28,5 +28,5 @@ This function create data.frame with values of sensor in wide format.
 Mean is computed from values in datetime interval.
 }
 \examples{
-example_tms_t1_table <- microclim::mc_reshape_wideformat_interval(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"), 10)
+example_tms_wideformat_interval <- microclim::mc_reshape_wideformat_interval(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"), 10)
 }

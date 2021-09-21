@@ -1,6 +1,6 @@
 <!-- toc -->
 
-září 20, 2021
+září 21, 2021
 
 # DESCRIPTION
 
@@ -405,7 +405,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_t1_table <- microclim::mc_reshape_wideformat_interval(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"), 10)
+example_tms_wideformat_interval <- microclim::mc_reshape_wideformat_interval(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"), 10)
 ```
 
 
@@ -443,7 +443,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+example_tms_wideformat <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
 ```
 
 
