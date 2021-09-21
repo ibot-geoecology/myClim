@@ -17,7 +17,7 @@ mc_reshape_wideformat(data, localities = c(), sensors = c())
 data in standard format
 }
 \description{
-This function create data.frame with values of sensor
+This function create data.frame with values of sensor in wide format.
 }
 \examples{
 example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))

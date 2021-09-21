@@ -1,6 +1,6 @@
 #' Wideformat of sensor values
 #'
-#' This function create data.frame with values of sensor
+#' This function create data.frame with values of sensor in wide format.
 #'
 #' @param data all data in standard format
 #' @param localities names of localities; if empty then all
@@ -8,7 +8,7 @@
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_t1_table <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+#' example_tms_wideformat <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
 mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensors)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
@@ -17,6 +17,36 @@ mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
         for(logger in locality$loggers) {
             result <- .reshape_add_wideformat_logger_columns(result, locality$metadata@id, logger)
         }
+    }
+    result
+}
+
+#' Wideformat of sensor values by interval
+#'
+#' This function create data.frame with values of sensor in wide format.
+#' Mean is computed from values in datetime interval.
+#'
+#' @param data all data in standard format
+#' @param localities names of localities; if empty then all
+#' @param sensors names of sensors; if empty then all
+#' @param interval_length in minutes (default 15)
+#' @return data in standard format
+#' @export
+#' @examples
+#' example_tms_wideformat_interval <- microclim::mc_reshape_wideformat_interval(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"), 10)
+mc_reshape_wideformat_interval <- function(data, localities=c(), sensors=c(), interval_length=15) {
+    table <- mc_reshape_wideformat(data, localities, sensors)
+    range <- .reshape_get_datetimes_range(table$datetime, interval_length)
+    start_datetimes <- seq(range[1], range[2], by=interval_length*60)
+    bins <- cut(as.numeric(table$datetime), start_datetimes, right = FALSE)
+    result <- data.frame(datetime <- as.POSIXct(start_datetimes[-length(start_datetimes)], origin="1970-01-01", tz="UTC"))
+    if(ncol(table) == 1) {
+        return(result)
+    }
+    for(i in 2:ncol(table)) {
+        result[names(table)[[i]]] <- tapply(table[[i]], bins, function(x) {
+            mean_result <- mean(x, na.rm = TRUE)
+            if (is.nan(mean_result)) NA else mean_result})
     }
     result
 }
@@ -92,4 +122,17 @@ mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
         count_items <- length(result_env$values) - length(result_env$sensors)
         result_env$sensors <- c(result_env$sensors, rep(sensor$metadata@sensor, count_items))
     }
+}
+
+.reshape_get_datetimes_range <- function(datetimes, interval_length)
+{
+    interval_length_seconds <- interval_length * 60
+    min_datetime <- as.numeric(min(datetimes))
+    min_range <- min_datetime %/% interval_length_seconds * interval_length_seconds
+    max_datetime <- as.numeric(max(datetimes))
+    max_range <- ceiling(max_datetime / interval_length_seconds) * interval_length_seconds
+    if(max_range == max_datetime) {
+        max_range <- max_range + interval_length_seconds
+    }
+    c(min_range, max_range)
 }
