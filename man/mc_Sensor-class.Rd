@@ -11,15 +11,13 @@ Class for sensor definition
 \section{Slots}{
 
 \describe{
-\item{\code{name}}{name of sensor (T1, T2, T3, TDT, RH, ...)}
+\item{\code{name}}{name of sensor (T1, T2, T3, moisture, ...)}
 
-\item{\code{logger}}{name of logger (TMS, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)}
+\item{\code{logger}}{name of logger (TMS, ...)}
 
-\item{\code{physical}}{measurement (T, RH, VWC, ...)}
+\item{\code{physical}}{measurement (T, TMS_moisture, ...)}
 
-\item{\code{units}}{measurument (°C, \\%, m3/m3, raw, mm, ...)}
-
-\item{\code{default_height}}{default height of sensor in cm}
+\item{\code{default_height}}{default height of sensor in m}
 
 \item{\code{min_value}}{minimal value}
 

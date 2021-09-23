@@ -6,24 +6,39 @@ mc_const_NONE_LOCALITY_ID <- "None"
 # classes ================================================================================
 
 #' Class for sensor definition
-#' @slot name name of sensor (T1, T2, T3, TDT, RH, ...)
-#' @slot logger name of logger (TMS, TMS-T1, TMS Dendro, iButton Hygrochron, iButton Thermochron, HOBO RH, HOBO T, ...)
-#' @slot physical measurement (T, RH, VWC, ...)
-#' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
-#' @slot default_height default height of sensor in cm
+#' @slot name name of sensor (T1, T2, T3, moisture, ...)
+#' @slot logger name of logger (TMS, ...)
+#' @slot physical measurement (T, TMS_moisture, ...)
+#' @slot default_height default height of sensor in m
 #' @slot min_value minimal value
 #' @slot max_value maximal value
 #' @export mc_Sensor
 #' @exportClass mc_Sensor
 mc_Sensor <- setClass("mc_Sensor",
-         slots = c(
+         representation (
            name = "character",
            logger = "character",
            physical = "character",
-           units = "character",
            default_height = "numeric",
            min_value = "numeric",
-           max_value = "numeric"
+           max_value = "numeric",
+           plot_color = "character"
+         ),
+         prototype (
+            plot_color = ""
+         ))
+
+#' Class for physical
+#' @slot name of physical
+#' @slot description
+#' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
+#' @export mc_Physical
+#' @exportClass mc_Physical
+mc_Physical <- setClass("mc_Physical",
+         representation(
+           name = "character",
+           description = "character",
+           units = "character"
          ))
 
 #' Class for locality metadata
