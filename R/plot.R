@@ -125,9 +125,9 @@ mc_plot_logger <- function(logger, filename, crop=c(NA, NA), interval_length=15)
 #' mc_plot_image(data_table, "T1_image.png", "T1 sensor")
 mc_plot_image <- function(data_table, filename, title) {
     values_matrix <- as.matrix(data_table[,-1])
-    image_height = 50 * ncol(values_matrix) + 100
-    if(image_height < 250) {image_height <- 250}
-    png(filename = filename,width = 800,height = image_height)
+    image_height = 120 * ncol(values_matrix) + 240
+    if(image_height < 700) {image_height <- 700}
+    png(filename=filename,width=1900, height=image_height, res=200)
     x_labels <- substr(data_table$datetime[seq(1, nrow(data_table), len=20)], 1, 10)
     bottom_margin <- 7
     left_margin <- 12
@@ -138,7 +138,7 @@ mc_plot_image <- function(data_table, filename, title) {
     axis(side = 1, at=seq(0, 1, len=20), labels=x_labels, las=3)
     axis(side = 2, at=seq(0, 1, len=ncol(values_matrix)), labels=colnames(data_table)[-1], las=2)
     legend_values <- round(seq(min(values_matrix, na.rm=T), max(values_matrix, na.rm=T), len=12), 2)
-    legend(grconvertX(710, "device"), grconvertY(45, "device"),
+    legend(grconvertX(1630, "device"), grconvertY(120, "device"),
            legend_values, fill = hcl.colors(12, "viridis", rev = TRUE), xpd = NA)
     title(main=title, line=0.5, cex.lab=1.2)
     dev.off()
