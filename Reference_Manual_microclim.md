@@ -1,6 +1,6 @@
 <!-- toc -->
 
-září 23, 2021
+září 24, 2021
 
 # DESCRIPTION
 
@@ -59,7 +59,7 @@ Physical quantities definition
 
 ## Format
 
-An object of class `list` of length 2.
+An object of class `list` of length 3.
 
 
 ## Usage
@@ -81,7 +81,7 @@ Sensors definition
 
 ## Format
 
-An object of class `list` of length 4.
+An object of class `list` of length 5.
 
 
 ## Usage
@@ -402,7 +402,7 @@ Function plot data of one logger
 ## Usage
 
 ```r
-mc_plot_logger(logger, filename, crop = c(NA, NA))
+mc_plot_logger(logger, filename, crop = c(NA, NA), interval_length = 15)
 ```
 
 
@@ -412,7 +412,8 @@ Argument      |Description
 ------------- |----------------
 `logger`     |     list with informations about logger
 `filename`     |     output filename
-`crop`     |     datetime range for plot, not cropping if NA default(c(NA, NA))
+`crop`     |     datetime range for plot, not cropping if NA (default c(NA, NA))
+`interval_length`     |     length of interval in minutes (default 15)
 
 
 ## Examples

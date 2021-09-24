@@ -8,7 +8,8 @@ mc_data_sensors <- list(
        default_height = -0.08,
        min_value = -40,
        max_value = 60,
-       plot_color = "#2000EEB0"
+       plot_color = "#2000EEB0",
+       plot_line_width = 2
     ),
     TMS_T2 = mc_Sensor(
        name = "T2",
@@ -28,14 +29,25 @@ mc_data_sensors <- list(
        max_value = 60,
        plot_color = "red3"
     ),
-    TMS_moisture = mc_Sensor(
-       name = "moisture",
+    TMS_TMSmoisture = mc_Sensor(
+       name = "TMSmoisture",
        logger = "TMS",
-       physical = "TMS_moisture",
+       physical = "TMSmoisture",
        default_height = -0.07,
        min_value = 0,
        max_value = 4000,
-       plot_color = "steelblue"
+       plot_color = "steelblue",
+       plot_line_width = 2
+    ),
+    TMS_moisture = mc_Sensor(
+       name = "moisture",
+       logger = "TMS",
+       physical = "moisture",
+       default_height = -0.07,
+       min_value = 0,
+       max_value = 1,
+       plot_color = "steelblue",
+       plot_line_width = 2
     )
 )
 

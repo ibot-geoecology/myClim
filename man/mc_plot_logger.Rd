@@ -4,14 +4,16 @@
 \alias{mc_plot_logger}
 \title{Plot data from logger}
 \usage{
-mc_plot_logger(logger, filename, crop = c(NA, NA))
+mc_plot_logger(logger, filename, crop = c(NA, NA), interval_length = 15)
 }
 \arguments{
 \item{logger}{list with informations about logger}
 
 \item{filename}{output filename}
 
-\item{crop}{datetime range for plot, not cropping if NA default(c(NA, NA))}
+\item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
+
+\item{interval_length}{length of interval in minutes (default 15)}
 }
 \description{
 Function plot data of one logger

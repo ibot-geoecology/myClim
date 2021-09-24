@@ -38,3 +38,7 @@
     name <- paste0(logger_metadata@type, "_", sensor_metadata@sensor)
     microclim::mc_data_sensors[[name]]
 }
+
+.common_as_utc_posixct <- function(datetime) {
+    as.POSIXct(datetime, origin="1970-01-01", tz="UTC")
+}

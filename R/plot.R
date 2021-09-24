@@ -1,4 +1,4 @@
-.plot_const_MOISTURE_PHYSICAL <- c("TMS_moisture", "moisture")
+.plot_const_MOISTURE_PHYSICAL <- c("TMSmoisture", "moisture")
 
 #' Plot data from logger
 #'
@@ -6,43 +6,110 @@
 #'
 #' @param logger list with informations about logger
 #' @param filename output filename
-#' @param crop datetime range for plot, not cropping if NA default(c(NA, NA))
+#' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
+#' @param interval_length length of interval in minutes (default 15)
 #' @export
 #' @examples
 #' mc_plot_logger(logger, "91184101.png")
-mc_plot_logger <- function(logger, filename, crop=c(NA, NA)) {
-    png(filename=filename, width=1920, height=1000)
-    physical_quantities <- .plot_get_logger_sensors_by_physical(logger)
-    .plot_logger_set_parameters(physical_quantities)
-    for(physical in physical_quantities){
+mc_plot_logger <- function(logger, filename, crop=c(NA, NA), interval_length=15) {
+    png(filename=filename, width=1920, height=1000, res=200)
+    physical <- .plot_get_logger_sensors_by_physical(logger)
+    moisture_sensor <- intersect(.plot_const_MOISTURE_PHYSICAL, names(physical))
+    .plot_logger_set_parameters(physical, moisture_sensor)
+    data <- microclim:::.reshape_wideformat_interval_logger(logger, interval_length)
+    xlimit <- .plot_get_xlimit(data$datetime, crop)
+    months <- .plot_get_months_from_xlimit(xlimit)
+    .plot_logger_temperature(logger, data, xlimit, months, physical$T)
+    if(length(moisture_sensor) > 0){
+        .plot_logger_moisture(logger, data, xlimit, months, moisture_sensor[[1]])
     }
+    axis.POSIXct(1, at=months, labels=T, format="%m/%Y", las=2)
+    dev.off()
 }
 
 .plot_get_logger_sensors_by_physical <- function(logger) {
     physical <- sapply(logger$sensors, function(x) {
         microclim:::.common_get_sensor_info(logger$metadata, x$metadata)@physical})
     sensor_names <- names(logger$sensors)
-    tapply(sensors, physical, c)
+    tapply(sensor_names, physical, c, simplify = FALSE)
 }
 
-.plot_logger_set_parameters <-function(physical_quantities)
+.plot_logger_set_parameters <-function(physical_quantities, moisture_sensor)
 {
-    left_margin <- 4
     top_margin <- 1.5
-    right_margin <- 4
-    if(length(intersect(.plot_const_MOISTURE_PHYSICAL, names(physical_quantities))) > 0) {
+    if(length(moisture_sensor) > 0) {
         layout(matrix(1:2))
         bottom_margin <- 0
+        right_margin <- 4.5
+        left_margin <- 4.5
     }
     else {
         bottom_margin <- 5
+        right_margin <- 4
+        left_margin <- 4
     }
     par(mar=c(bottom_margin, left_margin, top_margin, right_margin), mgp=c(2.5,1,0), las=1)
 }
 
-.plot_logger_temperature <- function()
+.plot_get_xlimit <- function(datetime, crop){
+    result <- crop
+    if(is.na(result[[1]])) {
+        result[[1]] <- min(datetime)
+    }
+    if(is.na(result[[2]])) {
+        result[[2]] <- max(datetime)
+    }
+    microclim:::.common_as_utc_posixct(result)
+}
+
+.plot_logger_temperature <- function(logger, data, xlimit, months, sensors)
 {
-    plot(logger$datetime, tms$T_A15_cal,type="n",xaxt="n",xlab=NA,ylab="Temperature (°C)",main=sernum,xlim=xlimit,ylim=ylimit)
+    sensor_info <- sapply(sensors, function(x) {
+        microclim:::.common_get_sensor_info(logger$metadata, logger$sensors[[x]]$metadata)})
+    values_range <- .plot_get_values_range(data, sensors)
+    ylimit = c(min(c(-15, values_range[[1]]), na.rm=T), max(c(30, values_range[[2]]), na.rm=T))
+    plot(data$datetime, data[[sensors[[1]]]], type="n", xaxt="n", xlab=NA, ylab="Temperature (°C)",
+         main=logger$metadata@serial_number, xlim=xlimit, ylim=ylimit)
+    abline(v=months, lty=1, col=gray(0.9))
+    grid(nx=NA, ny=NULL, col=gray(0.9), lty=1)
+    abline(0,0,col="gray70")
+    box()
+    for(sensor_name in sensors) {
+        lines(data$datetime, data[[sensor_name]], col=sensor_info[[sensor_name]]@plot_color,
+              lwd=sensor_info[[sensor_name]]@plot_line_width)
+    }
+}
+
+.plot_logger_moisture <- function(logger, data, xlimit, months, sensor)
+{
+    sensor_info <- microclim:::.common_get_sensor_info(logger$metadata, logger$sensors[[sensor]]$metadata)
+    physical <- microclim::mc_data_physical[[sensor_info@physical]]
+    par(mar=c(5, 4.5, 0.25, 4.5))
+    par(new=F)
+    plot(data$datetime, data[[sensor]], type="n", xaxt="n", yaxt="n", xlab=NA, ylab=NA, xlim=xlimit)
+    abline(v=months, lty=1, col=gray(0.9))
+    grid(nx=NA, ny=NULL, col=gray(0.9), lty=1)
+    box()
+    axis(4)
+    lines(data$datetime, data[[sensor]], col=sensor_info@plot_color,
+          lwd=sensor_info@plot_line_width)
+    mtext(physical@description, 4, line=3, las=3)
+}
+
+.plot_get_values_range <- function(data, sensors){
+    result <- min(sapply(sensors, function(x) min(data[[x]], na.rm = T)), na.rm = T)
+    result[[2]] <- max(sapply(sensors, function(x) max(data[[x]], na.rm = T)), na.rm = T)
+    result
+}
+
+.plot_get_months_from_xlimit <- function(xlimit){
+    start_month <- .plot_get_start_month_by_datetime(xlimit[[1]])
+    end_month <- .plot_get_start_month_by_datetime(xlimit[[2]])
+    seq(start_month, end_month, "months")
+}
+
+.plot_get_start_month_by_datetime <- function(datetime){
+    as.POSIXct(paste0(format(datetime, "%Y-%m"), "-01 00:00", tz="UTC"))
 }
 
 #' Plot data - image
@@ -75,5 +142,4 @@ mc_plot_image <- function(data_table, filename, title) {
            legend_values, fill = hcl.colors(12, "viridis", rev = TRUE), xpd = NA)
     title(main=title, line=0.5, cex.lab=1.2)
     dev.off()
-    NULL
 }

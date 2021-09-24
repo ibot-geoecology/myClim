@@ -104,9 +104,7 @@ mc_feed_from_df <- function(files_table) {
 .feed_add_logger_to_locality <- function(current_locality, row) {
     if(is.null(current_locality))
     {
-        metadata <- mc_LocalityMetadata(
-                        id = row$locality_id)
-        current_locality <- list(metadata = metadata, loggers=list())
+        current_locality <- .feed_get_new_locality(row$locality_id)
     }
     new_index <- length(current_locality$loggers) + 1
     logger <- .feed_functions_read_logger[[row$logger]](row$path, row$serial_number)
@@ -117,6 +115,15 @@ mc_feed_from_df <- function(files_table) {
         current_locality$loggers[[new_index]] <- logger
     }
     current_locality
+}
+
+.feed_get_new_locality <- function(locality_id = NULL) {
+    if (is.null(locality_id))
+    {
+        locality_id <- microclim::mc_const_NONE_LOCALITY_ID
+    }
+    metadata <- mc_LocalityMetadata(id = locality_id)
+    list(metadata = metadata, loggers=list())
 }
 
 .feed_read_TMS_logger <- function(filename, serial_number=NULL) {

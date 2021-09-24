@@ -6,10 +6,15 @@ mc_data_physical <- list(
        description = "Temperature",
        units = "°C"
     ),
-    TMS_moisture = mc_Physical(
-       name = "TMS_moisture",
-       description = "TMS moisture",
-       units = "raw count"
+    TMSmoisture = mc_Physical(
+       name = "TMSmoisture",
+       description = "Soil moisture (TDR counts)",
+       units = "TDR counts"
+    ),
+    moisture = mc_Physical(
+       name = "moisture",
+       description = "Volum. soil moisture",
+       units = "%"
     )
 )
 

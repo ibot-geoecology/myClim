@@ -25,6 +25,17 @@ test_that("wideformat-interval", {
     expect_equal(as.vector(table[["None-91184102-T1"]]), c(NA, 6.5, (6.625+6.75)/2, 6.875), tolerance = 0.001)
 })
 
+test_that("logger-wideformat-interval", {
+    files_table <- data.frame(path="data/simpleTMS/data_91184101_0.csv",
+                              locality_id=microclim::mc_const_NONE_LOCALITY_ID,
+                              logger="TMS", serial_number=NA_character_)
+    data <- microclim::mc_feed_from_df(files_table)
+    table <- microclim:::.reshape_wideformat_interval_logger(data[[1]]$loggers[[1]], interval_length = 30)
+    expect_equal(ncol(table), 2)
+    expect_equal(nrow(table), 3)
+    expect_equal(as.vector(table[["T1"]]), c(9.875, (6.8125+6.5)/2, 6.625), tolerance = 0.001)
+})
+
 test_that("longformat-filter", {
     data <- microclim::mc_feed_from_csv("data/TMS/files_table.csv")
     table <- microclim::mc_reshape_longformat(data, c("LOC_1", "LOC_2"), c("T1", "T2"))

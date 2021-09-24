@@ -22,10 +22,12 @@ mc_Sensor <- setClass("mc_Sensor",
            default_height = "numeric",
            min_value = "numeric",
            max_value = "numeric",
-           plot_color = "character"
+           plot_color = "character",
+           plot_line_width = "numeric"
          ),
          prototype (
-            plot_color = ""
+            plot_color = "",
+            plot_line_width = 1
          ))
 
 #' Class for physical
@@ -197,7 +199,7 @@ setMethod(
 
 .get_tms_columns <- function(data, T2_column){
     tms1_columns = list(T1 = 4)
-    tms3_columns = list(T1 = 4, T2 = 5, T3 = 6, moisture = 7)
+    tms3_columns = list(T1 = 4, T2 = 5, T3 = 6, TMSmoisture = 7)
     if(data[1, tms3_columns$T2] == -200) {
         return(tms1_columns)
     }

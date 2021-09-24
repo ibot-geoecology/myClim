@@ -5,7 +5,7 @@
 \alias{mc_data_physical}
 \title{Physical quantities definition}
 \format{
-An object of class \code{list} of length 2.
+An object of class \code{list} of length 3.
 }
 \usage{
 mc_data_physical
