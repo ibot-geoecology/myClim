@@ -1,6 +1,6 @@
 <!-- toc -->
 
-září 24, 2021
+září 27, 2021
 
 # DESCRIPTION
 
@@ -389,20 +389,27 @@ mc_plot_image(data_table, "T1_image.png", "T1 sensor")
 ```
 
 
-# `mc_plot_logger`
+# `mc_plot_loggers`
 
-Plot data from logger
+Plot data from loggers
 
 
 ## Description
 
-Function plot data of one logger
+Function plot loggers to directory
 
 
 ## Usage
 
 ```r
-mc_plot_logger(logger, filename, crop = c(NA, NA), interval_length = 15)
+mc_plot_loggers(
+  data,
+  directory,
+  localities = c(),
+  sensors = c(),
+  crop = c(NA, NA),
+  interval_length = 15
+)
 ```
 
 
@@ -410,8 +417,10 @@ mc_plot_logger(logger, filename, crop = c(NA, NA), interval_length = 15)
 
 Argument      |Description
 ------------- |----------------
-`logger`     |     list with informations about logger
-`filename`     |     output filename
+`data`     |     all data in standard format
+`directory`     |     output directory
+`localities`     |     names of localities; if empty then all
+`sensors`     |     names of sensors; if empty then all
 `crop`     |     datetime range for plot, not cropping if NA (default c(NA, NA))
 `interval_length`     |     length of interval in minutes (default 15)
 
@@ -419,7 +428,7 @@ Argument      |Description
 ## Examples
 
 ```r
-mc_plot_logger(logger, "91184101.png")
+mc_plot_loggers(example_tms_data1, "Figures")
 ```
 
 
@@ -540,7 +549,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_wideformat <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+example_tms_wideformat <- mc_reshape_wideformat(example_tms_data1, c("LOC_1", "LOC_2"), c("T1", "T2"))
 ```
 
 

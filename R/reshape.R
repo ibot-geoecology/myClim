@@ -8,7 +8,7 @@
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_wideformat <- microclim::mc_reshape_wideformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+#' example_tms_wideformat <- mc_reshape_wideformat(example_tms_data1, c("LOC_1", "LOC_2"), c("T1", "T2"))
 mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensors)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
