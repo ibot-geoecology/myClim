@@ -156,7 +156,7 @@ mc_plot_image <- function(data_table, filename, title) {
     axis(side = 2, at=seq(0, 1, len=ncol(values_matrix)), labels=colnames(data_table)[-1], las=2)
     legend_values <- round(seq(min(values_matrix, na.rm=T), max(values_matrix, na.rm=T), len=12), 2)
     legend(grconvertX(1630, "device"), grconvertY(120, "device"),
-           legend_values, fill = hcl.colors(12, "viridis", rev = TRUE), xpd = NA)
+           legend_values, fill = hcl.colors(12, "viridis", rev = FALSE), xpd = NA)
     title(main=title, line=0.5, cex.lab=1.2)
     dev.off()
 }
