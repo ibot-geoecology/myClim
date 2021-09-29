@@ -1,6 +1,6 @@
 <!-- toc -->
 
-září 27, 2021
+září 29, 2021
 
 # DESCRIPTION
 
@@ -21,7 +21,8 @@ Depends:
     R (>= 3.0)
 Imports:
     stringr,
-    rlang
+    rlang,
+    TTR
 Roxygen: list(markdown = TRUE)```
 
 
@@ -99,6 +100,49 @@ Class for source file data format
 ## Description
 
 Class for source file data format
+
+
+# `mc_eco_snow`
+
+Snow detection
+
+
+## Description
+
+Function detect snow based on detrended time series
+
+
+## Usage
+
+```r
+mc_eco_snow(
+  data,
+  sensor,
+  localities = c(),
+  dr = 2,
+  tmax = 0.5,
+  interval_length = 15
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     all data in standard format
+`sensor`     |     name of temperature sensor
+`localities`     |     names of localities; if empty then all
+`dr`     |     delta range
+`tmax`     |     maximal temperature
+`interval_length`     |     length of interval in minutes (default 15)
+
+
+## Examples
+
+```r
+mc_eco_snow(example_tms_data1, "T3")
+```
 
 
 # `mc_feed_directory`

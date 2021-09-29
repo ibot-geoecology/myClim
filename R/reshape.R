@@ -33,10 +33,14 @@ mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
 .reshape_add_wideformat_logger_columns <- function(df, locality, logger) {
     logger_df <- data.frame(datetime=logger$datetime)
     for(sensor in logger$sensors) {
-        column_name <- paste(locality, logger$metadata@serial_number, sensor$metadata@sensor, sep="-")
+        column_name <- .reshape_get_sesnor_fullname(locality, logger$metadata@serial_number, sensor$metadata@sensor)
         logger_df[column_name] <- sensor$values
     }
     merge(df, logger_df, by="datetime", all=TRUE)
+}
+
+.reshape_get_sesnor_fullname <- function(locality_id, logger_serial_number, sensor){
+    paste(locality_id, logger_serial_number, sensor, sep="-")
 }
 
 #' Wideformat of sensor values by interval
@@ -100,7 +104,7 @@ mc_reshape_wideformat_interval <- function(data, localities=c(), sensors=c(), in
 }
 
 .reshape_get_new_interval_data_frame <- function(start_datetimes) {
-    data.frame(datetime <- microclim:::.common_as_utc_posixct(start_datetimes[-length(start_datetimes)]))
+    data.frame(datetime=microclim:::.common_as_utc_posixct(start_datetimes[-length(start_datetimes)]))
 }
 
 .reshape_interval_mean <- function(x) {

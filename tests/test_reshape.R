@@ -34,6 +34,7 @@ test_that("logger-wideformat-interval", {
     expect_equal(ncol(table), 2)
     expect_equal(nrow(table), 3)
     expect_equal(as.vector(table[["T1"]]), c(9.875, (6.8125+6.5)/2, 6.625), tolerance = 0.001)
+    expect_equal(colnames(table), c("datetime", "T1"))
 })
 
 test_that("longformat-filter", {

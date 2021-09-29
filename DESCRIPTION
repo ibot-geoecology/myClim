@@ -14,5 +14,6 @@ Depends:
     R (>= 3.0)
 Imports:
     stringr,
-    rlang
+    rlang,
+    TTR
 Roxygen: list(markdown = TRUE)
