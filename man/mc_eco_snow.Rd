@@ -26,6 +26,9 @@ mc_eco_snow(
 
 \item{interval_length}{length of interval in minutes (default 15)}
 }
+\value{
+data.frame with datetime column and logical columns named by serial_number of loggers
+}
 \description{
 Function detect snow based on detrended time series
 }

@@ -1,6 +1,6 @@
 <!-- toc -->
 
-září 29, 2021
+září 30, 2021
 
 # DESCRIPTION
 
@@ -22,7 +22,7 @@ Depends:
 Imports:
     stringr,
     rlang,
-    TTR
+    runner
 Roxygen: list(markdown = TRUE)```
 
 
@@ -102,6 +102,44 @@ Class for source file data format
 Class for source file data format
 
 
+# `mc_eco_snow_agg`
+
+Snow detection summary
+
+
+## Description
+
+Function return summary info about snow detection
+
+
+## Usage
+
+```r
+mc_eco_snow_agg(snow_data, period = 3)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`snow_data`     |     data from function mc_eco_snow
+`period`     |     count days for continuous cover of snow (default 3)
+
+
+## Value
+
+data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
+
+
+## Examples
+
+```r
+data <- mc_eco_snow(example_tms_data1, "T3")
+mc_eco_snow_agg(data)
+```
+
+
 # `mc_eco_snow`
 
 Snow detection
@@ -136,6 +174,11 @@ Argument      |Description
 `dr`     |     delta range
 `tmax`     |     maximal temperature
 `interval_length`     |     length of interval in minutes (default 15)
+
+
+## Value
+
+data.frame with datetime column and logical columns named by serial_number of loggers
 
 
 ## Examples

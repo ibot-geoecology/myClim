@@ -4,8 +4,16 @@ library(microclim)
 
 test_that("mc_eco_snow", {
     data <- microclim::mc_feed_TMS_directory("data/eco-snow")
-    snow <- microclim::mc_eco_snow(data, "T2", dr=2, tmax=2)
+    snow <- microclim::mc_eco_snow(data, "T3", dr=1.5, tmax=0.5)
     expect_equal(ncol(snow), 3)
-    expect_equal(nrow(snow), 7)
-    expect_equal(snow[["94184102"]], c(NA, F, F, T, T, T, F))
+    expect_equal(nrow(snow), 96+576)
+    expect_equal(nrow(snow[!is.na(snow[["94184102"]]) & snow[["94184102"]] == TRUE, ]), 63)
+})
+
+test_that("mc_eco_snow_agg", {
+    data <- microclim::mc_feed_TMS_directory("data/eco-snow")
+    snow <- microclim::mc_eco_snow(data, "T3", dr=1.5, tmax=0.5)
+    snow_agg <- microclim::mc_eco_snow_agg(snow)
+    expect_equal(ncol(snow_agg), 6)
+    expect_equal(nrow(snow_agg), 2)
 })
