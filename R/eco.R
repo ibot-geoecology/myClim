@@ -21,8 +21,8 @@ mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5, interval_l
 
 .get_eco_snow_from_logger <- function(logger, dr, tmax, interval_length=15) {
     data_table <- microclim:::.reshape_wideformat_interval_logger(logger, interval_length)
-    day_max_temp <- runner::runner(data_table[[2]], k=3600*24, idx=data_table$datetime, f=max)
-    day_range_temp <- runner::runner(data_table[[2]], k=3600*24, idx=data_table$datetime, f=function(x) {max(x) - min(x)})
+    day_max_temp <- runner::runner(data_table[[2]], k=3600*24, idx=data_table$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    day_range_temp <- runner::runner(data_table[[2]], k=3600*24, idx=data_table$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
     result = data.frame(datetime=data_table$datetime)
     result[[logger$metadata@serial_number]] <- (day_range_temp < dr) & (day_max_temp < tmax)
     return(result)
@@ -40,7 +40,8 @@ mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5, interval_l
 #' data <- mc_eco_snow(example_tms_data1, "T3")
 #' mc_eco_snow_agg(data)
 mc_eco_snow_agg <- function(snow_data, period = 3) {
-    result <- data.frame(serial_number=character(), snow_days=numeric(),
+    result <- data.frame(serial_number=character(),
+                         snow_days=numeric(),
                          first_day=as.Date(x = integer(0), origin = "1970-01-01"),
                          last_day=as.Date(x = integer(0), origin = "1970-01-01"),
                          first_day_period=as.Date(x = integer(0), origin = "1970-01-01"),
@@ -56,9 +57,15 @@ mc_eco_snow_agg <- function(snow_data, period = 3) {
     snow_days_table <- aggregate(snow_data[[serial_number]], by=list(day=cut(snow_data$datetime, breaks = "days")), FUN=max)
     snow_days_table$day <- as.Date(snow_days_table$day)
     snow_days <- sum(snow_days_table$x)
-    last_day <- as.Date(snow_days_table$day[max(which(snow_days_table$x == 1))])
-    first_day <- as.Date(snow_days_table$day[min(which(snow_days_table$x == 1))])
-    snow_by_period <- runner::runner(snow_days_table$x, k=period, idx=as.Date(snow_days_table$day), f=min)
+    if(snow_days == 0) {
+        last_day <- NA
+        first_day <- NA
+    }
+    else {
+        last_day <- as.Date(snow_days_table$day[max(which(snow_days_table$x == 1))])
+        first_day <- as.Date(snow_days_table$day[min(which(snow_days_table$x == 1))])
+    }
+    snow_by_period <- runner::runner(snow_days_table$x, k=period, idx=as.Date(snow_days_table$day), f=function(x) if(length(x) == 0) NA else min(x), na_pad=TRUE)
     snow_by_period_index <- which(snow_by_period == 1)
     if(length(snow_by_period_index) == 0) {
         last_day_period <- NA
