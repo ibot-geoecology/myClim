@@ -42,3 +42,12 @@
 .common_as_utc_posixct <- function(datetime) {
     as.POSIXct(datetime, origin="1970-01-01", tz="UTC")
 }
+
+.common_get_loggers <- function(data) {
+    unname(do.call(c, lapply(data, function(x) x$loggers)))
+}
+
+.common_logger_values_as_tibble <- function(logger) {
+    data <- c(list(datetime=logger$datetime), purrr::map(logger$sensors, ~ .x$values))
+    tibble::as_tibble(data)
+}

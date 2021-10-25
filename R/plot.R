@@ -15,7 +15,7 @@
 #' mc_plot_loggers(example_tms_data1, "Figures")
 mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c(NA, NA), interval_length=15) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensors)
-    loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
+    loggers <- microclim:::.common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {
         filename <- file.path(directory, paste0(logger$metadata@serial_number, ".png"))
@@ -49,16 +49,14 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 .plot_logger_set_parameters <-function(physical_quantities, moisture_sensor)
 {
     top_margin <- 1.5
+    right_margin <- 5
+    left_margin <- 5
     if(length(moisture_sensor) > 0) {
         layout(matrix(1:2))
         bottom_margin <- 0
-        right_margin <- 4.5
-        left_margin <- 4.5
     }
     else {
         bottom_margin <- 5
-        right_margin <- 4
-        left_margin <- 4
     }
     par(mar=c(bottom_margin, left_margin, top_margin, right_margin), mgp=c(2.5,1,0), las=1)
 }
@@ -95,13 +93,17 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
         lines(data$datetime, data[[sensor_name]], col=sensor_info[[sensor_name]]@plot_color,
               lwd=sensor_info[[sensor_name]]@plot_line_width)
     }
+    colors <- sapply(sensors, function(x) sensor_info[[x]]@plot_color)
+    line_widths <- sapply(sensors, function(x) sensor_info[[x]]@plot_line_width)
+    legend(grconvertX(1730, "device"), grconvertY(60, "device"), lwd=line_widths,
+           sensors, lty = rep(1, length(sensors)), col=colors, xpd=NA)
 }
 
 .plot_logger_moisture <- function(logger, data, xlimit, months, sensor)
 {
     sensor_info <- microclim:::.common_get_sensor_info(logger$metadata, logger$sensors[[sensor]]$metadata)
     physical <- microclim::mc_data_physical[[sensor_info@physical]]
-    par(mar=c(5, 4.5, 0.25, 4.5))
+    par(mar=c(5, 5, 0.25, 5))
     par(new=F)
     plot(data$datetime, data[[sensor]], type="n", xaxt="n", yaxt="n", xlab=NA, ylab=NA, xlim=xlimit)
     abline(v=months, lty=1, col=gray(0.9))

@@ -149,6 +149,7 @@ mc_feed_from_df <- function(files_table) {
                     serial_number = serial_number,
                     type = logger_type)
     list(metadata = metadata,
+         clean_log = list(),
          datetime = datetime,
          sensors = .feed_get_sensors(data_table, data_format))
 }

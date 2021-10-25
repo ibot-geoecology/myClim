@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.2" last-position="0,0" last-zoom="1" max-obj-count="4"
+	 default-schema="public" default-owner="postgres">
+<database name="new_database" is-template="false" allow-conns="true">
+</database>
+
+<schema name="public" layer="0" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<table name="localities" layer="0" collapse-mode="2" max-obj-count="6">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="920" y="80"/>
+	<column name="locality_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="altitude">
+		<type name="double precision" length="0"/>
+	</column>
+	<column name="lat_wgs84">
+		<type name="double precision" length="0"/>
+	</column>
+	<column name="lon_wgs84">
+		<type name="double precision" length="0"/>
+	</column>
+	<constraint name="localities_pk" type="pk-constr" table="public.localities">
+		<columns names="locality_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="loggers" layer="0" collapse-mode="2" max-obj-count="4">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1360" y="80"/>
+	<column name="logger_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="type">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="serial_number">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="locality_id">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="loggers_pk" type="pk-constr" table="public.loggers">
+		<columns names="logger_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="sensors" layer="0" collapse-mode="2" max-obj-count="6">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="940" y="280"/>
+	<column name="sensor_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="height">
+		<type name="decimal" length="0"/>
+	</column>
+	<column name="calibrated">
+		<type name="bool" length="0"/>
+	</column>
+	<column name="logger_id">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="sensors_pk" type="pk-constr" table="public.sensors">
+		<columns names="sensor_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="sensor_data" layer="0" collapse-mode="2" max-obj-count="3">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1360" y="280"/>
+	<column name="datetime">
+		<type name="time" length="0"/>
+	</column>
+	<column name="value">
+		<type name="double precision" length="0"/>
+	</column>
+	<column name="sensor_id">
+		<type name="integer" length="0"/>
+	</column>
+</table>
+
+<constraint name="locality_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.localities" table="public.loggers">
+	<columns names="locality_id" ref-type="src-columns"/>
+	<columns names="locality_id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="loggers_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.loggers" table="public.sensors">
+	<columns names="logger_id" ref-type="src-columns"/>
+	<columns names="logger_id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="sensors_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="public.sensors" table="public.sensor_data">
+	<columns names="sensor_id" ref-type="src-columns"/>
+	<columns names="sensor_id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_loggers_localities" type="relfk" layer="0"
+	 src-table="public.loggers"
+	 dst-table="public.localities" reference-fk="locality_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_sensors_loggers" type="relfk" layer="0"
+	 src-table="public.sensors"
+	 dst-table="public.loggers" reference-fk="loggers_fk"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_sensor_data_sensors" type="relfk" layer="0"
+	 src-table="public.sensor_data"
+	 dst-table="public.sensors" reference-fk="sensors_fk"
+	 src-required="false" dst-required="false"/>
+
+</dbmodel>

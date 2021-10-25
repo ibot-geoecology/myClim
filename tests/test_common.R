@@ -10,3 +10,9 @@ test_that(".common_get_filtered_data", {
     expect_false("T1" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
     expect_true("T2" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
 })
+
+test_that(".common_logger_values_as_tibble", {
+    data <- mc_feed_TMS_files("data/TMS/data_94184102_0.csv")
+    table <- microclim:::.common_logger_values_as_tibble(data$None$loggers[[1]])
+    expect_equal(colnames(table), c("datetime", "T1", "T2", "T3", "TMSmoisture"))
+})

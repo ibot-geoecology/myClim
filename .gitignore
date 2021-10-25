@@ -1,6 +1,9 @@
 .Rproj.user
+.idea
+
 .Rhistory
 .RData
 .Ruserdata
+
 
 *.swp

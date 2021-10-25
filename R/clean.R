@@ -1,0 +1,97 @@
+# constants ================================================================================
+
+.clean_const_DETECT_STEP_LENGTH <- 100
+
+#' @export
+mc_const_CLEAN_DATETIME_STEP <- "datetime_step"
+
+#' Cleaning datetime series
+#'
+#' This function change datetime and values series. Result series has constant
+#' step without duplicits and missed values are filled in as NA.
+#'
+#' @param data character data in standard format
+#' @return cleaned data in standard format
+#' @export
+#' @examples
+#' cleaned_example_tms_data1 <- mc_clean_datetime_step(example_tms_data1)
+mc_clean_datetime_step <- function(data) {
+    logger_function <- function(logger) {
+        .clean_datetime_step_logger(logger)
+    }
+    locality_function <- function(locality) {
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        locality
+    }
+    purrr::map(data, locality_function)
+}
+
+.clean_datetime_step_logger <- function(logger) {
+    step <- .clean_detect_step_minutes(logger$datetime)
+    logger$clean_log <- .clean_add_log(logger$clean_log, mc_const_CLEAN_DATETIME_STEP,
+                                       as.character(stringr::str_glue("detected step: {step} min")))
+    logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{step} min"))
+    logger <- .clean_datetime_step_log_wrong(logger, step)
+    .clean_datetime_step_edit_series(logger, step)
+}
+
+.clean_detect_step_minutes <- function(datetime) {
+    if(length(datetime) > .clean_const_DETECT_STEP_LENGTH) {
+        datetime <- datetime[1:.clean_const_DETECT_STEP_LENGTH]
+    }
+    datetime <- as.numeric(datetime)
+    round(quantile(diff(datetime), p=0.5, type=1)/60)
+}
+
+.clean_add_log <- function(clean_log, method, message) {
+    if(!(method %in% names(clean_log))) {
+        clean_log[[method]] <- character()
+    }
+    clean_log[[method]][[length(clean_log[[method]]) + 1]] <- message
+    clean_log
+}
+
+.clean_datetime_step_edit_series <- function(logger, step) {
+    if(!.clean_was_error_in_logger_datetime_step(logger)){
+        return(logger)
+    }
+    table <- microclim:::.common_logger_values_as_tibble(logger)
+    table_noduplicits <- dplyr::group_by(table, datetime) %>% dplyr::summarise_all(mean)
+    datetime_range <- range(table_noduplicits$datetime)
+    datetime_seq <- seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{step} min")) %>% tibble::as_tibble()
+    colnames(datetime_seq) <- "datetime"
+    output_table <- dplyr::left_join(datetime_seq, table_noduplicits, by="datetime")
+    logger$datetime <- output_table$datetime
+    logger$sensors <- names(logger$sensors) %>%
+      purrr::set_names() %>%
+      purrr::map(function(x) {
+        logger$sensors[[x]]$values <- output_table[[x]]
+        logger$sensors[[x]]
+    })
+    logger
+}
+
+.clean_datetime_step_log_wrong <- function(logger, step) {
+    wrong_diff <- diff(as.numeric(logger$datetime)) %/% 60 %>%
+      tibble::as_tibble() %>%
+      dplyr::count(value) %>%
+      dplyr::filter(value != step)
+    log_message_function <- function(value, n) {
+        if(value == 0) {
+            return(stringr::str_glue("data contains {n}x duplicits"))
+        }
+        stringr::str_glue("data contains {n}x {value} min gap")
+    }
+    new_items <- purrr::map2_chr(wrong_diff$value, wrong_diff$n, log_message_function)
+    logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]] <- c(logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]], new_items)
+    logger
+}
+
+.clean_is_logger_datetime_step_proceessed <- function(logger) {
+    mc_const_CLEAN_DATETIME_STEP %in% names(logger$clean_log)
+}
+
+.clean_was_error_in_logger_datetime_step <- function(logger) {
+    length(logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]]) > 1
+}
+

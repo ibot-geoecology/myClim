@@ -1,6 +1,6 @@
 <!-- toc -->
 
-října 06, 2021
+října 25, 2021
 
 # DESCRIPTION
 
@@ -21,9 +21,49 @@ Depends:
     R (>= 3.0)
 Imports:
     stringr,
+    lubridate,
+    tibble,
+    dplyr,
     rlang,
     runner
 Roxygen: list(markdown = TRUE)```
+
+
+# `mc_clean_datetime_step`
+
+Cleaning datetime series
+
+
+## Description
+
+This function change datetime and values series. Result series has constant
+ step without duplicits and missed values are filled in as NA.
+
+
+## Usage
+
+```r
+mc_clean_datetime_step(data)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     character data in standard format
+
+
+## Value
+
+cleaned data in standard format
+
+
+## Examples
+
+```r
+cleaned_example_tms_data1 <- mc_clean_datetime_step(example_tms_data1)
+```
 
 
 # `mc_data_formats`
