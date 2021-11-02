@@ -17,5 +17,5 @@ This function change datetime and values series. Result series has constant
 step without duplicits and missed values are filled in as NA.
 }
 \examples{
-cleaned_example_tms_data1 <- mc_clean_datetime_step(example_tms_data1)
+cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
 }

@@ -2,17 +2,17 @@ library(testthat)
 library(microclim)
 
 test_that(".common_get_filtered_data", {
-    data <- microclim::mc_feed_from_csv("data/TMS/files_table.csv")
-    filtered <- microclim:::.common_get_filtered_data(data, c("LOC_1", "LOC_2", "LOC_3"), "T2")
+    data <- microclim::mc_feed_from_csv("data/TOMST/files_table.csv")
+    filtered <- microclim:::.common_get_filtered_data(data, c("LOC_1", "LOC_2", "LOC_3"), "TMS_T2")
     expect_equal(length(filtered), 2)
     expect_equal(length(filtered$LOC_1$loggers[[1]]$sensors), 1)
     expect_equal(length(filtered$LOC_1$loggers[[1]]$sensors), 1)
-    expect_false("T1" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
-    expect_true("T2" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
+    expect_false("TMS_T1" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
+    expect_true("TMS_T2" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
 })
 
 test_that(".common_logger_values_as_tibble", {
-    data <- mc_feed_TMS_files("data/TMS/data_94184102_0.csv")
+    data <- mc_feed_TOMST_files("data/TOMST/data_94184102_0.csv")
     table <- microclim:::.common_logger_values_as_tibble(data$None$loggers[[1]])
-    expect_equal(colnames(table), c("datetime", "T1", "T2", "T3", "TMSmoisture"))
+    expect_equal(colnames(table), c("datetime", "TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture"))
 })

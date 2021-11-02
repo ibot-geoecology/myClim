@@ -7,13 +7,13 @@ mc_data_formats <- list(
                separator = ";",
                date_column = 1
     ),
-    TMS = mc_TMSDataFormat(
-               has_header = FALSE,
-               separator = ";",
-               date_column = 2,
-               na_strings = c("NA", " NA"),
-               filename_serial_number_pattern = "data_(\\d+)_\\d+\\.csv$",
-               data_row_pattern = "^\\d+;[^;]+;\\d+;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;\\d+;\\d+;\\d+$"
+    TOMST = mc_TOMSTDataFormat(
+      has_header = FALSE,
+      separator = ";",
+      date_column = 2,
+      na_strings = c("NA", " NA"),
+      filename_serial_number_pattern = "data_(\\d+)_\\d+\\.csv$",
+      data_row_pattern = "^\\d+;[^;]+;\\d+;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;\\d+;\\d+;\\d+$"
     )
 )
 

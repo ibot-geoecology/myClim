@@ -6,7 +6,7 @@ mc_const_NONE_LOCALITY_ID <- "None"
 # classes ================================================================================
 
 #' Class for sensor definition
-#' @slot name name of sensor (T1, T2, T3, moisture, ...)
+#' @slot id of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moisture, ...)
 #' @slot logger name of logger (TMS, ...)
 #' @slot physical measurement (T, TMS_moisture, ...)
 #' @slot default_height default height of sensor in m
@@ -16,7 +16,7 @@ mc_const_NONE_LOCALITY_ID <- "None"
 #' @exportClass mc_Sensor
 mc_Sensor <- setClass("mc_Sensor",
          representation (
-           name = "character",
+           id = "character",
            logger = "character",
            physical = "character",
            default_height = "numeric",
@@ -67,15 +67,19 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
          ))
 
 #' Class for logger metadata
-#' @slot type of logger
+#' @slot type of logger (TMS1)
 #' @slot serial_number
+#' @slot step of series in minutes
 #' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
-         representation(
-           type = "character",
-           serial_number = "character"
-         ))
+                              representation(
+                                type = "character",
+                                serial_number = "character",
+                                step = "numeric"),
+                              prototype(
+                                step = NA_integer_)
+)
 
 #' Class for sensor metadata
 #' @export mc_SensorMetadata
@@ -125,7 +129,8 @@ mc_DataFormat <- setClass("mc_DataFormat",
            na_strings = "character",
            columns = "list",
            filename_serial_number_pattern = "character",
-           data_row_pattern = "character"
+           data_row_pattern = "character",
+           logger_type = "character"
          ),
          prototype(
            has_header = TRUE,
@@ -134,41 +139,42 @@ mc_DataFormat <- setClass("mc_DataFormat",
            date_format = NA_character_,
            na_strings = NA_character_,
            columns = list(),
-           filename_serial_number_pattern = NA_character_
+           filename_serial_number_pattern = NA_character_,
+           logger_type = NA_character_
          ))
 
 #' Class for source file data format for TMS logger
-#' @export mc_TMSDataFormat
-#' @exportClass mc_TMSDataFormat
-mc_TMSDataFormat <- setClass("mc_TMSDataFormat", contains = "mc_DataFormat")
+#' @export mc_TOMSTDataFormat
+#' @exportClass mc_TOMSTDataFormat
+mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 
 # generics ================================================================================
 
 setGeneric(
-  ".model.load_data_format_params_from_data",
+  ".model_load_data_format_params_from_data",
   function(object, data){
-    standardGeneric(".model.load_data_format_params_from_data")
+    standardGeneric(".model_load_data_format_params_from_data")
   }
 )
 
 setGeneric(
-  ".model.get_serial_number_from_filename",
+  ".model_get_serial_number_from_filename",
   function(object, filename){
-    standardGeneric(".model.get_serial_number_from_filename")
+    standardGeneric(".model_get_serial_number_from_filename")
   }
 )
 
 setGeneric(
-  ".model.is_file_in_right_format",
+  ".model_is_file_in_right_format",
   function(object, filename){
-    standardGeneric(".model.is_file_in_right_format")
+    standardGeneric(".model_is_file_in_right_format")
   }
 )
 
 # methods ================================================================================
 
 setMethod(
-    ".model.load_data_format_params_from_data",
+    ".model_load_data_format_params_from_data",
     "mc_DataFormat",
     function(object, data) {
         object
@@ -176,16 +182,15 @@ setMethod(
 )
 
 setMethod(
-    ".model.load_data_format_params_from_data",
-    "mc_TMSDataFormat",
+    ".model_load_data_format_params_from_data",
+    "mc_TOMSTDataFormat",
     function(object, data) {
-        object@date_format <- .get_tms_datetime_format(data, object@date_column)
-        object@columns <- .get_tms_columns(data)
-        object
+        object@date_format <- .get_tomst_datetime_format(data, object@date_column)
+        .change_tomst_columns_and_logger_type(object, data)
     }
 )
 
-.get_tms_datetime_format <- function(data, date_column){
+.get_tomst_datetime_format <- function(data, date_column){
     if(stringr::str_detect(data[1, date_column], "\\d{4}\\.\\d{2}\\.\\d{2} \\d{2}:\\d{2}"))
     {
         return("%Y.%m.%d %H:%M")
@@ -197,20 +202,22 @@ setMethod(
     return(NA_character_)
 }
 
-.get_tms_columns <- function(data, T2_column){
-    tms1_columns = list(T1 = 4)
-    tms3_columns = list(T1 = 4, T2 = 5, T3 = 6, TMSmoisture = 7)
-    if(data[1, tms3_columns$T2] == -200) {
-        return(tms1_columns)
+.change_tomst_columns_and_logger_type <- function(object, data){
+    tm_columns = list(TM_T = 4)
+    tms_columns = list(TMS_T1 = 4, TMS_T2 = 5, TMS_T3 = 6, TMS_TMSmoisture = 7)
+    if(data[1, tms_columns$TMS_T2] == -200) {
+        object@columns <- tm_columns
+        object@logger_type <- "ThermoDatalogger"
     }
     else {
-        return(tms3_columns)
+        object@columns <- tms_columns
+        object@logger_type <- "TMS"
     }
-    return(list())
+    object
 }
 
 setMethod(
-    ".model.get_serial_number_from_filename",
+    ".model_get_serial_number_from_filename",
     signature("mc_DataFormat"),
     function(object, filename) {
         if(is.null(object@filename_serial_number_pattern)) {
@@ -221,7 +228,7 @@ setMethod(
 )
 
 setMethod(
-    ".model.is_file_in_right_format",
+    ".model_is_file_in_right_format",
     signature("mc_DataFormat"),
     function(object, filename) {
         con = file(filename, "r")

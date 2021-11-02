@@ -16,5 +16,5 @@ data in standard format
 This function read raw data from loggers by table saved in CSV file
 }
 \examples{
-example_tms_data <- microclim::mc_feed_from_csv("examples/data/TMS/files_table.csv")
+example_tomst_data <- microclim::mc_feed_from_csv("examples/data/TOMST/files_table.csv")
 }

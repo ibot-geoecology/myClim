@@ -7,23 +7,27 @@
 #' @param localities names of localities; if empty then all
 #' @param dr delta range
 #' @param tmax maximal temperature
-#' @param interval_length length of interval in minutes (default 15)
 #' @return data.frame with datetime column and logical columns named by serial_number of loggers
 #' @export
 #' @examples
-#' mc_eco_snow(example_tms_data1, "T3")
-mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5, interval_length=15) {
+#' mc_eco_snow(example_tomst_data1, "TMS_T3")
+mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensor)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
-    snow_tables <- lapply(loggers, function(x) .get_eco_snow_from_logger(x, dr, tmax, interval_length))
-    Reduce(function(x, y) merge(x, y, by="datetime", all=TRUE), snow_tables)
+    snow_tables <- purrr::map(loggers, function(x) .get_eco_snow_from_logger(x, dr, tmax))
+    result <- purrr::reduce(snow_tables, function(x, y) dplyr::full_join(x, y, by="datetime"))
+    as.data.frame(result)
 }
 
-.get_eco_snow_from_logger <- function(logger, dr, tmax, interval_length=15) {
-    data_table <- microclim:::.reshape_wideformat_interval_logger(logger, interval_length)
-    day_max_temp <- runner::runner(data_table[[2]], k=3600*24, idx=data_table$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
-    day_range_temp <- runner::runner(data_table[[2]], k=3600*24, idx=data_table$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-    result = data.frame(datetime=data_table$datetime)
+.get_eco_snow_from_logger <- function(logger, dr, tmax) {
+    microclim:::.clean_warn_if_datetime_step_unprocessed(logger)
+    result = tibble::tibble(datetime=logger$datetime)
+    if(length(logger$sensors) == 0){
+        result[[logger$metadata@serial_number]] <- NA
+        return(result)
+    }
+    day_max_temp <- runner::runner(logger$sensors[[1]]$values, k=3600*24, idx=logger$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    day_range_temp <- runner::runner(logger$sensors[[1]]$values, k=3600*24, idx=logger$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
     result[[logger$metadata@serial_number]] <- (day_range_temp < dr) & (day_max_temp < tmax)
     return(result)
 }
@@ -37,7 +41,7 @@ mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5, interval_l
 #' @return data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
 #' @export
 #' @examples
-#' data <- mc_eco_snow(example_tms_data1, "T3")
+#' data <- mc_eco_snow(example_tomst_data1, "TMS_T3")
 #' mc_eco_snow_agg(data)
 mc_eco_snow_agg <- function(snow_data, period = 3) {
     result <- data.frame(serial_number=character(),

@@ -18,7 +18,7 @@ Columns of data.frame:
 \itemize{
 \item path - path to file
 \item locality_id
-\item logger
+\item data_format
 \item serial_number - can be NA, than try detect
 }
 }

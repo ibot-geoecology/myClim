@@ -4,14 +4,7 @@
 \alias{mc_eco_snow}
 \title{Snow detection}
 \usage{
-mc_eco_snow(
-  data,
-  sensor,
-  localities = c(),
-  dr = 2,
-  tmax = 0.5,
-  interval_length = 15
-)
+mc_eco_snow(data, sensor, localities = c(), dr = 2, tmax = 0.5)
 }
 \arguments{
 \item{data}{all data in standard format}
@@ -23,8 +16,6 @@ mc_eco_snow(
 \item{dr}{delta range}
 
 \item{tmax}{maximal temperature}
-
-\item{interval_length}{length of interval in minutes (default 15)}
 }
 \value{
 data.frame with datetime column and logical columns named by serial_number of loggers
@@ -33,5 +24,5 @@ data.frame with datetime column and logical columns named by serial_number of lo
 Function detect snow based on detrended time series
 }
 \examples{
-mc_eco_snow(example_tms_data1, "T3")
+mc_eco_snow(example_tomst_data1, "TMS_T3")
 }

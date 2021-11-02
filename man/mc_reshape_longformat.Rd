@@ -14,11 +14,11 @@ mc_reshape_longformat(data, localities = c(), sensors = c())
 \item{sensors}{names of sensors; if empty then all}
 }
 \value{
-data in standard format
+data.frame with columns location, serial_number, sensor, datetime, value
 }
 \description{
 This function create data.frame with values of sensor
 }
 \examples{
-example_tms_t1_table <- microclim::mc_reshape_longformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
+example_tms_t1_table <- microclim::mc_reshape_longformat(example_tomst_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
 }

@@ -9,8 +9,7 @@ mc_plot_loggers(
   directory,
   localities = c(),
   sensors = c(),
-  crop = c(NA, NA),
-  interval_length = 15
+  crop = c(NA, NA)
 )
 }
 \arguments{
@@ -23,12 +22,10 @@ mc_plot_loggers(
 \item{sensors}{names of sensors; if empty then all}
 
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
-
-\item{interval_length}{length of interval in minutes (default 15)}
 }
 \description{
 Function plot loggers to directory
 }
 \examples{
-mc_plot_loggers(example_tms_data1, "Figures")
+mc_plot_loggers(example_tomst_data1, "Figures")
 }

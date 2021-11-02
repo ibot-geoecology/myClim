@@ -1,6 +1,6 @@
 <!-- toc -->
 
-října 25, 2021
+listopadu 02, 2021
 
 # DESCRIPTION
 
@@ -62,7 +62,7 @@ cleaned data in standard format
 ## Examples
 
 ```r
-cleaned_example_tms_data1 <- mc_clean_datetime_step(example_tms_data1)
+cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
 ```
 
 
@@ -122,7 +122,7 @@ Sensors definition
 
 ## Format
 
-An object of class `list` of length 5.
+An object of class `list` of length 6.
 
 
 ## Usage
@@ -175,7 +175,7 @@ data.frame with columns serial_number, snow_days, first_day, last_day, first_day
 ## Examples
 
 ```r
-data <- mc_eco_snow(example_tms_data1, "T3")
+data <- mc_eco_snow(example_tomst_data1, "TMS_T3")
 mc_eco_snow_agg(data)
 ```
 
@@ -193,14 +193,7 @@ Function detect snow based on detrended time series
 ## Usage
 
 ```r
-mc_eco_snow(
-  data,
-  sensor,
-  localities = c(),
-  dr = 2,
-  tmax = 0.5,
-  interval_length = 15
-)
+mc_eco_snow(data, sensor, localities = c(), dr = 2, tmax = 0.5)
 ```
 
 
@@ -213,7 +206,6 @@ Argument      |Description
 `localities`     |     names of localities; if empty then all
 `dr`     |     delta range
 `tmax`     |     maximal temperature
-`interval_length`     |     length of interval in minutes (default 15)
 
 
 ## Value
@@ -224,7 +216,7 @@ data.frame with datetime column and logical columns named by serial_number of lo
 ## Examples
 
 ```r
-mc_eco_snow(example_tms_data1, "T3")
+mc_eco_snow(example_tomst_data1, "TMS_T3")
 ```
 
 
@@ -242,7 +234,7 @@ This function read csv data files from directory of one logger type.
 ## Usage
 
 ```r
-mc_feed_directory(directory, logger_type, recursive = TRUE)
+mc_feed_directory(directory, dataformat_name, recursive = TRUE)
 ```
 
 
@@ -251,7 +243,7 @@ mc_feed_directory(directory, logger_type, recursive = TRUE)
 Argument      |Description
 ------------- |----------------
 `directory`     |     character
-`logger_type`     |     character - type of logger (TMS)
+`dataformat_name`     |     character - data format of logger (TOMST)
 `recursive`     |     logical - recursive search in subdirectories
 
 
@@ -263,7 +255,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_data <- microclim::mc_feed_directory("examples/data/TMS/", "TMS")
+example_tomst_data <- microclim::mc_feed_directory("examples/data/TOMST/", "TOMST")
 ```
 
 
@@ -280,7 +272,7 @@ This function read data files of one logger type. Locality is set None.
 ## Usage
 
 ```r
-mc_feed_files(files, logger_type)
+mc_feed_files(files, dataformat_name)
 ```
 
 
@@ -289,7 +281,7 @@ mc_feed_files(files, logger_type)
 Argument      |Description
 ------------- |----------------
 `files`     |     vector of character - files with data
-`logger_type`     |     character - type of logger (TMS)
+`dataformat_name`     |     character - data format of logger (TOMST)
 
 
 ## Value
@@ -300,7 +292,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_data <- microclim::mc_feed_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"), "TMS")
+example_tomst_data <- microclim::mc_feed_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 ```
 
 
@@ -336,7 +328,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_data <- microclim::mc_feed_from_csv("examples/data/TMS/files_table.csv")
+example_tomst_data <- microclim::mc_feed_from_csv("examples/data/TOMST/files_table.csv")
 ```
 
 
@@ -355,7 +347,7 @@ This function read raw data from loggers by data.frame with files description.
 
 *  locality_id 
 
-*  logger 
+*  data_format 
 
 *  serial_number - can be NA, than try detect
 
@@ -379,20 +371,20 @@ Argument      |Description
 data in standard format
 
 
-# `mc_feed_TMS_directory`
+# `mc_feed_TOMST_directory`
 
-Reading TMS files from directory
+Reading TOMST files from directory
 
 
 ## Description
 
-This function read TMS data files from directory. Locality is set None.
+This function read TOMST data files from directory. Locality is set None.
 
 
 ## Usage
 
 ```r
-mc_feed_TMS_directory(directory, recursive = TRUE)
+mc_feed_TOMST_directory(directory, recursive = TRUE)
 ```
 
 
@@ -412,24 +404,24 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_data <- microclim::mc_feed_TMS_directory("examples/data/TMS/")
+example_tomst_data <- microclim::mc_feed_TOMST_directory("examples/data/TOMST/")
 ```
 
 
-# `mc_feed_TMS_files`
+# `mc_feed_TOMST_files`
 
-Reading TMS files
+Reading TOMST files
 
 
 ## Description
 
-This function read data files of TMS type. Locality is set None.
+This function read data files of TOMST type. Locality is set None.
 
 
 ## Usage
 
 ```r
-mc_feed_TMS_files(files)
+mc_feed_TOMST_files(files)
 ```
 
 
@@ -448,7 +440,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_data <- microclim::mc_feed_TMS_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"))
+example_tomst_data <- microclim::mc_feed_TOMST_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"))
 ```
 
 
@@ -495,7 +487,7 @@ Function plot data to file with image function
 ## Usage
 
 ```r
-mc_plot_image(data_table, filename, title)
+mc_plot_image(data, filename, title, localities = NULL, sensors = NULL)
 ```
 
 
@@ -503,16 +495,17 @@ mc_plot_image(data_table, filename, title)
 
 Argument      |Description
 ------------- |----------------
-`data_table`     |     data.frame in wideformat generated by mc_reshape_wideformat_interval
+`data`     |     all data in standard format
 `filename`     |     output filename
 `title`     |     of plot
+`localities`     |     names of localities; if empty then all
+`sensors`     |     names of sensors; if empty then all
 
 
 ## Examples
 
 ```r
-data_table <- mc_reshape_wideformat_interval(example_tms_data1, sensors="T1")
-mc_plot_image(data_table, "T1_image.png", "T1 sensor")
+mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
 ```
 
 
@@ -534,8 +527,7 @@ mc_plot_loggers(
   directory,
   localities = c(),
   sensors = c(),
-  crop = c(NA, NA),
-  interval_length = 15
+  crop = c(NA, NA)
 )
 ```
 
@@ -549,13 +541,12 @@ Argument      |Description
 `localities`     |     names of localities; if empty then all
 `sensors`     |     names of sensors; if empty then all
 `crop`     |     datetime range for plot, not cropping if NA (default c(NA, NA))
-`interval_length`     |     length of interval in minutes (default 15)
 
 
 ## Examples
 
 ```r
-mc_plot_loggers(example_tms_data1, "Figures")
+mc_plot_loggers(example_tomst_data1, "Figures")
 ```
 
 
@@ -587,58 +578,13 @@ Argument      |Description
 
 ## Value
 
-data in standard format
+data.frame with columns location, serial_number, sensor, datetime, value
 
 
 ## Examples
 
 ```r
-example_tms_t1_table <- microclim::mc_reshape_longformat(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
-```
-
-
-# `mc_reshape_wideformat_interval`
-
-Wideformat of sensor values by interval
-
-
-## Description
-
-This function create data.frame with values of sensor in wide format.
- Mean is computed from values in datetime interval.
-
-
-## Usage
-
-```r
-mc_reshape_wideformat_interval(
-  data,
-  localities = c(),
-  sensors = c(),
-  interval_length = 15
-)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`data`     |     all data in standard format
-`localities`     |     names of localities; if empty then all
-`sensors`     |     names of sensors; if empty then all
-`interval_length`     |     in minutes (default 15)
-
-
-## Value
-
-data in standard format
-
-
-## Examples
-
-```r
-example_tms_wideformat_interval <- microclim::mc_reshape_wideformat_interval(example_tms_data, c("LOC_1", "LOC_2"), c("T1", "T2"), 10)
+example_tms_t1_table <- microclim::mc_reshape_longformat(example_tomst_data, c("LOC_1", "LOC_2"), c("T1", "T2"))
 ```
 
 
@@ -676,7 +622,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_wideformat <- mc_reshape_wideformat(example_tms_data1, c("LOC_1", "LOC_2"), c("T1", "T2"))
+example_tms_wideformat <- mc_reshape_wideformat(example_tomst_data1, c("LOC_1", "LOC_2"), c("T1", "T2"))
 ```
 
 
@@ -710,7 +656,7 @@ Class for state of sensor
 Class for state of sensor
 
 
-# `mc_TMSDataFormat-class`
+# `mc_TOMSTDataFormat-class`
 
 Class for source file data format for TMS logger
 

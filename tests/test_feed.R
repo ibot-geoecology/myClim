@@ -2,7 +2,7 @@ library(testthat)
 library(microclim)
 
 test_that("mc_feed_from_csv", {
-    data <- microclim::mc_feed_from_csv("data/TMS/files_table.csv")
+    data <- mc_feed_from_csv("data/TOMST/files_table.csv")
     expect_equal(length(data), 3)
     expect_equal(length(data$LOC_1$loggers[[1]]$datetime), 49)
     expect_equal(class(data$LOC_1$loggers[[1]]$clean_log), "list")
@@ -12,14 +12,14 @@ test_that("mc_feed_from_csv", {
     expect_equal(length(data$LOC_2$loggers[[1]]$datetime), 75)
     expect_equal(length(data$LOC_2$loggers[[1]]$sensors), 4)
     expect_equal(class(data$LOC_2$loggers[[1]]$sensors), "list")
-    expect_equal(class(data$LOC_2$loggers[[1]]$sensors$T1), "list")
-    expect_equal(length(data$LOC_2$loggers[[1]]$sensors$T1), 3)
+    expect_equal(class(data$LOC_2$loggers[[1]]$sensors$TMS_T1), "list")
+    expect_equal(length(data$LOC_2$loggers[[1]]$sensors$TMS_T1), 3)
     expect_equal(length(data$LOC_3$loggers[[1]]$datetime), 11)
     expect_equal(length(data$LOC_3$loggers[[1]]$sensors), 1)
 })
 
 test_that("mc_feed_TMS_directory", {
-    expect_warning(data <- microclim::mc_feed_TMS_directory("data/TMS"))
+    expect_warning(data <- microclim::mc_feed_TOMST_directory("data/TOMST"))
     expect_equal(length(data), 1)
     expect_equal(length(data$None$loggers), 4)
 })

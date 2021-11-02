@@ -1,4 +1,0 @@
-path,locality_id,logger,serial_number
-"examples/data/TMS/data_94184102_0.csv",LOC_1,TMS,
-"examples/data/TMS/data_94184103_0.csv",LOC_2,TMS,
-"examples/data/TMS/data_91184101_0.csv",LOC_3,TMS,

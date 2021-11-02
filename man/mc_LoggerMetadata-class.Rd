@@ -11,6 +11,8 @@ Class for logger metadata
 \section{Slots}{
 
 \describe{
-\item{\code{type}}{of logger}
+\item{\code{type}}{of logger (TMS1)}
+
+\item{\code{step}}{of series in minutes}
 }}
 

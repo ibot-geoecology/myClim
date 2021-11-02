@@ -34,9 +34,8 @@
     Filter(function(x) rlang::env_has(sensors_filter, x$metadata@sensor), sensors)
 }
 
-.common_get_sensor_info <- function(logger_metadata, sensor_metadata) {
-    name <- paste0(logger_metadata@type, "_", sensor_metadata@sensor)
-    microclim::mc_data_sensors[[name]]
+.common_get_sensor_info <- function(sensor_metadata) {
+    microclim::mc_data_sensors[[sensor_metadata@sensor]]
 }
 
 .common_as_utc_posixct <- function(datetime) {

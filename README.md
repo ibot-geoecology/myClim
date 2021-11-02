@@ -24,14 +24,14 @@ V RStudiu je možné aktualizovat balíček v menu Build -> Install and restart.
 
 V adresáři [examples](https://git.sorbus.ibot.cas.cz/microclimate_r/microclim/-/tree/main/examples)
 se nachází soubory a skripty pro ukázku funkcionality.
-V souboru [examples/load_tms.R](examples/load_tms.R) je ukázka načtení dat z TMS čidel.
+V souboru [examples/load_tms.R](examples/load_tomst.R) je ukázka načtení dat z TMS čidel.
 Stručný popis se nachází v komentářích.
 
 Spuštění příkladu je možné následujícím kódem:
 
 ```R
 library(microclim)
-source("examples/load_tms.R")
+source("examples/load_tomst.R")
 ```
 
 # Testy

@@ -14,7 +14,7 @@ mc_const_CLEAN_DATETIME_STEP <- "datetime_step"
 #' @return cleaned data in standard format
 #' @export
 #' @examples
-#' cleaned_example_tms_data1 <- mc_clean_datetime_step(example_tms_data1)
+#' cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
 mc_clean_datetime_step <- function(data) {
     logger_function <- function(logger) {
         .clean_datetime_step_logger(logger)
@@ -27,12 +27,10 @@ mc_clean_datetime_step <- function(data) {
 }
 
 .clean_datetime_step_logger <- function(logger) {
-    step <- .clean_detect_step_minutes(logger$datetime)
-    logger$clean_log <- .clean_add_log(logger$clean_log, mc_const_CLEAN_DATETIME_STEP,
-                                       as.character(stringr::str_glue("detected step: {step} min")))
-    logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{step} min"))
-    logger <- .clean_datetime_step_log_wrong(logger, step)
-    .clean_datetime_step_edit_series(logger, step)
+    logger$metadata@step <- .clean_detect_step_minutes(logger$datetime)
+    logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{logger$metadata@step} min"))
+    logger <- .clean_datetime_step_log_wrong(logger)
+    .clean_datetime_step_edit_series(logger)
 }
 
 .clean_detect_step_minutes <- function(datetime) {
@@ -40,25 +38,24 @@ mc_clean_datetime_step <- function(data) {
         datetime <- datetime[1:.clean_const_DETECT_STEP_LENGTH]
     }
     datetime <- as.numeric(datetime)
-    round(quantile(diff(datetime), p=0.5, type=1)/60)
+    round(unname(quantile(diff(datetime), p=0.5, type=1)/60))
 }
 
-.clean_add_log <- function(clean_log, method, message) {
+.add_method_to_clean_log_if_need <- function(clean_log, method) {
     if(!(method %in% names(clean_log))) {
         clean_log[[method]] <- character()
     }
-    clean_log[[method]][[length(clean_log[[method]]) + 1]] <- message
     clean_log
 }
 
-.clean_datetime_step_edit_series <- function(logger, step) {
+.clean_datetime_step_edit_series <- function(logger) {
     if(!.clean_was_error_in_logger_datetime_step(logger)){
         return(logger)
     }
     table <- microclim:::.common_logger_values_as_tibble(logger)
     table_noduplicits <- dplyr::group_by(table, datetime) %>% dplyr::summarise_all(mean)
     datetime_range <- range(table_noduplicits$datetime)
-    datetime_seq <- seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{step} min")) %>% tibble::as_tibble()
+    datetime_seq <- seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$metadata@step} min")) %>% tibble::as_tibble()
     colnames(datetime_seq) <- "datetime"
     output_table <- dplyr::left_join(datetime_seq, table_noduplicits, by="datetime")
     logger$datetime <- output_table$datetime
@@ -71,11 +68,12 @@ mc_clean_datetime_step <- function(data) {
     logger
 }
 
-.clean_datetime_step_log_wrong <- function(logger, step) {
+.clean_datetime_step_log_wrong <- function(logger) {
+    .add_method_to_clean_log_if_need(logger$clean_log,  mc_const_CLEAN_DATETIME_STEP)
     wrong_diff <- diff(as.numeric(logger$datetime)) %/% 60 %>%
       tibble::as_tibble() %>%
       dplyr::count(value) %>%
-      dplyr::filter(value != step)
+      dplyr::filter(value != logger$metadata@step)
     log_message_function <- function(value, n) {
         if(value == 0) {
             return(stringr::str_glue("data contains {n}x duplicits"))
@@ -88,10 +86,15 @@ mc_clean_datetime_step <- function(data) {
 }
 
 .clean_is_logger_datetime_step_proceessed <- function(logger) {
-    mc_const_CLEAN_DATETIME_STEP %in% names(logger$clean_log)
+    !is.na(logger$metadata@step)
 }
 
 .clean_was_error_in_logger_datetime_step <- function(logger) {
     length(logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]]) > 1
 }
 
+.clean_warn_if_datetime_step_unprocessed <- function(logger) {
+    if(!.clean_is_logger_datetime_step_proceessed(logger)){
+        warning(stringr::str_glue("Detected step miss in logger {logger$metadata@type} {logger$metadata@serial_number}. Probably logger wasn't cleaned"))
+    }
+}

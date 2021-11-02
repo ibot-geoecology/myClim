@@ -4,12 +4,12 @@
 \alias{mc_feed_directory}
 \title{Reading files from directory}
 \usage{
-mc_feed_directory(directory, logger_type, recursive = TRUE)
+mc_feed_directory(directory, dataformat_name, recursive = TRUE)
 }
 \arguments{
 \item{directory}{character}
 
-\item{logger_type}{character - type of logger (TMS)}
+\item{dataformat_name}{character - data format of logger (TOMST)}
 
 \item{recursive}{logical - recursive search in subdirectories}
 }
@@ -21,5 +21,5 @@ This function read csv data files from directory of one logger type.
 If csv file is not in correct format, is skipped. Locality is set None.
 }
 \examples{
-example_tms_data <- microclim::mc_feed_directory("examples/data/TMS/", "TMS")
+example_tomst_data <- microclim::mc_feed_directory("examples/data/TOMST/", "TOMST")
 }

@@ -4,12 +4,12 @@
 \alias{mc_feed_files}
 \title{Reading files}
 \usage{
-mc_feed_files(files, logger_type)
+mc_feed_files(files, dataformat_name)
 }
 \arguments{
 \item{files}{vector of character - files with data}
 
-\item{logger_type}{character - type of logger (TMS)}
+\item{dataformat_name}{character - data format of logger (TOMST)}
 }
 \value{
 data in standard format
@@ -18,5 +18,5 @@ data in standard format
 This function read data files of one logger type. Locality is set None.
 }
 \examples{
-example_tms_data <- microclim::mc_feed_files(c("examples/data/TMS/data_91184101_0.csv", "examples/data/TMS/data_94184102_0.csv"), "TMS")
+example_tomst_data <- microclim::mc_feed_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 }
