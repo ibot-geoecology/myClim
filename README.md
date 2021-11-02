@@ -24,14 +24,15 @@ V RStudiu je možné aktualizovat balíček v menu Build -> Install and restart.
 
 V adresáři [examples](https://git.sorbus.ibot.cas.cz/microclimate_r/microclim/-/tree/main/examples)
 se nachází soubory a skripty pro ukázku funkcionality.
-V souboru [examples/load_tms.R](examples/load_tomst.R) je ukázka načtení dat z TMS čidel.
+V souboru [examples/load_tomst.R](examples/load_tomst.R) je ukázka načtení dat z TOMST čidel.
 Stručný popis se nachází v komentářích.
+V souboru [examples/plot_tomst.R](examples/plot_tomst.R) je ukázka generování grafů.
 
-Spuštění příkladu je možné následujícím kódem:
+Spuštění příkladů je možné následujícím kódem:
 
 ```R
-library(microclim)
 source("examples/load_tomst.R")
+source("examples/plot_tomst.R")
 ```
 
 # Testy
@@ -52,8 +53,12 @@ Zde je jednotná struktura, ve kterých si balíček drží načtená data.
         * `altitude`
         * `lat_wgs84`
         * `lon_wgs84`
+        * `user_data`
     * `loggers` - seznam loggerů v lokalitě bez jmen; logger je tvořen seznamem o třech položkách
         * `metadata` - instance třídy `mc_LoggerMetadata`
+            * `type`
+            * `serial_number`
+            * `step` - krok času v minutách
         * `datetime` - vector data a času ve fromátu POSIXct
         * `sensors` - seznam senzorů patřících pod logger; položky jsou pojmenované; každý senzor je seznam o třech položkách`
             * `metadata` - instance třídy `mc_SensorMetadata`
