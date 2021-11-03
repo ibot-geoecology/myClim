@@ -7,7 +7,7 @@ example_tomst_data1 <- mc_feed_from_csv("examples/data/TOMST/files_table.csv")
 example_tomst_data2 <- mc_feed_TOMST_directory("examples/data/TOMST/")
 # cleaning datetime step
 example_cleaned_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
-# The function returns a wideformat table with the values of the TMS_T1, and TMS_T2 sensors in the localities LOC_1 and LOC_2.
-example_tms_wideformat_table <- mc_reshape_wideformat(example_cleaned_tomst_data1, c("LOC_1", "LOC_2"), c("TMS_T1", "TMS_T2"))
-# The function returns a longformat table with the values of the TMS_T1, and TMS_T2 sensors in the localities LOC_1 and LOC_2.
-example_tms_longformat_table <- mc_reshape_longformat(example_cleaned_tomst_data1, c("LOC_1", "LOC_2"), c("TMS_T1", "TMS_T2"))
+# The function returns a wideformat table with the values of the TMS_T1, and TMS_T2 sensors in the localities A6W79 and A2E32.
+example_tms_wideformat_table <- mc_reshape_wideformat(example_cleaned_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+# The function returns a longformat table with the values of the TMS_T1, and TMS_T2 sensors in the localities A6W79 and A2E32.
+example_tms_longformat_table <- mc_reshape_longformat(example_cleaned_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))

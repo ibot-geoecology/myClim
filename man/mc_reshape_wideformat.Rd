@@ -20,5 +20,5 @@ data in standard format
 This function create data.frame with values of sensor in wide format.
 }
 \examples{
-example_tms_wideformat <- mc_reshape_wideformat(example_tomst_data1, c("LOC_1", "LOC_2"), c("T1", "T2"))
+example_tms_wideformat <- mc_reshape_wideformat(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 }

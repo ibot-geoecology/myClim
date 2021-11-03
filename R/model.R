@@ -48,6 +48,7 @@ mc_Physical <- setClass("mc_Physical",
 #' @slot altitude of loacality
 #' @slot lat_wgs84 latitude of locality in WGS-84
 #' @slot lon_wgs84 longitude of locality in WGS-84
+#' @slot tz_offset offset from UTC in minutes
 #' @slot user_data list for user data
 #' @export mc_LocalityMetadata
 #' @exportClass mc_LocalityMetadata
@@ -57,12 +58,14 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
             altitude = "numeric",
             lat_wgs84 = "numeric",
             lon_wgs84 = "numeric",
+            tz_offset = "numeric",
             user_data = "list"
          ),
          prototype (
             altitude = NA_real_,
             lat_wgs84 = NA_real_,
             lon_wgs84 = NA_real_,
+            tz_offset = NA_integer_,
             user_data = list()
          ))
 

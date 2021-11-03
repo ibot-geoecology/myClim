@@ -3,12 +3,12 @@ library(microclim)
 
 test_that(".common_get_filtered_data", {
     data <- microclim::mc_feed_from_csv("data/TOMST/files_table.csv")
-    filtered <- microclim:::.common_get_filtered_data(data, c("LOC_1", "LOC_2", "LOC_3"), "TMS_T2")
+    filtered <- microclim:::.common_get_filtered_data(data, c("A6W79", "A2E32", "A1E05"), "TMS_T2")
     expect_equal(length(filtered), 2)
-    expect_equal(length(filtered$LOC_1$loggers[[1]]$sensors), 1)
-    expect_equal(length(filtered$LOC_1$loggers[[1]]$sensors), 1)
-    expect_false("TMS_T1" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
-    expect_true("TMS_T2" %in% names(filtered$LOC_1$loggers[[1]]$sensors))
+    expect_equal(length(filtered$A6W79$loggers[[1]]$sensors), 1)
+    expect_equal(length(filtered$A6W79$loggers[[1]]$sensors), 1)
+    expect_false("TMS_T1" %in% names(filtered$A6W79$loggers[[1]]$sensors))
+    expect_true("TMS_T2" %in% names(filtered$A6W79$loggers[[1]]$sensors))
 })
 
 test_that(".common_logger_values_as_tibble", {
