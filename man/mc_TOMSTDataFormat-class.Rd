@@ -4,7 +4,7 @@
 \name{mc_TOMSTDataFormat-class}
 \alias{mc_TOMSTDataFormat-class}
 \alias{mc_TOMSTDataFormat}
-\title{Class for source file data format for TMS logger}
+\title{Class for source file data format for TOMST logger}
 \description{
-Class for source file data format for TMS logger
+Class for source file data format for TOMST logger
 }

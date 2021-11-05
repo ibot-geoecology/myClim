@@ -146,7 +146,7 @@ mc_DataFormat <- setClass("mc_DataFormat",
            logger_type = NA_character_
          ))
 
-#' Class for source file data format for TMS logger
+#' Class for source file data format for TOMST logger
 #' @export mc_TOMSTDataFormat
 #' @exportClass mc_TOMSTDataFormat
 mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")

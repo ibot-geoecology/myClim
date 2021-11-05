@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 03, 2021
+listopadu 05, 2021
 
 # DESCRIPTION
 
@@ -658,12 +658,12 @@ Class for state of sensor
 
 # `mc_TOMSTDataFormat-class`
 
-Class for source file data format for TMS logger
+Class for source file data format for TOMST logger
 
 
 ## Description
 
-Class for source file data format for TMS logger
+Class for source file data format for TOMST logger
 
 
 # `microclim-package`

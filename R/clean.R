@@ -53,15 +53,15 @@ mc_clean_datetime_step <- function(data) {
         return(logger)
     }
     table <- microclim:::.common_logger_values_as_tibble(logger)
-    table_noduplicits <- dplyr::group_by(table, datetime) %>% dplyr::summarise_all(mean)
+    grouped_table <- dplyr::group_by(table, datetime)
+    table_noduplicits <- dplyr::summarise_all(grouped_table, mean)
     datetime_range <- range(table_noduplicits$datetime)
-    datetime_seq <- seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$metadata@step} min")) %>% tibble::as_tibble()
+    datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$metadata@step} min")))
     colnames(datetime_seq) <- "datetime"
     output_table <- dplyr::left_join(datetime_seq, table_noduplicits, by="datetime")
     logger$datetime <- output_table$datetime
-    logger$sensors <- names(logger$sensors) %>%
-      purrr::set_names() %>%
-      purrr::map(function(x) {
+    sensor_names <- purrr::set_names(names(logger$sensors))
+    logger$sensors <- purrr::map(sensor_names, function(x) {
         logger$sensors[[x]]$values <- output_table[[x]]
         logger$sensors[[x]]
     })
@@ -70,10 +70,9 @@ mc_clean_datetime_step <- function(data) {
 
 .clean_datetime_step_log_wrong <- function(logger) {
     .add_method_to_clean_log_if_need(logger$clean_log,  mc_const_CLEAN_DATETIME_STEP)
-    wrong_diff <- diff(as.numeric(logger$datetime)) %/% 60 %>%
-      tibble::as_tibble() %>%
-      dplyr::count(value) %>%
-      dplyr::filter(value != logger$metadata@step)
+    diff_datetime <- tibble::as_tibble(diff(as.numeric(logger$datetime)) %/% 60)
+    count_table <- dplyr::count(diff_datetime, value)
+    wrong_diff <- dplyr::filter(count_table, value != logger$metadata@step)
     log_message_function <- function(value, n) {
         if(value == 0) {
             return(stringr::str_glue("data contains {n}x duplicits"))
