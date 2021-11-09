@@ -155,12 +155,12 @@ mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL) 
     top_margin <- 3
     right_margin <- 8
     par(mar=c(bottom_margin, left_margin, top_margin, right_margin))
-    image(values_matrix, xaxt ="n", yaxt="n", col = hcl.colors(12, "viridis", rev = TRUE))
+    image(values_matrix, xaxt ="n", yaxt="n", col = hcl.colors(12, "viridis", rev = FALSE))
     axis(side = 1, at=seq(0, 1, len=20), labels=x_labels, las=3)
     axis(side = 2, at=seq(0, 1, len=ncol(values_matrix)), labels=colnames(data_table)[-1], las=2)
-    legend_values <- round(seq(min(values_matrix, na.rm=T), max(values_matrix, na.rm=T), len=12), 2)
+    legend_values <- round(seq(max(values_matrix, na.rm=T), min(values_matrix, na.rm=T), len=12), 2)
     legend(grconvertX(1630, "device"), grconvertY(120, "device"),
-           legend_values, fill = hcl.colors(12, "viridis", rev = FALSE), xpd = NA)
+           legend_values, fill = hcl.colors(12, "viridis", rev = TRUE), xpd = NA)
     title(main=title, line=0.5, cex.lab=1.2)
     dev.off()
 }

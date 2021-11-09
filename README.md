@@ -7,15 +7,15 @@ do kterého se rozbalí zdrojové soubory knihovny.
 # directory to unzip source files
 setwd("C:/path/to/directory") # !EDIT IT!
 zip_file <- "microclim.zip"
+dir_name <- "microclim"
 download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
 subdir <- unzip(zip_file, list=TRUE)$Name[1]
 unzip(zip_file)
 file.remove(zip_file)
-for(item in list.files(subdir, all.files = FALSE, include.dirs = TRUE)){
-    file.copy(file.path(subdir, item), "./", recursive=TRUE)
-}
-unlink(subdir, recursive=TRUE)
-install.packages(".", repos=NULL, type="source")
+unlink(dir_name, recursive=TRUE)
+file.rename(subdir, dir_name)
+install.packages(dir_name, repos=NULL, type="source")
+setwd(dir_name)
 ```
 
 V RStudiu je možné aktualizovat balíček v menu Build -> Install and restart.
