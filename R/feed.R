@@ -38,7 +38,7 @@ mc_feed_TOMST_files <- function(files) {
 #' @examples
 #' example_tomst_data <- microclim::mc_feed_directory("examples/data/TOMST/", "TOMST")
 mc_feed_directory <- function(directory, dataformat_name, recursive=TRUE) {
-    files <-list.files(directory, pattern=".+\\.[cC][sS][vV]", recursive=recursive, full.names=TRUE)
+    files <-list.files(directory, pattern=".+\\.[cC][sS][vV]$", recursive=recursive, full.names=TRUE)
     mc_feed_files(files, dataformat_name)
 }
 

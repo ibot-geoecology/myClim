@@ -58,6 +58,11 @@ mc_eco_snow_agg <- function(snow_data, period = 3) {
 
 .eco_get_snow_agg_row <- function(snow_data, serial_number, period) {
     snow_data <- snow_data[!is.na(snow_data[[serial_number]]), ]
+    if(nrow(snow_data) == 0) {
+        return(list(serial_number=serial_number, snow_days=0,
+             first_day=NA, last_day=NA,
+             first_day_period=NA, last_day_period=NA))
+    }
     snow_days_table <- aggregate(snow_data[[serial_number]], by=list(day=cut(snow_data$datetime, breaks = "days")), FUN=max)
     snow_days_table$day <- as.Date(snow_days_table$day)
     snow_days <- sum(snow_days_table$x)
@@ -77,7 +82,7 @@ mc_eco_snow_agg <- function(snow_data, period = 3) {
     }
     else{
         last_day_period <- snow_days_table$day[max(snow_by_period_index)]
-        first_day_period <- snow_days_table$day[min(snow_by_period_index)]
+        first_day_period <- snow_days_table$day[min(snow_by_period_index) - period + 1]
     }
     list(serial_number=serial_number, snow_days=snow_days,
          first_day=first_day, last_day=last_day,
