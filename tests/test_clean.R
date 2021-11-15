@@ -19,3 +19,10 @@ test_that("mc_clean_datetime_step_ok", {
     expect_true(microclim:::.clean_is_logger_datetime_step_proceessed(cleaned_data$None$loggers[[1]]))
     expect_false(microclim:::.clean_was_error_in_logger_datetime_step(cleaned_data$None$loggers[[1]]))
 })
+
+test_that("mc_clean_logs", {
+    data <- mc_feed_TOMST_directory("data/clean-datetime_step")
+    cleaned_data <- mc_clean_datetime_step(data)
+    logs <- mc_clean_logs(cleaned_data)
+    expect_equal(colnames(logs), c("locality_id", "serial_number", "clean_type", "message"))
+})

@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 11, 2021
+listopadu 15, 2021
 
 # DESCRIPTION
 
@@ -57,6 +57,42 @@ Argument      |Description
 ## Value
 
 cleaned data in standard format
+
+
+## Examples
+
+```r
+cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
+```
+
+
+# `mc_clean_logs`
+
+Get all clean log messages
+
+
+## Description
+
+This function return dataframe with all clean log messages
+
+
+## Usage
+
+```r
+mc_clean_logs(data)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     character data in standard format
+
+
+## Value
+
+dataframe with columns locality_id, serial_number, clean_type, message
 
 
 ## Examples

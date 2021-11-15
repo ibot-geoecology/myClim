@@ -97,3 +97,33 @@ mc_clean_datetime_step <- function(data) {
         warning(stringr::str_glue("Detected step miss in logger {logger$metadata@type} {logger$metadata@serial_number}. Probably logger wasn't cleaned"))
     }
 }
+
+#' Get all clean log messages
+#'
+#' This function return dataframe with all clean log messages
+#'
+#' @param data character data in standard format
+#' @return dataframe with columns locality_id, serial_number, clean_type, message
+#' @export
+#' @examples
+#' cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
+mc_clean_logs <- function(data) {
+    logger_function <- function (logger) {
+        log_function <- function(type, messages) {
+            purrr::map(messages, function(message) c(logger$metadata@serial_number, type, message))
+        }
+        items <- purrr::map2(names(logger$clean_log), logger$clean_log, log_function)
+        purrr::flatten(items)
+    }
+
+    locality_function <- function(locality) {
+        items <- purrr::map(locality$loggers, logger_function)
+        purrr::map(purrr::flatten(items), function(x) purrr::prepend(x, locality$metadata@id))
+    }
+
+    rows <- purrr::flatten(purrr::map(data, locality_function))
+    columns <- purrr::transpose(rows)
+    data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
+               clean_type=unlist(columns[[3]]), message=unlist(columns[[4]]))
+}
+
