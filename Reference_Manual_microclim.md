@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 15, 2021
+listopadu 16, 2021
 
 # DESCRIPTION
 
@@ -345,7 +345,7 @@ This function read raw data from loggers by table saved in CSV file
 ## Usage
 
 ```r
-mc_feed_from_csv(csv_with_files_table)
+mc_feed_from_csv(csv_files_table, csv_localities_table = NULL)
 ```
 
 
@@ -353,7 +353,8 @@ mc_feed_from_csv(csv_with_files_table)
 
 Argument      |Description
 ------------- |----------------
-`csv_with_files_table`     |     data.frame
+`csv_files_table`     |     data.frame
+`csv_localities_table`     |     data.frame
 
 
 ## Value
@@ -376,8 +377,20 @@ Data files reading
 ## Description
 
 This function read raw data from loggers by data.frame with files description.
- Columns of data.frame:
-  
+
+
+## Usage
+
+```r
+mc_feed_from_df(files_table, localities_table = NULL)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`files_table`     |     data.frame which describe data files Columns:  
 
 *  path - path to file 
 
@@ -386,20 +399,17 @@ This function read raw data from loggers by data.frame with files description.
 *  data_format 
 
 *  serial_number - can be NA, than try detect
+`localities_table`     |     data.frame which describe localities Columns:  
 
+*  id 
 
-## Usage
+*  altitude 
 
-```r
-mc_feed_from_df(files_table)
-```
+*  lon_wgs84 
 
+*  lat_wgs84 
 
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`files_table`     |     data.frame which describe data files
+*  tz_offset
 
 
 ## Value

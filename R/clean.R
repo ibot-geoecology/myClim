@@ -106,7 +106,7 @@ mc_clean_datetime_step <- function(data) {
 #' @return dataframe with columns locality_id, serial_number, clean_type, message
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
+#' log_table <- mc_clean_logs(cleaned_example_tomst_data1)
 mc_clean_logs <- function(data) {
     logger_function <- function (logger) {
         log_function <- function(type, messages) {

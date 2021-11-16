@@ -16,6 +16,12 @@ test_that("mc_feed_from_csv", {
     expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1), 3)
     expect_equal(length(data$A1E05$loggers[[1]]$datetime), 11)
     expect_equal(length(data$A1E05$loggers[[1]]$sensors), 1)
+    expect_true(is.na(data$A1E05$metadata@altitude))
+})
+
+test_that("mc_feed_from_csv", {
+    data <- mc_feed_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    expect_equal(data$A1E05$metadata@altitude, 255)
 })
 
 test_that("mc_feed_TMS_directory", {

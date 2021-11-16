@@ -4,10 +4,12 @@
 \alias{mc_feed_from_csv}
 \title{Data files reading by CSV}
 \usage{
-mc_feed_from_csv(csv_with_files_table)
+mc_feed_from_csv(csv_files_table, csv_localities_table = NULL)
 }
 \arguments{
-\item{csv_with_files_table}{data.frame}
+\item{csv_files_table}{data.frame}
+
+\item{csv_localities_table}{data.frame}
 }
 \value{
 data in standard format

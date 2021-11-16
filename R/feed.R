@@ -61,43 +61,68 @@ mc_feed_files <- function(files, dataformat_name) {
 #'
 #' This function read raw data from loggers by table saved in CSV file
 #'
-#' @param csv_with_files_table data.frame
+#' @param csv_files_table data.frame
+#' @param csv_localities_table data.frame
 #' @return data in standard format
 #' @export
 #' @examples
 #' example_tomst_data <- microclim::mc_feed_from_csv("examples/data/TOMST/files_table.csv")
-mc_feed_from_csv <- function(csv_with_files_table) {
-    files_table <- read.table(csv_with_files_table,
+mc_feed_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
+    files_table <- read.table(csv_files_table,
                               header = TRUE,
                               sep = ",",
                               stringsAsFactors = FALSE)
-    mc_feed_from_df(files_table)
+    localities_table <- NULL
+    if(!is.null(csv_localities_table)){
+        localities_table <- read.table(csv_localities_table,
+                                       header = TRUE,
+                                       sep = ",",
+                                       stringsAsFactors = FALSE)
+    }
+    mc_feed_from_df(files_table, localities_table)
 }
 
 #' Data files reading
 #'
 #' This function read raw data from loggers by data.frame with files description.
-#' Columns of data.frame:
+#'
+#' @param files_table data.frame which describe data files
+#' Columns:
 #' * path - path to file
 #' * locality_id
 #' * data_format
 #' * serial_number - can be NA, than try detect
-#'
-#' @param files_table data.frame which describe data files
+#' @param localities_table data.frame which describe localities
+#' Columns:
+#' * id
+#' * altitude
+#' * lon_wgs84
+#' * lat_wgs84
+#' * tz_offset
 #' @return data in standard format
 #' @export
-mc_feed_from_df <- function(files_table) {
+mc_feed_from_df <- function(files_table, localities_table=NULL) {
     files_table <- microclim:::.common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {
         return(list())
     }
     result <- list()
+    if(!is.null(localities_table))
+    {
+        result <- .feed_init_localities_from_table(localities_table)
+    }
     for(i in 1:nrow(files_table))
     {
         row <- files_table[i, ]
         result[[row$locality_id]] <- .feed_add_logger_to_locality(result[[row$locality_id]], row)
     }
+    result
+}
+
+.feed_init_localities_from_table <- function(localities_table) {
+    result <- purrr::pmap(localities_table, .feed_get_new_locality)
+    names(result) <- localities_table$id
     result
 }
 
@@ -117,12 +142,16 @@ mc_feed_from_df <- function(files_table) {
     current_locality
 }
 
-.feed_get_new_locality <- function(locality_id = NULL) {
-    if (is.null(locality_id))
+.feed_get_new_locality <- function(id=NULL, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
+    if (is.null(id))
     {
-        locality_id <- microclim::mc_const_NONE_LOCALITY_ID
+        id <- microclim::mc_const_NONE_LOCALITY_ID
     }
-    metadata <- mc_LocalityMetadata(id = locality_id)
+    metadata <- mc_LocalityMetadata(id=id,
+                                    altitude=altitude,
+                                    lon_wgs84=lon_wgs84,
+                                    lat_wgs84=lat_wgs84,
+                                    tz_offset=tz_offset)
     list(metadata = metadata, loggers=list())
 }
 

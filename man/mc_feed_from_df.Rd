@@ -4,21 +4,31 @@
 \alias{mc_feed_from_df}
 \title{Data files reading}
 \usage{
-mc_feed_from_df(files_table)
+mc_feed_from_df(files_table, localities_table = NULL)
 }
 \arguments{
-\item{files_table}{data.frame which describe data files}
+\item{files_table}{data.frame which describe data files
+Columns:
+\itemize{
+\item path - path to file
+\item locality_id
+\item data_format
+\item serial_number - can be NA, than try detect
+}}
+
+\item{localities_table}{data.frame which describe localities
+Columns:
+\itemize{
+\item id
+\item altitude
+\item lon_wgs84
+\item lat_wgs84
+\item tz_offset
+}}
 }
 \value{
 data in standard format
 }
 \description{
 This function read raw data from loggers by data.frame with files description.
-Columns of data.frame:
-\itemize{
-\item path - path to file
-\item locality_id
-\item data_format
-\item serial_number - can be NA, than try detect
-}
 }
