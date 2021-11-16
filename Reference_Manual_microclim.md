@@ -98,7 +98,43 @@ dataframe with columns locality_id, serial_number, clean_type, message
 ## Examples
 
 ```r
-cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
+log_table <- mc_clean_logs(cleaned_example_tomst_data1)
+```
+
+
+# `mc_clean_solar_tz`
+
+Solar TZ offset
+
+
+## Description
+
+This function compute TZ offset in localities by solar time
+
+
+## Usage
+
+```r
+mc_clean_solar_tz(data)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     character data in standard format
+
+
+## Value
+
+data with changed TZ offset in standard format
+
+
+## Examples
+
+```r
+cleaned_example_tomst_data1 <- mc_clean_solar_tz(cleaned_example_tomst_data1)
 ```
 
 

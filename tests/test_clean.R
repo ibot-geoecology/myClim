@@ -26,3 +26,9 @@ test_that("mc_clean_logs", {
     logs <- mc_clean_logs(cleaned_data)
     expect_equal(colnames(logs), c("locality_id", "serial_number", "clean_type", "message"))
 })
+
+test_that("mc_clean_solar_tz", {
+    data <- mc_feed_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_clean_solar_tz(data)
+    expect_equal(data$A1E05$metadata@tz_offset, 57)
+})

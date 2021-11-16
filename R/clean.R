@@ -127,3 +127,24 @@ mc_clean_logs <- function(data) {
                clean_type=unlist(columns[[3]]), message=unlist(columns[[4]]))
 }
 
+#' Solar TZ offset
+#'
+#' This function compute TZ offset in localities by solar time
+#'
+#' @param data character data in standard format
+#' @return data with changed TZ offset in standard format
+#' @export
+#' @examples
+#' cleaned_example_tomst_data1 <- mc_clean_solar_tz(cleaned_example_tomst_data1)
+mc_clean_solar_tz <- function(data) {
+    locality_function <- function(locality) {
+        if(is.na(locality$metadata@lon_wgs84)) {
+            warning(stringr::str_glue("missing longitude in locality {locality$metadata@id} - skip"))
+            return(locality)
+        }
+        locality$metadata@tz_offset <- round(locality$metadata@lon_wgs84 / 180 * 12 * 60)
+        locality
+    }
+
+    purrr::map(data, locality_function)
+}
