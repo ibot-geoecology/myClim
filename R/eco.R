@@ -36,55 +36,86 @@ mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
 #'
 #' Function return summary info about snow detection
 #'
-#' @param snow_data data from function mc_eco_snow
+#' @param data all data in standard format
+#' @param sensor name of temperature sensor
+#' @param localities names of localities; if empty then all
+#' @param dr delta range
+#' @param tmax maximal temperature
 #' @param period count days for continuous cover of snow (default 3)
 #' @return data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
 #' @export
 #' @examples
-#' data <- mc_eco_snow(example_tomst_data1, "TMS_T3")
-#' mc_eco_snow_agg(data)
-mc_eco_snow_agg <- function(snow_data, period = 3) {
-    result <- data.frame(serial_number=character(),
-                         snow_days=numeric(),
-                         first_day=as.Date(x = integer(0), origin = "1970-01-01"),
-                         last_day=as.Date(x = integer(0), origin = "1970-01-01"),
-                         first_day_period=as.Date(x = integer(0), origin = "1970-01-01"),
-                         last_day_period=as.Date(x = integer(0), origin = "1970-01-01"))
-    for(serial_number in colnames(snow_data)[-1]) {
-        result[nrow(result) + 1, ] <- .eco_get_snow_agg_row(snow_data, serial_number, period)
-    }
-    result
+#' mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
+mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period = 3) {
+    data <- microclim:::.common_get_filtered_data(data, localities, sensor)
+    loggers_with_offset <- .eco_get_loggers_with_offset(data)
+    result_env <- new.env()
+    result_env$serial_number <- character()
+    result_env$snow_days <- numeric()
+    result_env$first_day <- as.Date(x = integer(0), origin = "1970-01-01")
+    result_env$last_day <- as.Date(x = integer(0), origin = "1970-01-01")
+    result_env$first_day_period <- as.Date(x = integer(0), origin = "1970-01-01")
+    result_env$last_day_period <- as.Date(x = integer(0), origin = "1970-01-01")
+    purrr::walk(loggers_with_offset, function (x) {
+        snow_table <- .get_eco_snow_from_logger(x$logger, dr, tmax)
+        .eco_compute_snow_agg_from_table(snow_table, x$tz_offset, period, result_env)
+    })
+    data.frame(serial_number=result_env$serial_number,
+               snow_days=result_env$snow_days,
+               first_day=result_env$first_day,
+               last_day=result_env$last_day,
+               first_day_period=result_env$first_day_period,
+               last_day_period=result_env$last_day_period)
 }
 
-.eco_get_snow_agg_row <- function(snow_data, serial_number, period) {
-    snow_data <- snow_data[!is.na(snow_data[[serial_number]]), ]
-    if(nrow(snow_data) == 0) {
-        return(list(serial_number=serial_number, snow_days=0,
-             first_day=NA, last_day=NA,
-             first_day_period=NA, last_day_period=NA))
+.eco_get_loggers_with_offset <- function(data) {
+    locality_function <- function(locality) {
+        microclim:::.clean_warn_if_unset_tz_offset(locality)
+        purrr::map(locality$loggers, function(logger) list(logger=logger, tz_offset=locality$metadata@tz_offset))
     }
-    snow_days_table <- aggregate(snow_data[[serial_number]], by=list(day=cut(snow_data$datetime, breaks = "days")), FUN=max)
+    purrr::flatten(purrr::map(data, locality_function))
+}
+
+.eco_compute_snow_agg_from_table <- function(snow_table, tz_offset, period, environment) {
+    environment$serial_number <- c(environment$serial_number, colnames(snow_table)[[2]])
+    snow_table <- snow_table[!is.na(snow_table[[2]]), ]
+    snow_table$datetime <- .eco_get_datetimes_with_offset(snow_table$datetime, tz_offset)
+
+    if(nrow(snow_table) == 0) {
+        environment$snow_days <- c(environment$snow_days, 0)
+        environment$first_day <- c(environment$first_day, NA)
+        environment$last_day <- c(environment$last_day, NA)
+        environment$first_day_period <- c(environment$first_day_period, NA)
+        environment$last_day_period <- c(environment$last_day_period, NA)
+        return()
+    }
+    snow_days_table <- aggregate(snow_table[[2]], by=list(day=cut(snow_table$datetime, breaks = "days")), FUN=max)
     snow_days_table$day <- as.Date(snow_days_table$day)
     snow_days <- sum(snow_days_table$x)
+    environment$snow_days <- c(environment$snow_days, snow_days)
     if(snow_days == 0) {
-        last_day <- NA
-        first_day <- NA
+        environment$first_day <- c(environment$first_day, NA)
+        environment$last_day <- c(environment$last_day, NA)
     }
     else {
-        last_day <- as.Date(snow_days_table$day[max(which(snow_days_table$x == 1))])
-        first_day <- as.Date(snow_days_table$day[min(which(snow_days_table$x == 1))])
+        environment$first_day <- c(environment$first_day, as.Date(snow_days_table$day[min(which(snow_days_table$x == 1))]))
+        environment$last_day <- c(environment$last_day, as.Date(snow_days_table$day[max(which(snow_days_table$x == 1))]))
     }
     snow_by_period <- runner::runner(snow_days_table$x, k=period, idx=as.Date(snow_days_table$day), f=function(x) if(length(x) == 0) NA else min(x), na_pad=TRUE)
     snow_by_period_index <- which(snow_by_period == 1)
     if(length(snow_by_period_index) == 0) {
-        last_day_period <- NA
-        first_day_period <- NA
+        environment$first_day_period <- c(environment$first_day_period, NA)
+        environment$last_day_period <- c(environment$last_day_period, NA)
     }
-    else{
-        last_day_period <- snow_days_table$day[max(snow_by_period_index)]
-        first_day_period <- snow_days_table$day[min(snow_by_period_index) - period + 1]
+    else {
+        environment$first_day_period <- c(environment$first_day_period, snow_days_table$day[min(snow_by_period_index) - period + 1])
+        environment$last_day_period <- c(environment$last_day_period, snow_days_table$day[max(snow_by_period_index)])
     }
-    list(serial_number=serial_number, snow_days=snow_days,
-         first_day=first_day, last_day=last_day,
-         first_day_period=first_day_period, last_day_period=last_day_period)
+}
+
+.eco_get_datetimes_with_offset <- function(datetimes, tz_offset) {
+    if(is.na(tz_offset)) {
+        return(datetimes)
+    }
+    datetimes + (tz_offset * 60)
 }

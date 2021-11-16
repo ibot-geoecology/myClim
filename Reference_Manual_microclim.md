@@ -227,7 +227,7 @@ Function return summary info about snow detection
 ## Usage
 
 ```r
-mc_eco_snow_agg(snow_data, period = 3)
+mc_eco_snow_agg(data, sensor, localities = c(), dr = 2, tmax = 0.5, period = 3)
 ```
 
 
@@ -235,7 +235,11 @@ mc_eco_snow_agg(snow_data, period = 3)
 
 Argument      |Description
 ------------- |----------------
-`snow_data`     |     data from function mc_eco_snow
+`data`     |     all data in standard format
+`sensor`     |     name of temperature sensor
+`localities`     |     names of localities; if empty then all
+`dr`     |     delta range
+`tmax`     |     maximal temperature
 `period`     |     count days for continuous cover of snow (default 3)
 
 
@@ -247,8 +251,7 @@ data.frame with columns serial_number, snow_days, first_day, last_day, first_day
 ## Examples
 
 ```r
-data <- mc_eco_snow(example_tomst_data1, "TMS_T3")
-mc_eco_snow_agg(data)
+mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
 ```
 
 

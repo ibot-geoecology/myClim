@@ -4,10 +4,18 @@
 \alias{mc_eco_snow_agg}
 \title{Snow detection summary}
 \usage{
-mc_eco_snow_agg(snow_data, period = 3)
+mc_eco_snow_agg(data, sensor, localities = c(), dr = 2, tmax = 0.5, period = 3)
 }
 \arguments{
-\item{snow_data}{data from function mc_eco_snow}
+\item{data}{all data in standard format}
+
+\item{sensor}{name of temperature sensor}
+
+\item{localities}{names of localities; if empty then all}
+
+\item{dr}{delta range}
+
+\item{tmax}{maximal temperature}
 
 \item{period}{count days for continuous cover of snow (default 3)}
 }
@@ -18,6 +26,5 @@ data.frame with columns serial_number, snow_days, first_day, last_day, first_day
 Function return summary info about snow detection
 }
 \examples{
-data <- mc_eco_snow(example_tomst_data1, "TMS_T3")
-mc_eco_snow_agg(data)
+mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
 }

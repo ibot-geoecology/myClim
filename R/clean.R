@@ -148,3 +148,10 @@ mc_clean_solar_tz <- function(data) {
 
     purrr::map(data, locality_function)
 }
+
+.clean_warn_if_unset_tz_offset <- function(locality) {
+    if(is.na(locality$metadata@tz_offset)){
+        warning(stringr::str_glue("TZ offset in locality {locality$metadata@id} is not set - UTC used"))
+    }
+}
+
