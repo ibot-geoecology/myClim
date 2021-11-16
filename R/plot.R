@@ -140,15 +140,14 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 #' @param title of plot
 #' @param localities names of localities; if empty then all
 #' @param sensors names of sensors; if empty then all
+#' @param height of image default = 1900
 #' @export
 #' @examples
 #' mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
-mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL) {
+mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, height=1900) {
     data_table <- microclim::mc_reshape_wideformat(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
-    image_height = 120 * ncol(values_matrix) + 240
-    if(image_height < 700) {image_height <- 700}
-    png(filename=filename,width=1900, height=image_height, res=200)
+    png(filename=filename,width=1900, height=height, res=200)
     x_labels <- substr(data_table$datetime[seq(1, nrow(data_table), len=20)], 1, 10)
     bottom_margin <- 7
     left_margin <- 12

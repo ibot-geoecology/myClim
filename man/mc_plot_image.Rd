@@ -4,7 +4,14 @@
 \alias{mc_plot_image}
 \title{Plot data - image}
 \usage{
-mc_plot_image(data, filename, title, localities = NULL, sensors = NULL)
+mc_plot_image(
+  data,
+  filename,
+  title,
+  localities = NULL,
+  sensors = NULL,
+  height = 1900
+)
 }
 \arguments{
 \item{data}{all data in standard format}
@@ -16,6 +23,8 @@ mc_plot_image(data, filename, title, localities = NULL, sensors = NULL)
 \item{localities}{names of localities; if empty then all}
 
 \item{sensors}{names of sensors; if empty then all}
+
+\item{height}{of image default = 1900}
 }
 \description{
 Function plot data to file with image function
