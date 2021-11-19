@@ -89,7 +89,7 @@ mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
 #' @exportClass mc_SensorMetadata
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
          representation(
-           sensor = "character",
+           name = "character",
            height = "numeric",
            calibrated = "logical"
          ),

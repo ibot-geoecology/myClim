@@ -4,6 +4,8 @@
 
 #' @export
 mc_const_CLEAN_DATETIME_STEP <- "datetime_step"
+#' @export
+mc_const_CLEAN_CROP <- "crop"
 
 #' Cleaning datetime series
 #'
@@ -41,10 +43,16 @@ mc_clean_datetime_step <- function(data) {
     round(unname(quantile(diff(datetime), p=0.5, type=1)/60))
 }
 
-.add_method_to_clean_log_if_need <- function(clean_log, method) {
+.clean_add_method_to_clean_log_if_need <- function(clean_log, method) {
     if(!(method %in% names(clean_log))) {
         clean_log[[method]] <- character()
     }
+    clean_log
+}
+
+.clean_add_log <- function(clean_log, method, message) {
+    clean_log <- .clean_add_method_to_clean_log_if_need(clean_log, method)
+    clean_log[[method]][[length(clean_log[[method]]) + 1]] <- message
     clean_log
 }
 
@@ -69,7 +77,7 @@ mc_clean_datetime_step <- function(data) {
 }
 
 .clean_datetime_step_log_wrong <- function(logger) {
-    .add_method_to_clean_log_if_need(logger$clean_log,  mc_const_CLEAN_DATETIME_STEP)
+    .clean_add_method_to_clean_log_if_need(logger$clean_log, mc_const_CLEAN_DATETIME_STEP)
     diff_datetime <- tibble::as_tibble(diff(as.numeric(logger$datetime)) %/% 60)
     count_table <- dplyr::count(diff_datetime, value)
     wrong_diff <- dplyr::filter(count_table, value != logger$metadata@step)
@@ -155,3 +163,55 @@ mc_clean_solar_tz <- function(data) {
     }
 }
 
+#' Crop datetime
+#'
+#' This function crop data by datetime
+#'
+#' @param data character data in standard format
+#' @param start POSIXct datetime in UTC; is optional
+#' @param end POSIXct datetime in UTC; is optional
+#' @return cropped data in standard format
+#' @export
+#' @examples
+#' cleaned_example_tomst_data1 <- mc_clean_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
+mc_clean_crop <- function(data, start=NULL, end=NULL) {
+    if(!is.null(start) && format(start, format="%Z") != "UTC") {
+        warning(stringr::str_glue("start datetime is not in UTC"))
+    }
+    if(!is.null(end) && format(end, format="%Z") != "UTC") {
+        warning(stringr::str_glue("end datetime is not in UTC"))
+    }
+    logger_function <- function(logger) {
+        table <- microclim:::.common_logger_values_as_tibble(logger)
+        logger <- .clean_log_crop(logger, start, end)
+        if(!is.null(start)) {
+            table <- dplyr::filter(table, datetime >= start)
+        }
+        if(!is.null(end)) {
+            table <- dplyr::filter(table, datetime <= end)
+        }
+        logger$datetime <- table$datetime
+        purrr::walk(names(logger$sensors), function(.x) logger$sensors[[.x]]$values <- table[[.x]])
+        logger
+    }
+
+    locality_function <- function(locality) {
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        locality
+    }
+
+    purrr::map(data, locality_function)
+}
+
+.clean_log_crop <- function(logger, start, end) {
+    datetime_range <- range(logger$datetime)
+    if(is.null(start)) {
+        start <- datetime_range[[1]]
+    }
+    if(is.null(end)) {
+        end <- datetime_range[[2]]
+    }
+    message <- stringr::str_glue("original datetime range {datetime_range[[1]]} - {datetime_range[[2]]} cropped to {start} - {end}")
+    logger$clean_log <- .clean_add_log(logger$clean_log, mc_const_CLEAN_CROP, message)
+    logger
+}

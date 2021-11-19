@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 16, 2021
+listopadu 19, 2021
 
 # DESCRIPTION
 
@@ -27,6 +27,44 @@ Imports:
     rlang,
     runner
 Roxygen: list(markdown = TRUE)```
+
+
+# `mc_clean_crop`
+
+Crop datetime
+
+
+## Description
+
+This function crop data by datetime
+
+
+## Usage
+
+```r
+mc_clean_crop(data, start = NULL, end = NULL)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     character data in standard format
+`start`     |     POSIXct datetime in UTC; is optional
+`end`     |     POSIXct datetime in UTC; is optional
+
+
+## Value
+
+cropped data in standard format
+
+
+## Examples
+
+```r
+cleaned_example_tomst_data1 <- mc_clean_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
+```
 
 
 # `mc_clean_datetime_step`

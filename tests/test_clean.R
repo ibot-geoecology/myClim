@@ -32,3 +32,23 @@ test_that("mc_clean_solar_tz", {
     data <- mc_clean_solar_tz(data)
     expect_equal(data$A1E05$metadata@tz_offset, 57)
 })
+
+test_that("clean_add_log", {
+    logger <- list()
+    logger$clean_log <- list()
+    step <- 15
+    logger$clean_log <- microclim:::.clean_add_log(logger$clean_log, mc_const_CLEAN_DATETIME_STEP,
+                                                   as.character(stringr::str_glue("first message")))
+    logger$clean_log <- microclim:::.clean_add_log(logger$clean_log, mc_const_CLEAN_DATETIME_STEP,
+                                                   "other message")
+    expect_equal(length(logger$clean_log), 1)
+    expect_equal(length(logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]]), 2)
+})
+
+test_that("mc_clean_crop", {
+    data <- mc_feed_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_clean_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
+    expect_equal(length(data$A2E32$loggers[[1]]$datetime), 68)
+    expect_equal(length(data$A2E32$loggers[[1]]$clean_log[[mc_const_CLEAN_CROP]]), 1)
+})
+

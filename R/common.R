@@ -31,11 +31,11 @@
     if(length(sensors_filter) == 0) {
         return(sensors)
     }
-    Filter(function(x) rlang::env_has(sensors_filter, x$metadata@sensor), sensors)
+    Filter(function(x) rlang::env_has(sensors_filter, x$metadata@name), sensors)
 }
 
 .common_get_sensor_info <- function(sensor_metadata) {
-    microclim::mc_data_sensors[[sensor_metadata@sensor]]
+    microclim::mc_data_sensors[[sensor_metadata@name]]
 }
 
 .common_as_utc_posixct <- function(datetime) {
@@ -47,6 +47,6 @@
 }
 
 .common_logger_values_as_tibble <- function(logger) {
-    data <- c(list(datetime=logger$datetime), purrr::map(logger$sensors, ~ .x$values))
+    data <- c(list(datetime=logger$datetime), purrr::map(logger$sensors, function(.x) .x$values))
     tibble::as_tibble(data)
 }

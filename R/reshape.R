@@ -33,7 +33,7 @@ mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
 .reshape_add_wideformat_logger_columns <- function(df, locality, logger) {
     logger_df <- data.frame(datetime=logger$datetime)
     for(sensor in logger$sensors) {
-        column_name <- .reshape_get_sesnor_fullname(locality, logger$metadata@serial_number, sensor$metadata@sensor)
+        column_name <- .reshape_get_sesnor_fullname(locality, logger$metadata@serial_number, sensor$metadata@name)
         logger_df[column_name] <- sensor$values
     }
     merge(df, logger_df, by="datetime", all=TRUE)
@@ -86,7 +86,7 @@ mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
         result_env$values <- c(result_env$values, sensor$values)
         result_env$datetimes <- c(result_env$datetimes, logger$datetime)
         count_items <- length(result_env$values) - length(result_env$sensors)
-        result_env$sensors <- c(result_env$sensors, rep(sensor$metadata@sensor, count_items))
+        result_env$sensors <- c(result_env$sensors, rep(sensor$metadata@name, count_items))
     }
 }
 

@@ -190,7 +190,7 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
 
 .feed_get_sensor <- function(data_table, data_format, sensor_name){
     values <- data_table[[data_format@columns[[sensor_name]]]]
-    metadata <- mc_SensorMetadata(sensor = sensor_name)
+    metadata <- mc_SensorMetadata(name = sensor_name)
     item <- list(metadata = metadata,
                  values = values,
                  states = list())
