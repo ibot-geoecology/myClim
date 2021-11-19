@@ -478,7 +478,7 @@ Argument      |Description
 *  serial_number - can be NA, than try detect
 `localities_table`     |     data.frame which describe localities Columns:  
 
-*  id 
+*  locality_id 
 
 *  altitude 
 

@@ -54,7 +54,7 @@ mc_Physical <- setClass("mc_Physical",
 #' @exportClass mc_LocalityMetadata
 mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
          representation(
-            id = "character",
+            locality_id = "character",
             altitude = "numeric",
             lat_wgs84 = "numeric",
             lon_wgs84 = "numeric",
@@ -70,7 +70,7 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
          ))
 
 #' Class for logger metadata
-#' @slot type of logger (TMS1)
+#' @slot type of logger (TMS, ThermoDatalogger)
 #' @slot serial_number
 #' @slot step of series in minutes
 #' @export mc_LoggerMetadata
@@ -89,7 +89,7 @@ mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
 #' @exportClass mc_SensorMetadata
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
          representation(
-           name = "character",
+           sensor_id = "character",
            height = "numeric",
            calibrated = "logical"
          ),

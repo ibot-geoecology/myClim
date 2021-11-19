@@ -11,7 +11,7 @@ Class for logger metadata
 \section{Slots}{
 
 \describe{
-\item{\code{type}}{of logger (TMS1)}
+\item{\code{type}}{of logger (TMS, ThermoDatalogger)}
 
 \item{\code{step}}{of series in minutes}
 }}

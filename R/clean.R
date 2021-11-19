@@ -126,7 +126,7 @@ mc_clean_logs <- function(data) {
 
     locality_function <- function(locality) {
         items <- purrr::map(locality$loggers, logger_function)
-        purrr::map(purrr::flatten(items), function(x) purrr::prepend(x, locality$metadata@id))
+        purrr::map(purrr::flatten(items), function(x) purrr::prepend(x, locality$metadata@locality_id))
     }
 
     rows <- purrr::flatten(purrr::map(data, locality_function))
@@ -147,7 +147,7 @@ mc_clean_logs <- function(data) {
 mc_clean_solar_tz <- function(data) {
     locality_function <- function(locality) {
         if(is.na(locality$metadata@lon_wgs84)) {
-            warning(stringr::str_glue("missing longitude in locality {locality$metadata@id} - skip"))
+            warning(stringr::str_glue("missing longitude in locality {locality$metadata@locality_id} - skip"))
             return(locality)
         }
         locality$metadata@tz_offset <- round(locality$metadata@lon_wgs84 / 180 * 12 * 60)
@@ -159,7 +159,7 @@ mc_clean_solar_tz <- function(data) {
 
 .clean_warn_if_unset_tz_offset <- function(locality) {
     if(is.na(locality$metadata@tz_offset)){
-        warning(stringr::str_glue("TZ offset in locality {locality$metadata@id} is not set - UTC used"))
+        warning(stringr::str_glue("TZ offset in locality {locality$metadata@locality_id} is not set - UTC used"))
     }
 }
 

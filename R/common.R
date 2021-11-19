@@ -13,7 +13,7 @@
     }
     localities_filter <- list2env(sapply(localities, function(x) NULL))
     sensors_filter <- list2env(sapply(sensors, function(x) NULL))
-    result <- Filter(function(x)rlang::env_has(localities_filter, x$metadata@id), data)
+    result <- Filter(function(x)rlang::env_has(localities_filter, x$metadata@locality_id), data)
     for(locality_name in names(result)) {
         result[[locality_name]]$loggers <- .common_get_filtered_loggers(result[[locality_name]]$loggers, sensors_filter)
     }
@@ -31,11 +31,11 @@
     if(length(sensors_filter) == 0) {
         return(sensors)
     }
-    Filter(function(x) rlang::env_has(sensors_filter, x$metadata@name), sensors)
+    Filter(function(x) rlang::env_has(sensors_filter, x$metadata@sensor_id), sensors)
 }
 
 .common_get_sensor_info <- function(sensor_metadata) {
-    microclim::mc_data_sensors[[sensor_metadata@name]]
+    microclim::mc_data_sensors[[sensor_metadata@sensor_id]]
 }
 
 .common_as_utc_posixct <- function(datetime) {

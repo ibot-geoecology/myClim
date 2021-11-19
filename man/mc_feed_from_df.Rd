@@ -19,7 +19,7 @@ Columns:
 \item{localities_table}{data.frame which describe localities
 Columns:
 \itemize{
-\item id
+\item locality_id
 \item altitude
 \item lon_wgs84
 \item lat_wgs84

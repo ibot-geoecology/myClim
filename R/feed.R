@@ -94,7 +94,7 @@ mc_feed_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
 #' * serial_number - can be NA, than try detect
 #' @param localities_table data.frame which describe localities
 #' Columns:
-#' * id
+#' * locality_id
 #' * altitude
 #' * lon_wgs84
 #' * lat_wgs84
@@ -122,7 +122,7 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
 
 .feed_init_localities_from_table <- function(localities_table) {
     result <- purrr::pmap(localities_table, .feed_get_new_locality)
-    names(result) <- localities_table$id
+    names(result) <- localities_table$locality_id
     result
 }
 
@@ -142,12 +142,12 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
     current_locality
 }
 
-.feed_get_new_locality <- function(id=NULL, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
-    if (is.null(id))
+.feed_get_new_locality <- function(locality_id=NULL, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
+    if (is.null(locality_id))
     {
-        id <- microclim::mc_const_NONE_LOCALITY_ID
+        locality_id <- microclim::mc_const_NONE_LOCALITY_ID
     }
-    metadata <- mc_LocalityMetadata(id=id,
+    metadata <- mc_LocalityMetadata(locality_id=locality_id,
                                     altitude=altitude,
                                     lon_wgs84=lon_wgs84,
                                     lat_wgs84=lat_wgs84,
@@ -190,7 +190,7 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
 
 .feed_get_sensor <- function(data_table, data_format, sensor_name){
     values <- data_table[[data_format@columns[[sensor_name]]]]
-    metadata <- mc_SensorMetadata(name = sensor_name)
+    metadata <- mc_SensorMetadata(sensor_id = sensor_name)
     item <- list(metadata = metadata,
                  values = values,
                  states = list())
