@@ -23,7 +23,7 @@ test_that("mc_eco_snow_logger_without_sensor", {
 test_that("mc_eco_snow_agg", {
     data <- mc_feed_TOMST_directory("data/eco-snow")
     cleaned_data <- mc_clean_datetime_step(data)
-    cleaned_data$None$metadata@tz_offset <- 60
+    cleaned_data <- mc_clean_user_tz(cleaned_data, list(None=60))
     snow_agg <- mc_eco_snow_agg(cleaned_data, "TMS_T3", dr=1.5, tmax=0.5)
     expect_equal(colnames(snow_agg), c("serial_number", "snow_days", "first_day", "last_day", "first_day_period", "last_day_period"))
     expect_equal(nrow(snow_agg), 2)

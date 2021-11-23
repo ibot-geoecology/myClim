@@ -5,6 +5,7 @@ test_that("mc_feed_from_csv", {
     data <- mc_feed_from_csv("data/TOMST/files_table.csv")
     expect_equal(length(data), 3)
     expect_equal(length(data$A6W79$loggers[[1]]$datetime), 49)
+    expect_equal(data$A6W79$metadata@tz_type, mc_const_TZ_UTC)
     expect_equal(class(data$A6W79$loggers[[1]]$clean_log), "list")
     expect_equal(length(data$A6W79$loggers[[1]]$sensors), 4)
     expect_equal(data$A6W79$loggers[[1]]$metadata@type, "TMS")
@@ -22,10 +23,12 @@ test_that("mc_feed_from_csv", {
 test_that("mc_feed_from_csv", {
     data <- mc_feed_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     expect_equal(data$A1E05$metadata@altitude, 255)
+    expect_equal(data$A6W79$metadata@tz_type, mc_const_TZ_USER_DEFINED)
 })
 
 test_that("mc_feed_TMS_directory", {
     expect_warning(data <- microclim::mc_feed_TOMST_directory("data/TOMST"))
+    expect_equal(data$None$metadata@tz_type, mc_const_TZ_UTC)
     expect_equal(length(data), 1)
     expect_equal(length(data$None$loggers), 4)
 })

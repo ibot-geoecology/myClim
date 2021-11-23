@@ -147,11 +147,13 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
     {
         locality_id <- microclim::mc_const_NONE_LOCALITY_ID
     }
+    tz_type <- if(is.na(tz_offset)) microclim::mc_const_TZ_UTC else microclim::mc_const_TZ_USER_DEFINED
     metadata <- mc_LocalityMetadata(locality_id=locality_id,
                                     altitude=altitude,
                                     lon_wgs84=lon_wgs84,
                                     lat_wgs84=lat_wgs84,
-                                    tz_offset=tz_offset)
+                                    tz_offset=tz_offset,
+                                    tz_type=tz_type)
     list(metadata = metadata, loggers=list())
 }
 

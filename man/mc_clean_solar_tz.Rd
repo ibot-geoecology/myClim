@@ -7,7 +7,7 @@
 mc_clean_solar_tz(data)
 }
 \arguments{
-\item{data}{character data in standard format}
+\item{data}{in standard format}
 }
 \value{
 data with changed TZ offset in standard format

@@ -7,7 +7,7 @@
 mc_clean_logs(data)
 }
 \arguments{
-\item{data}{character data in standard format}
+\item{data}{in standard format}
 }
 \value{
 dataframe with columns locality_id, serial_number, clean_type, message

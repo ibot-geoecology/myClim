@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 19, 2021
+listopadu 23, 2021
 
 # DESCRIPTION
 
@@ -125,7 +125,7 @@ mc_clean_logs(data)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     character data in standard format
+`data`     |     in standard format
 
 
 ## Value
@@ -161,7 +161,7 @@ mc_clean_solar_tz(data)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     character data in standard format
+`data`     |     in standard format
 
 
 ## Value
@@ -173,6 +173,43 @@ data with changed TZ offset in standard format
 
 ```r
 cleaned_example_tomst_data1 <- mc_clean_solar_tz(cleaned_example_tomst_data1)
+```
+
+
+# `mc_clean_user_tz`
+
+Set user defined TZ offset
+
+
+## Description
+
+This function set user defined TZ offsets in localities
+
+
+## Usage
+
+```r
+mc_clean_user_tz(data, tz_offsets)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in standard format
+`tz_offsets`     |     named list (name: locality_id, item: tz_offset in rounded minutes)
+
+
+## Value
+
+data with changed TZ offset in standard format
+
+
+## Examples
+
+```r
+example_tomst_data2 <- mc_clean_solar_tz(example_tomst_data2, list(None=60))
 ```
 
 

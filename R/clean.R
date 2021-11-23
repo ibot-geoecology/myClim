@@ -110,7 +110,7 @@ mc_clean_datetime_step <- function(data) {
 #'
 #' This function return dataframe with all clean log messages
 #'
-#' @param data character data in standard format
+#' @param data in standard format
 #' @return dataframe with columns locality_id, serial_number, clean_type, message
 #' @export
 #' @examples
@@ -135,11 +135,30 @@ mc_clean_logs <- function(data) {
                clean_type=unlist(columns[[3]]), message=unlist(columns[[4]]))
 }
 
+#' Set user defined TZ offset
+#'
+#' This function set user defined TZ offsets in localities
+#'
+#' @param data in standard format
+#' @param tz_offsets named list (name: locality_id, item: tz_offset in rounded minutes)
+#' @return data with changed TZ offset in standard format
+#' @export
+#' @examples
+#' example_tomst_data2 <- mc_clean_solar_tz(example_tomst_data2, list(None=60))
+mc_clean_user_tz <- function(data, tz_offsets) {
+    for (locality_id in names(tz_offsets))
+    {
+        data[[locality_id]]$metadata@tz_offset <- tz_offsets[[locality_id]]
+        data[[locality_id]]$metadata@tz_type <- microclim::mc_const_TZ_USER_DEFINED
+    }
+    data
+}
+
 #' Solar TZ offset
 #'
 #' This function compute TZ offset in localities by solar time
 #'
-#' @param data character data in standard format
+#' @param data in standard format
 #' @return data with changed TZ offset in standard format
 #' @export
 #' @examples
@@ -151,6 +170,7 @@ mc_clean_solar_tz <- function(data) {
             return(locality)
         }
         locality$metadata@tz_offset <- round(locality$metadata@lon_wgs84 / 180 * 12 * 60)
+        locality$metadata@tz_type <- microclim::mc_const_TZ_SOLAR
         locality
     }
 
@@ -158,7 +178,7 @@ mc_clean_solar_tz <- function(data) {
 }
 
 .clean_warn_if_unset_tz_offset <- function(locality) {
-    if(is.na(locality$metadata@tz_offset)){
+    if(locality$metadata@tz_type == mc_const_TZ_UTC){
         warning(stringr::str_glue("TZ offset in locality {locality$metadata@locality_id} is not set - UTC used"))
     }
 }
@@ -191,7 +211,9 @@ mc_clean_crop <- function(data, start=NULL, end=NULL) {
             table <- dplyr::filter(table, datetime <= end)
         }
         logger$datetime <- table$datetime
-        purrr::walk(names(logger$sensors), function(.x) logger$sensors[[.x]]$values <- table[[.x]])
+        logger$sensors <- purrr::map(logger$sensors, function(sensor) {
+            sensor$values <- table[[sensor$metadata@sensor_id]]
+            sensor})
         logger
     }
 

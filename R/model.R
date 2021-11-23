@@ -2,6 +2,12 @@
 
 #' @export
 mc_const_NONE_LOCALITY_ID <- "None"
+#' @export
+mc_const_TZ_UTC <- "UTC"
+#' @export
+mc_const_TZ_SOLAR <- "solar"
+#' @export
+mc_const_TZ_USER_DEFINED <- "user defined"
 
 # classes ================================================================================
 
@@ -49,6 +55,7 @@ mc_Physical <- setClass("mc_Physical",
 #' @slot lat_wgs84 latitude of locality in WGS-84
 #' @slot lon_wgs84 longitude of locality in WGS-84
 #' @slot tz_offset offset from UTC in minutes
+#' @slot tz_type type of time zone
 #' @slot user_data list for user data
 #' @export mc_LocalityMetadata
 #' @exportClass mc_LocalityMetadata
@@ -59,6 +66,7 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
             lat_wgs84 = "numeric",
             lon_wgs84 = "numeric",
             tz_offset = "numeric",
+            tz_type = "character",
             user_data = "list"
          ),
          prototype (
@@ -66,6 +74,7 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
             lat_wgs84 = NA_real_,
             lon_wgs84 = NA_real_,
             tz_offset = NA_integer_,
+            tz_type = mc_const_TZ_UTC,
             user_data = list()
          ))
 

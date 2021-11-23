@@ -49,6 +49,7 @@ test_that("mc_clean_crop", {
     data <- mc_feed_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_clean_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 68)
+    expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 68)
     expect_equal(length(data$A2E32$loggers[[1]]$clean_log[[mc_const_CLEAN_CROP]]), 1)
 })
 

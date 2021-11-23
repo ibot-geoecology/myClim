@@ -21,6 +21,8 @@ Class for locality metadata
 
 \item{\code{tz_offset}}{offset from UTC in minutes}
 
+\item{\code{tz_type}}{type of time zone}
+
 \item{\code{user_data}}{list for user data}
 }}
 
