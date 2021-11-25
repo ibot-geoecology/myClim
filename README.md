@@ -59,6 +59,7 @@ Zde je jednotná struktura, ve kterých si balíček drží načtená data.
             * `type`
             * `serial_number`
             * `step` - krok času v minutách
+        * `clean_log` - seznam: log změn v procesu čištění
         * `datetime` - vector data a času ve fromátu POSIXct
         * `sensors` - seznam senzorů patřících pod logger; položky jsou pojmenované; každý senzor je seznam o třech položkách`
             * `metadata` - instance třídy `mc_SensorMetadata`

@@ -126,14 +126,14 @@ mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period
 #'
 #' @param data all data in standard format
 #' @param fun aggregation function
-#' @param braks cut function parameter
+#' @param breaks cut function parameter
 #' @param localities locality_ids for filtering data; if empty then all
-#' @param snesors sensor_ids for filtering data; if empty then all
-#' @return aggregated data in standard formta
+#' @param sensors sensor_ids for filtering data; if empty then all
+#' @return aggregated data in standard format
 #' @export
 #' @examples
 #' example_cleaned_tomst_data <- mc_eco_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
-mc_eco_agg <- function(data, fun, breaks, localities=c(), sensors=c(), ...) {
+mc_eco_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, ...) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensors)
     locality_function <- function (locality) {
         locality$loggers <- purrr::map(locality$loggers, function (logger) .eco_aggregate_logger(logger, fun, breaks, ...))
@@ -154,3 +154,37 @@ mc_eco_agg <- function(data, fun, breaks, localities=c(), sensors=c(), ...) {
     logger$sensors <- purrr::map(logger$sensors, sensor_function)
     logger
 }
+
+#' Agregate data by mean function
+#'
+#' Function return aggregated data by mean
+#'
+#' @param data all data in standard format
+#' @param breaks cut function parameter
+#' @param localities locality_ids for filtering data; if empty then all
+#' @param sensors sensor_ids for filtering data; if empty then all
+#' @return aggregated data in standard format
+#' @export
+#' @examples
+#' example_cleaned_tomst_data <- mc_eco_agg_mean(example_cleaned_tomst_data, "hour", na.rm=TRUE)
+mc_eco_agg_mean <- function(data, breaks, localities=NULL, sensors=NULL, ...) {
+    mc_eco_agg(data, mean, breaks, localities, sensors, ...)
+}
+
+#' Agregate data by quantile function
+#'
+#' Function return aggregated data by quantile function
+#'
+#' @param data all data in standard format
+#' @param breaks cut function parameter
+#' @param probs value 0-1
+#' @param localities locality_ids for filtering data; if empty then all
+#' @param sensors sensor_ids for filtering data; if empty then all
+#' @return aggregated data in standard format
+#' @export
+#' @examples
+#' example_cleaned_tomst_data <- mc_eco_agg_quantile(example_cleaned_tomst_data, "hour", 0.1, na.rm=TRUE)
+mc_eco_agg_quantile <- function(data, breaks, probs, localities=NULL, sensors=NULL, ...) {
+    mc_eco_agg(data, quantile, breaks, localities, sensors, probs=probs, ...)
+}
+

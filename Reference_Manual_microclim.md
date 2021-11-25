@@ -289,6 +289,92 @@ Class for source file data format
 Class for source file data format
 
 
+# `mc_eco_agg_mean`
+
+Agregate data by mean function
+
+
+## Description
+
+Function return aggregated data by mean
+
+
+## Usage
+
+```r
+mc_eco_agg_mean(data, breaks, localities = NULL, sensors = NULL, ...)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     all data in standard format
+`breaks`     |     cut function parameter
+`localities`     |     locality_ids for filtering data; if empty then all
+`sensors`     |     sensor_ids for filtering data; if empty then all
+
+
+## Value
+
+aggregated data in standard format
+
+
+## Examples
+
+```r
+example_cleaned_tomst_data <- mc_eco_agg_mean(example_cleaned_tomst_data, "hour", na.rm=TRUE)
+```
+
+
+# `mc_eco_agg_quantile`
+
+Agregate data by quantile function
+
+
+## Description
+
+Function return aggregated data by quantile function
+
+
+## Usage
+
+```r
+mc_eco_agg_quantile(
+  data,
+  breaks,
+  probs,
+  localities = NULL,
+  sensors = NULL,
+  ...
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     all data in standard format
+`breaks`     |     cut function parameter
+`probs`     |     value 0-1
+`localities`     |     locality_ids for filtering data; if empty then all
+`sensors`     |     sensor_ids for filtering data; if empty then all
+
+
+## Value
+
+aggregated data in standard format
+
+
+## Examples
+
+```r
+example_cleaned_tomst_data <- mc_eco_agg_quantile(example_cleaned_tomst_data, "hour", 0.1, na.rm=TRUE)
+```
+
+
 # `mc_eco_agg`
 
 Agregate data by function
@@ -302,7 +388,7 @@ Function return aggregated data by function
 ## Usage
 
 ```r
-mc_eco_agg(data, fun, breaks, localities = c(), sensors = c(), ...)
+mc_eco_agg(data, fun, breaks, localities = NULL, sensors = NULL, ...)
 ```
 
 
@@ -312,14 +398,14 @@ Argument      |Description
 ------------- |----------------
 `data`     |     all data in standard format
 `fun`     |     aggregation function
+`breaks`     |     cut function parameter
 `localities`     |     locality_ids for filtering data; if empty then all
-`braks`     |     cut function parameter
-`snesors`     |     sensor_ids for filtering data; if empty then all
+`sensors`     |     sensor_ids for filtering data; if empty then all
 
 
 ## Value
 
-aggregated data in standard formta
+aggregated data in standard format
 
 
 ## Examples
