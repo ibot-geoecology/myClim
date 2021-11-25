@@ -24,5 +24,5 @@ data.frame with datetime column and logical columns named by serial_number of lo
 Function detect snow based on detrended time series
 }
 \examples{
-mc_eco_snow(example_tomst_data1, "TMS_T3")
+snow <- mc_eco_snow(example_tomst_data1, "TMS_T3")
 }

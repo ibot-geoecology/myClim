@@ -1,7 +1,7 @@
 library(microclim)
 
 # The table in the examples/data/TOMST/files_table.csv file is used to load data.
-example_tomst_data1 <- mc_feed_from_csv("examples/data/TOMST/files_table.csv")
+example_tomst_data1 <- mc_feed_from_csv("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")
 # The function looks for csv files in the examples/data/TOMST/ directory and tries to parse the TOMST data.
 # File examples/data/TOMST/files_table.csv doesn't contain TOMST data. A warning is printed and the file is skipped.
 example_tomst_data2 <- mc_feed_TOMST_directory("examples/data/TOMST/")

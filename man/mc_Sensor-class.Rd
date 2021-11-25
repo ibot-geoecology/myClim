@@ -11,7 +11,7 @@ Class for sensor definition
 \section{Slots}{
 
 \describe{
-\item{\code{id}}{of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moisture, ...)}
+\item{\code{sensor_id}}{of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moisture, ...)}
 
 \item{\code{logger}}{name of logger (TMS, ...)}
 

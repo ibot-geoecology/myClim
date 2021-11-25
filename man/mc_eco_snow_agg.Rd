@@ -26,5 +26,5 @@ data.frame with columns serial_number, snow_days, first_day, last_day, first_day
 Function return summary info about snow detection
 }
 \examples{
-mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
+snow_agg <- mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
 }

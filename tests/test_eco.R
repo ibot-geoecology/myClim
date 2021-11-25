@@ -1,6 +1,7 @@
 library(testthat)
 library(microclim)
 
+source("test.R")
 
 test_that("mc_eco_snow", {
     data <- mc_feed_TOMST_directory("data/eco-snow")
@@ -35,3 +36,13 @@ test_that("mc_eco_snow_agg", {
     expect_equal(snow_agg[2, 4], as.Date("2021-01-25"))
     expect_true(is.na(snow_agg[2, 5]))
 })
+
+test_that("mc_eco_agg", {
+    data <- mc_feed_TOMST_directory("data/clean-datetime_step")
+    data <- mc_clean_datetime_step(data)
+    data <- mc_eco_agg(data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+    test_standard_data_format(data)
+    expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[1]], 10)
+    expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[5]], 10)
+})
+

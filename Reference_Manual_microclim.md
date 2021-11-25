@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 23, 2021
+listopadu 25, 2021
 
 # DESCRIPTION
 
@@ -289,6 +289,46 @@ Class for source file data format
 Class for source file data format
 
 
+# `mc_eco_agg`
+
+Agregate data by function
+
+
+## Description
+
+Function return aggregated data by function
+
+
+## Usage
+
+```r
+mc_eco_agg(data, fun, breaks, localities = c(), sensors = c(), ...)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     all data in standard format
+`fun`     |     aggregation function
+`localities`     |     locality_ids for filtering data; if empty then all
+`braks`     |     cut function parameter
+`snesors`     |     sensor_ids for filtering data; if empty then all
+
+
+## Value
+
+aggregated data in standard formta
+
+
+## Examples
+
+```r
+example_cleaned_tomst_data <- mc_eco_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+```
+
+
 # `mc_eco_snow_agg`
 
 Snow detection summary
@@ -326,7 +366,7 @@ data.frame with columns serial_number, snow_days, first_day, last_day, first_day
 ## Examples
 
 ```r
-mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
+snow_agg <- mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
 ```
 
 
@@ -366,7 +406,7 @@ data.frame with datetime column and logical columns named by serial_number of lo
 ## Examples
 
 ```r
-mc_eco_snow(example_tomst_data1, "TMS_T3")
+snow <- mc_eco_snow(example_tomst_data1, "TMS_T3")
 ```
 
 

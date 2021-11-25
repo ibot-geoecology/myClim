@@ -10,7 +10,7 @@
 #' @return data.frame with datetime column and logical columns named by serial_number of loggers
 #' @export
 #' @examples
-#' mc_eco_snow(example_tomst_data1, "TMS_T3")
+#' snow <- mc_eco_snow(example_tomst_data1, "TMS_T3")
 mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensor)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
@@ -45,7 +45,7 @@ mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
 #' @return data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
 #' @export
 #' @examples
-#' mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
+#' snow_agg <- mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
 mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period = 3) {
     data <- microclim:::.common_get_filtered_data(data, localities, sensor)
     loggers_with_offset <- .eco_get_loggers_with_offset(data)
@@ -118,4 +118,39 @@ mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period
         return(datetimes)
     }
     datetimes + (tz_offset * 60)
+}
+
+#' Agregate data by function
+#'
+#' Function return aggregated data by function
+#'
+#' @param data all data in standard format
+#' @param fun aggregation function
+#' @param braks cut function parameter
+#' @param localities locality_ids for filtering data; if empty then all
+#' @param snesors sensor_ids for filtering data; if empty then all
+#' @return aggregated data in standard formta
+#' @export
+#' @examples
+#' example_cleaned_tomst_data <- mc_eco_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+mc_eco_agg <- function(data, fun, breaks, localities=c(), sensors=c(), ...) {
+    data <- microclim:::.common_get_filtered_data(data, localities, sensors)
+    locality_function <- function (locality) {
+        locality$loggers <- purrr::map(locality$loggers, function (logger) .eco_aggregate_logger(logger, fun, breaks, ...))
+        locality
+    }
+    purrr::map(data, locality_function)
+}
+
+.eco_aggregate_logger <- function(logger, fun, breaks, ...)
+{
+    microclim:::.clean_warn_if_datetime_step_unprocessed(logger)
+    by_aggregate <- list(step=cut(logger$datetime, breaks=breaks))
+    logger$datetime <- aggregate(logger$datetime, by_aggregate, min)$x
+    sensor_function <- function(sensor) {
+        sensor$values <- aggregate(sensor$values, by_aggregate, fun, ...)$x
+        sensor
+    }
+    logger$sensors <- purrr::map(logger$sensors, sensor_function)
+    logger
 }

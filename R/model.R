@@ -12,7 +12,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 # classes ================================================================================
 
 #' Class for sensor definition
-#' @slot id of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moisture, ...)
+#' @slot sensor_id of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moisture, ...)
 #' @slot logger name of logger (TMS, ...)
 #' @slot physical measurement (T, TMS_moisture, ...)
 #' @slot default_height default height of sensor in m
@@ -22,7 +22,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 #' @exportClass mc_Sensor
 mc_Sensor <- setClass("mc_Sensor",
          representation (
-           id = "character",
+           sensor_id = "character",
            logger = "character",
            physical = "character",
            default_height = "numeric",
