@@ -1,5 +1,13 @@
 # Instalace
 
+Ruční instalace nenainstaluje automaticky závislosti. Můžete nainstalovat pomocí:
+
+```R
+requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "rlang", "runner")
+missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
+if(length(missing_packages)) install.packages(missing_packages)
+```
+
 Pomocí následujícího kódu je možné stáhnout a nainstalovat knihovnu včetně ukázkových příkladů a dat. Na začátku je potřeba nastavit adresář,
 do kterého se rozbalí zdrojové soubory knihovny.
 
