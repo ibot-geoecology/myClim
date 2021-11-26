@@ -39,8 +39,9 @@ mc_clean_datetime_step <- function(data) {
     if(length(datetime) > .clean_const_DETECT_STEP_LENGTH) {
         datetime <- datetime[1:.clean_const_DETECT_STEP_LENGTH]
     }
-    datetime <- as.numeric(datetime)
-    round(unname(quantile(diff(datetime), p=0.5, type=1)/60))
+    datetime <- sort(as.numeric(datetime))
+    diff_datetime <- Filter(function(x) x > 0, diff(datetime))
+    round(unname(quantile(diff_datetime, p=0.5, type=1)/60))
 }
 
 .clean_add_method_to_clean_log_if_need <- function(clean_log, method) {
@@ -61,6 +62,7 @@ mc_clean_datetime_step <- function(data) {
         return(logger)
     }
     table <- microclim:::.common_logger_values_as_tibble(logger)
+    table <- dplyr::arrange(table, datetime)
     grouped_table <- dplyr::group_by(table, datetime)
     table_noduplicits <- dplyr::summarise_all(grouped_table, mean)
     datetime_range <- range(table_noduplicits$datetime)
@@ -78,7 +80,7 @@ mc_clean_datetime_step <- function(data) {
 
 .clean_datetime_step_log_wrong <- function(logger) {
     .clean_add_method_to_clean_log_if_need(logger$clean_log, mc_const_CLEAN_DATETIME_STEP)
-    diff_datetime <- tibble::as_tibble(diff(as.numeric(logger$datetime)) %/% 60)
+    diff_datetime <- tibble::as_tibble(diff(sort(as.numeric(logger$datetime))) %/% 60)
     count_table <- dplyr::count(diff_datetime, value)
     wrong_diff <- dplyr::filter(count_table, value != logger$metadata@step)
     log_message_function <- function(value, n) {

@@ -8,6 +8,7 @@ test_that("mc_clean_datetime_step", {
     test_standard_data_format(cleaned_data)
     expect_true("data contains 1x duplicits" %in% cleaned_data$None$loggers[[1]]$clean_log[[mc_const_CLEAN_DATETIME_STEP]])
     expect_true("data contains 1x 45 min gap" %in% cleaned_data$None$loggers[[1]]$clean_log[[mc_const_CLEAN_DATETIME_STEP]])
+    expect_true("data contains 25x duplicits" %in% cleaned_data$None$loggers[[2]]$clean_log[[mc_const_CLEAN_DATETIME_STEP]])
     test_function <- if(exists(".clean_is_logger_datetime_step_proceessed")) .clean_is_logger_datetime_step_proceessed else microclim:::.clean_is_logger_datetime_step_proceessed
     expect_true(test_function(cleaned_data$None$loggers[[1]]))
     expect_true(microclim:::.clean_was_error_in_logger_datetime_step(cleaned_data$None$loggers[[1]]))
