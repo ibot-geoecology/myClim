@@ -7,7 +7,7 @@
 mc_clean_crop(data, start = NULL, end = NULL)
 }
 \arguments{
-\item{data}{character data in standard format}
+\item{data}{in standard format}
 
 \item{start}{POSIXct datetime in UTC; is optional}
 

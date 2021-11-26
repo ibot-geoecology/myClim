@@ -21,6 +21,7 @@ test_logger <- function(logger) {
     expect_equal(class(logger$clean_log), "list")
     expect_equal(class(logger$datetime), c("POSIXct", "POSIXt"))
     expect_equal(class(logger$sensors), "list")
+    expect_true(length(logger$sensors) > 0)
     test_data_length(logger)
     walk(logger$sensors, test_sensor)
 }

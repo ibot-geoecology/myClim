@@ -13,7 +13,7 @@
 #' @examples
 #' mc_plot_loggers(example_tomst_data1, "Figures")
 mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c(NA, NA)) {
-    data <- microclim:::.common_get_filtered_data(data, localities, sensors)
+    data <- mc_filter(data, localities, sensors)
     loggers <- microclim:::.common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {

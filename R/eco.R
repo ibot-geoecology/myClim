@@ -12,7 +12,7 @@
 #' @examples
 #' snow <- mc_eco_snow(example_tomst_data1, "TMS_T3")
 mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
-    data <- microclim:::.common_get_filtered_data(data, localities, sensor)
+    data <- mc_filter(data, localities, sensor)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
     snow_tables <- purrr::map(loggers, function(x) .get_eco_snow_from_logger(x, dr, tmax))
     result <- purrr::reduce(snow_tables, function(x, y) dplyr::full_join(x, y, by="datetime"))
@@ -47,7 +47,7 @@ mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
 #' @examples
 #' snow_agg <- mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
 mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period = 3) {
-    data <- microclim:::.common_get_filtered_data(data, localities, sensor)
+    data <- mc_filter(data, localities, sensor)
     loggers_with_offset <- .eco_get_loggers_with_offset(data)
     result_env <- new.env()
     result_env$serial_number <- character()
@@ -134,7 +134,7 @@ mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period
 #' @examples
 #' example_cleaned_tomst_data <- mc_eco_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
 mc_eco_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, ...) {
-    data <- microclim:::.common_get_filtered_data(data, localities, sensors)
+    data <- mc_filter(data, localities, sensors)
     locality_function <- function (locality) {
         locality$loggers <- purrr::map(locality$loggers, function (logger) .eco_aggregate_logger(logger, fun, breaks, ...))
         locality

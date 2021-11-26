@@ -10,7 +10,7 @@
 #' @examples
 #' example_tms_wideformat <- mc_reshape_wideformat(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
-    data <- microclim:::.common_get_filtered_data(data, localities, sensors)
+    data <- mc_filter(data, localities, sensors)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
     result <- data.frame(datetime=.reshape_get_datetimes_of_loggers(loggers))
     for(locality in data) {
@@ -55,7 +55,7 @@ mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
 #' @examples
 #' example_tms_t1_table <- microclim::mc_reshape_longformat(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
-    data <- microclim:::.common_get_filtered_data(data, localities, sensors)
+    data <- mc_filter(data, localities, sensors)
     result_env <- new.env()
     result_env$localities <- character()
     result_env$serial_numbers <- character()

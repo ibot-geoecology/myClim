@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 25, 2021
+listopadu 26, 2021
 
 # DESCRIPTION
 
@@ -50,7 +50,7 @@ mc_clean_crop(data, start = NULL, end = NULL)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     character data in standard format
+`data`     |     in standard format
 `start`     |     POSIXct datetime in UTC; is optional
 `end`     |     POSIXct datetime in UTC; is optional
 
@@ -727,6 +727,80 @@ data in standard format
 
 ```r
 example_tomst_data <- microclim::mc_feed_TOMST_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"))
+```
+
+
+# `mc_filter`
+
+Filter data
+
+
+## Description
+
+This function filter data by localities and sensors
+
+
+## Usage
+
+```r
+mc_filter(data, localities = c(), sensors = c())
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in standard format
+`localities`     |     locality_ids for filtering data; if empty then all
+`sensors`     |     sensor_ids for filtering data; if empty then all
+
+
+## Value
+
+filtered data in standard format
+
+
+## Examples
+
+```r
+example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
+```
+
+
+# `mc_info_count`
+
+count data
+
+
+## Description
+
+This function return count of localities, loggers and sensors
+
+
+## Usage
+
+```r
+mc_info_count(data)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in standard format
+
+
+## Value
+
+data.frame with count localities, loggers and sensors
+
+
+## Examples
+
+```r
+count_table <- mc_info_count(example_tomst_data1)
 ```
 
 

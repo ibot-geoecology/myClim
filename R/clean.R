@@ -187,7 +187,7 @@ mc_clean_solar_tz <- function(data) {
 #'
 #' This function crop data by datetime
 #'
-#' @param data character data in standard format
+#' @param data in standard format
 #' @param start POSIXct datetime in UTC; is optional
 #' @param end POSIXct datetime in UTC; is optional
 #' @return cropped data in standard format
