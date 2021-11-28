@@ -1,5 +1,6 @@
 library(purrr)
 library(testthat)
+library(microclim)
 
 test_standard_data_format <- function(data) {
     expect_equal(class(data), "list")
@@ -37,4 +38,11 @@ test_sensor <- function(sensor) {
     expect_equal(class(sensor$metadata)[[1]], "mc_SensorMetadata")
     expect_equal(class(sensor$states), "list")
     expect_true(class(sensor$values) %in% c("integer", "numeric"))
+}
+
+get_empty_data <- function() {
+    data <- mc_feed_TOMST_files("data/TOMST/data_94184102_0.csv")
+    data <- mc_clean_datetime_step(data)
+    data <- mc_clean_crop(data, end=as.POSIXct("2020-01-01", tz="UTC"))
+    data
 }

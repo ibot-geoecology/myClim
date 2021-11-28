@@ -47,6 +47,12 @@ test_that("mc_eco_agg", {
     expect_equal(data$None$loggers[[1]]$metadata@step, 60)
 })
 
+test_that("mc_eco_agg_empty_data", {
+    data <- get_empty_data()
+    data <- mc_eco_agg(data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+    expect_equal(length(data$None$loggers[[1]]$datetime), 0)
+})
+
 test_that("mc_eco_agg_mean", {
     data <- mc_feed_TOMST_directory("data/clean-datetime_step")
     data <- mc_clean_datetime_step(data)

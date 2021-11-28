@@ -144,6 +144,9 @@ mc_eco_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, ...) {
 
 .eco_aggregate_logger <- function(logger, fun, breaks, ...)
 {
+    if(length(logger$datetime) == 0) {
+        return(logger)
+    }
     microclim:::.clean_warn_if_datetime_step_unprocessed(logger)
     by_aggregate <- list(step=cut(logger$datetime, breaks=breaks))
     logger$datetime <- aggregate(logger$datetime, by_aggregate, min)$x
