@@ -3,7 +3,7 @@
 Ruční instalace nenainstaluje automaticky závislosti. Můžete nainstalovat pomocí:
 
 ```R
-requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "rlang", "runner")
+requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "runner")
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
 ```

@@ -17,6 +17,5 @@ Imports:
     lubridate,
     tibble,
     dplyr,
-    rlang,
     runner
 Roxygen: list(markdown = TRUE)

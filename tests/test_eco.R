@@ -44,6 +44,7 @@ test_that("mc_eco_agg", {
     test_standard_data_format(data)
     expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[1]], 10)
     expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[5]], 10)
+    expect_equal(data$None$loggers[[1]]$metadata@step, 60)
 })
 
 test_that("mc_eco_agg_mean", {

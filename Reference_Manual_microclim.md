@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 26, 2021
+listopadu 28, 2021
 
 # DESCRIPTION
 
@@ -24,7 +24,6 @@ Imports:
     lubridate,
     tibble,
     dplyr,
-    rlang,
     runner
 Roxygen: list(markdown = TRUE)```
 
@@ -743,7 +742,7 @@ This function filter data by localities and sensors
 ## Usage
 
 ```r
-mc_filter(data, localities = c(), sensors = c())
+mc_filter(data, localities = NULL, sensors = NULL)
 ```
 
 

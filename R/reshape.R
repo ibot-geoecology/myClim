@@ -79,14 +79,13 @@ mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
 }
 
 .reshape_add_logger_rows_to_longformat_table <- function(result_env, logger){
-    for(sensor in logger$sensors) {
-        if(length(sensor$values) == 0){
-            continue
-        }
+    sensors <- purrr::keep(logger$sensors, function(x) length(x$values) > 0)
+    sensor_function <- function(sensor) {
         result_env$values <- c(result_env$values, sensor$values)
         result_env$datetimes <- c(result_env$datetimes, logger$datetime)
         count_items <- length(result_env$values) - length(result_env$sensors)
         result_env$sensors <- c(result_env$sensors, rep(sensor$metadata@sensor_id, count_items))
     }
+    purrr::walk(sensors, sensor_function)
 }
 

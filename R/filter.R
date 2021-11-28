@@ -9,30 +9,27 @@
 #' @export
 #' @examples
 #' example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
-mc_filter <- function(data, localities=c(), sensors=c()) {
-    if(length(localities) == 0) {
-        localities <- names(data)
+mc_filter <- function(data, localities=NULL, sensors=NULL) {
+    if(!is.null(localities)) {
+        data <- purrr::keep(data, function(.x) .x$metadata@locality_id %in% localities)
     }
-    localities_filter <- list2env(sapply(localities, function(x) NULL))
-    sensors_filter <- list2env(sapply(sensors, function(x) NULL))
-    result <- Filter(function(x)rlang::env_has(localities_filter, x$metadata@locality_id), data)
-    for(locality_name in names(result)) {
-        result[[locality_name]]$loggers <- .filter_get_filtered_loggers(result[[locality_name]]$loggers, sensors_filter)
+    if(!is.null(sensors)) {
+        data <- .filter_sensors(data, sensors)
     }
-    Filter(function(x) length(x$loggers) > 0, result)
+    data
 }
 
-.filter_get_filtered_loggers <- function(loggers, sensors_filter) {
-    result <- lapply(loggers, function(x) {
-        x$sensors <- .filter_get_filtered_sensors(x$sensors, sensors_filter)
-        x})
-    Filter(function(x) length(x$sensors) > 0, result)
-}
-
-.filter_get_filtered_sensors <- function(sensors, sensors_filter) {
-    if(length(sensors_filter) == 0) {
-        return(sensors)
+.filter_sensors <- function(data, sensors) {
+    logger_function <- function (logger) {
+        logger$sensors <- purrr::keep(logger$sensors, function(.x) .x$metadata@sensor_id %in% sensors)
+        logger
     }
-    Filter(function(x) rlang::env_has(sensors_filter, x$metadata@sensor_id), sensors)
-}
 
+    locality_function <- function (locality) {
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        locality$loggers <- purrr::keep(locality$loggers, function(.x) length(.x$sensors) > 0)
+        locality
+    }
+    data <- purrr::map(data, locality_function)
+    purrr::keep(data, function(.x) length(.x$loggers) > 0)
+}

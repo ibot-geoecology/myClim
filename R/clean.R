@@ -79,18 +79,26 @@ mc_clean_datetime_step <- function(data) {
 }
 
 .clean_datetime_step_log_wrong <- function(logger) {
-    .clean_add_method_to_clean_log_if_need(logger$clean_log, mc_const_CLEAN_DATETIME_STEP)
+    diff_datetime <- diff(as.numeric(logger$datetime))
+    count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
+    messages <- character()
+    if(count_disordered > 0) {
+        messages <- stringr::str_glue("{count_disordered}x disordered")
+    }
     diff_datetime <- tibble::as_tibble(diff(sort(as.numeric(logger$datetime))) %/% 60)
     count_table <- dplyr::count(diff_datetime, value)
     wrong_diff <- dplyr::filter(count_table, value != logger$metadata@step)
     log_message_function <- function(value, n) {
         if(value == 0) {
-            return(stringr::str_glue("data contains {n}x duplicits"))
+            return(stringr::str_glue("{n}x duplicits"))
         }
-        stringr::str_glue("data contains {n}x {value} min gap")
+        stringr::str_glue("{n}x {value} min gap")
     }
-    new_items <- purrr::map2_chr(wrong_diff$value, wrong_diff$n, log_message_function)
-    logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]] <- c(logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]], new_items)
+    messages <- c(messages, purrr::map2_chr(wrong_diff$value, wrong_diff$n, log_message_function))
+    if(length(messages) > 0)
+    {
+        logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]] <- messages
+    }
     logger
 }
 
@@ -99,7 +107,7 @@ mc_clean_datetime_step <- function(data) {
 }
 
 .clean_was_error_in_logger_datetime_step <- function(logger) {
-    length(logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]]) > 1
+    mc_const_CLEAN_DATETIME_STEP %in% names(logger$clean_log)
 }
 
 .clean_warn_if_datetime_step_unprocessed <- function(logger) {

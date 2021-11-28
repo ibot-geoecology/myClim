@@ -1,4 +1,4 @@
-path_prefix <- "../"
+path_prefix <- "./"
 
 files_sources <- list.files(stringr::str_glue("{path_prefix}R"), full.names = T)
 purrr::walk(files_sources, source)

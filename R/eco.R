@@ -152,6 +152,12 @@ mc_eco_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, ...) {
         sensor
     }
     logger$sensors <- purrr::map(logger$sensors, sensor_function)
+    if(length(logger$datetime) > 1) {
+        logger$metadata@step <- diff(as.numeric(logger$datetime[1:2])) %/% 60
+    } else {
+        logger$metadata@step <- NA_integer_
+    }
+
     logger
 }
 

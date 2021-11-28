@@ -4,7 +4,7 @@
 \alias{mc_filter}
 \title{Filter data}
 \usage{
-mc_filter(data, localities = c(), sensors = c())
+mc_filter(data, localities = NULL, sensors = NULL)
 }
 \arguments{
 \item{data}{in standard format}
