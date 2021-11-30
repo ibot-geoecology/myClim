@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 28, 2021
+listopadu 30, 2021
 
 # DESCRIPTION
 
@@ -852,7 +852,8 @@ mc_plot_image(
   title,
   localities = NULL,
   sensors = NULL,
-  height = 1900
+  height = 1900,
+  left_margin = 12
 )
 ```
 
@@ -866,7 +867,8 @@ Argument      |Description
 `title`     |     of plot
 `localities`     |     names of localities; if empty then all
 `sensors`     |     names of sensors; if empty then all
-`height`     |     of image default = 1900
+`height`     |     of image; default = 1900
+`left_margin`     |     width of space for sensor_labels; default = 12
 
 
 ## Examples

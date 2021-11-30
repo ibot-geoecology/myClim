@@ -10,7 +10,8 @@ mc_plot_image(
   title,
   localities = NULL,
   sensors = NULL,
-  height = 1900
+  height = 1900,
+  left_margin = 12
 )
 }
 \arguments{
@@ -24,7 +25,9 @@ mc_plot_image(
 
 \item{sensors}{names of sensors; if empty then all}
 
-\item{height}{of image default = 1900}
+\item{height}{of image; default = 1900}
+
+\item{left_margin}{width of space for sensor_labels; default = 12}
 }
 \description{
 Function plot data to file with image function

@@ -140,23 +140,29 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 #' @param title of plot
 #' @param localities names of localities; if empty then all
 #' @param sensors names of sensors; if empty then all
-#' @param height of image default = 1900
+#' @param height of image; default = 1900
+#' @param left_margin width of space for sensor_labels; default = 12
 #' @export
 #' @examples
 #' mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
-mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, height=1900) {
+mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, height=1900, left_margin=12) {
     data_table <- microclim::mc_reshape_wideformat(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
     png(filename=filename,width=1900, height=height, res=200)
     x_labels <- substr(data_table$datetime[seq(1, nrow(data_table), len=20)], 1, 10)
     bottom_margin <- 7
-    left_margin <- 12
     top_margin <- 3
     right_margin <- 8
     par(mar=c(bottom_margin, left_margin, top_margin, right_margin))
     image(values_matrix, xaxt ="n", yaxt="n", col = hcl.colors(12, "viridis", rev = FALSE))
     axis(side = 1, at=seq(0, 1, len=20), labels=x_labels, las=3)
-    axis(side = 2, at=seq(0, 1, len=ncol(values_matrix)), labels=colnames(data_table)[-1], las=2)
+    cex.axis_function <- function() {
+        ref_value = 50
+        current_value = height / (ncol(data_table) - 1)
+        if(current_value >= ref_value) return(1)
+        current_value / ref_value
+    }
+    axis(side = 2, at=seq(0, 1, len=ncol(values_matrix)), labels=colnames(data_table)[-1], las=2, cex.axis=cex.axis_function())
     legend_values <- round(seq(max(values_matrix, na.rm=T), min(values_matrix, na.rm=T), len=12), 2)
     legend(grconvertX(1630, "device"), grconvertY(120, "device"),
            legend_values, fill = hcl.colors(12, "viridis", rev = TRUE), xpd = NA)
