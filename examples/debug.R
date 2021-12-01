@@ -9,5 +9,7 @@ loading_function <- function (path_prefix) {
 
 # debug package
 loading_function("./")
+
 # debug tests
+setwd("tests")
 loading_function("../")

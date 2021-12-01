@@ -1,6 +1,6 @@
 <!-- toc -->
 
-listopadu 30, 2021
+prosince 01, 2021
 
 # DESCRIPTION
 
@@ -301,7 +301,14 @@ Function return aggregated data by mean
 ## Usage
 
 ```r
-mc_eco_agg_mean(data, breaks, localities = NULL, sensors = NULL, ...)
+mc_eco_agg_mean(
+  data,
+  breaks,
+  localities = NULL,
+  sensors = NULL,
+  use_utc = F,
+  ...
+)
 ```
 
 
@@ -313,6 +320,8 @@ Argument      |Description
 `breaks`     |     cut function parameter
 `localities`     |     locality_ids for filtering data; if empty then all
 `sensors`     |     sensor_ids for filtering data; if empty then all
+`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
+`...`     |     parameters for mean function
 
 
 ## Value
@@ -346,6 +355,7 @@ mc_eco_agg_quantile(
   probs,
   localities = NULL,
   sensors = NULL,
+  use_utc = F,
   ...
 )
 ```
@@ -360,6 +370,8 @@ Argument      |Description
 `probs`     |     value 0-1
 `localities`     |     locality_ids for filtering data; if empty then all
 `sensors`     |     sensor_ids for filtering data; if empty then all
+`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
+`...`     |     parameters for quantile function
 
 
 ## Value
@@ -387,7 +399,15 @@ Function return aggregated data by function
 ## Usage
 
 ```r
-mc_eco_agg(data, fun, breaks, localities = NULL, sensors = NULL, ...)
+mc_eco_agg(
+  data,
+  fun,
+  breaks,
+  localities = NULL,
+  sensors = NULL,
+  use_utc = F,
+  ...
+)
 ```
 
 
@@ -400,6 +420,8 @@ Argument      |Description
 `breaks`     |     cut function parameter
 `localities`     |     locality_ids for filtering data; if empty then all
 `sensors`     |     sensor_ids for filtering data; if empty then all
+`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
+`...`     |     parameters for aggregation function
 
 
 ## Value

@@ -14,6 +14,7 @@
 #' mc_plot_loggers(example_tomst_data1, "Figures")
 mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c(NA, NA)) {
     data <- mc_filter(data, localities, sensors)
+    microclim:::.clean_warn_if_datetime_step_unprocessed(data)
     loggers <- microclim:::.common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {
@@ -23,7 +24,6 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 }
 
 .plot_logger <- function(logger, filename, crop=c(NA, NA)) {
-    microclim:::.clean_warn_if_datetime_step_unprocessed(logger)
     png(filename=filename, width=1920, height=1000, res=200)
     physical <- .plot_get_logger_sensors_by_physical(logger)
     moisture_physical <- intersect(.plot_const_MOISTURE_PHYSICAL, names(physical))

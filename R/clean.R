@@ -102,7 +102,7 @@ mc_clean_datetime_step <- function(data) {
     logger
 }
 
-.clean_is_logger_datetime_step_proceessed <- function(logger) {
+.clean_is_logger_datetime_step_processed <- function(logger) {
     !is.na(logger$metadata@step)
 }
 
@@ -110,9 +110,20 @@ mc_clean_datetime_step <- function(data) {
     mc_const_CLEAN_DATETIME_STEP %in% names(logger$clean_log)
 }
 
-.clean_warn_if_datetime_step_unprocessed <- function(logger) {
-    if(!.clean_is_logger_datetime_step_proceessed(logger)){
-        warning(stringr::str_glue("Detected step miss in logger {logger$metadata@type} {logger$metadata@serial_number}. Probably logger wasn't cleaned"))
+.clean_get_loggers_datetime_step_unprocessed <- function(data) {
+    locality_function <- function(locality) {
+        unprocessed <- purrr::discard(locality$loggers, .clean_is_logger_datetime_step_processed)
+        purrr::map_chr(unprocessed, function(x) x$metadata@serial_number)
+    }
+    loggers <- purrr::map(data, locality_function)
+    purrr::reduce(loggers, c)
+}
+
+.clean_warn_if_datetime_step_unprocessed <- function(data) {
+    unprocessed_loggers <- .clean_get_loggers_datetime_step_unprocessed(data)
+    if(length(unprocessed_loggers) > 0){
+        loggers_text <- paste(unprocessed_loggers, sep=", ", collapse="")
+        warning(stringr::str_glue("Detected missed step in loggers {loggers_text}. Probably loggers weren't cleaned."))
     }
 }
 
@@ -187,9 +198,16 @@ mc_clean_solar_tz <- function(data) {
     purrr::map(data, locality_function)
 }
 
-.clean_warn_if_unset_tz_offset <- function(locality) {
-    if(locality$metadata@tz_type == mc_const_TZ_UTC){
-        warning(stringr::str_glue("TZ offset in locality {locality$metadata@locality_id} is not set - UTC used"))
+.clean_get_utc_localities <- function(data) {
+    items <- purrr::keep(data, function(x) x$metadata@tz_type == mc_const_TZ_UTC)
+    unname(purrr::map_chr(items, function(x) x$metadata@locality_id))
+}
+
+.clean_warn_if_unset_tz_offset <- function(data) {
+    utc_localities <- .clean_get_utc_localities(data)
+    if(length(utc_localities) > 0){
+        localities_text <- paste(utc_localities, sep=", ", collapse="")
+        warning(stringr::str_glue("TZ offset in localities {localities_text} is not set - UTC used."))
     }
 }
 

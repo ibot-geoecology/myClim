@@ -4,7 +4,14 @@
 \alias{mc_eco_agg_mean}
 \title{Agregate data by mean function}
 \usage{
-mc_eco_agg_mean(data, breaks, localities = NULL, sensors = NULL, ...)
+mc_eco_agg_mean(
+  data,
+  breaks,
+  localities = NULL,
+  sensors = NULL,
+  use_utc = F,
+  ...
+)
 }
 \arguments{
 \item{data}{all data in standard format}
@@ -14,6 +21,10 @@ mc_eco_agg_mean(data, breaks, localities = NULL, sensors = NULL, ...)
 \item{localities}{locality_ids for filtering data; if empty then all}
 
 \item{sensors}{sensor_ids for filtering data; if empty then all}
+
+\item{use_utc}{if set FALSE then datetime changed by locality tz_offset; default FALSE}
+
+\item{...}{parameters for mean function}
 }
 \value{
 aggregated data in standard format

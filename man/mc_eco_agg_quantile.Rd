@@ -10,6 +10,7 @@ mc_eco_agg_quantile(
   probs,
   localities = NULL,
   sensors = NULL,
+  use_utc = F,
   ...
 )
 }
@@ -23,6 +24,10 @@ mc_eco_agg_quantile(
 \item{localities}{locality_ids for filtering data; if empty then all}
 
 \item{sensors}{sensor_ids for filtering data; if empty then all}
+
+\item{use_utc}{if set FALSE then datetime changed by locality tz_offset; default FALSE}
+
+\item{...}{parameters for quantile function}
 }
 \value{
 aggregated data in standard format

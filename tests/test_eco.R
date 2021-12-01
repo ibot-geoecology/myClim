@@ -37,26 +37,35 @@ test_that("mc_eco_snow_agg", {
     expect_true(is.na(snow_agg[2, 5]))
 })
 
-test_that("mc_eco_agg", {
+test_that("mc_eco_agg UTC", {
     data <- mc_feed_TOMST_directory("data/clean-datetime_step")
     data <- mc_clean_datetime_step(data)
-    data <- mc_eco_agg(data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+    data <- mc_eco_agg(data, quantile, "hour", use_utc = TRUE, probs = 0.5, na.rm=TRUE)
     test_standard_data_format(data)
     expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[1]], 10)
     expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[5]], 10)
     expect_equal(data$None$loggers[[1]]$metadata@step, 60)
 })
 
+test_that("mc_eco_agg solar time day", {
+    data <- mc_feed_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_clean_datetime_step(data)
+    data <- mc_clean_solar_tz(data)
+    data <- mc_eco_agg(data, quantile, "day", probs = 0.5, na.rm=TRUE)
+    test_standard_data_format(data)
+    expect_equal(length(data$A2E32$loggers[[1]]$datetime), 2)
+})
+
 test_that("mc_eco_agg_empty_data", {
     data <- get_empty_data()
-    data <- mc_eco_agg(data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+    data <- mc_eco_agg(data, quantile, "hour", use_utc=TRUE, probs=0.5, na.rm=TRUE)
     expect_equal(length(data$None$loggers[[1]]$datetime), 0)
 })
 
 test_that("mc_eco_agg_mean", {
     data <- mc_feed_TOMST_directory("data/clean-datetime_step")
     data <- mc_clean_datetime_step(data)
-    data <- mc_eco_agg_mean(data, "hour", na.rm=TRUE)
+    data <- mc_eco_agg_mean(data, "hour", use_utc=T, na.rm=TRUE)
     test_standard_data_format(data)
     expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[3]], (3 * 10 + 9.9375) / 4)
 })
@@ -64,7 +73,7 @@ test_that("mc_eco_agg_mean", {
 test_that("mc_eco_agg_quantile", {
     data <- mc_feed_TOMST_directory("data/clean-datetime_step")
     data <- mc_clean_datetime_step(data)
-    data <- mc_eco_agg_quantile(data, "hour", 0.1, na.rm=TRUE)
+    data <- mc_eco_agg_quantile(data, "hour", use_utc=T, 0.1, na.rm=TRUE)
     test_standard_data_format(data)
     expect_equal(data$None$loggers[[1]]$sensors$TMS_T1$values[[1]], 10)
 })
