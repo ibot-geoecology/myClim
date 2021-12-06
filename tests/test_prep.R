@@ -19,6 +19,7 @@ test_that("mc_prep_datetime_step", {
     expect_true(microclim:::.prep_was_error_in_logger_datetime_step(cleaned_data[["94184102"]]$loggers[[1]]))
     expect_equal(length(cleaned_data[["94184102"]]$loggers[[1]]$datetime), 49)
     expect_true(is.na(cleaned_data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[19]]))
+    expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$metadata@step, 15)
 })
 
 test_that("mc_prep_datetime_step_ok", {

@@ -36,9 +36,7 @@ mc_prep_datetime_step <- function(data) {
 }
 
 .prep_detect_step_minutes <- function(datetime) {
-    if(length(datetime) > .prep_const_DETECT_STEP_LENGTH) {
-        datetime <- datetime[1:.prep_const_DETECT_STEP_LENGTH]
-    }
+    datetime <- tail(datetime, .prep_const_DETECT_STEP_LENGTH)
     datetime <- sort(as.numeric(datetime))
     diff_datetime <- Filter(function(x) x > 0, diff(datetime))
     round(unname(quantile(diff_datetime, p=0.5, type=1)/60))
