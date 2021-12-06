@@ -3,7 +3,7 @@ library(microclim)
 source("test.R")
 
 test_that("mc_filter", {
-    data <- mc_feed_from_csv("data/TOMST/files_table.csv")
+    data <- mc_read_from_csv("data/TOMST/files_table.csv")
     filtered <- mc_filter(data, c("A6W79", "A2E32", "A1E05"), "TMS_T2")
     test_standard_data_format(filtered)
     expect_equal(length(filtered), 2)

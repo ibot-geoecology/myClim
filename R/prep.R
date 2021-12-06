@@ -1,6 +1,6 @@
 # constants ================================================================================
 
-.clean_const_DETECT_STEP_LENGTH <- 100
+.prep_const_DETECT_STEP_LENGTH <- 100
 
 #' @export
 mc_const_CLEAN_DATETIME_STEP <- "datetime_step"
@@ -16,10 +16,10 @@ mc_const_CLEAN_CROP <- "crop"
 #' @return cleaned data in standard format
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_clean_datetime_step(example_tomst_data1)
-mc_clean_datetime_step <- function(data) {
+#' cleaned_example_tomst_data1 <- mc_prep_datetime_step(example_tomst_data1)
+mc_prep_datetime_step <- function(data) {
     logger_function <- function(logger) {
-        .clean_datetime_step_logger(logger)
+        .prep_datetime_step_logger(logger)
     }
     locality_function <- function(locality) {
         locality$loggers <- purrr::map(locality$loggers, logger_function)
@@ -28,37 +28,37 @@ mc_clean_datetime_step <- function(data) {
     purrr::map(data, locality_function)
 }
 
-.clean_datetime_step_logger <- function(logger) {
-    logger$metadata@step <- .clean_detect_step_minutes(logger$datetime)
+.prep_datetime_step_logger <- function(logger) {
+    logger$metadata@step <- .prep_detect_step_minutes(logger$datetime)
     logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{logger$metadata@step} min"))
-    logger <- .clean_datetime_step_log_wrong(logger)
-    .clean_datetime_step_edit_series(logger)
+    logger <- .prep_datetime_step_log_wrong(logger)
+    .prep_datetime_step_edit_series(logger)
 }
 
-.clean_detect_step_minutes <- function(datetime) {
-    if(length(datetime) > .clean_const_DETECT_STEP_LENGTH) {
-        datetime <- datetime[1:.clean_const_DETECT_STEP_LENGTH]
+.prep_detect_step_minutes <- function(datetime) {
+    if(length(datetime) > .prep_const_DETECT_STEP_LENGTH) {
+        datetime <- datetime[1:.prep_const_DETECT_STEP_LENGTH]
     }
     datetime <- sort(as.numeric(datetime))
     diff_datetime <- Filter(function(x) x > 0, diff(datetime))
     round(unname(quantile(diff_datetime, p=0.5, type=1)/60))
 }
 
-.clean_add_method_to_clean_log_if_need <- function(clean_log, method) {
+.prep_add_method_to_clean_log_if_need <- function(clean_log, method) {
     if(!(method %in% names(clean_log))) {
         clean_log[[method]] <- character()
     }
     clean_log
 }
 
-.clean_add_log <- function(clean_log, method, message) {
-    clean_log <- .clean_add_method_to_clean_log_if_need(clean_log, method)
+.prep_add_log <- function(clean_log, method, message) {
+    clean_log <- .prep_add_method_to_clean_log_if_need(clean_log, method)
     clean_log[[method]][[length(clean_log[[method]]) + 1]] <- message
     clean_log
 }
 
-.clean_datetime_step_edit_series <- function(logger) {
-    if(!.clean_was_error_in_logger_datetime_step(logger)){
+.prep_datetime_step_edit_series <- function(logger) {
+    if(!.prep_was_error_in_logger_datetime_step(logger)){
         return(logger)
     }
     table <- microclim:::.common_logger_values_as_tibble(logger)
@@ -78,7 +78,7 @@ mc_clean_datetime_step <- function(data) {
     logger
 }
 
-.clean_datetime_step_log_wrong <- function(logger) {
+.prep_datetime_step_log_wrong <- function(logger) {
     diff_datetime <- diff(as.numeric(logger$datetime))
     count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
     messages <- character()
@@ -102,25 +102,25 @@ mc_clean_datetime_step <- function(data) {
     logger
 }
 
-.clean_is_logger_datetime_step_processed <- function(logger) {
+.prep_is_logger_datetime_step_processed <- function(logger) {
     !is.na(logger$metadata@step)
 }
 
-.clean_was_error_in_logger_datetime_step <- function(logger) {
+.prep_was_error_in_logger_datetime_step <- function(logger) {
     mc_const_CLEAN_DATETIME_STEP %in% names(logger$clean_log)
 }
 
-.clean_get_loggers_datetime_step_unprocessed <- function(data) {
+.prep_get_loggers_datetime_step_unprocessed <- function(data) {
     locality_function <- function(locality) {
-        unprocessed <- purrr::discard(locality$loggers, .clean_is_logger_datetime_step_processed)
+        unprocessed <- purrr::discard(locality$loggers, .prep_is_logger_datetime_step_processed)
         purrr::map_chr(unprocessed, function(x) x$metadata@serial_number)
     }
     loggers <- purrr::map(data, locality_function)
     purrr::reduce(loggers, c)
 }
 
-.clean_warn_if_datetime_step_unprocessed <- function(data) {
-    unprocessed_loggers <- .clean_get_loggers_datetime_step_unprocessed(data)
+.prep_warn_if_datetime_step_unprocessed <- function(data) {
+    unprocessed_loggers <- .prep_get_loggers_datetime_step_unprocessed(data)
     if(length(unprocessed_loggers) > 0){
         loggers_text <- paste(unprocessed_loggers, sep=", ", collapse="")
         warning(stringr::str_glue("Detected missed step in loggers {loggers_text}. Probably loggers weren't cleaned."))
@@ -135,8 +135,8 @@ mc_clean_datetime_step <- function(data) {
 #' @return dataframe with columns locality_id, serial_number, clean_type, message
 #' @export
 #' @examples
-#' log_table <- mc_clean_logs(cleaned_example_tomst_data1)
-mc_clean_logs <- function(data) {
+#' log_table <- mc_prep_logs(cleaned_example_tomst_data1)
+mc_prep_logs <- function(data) {
     logger_function <- function (logger) {
         log_function <- function(type, messages) {
             purrr::map(messages, function(message) c(logger$metadata@serial_number, type, message))
@@ -165,8 +165,8 @@ mc_clean_logs <- function(data) {
 #' @return data with changed TZ offset in standard format
 #' @export
 #' @examples
-#' example_tomst_data2 <- mc_clean_solar_tz(example_tomst_data2, list(None=60))
-mc_clean_user_tz <- function(data, tz_offsets) {
+#' example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(None=60))
+mc_prep_user_tz <- function(data, tz_offsets) {
     for (locality_id in names(tz_offsets))
     {
         data[[locality_id]]$metadata@tz_offset <- tz_offsets[[locality_id]]
@@ -183,8 +183,8 @@ mc_clean_user_tz <- function(data, tz_offsets) {
 #' @return data with changed TZ offset in standard format
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_clean_solar_tz(cleaned_example_tomst_data1)
-mc_clean_solar_tz <- function(data) {
+#' cleaned_example_tomst_data1 <- mc_prep_solar_tz(cleaned_example_tomst_data1)
+mc_prep_solar_tz <- function(data) {
     locality_function <- function(locality) {
         if(is.na(locality$metadata@lon_wgs84)) {
             warning(stringr::str_glue("missing longitude in locality {locality$metadata@locality_id} - skip"))
@@ -198,13 +198,13 @@ mc_clean_solar_tz <- function(data) {
     purrr::map(data, locality_function)
 }
 
-.clean_get_utc_localities <- function(data) {
+.prep_get_utc_localities <- function(data) {
     items <- purrr::keep(data, function(x) x$metadata@tz_type == mc_const_TZ_UTC)
     unname(purrr::map_chr(items, function(x) x$metadata@locality_id))
 }
 
-.clean_warn_if_unset_tz_offset <- function(data) {
-    utc_localities <- .clean_get_utc_localities(data)
+.prep_warn_if_unset_tz_offset <- function(data) {
+    utc_localities <- .prep_get_utc_localities(data)
     if(length(utc_localities) > 0){
         localities_text <- paste(utc_localities, sep=", ", collapse="")
         warning(stringr::str_glue("TZ offset in localities {localities_text} is not set - UTC used."))
@@ -221,8 +221,8 @@ mc_clean_solar_tz <- function(data) {
 #' @return cropped data in standard format
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_clean_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
-mc_clean_crop <- function(data, start=NULL, end=NULL) {
+#' cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
+mc_prep_crop <- function(data, start=NULL, end=NULL) {
     if(!is.null(start) && format(start, format="%Z") != "UTC") {
         warning(stringr::str_glue("start datetime is not in UTC"))
     }
@@ -231,7 +231,7 @@ mc_clean_crop <- function(data, start=NULL, end=NULL) {
     }
     logger_function <- function(logger) {
         table <- microclim:::.common_logger_values_as_tibble(logger)
-        logger <- .clean_log_crop(logger, start, end)
+        logger <- .prep_log_crop(logger, start, end)
         if(!is.null(start)) {
             table <- dplyr::filter(table, datetime >= start)
         }
@@ -253,7 +253,7 @@ mc_clean_crop <- function(data, start=NULL, end=NULL) {
     purrr::map(data, locality_function)
 }
 
-.clean_log_crop <- function(logger, start, end) {
+.prep_log_crop <- function(logger, start, end) {
     datetime_range <- range(logger$datetime)
     if(is.null(start)) {
         start <- datetime_range[[1]]
@@ -262,6 +262,6 @@ mc_clean_crop <- function(data, start=NULL, end=NULL) {
         end <- datetime_range[[2]]
     }
     message <- stringr::str_glue("original datetime range {datetime_range[[1]]} - {datetime_range[[2]]} cropped to {start} - {end}")
-    logger$clean_log <- .clean_add_log(logger$clean_log, mc_const_CLEAN_CROP, message)
+    logger$clean_log <- .prep_add_log(logger$clean_log, mc_const_CLEAN_CROP, message)
     logger
 }

@@ -2,8 +2,8 @@ library(testthat)
 library(microclim)
 source("test.R")
 
-test_that("mc_feed_from_csv", {
-    data <- mc_feed_from_csv("data/TOMST/files_table.csv")
+test_that("mc_read_from_csv", {
+    data <- mc_read_from_csv("data/TOMST/files_table.csv")
     test_standard_data_format(data)
     expect_equal(length(data), 3)
     expect_equal(length(data$A6W79$loggers[[1]]$datetime), 49)
@@ -22,15 +22,15 @@ test_that("mc_feed_from_csv", {
     expect_true(is.na(data$A1E05$metadata@altitude))
 })
 
-test_that("mc_feed_from_csv", {
-    data <- mc_feed_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+test_that("mc_read_from_csv", {
+    data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     test_standard_data_format(data)
     expect_equal(data$A1E05$metadata@altitude, 255)
     expect_equal(data$A6W79$metadata@tz_type, mc_const_TZ_USER_DEFINED)
 })
 
-test_that("mc_feed_TMS_directory", {
-    expect_warning(data <- microclim::mc_feed_TOMST_directory("data/TOMST"))
+test_that("mc_read_TMS_directory", {
+    expect_warning(data <- microclim::mc_read_TOMST_directory("data/TOMST"))
     test_standard_data_format(data)
     expect_equal(data$None$metadata@tz_type, mc_const_TZ_UTC)
     expect_equal(length(data), 1)

@@ -7,9 +7,9 @@
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_feed_TOMST_directory("examples/data/TOMST/")
-mc_feed_TOMST_directory <- function(directory, recursive=TRUE) {
-    mc_feed_directory(directory, "TOMST", recursive = recursive)
+#' example_tomst_data <- microclim::mc_read_TOMST_directory("examples/data/TOMST/")
+mc_read_TOMST_directory <- function(directory, recursive=TRUE) {
+    mc_read_directory(directory, "TOMST", recursive = recursive)
 }
 
 #' Reading TOMST files
@@ -20,9 +20,9 @@ mc_feed_TOMST_directory <- function(directory, recursive=TRUE) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_feed_TOMST_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"))
-mc_feed_TOMST_files <- function(files) {
-    mc_feed_files(files, "TOMST")
+#' example_tomst_data <- microclim::mc_read_TOMST_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"))
+mc_read_TOMST_files <- function(files) {
+    mc_read_files(files, "TOMST")
 }
 
 #' Reading files from directory
@@ -36,10 +36,10 @@ mc_feed_TOMST_files <- function(files) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_feed_directory("examples/data/TOMST/", "TOMST")
-mc_feed_directory <- function(directory, dataformat_name, recursive=TRUE) {
+#' example_tomst_data <- microclim::mc_read_directory("examples/data/TOMST/", "TOMST")
+mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
     files <-list.files(directory, pattern=".+\\.[cC][sS][vV]$", recursive=recursive, full.names=TRUE)
-    mc_feed_files(files, dataformat_name)
+    mc_read_files(files, dataformat_name)
 }
 
 #' Reading files
@@ -51,10 +51,10 @@ mc_feed_directory <- function(directory, dataformat_name, recursive=TRUE) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_feed_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
-mc_feed_files <- function(files, dataformat_name) {
+#' example_tomst_data <- microclim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+mc_read_files <- function(files, dataformat_name) {
     files_table <- data.frame(path=files, locality_id=mc_const_NONE_LOCALITY_ID, data_format=dataformat_name, serial_number=NA_character_)
-    mc_feed_from_df(files_table)
+    mc_read_from_df(files_table)
 }
 
 #' Data files reading by CSV
@@ -66,8 +66,8 @@ mc_feed_files <- function(files, dataformat_name) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_feed_from_csv("examples/data/TOMST/files_table.csv")
-mc_feed_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
+#' example_tomst_data <- microclim::mc_read_from_csv("examples/data/TOMST/files_table.csv")
+mc_read_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
     files_table <- read.table(csv_files_table,
                               header = TRUE,
                               sep = ",",
@@ -79,7 +79,7 @@ mc_feed_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
                                        sep = ",",
                                        stringsAsFactors = FALSE)
     }
-    mc_feed_from_df(files_table, localities_table)
+    mc_read_from_df(files_table, localities_table)
 }
 
 #' Data files reading
@@ -101,7 +101,7 @@ mc_feed_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
 #' * tz_offset
 #' @return data in standard format
 #' @export
-mc_feed_from_df <- function(files_table, localities_table=NULL) {
+mc_read_from_df <- function(files_table, localities_table=NULL) {
     files_table <- microclim:::.common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {
@@ -110,29 +110,29 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
     result <- list()
     if(!is.null(localities_table))
     {
-        result <- .feed_init_localities_from_table(localities_table)
+        result <- .read_init_localities_from_table(localities_table)
     }
     for(i in 1:nrow(files_table))
     {
         row <- files_table[i, ]
-        result[[row$locality_id]] <- .feed_add_logger_to_locality(result[[row$locality_id]], row)
+        result[[row$locality_id]] <- .read_add_logger_to_locality(result[[row$locality_id]], row)
     }
     result
 }
 
-.feed_init_localities_from_table <- function(localities_table) {
-    result <- purrr::pmap(localities_table, .feed_get_new_locality)
+.read_init_localities_from_table <- function(localities_table) {
+    result <- purrr::pmap(localities_table, .read_get_new_locality)
     names(result) <- localities_table$locality_id
     result
 }
 
-.feed_add_logger_to_locality <- function(current_locality, row) {
+.read_add_logger_to_locality <- function(current_locality, row) {
     if(is.null(current_locality))
     {
-        current_locality <- .feed_get_new_locality(row$locality_id)
+        current_locality <- .read_get_new_locality(row$locality_id)
     }
     new_index <- length(current_locality$loggers) + 1
-    logger <- .feed_read_logger(row$path, mc_data_formats[[row$data_format]], row$serial_number)
+    logger <- .read_read_logger(row$path, mc_data_formats[[row$data_format]], row$serial_number)
     if(is.null(logger)) {
         warning(sprintf("File %s dosn't have right format. File is skipped.", row$path))
     }
@@ -142,7 +142,7 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
     current_locality
 }
 
-.feed_get_new_locality <- function(locality_id=NULL, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
+.read_get_new_locality <- function(locality_id=NULL, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
     if (is.null(locality_id))
     {
         locality_id <- microclim::mc_const_NONE_LOCALITY_ID
@@ -157,7 +157,7 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
     list(metadata = metadata, loggers=list())
 }
 
-.feed_read_logger <- function(filename, data_format, serial_number=NULL) {
+.read_read_logger <- function(filename, data_format, serial_number=NULL) {
     if(is.null(serial_number) | is.na(serial_number)){
         serial_number <- microclim:::.model_get_serial_number_from_filename(data_format, filename)
     }
@@ -178,19 +178,19 @@ mc_feed_from_df <- function(files_table, localities_table=NULL) {
     list(metadata = metadata,
          clean_log = list(),
          datetime = datetime,
-         sensors = .feed_get_sensors(data_table, data_format))
+         sensors = .read_get_sensors(data_table, data_format))
 }
 
-.feed_get_sensors <- function(data_table, data_format){
+.read_get_sensors <- function(data_table, data_format){
     result <- list()
     for(sensor_name in names(data_format@columns))
     {
-        result[[sensor_name]] <- .feed_get_sensor(data_table, data_format, sensor_name)
+        result[[sensor_name]] <- .read_get_sensor(data_table, data_format, sensor_name)
     }
     result
 }
 
-.feed_get_sensor <- function(data_table, data_format, sensor_name){
+.read_get_sensor <- function(data_table, data_format, sensor_name){
     values <- data_table[[data_format@columns[[sensor_name]]]]
     metadata <- mc_SensorMetadata(sensor_id = sensor_name)
     item <- list(metadata = metadata,

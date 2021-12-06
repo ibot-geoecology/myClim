@@ -2,7 +2,7 @@ library(testthat)
 library(microclim)
 
 test_that(".plot_get_logger_sensors_by_physical", {
-    data <- mc_feed_from_csv("data/TOMST/files_table.csv")
+    data <- mc_read_from_csv("data/TOMST/files_table.csv")
     test_function <- if(exists(".plot_get_logger_sensors_by_physical")) .plot_get_logger_sensors_by_physical else microclim:::.plot_get_logger_sensors_by_physical
     physical <- test_function(data$A6W79$loggers[[1]])
     expect_equal(length(physical), 2)

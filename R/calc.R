@@ -10,10 +10,10 @@
 #' @return data.frame with datetime column and logical columns named by serial_number of loggers
 #' @export
 #' @examples
-#' snow <- mc_eco_snow(example_tomst_data1, "TMS_T3")
-mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
+#' snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")
+mc_calc_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
     data <- mc_filter(data, localities, sensor)
-    microclim:::.clean_warn_if_datetime_step_unprocessed(data)
+    microclim:::.prep_warn_if_datetime_step_unprocessed(data)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
     snow_tables <- purrr::map(loggers, function(x) .get_eco_snow_from_logger(x, dr, tmax))
     result <- purrr::reduce(snow_tables, function(x, y) dplyr::full_join(x, y, by="datetime"))
@@ -45,10 +45,10 @@ mc_eco_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
 #' @return data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
 #' @export
 #' @examples
-#' snow_agg <- mc_eco_snow_agg(example_tomst_data1, "TMS_T3")
-mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period = 3) {
+#' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")
+mc_calc_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period = 3) {
     data <- mc_filter(data, localities, sensor)
-    loggers_with_offset <- .eco_get_loggers_with_offset(data)
+    loggers_with_offset <- .calc_get_loggers_with_offset(data)
     result_env <- new.env()
     result_env$serial_number <- character()
     result_env$snow_days <- numeric()
@@ -58,7 +58,7 @@ mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period
     result_env$last_day_period <- as.Date(x = integer(0), origin = "1970-01-01")
     purrr::walk(loggers_with_offset, function (x) {
         snow_table <- .get_eco_snow_from_logger(x$logger, dr, tmax)
-        .eco_compute_snow_agg_from_table(snow_table, x$tz_offset, period, result_env)
+        .calc_compute_snow_agg_from_table(snow_table, x$tz_offset, period, result_env)
     })
     data.frame(serial_number=result_env$serial_number,
                snow_days=result_env$snow_days,
@@ -68,18 +68,18 @@ mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period
                last_day_period=result_env$last_day_period)
 }
 
-.eco_get_loggers_with_offset <- function(data) {
-    microclim:::.clean_warn_if_unset_tz_offset(data)
+.calc_get_loggers_with_offset <- function(data) {
+    microclim:::.prep_warn_if_unset_tz_offset(data)
     locality_function <- function(locality) {
         purrr::map(locality$loggers, function(logger) list(logger=logger, tz_offset=locality$metadata@tz_offset))
     }
     purrr::flatten(purrr::map(data, locality_function))
 }
 
-.eco_compute_snow_agg_from_table <- function(snow_table, tz_offset, period, environment) {
+.calc_compute_snow_agg_from_table <- function(snow_table, tz_offset, period, environment) {
     environment$serial_number <- c(environment$serial_number, colnames(snow_table)[[2]])
     snow_table <- snow_table[!is.na(snow_table[[2]]), ]
-    snow_table$datetime <- .eco_get_datetimes_with_offset(snow_table$datetime, tz_offset)
+    snow_table$datetime <- .calc_get_datetimes_with_offset(snow_table$datetime, tz_offset)
 
     if(nrow(snow_table) == 0) {
         environment$snow_days <- c(environment$snow_days, 0)
@@ -113,7 +113,7 @@ mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period
     }
 }
 
-.eco_get_datetimes_with_offset <- function(datetimes, tz_offset) {
+.calc_get_datetimes_with_offset <- function(datetimes, tz_offset) {
     if(is.na(tz_offset) || tz_offset == 0) {
         return(datetimes)
     }
@@ -134,17 +134,17 @@ mc_eco_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period
 #' @return aggregated data in standard format
 #' @export
 #' @examples
-#' example_cleaned_tomst_data <- mc_eco_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
-mc_eco_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, use_utc=F, ...) {
+#' example_cleaned_tomst_data <- mc_calc_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+mc_calc_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, use_utc=F, ...) {
     data <- mc_filter(data, localities, sensors)
-    microclim:::.clean_warn_if_datetime_step_unprocessed(data)
+    microclim:::.prep_warn_if_datetime_step_unprocessed(data)
     if(!use_utc) {
-        microclim:::.clean_warn_if_unset_tz_offset(data)
+        microclim:::.prep_warn_if_unset_tz_offset(data)
     }
     locality_function <- function (locality) {
         logger_function <- function (logger) {
             tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
-            .eco_aggregate_logger(logger, fun, breaks, tz_offset, ...)
+            .calc_aggregate_logger(logger, fun, breaks, tz_offset, ...)
         }
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         locality
@@ -152,12 +152,12 @@ mc_eco_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, use_utc
     purrr::map(data, locality_function)
 }
 
-.eco_aggregate_logger <- function(logger, fun, breaks, tz_offset, ...)
+.calc_aggregate_logger <- function(logger, fun, breaks, tz_offset, ...)
 {
     if(length(logger$datetime) == 0) {
         return(logger)
     }
-    logger$datetime <- .eco_get_datetimes_with_offset(logger$datetime, tz_offset)
+    logger$datetime <- .calc_get_datetimes_with_offset(logger$datetime, tz_offset)
     by_aggregate <- list(step=cut(logger$datetime, breaks=breaks))
     logger$datetime <- aggregate(logger$datetime, by_aggregate, min)$x
     sensor_function <- function(sensor) {
@@ -187,9 +187,9 @@ mc_eco_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, use_utc
 #' @return aggregated data in standard format
 #' @export
 #' @examples
-#' example_cleaned_tomst_data <- mc_eco_agg_mean(example_cleaned_tomst_data, "hour", na.rm=TRUE)
-mc_eco_agg_mean <- function(data, breaks, localities=NULL, sensors=NULL, use_utc=F, ...) {
-    mc_eco_agg(data, mean, breaks, localities, sensors, use_utc, ...)
+#' example_cleaned_tomst_data <- mc_calc_agg_mean(example_cleaned_tomst_data, "hour", na.rm=TRUE)
+mc_calc_agg_mean <- function(data, breaks, localities=NULL, sensors=NULL, use_utc=F, ...) {
+    mc_calc_agg(data, mean, breaks, localities, sensors, use_utc, ...)
 }
 
 #' Agregate data by quantile function
@@ -206,8 +206,8 @@ mc_eco_agg_mean <- function(data, breaks, localities=NULL, sensors=NULL, use_utc
 #' @return aggregated data in standard format
 #' @export
 #' @examples
-#' example_cleaned_tomst_data <- mc_eco_agg_quantile(example_cleaned_tomst_data, "hour", 0.1, na.rm=TRUE)
-mc_eco_agg_quantile <- function(data, breaks, probs, localities=NULL, sensors=NULL, use_utc=F, ...) {
-    mc_eco_agg(data, quantile, breaks, localities, sensors, use_utc, probs=probs, ...)
+#' example_cleaned_tomst_data <- mc_calc_agg_quantile(example_cleaned_tomst_data, "hour", 0.1, na.rm=TRUE)
+mc_calc_agg_quantile <- function(data, breaks, probs, localities=NULL, sensors=NULL, use_utc=F, ...) {
+    mc_calc_agg(data, quantile, breaks, localities, sensors, use_utc, probs=probs, ...)
 }
 

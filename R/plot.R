@@ -14,7 +14,7 @@
 #' mc_plot_loggers(example_tomst_data1, "Figures")
 mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c(NA, NA)) {
     data <- mc_filter(data, localities, sensors)
-    microclim:::.clean_warn_if_datetime_step_unprocessed(data)
+    microclim:::.prep_warn_if_datetime_step_unprocessed(data)
     loggers <- microclim:::.common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {
