@@ -41,7 +41,7 @@ test_sensor <- function(sensor) {
 }
 
 get_empty_data <- function() {
-    data <- mc_read_TOMST_files("data/TOMST/data_94184102_0.csv")
+    data <- mc_read_files("data/TOMST/data_94184102_0.csv", "TOMST")
     data <- mc_prep_datetime_step(data)
     data <- mc_prep_crop(data, end=as.POSIXct("2020-01-01", tz="UTC"))
     data

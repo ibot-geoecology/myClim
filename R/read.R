@@ -1,34 +1,7 @@
-#' Reading TOMST files from directory
-#'
-#' This function read TOMST data files from directory. Locality is set None.
-#'
-#' @param directory character
-#' @param recursive logical - recursive search in subdirectories
-#' @return data in standard format
-#' @export
-#' @examples
-#' example_tomst_data <- microclim::mc_read_TOMST_directory("examples/data/TOMST/")
-mc_read_TOMST_directory <- function(directory, recursive=TRUE) {
-    mc_read_directory(directory, "TOMST", recursive = recursive)
-}
-
-#' Reading TOMST files
-#'
-#' This function read data files of TOMST type. Locality is set None.
-#'
-#' @param files vector of character - files with data
-#' @return data in standard format
-#' @export
-#' @examples
-#' example_tomst_data <- microclim::mc_read_TOMST_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"))
-mc_read_TOMST_files <- function(files) {
-    mc_read_files(files, "TOMST")
-}
-
 #' Reading files from directory
 #'
 #' This function read csv data files from directory of one logger type.
-#' If csv file is not in correct format, is skipped. Locality is set None.
+#' If csv file is not in correct format, is skipped. Locality is set to serial_number of logger.
 #'
 #' @param directory character
 #' @param dataformat_name character - data format of logger (TOMST)
@@ -44,7 +17,7 @@ mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
 
 #' Reading files
 #'
-#' This function read data files of one logger type. Locality is set None.
+#' This function read data files of one logger type. Locality is set to serial_number of logger.
 #'
 #' @param files vector of character - files with data
 #' @param dataformat_name character - data format of logger (TOMST)
@@ -53,7 +26,7 @@ mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
 #' @examples
 #' example_tomst_data <- microclim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 mc_read_files <- function(files, dataformat_name) {
-    files_table <- data.frame(path=files, locality_id=mc_const_NONE_LOCALITY_ID, data_format=dataformat_name, serial_number=NA_character_)
+    files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name, serial_number=NA_character_)
     mc_read_from_df(files_table)
 }
 
@@ -107,17 +80,15 @@ mc_read_from_df <- function(files_table, localities_table=NULL) {
     {
         return(list())
     }
-    result <- list()
+    localities <- list()
     if(!is.null(localities_table))
     {
-        result <- .read_init_localities_from_table(localities_table)
+        localities <- .read_init_localities_from_table(localities_table)
     }
-    for(i in 1:nrow(files_table))
-    {
-        row <- files_table[i, ]
-        result[[row$locality_id]] <- .read_add_logger_to_locality(result[[row$locality_id]], row)
-    }
-    result
+    files_table <- dplyr::filter(files_table, .read_is_data_format_ok(path, data_format))
+    files_table$serial_number <- .read_get_edited_serial_numbers(files_table)
+    files_table$locality_id <- .read_get_edited_locality_ids(files_table)
+    .read_get_output_data(files_table, localities)
 }
 
 .read_init_localities_from_table <- function(localities_table) {
@@ -126,27 +97,63 @@ mc_read_from_df <- function(files_table, localities_table=NULL) {
     result
 }
 
-.read_add_logger_to_locality <- function(current_locality, row) {
-    if(is.null(current_locality))
-    {
-        current_locality <- .read_get_new_locality(row$locality_id)
+.read_is_data_format_ok <- function(paths, data_formats) {
+    item_function <- function(path, data_format) {
+        if(!(data_format %in% names(mc_data_formats))){
+            warning(stringr::str_glue("It is unknown format {data_format} for {path}. File is skipped."))
+            return(FALSE)
+        }
+        if(!microclim:::.model_is_file_in_right_format(mc_data_formats[[data_format]], path)) {
+            warning(stringr::str_glue("File {path} dosn't have right format. File is skipped."))
+            return(FALSE)
+        }
+        TRUE
     }
-    new_index <- length(current_locality$loggers) + 1
-    logger <- .read_read_logger(row$path, mc_data_formats[[row$data_format]], row$serial_number)
-    if(is.null(logger)) {
-        warning(sprintf("File %s dosn't have right format. File is skipped.", row$path))
-    }
-    else {
-        current_locality$loggers[[new_index]] <- logger
-    }
-    current_locality
+    purrr::map2_lgl(paths, data_formats, item_function)
 }
 
-.read_get_new_locality <- function(locality_id=NULL, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
-    if (is.null(locality_id))
-    {
-        locality_id <- microclim::mc_const_NONE_LOCALITY_ID
+.read_get_edited_serial_numbers <- function(files_table) {
+    row_function <- function(path, locality_id, data_format, serial_number) {
+        if(!is.na(serial_number)) {
+            return(serial_number)
+        }
+        microclim:::.model_get_serial_number_from_filename(mc_data_formats[[data_format]], path)
     }
+
+    purrr::pmap_chr(files_table, row_function)
+}
+
+.read_get_edited_locality_ids <- function(files_table) {
+    row_function <- function(locality_id, serial_number) {
+        if(!is.na(locality_id)) {
+            return(locality_id)
+        }
+        serial_number
+    }
+
+    purrr::map2_chr(files_table$locality_id, files_table$serial_number, row_function)
+}
+
+.read_get_output_data <- function(files_table, localities) {
+    groupped_files <- dplyr::group_by(files_table, locality_id)
+    row_function <- function(path, data_format, serial_number) {
+        .read_logger(path, mc_data_formats[[data_format]], serial_number)
+    }
+    locality_function <- function(.x, .y) {
+        if(.y$locality_id %in% names(localities)) {
+            locality <- localities[[.y$locality_id]]
+        } else {
+            locality <- .read_get_new_locality(.y$locality_id)
+        }
+        locality$loggers <- purrr::pmap(.x, row_function)
+        locality
+    }
+    result <- dplyr::group_map(groupped_files, locality_function)
+    names(result) <- purrr::map_chr(result, function(.x) .x$metadata@locality_id)
+    result
+}
+
+.read_get_new_locality <- function(locality_id, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
     tz_type <- if(is.na(tz_offset)) microclim::mc_const_TZ_UTC else microclim::mc_const_TZ_USER_DEFINED
     metadata <- mc_LocalityMetadata(locality_id=locality_id,
                                     altitude=altitude,
@@ -157,13 +164,7 @@ mc_read_from_df <- function(files_table, localities_table=NULL) {
     list(metadata = metadata, loggers=list())
 }
 
-.read_read_logger <- function(filename, data_format, serial_number=NULL) {
-    if(is.null(serial_number) | is.na(serial_number)){
-        serial_number <- microclim:::.model_get_serial_number_from_filename(data_format, filename)
-    }
-    if(!microclim:::.model_is_file_in_right_format(data_format, filename)) {
-        return(NULL)
-    }
+.read_logger <- function(filename, data_format, serial_number) {
     skip <- if(data_format@has_header) 1 else 0
     data_table <- read.table(filename,
                              sep = data_format@separator,

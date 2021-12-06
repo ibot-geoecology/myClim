@@ -18,5 +18,5 @@ data with changed TZ offset in standard format
 This function set user defined TZ offsets in localities
 }
 \examples{
-example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(None=60))
+example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(`91184101`=60))
 }

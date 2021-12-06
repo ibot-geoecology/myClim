@@ -165,7 +165,7 @@ mc_prep_logs <- function(data) {
 #' @return data with changed TZ offset in standard format
 #' @export
 #' @examples
-#' example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(None=60))
+#' example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(`91184101`=60))
 mc_prep_user_tz <- function(data, tz_offsets) {
     for (locality_id in names(tz_offsets))
     {

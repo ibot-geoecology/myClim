@@ -710,11 +710,11 @@ data with changed TZ offset in standard format
 ## Examples
 
 ```r
-example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(None=60))
+example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(`91184101`=60))
 ```
 
 
-# `mc_reed_directory`
+# `mc_read_directory`
 
 Reading files from directory
 
@@ -722,13 +722,13 @@ Reading files from directory
 ## Description
 
 This function read csv data files from directory of one logger type.
- If csv file is not in correct format, is skipped. Locality is set None.
+ If csv file is not in correct format, is skipped. Locality is set to serial_number of logger.
 
 
 ## Usage
 
 ```r
-mc_reed_directory(directory, dataformat_name, recursive = TRUE)
+mc_read_directory(directory, dataformat_name, recursive = TRUE)
 ```
 
 
@@ -749,24 +749,24 @@ data in standard format
 ## Examples
 
 ```r
-example_tomst_data <- microclim::mc_reed_directory("examples/data/TOMST/", "TOMST")
+example_tomst_data <- microclim::mc_read_directory("examples/data/TOMST/", "TOMST")
 ```
 
 
-# `mc_reed_files`
+# `mc_read_files`
 
 Reading files
 
 
 ## Description
 
-This function read data files of one logger type. Locality is set None.
+This function read data files of one logger type. Locality is set to serial_number of logger.
 
 
 ## Usage
 
 ```r
-mc_reed_files(files, dataformat_name)
+mc_read_files(files, dataformat_name)
 ```
 
 
@@ -786,11 +786,11 @@ data in standard format
 ## Examples
 
 ```r
-example_tomst_data <- microclim::mc_reed_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+example_tomst_data <- microclim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 ```
 
 
-# `mc_reed_from_csv`
+# `mc_read_from_csv`
 
 Data files reading by CSV
 
@@ -803,7 +803,7 @@ This function read raw data from loggers by table saved in CSV file
 ## Usage
 
 ```r
-mc_reed_from_csv(csv_files_table, csv_localities_table = NULL)
+mc_read_from_csv(csv_files_table, csv_localities_table = NULL)
 ```
 
 
@@ -823,11 +823,11 @@ data in standard format
 ## Examples
 
 ```r
-example_tomst_data <- microclim::mc_reed_from_csv("examples/data/TOMST/files_table.csv")
+example_tomst_data <- microclim::mc_read_from_csv("examples/data/TOMST/files_table.csv")
 ```
 
 
-# `mc_reed_from_df`
+# `mc_read_from_df`
 
 Data files reading
 
@@ -840,7 +840,7 @@ This function read raw data from loggers by data.frame with files description.
 ## Usage
 
 ```r
-mc_reed_from_df(files_table, localities_table = NULL)
+mc_read_from_df(files_table, localities_table = NULL)
 ```
 
 
@@ -873,79 +873,6 @@ Argument      |Description
 ## Value
 
 data in standard format
-
-
-# `mc_reed_TOMST_directory`
-
-Reading TOMST files from directory
-
-
-## Description
-
-This function read TOMST data files from directory. Locality is set None.
-
-
-## Usage
-
-```r
-mc_reed_TOMST_directory(directory, recursive = TRUE)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`directory`     |     character
-`recursive`     |     logical - recursive search in subdirectories
-
-
-## Value
-
-data in standard format
-
-
-## Examples
-
-```r
-example_tomst_data <- microclim::mc_reed_TOMST_directory("examples/data/TOMST/")
-```
-
-
-# `mc_reed_TOMST_files`
-
-Reading TOMST files
-
-
-## Description
-
-This function read data files of TOMST type. Locality is set None.
-
-
-## Usage
-
-```r
-mc_reed_TOMST_files(files)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`files`     |     vector of character - files with data
-
-
-## Value
-
-data in standard format
-
-
-## Examples
-
-```r
-example_tomst_data <- microclim::mc_reed_TOMST_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"))
-```
 
 
 # `mc_reshape_longformat`

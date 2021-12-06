@@ -1,8 +1,6 @@
 # constants ================================================================================
 
 #' @export
-mc_const_NONE_LOCALITY_ID <- "None"
-#' @export
 mc_const_TZ_UTC <- "UTC"
 #' @export
 mc_const_TZ_SOLAR <- "solar"
@@ -233,7 +231,7 @@ setMethod(
     signature("mc_DataFormat"),
     function(object, filename) {
         if(is.null(object@filename_serial_number_pattern)) {
-          stop(sprintf("It is not possible identify serial_number from file %s.", filename));
+          stop(stringr::str_glue("It is not possible identify serial_number from file {filename}."))
         }
         stringr::str_match(filename, object@filename_serial_number_pattern)[1, 2]
     }

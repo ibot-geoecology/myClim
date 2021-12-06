@@ -30,9 +30,9 @@ test_that("mc_read_from_csv", {
 })
 
 test_that("mc_read_TMS_directory", {
-    expect_warning(data <- microclim::mc_read_TOMST_directory("data/TOMST"))
+    expect_warning(data <- mc_read_directory("data/TOMST", "TOMST"))
     test_standard_data_format(data)
-    expect_equal(data$None$metadata@tz_type, mc_const_TZ_UTC)
-    expect_equal(length(data), 1)
-    expect_equal(length(data$None$loggers), 4)
+    expect_equal(data[[1]]$metadata@tz_type, mc_const_TZ_UTC)
+    expect_equal(length(data), 4)
+    expect_equal(length(data[[1]]$loggers), 1)
 })
