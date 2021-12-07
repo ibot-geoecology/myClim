@@ -22,6 +22,13 @@ test_that("mc_read_from_csv", {
     expect_true(is.na(data$A1E05$metadata@altitude))
 })
 
+test_that("mc_read TOMST format datetime", {
+    table <- data.frame(path="data/format/201911_93164272.csv", locality_id="AAA",
+                        data_format="TOMST", serial_number="93164272")
+    data <- mc_read_from_df(table)
+    test_standard_data_format(data)
+})
+
 test_that("mc_read_from_csv", {
     data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     test_standard_data_format(data)

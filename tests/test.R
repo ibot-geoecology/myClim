@@ -21,6 +21,7 @@ test_logger <- function(logger) {
     expect_equal(class(logger$metadata)[[1]], "mc_LoggerMetadata")
     expect_equal(class(logger$clean_log), "list")
     expect_equal(class(logger$datetime), c("POSIXct", "POSIXt"))
+    expect_true(all(!is.na(logger$datetime)))
     expect_equal(class(logger$sensors), "list")
     expect_true(length(logger$sensors) > 0)
     test_data_length(logger)

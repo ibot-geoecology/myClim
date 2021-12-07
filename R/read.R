@@ -117,7 +117,12 @@ mc_read_from_df <- function(files_table, localities_table=NULL) {
         if(!is.na(serial_number)) {
             return(serial_number)
         }
-        microclim:::.model_get_serial_number_from_filename(mc_data_formats[[data_format]], path)
+        serial_number <- microclim:::.model_get_serial_number_from_filename(mc_data_formats[[data_format]], path)
+        if(is.na(serial_number))
+        {
+            stop(stringr::str_glue("It isn't possible detect serial_number for {path}."))
+        }
+        serial_number
     }
 
     purrr::pmap_chr(files_table, row_function)
@@ -173,6 +178,9 @@ mc_read_from_df <- function(files_table, localities_table=NULL) {
                              na.strings = data_format@na_strings)
     data_format <- microclim:::.model_load_data_format_params_from_data(data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
+    if(any(is.na(datetime))) {
+        stop(stringr::str_glue("It isn't possible read datetimes from {filename}."))
+    }
     metadata <- mc_LoggerMetadata(
                     serial_number = serial_number,
                     type = data_format@logger_type)
