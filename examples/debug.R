@@ -1,4 +1,4 @@
-loading_function <- function (path_prefix) {
+debug_loading_function <- function (path_prefix) {
     files_sources <- list.files(stringr::str_glue("{path_prefix}R"), full.names = T)
     purrr::walk(files_sources, source)
     files_data <- list.files(stringr::str_glue("{path_prefix}data"), full.names = T)
@@ -8,8 +8,8 @@ loading_function <- function (path_prefix) {
 }
 
 # debug package
-loading_function("./")
+debug_loading_function("./")
 
 # debug tests
 setwd("tests")
-loading_function("../")
+debug_loading_function("../")

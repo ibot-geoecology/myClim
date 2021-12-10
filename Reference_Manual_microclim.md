@@ -1,6 +1,6 @@
 <!-- toc -->
 
-prosince 07, 2021
+prosince 10, 2021
 
 # DESCRIPTION
 
@@ -26,104 +26,6 @@ Imports:
     dplyr,
     runner
 Roxygen: list(markdown = TRUE)```
-
-
-# `mc_calc_agg_mean`
-
-Agregate data by mean function
-
-
-## Description
-
-Function return aggregated data by mean
-
-
-## Usage
-
-```r
-mc_calc_agg_mean(
-  data,
-  breaks,
-  localities = NULL,
-  sensors = NULL,
-  use_utc = F,
-  ...
-)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`data`     |     all data in standard format
-`breaks`     |     cut function parameter
-`localities`     |     locality_ids for filtering data; if empty then all
-`sensors`     |     sensor_ids for filtering data; if empty then all
-`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
-`...`     |     parameters for mean function
-
-
-## Value
-
-aggregated data in standard format
-
-
-## Examples
-
-```r
-example_cleaned_tomst_data <- mc_calc_agg_mean(example_cleaned_tomst_data, "hour", na.rm=TRUE)
-```
-
-
-# `mc_calc_agg_quantile`
-
-Agregate data by quantile function
-
-
-## Description
-
-Function return aggregated data by quantile function
-
-
-## Usage
-
-```r
-mc_calc_agg_quantile(
-  data,
-  breaks,
-  probs,
-  localities = NULL,
-  sensors = NULL,
-  use_utc = F,
-  ...
-)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`data`     |     all data in standard format
-`breaks`     |     cut function parameter
-`probs`     |     value 0-1
-`localities`     |     locality_ids for filtering data; if empty then all
-`sensors`     |     sensor_ids for filtering data; if empty then all
-`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
-`...`     |     parameters for quantile function
-
-
-## Value
-
-aggregated data in standard format
-
-
-## Examples
-
-```r
-example_cleaned_tomst_data <- mc_calc_agg_quantile(example_cleaned_tomst_data, "hour", 0.1, na.rm=TRUE)
-```
 
 
 # `mc_calc_agg`
@@ -378,6 +280,42 @@ example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E
 ```
 
 
+# `mc_info_clean`
+
+Get all clean table
+
+
+## Description
+
+This function return dataframe with all clean info about loggers
+
+
+## Usage
+
+```r
+mc_info_clean(data)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in standard format
+
+
+## Value
+
+dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
+
+
+## Examples
+
+```r
+log_table <- mc_prep_logs(cleaned_example_tomst_data1)
+```
+
+
 # `mc_info_count`
 
 count data
@@ -422,6 +360,16 @@ Class for locality metadata
 ## Description
 
 Class for locality metadata
+
+
+# `mc_LoggerCleanInfo-class`
+
+Class for logger clean info
+
+
+## Description
+
+Class for logger clean info
 
 
 # `mc_LoggerMetadata-class`
@@ -530,6 +478,44 @@ mc_plot_loggers(example_tomst_data1, "Figures")
 ```
 
 
+# `mc_prep_clean`
+
+Cleaning datetime series
+
+
+## Description
+
+This function change datetime and values series. Result series has constant
+ step without duplicits and missed values are filled in as NA.
+
+
+## Usage
+
+```r
+mc_prep_clean(data, silent = FALSE)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     character data in standard format
+`silent`     |     if true, then informations aren't printed (default FALSE)
+
+
+## Value
+
+cleaned data in standard format
+
+
+## Examples
+
+```r
+cleaned_example_tomst_data1 <- mc_prep_clean(example_tomst_data1)
+```
+
+
 # `mc_prep_crop`
 
 Crop datetime
@@ -565,79 +551,6 @@ cropped data in standard format
 
 ```r
 cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
-```
-
-
-# `mc_prep_datetime_step`
-
-Cleaning datetime series
-
-
-## Description
-
-This function change datetime and values series. Result series has constant
- step without duplicits and missed values are filled in as NA.
-
-
-## Usage
-
-```r
-mc_prep_datetime_step(data)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`data`     |     character data in standard format
-
-
-## Value
-
-cleaned data in standard format
-
-
-## Examples
-
-```r
-cleaned_example_tomst_data1 <- mc_prep_datetime_step(example_tomst_data1)
-```
-
-
-# `mc_prep_logs`
-
-Get all clean log messages
-
-
-## Description
-
-This function return dataframe with all clean log messages
-
-
-## Usage
-
-```r
-mc_prep_logs(data)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`data`     |     in standard format
-
-
-## Value
-
-dataframe with columns locality_id, serial_number, clean_type, message
-
-
-## Examples
-
-```r
-log_table <- mc_prep_logs(cleaned_example_tomst_data1)
 ```
 
 

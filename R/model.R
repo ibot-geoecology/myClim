@@ -79,16 +79,32 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
 #' Class for logger metadata
 #' @slot type of logger (TMS, ThermoDatalogger)
 #' @slot serial_number
-#' @slot step of series in minutes
 #' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               representation(
                                 type = "character",
-                                serial_number = "character",
-                                step = "numeric"),
+                                serial_number = "character"),
+)
+
+#' Class for logger clean info
+#' @slot step of series in minutes
+#' @slot count_duplicits
+#' @slot count_missed
+#' @slot count_disordered
+#' @export mc_LoggerCleanInfo
+#' @exportClass mc_LoggerCleanInfo
+mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
+                              representation(
+                                  step = "numeric",
+                                  count_duplicits = "numeric",
+                                  count_missed = "numeric",
+                                  count_disordered = "numeric"),
                               prototype(
-                                step = NA_integer_)
+                                  step = NA_integer_,
+                                  count_duplicits = NA_integer_,
+                                  count_missed = NA_integer_,
+                                  count_disordered = NA_integer_),
 )
 
 #' Class for sensor metadata

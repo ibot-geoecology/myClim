@@ -185,7 +185,7 @@ mc_read_from_df <- function(files_table, localities_table=NULL) {
                     serial_number = serial_number,
                     type = data_format@logger_type)
     list(metadata = metadata,
-         clean_log = list(),
+         clean_info = mc_LoggerCleanInfo(),
          datetime = datetime,
          sensors = .read_get_sensors(data_table, data_format))
 }

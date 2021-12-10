@@ -2,37 +2,46 @@
 
 .prep_const_DETECT_STEP_LENGTH <- 100
 
-#' @export
-mc_const_CLEAN_DATETIME_STEP <- "datetime_step"
-#' @export
-mc_const_CLEAN_CROP <- "crop"
-
 #' Cleaning datetime series
 #'
 #' This function change datetime and values series. Result series has constant
 #' step without duplicits and missed values are filled in as NA.
 #'
 #' @param data character data in standard format
+#' @param silent if true, then informations aren't printed (default FALSE)
 #' @return cleaned data in standard format
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_prep_datetime_step(example_tomst_data1)
-mc_prep_datetime_step <- function(data) {
+#' cleaned_example_tomst_data1 <- mc_prep_clean(example_tomst_data1)
+mc_prep_clean <- function(data, silent=FALSE) {
     logger_function <- function(logger) {
-        .prep_datetime_step_logger(logger)
+        .prep_clean_logger(logger)
     }
     locality_function <- function(locality) {
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         locality
     }
-    purrr::map(data, locality_function)
+    result <- purrr::map(data, locality_function)
+    if(silent) {
+        return(result)
+    }
+    info_table <- mc_info_clean(result)
+    count_loggers <- nrow(info_table)
+    print(stringr::str_glue("{count_loggers} loggers"))
+    start_date <- min(info_table$start_date)
+    end_date <- max(info_table$end_date)
+    print(stringr::str_glue("datetime range: {start_date} - {end_date}"))
+    steps <- paste(unique(info_table$step), sep = ", ", collapse = "")
+    print(stringr::str_glue("detected steps: {steps}"))
+    print.data.frame(info_table)
+    result
 }
 
-.prep_datetime_step_logger <- function(logger) {
-    logger$metadata@step <- .prep_detect_step_minutes(logger$datetime)
-    logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{logger$metadata@step} min"))
-    logger <- .prep_datetime_step_log_wrong(logger)
-    .prep_datetime_step_edit_series(logger)
+.prep_clean_logger <- function(logger) {
+    logger$clean_info@step <- .prep_detect_step_minutes(logger$datetime)
+    logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{logger$clean_info@step} min"))
+    logger <- .prep_clean_write_info(logger)
+    logger <- .prep_clean_edit_series(logger)
 }
 
 .prep_detect_step_minutes <- function(datetime) {
@@ -42,29 +51,27 @@ mc_prep_datetime_step <- function(data) {
     round(unname(quantile(diff_datetime, p=0.5, type=1)/60))
 }
 
-.prep_add_method_to_clean_log_if_need <- function(clean_log, method) {
-    if(!(method %in% names(clean_log))) {
-        clean_log[[method]] <- character()
-    }
-    clean_log
+.prep_clean_write_info <- function(logger) {
+    diff_datetime <- diff(as.numeric(logger$datetime))
+    logger$clean_info@count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
+    sorted_datetime <- sort(as.numeric(logger$datetime))
+    diff_datetime <- diff(sorted_datetime) %/% 60
+    logger$clean_info@count_duplicits <- length(purrr::keep(diff_datetime, function(x) x == 0))
+    right_count_datetime <- diff(c(sorted_datetime[[1]], tail(sorted_datetime, n=1))) %/% 60 %/% logger$clean_info@step + 1
+    logger$clean_info@count_missed <- right_count_datetime - (length(logger$datetime) - logger$clean_info@count_duplicits)
+    logger
 }
 
-.prep_add_log <- function(clean_log, method, message) {
-    clean_log <- .prep_add_method_to_clean_log_if_need(clean_log, method)
-    clean_log[[method]][[length(clean_log[[method]]) + 1]] <- message
-    clean_log
-}
-
-.prep_datetime_step_edit_series <- function(logger) {
-    if(!.prep_was_error_in_logger_datetime_step(logger)){
+.prep_clean_edit_series <- function(logger) {
+    if(!.prep_clean_was_error_in_logger(logger)){
         return(logger)
     }
     table <- microclim:::.common_logger_values_as_tibble(logger)
     table <- dplyr::arrange(table, datetime)
     grouped_table <- dplyr::group_by(table, datetime)
-    table_noduplicits <- dplyr::summarise_all(grouped_table, mean)
+    table_noduplicits <- dplyr::summarise_all(grouped_table, dplyr::first)
     datetime_range <- range(table_noduplicits$datetime)
-    datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$metadata@step} min")))
+    datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$clean_info@step} min")))
     colnames(datetime_seq) <- "datetime"
     output_table <- dplyr::left_join(datetime_seq, table_noduplicits, by="datetime")
     logger$datetime <- output_table$datetime
@@ -76,41 +83,20 @@ mc_prep_datetime_step <- function(data) {
     logger
 }
 
-.prep_datetime_step_log_wrong <- function(logger) {
-    diff_datetime <- diff(as.numeric(logger$datetime))
-    count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
-    messages <- character()
-    if(count_disordered > 0) {
-        messages <- stringr::str_glue("{count_disordered}x disordered")
-    }
-    diff_datetime <- tibble::as_tibble(diff(sort(as.numeric(logger$datetime))) %/% 60)
-    count_table <- dplyr::count(diff_datetime, value)
-    wrong_diff <- dplyr::filter(count_table, value != logger$metadata@step)
-    log_message_function <- function(value, n) {
-        if(value == 0) {
-            return(stringr::str_glue("{n}x duplicits"))
-        }
-        stringr::str_glue("{n}x {value} min gap")
-    }
-    messages <- c(messages, purrr::map2_chr(wrong_diff$value, wrong_diff$n, log_message_function))
-    if(length(messages) > 0)
-    {
-        logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]] <- messages
-    }
-    logger
+.prep_is_logger_cleaned <- function(logger) {
+    !is.na(logger$clean_info@step)
 }
 
-.prep_is_logger_datetime_step_processed <- function(logger) {
-    !is.na(logger$metadata@step)
+.prep_clean_was_error_in_logger <- function(logger) {
+    is_ok <- c(logger$clean_info@count_disordered == 0,
+               logger$clean_info@count_duplicits == 0,
+               logger$clean_info@count_missed == 0)
+    !all(is_ok)
 }
 
-.prep_was_error_in_logger_datetime_step <- function(logger) {
-    mc_const_CLEAN_DATETIME_STEP %in% names(logger$clean_log)
-}
-
-.prep_get_loggers_datetime_step_unprocessed <- function(data) {
+.prep_get_uncleaned_loggers <- function(data) {
     locality_function <- function(locality) {
-        unprocessed <- purrr::discard(locality$loggers, .prep_is_logger_datetime_step_processed)
+        unprocessed <- purrr::discard(locality$loggers, .prep_is_logger_cleaned)
         purrr::map_chr(unprocessed, function(x) x$metadata@serial_number)
     }
     loggers <- purrr::map(data, locality_function)
@@ -118,40 +104,11 @@ mc_prep_datetime_step <- function(data) {
 }
 
 .prep_warn_if_datetime_step_unprocessed <- function(data) {
-    unprocessed_loggers <- .prep_get_loggers_datetime_step_unprocessed(data)
+    unprocessed_loggers <- .prep_get_uncleaned_loggers(data)
     if(length(unprocessed_loggers) > 0){
         loggers_text <- paste(unprocessed_loggers, sep=", ", collapse="")
         warning(stringr::str_glue("Detected missed step in loggers {loggers_text}. Probably loggers weren't cleaned."))
     }
-}
-
-#' Get all clean log messages
-#'
-#' This function return dataframe with all clean log messages
-#'
-#' @param data in standard format
-#' @return dataframe with columns locality_id, serial_number, clean_type, message
-#' @export
-#' @examples
-#' log_table <- mc_prep_logs(cleaned_example_tomst_data1)
-mc_prep_logs <- function(data) {
-    logger_function <- function (logger) {
-        log_function <- function(type, messages) {
-            purrr::map(messages, function(message) c(logger$metadata@serial_number, type, message))
-        }
-        items <- purrr::map2(names(logger$clean_log), logger$clean_log, log_function)
-        purrr::flatten(items)
-    }
-
-    locality_function <- function(locality) {
-        items <- purrr::map(locality$loggers, logger_function)
-        purrr::map(purrr::flatten(items), function(x) purrr::prepend(x, locality$metadata@locality_id))
-    }
-
-    rows <- purrr::flatten(purrr::map(data, locality_function))
-    columns <- purrr::transpose(rows)
-    data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
-               clean_type=unlist(columns[[3]]), message=unlist(columns[[4]]))
 }
 
 #' Set user defined TZ offset
@@ -259,7 +216,5 @@ mc_prep_crop <- function(data, start=NULL, end=NULL) {
     if(is.null(end)) {
         end <- datetime_range[[2]]
     }
-    message <- stringr::str_glue("original datetime range {datetime_range[[1]]} - {datetime_range[[2]]} cropped to {start} - {end}")
-    logger$clean_log <- .prep_add_log(logger$clean_log, mc_const_CLEAN_CROP, message)
     logger
 }

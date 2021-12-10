@@ -166,48 +166,10 @@ mc_calc_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, use_ut
     }
     logger$sensors <- purrr::map(logger$sensors, sensor_function)
     if(length(logger$datetime) > 1) {
-        logger$metadata@step <- diff(as.numeric(logger$datetime[1:2])) %/% 60
+        logger$clean_info@step <- diff(as.numeric(logger$datetime[1:2])) %/% 60
     } else {
-        logger$metadata@step <- NA_integer_
+        logger$clean_info@step <- NA_integer_
     }
 
     logger
 }
-
-#' Agregate data by mean function
-#'
-#' Function return aggregated data by mean
-#'
-#' @param data all data in standard format
-#' @param breaks cut function parameter
-#' @param localities locality_ids for filtering data; if empty then all
-#' @param sensors sensor_ids for filtering data; if empty then all
-#' @param use_utc if set FALSE then datetime changed by locality tz_offset; default FALSE
-#' @param ... parameters for mean function
-#' @return aggregated data in standard format
-#' @export
-#' @examples
-#' example_cleaned_tomst_data <- mc_calc_agg_mean(example_cleaned_tomst_data, "hour", na.rm=TRUE)
-mc_calc_agg_mean <- function(data, breaks, localities=NULL, sensors=NULL, use_utc=F, ...) {
-    mc_calc_agg(data, mean, breaks, localities, sensors, use_utc, ...)
-}
-
-#' Agregate data by quantile function
-#'
-#' Function return aggregated data by quantile function
-#'
-#' @param data all data in standard format
-#' @param breaks cut function parameter
-#' @param probs value 0-1
-#' @param localities locality_ids for filtering data; if empty then all
-#' @param sensors sensor_ids for filtering data; if empty then all
-#' @param use_utc if set FALSE then datetime changed by locality tz_offset; default FALSE
-#' @param ... parameters for quantile function
-#' @return aggregated data in standard format
-#' @export
-#' @examples
-#' example_cleaned_tomst_data <- mc_calc_agg_quantile(example_cleaned_tomst_data, "hour", 0.1, na.rm=TRUE)
-mc_calc_agg_quantile <- function(data, breaks, probs, localities=NULL, sensors=NULL, use_utc=F, ...) {
-    mc_calc_agg(data, quantile, breaks, localities, sensors, use_utc, probs=probs, ...)
-}
-

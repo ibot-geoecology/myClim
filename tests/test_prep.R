@@ -2,38 +2,31 @@ library(testthat)
 library(microclim)
 source("test.R")
 
-test_that("mc_prep_datetime_step", {
+test_that("mc_prep_clean", {
     data <- mc_read_directory("data/clean-datetime_step", "TOMST")
-    cleaned_data <- mc_prep_datetime_step(data)
+    cleaned_data <- mc_prep_clean(data, silent=T)
     test_standard_data_format(cleaned_data)
-    expect_true("1x duplicits" %in% cleaned_data[["94184102"]]$loggers[[1]]$clean_log[[mc_const_CLEAN_DATETIME_STEP]])
-    expect_true("1x 45 min gap" %in% cleaned_data[["94184102"]]$loggers[[1]]$clean_log[[mc_const_CLEAN_DATETIME_STEP]])
-    expect_true("25x duplicits" %in% cleaned_data[["94184165"]]$loggers[[1]]$clean_log[[mc_const_CLEAN_DATETIME_STEP]])
-    expect_true("1x disordered" %in% cleaned_data[["94184169"]]$loggers[[1]]$clean_log[[mc_const_CLEAN_DATETIME_STEP]])
+    expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@count_duplicits, 1)
+    expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@count_missed, 2)
+    expect_equal(cleaned_data[["94184165"]]$loggers[[1]]$clean_info@count_duplicits, 25)
+    expect_equal(cleaned_data[["94184169"]]$loggers[[1]]$clean_info@count_disordered, 1)
     diff_datetime <- diff(as.numeric(cleaned_data[["94184169"]]$loggers[[1]]$datetime)) %/% 60
     expect_equal(diff_datetime, rep(15, 5))
     diff_datetime <- diff(as.numeric(cleaned_data[["94184170"]]$loggers[[1]]$datetime)) %/% 60
     expect_equal(diff_datetime, rep(15, 5))
-    test_function <- if(exists(".prep_is_logger_datetime_step_processed")) .prep_is_logger_datetime_step_processed else microclim:::.prep_is_logger_datetime_step_processed
+    test_function <- if(exists(".prep_is_logger_cleaned")) .prep_is_logger_cleaned else microclim:::.prep_is_logger_cleaned
     expect_true(test_function(cleaned_data[["94184102"]]$loggers[[1]]))
-    expect_true(microclim:::.prep_was_error_in_logger_datetime_step(cleaned_data[["94184102"]]$loggers[[1]]))
+    expect_true(microclim:::.prep_clean_was_error_in_logger(cleaned_data[["94184102"]]$loggers[[1]]))
     expect_equal(length(cleaned_data[["94184102"]]$loggers[[1]]$datetime), 49)
     expect_true(is.na(cleaned_data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[19]]))
-    expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$metadata@step, 15)
+    expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$clean_info@step, 15)
 })
 
-test_that("mc_prep_datetime_step_ok", {
+test_that("mc_prep_clean ok", {
     data <- mc_read_files("data/TOMST/data_94184102_0.csv", "TOMST")
-    cleaned_data <- mc_prep_datetime_step(data)
-    expect_true(microclim:::.prep_is_logger_datetime_step_processed(cleaned_data[[1]]$loggers[[1]]))
-    expect_false(microclim:::.prep_was_error_in_logger_datetime_step(cleaned_data[[1]]$loggers[[1]]))
-})
-
-test_that("mc_prep_logs", {
-    data <- mc_read_directory("data/clean-datetime_step", "TOMST")
-    cleaned_data <- mc_prep_datetime_step(data)
-    logs <- mc_prep_logs(cleaned_data)
-    expect_equal(colnames(logs), c("locality_id", "serial_number", "clean_type", "message"))
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_true(microclim:::.prep_is_logger_cleaned(cleaned_data[[1]]$loggers[[1]]))
+    expect_false(microclim:::.prep_clean_was_error_in_logger(cleaned_data[[1]]$loggers[[1]]))
 })
 
 test_that("mc_prep_solar_tz", {
@@ -50,32 +43,19 @@ test_that("mc_prep_user_tz", {
     expect_equal(data$A1E05$metadata@tz_offset, 50)
 })
 
-test_that("clean_add_log", {
-    logger <- list()
-    logger$clean_log <- list()
-    step <- 15
-    logger$clean_log <- microclim:::.prep_add_log(logger$clean_log, mc_const_CLEAN_DATETIME_STEP,
-                                                   as.character(stringr::str_glue("first message")))
-    logger$clean_log <- microclim:::.prep_add_log(logger$clean_log, mc_const_CLEAN_DATETIME_STEP,
-                                                   "other message")
-    expect_equal(length(logger$clean_log), 1)
-    expect_equal(length(logger$clean_log[[mc_const_CLEAN_DATETIME_STEP]]), 2)
-})
-
 test_that("mc_prep_crop", {
     data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
     test_standard_data_format(data)
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 68)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 68)
-    expect_equal(length(data$A2E32$loggers[[1]]$clean_log[[mc_const_CLEAN_CROP]]), 1)
 })
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
     data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
-    test_function <- if(exists(".prep_get_loggers_datetime_step_unprocessed")) .prep_get_loggers_datetime_step_unprocessed else microclim:::.prep_get_loggers_datetime_step_unprocessed
+    test_function <- if(exists(".prep_get_uncleaned_loggers")) .prep_get_uncleaned_loggers else microclim:::.prep_get_uncleaned_loggers
     expect_equal(test_function(data), c("91184101", "94184103", "94184102"))
-    data_clean <- mc_prep_datetime_step(data)
+    data_clean <- mc_prep_clean(data, silent=T)
     expect_equal(length(test_function(data_clean)), 0)
 })
 

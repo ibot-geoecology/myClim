@@ -5,7 +5,7 @@ source("test.R")
 
 test_that("mc_calc_snow", {
     data <- mc_read_directory("data/eco-snow", "TOMST")
-    cleaned_data <- mc_prep_datetime_step(data)
+    cleaned_data <- mc_prep_clean(data, silent=T)
     snow <- mc_calc_snow(cleaned_data, "TMS_T3", dr=1.5, tmax=0.5)
     expect_equal(ncol(snow), 3)
     expect_equal(nrow(snow), 24*4*31)
@@ -15,7 +15,7 @@ test_that("mc_calc_snow", {
 
 test_that("mc_calc_snow_logger_without_sensor", {
     expect_warning(data <- mc_read_directory("data/TOMST", "TOMST"))
-    cleaned_data <- mc_prep_datetime_step(data)
+    cleaned_data <- mc_prep_clean(data, silent=T)
     snow <- mc_calc_snow(cleaned_data, "TMS_T3", dr=1.5, tmax=0.5)
     expect_equal(ncol(snow), 4)
     expect_true(all(is.na(snow[["94184103"]])))
@@ -23,7 +23,7 @@ test_that("mc_calc_snow_logger_without_sensor", {
 
 test_that("mc_calc_snow_agg", {
     data <- mc_read_directory("data/eco-snow", "TOMST")
-    cleaned_data <- mc_prep_datetime_step(data)
+    cleaned_data <- mc_prep_clean(data, silent=T)
     cleaned_data <- mc_prep_user_tz(cleaned_data, list(`94184102`=60, `94184103`=60))
     snow_agg <- mc_calc_snow_agg(cleaned_data, "TMS_T3", dr=1.5, tmax=0.5)
     expect_equal(colnames(snow_agg), c("serial_number", "snow_days", "first_day", "last_day", "first_day_period", "last_day_period"))
@@ -39,17 +39,16 @@ test_that("mc_calc_snow_agg", {
 
 test_that("mc_calc_agg UTC", {
     data <- mc_read_directory("data/clean-datetime_step", "TOMST")
-    data <- mc_prep_datetime_step(data)
+    data <- mc_prep_clean(data, silent=T)
     data <- mc_calc_agg(data, quantile, "hour", use_utc = TRUE, probs = 0.5, na.rm=TRUE)
-    test_standard_data_format(data)
     expect_equal(data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[1]], 10)
     expect_equal(data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[5]], 10)
-    expect_equal(data[["94184102"]]$loggers[[1]]$metadata@step, 60)
+    expect_equal(data[["94184102"]]$loggers[[1]]$clean_info@step, 60)
 })
 
 test_that("mc_calc_agg solar time day", {
     data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
-    data <- mc_prep_datetime_step(data)
+    data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_solar_tz(data)
     data <- mc_calc_agg(data, quantile, "day", probs = 0.5, na.rm=TRUE)
     test_standard_data_format(data)
@@ -64,17 +63,15 @@ test_that("mc_calc_agg_empty_data", {
 
 test_that("mc_calc_agg_mean", {
     data <- mc_read_directory("data/clean-datetime_step", "TOMST")
-    data <- mc_prep_datetime_step(data)
-    data <- mc_calc_agg_mean(data, "hour", use_utc=T, na.rm=TRUE)
-    test_standard_data_format(data)
+    data <- mc_prep_clean(data, silent=T)
+    data <- mc_calc_agg(data, mean, "hour", use_utc=T, na.rm=TRUE)
     expect_equal(data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[3]], (3 * 10 + 9.9375) / 4)
 })
 
 test_that("mc_calc_agg_quantile", {
     data <- mc_read_directory("data/clean-datetime_step", "TOMST")
-    data <- mc_prep_datetime_step(data)
-    data <- mc_calc_agg_quantile(data, "hour", use_utc=T, 0.1, na.rm=TRUE)
-    test_standard_data_format(data)
+    data <- mc_prep_clean(data, silent=T)
+    data <- mc_calc_agg(data, quantile, "hour", use_utc=T, probs=0.1, na.rm=TRUE)
     expect_equal(data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[1]], 10)
 })
 

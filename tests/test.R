@@ -17,20 +17,28 @@ test_locality <- function(locality) {
 
 test_logger <- function(logger) {
     expect_equal(class(logger), "list")
-    expect_equal(names(logger), c("metadata", "clean_log", "datetime", "sensors"))
+    expect_equal(names(logger), c("metadata", "clean_info", "datetime", "sensors"))
     expect_equal(class(logger$metadata)[[1]], "mc_LoggerMetadata")
-    expect_equal(class(logger$clean_log), "list")
+    expect_equal(class(logger$clean_info)[[1]], "mc_LoggerCleanInfo")
     expect_equal(class(logger$datetime), c("POSIXct", "POSIXt"))
     expect_true(all(!is.na(logger$datetime)))
     expect_equal(class(logger$sensors), "list")
     expect_true(length(logger$sensors) > 0)
     test_data_length(logger)
+    test_cleaning(logger)
     walk(logger$sensors, test_sensor)
 }
 
 test_data_length <- function(logger) {
     datetime_length <- length(logger$datetime)
     walk(logger$sensors, ~ {expect_equal(length(.x$values), datetime_length)})
+}
+
+test_cleaning <- function(logger) {
+    if(!microclim:::.prep_is_logger_cleaned(logger)) {
+        return()
+    }
+    expect_equal(logger$clean_info@count_missed, length(purrr::keep(logger$sensors[[1]]$values, ~ is.na(.x))))
 }
 
 test_sensor <- function(sensor) {
@@ -43,7 +51,7 @@ test_sensor <- function(sensor) {
 
 get_empty_data <- function() {
     data <- mc_read_files("data/TOMST/data_94184102_0.csv", "TOMST")
-    data <- mc_prep_datetime_step(data)
+    data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_crop(data, end=as.POSIXct("2020-01-01", tz="UTC"))
     data
 }

@@ -6,7 +6,7 @@ example_tomst_data1 <- mc_read_from_csv("examples/data/TOMST/files_table.csv", "
 # File examples/data/TOMST/files_table.csv doesn't contain TOMST data. A warning is printed and the file is skipped.
 example_tomst_data2 <- mc_read_directory("examples/data/TOMST/", dataformat_name = "TOMST")
 # cleaning datetime step
-example_cleaned_tomst_data1 <- mc_prep_datetime_step(example_tomst_data1)
+example_cleaned_tomst_data1 <- mc_prep_clean(example_tomst_data1)
 # solar tz offset
 example_cleaned_tomst_data1 <- mc_prep_solar_tz(example_cleaned_tomst_data1)
 # The function returns a wideformat table with the values of the TMS_T1, and TMS_T2 sensors in the localities A6W79 and A2E32.
