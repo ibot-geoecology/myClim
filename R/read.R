@@ -27,7 +27,7 @@ mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
 #' example_tomst_data <- microclim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 mc_read_files <- function(files, dataformat_name) {
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name, serial_number=NA_character_)
-    mc_read_from_df(files_table)
+    mc_read_dataframe(files_table)
 }
 
 #' Data files reading by CSV
@@ -39,8 +39,8 @@ mc_read_files <- function(files, dataformat_name) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_read_from_csv("examples/data/TOMST/files_table.csv")
-mc_read_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
+#' example_tomst_data <- microclim::mc_read_csv("examples/data/TOMST/files_table.csv")
+mc_read_csv <- function(csv_files_table, csv_localities_table=NULL) {
     files_table <- read.table(csv_files_table,
                               header = TRUE,
                               sep = ",",
@@ -52,7 +52,7 @@ mc_read_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
                                        sep = ",",
                                        stringsAsFactors = FALSE)
     }
-    mc_read_from_df(files_table, localities_table)
+    mc_read_dataframe(files_table, localities_table)
 }
 
 #' Data files reading
@@ -74,7 +74,7 @@ mc_read_from_csv <- function(csv_files_table, csv_localities_table=NULL) {
 #' * tz_offset
 #' @return data in standard format
 #' @export
-mc_read_from_df <- function(files_table, localities_table=NULL) {
+mc_read_dataframe <- function(files_table, localities_table=NULL) {
     files_table <- microclim:::.common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {

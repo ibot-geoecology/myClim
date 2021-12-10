@@ -627,6 +627,91 @@ example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(`91184101`=60)
 ```
 
 
+# `mc_read_csv`
+
+Data files reading by CSV
+
+
+## Description
+
+This function read raw data from loggers by table saved in CSV file
+
+
+## Usage
+
+```r
+mc_read_csv(csv_files_table, csv_localities_table = NULL)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`csv_files_table`     |     data.frame
+`csv_localities_table`     |     data.frame
+
+
+## Value
+
+data in standard format
+
+
+## Examples
+
+```r
+example_tomst_data <- microclim::mc_read_csv("examples/data/TOMST/files_table.csv")
+```
+
+
+# `mc_read_dataframe`
+
+Data files reading
+
+
+## Description
+
+This function read raw data from loggers by data.frame with files description.
+
+
+## Usage
+
+```r
+mc_read_dataframe(files_table, localities_table = NULL)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`files_table`     |     data.frame which describe data files Columns:  
+
+*  path - path to file 
+
+*  locality_id 
+
+*  data_format 
+
+*  serial_number - can be NA, than try detect
+`localities_table`     |     data.frame which describe localities Columns:  
+
+*  locality_id 
+
+*  altitude 
+
+*  lon_wgs84 
+
+*  lat_wgs84 
+
+*  tz_offset
+
+
+## Value
+
+data in standard format
+
+
 # `mc_read_directory`
 
 Reading files from directory
@@ -703,92 +788,7 @@ example_tomst_data <- microclim::mc_read_files(c("examples/data/TOMST/data_91184
 ```
 
 
-# `mc_read_from_csv`
-
-Data files reading by CSV
-
-
-## Description
-
-This function read raw data from loggers by table saved in CSV file
-
-
-## Usage
-
-```r
-mc_read_from_csv(csv_files_table, csv_localities_table = NULL)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`csv_files_table`     |     data.frame
-`csv_localities_table`     |     data.frame
-
-
-## Value
-
-data in standard format
-
-
-## Examples
-
-```r
-example_tomst_data <- microclim::mc_read_from_csv("examples/data/TOMST/files_table.csv")
-```
-
-
-# `mc_read_from_df`
-
-Data files reading
-
-
-## Description
-
-This function read raw data from loggers by data.frame with files description.
-
-
-## Usage
-
-```r
-mc_read_from_df(files_table, localities_table = NULL)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`files_table`     |     data.frame which describe data files Columns:  
-
-*  path - path to file 
-
-*  locality_id 
-
-*  data_format 
-
-*  serial_number - can be NA, than try detect
-`localities_table`     |     data.frame which describe localities Columns:  
-
-*  locality_id 
-
-*  altitude 
-
-*  lon_wgs84 
-
-*  lat_wgs84 
-
-*  tz_offset
-
-
-## Value
-
-data in standard format
-
-
-# `mc_reshape_longformat`
+# `mc_reshape_long`
 
 Longformat of sensor values
 
@@ -801,7 +801,7 @@ This function create data.frame with values of sensor
 ## Usage
 
 ```r
-mc_reshape_longformat(data, localities = c(), sensors = c())
+mc_reshape_long(data, localities = c(), sensors = c())
 ```
 
 
@@ -822,11 +822,11 @@ data.frame with columns location, serial_number, sensor, datetime, value
 ## Examples
 
 ```r
-example_tms_t1_table <- microclim::mc_reshape_longformat(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+example_tms_t1_table <- microclim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 ```
 
 
-# `mc_reshape_wideformat`
+# `mc_reshape_wide`
 
 Wideformat of sensor values
 
@@ -839,7 +839,7 @@ This function create data.frame with values of sensor in wide format.
 ## Usage
 
 ```r
-mc_reshape_wideformat(data, localities = c(), sensors = c())
+mc_reshape_wide(data, localities = c(), sensors = c())
 ```
 
 
@@ -860,7 +860,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tms_wideformat <- mc_reshape_wideformat(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+example_tms_wideformat <- mc_reshape_wide(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 ```
 
 

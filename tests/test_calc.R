@@ -47,7 +47,7 @@ test_that("mc_calc_agg UTC", {
 })
 
 test_that("mc_calc_agg solar time day", {
-    data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_solar_tz(data)
     data <- mc_calc_agg(data, quantile, "day", probs = 0.5, na.rm=TRUE)

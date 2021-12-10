@@ -146,7 +146,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 #' @examples
 #' mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
 mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, height=1900, left_margin=12) {
-    data_table <- microclim::mc_reshape_wideformat(data, localities, sensors)
+    data_table <- microclim::mc_reshape_wide(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
     png(filename=filename,width=1900, height=height, res=200)
     x_labels <- substr(data_table$datetime[seq(1, nrow(data_table), len=20)], 1, 10)

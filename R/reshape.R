@@ -8,8 +8,8 @@
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tms_wideformat <- mc_reshape_wideformat(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
-mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
+#' example_tms_wideformat <- mc_reshape_wide(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+mc_reshape_wide <- function(data, localities=c(), sensors=c()) {
     data <- mc_filter(data, localities, sensors)
     loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
     result <- data.frame(datetime=.reshape_get_datetimes_of_loggers(loggers))
@@ -53,8 +53,8 @@ mc_reshape_wideformat <- function(data, localities=c(), sensors=c()) {
 #' @return data.frame with columns location, serial_number, sensor, datetime, value
 #' @export
 #' @examples
-#' example_tms_t1_table <- microclim::mc_reshape_longformat(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
-mc_reshape_longformat <- function(data, localities=c(), sensors=c()) {
+#' example_tms_t1_table <- microclim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+mc_reshape_long <- function(data, localities=c(), sensors=c()) {
     data <- mc_filter(data, localities, sensors)
     result_env <- new.env()
     result_env$localities <- character()

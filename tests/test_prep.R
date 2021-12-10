@@ -30,21 +30,21 @@ test_that("mc_prep_clean ok", {
 })
 
 test_that("mc_prep_solar_tz", {
-    data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_solar_tz(data)
     test_standard_data_format(data)
     expect_equal(data$A1E05$metadata@tz_offset, 57)
 })
 
 test_that("mc_prep_user_tz", {
-    data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_user_tz(data, list(A1E05=50))
     test_standard_data_format(data)
     expect_equal(data$A1E05$metadata@tz_offset, 50)
 })
 
 test_that("mc_prep_crop", {
-    data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
     test_standard_data_format(data)
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 68)
@@ -52,7 +52,7 @@ test_that("mc_prep_crop", {
 })
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
-    data <- mc_read_from_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     test_function <- if(exists(".prep_get_uncleaned_loggers")) .prep_get_uncleaned_loggers else microclim:::.prep_get_uncleaned_loggers
     expect_equal(test_function(data), c("91184101", "94184103", "94184102"))
     data_clean <- mc_prep_clean(data, silent=T)
