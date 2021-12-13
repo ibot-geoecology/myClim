@@ -31,7 +31,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     start_date <- min(info_table$start_date)
     end_date <- max(info_table$end_date)
     print(stringr::str_glue("datetime range: {start_date} - {end_date}"))
-    steps <- paste(unique(info_table$step), sep = ", ", collapse = "")
+    steps <- paste(unique(info_table$step), collapse = ", ")
     print(stringr::str_glue("detected steps: {steps}"))
     print.data.frame(info_table)
     result
@@ -39,9 +39,14 @@ mc_prep_clean <- function(data, silent=FALSE) {
 
 .prep_clean_logger <- function(logger) {
     logger$clean_info@step <- .prep_detect_step_minutes(logger$datetime)
+    if(is.na(logger$clean_info@step)) {
+        warning(stringr::str_glue("step cannot be detected for logger {logger$metadata@serial_number} - skip"))
+        return(logger)
+    }
     logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{logger$clean_info@step} min"))
     logger <- .prep_clean_write_info(logger)
     logger <- .prep_clean_edit_series(logger)
+    logger
 }
 
 .prep_detect_step_minutes <- function(datetime) {
@@ -106,7 +111,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 .prep_warn_if_datetime_step_unprocessed <- function(data) {
     unprocessed_loggers <- .prep_get_uncleaned_loggers(data)
     if(length(unprocessed_loggers) > 0){
-        loggers_text <- paste(unprocessed_loggers, sep=", ", collapse="")
+        loggers_text <- paste(unprocessed_loggers, collapse=", ")
         warning(stringr::str_glue("Detected missed step in loggers {loggers_text}. Probably loggers weren't cleaned."))
     }
 }
@@ -161,7 +166,7 @@ mc_prep_solar_tz <- function(data) {
 .prep_warn_if_unset_tz_offset <- function(data) {
     utc_localities <- .prep_get_utc_localities(data)
     if(length(utc_localities) > 0){
-        localities_text <- paste(utc_localities, sep=", ", collapse="")
+        localities_text <- paste(utc_localities, collapse=", ")
         warning(stringr::str_glue("TZ offset in localities {localities_text} is not set - UTC used."))
     }
 }

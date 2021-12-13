@@ -22,6 +22,15 @@ test_that("mc_prep_clean", {
     expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$clean_info@step, 15)
 })
 
+test_that("mc_prep_clean one record", {
+    data <- mc_read_directory("data/clean-one-record", "TOMST")
+    expect_warning(cleaned_data <- mc_prep_clean(data, silent=T))
+    expect_true(is.na(cleaned_data[["94208611"]]$loggers[[1]]$clean_info@step))
+    expect_true(is.na(cleaned_data[["94208611"]]$loggers[[1]]$clean_info@count_duplicits))
+    expect_true(is.na(cleaned_data[["94208611"]]$loggers[[1]]$clean_info@count_disordered))
+    expect_true(is.na(cleaned_data[["94208611"]]$loggers[[1]]$clean_info@count_missed))
+})
+
 test_that("mc_prep_clean ok", {
     data <- mc_read_files("data/TOMST/data_94184102_0.csv", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)

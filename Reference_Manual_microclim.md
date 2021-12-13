@@ -1,6 +1,6 @@
 <!-- toc -->
 
-prosince 10, 2021
+prosince 13, 2021
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@ prosince 10, 2021
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.1
+Version: 0.0.2
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
