@@ -223,3 +223,87 @@ mc_prep_crop <- function(data, start=NULL, end=NULL) {
     }
     logger
 }
+
+#' Flattening data
+#'
+#' This function flatten data. Logger lever from data hierarchy is deleted.
+#' Sensors are moved to locality and datetimes are merged to one series.
+#'
+#' @param data in standard format
+#' @return flattened data in format for calculation
+#' @export
+#' @examples
+#' calc_data <- mc_prep_flat(example_cleaned_tomst_data1)
+mc_prep_flat <- function(data) {
+    locality_function <- function(locality) {
+        steps <- purrr::map_int(locality$loggers, function(.x) as.integer(.x$clean_info@step))
+        if(any(is.na(steps))){
+            stop(stringr::str_glue("Some Logger in locality {locality$metadata@locality_id} has NA step."))
+        }
+        if(length(steps) > 1 && var(steps) != 0) {
+            stop(stringr::str_glue("Loggers in locality {locality$metadata@locality_id} has different step."))
+        }
+
+        new_sensors <- .prep_get_flat_sensors(locality)
+        .prep_get_flat_locality(locality, new_sensors)
+    }
+
+    purrr::map(data, locality_function)
+}
+
+.prep_get_flat_sensors <- function(locality) {
+    result <- new.env()
+    result$sensor_names=list()
+    if(length(locality$loggers) == 0) {
+        return(result)
+    }
+    min_datetime <- microclim:::.common_as_utc_posixct(min(purrr::map_int(locality$loggers, function(.x) as.integer(.x$datetime[[1]]))))
+    max_datetime <- microclim:::.common_as_utc_posixct(max(purrr::map_int(locality$loggers, function(.x) as.integer(tail(.x$datetime, n=1)))))
+    datetimes <- seq(min_datetime, max_datetime, by=stringr::str_glue("{locality$loggers[[1]]$clean_info@step} min"))
+    sensor_name_function <- function(original_sensor_name, logger_index, logger_serial_number) {
+        sensor_name <- .prep_get_flat_sensor_name(original_sensor_name, names(result$sensor_names),
+                                                  logger_serial_number)
+        result$sensor_names[[sensor_name]] <- list(logger_index=logger_index, original_name=original_sensor_name)
+        sensor_name
+    }
+    logger_table_function <- function(logger, idx) {
+        result <- microclim:::.common_logger_values_as_tibble(logger)
+        sensor_names <- purrr::map_chr(logger$sensors, function(.x) sensor_name_function(.x$metadata@name, idx, logger$metadata@serial_number))
+        colnames(result) <- c("datetime", sensor_names)
+        result
+    }
+    tables <- c(tibble::as_tibble(datetimes), purrr::imap(locality$loggers, logger_table_function))
+    tables[[1]] <- tibble::as_tibble(tables[[1]])
+    colnames(tables[[1]]) <- "datetime"
+    result$table <- purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime"))
+    result
+}
+
+.prep_get_flat_sensor_name <- function(original_sensor_name, existed_names, logger_serial_number) {
+    sensor_name <- original_sensor_name
+    number <- 1
+    while(sensor_name %in% existed_names) {
+        sensor_name <- stringr::str_glue("{original_sensor_name}_{formatC(number, width=3, flag='0')}")
+        number <- number + 1
+    }
+    if(sensor_name != original_sensor_name) {
+        warning(stringr::str_glue("sensor {original_sensor_name} from {logger_serial_number} is renamed to {sensor_name}"))
+    }
+    sensor_name
+}
+
+.prep_get_flat_locality <- function(locality, new_sensors) {
+    sensor_function <- function(sensor_name) {
+        sensor_names_item <- new_sensors$sensor_names[[sensor_name]]
+        sensor <- locality$loggers[[sensor_names_item$logger_index]]$sensors[[sensor_names_item$original_name]]
+        sensor$metadata@name <- sensor_name
+        sensor
+    }
+
+    sensors <- purrr::map(colnames(new_sensors$table)[-1], sensor_function)
+    names(sensors) <- purrr::map(sensors, function(.x) .x$metadata@name)
+
+    list(metadata = locality$metadata,
+         datetime = new_sensors$table$datetime,
+         sensors = sensors)
+}

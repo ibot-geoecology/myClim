@@ -2,17 +2,32 @@ library(purrr)
 library(testthat)
 library(microclim)
 
-test_standard_data_format <- function(data) {
+test_prep_data_format <- function(data) {
     expect_equal(class(data), "list")
-    walk(data, test_locality)
+    walk(data, test_prep_locality)
 }
 
-test_locality <- function(locality) {
+test_calc_data_format <- function(data) {
+    expect_equal(class(data), "list")
+    walk(data, test_calc_locality)
+}
+
+test_prep_locality <- function(locality) {
     expect_equal(class(locality), "list")
     expect_equal(names(locality), c("metadata", "loggers"))
     expect_equal(class(locality$metadata)[[1]], "mc_LocalityMetadata")
     expect_equal(class(locality$loggers), "list")
     walk(locality$loggers, test_logger)
+}
+
+test_calc_locality <- function(locality) {
+    expect_equal(class(locality), "list")
+    expect_equal(names(locality), c("metadata", "datetime", "sensors"))
+    expect_equal(class(locality$metadata)[[1]], "mc_LocalityMetadata")
+    expect_equal(class(locality$datetime), c("POSIXct", "POSIXt"))
+    expect_true(all(!is.na(locality$datetime)))
+    expect_equal(class(locality$sensors), "list")
+    walk(locality$sensors, test_sensor)
 }
 
 test_logger <- function(logger) {

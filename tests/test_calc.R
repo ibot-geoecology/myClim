@@ -51,7 +51,7 @@ test_that("mc_calc_agg solar time day", {
     data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_solar_tz(data)
     data <- mc_calc_agg(data, quantile, "day", probs = 0.5, na.rm=TRUE)
-    test_standard_data_format(data)
+    test_prep_data_format(data)
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 2)
 })
 

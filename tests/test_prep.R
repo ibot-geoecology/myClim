@@ -5,7 +5,7 @@ source("test.R")
 test_that("mc_prep_clean", {
     data <- mc_read_directory("data/clean-datetime_step", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
-    test_standard_data_format(cleaned_data)
+    test_prep_data_format(cleaned_data)
     expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@count_duplicits, 1)
     expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@count_missed, 2)
     expect_equal(cleaned_data[["94184165"]]$loggers[[1]]$clean_info@count_duplicits, 25)
@@ -41,21 +41,21 @@ test_that("mc_prep_clean ok", {
 test_that("mc_prep_solar_tz", {
     data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_solar_tz(data)
-    test_standard_data_format(data)
+    test_prep_data_format(data)
     expect_equal(data$A1E05$metadata@tz_offset, 57)
 })
 
 test_that("mc_prep_user_tz", {
     data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_user_tz(data, list(A1E05=50))
-    test_standard_data_format(data)
+    test_prep_data_format(data)
     expect_equal(data$A1E05$metadata@tz_offset, 50)
 })
 
 test_that("mc_prep_crop", {
     data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
-    test_standard_data_format(data)
+    test_prep_data_format(data)
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 68)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 68)
 })
@@ -76,3 +76,9 @@ test_that(".prep_get_utc_localities", {
     expect_equal(length(test_function(data_clean)), 0)
 })
 
+test_that("mc_prep_flat", {
+    data <- mc_read_csv("data/flat/files_table.csv")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_warning(calc_data <- mc_prep_flat(cleaned_data))
+    test_calc_data_format(calc_data)
+})

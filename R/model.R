@@ -113,6 +113,7 @@ mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
          representation(
            sensor_id = "character",
+           name = "character",
            height = "numeric",
            calibrated = "logical"
          ),

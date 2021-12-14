@@ -1,6 +1,6 @@
 <!-- toc -->
 
-prosince 13, 2021
+prosince 14, 2021
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@ prosince 13, 2021
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.2
+Version: 0.0.3
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -551,6 +551,43 @@ cropped data in standard format
 
 ```r
 cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
+```
+
+
+# `mc_prep_flat`
+
+Flattening data
+
+
+## Description
+
+This function flatten data. Logger lever from data hierarchy is deleted.
+ Sensors are moved to locality and datetimes are merged to one series.
+
+
+## Usage
+
+```r
+mc_prep_flat(data)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in standard format
+
+
+## Value
+
+flattened data in format for calculation
+
+
+## Examples
+
+```r
+calc_data <- mc_prep_flat(example_cleaned_tomst_data1)
 ```
 
 
