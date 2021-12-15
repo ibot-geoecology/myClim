@@ -201,10 +201,5 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
 
 .read_get_sensor <- function(data_table, data_format, sensor_name){
     values <- data_table[[data_format@columns[[sensor_name]]]]
-    metadata <- mc_SensorMetadata(sensor_id = sensor_name,
-                                  name = sensor_name)
-    item <- list(metadata = metadata,
-                 values = values,
-                 states = list())
-    item
+    microclim:::.common_get_sensor(sensor_name, sensor_name, values)
 }

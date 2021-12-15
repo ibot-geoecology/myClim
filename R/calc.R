@@ -2,115 +2,107 @@
 #'
 #' Function detect snow based on detrended time series
 #'
-#' @param data all data in standard format
+#' @param data all data in format for calculation
 #' @param sensor name of temperature sensor
-#' @param localities names of localities; if empty then all
+#' @param output_sensor name of new snow sensor (default "snow")
+#' @param localities names for calculation; if empty then all
 #' @param dr delta range
 #' @param tmax maximal temperature
-#' @return data.frame with datetime column and logical columns named by serial_number of loggers
+#' @return input data with added snow sensor
 #' @export
 #' @examples
 #' snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")
-mc_calc_snow <- function(data, sensor, localities=c(), dr=2, tmax=0.5) {
-    data <- mc_filter(data, localities, sensor)
-    microclim:::.prep_warn_if_datetime_step_unprocessed(data)
-    loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
-    snow_tables <- purrr::map(loggers, function(x) .get_eco_snow_from_logger(x, dr, tmax))
-    result <- purrr::reduce(snow_tables, function(x, y) dplyr::full_join(x, y, by="datetime"))
-    as.data.frame(result)
+mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr=2, tmax=0.5) {
+    microclim:::.common_stop_if_not_calc_format(data)
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        .calc_add_snow_to_locality(locality, sensor, output_sensor, dr, tmax)
+    }
+    purrr::map(data, locality_function)
 }
 
-.get_eco_snow_from_logger <- function(logger, dr, tmax) {
-    result = tibble::tibble(datetime=logger$datetime)
-    if(length(logger$sensors) == 0){
-        result[[logger$metadata@serial_number]] <- NA
-        return(result)
+.calc_add_snow_to_locality <- function(locality, sensor, output_sensor, dr, tmax) {
+    if(!(sensor %in% names(locality$sensors))){
+        return(locality)
     }
-    day_max_temp <- runner::runner(logger$sensors[[1]]$values, k=3600*24, idx=logger$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
-    day_range_temp <- runner::runner(logger$sensors[[1]]$values, k=3600*24, idx=logger$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-    result[[logger$metadata@serial_number]] <- (day_range_temp < dr) & (day_max_temp < tmax)
-    return(result)
+    .calc_warn_if_overwriting(locality, output_sensor)
+    day_max_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    day_range_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
+    values <- (day_range_temp < dr) & (day_max_temp < tmax)
+    locality$sensors[[output_sensor]] <- microclim:::.common_get_sensor(output_sensor, values=values)
+    return(locality)
+}
+
+.calc_warn_if_overwriting <- function(locality, output_sensor) {
+    if(output_sensor %in% names(locality$sensors)) {
+        warning(stringr::str_glue("Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."))
+    }
 }
 
 #' Snow detection summary
 #'
+#' @description
 #' Function return summary info about snow detection
 #'
+#' @details
+#' If sensor isn't in locality, then NA returned.
+#'
 #' @param data all data in standard format
-#' @param sensor name of temperature sensor
+#' @param snow_sensor name of snow sensor created by function mc_calc_snow
 #' @param localities names of localities; if empty then all
-#' @param dr delta range
-#' @param tmax maximal temperature
 #' @param period count days for continuous cover of snow (default 3)
-#' @return data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
+#' @param use_utc if set FALSE then datetime changed by locality tz_offset; default FALSE
+#' @return data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
 #' @export
 #' @examples
 #' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")
-mc_calc_snow_agg <- function(data, sensor, localities=c(), dr=2, tmax=0.5, period = 3) {
-    data <- mc_filter(data, localities, sensor)
-    loggers_with_offset <- .calc_get_loggers_with_offset(data)
-    result_env <- new.env()
-    result_env$serial_number <- character()
-    result_env$snow_days <- numeric()
-    result_env$first_day <- as.Date(x = integer(0), origin = "1970-01-01")
-    result_env$last_day <- as.Date(x = integer(0), origin = "1970-01-01")
-    result_env$first_day_period <- as.Date(x = integer(0), origin = "1970-01-01")
-    result_env$last_day_period <- as.Date(x = integer(0), origin = "1970-01-01")
-    purrr::walk(loggers_with_offset, function (x) {
-        snow_table <- .get_eco_snow_from_logger(x$logger, dr, tmax)
-        .calc_compute_snow_agg_from_table(snow_table, x$tz_offset, period, result_env)
-    })
-    data.frame(serial_number=result_env$serial_number,
-               snow_days=result_env$snow_days,
-               first_day=result_env$first_day,
-               last_day=result_env$last_day,
-               first_day_period=result_env$first_day_period,
-               last_day_period=result_env$last_day_period)
-}
-
-.calc_get_loggers_with_offset <- function(data) {
-    microclim:::.prep_warn_if_unset_tz_offset(data)
-    locality_function <- function(locality) {
-        purrr::map(locality$loggers, function(logger) list(logger=logger, tz_offset=locality$metadata@tz_offset))
+mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_utc=F) {
+    microclim:::.common_stop_if_not_calc_format(data)
+    data <- mc_filter(data, localities)
+    if(!use_utc) {
+        microclim:::.prep_warn_if_unset_tz_offset(data)
     }
-    purrr::flatten(purrr::map(data, locality_function))
+    locality_function <- function(locality) {
+        .calc_get_snow_agg_row(locality, snow_sensor, period, use_utc)
+    }
+    as.data.frame(purrr::map_dfr(data, locality_function))
 }
 
-.calc_compute_snow_agg_from_table <- function(snow_table, tz_offset, period, environment) {
-    environment$serial_number <- c(environment$serial_number, colnames(snow_table)[[2]])
-    snow_table <- snow_table[!is.na(snow_table[[2]]), ]
-    snow_table$datetime <- .calc_get_datetimes_with_offset(snow_table$datetime, tz_offset)
+.calc_get_snow_agg_row <- function(locality, snow_sensor, period, use_utc) {
+    result <- list(locality_id = locality$metadata@locality_id,
+                   snow_days = NA_integer_,
+                   first_day = NA,
+                   last_day = NA,
+                   first_day_period = NA,
+                   last_day_period = NA)
+    if(!(snow_sensor %in% names(locality$sensors))) {
+        return(result)
+    }
+    snow_table <- tibble::tibble(datetime=locality$datetime, snow=locality$sensors[[snow_sensor]]$values)
+    snow_table <- dplyr::filter(snow_table, !is.na(snow))
+    if(!use_utc) {
+        snow_table$datetime <- .calc_get_datetimes_with_offset(snow_table$datetime, locality$metadata@tz_offset)
+    }
 
     if(nrow(snow_table) == 0) {
-        environment$snow_days <- c(environment$snow_days, 0)
-        environment$first_day <- c(environment$first_day, NA)
-        environment$last_day <- c(environment$last_day, NA)
-        environment$first_day_period <- c(environment$first_day_period, NA)
-        environment$last_day_period <- c(environment$last_day_period, NA)
-        return()
+        return(result)
     }
-    snow_days_table <- aggregate(snow_table[[2]], by=list(day=cut(snow_table$datetime, breaks = "days")), FUN=max)
+    snow_days_table <- aggregate(snow_table$snow, by=list(day=cut(snow_table$datetime, breaks = "days")), FUN=max)
     snow_days_table$day <- as.Date(snow_days_table$day)
-    snow_days <- sum(snow_days_table$x)
-    environment$snow_days <- c(environment$snow_days, snow_days)
-    if(snow_days == 0) {
-        environment$first_day <- c(environment$first_day, NA)
-        environment$last_day <- c(environment$last_day, NA)
-    }
-    else {
-        environment$first_day <- c(environment$first_day, as.Date(snow_days_table$day[min(which(snow_days_table$x == 1))]))
-        environment$last_day <- c(environment$last_day, as.Date(snow_days_table$day[max(which(snow_days_table$x == 1))]))
+    result$snow_days <- sum(snow_days_table$x)
+    if(result$snow_days > 0) {
+        result$first_day <- as.Date(snow_days_table$day[min(which(snow_days_table$x == 1))])
+        result$last_day <- as.Date(snow_days_table$day[max(which(snow_days_table$x == 1))])
     }
     snow_by_period <- runner::runner(snow_days_table$x, k=period, idx=as.Date(snow_days_table$day), f=function(x) if(length(x) == 0) NA else min(x), na_pad=TRUE)
     snow_by_period_index <- which(snow_by_period == 1)
-    if(length(snow_by_period_index) == 0) {
-        environment$first_day_period <- c(environment$first_day_period, NA)
-        environment$last_day_period <- c(environment$last_day_period, NA)
+    if(length(snow_by_period_index) > 0) {
+        result$first_day_period <- snow_days_table$day[min(snow_by_period_index) - period + 1]
+        result$last_day_period <- snow_days_table$day[max(snow_by_period_index)]
     }
-    else {
-        environment$first_day_period <- c(environment$first_day_period, snow_days_table$day[min(snow_by_period_index) - period + 1])
-        environment$last_day_period <- c(environment$last_day_period, snow_days_table$day[max(snow_by_period_index)])
-    }
+    result
 }
 
 .calc_get_datetimes_with_offset <- function(datetimes, tz_offset) {

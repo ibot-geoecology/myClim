@@ -22,8 +22,9 @@ test_prep_locality <- function(locality) {
 
 test_calc_locality <- function(locality) {
     expect_equal(class(locality), "list")
-    expect_equal(names(locality), c("metadata", "datetime", "sensors"))
+    expect_equal(names(locality), c("metadata", "step", "datetime", "sensors"))
     expect_equal(class(locality$metadata)[[1]], "mc_LocalityMetadata")
+    expect_equal(class(locality$step), "integer")
     expect_equal(class(locality$datetime), c("POSIXct", "POSIXt"))
     expect_true(all(!is.na(locality$datetime)))
     expect_equal(class(locality$sensors), "list")

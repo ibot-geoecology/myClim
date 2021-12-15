@@ -4,17 +4,21 @@
 \alias{mc_filter}
 \title{Filter data}
 \usage{
-mc_filter(data, localities = NULL, sensors = NULL)
+mc_filter(data, localities = NULL, sensors = NULL, reverse = FALSE)
 }
 \arguments{
-\item{data}{in standard format}
+\item{data}{in format for preparing or calculation}
 
-\item{localities}{locality_ids for filtering data; if empty then all}
+\item{localities}{locality_ids for filtering data; if NULL then do nothing}
 
-\item{sensors}{sensor_ids for filtering data; if empty then all}
+\item{sensors}{sensor_ids for filtering data; if NULL then do nothing}
+
+\item{reverse}{\itemize{
+\item if TRUE then filtered discard else keeped (default FALSE)
+}}
 }
 \value{
-filtered data in standard format
+filtered data in same format as input
 }
 \description{
 This function filter data by localities and sensors

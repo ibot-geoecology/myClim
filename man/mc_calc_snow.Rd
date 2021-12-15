@@ -4,21 +4,30 @@
 \alias{mc_calc_snow}
 \title{Snow detection}
 \usage{
-mc_calc_snow(data, sensor, localities = c(), dr = 2, tmax = 0.5)
+mc_calc_snow(
+  data,
+  sensor,
+  output_sensor = "snow",
+  localities = NULL,
+  dr = 2,
+  tmax = 0.5
+)
 }
 \arguments{
-\item{data}{all data in standard format}
+\item{data}{all data in format for calculation}
 
 \item{sensor}{name of temperature sensor}
 
-\item{localities}{names of localities; if empty then all}
+\item{output_sensor}{name of new snow sensor (default "snow")}
+
+\item{localities}{names for calculation; if empty then all}
 
 \item{dr}{delta range}
 
 \item{tmax}{maximal temperature}
 }
 \value{
-data.frame with datetime column and logical columns named by serial_number of loggers
+input data with added snow sensor
 }
 \description{
 Function detect snow based on detrended time series

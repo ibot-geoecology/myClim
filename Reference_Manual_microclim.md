@@ -1,6 +1,6 @@
 <!-- toc -->
 
-prosince 14, 2021
+prosince 15, 2021
 
 # DESCRIPTION
 
@@ -91,14 +91,7 @@ Function return summary info about snow detection
 ## Usage
 
 ```r
-mc_calc_snow_agg(
-  data,
-  sensor,
-  localities = c(),
-  dr = 2,
-  tmax = 0.5,
-  period = 3
-)
+mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
 ```
 
 
@@ -107,16 +100,20 @@ mc_calc_snow_agg(
 Argument      |Description
 ------------- |----------------
 `data`     |     all data in standard format
-`sensor`     |     name of temperature sensor
+`snow_sensor`     |     name of snow sensor created by function mc_calc_snow
 `localities`     |     names of localities; if empty then all
-`dr`     |     delta range
-`tmax`     |     maximal temperature
 `period`     |     count days for continuous cover of snow (default 3)
+`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
+
+
+## Details
+
+If sensor isn't in locality, then NA returned.
 
 
 ## Value
 
-data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
+data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
 
 
 ## Examples
@@ -139,7 +136,14 @@ Function detect snow based on detrended time series
 ## Usage
 
 ```r
-mc_calc_snow(data, sensor, localities = c(), dr = 2, tmax = 0.5)
+mc_calc_snow(
+  data,
+  sensor,
+  output_sensor = "snow",
+  localities = NULL,
+  dr = 2,
+  tmax = 0.5
+)
 ```
 
 
@@ -147,16 +151,17 @@ mc_calc_snow(data, sensor, localities = c(), dr = 2, tmax = 0.5)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in standard format
+`data`     |     all data in format for calculation
 `sensor`     |     name of temperature sensor
-`localities`     |     names of localities; if empty then all
+`output_sensor`     |     name of new snow sensor (default "snow")
+`localities`     |     names for calculation; if empty then all
 `dr`     |     delta range
 `tmax`     |     maximal temperature
 
 
 ## Value
 
-data.frame with datetime column and logical columns named by serial_number of loggers
+input data with added snow sensor
 
 
 ## Examples
@@ -255,7 +260,7 @@ This function filter data by localities and sensors
 ## Usage
 
 ```r
-mc_filter(data, localities = NULL, sensors = NULL)
+mc_filter(data, localities = NULL, sensors = NULL, reverse = FALSE)
 ```
 
 
@@ -263,14 +268,17 @@ mc_filter(data, localities = NULL, sensors = NULL)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in standard format
-`localities`     |     locality_ids for filtering data; if empty then all
-`sensors`     |     sensor_ids for filtering data; if empty then all
+`data`     |     in format for preparing or calculation
+`localities`     |     locality_ids for filtering data; if NULL then do nothing
+`sensors`     |     sensor_ids for filtering data; if NULL then do nothing
+`reverse`     |      
+
+*  if TRUE then filtered discard else keeped (default FALSE)
 
 
 ## Value
 
-filtered data in standard format
+filtered data in same format as input
 
 
 ## Examples

@@ -4,33 +4,27 @@
 \alias{mc_calc_snow_agg}
 \title{Snow detection summary}
 \usage{
-mc_calc_snow_agg(
-  data,
-  sensor,
-  localities = c(),
-  dr = 2,
-  tmax = 0.5,
-  period = 3
-)
+mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
 }
 \arguments{
 \item{data}{all data in standard format}
 
-\item{sensor}{name of temperature sensor}
+\item{snow_sensor}{name of snow sensor created by function mc_calc_snow}
 
 \item{localities}{names of localities; if empty then all}
 
-\item{dr}{delta range}
-
-\item{tmax}{maximal temperature}
-
 \item{period}{count days for continuous cover of snow (default 3)}
+
+\item{use_utc}{if set FALSE then datetime changed by locality tz_offset; default FALSE}
 }
 \value{
-data.frame with columns serial_number, snow_days, first_day, last_day, first_day_period, last_day_period
+data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
 }
 \description{
 Function return summary info about snow detection
+}
+\details{
+If sensor isn't in locality, then NA returned.
 }
 \examples{
 snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")

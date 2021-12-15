@@ -245,7 +245,7 @@ mc_prep_flat <- function(data) {
         }
 
         new_sensors <- .prep_get_flat_sensors(locality)
-        .prep_get_flat_locality(locality, new_sensors)
+        .prep_get_flat_locality(locality, new_sensors, steps[[1]])
     }
 
     purrr::map(data, locality_function)
@@ -292,7 +292,7 @@ mc_prep_flat <- function(data) {
     sensor_name
 }
 
-.prep_get_flat_locality <- function(locality, new_sensors) {
+.prep_get_flat_locality <- function(locality, new_sensors, step) {
     sensor_function <- function(sensor_name) {
         sensor_names_item <- new_sensors$sensor_names[[sensor_name]]
         sensor <- locality$loggers[[sensor_names_item$logger_index]]$sensors[[sensor_names_item$original_name]]
@@ -304,6 +304,7 @@ mc_prep_flat <- function(data) {
     names(sensors) <- purrr::map(sensors, function(.x) .x$metadata@name)
 
     list(metadata = locality$metadata,
+         step = step,
          datetime = new_sensors$table$datetime,
          sensors = sensors)
 }

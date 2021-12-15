@@ -23,3 +23,22 @@
     data <- c(list(datetime=logger$datetime), purrr::map(logger$sensors, function(.x) .x$values))
     tibble::as_tibble(data)
 }
+
+.common_is_calc_format <- function(data) {
+    length(data) > 0 && "sensors" %in% names(data[[1]])
+}
+
+.common_stop_if_not_calc_format <- function(data) {
+    if(!.common_is_calc_format(data)) {
+        stop("Format of data isn't right for calculation.")
+    }
+}
+
+.common_get_sensor <- function(sensor_name, sensor_id=NA_character_, values=NULL){
+    metadata <- mc_SensorMetadata(sensor_id = sensor_id,
+                                  name = sensor_name)
+    item <- list(metadata = metadata,
+                 values = values,
+                 states = list())
+    item
+}
