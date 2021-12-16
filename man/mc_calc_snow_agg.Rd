@@ -7,7 +7,7 @@
 mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
 }
 \arguments{
-\item{data}{all data in standard format}
+\item{data}{in format for calculation}
 
 \item{snow_sensor}{name of snow sensor created by function mc_calc_snow}
 
@@ -24,7 +24,7 @@ data.frame with columns locality, snow_days, first_day, last_day, first_day_peri
 Function return summary info about snow detection
 }
 \details{
-If sensor isn't in locality, then NA returned.
+If snow_sensor isn't in locality, then NA returned.
 }
 \examples{
 snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")

@@ -1,6 +1,6 @@
 <!-- toc -->
 
-prosince 15, 2021
+prosince 16, 2021
 
 # DESCRIPTION
 
@@ -35,7 +35,7 @@ Agregate data by function
 
 ## Description
 
-Function return aggregated data by function
+Function add agregated locality.
 
 
 ## Usage
@@ -48,6 +48,7 @@ mc_calc_agg(
   localities = NULL,
   sensors = NULL,
   use_utc = F,
+  suffix = "_agg",
   ...
 )
 ```
@@ -57,12 +58,13 @@ mc_calc_agg(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in standard format
+`data`     |     in format for calculation
 `fun`     |     aggregation function
 `breaks`     |     cut function parameter
 `localities`     |     locality_ids for filtering data; if empty then all
 `sensors`     |     sensor_ids for filtering data; if empty then all
-`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
+`use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default FALSE)
+`suffix`     |     of new locality name
 `...`     |     parameters for aggregation function
 
 
@@ -99,7 +101,7 @@ mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in standard format
+`data`     |     in format for calculation
 `snow_sensor`     |     name of snow sensor created by function mc_calc_snow
 `localities`     |     names of localities; if empty then all
 `period`     |     count days for continuous cover of snow (default 3)
@@ -108,7 +110,7 @@ Argument      |Description
 
 ## Details
 
-If sensor isn't in locality, then NA returned.
+If snow_sensor isn't in locality, then NA returned.
 
 
 ## Value
@@ -130,7 +132,7 @@ Snow detection
 
 ## Description
 
-Function detect snow based on detrended time series
+Function add sensor to locality with snow detection
 
 
 ## Usage
@@ -151,7 +153,7 @@ mc_calc_snow(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in format for calculation
+`data`     |     in format for calculation
 `sensor`     |     name of temperature sensor
 `output_sensor`     |     name of new snow sensor (default "snow")
 `localities`     |     names for calculation; if empty then all

@@ -14,7 +14,7 @@ mc_calc_snow(
 )
 }
 \arguments{
-\item{data}{all data in format for calculation}
+\item{data}{in format for calculation}
 
 \item{sensor}{name of temperature sensor}
 
@@ -30,7 +30,7 @@ mc_calc_snow(
 input data with added snow sensor
 }
 \description{
-Function detect snow based on detrended time series
+Function add sensor to locality with snow detection
 }
 \examples{
 snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")

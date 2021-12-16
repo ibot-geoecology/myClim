@@ -11,11 +11,12 @@ mc_calc_agg(
   localities = NULL,
   sensors = NULL,
   use_utc = F,
+  suffix = "_agg",
   ...
 )
 }
 \arguments{
-\item{data}{all data in standard format}
+\item{data}{in format for calculation}
 
 \item{fun}{aggregation function}
 
@@ -25,7 +26,9 @@ mc_calc_agg(
 
 \item{sensors}{sensor_ids for filtering data; if empty then all}
 
-\item{use_utc}{if set FALSE then datetime changed by locality tz_offset; default FALSE}
+\item{use_utc}{if set FALSE then datetime changed by locality tz_offset (default FALSE)}
+
+\item{suffix}{of new locality name}
 
 \item{...}{parameters for aggregation function}
 }
@@ -33,7 +36,7 @@ mc_calc_agg(
 aggregated data in standard format
 }
 \description{
-Function return aggregated data by function
+Function add agregated locality.
 }
 \examples{
 example_cleaned_tomst_data <- mc_calc_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)

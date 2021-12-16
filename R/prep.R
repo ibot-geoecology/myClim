@@ -257,9 +257,19 @@ mc_prep_flat <- function(data) {
     if(length(locality$loggers) == 0) {
         return(result)
     }
-    min_datetime <- microclim:::.common_as_utc_posixct(min(purrr::map_int(locality$loggers, function(.x) as.integer(.x$datetime[[1]]))))
-    max_datetime <- microclim:::.common_as_utc_posixct(max(purrr::map_int(locality$loggers, function(.x) as.integer(tail(.x$datetime, n=1)))))
-    datetimes <- seq(min_datetime, max_datetime, by=stringr::str_glue("{locality$loggers[[1]]$clean_info@step} min"))
+    min_datetime_function <- function(.x) {
+        if(length(.x$datetime) == 0) return(NA_integer_)
+        as.integer(.x$datetime[[1]])}
+    min_datetime <- microclim:::.common_as_utc_posixct(min(purrr::map_int(locality$loggers, min_datetime_function), na.rm=TRUE))
+    max_datetime_function <- function(.x) {
+        if(length(.x$datetime) == 0) return(NA_integer_)
+        as.integer(tail(.x$datetime, n=1))}
+    max_datetime <- microclim:::.common_as_utc_posixct(max(purrr::map_int(locality$loggers, max_datetime_function), na.rm=TRUE))
+    if(is.infinite(min_datetime) || is.infinite(max_datetime)) {
+        datetimes <- .POSIXct(integer(0))
+    } else {
+        datetimes <- seq(min_datetime, max_datetime, by=stringr::str_glue("{locality$loggers[[1]]$clean_info@step} min"))
+    }
     sensor_name_function <- function(original_sensor_name, logger_index, logger_serial_number) {
         sensor_name <- .prep_get_flat_sensor_name(original_sensor_name, names(result$sensor_names),
                                                   logger_serial_number)

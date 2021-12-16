@@ -65,9 +65,15 @@ test_sensor <- function(sensor) {
     expect_true(class(sensor$values) %in% c("integer", "numeric"))
 }
 
-get_empty_data <- function() {
+get_empty_prep_data <- function() {
     data <- mc_read_files("data/TOMST/data_94184102_0.csv", "TOMST")
     data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_crop(data, end=as.POSIXct("2020-01-01", tz="UTC"))
+    data
+}
+
+get_empty_calc_data <- function() {
+    data <- get_empty_prep_data()
+    data <- mc_prep_flat(data)
     data
 }
