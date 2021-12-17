@@ -7,6 +7,12 @@ test_that("wideformat-filter", {
     expect_true("A6W79-94184102-TMS_T1" %in% colnames(table))
     expect_equal(ncol(table), 5)
     expect_equal(nrow(table), 100)
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_prep_flat(cleaned_data)
+    table <- mc_reshape_wide(calc_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+    expect_true("A6W79-TMS_T1" %in% colnames(table))
+    expect_equal(ncol(table), 5)
+    expect_equal(nrow(table), 100)
 })
 
 test_that("wideformat-all", {
@@ -21,4 +27,10 @@ test_that("longformat-filter", {
     table <- mc_reshape_long(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
     expect_equal(ncol(table), 5)
     expect_equal(nrow(table), 2*(49+75))
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_prep_flat(cleaned_data)
+    table <- mc_reshape_long(calc_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+    expect_equal(ncol(table), 5)
+    expect_equal(nrow(table), 2*(49+75))
+    expect_true(all(is.na(table$serial_number)))
 })

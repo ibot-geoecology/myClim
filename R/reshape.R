@@ -2,90 +2,100 @@
 #'
 #' This function create data.frame with values of sensor in wide format.
 #'
-#' @param data all data in standard format
-#' @param localities names of localities; if empty then all
-#' @param sensors names of sensors; if empty then all
-#' @return data in standard format
+#' @param data in format for preparing or calculation
+#' @param localities names of localities; if NULL then all (default NULL)
+#' @param sensors names of sensors; if NULL then all (default NULL)
+#' @return data.frame with datetime column and columns for every sensor
 #' @export
 #' @examples
 #' example_tms_wideformat <- mc_reshape_wide(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
-mc_reshape_wide <- function(data, localities=c(), sensors=c()) {
+mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
     data <- mc_filter(data, localities, sensors)
-    loggers <- unname(do.call(c, lapply(data, function(x) x$loggers)))
-    result <- data.frame(datetime=.reshape_get_datetimes_of_loggers(loggers))
-    for(locality in data) {
-        for(logger in locality$loggers) {
-            result <- .reshape_add_wideformat_logger_columns(result, locality$metadata@locality_id, logger)
+    datetimes <- .reshape_get_all_datetimes(data)
+    tables <- c(tibble::tibble(datetimes), .reshape_get_sensor_tables(data))
+    tables[[1]] <- tibble::as_tibble(tables[[1]])
+    colnames(tables[[1]]) <- "datetime"
+    as.data.frame(purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime")))
+}
+
+.reshape_get_all_datetimes <- function(data){
+    is_calc_format <- microclim:::.common_is_calc_format(data)
+    locality_function <- function(locality) {
+        if(is_calc_format) {
+            return(locality$datetime)
         }
+        datetimes <- purrr::map(locality$loggers, function(x) x$datetime)
+        purrr::reduce(datetimes, union)
     }
-    result
+    locality_datetimes <- purrr::map(data, locality_function)
+    datetimes <- purrr::reduce(locality_datetimes, union)
+    datetimes <- sort(datetimes)
+    microclim:::.common_as_utc_posixct(datetimes)
 }
 
-.reshape_get_datetimes_of_loggers <- function(loggers){
-    if(length(loggers) == 0) {
-        return(c())
+.reshape_get_sensor_tables <- function(data) {
+    sensors_function <- function(item, name_prefix) {
+        table <- microclim:::.common_sensor_values_as_tibble(item)
+        colnames(table)[-1] <- purrr::map_chr(colnames(table)[-1], function(x) stringr::str_glue("{name_prefix}-{x}"))
+        table
     }
-    result <- Reduce(union, sapply(loggers, function(x) x$datetime))
-    result <- sort(result)
-    microclim:::.common_as_utc_posixct(result)
-}
 
-.reshape_add_wideformat_logger_columns <- function(df, locality, logger) {
-    logger_df <- data.frame(datetime=logger$datetime)
-    for(sensor in logger$sensors) {
-        column_name <- .reshape_get_sesnor_fullname(locality, logger$metadata@serial_number, sensor$metadata@sensor_id)
-        logger_df[column_name] <- sensor$values
+    if(microclim:::.common_is_calc_format(data)) {
+        return(purrr::map2(data, names(data), sensors_function))
     }
-    merge(df, logger_df, by="datetime", all=TRUE)
-}
 
-.reshape_get_sesnor_fullname <- function(locality_id, logger_serial_number, sensor){
-    paste(locality_id, logger_serial_number, sensor, sep="-")
+    prep_locality_function <- function(locality) {
+        prefixes <- purrr::map_chr(locality$loggers, function(x) stringr::str_glue("{locality$metadata@locality_id}-{x$metadata@serial_number}"))
+        purrr::map2(locality$loggers, prefixes, sensors_function)
+    }
+    result <- purrr::map(data, prep_locality_function)
+    purrr::flatten(result)
 }
 
 #' Longformat of sensor values
 #'
 #' This function create data.frame with values of sensor
 #'
-#' @param data all data in standard format
-#' @param localities names of localities; if empty then all
-#' @param sensors names of sensors; if empty then all
-#' @return data.frame with columns location, serial_number, sensor, datetime, value
+#' @param data in format for preparing or calculation
+#' @param localities locality_ids; if NULL then all (default NULL)
+#' @param sensors names of sensors; if NULL then all (default NULL)
+#' @return data.frame with columns locality_id, serial_number, sensor, datetime, value
 #' @export
 #' @examples
 #' example_tms_t1_table <- microclim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
-mc_reshape_long <- function(data, localities=c(), sensors=c()) {
+mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     data <- mc_filter(data, localities, sensors)
-    result_env <- new.env()
-    result_env$localities <- character()
-    result_env$serial_numbers <- character()
-    result_env$sensors <- character()
-    result_env$datetimes <- numeric()
-    result_env$values <- numeric()
-    for(locality in data) {
-        for(logger in locality$loggers) {
-            .reshape_add_logger_rows_to_longformat_table(result_env, logger)
-            count_items <- length(result_env$values) - length(result_env$serial_numbers)
-            result_env$serial_numbers <- c(result_env$serial_numbers, rep(logger$metadata@serial_number, count_items))
-        }
-        count_items <- length(result_env$values) - length(result_env$localities)
-        result_env$localities <- c(result_env$localities, rep(locality$metadata@locality_id, count_items))
+    is_prep_format <- microclim:::.common_is_prep_format(data)
+
+    sensor_function <- function(locality_id, serial_number, datetime, sensor_item) {
+        count <- length(datetime)
+        tibble::tibble(locality_id=rep(locality_id, count),
+                       serial_number=rep(serial_number, count),
+                       sensor=rep(sensor_item$metadata@name, count),
+                       datetime=datetime,
+                       value=sensor_item$values)
     }
-    data.frame(location=result_env$localities,
-               serial_number=result_env$serial_numbers,
-               sensor=result_env$sensors,
-               datetime=microclim:::.common_as_utc_posixct(result_env$datetimes),
-               value=result_env$values)
+
+    sensors_item_function <- function(locality_id, item) {
+        serial_number <- NA_character_
+        if(is_prep_format) {
+            serial_number <- item$metadata@serial_number
+        }
+        tables <- purrr::pmap_dfr(list(locality_id=locality_id, serial_number=serial_number,
+                                       datetime=list(item$datetime), sensor=item$sensors),
+                                  sensor_function)
+    }
+
+    prep_locality_function <- function(locality) {
+        map2_dfr(locality$metadata@locality_id, locality$loggers, sensors_item_function)
+    }
+
+    if(is_prep_format) {
+        result <- map_dfr(data, prep_locality_function)
+    } else {
+        result <- map2_dfr(names(data), data, sensors_item_function)
+    }
+    result
 }
 
-.reshape_add_logger_rows_to_longformat_table <- function(result_env, logger){
-    sensors <- purrr::keep(logger$sensors, function(x) length(x$values) > 0)
-    sensor_function <- function(sensor) {
-        result_env$values <- c(result_env$values, sensor$values)
-        result_env$datetimes <- c(result_env$datetimes, logger$datetime)
-        count_items <- length(result_env$values) - length(result_env$sensors)
-        result_env$sensors <- c(result_env$sensors, rep(sensor$metadata@sensor_id, count_items))
-    }
-    purrr::walk(sensors, sensor_function)
-}
 

@@ -7,7 +7,7 @@
 mc_prep_flat(data)
 }
 \arguments{
-\item{data}{in standard format}
+\item{data}{in format for preparing}
 }
 \value{
 flattened data in format for calculation

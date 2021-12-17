@@ -19,8 +19,8 @@
     unname(do.call(c, lapply(data, function(x) x$loggers)))
 }
 
-.common_logger_values_as_tibble <- function(logger) {
-    data <- c(list(datetime=logger$datetime), purrr::map(logger$sensors, function(.x) .x$values))
+.common_sensor_values_as_tibble <- function(item) {
+    data <- c(list(datetime=item$datetime), purrr::map(item$sensors, function(.x) .x$values))
     tibble::as_tibble(data)
 }
 

@@ -7,7 +7,7 @@
 mc_info_count(data)
 }
 \arguments{
-\item{data}{in standard format}
+\item{data}{in format for preparing or calculation}
 }
 \value{
 data.frame with count localities, loggers and sensors

@@ -4,17 +4,17 @@
 \alias{mc_reshape_long}
 \title{Longformat of sensor values}
 \usage{
-mc_reshape_long(data, localities = c(), sensors = c())
+mc_reshape_long(data, localities = NULL, sensors = NULL)
 }
 \arguments{
-\item{data}{all data in standard format}
+\item{data}{in format for preparing or calculation}
 
-\item{localities}{names of localities; if empty then all}
+\item{localities}{locality_ids; if NULL then all (default NULL)}
 
-\item{sensors}{names of sensors; if empty then all}
+\item{sensors}{names of sensors; if NULL then all (default NULL)}
 }
 \value{
-data.frame with columns location, serial_number, sensor, datetime, value
+data.frame with columns locality_id, serial_number, sensor, datetime, value
 }
 \description{
 This function create data.frame with values of sensor

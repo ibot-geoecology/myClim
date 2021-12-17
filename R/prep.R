@@ -71,7 +71,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     if(!.prep_clean_was_error_in_logger(logger)){
         return(logger)
     }
-    table <- microclim:::.common_logger_values_as_tibble(logger)
+    table <- microclim:::.common_sensor_values_as_tibble(logger)
     table <- dplyr::arrange(table, datetime)
     grouped_table <- dplyr::group_by(table, datetime)
     table_noduplicits <- dplyr::summarise_all(grouped_table, dplyr::first)
@@ -190,7 +190,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL) {
         warning(stringr::str_glue("end datetime is not in UTC"))
     }
     logger_function <- function(logger) {
-        table <- microclim:::.common_logger_values_as_tibble(logger)
+        table <- microclim:::.common_sensor_values_as_tibble(logger)
         logger <- .prep_log_crop(logger, start, end)
         if(!is.null(start)) {
             table <- dplyr::filter(table, datetime >= start)
@@ -229,7 +229,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL) {
 #' This function flatten data. Logger lever from data hierarchy is deleted.
 #' Sensors are moved to locality and datetimes are merged to one series.
 #'
-#' @param data in standard format
+#' @param data in format for preparing
 #' @return flattened data in format for calculation
 #' @export
 #' @examples
@@ -277,7 +277,7 @@ mc_prep_flat <- function(data) {
         sensor_name
     }
     logger_table_function <- function(logger, idx) {
-        result <- microclim:::.common_logger_values_as_tibble(logger)
+        result <- microclim:::.common_sensor_values_as_tibble(logger)
         sensor_names <- purrr::map_chr(logger$sensors, function(.x) sensor_name_function(.x$metadata@name, idx, logger$metadata@serial_number))
         colnames(result) <- c("datetime", sensor_names)
         result

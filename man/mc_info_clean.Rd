@@ -7,7 +7,7 @@
 mc_info_clean(data)
 }
 \arguments{
-\item{data}{in standard format}
+\item{data}{in format for preparing}
 }
 \value{
 dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered

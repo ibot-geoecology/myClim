@@ -24,6 +24,7 @@ Imports:
     lubridate,
     tibble,
     dplyr,
+    purrr,
     runner
 Roxygen: list(markdown = TRUE)```
 
@@ -311,7 +312,7 @@ mc_info_clean(data)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in standard format
+`data`     |     in format for preparing
 
 
 ## Value
@@ -347,7 +348,7 @@ mc_info_count(data)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in standard format
+`data`     |     in format for preparing or calculation
 
 
 ## Value
@@ -586,7 +587,7 @@ mc_prep_flat(data)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in standard format
+`data`     |     in format for preparing
 
 
 ## Value
@@ -892,7 +893,7 @@ This function create data.frame with values of sensor
 ## Usage
 
 ```r
-mc_reshape_long(data, localities = c(), sensors = c())
+mc_reshape_long(data, localities = NULL, sensors = NULL)
 ```
 
 
@@ -900,14 +901,14 @@ mc_reshape_long(data, localities = c(), sensors = c())
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in standard format
-`localities`     |     names of localities; if empty then all
-`sensors`     |     names of sensors; if empty then all
+`data`     |     in format for preparing or calculation
+`localities`     |     locality_ids; if NULL then all (default NULL)
+`sensors`     |     names of sensors; if NULL then all (default NULL)
 
 
 ## Value
 
-data.frame with columns location, serial_number, sensor, datetime, value
+data.frame with columns locality_id, serial_number, sensor, datetime, value
 
 
 ## Examples
@@ -930,7 +931,7 @@ This function create data.frame with values of sensor in wide format.
 ## Usage
 
 ```r
-mc_reshape_wide(data, localities = c(), sensors = c())
+mc_reshape_wide(data, localities = NULL, sensors = NULL)
 ```
 
 
@@ -938,14 +939,14 @@ mc_reshape_wide(data, localities = c(), sensors = c())
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in standard format
-`localities`     |     names of localities; if empty then all
-`sensors`     |     names of sensors; if empty then all
+`data`     |     in format for preparing or calculation
+`localities`     |     names of localities; if NULL then all (default NULL)
+`sensors`     |     names of sensors; if NULL then all (default NULL)
 
 
 ## Value
 
-data in standard format
+data.frame with datetime column and columns for every sensor
 
 
 ## Examples

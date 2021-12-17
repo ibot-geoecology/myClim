@@ -2,7 +2,7 @@
 #'
 #' This function return count of localities, loggers and sensors
 #'
-#' @param data in standard format
+#' @param data in format for preparing or calculation
 #' @return data.frame with count localities, loggers and sensors
 #' @export
 #' @examples
@@ -41,7 +41,7 @@ mc_info_count <- function(data) {
 #'
 #' This function return dataframe with all clean info about loggers
 #'
-#' @param data in standard format
+#' @param data in format for preparing
 #' @return dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
 #' @export
 #' @examples
