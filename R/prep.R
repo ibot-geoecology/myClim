@@ -318,3 +318,56 @@ mc_prep_flat <- function(data) {
          datetime = new_sensors$table$datetime,
          sensors = sensors)
 }
+
+#' Rename sensor
+#'
+#' This function rename sensors. It is usefull for flatting data format.
+#'
+#' @param data in format for preparing or calculation
+#' @param sensor_names list with new names of sensors; names of items are old ones
+#' @param localities vector of locality_ids; if NULL than all (default NULL)
+#' @param serial_numbers vector of serial_numbers; if NULL than all (default NULL); parameter is usefull only for
+#' preparing format of data
+#' @return data with changed sensor names
+#' @export
+#' @examples
+#'
+mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_numbers=NULL) {
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        if(microclim:::.common_is_calc_format(data)) {
+            return(.prepare_process_sensor_renaming(locality, sensor_names))
+        }
+        .prepare_process_sensor_renaming_in_loggers(locality, serial_numbers, sensor_names)
+    }
+
+    purrr::map(data, locality_function)
+}
+
+.prepare_process_sensor_renaming <- function(item, sensor_names) {
+    is_changed <- FALSE
+    for(old_name in names(sensor_names)) {
+        if(old_name %in% names(item$sensors)) {
+            item$sensors[[old_name]]$metadata@name <- sensor_names[[old_name]]
+            is_changed <- TRUE
+        }
+    }
+    if(is_changed) {
+        names(item$sensors) <- purrr::map_chr(item$sensors, function(x) x$metadata@name)
+    }
+    item
+}
+
+.prepare_process_sensor_renaming_in_loggers <- function(locality, serial_numbers, sensor_names) {
+    logger_function <- function(logger) {
+        if(!(is.null(serial_numbers) || logger$metadata@serial_number %in% serial_numbers)) {
+            return(logger)
+        }
+        .prepare_process_sensor_renaming(logger, sensor_names)
+    }
+    locality$loggers <- purrr::map(locality$loggers, logger_function)
+    locality
+}
+

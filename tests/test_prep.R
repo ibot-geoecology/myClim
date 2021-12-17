@@ -82,3 +82,16 @@ test_that("mc_prep_flat", {
     expect_warning(calc_data <- mc_prep_flat(cleaned_data))
     test_calc_data_format(calc_data)
 })
+
+test_that("mc_prep_rename_sensor", {
+    data <- mc_read_csv("data/flat/files_table.csv")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T1="TMS_Tsoil"))
+    expect_true("TMS_Tsoil" %in% names(cleaned_data$main$loggers[[1]]$sensors))
+    cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T2="T2"), serial_numbers="94184102")
+    expect_true("T2" %in% names(cleaned_data$main$loggers[[1]]$sensors))
+    expect_false("T2" %in% names(cleaned_data$main$loggers[[2]]$sensors))
+    expect_warning(calc_data <- mc_prep_flat(cleaned_data))
+    calc_data <- mc_prep_rename_sensor(calc_data, list(TMS_T3_001="TMS_T3_secondary"), localities="main")
+    expect_true("TMS_T3_secondary" %in% names(calc_data$main$sensors))
+})

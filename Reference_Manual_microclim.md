@@ -1,6 +1,6 @@
 <!-- toc -->
 
-prosince 16, 2021
+prosince 17, 2021
 
 # DESCRIPTION
 
@@ -598,6 +598,50 @@ flattened data in format for calculation
 
 ```r
 calc_data <- mc_prep_flat(example_cleaned_tomst_data1)
+```
+
+
+# `mc_prep_rename_sensor`
+
+Rename sensor
+
+
+## Description
+
+This function rename sensors. It is usefull for flatting data format.
+
+
+## Usage
+
+```r
+mc_prep_rename_sensor(
+  data,
+  sensor_names,
+  localities = NULL,
+  serial_numbers = NULL
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for preparing or calculation
+`sensor_names`     |     list with new names of sensors; names of items are old ones
+`localities`     |     vector of locality_ids; if NULL than all (default NULL)
+`serial_numbers`     |     vector of serial_numbers; if NULL than all (default NULL); parameter is usefull only for preparing format of data
+
+
+## Value
+
+data with changed sensor names
+
+
+## Examples
+
+```r
+
 ```
 
 
