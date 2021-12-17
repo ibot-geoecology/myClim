@@ -34,6 +34,16 @@
     }
 }
 
+.common_is_prep_format <- function(data) {
+    length(data) > 0 && "loggers" %in% names(data[[1]])
+}
+
+.common_stop_if_not_prep_format <- function(data) {
+    if(!.common_is_prep_format(data)) {
+        stop("Format of data isn't right for preparing.")
+    }
+}
+
 .common_get_sensor <- function(sensor_name, sensor_id=NA_character_, values=NULL){
     metadata <- mc_SensorMetadata(sensor_id = sensor_id,
                                   name = sensor_name)

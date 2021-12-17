@@ -333,11 +333,13 @@ mc_prep_flat <- function(data) {
 #' @examples
 #'
 mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_numbers=NULL) {
+    is_calc_format <- microclim:::.common_is_calc_format(data)
+
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        if(microclim:::.common_is_calc_format(data)) {
+        if(is_calc_format) {
             return(.prepare_process_sensor_renaming(locality, sensor_names))
         }
         .prepare_process_sensor_renaming_in_loggers(locality, serial_numbers, sensor_names)

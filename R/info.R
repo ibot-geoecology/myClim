@@ -13,18 +13,28 @@ mc_info_count <- function(data) {
     count_env$loggers <- 0
     count_env$sensors <- 0
 
-    logger_function <- function(logger) {
-        count_env$sensors <- count_env$sensors + length(logger$sensors)
+    sensors_item_function <- function(item) {
+        count_env$sensors <- count_env$sensors + length(item$sensors)
     }
 
-    locality_function <- function(locality) {
+    prep_locality_function <- function(locality) {
         count_env$loggers <- count_env$loggers + length(locality$loggers)
-        purrr::walk(locality$loggers, logger_function)
+        purrr::walk(locality$loggers, sensors_item_function)
     }
 
-    purrr::walk(data, locality_function)
-    data.frame(item=c("localities", "loggers", "sensors"),
-               count=c(count_env$localities, count_env$loggers, count_env$sensors))
+    if(microclim:::.common_is_calc_format(data)) {
+        purrr::walk(data, sensors_item_function)
+    } else {
+        purrr::walk(data, prep_locality_function)
+    }
+
+    result <- data.frame(item=c("localities", "loggers", "sensors"),
+                         count=c(count_env$localities, count_env$loggers, count_env$sensors))
+
+    if(microclim:::.common_is_calc_format(data)) {
+        result <- result[-2, ]
+    }
+    result
 }
 
 #' Get all clean table
@@ -37,6 +47,8 @@ mc_info_count <- function(data) {
 #' @examples
 #' log_table <- mc_prep_logs(cleaned_example_tomst_data1)
 mc_info_clean <- function(data) {
+    microclim:::.common_stop_if_not_prep_format(data)
+
     logger_function <- function (logger) {
         list(logger$metadata@serial_number,
              min(logger$datetime),
