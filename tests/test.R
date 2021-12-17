@@ -28,6 +28,7 @@ test_calc_locality <- function(locality) {
     expect_equal(class(locality$datetime), c("POSIXct", "POSIXt"))
     expect_true(all(!is.na(locality$datetime)))
     expect_equal(class(locality$sensors), "list")
+    test_data_length(locality)
     walk(locality$sensors, test_sensor)
 }
 
@@ -45,9 +46,9 @@ test_logger <- function(logger) {
     walk(logger$sensors, test_sensor)
 }
 
-test_data_length <- function(logger) {
-    datetime_length <- length(logger$datetime)
-    walk(logger$sensors, ~ {expect_equal(length(.x$values), datetime_length)})
+test_data_length <- function(item) {
+    datetime_length <- length(item$datetime)
+    walk(item$sensors, ~ {expect_equal(length(.x$values), datetime_length)})
 }
 
 test_cleaning <- function(logger) {

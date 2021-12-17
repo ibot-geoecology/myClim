@@ -307,6 +307,7 @@ mc_prep_flat <- function(data) {
         sensor_names_item <- new_sensors$sensor_names[[sensor_name]]
         sensor <- locality$loggers[[sensor_names_item$logger_index]]$sensors[[sensor_names_item$original_name]]
         sensor$metadata@name <- sensor_name
+        sensor$values <- new_sensors$table[[sensor_name]]
         sensor
     }
 
