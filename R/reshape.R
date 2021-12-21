@@ -87,13 +87,13 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     }
 
     prep_locality_function <- function(locality) {
-        map2_dfr(locality$metadata@locality_id, locality$loggers, sensors_item_function)
+        purrr::map2_dfr(locality$metadata@locality_id, locality$loggers, sensors_item_function)
     }
 
     if(is_prep_format) {
-        result <- map_dfr(data, prep_locality_function)
+        result <- purrr::map_dfr(data, prep_locality_function)
     } else {
-        result <- map2_dfr(names(data), data, sensors_item_function)
+        result <- purrr::map2_dfr(names(data), data, sensors_item_function)
     }
     result
 }
