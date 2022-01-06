@@ -41,6 +41,7 @@ Spuštění příkladů je možné následujícím kódem:
 ```R
 source("examples/load_tomst.R")
 source("examples/plot_tomst.R")
+source("examples/calc.R")
 ```
 
 # Testy
