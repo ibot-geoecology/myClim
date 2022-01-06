@@ -6,7 +6,7 @@ test_that("mc_info_count", {
     count_table <- mc_info_count(data)
     expect_equal(count_table$count, c(3, 3, 9))
     cleaned_data <- mc_prep_clean(data, silent=T)
-    calc_data <- mc_prep_flat(cleaned_data)
+    calc_data <- mc_agg(cleaned_data)
     count_table <- mc_info_count(calc_data)
     expect_equal(count_table$count, c(3, 9))
 })

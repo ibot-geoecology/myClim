@@ -27,7 +27,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
         datetimes <- purrr::map(locality$loggers, function(x) x$datetime)
         purrr::reduce(datetimes, union)
     }
-    locality_datetimes <- purrr::map(data, locality_function)
+    locality_datetimes <- purrr::map(microclim:::.common_get_localities(data), locality_function)
     datetimes <- purrr::reduce(locality_datetimes, union)
     datetimes <- sort(datetimes)
     microclim:::.common_as_utc_posixct(datetimes)
@@ -41,7 +41,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
     }
 
     if(microclim:::.common_is_calc_format(data)) {
-        return(purrr::map2(data, names(data), sensors_function))
+        return(purrr::map2(data$localities, names(data$localities), sensors_function))
     }
 
     prep_locality_function <- function(locality) {
@@ -93,7 +93,7 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     if(is_prep_format) {
         result <- purrr::map_dfr(data, prep_locality_function)
     } else {
-        result <- purrr::map2_dfr(names(data), data, sensors_item_function)
+        result <- purrr::map2_dfr(names(data$localities), data$localities, sensors_item_function)
     }
     result
 }

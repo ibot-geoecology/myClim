@@ -1,6 +1,6 @@
 <!-- toc -->
 
-prosince 21, 2021
+ledna 06, 2022
 
 # DESCRIPTION
 
@@ -29,28 +29,27 @@ Imports:
 Roxygen: list(markdown = TRUE)```
 
 
-# `mc_calc_agg`
+# `mc_agg`
 
 Agregate data by function
 
 
 ## Description
 
-Function add agregated locality.
+Function create aggregated data in format for calculation. If fun is NULL and period is NULL, than
+ function only convert source data to format for calculation.
 
 
 ## Usage
 
 ```r
-mc_calc_agg(
+mc_agg(
   data,
-  fun,
-  breaks,
-  localities = NULL,
-  sensors = NULL,
-  use_utc = F,
-  suffix = "_agg",
-  ...
+  fun = NULL,
+  period = NULL,
+  use_utc = TRUE,
+  percentiles = NULL,
+  na.rm = TRUE
 )
 ```
 
@@ -59,25 +58,35 @@ mc_calc_agg(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in format for calculation
-`fun`     |     aggregation function
-`breaks`     |     cut function parameter
-`localities`     |     locality_ids for filtering data; if empty then all
-`sensors`     |     sensor_ids for filtering data; if empty then all
-`use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default FALSE)
-`suffix`     |     of new locality name
-`...`     |     parameters for aggregation function
+`data`     |     in format for preparing or calculation
+`fun`     |     aggregation function ("min", "max", "mean", "percentile", "sum", "count", "coverage") Can be character vector of function names or list. if NULL than no aggregation.  
+
+*  functions are applied to all sensors. Sensors aren't renamed. 
+
+*  Names of items in list are sensor_names and items are vectors of functions applied to sensors. Names of new sensors are in format sensor_name _ function .   function coverage is count_values/count_all_records
+`period`     |     of aggregation - same as breaks in cut.POSIXt; if NULL then no aggregation
+`use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default TRUE); Non-UTC time can by used only for period `day` and bigger.
+`percentiles`     |      
+
+*  vector of percentile numbers; numbers are from range 0-100; every number generate new sensor
+`na.rm`     |     parameter for aggregation function; It isn't used for count and coverage.
+
+
+## Details
+
+If first or last period isn't full filled, data are cropped and a warning is shown. New sensors have
+ same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
 
 
 ## Value
 
-aggregated data in standard format
+aggregated data in format for calculating
 
 
 ## Examples
 
 ```r
-example_cleaned_tomst_data <- mc_calc_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
+example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c(min, max, percentile), "hour", percentiles = 50, na.rm=TRUE)
 ```
 
 
@@ -393,6 +402,16 @@ Class for logger metadata
 Class for logger metadata
 
 
+# `mc_MainMetadata-class`
+
+Class for main metadata in data format for calculation
+
+
+## Description
+
+Class for main metadata in data format for calculation
+
+
 # `mc_Physical-class`
 
 Class for physical
@@ -511,7 +530,7 @@ mc_prep_clean(data, silent = FALSE)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     character data in standard format
+`data`     |     in format for preparing
 `silent`     |     if true, then informations aren't printed (default FALSE)
 
 
@@ -540,7 +559,7 @@ This function crop data by datetime
 ## Usage
 
 ```r
-mc_prep_crop(data, start = NULL, end = NULL)
+mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 ```
 
 
@@ -548,9 +567,10 @@ mc_prep_crop(data, start = NULL, end = NULL)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in standard format
-`start`     |     POSIXct datetime in UTC; is optional
+`data`     |     in format for preparing
+`start`     |     POSIXct datetime in UTC; is optional; start datetime is included
 `end`     |     POSIXct datetime in UTC; is optional
+`end_included`     |     if TRUE then  end datetime is included (default TRUE)
 
 
 ## Value
@@ -561,44 +581,7 @@ cropped data in standard format
 ## Examples
 
 ```r
-cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
-```
-
-
-# `mc_prep_flat`
-
-Flattening data
-
-
-## Description
-
-This function flatten data. Logger lever from data hierarchy is deleted.
- Sensors are moved to locality and datetimes are merged to one series.
-
-
-## Usage
-
-```r
-mc_prep_flat(data)
-```
-
-
-## Arguments
-
-Argument      |Description
-------------- |----------------
-`data`     |     in format for preparing
-
-
-## Value
-
-flattened data in format for calculation
-
-
-## Examples
-
-```r
-calc_data <- mc_prep_flat(example_cleaned_tomst_data1)
+cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01", tz="UTC"))
 ```
 
 
@@ -667,12 +650,18 @@ mc_prep_solar_tz(data)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in standard format
+`data`     |     in format for preparing or calculation
+
+
+## Details
+
+The function require filled longitude of locality in slot lon_wgs84 of metadata.
+ TZ offset in minutes is calculated as `longitude / 180 * 12 * 60` .
 
 
 ## Value
 
-data with changed TZ offset in standard format
+data with changed TZ offset in same format as input data
 
 
 ## Examples

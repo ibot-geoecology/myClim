@@ -9,7 +9,10 @@ test_prep_data_format <- function(data) {
 
 test_calc_data_format <- function(data) {
     expect_equal(class(data), "list")
-    walk(data, test_calc_locality)
+    expect_equal(names(data), c("metadata", "localities"))
+    expect_equal(class(data$metadata)[[1]], "mc_MainMetadata")
+    expect_equal(class(data$localities), "list")
+    walk(data$localities, test_calc_locality)
 }
 
 test_prep_locality <- function(locality) {
@@ -22,9 +25,8 @@ test_prep_locality <- function(locality) {
 
 test_calc_locality <- function(locality) {
     expect_equal(class(locality), "list")
-    expect_equal(names(locality), c("metadata", "step", "datetime", "sensors"))
+    expect_equal(names(locality), c("metadata", "datetime", "sensors"))
     expect_equal(class(locality$metadata)[[1]], "mc_LocalityMetadata")
-    expect_equal(class(locality$step), "integer")
     expect_equal(class(locality$datetime), c("POSIXct", "POSIXt"))
     expect_true(all(!is.na(locality$datetime)))
     expect_equal(class(locality$sensors), "list")
@@ -75,6 +77,6 @@ get_empty_prep_data <- function() {
 
 get_empty_calc_data <- function() {
     data <- get_empty_prep_data()
-    data <- mc_prep_flat(data)
+    data <- mc_agg(data)
     data
 }

@@ -47,6 +47,17 @@ mc_Physical <- setClass("mc_Physical",
            units = "character"
          ))
 
+#' Class for main metadata in data format for calculation
+#' @slot step of data
+#' @export mc_MainMetadata
+#' @exportClass mc_MainMetadata
+mc_MainMetadata <- setClass("mc_MainMetadata",
+                            representation(
+                                    step = "numeric"
+                                ),
+                                prototype (
+                                ))
+
 #' Class for locality metadata
 #' @slot id name of loacality
 #' @slot altitude of loacality

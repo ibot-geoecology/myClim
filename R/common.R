@@ -25,7 +25,7 @@
 }
 
 .common_is_calc_format <- function(data) {
-    length(data) > 0 && "sensors" %in% names(data[[1]])
+    length(data) == 2 && all(names(data) == c("metadata", "localities"))
 }
 
 .common_stop_if_not_calc_format <- function(data) {
@@ -35,7 +35,7 @@
 }
 
 .common_is_prep_format <- function(data) {
-    length(data) > 0 && "loggers" %in% names(data[[1]])
+    !.common_is_calc_format(data)
 }
 
 .common_stop_if_not_prep_format <- function(data) {
@@ -44,7 +44,7 @@
     }
 }
 
-.common_get_sensor <- function(sensor_name, sensor_id=NA_character_, values=NULL){
+.common_get_new_sensor <- function(sensor_name, sensor_id=NA_character_, values=NULL){
     metadata <- mc_SensorMetadata(sensor_id = sensor_id,
                                   name = sensor_name)
     item <- list(metadata = metadata,
@@ -52,3 +52,26 @@
                  states = list())
     item
 }
+
+.common_get_localities <- function(data) {
+    if(.common_is_calc_format(data)) {
+        return(data$localities)
+    }
+    data
+}
+
+.common_get_id_of_item_with_sensors <-function(item) {
+    if("locality_id" %in% slotNames(item$metadata)) {
+        return(item$metadata@locality_id)
+    }
+    item$metadata@serial_number
+}
+
+.common_set_localities <- function(data, localities) {
+    if(.common_is_calc_format(data)) {
+        data$localities <- localities
+        return(data)
+    }
+    localities
+}
+

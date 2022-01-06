@@ -9,7 +9,7 @@
 #' count_table <- mc_info_count(example_tomst_data1)
 mc_info_count <- function(data) {
     count_env <- new.env()
-    count_env$localities <- length(data)
+    count_env$localities <- length(.common_get_localities(data))
     count_env$loggers <- 0
     count_env$sensors <- 0
 
@@ -23,7 +23,7 @@ mc_info_count <- function(data) {
     }
 
     if(microclim:::.common_is_calc_format(data)) {
-        purrr::walk(data, sensors_item_function)
+        purrr::walk(data$localities, sensors_item_function)
     } else {
         purrr::walk(data, prep_locality_function)
     }

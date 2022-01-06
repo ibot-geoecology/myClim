@@ -7,7 +7,7 @@
 mc_prep_clean(data, silent = FALSE)
 }
 \arguments{
-\item{data}{character data in standard format}
+\item{data}{in format for preparing}
 
 \item{silent}{if true, then informations aren't printed (default FALSE)}
 }

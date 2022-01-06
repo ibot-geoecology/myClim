@@ -4,14 +4,16 @@
 \alias{mc_prep_crop}
 \title{Crop datetime}
 \usage{
-mc_prep_crop(data, start = NULL, end = NULL)
+mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 }
 \arguments{
-\item{data}{in standard format}
+\item{data}{in format for preparing}
 
-\item{start}{POSIXct datetime in UTC; is optional}
+\item{start}{POSIXct datetime in UTC; is optional; start datetime is included}
 
 \item{end}{POSIXct datetime in UTC; is optional}
+
+\item{end_included}{if TRUE then  end datetime is included (default TRUE)}
 }
 \value{
 cropped data in standard format
@@ -20,5 +22,5 @@ cropped data in standard format
 This function crop data by datetime
 }
 \examples{
-cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
+cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01", tz="UTC"))
 }

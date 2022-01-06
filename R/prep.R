@@ -7,7 +7,7 @@
 #' This function change datetime and values series. Result series has constant
 #' step without duplicits and missed values are filled in as NA.
 #'
-#' @param data character data in standard format
+#' @param data in format for preparing
 #' @param silent if true, then informations aren't printed (default FALSE)
 #' @return cleaned data in standard format
 #' @export
@@ -139,8 +139,11 @@ mc_prep_user_tz <- function(data, tz_offsets) {
 #'
 #' This function compute TZ offset in localities by solar time
 #'
-#' @param data in standard format
-#' @return data with changed TZ offset in standard format
+#' The function require filled longitude of locality in slot lon_wgs84 of metadata.
+#' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
+#'
+#' @param data in format for preparing or calculation
+#' @return data with changed TZ offset in same format as input data
 #' @export
 #' @examples
 #' cleaned_example_tomst_data1 <- mc_prep_solar_tz(cleaned_example_tomst_data1)
@@ -155,11 +158,12 @@ mc_prep_solar_tz <- function(data) {
         locality
     }
 
-    purrr::map(data, locality_function)
+    localities <- purrr::map(microclim:::.common_get_localities(data), locality_function)
+    microclim:::.common_set_localities(data, localities)
 }
 
 .prep_get_utc_localities <- function(data) {
-    items <- purrr::keep(data, function(x) x$metadata@tz_type == mc_const_TZ_UTC)
+    items <- purrr::keep(microclim:::.common_get_localities(data), function(x) x$metadata@tz_type == mc_const_TZ_UTC)
     unname(purrr::map_chr(items, function(x) x$metadata@locality_id))
 }
 
@@ -175,14 +179,15 @@ mc_prep_solar_tz <- function(data) {
 #'
 #' This function crop data by datetime
 #'
-#' @param data in standard format
-#' @param start POSIXct datetime in UTC; is optional
+#' @param data in format for preparing
+#' @param start POSIXct datetime in UTC; is optional; start datetime is included
 #' @param end POSIXct datetime in UTC; is optional
+#' @param end_included if TRUE then  end datetime is included (default TRUE)
 #' @return cropped data in standard format
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01"))
-mc_prep_crop <- function(data, start=NULL, end=NULL) {
+#' cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01", tz="UTC"))
+mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     if(!is.null(start) && format(start, format="%Z") != "UTC") {
         warning(stringr::str_glue("start datetime is not in UTC"))
     }
@@ -190,19 +195,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL) {
         warning(stringr::str_glue("end datetime is not in UTC"))
     }
     logger_function <- function(logger) {
-        table <- microclim:::.common_sensor_values_as_tibble(logger)
-        logger <- .prep_log_crop(logger, start, end)
-        if(!is.null(start)) {
-            table <- dplyr::filter(table, datetime >= start)
-        }
-        if(!is.null(end)) {
-            table <- dplyr::filter(table, datetime <= end)
-        }
-        logger$datetime <- table$datetime
-        logger$sensors <- purrr::map(logger$sensors, function(sensor) {
-            sensor$values <- table[[sensor$metadata@sensor_id]]
-            sensor})
-        logger
+        .prep_crop_data(logger, start, end, end_included)
     }
 
     locality_function <- function(locality) {
@@ -213,111 +206,19 @@ mc_prep_crop <- function(data, start=NULL, end=NULL) {
     purrr::map(data, locality_function)
 }
 
-.prep_log_crop <- function(logger, start, end) {
-    datetime_range <- range(logger$datetime)
-    if(is.null(start)) {
-        start <- datetime_range[[1]]
+.prep_crop_data <- function(item, start, end, end_included) {
+    table <- microclim:::.common_sensor_values_as_tibble(item)
+    if(!is.null(start)) {
+        table <- dplyr::filter(table, datetime >= start)
     }
-    if(is.null(end)) {
-        end <- datetime_range[[2]]
+    if(!is.null(end)) {
+        table <- dplyr::filter(table, datetime < end | (end_included & datetime == end))
     }
-    logger
-}
-
-#' Flattening data
-#'
-#' This function flatten data. Logger lever from data hierarchy is deleted.
-#' Sensors are moved to locality and datetimes are merged to one series.
-#'
-#' @param data in format for preparing
-#' @return flattened data in format for calculation
-#' @export
-#' @examples
-#' calc_data <- mc_prep_flat(example_cleaned_tomst_data1)
-mc_prep_flat <- function(data) {
-    locality_function <- function(locality) {
-        steps <- purrr::map_int(locality$loggers, function(.x) as.integer(.x$clean_info@step))
-        if(any(is.na(steps))){
-            stop(stringr::str_glue("Some Logger in locality {locality$metadata@locality_id} has NA step."))
-        }
-        if(length(steps) > 1 && var(steps) != 0) {
-            stop(stringr::str_glue("Loggers in locality {locality$metadata@locality_id} has different step."))
-        }
-
-        new_sensors <- .prep_get_flat_sensors(locality)
-        .prep_get_flat_locality(locality, new_sensors, steps[[1]])
-    }
-
-    purrr::map(data, locality_function)
-}
-
-.prep_get_flat_sensors <- function(locality) {
-    result <- new.env()
-    result$sensor_names=list()
-    if(length(locality$loggers) == 0) {
-        return(result)
-    }
-    min_datetime_function <- function(.x) {
-        if(length(.x$datetime) == 0) return(NA_integer_)
-        as.integer(.x$datetime[[1]])}
-    min_datetime <- microclim:::.common_as_utc_posixct(min(purrr::map_int(locality$loggers, min_datetime_function), na.rm=TRUE))
-    max_datetime_function <- function(.x) {
-        if(length(.x$datetime) == 0) return(NA_integer_)
-        as.integer(tail(.x$datetime, n=1))}
-    max_datetime <- microclim:::.common_as_utc_posixct(max(purrr::map_int(locality$loggers, max_datetime_function), na.rm=TRUE))
-    if(is.infinite(min_datetime) || is.infinite(max_datetime)) {
-        datetimes <- .POSIXct(integer(0))
-    } else {
-        datetimes <- seq(min_datetime, max_datetime, by=stringr::str_glue("{locality$loggers[[1]]$clean_info@step} min"))
-    }
-    sensor_name_function <- function(original_sensor_name, logger_index, logger_serial_number) {
-        sensor_name <- .prep_get_flat_sensor_name(original_sensor_name, names(result$sensor_names),
-                                                  logger_serial_number)
-        result$sensor_names[[sensor_name]] <- list(logger_index=logger_index, original_name=original_sensor_name)
-        sensor_name
-    }
-    logger_table_function <- function(logger, idx) {
-        result <- microclim:::.common_sensor_values_as_tibble(logger)
-        sensor_names <- purrr::map_chr(logger$sensors, function(.x) sensor_name_function(.x$metadata@name, idx, logger$metadata@serial_number))
-        colnames(result) <- c("datetime", sensor_names)
-        result
-    }
-    tables <- c(tibble::as_tibble(datetimes), purrr::imap(locality$loggers, logger_table_function))
-    tables[[1]] <- tibble::as_tibble(tables[[1]])
-    colnames(tables[[1]]) <- "datetime"
-    result$table <- purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime"))
-    result
-}
-
-.prep_get_flat_sensor_name <- function(original_sensor_name, existed_names, logger_serial_number) {
-    sensor_name <- original_sensor_name
-    number <- 1
-    while(sensor_name %in% existed_names) {
-        sensor_name <- stringr::str_glue("{original_sensor_name}_{formatC(number, width=3, flag='0')}")
-        number <- number + 1
-    }
-    if(sensor_name != original_sensor_name) {
-        warning(stringr::str_glue("sensor {original_sensor_name} from {logger_serial_number} is renamed to {sensor_name}"))
-    }
-    sensor_name
-}
-
-.prep_get_flat_locality <- function(locality, new_sensors, step) {
-    sensor_function <- function(sensor_name) {
-        sensor_names_item <- new_sensors$sensor_names[[sensor_name]]
-        sensor <- locality$loggers[[sensor_names_item$logger_index]]$sensors[[sensor_names_item$original_name]]
-        sensor$metadata@name <- sensor_name
-        sensor$values <- new_sensors$table[[sensor_name]]
-        sensor
-    }
-
-    sensors <- purrr::map(colnames(new_sensors$table)[-1], sensor_function)
-    names(sensors) <- purrr::map(sensors, function(.x) .x$metadata@name)
-
-    list(metadata = locality$metadata,
-         step = step,
-         datetime = new_sensors$table$datetime,
-         sensors = sensors)
+    item$datetime <- table$datetime
+    item$sensors <- purrr::map(item$sensors, function(sensor) {
+        sensor$values <- table[[sensor$metadata@sensor_id]]
+        sensor})
+    item
 }
 
 #' Rename sensor
@@ -346,7 +247,8 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
         .prepare_process_sensor_renaming_in_loggers(locality, serial_numbers, sensor_names)
     }
 
-    purrr::map(data, locality_function)
+    localities <- purrr::map(microclim:::.common_get_localities(data), locality_function)
+    microclim:::.common_set_localities(data, localities)
 }
 
 .prepare_process_sensor_renaming <- function(item, sensor_names) {

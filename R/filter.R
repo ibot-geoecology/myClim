@@ -11,12 +11,18 @@
 #' @examples
 #' example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE) {
+    is_calc_format <- microclim:::.common_is_calc_format(data)
     if(!is.null(localities)) {
         filter_function <- if(reverse) purrr::discard else purrr::keep
-        data <- filter_function(data, function(.x) .x$metadata@locality_id %in% localities)
+        localities <- filter_function(microclim:::.common_get_localities(data), function(.x) .x$metadata@locality_id %in% localities)
+        if(is_calc_format) {
+            data$localities <- localities
+        } else {
+            data <- localities
+        }
     }
     if(!is.null(sensors)) {
-        if(microclim:::.common_is_calc_format(data)) {
+        if(is_calc_format) {
             data <- .filter_calc_sensors(data, sensors, reverse)
         } else {
             data <- .filter_prep_sensors(data, sensors, reverse)
@@ -47,6 +53,7 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE) {
         locality$sensors <- filter_function(locality$sensors, function(.x) .x$metadata@name %in% sensors)
         locality
     }
-    data <- purrr::map(data, locality_function)
-    purrr::keep(data, function(.x) length(.x$sensors) > 0)
+    data$localities <- purrr::map(data$localities, locality_function)
+    data$localities <- purrr::keep(data$localities, function(.x) length(.x$sensors) > 0)
+    data
 }

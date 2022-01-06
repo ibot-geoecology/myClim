@@ -20,7 +20,8 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
         }
         .calc_add_snow_to_locality(locality, sensor, output_sensor, dr, tmax)
     }
-    purrr::map(data, locality_function)
+    data$localities <- purrr::map(data$localities, locality_function)
+    data
 }
 
 .calc_add_snow_to_locality <- function(locality, sensor, output_sensor, dr, tmax) {
@@ -31,7 +32,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     day_max_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
     values <- (day_range_temp < dr) & (day_max_temp < tmax)
-    locality$sensors[[output_sensor]] <- microclim:::.common_get_sensor(output_sensor, values=values)
+    locality$sensors[[output_sensor]] <- microclim:::.common_get_new_sensor(output_sensor, values=values)
     return(locality)
 }
 
@@ -67,7 +68,7 @@ mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_u
     locality_function <- function(locality) {
         .calc_get_snow_agg_row(locality, snow_sensor, period, use_utc)
     }
-    as.data.frame(purrr::map_dfr(data, locality_function))
+    as.data.frame(purrr::map_dfr(data$localities, locality_function))
 }
 
 .calc_get_snow_agg_row <- function(locality, snow_sensor, period, use_utc) {
@@ -112,63 +113,3 @@ mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_u
     datetimes + (tz_offset * 60)
 }
 
-#' Agregate data by function
-#'
-#' Function add agregated locality.
-#'
-#' @param data in format for calculation
-#' @param fun aggregation function
-#' @param breaks cut function parameter
-#' @param localities locality_ids for filtering data; if empty then all
-#' @param sensors sensor_ids for filtering data; if empty then all
-#' @param use_utc if set FALSE then datetime changed by locality tz_offset (default FALSE)
-#' @param suffix of new locality name
-#' @param ... parameters for aggregation function
-#' @return aggregated data in standard format
-#' @export
-#' @examples
-#' example_cleaned_tomst_data <- mc_calc_agg(example_cleaned_tomst_data, quantile, "hour", probs = 0.5, na.rm=TRUE)
-mc_calc_agg <- function(data, fun, breaks, localities=NULL, sensors=NULL, use_utc=F, suffix="_agg", ...) {
-    microclim:::.common_stop_if_not_calc_format(data)
-    if(!use_utc) {
-        microclim:::.prep_warn_if_unset_tz_offset(data)
-    }
-    filtered_localities <- mc_filter(data, localities, sensors)
-    locality_function <- function (locality) {
-        tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
-        locality <- .calc_aggregate_locality(locality, fun, breaks, tz_offset, ...)
-        locality$metadata@locality_id <- stringr::str_glue("{locality$metadata@locality_id}{suffix}")
-        locality
-    }
-    new_localities <- purrr::map(filtered_localities, locality_function)
-    names(new_localities) <- purrr::map(new_localities, function(.x) .x$metadata@locality_id)
-    collision_names <- intersect(names(data), names(new_localities))
-    if(length(collision_names) != 0){
-        collision_names_text <- paste(collision_names, collapse = ", ")
-        warning(stringr::str_glue("Localities ({collision_names_text}) exists in data yet. It will be overwritten."))
-        data <- purrr::discard(data, function(.x) .x$metadata@locality_id %in% collision_names)
-    }
-    c(data, new_localities)
-}
-
-.calc_aggregate_locality <- function(locality, fun, breaks, tz_offset, ...)
-{
-    if(length(locality$datetime) == 0) {
-        return(locality)
-    }
-    locality$datetime <- .calc_get_datetimes_with_offset(locality$datetime, tz_offset)
-    by_aggregate <- list(step=cut(locality$datetime, breaks=breaks))
-    locality$datetime <- aggregate(locality$datetime, by_aggregate, min)$x
-    sensor_function <- function(sensor) {
-        sensor$values <- aggregate(sensor$values, by_aggregate, fun, ...)$x
-        sensor
-    }
-    locality$sensors <- purrr::map(locality$sensors, sensor_function)
-    if(length(locality$datetime) > 1) {
-        locality$step <- as.integer(diff(as.numeric(locality$datetime[1:2])) %/% 60)
-    } else {
-        locality$step <- NA_integer_
-    }
-
-    locality
-}

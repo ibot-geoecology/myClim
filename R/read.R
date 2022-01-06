@@ -201,5 +201,5 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
 
 .read_get_sensor <- function(data_table, data_format, sensor_name){
     values <- data_table[[data_format@columns[[sensor_name]]]]
-    microclim:::.common_get_sensor(sensor_name, sensor_name, values)
+    microclim:::.common_get_new_sensor(sensor_name, sensor_name, values)
 }

@@ -11,7 +11,7 @@ cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T1="TMS_T1_secondar
                                                          TMS_TMSmoisture="TMS_TMSmoisture_secondary"),
                                       serial_numbers=c("94184103", "94184105"))
 # flatting data - loggers are deleted and sensors are moved under locality
-calc_data <- mc_prep_flat(cleaned_data)
+calc_data <- mc_agg(cleaned_data)
 # calculating new snow sensor
 calc_data <- mc_calc_snow(calc_data, "TMS_T2", output_sensor="snow")
 calc_data <- mc_calc_snow(calc_data, "TMS_T2_secondary", output_sensor="snow_secondary", localities="LOC1")

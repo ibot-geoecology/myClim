@@ -7,13 +7,17 @@
 mc_prep_solar_tz(data)
 }
 \arguments{
-\item{data}{in standard format}
+\item{data}{in format for preparing or calculation}
 }
 \value{
-data with changed TZ offset in standard format
+data with changed TZ offset in same format as input data
 }
 \description{
 This function compute TZ offset in localities by solar time
+}
+\details{
+The function require filled longitude of locality in slot lon_wgs84 of metadata.
+TZ offset in minutes is calculated as \code{longitude / 180 * 12 * 60}.
 }
 \examples{
 cleaned_example_tomst_data1 <- mc_prep_solar_tz(cleaned_example_tomst_data1)

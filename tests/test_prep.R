@@ -54,10 +54,18 @@ test_that("mc_prep_user_tz", {
 
 test_that("mc_prep_crop", {
     data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
-    data <- mc_prep_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
-    test_prep_data_format(data)
-    expect_equal(length(data$A2E32$loggers[[1]]$datetime), 68)
-    expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 68)
+    cropped_data <- mc_prep_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
+    test_prep_data_format(cropped_data)
+    expect_equal(length(cropped_data$A2E32$loggers[[1]]$datetime), 68)
+    expect_equal(length(cropped_data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 68)
+    cropped_data <- mc_prep_crop(data, end=as.POSIXct("2020-10-16 08:00", tz="UTC"))
+    test_prep_data_format(cropped_data)
+    expect_equal(length(cropped_data$A2E32$loggers[[1]]$datetime), 8)
+    expect_equal(length(cropped_data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 8)
+    cropped_data <- mc_prep_crop(data, end=as.POSIXct("2020-10-16 08:00", tz="UTC"), end_included=FALSE)
+    test_prep_data_format(cropped_data)
+    expect_equal(length(cropped_data$A2E32$loggers[[1]]$datetime), 7)
+    expect_equal(length(cropped_data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 7)
 })
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
@@ -76,13 +84,6 @@ test_that(".prep_get_utc_localities", {
     expect_equal(length(test_function(data_clean)), 0)
 })
 
-test_that("mc_prep_flat", {
-    data <- mc_read_csv("data/flat/files_table.csv")
-    cleaned_data <- mc_prep_clean(data, silent=T)
-    expect_warning(calc_data <- mc_prep_flat(cleaned_data))
-    test_calc_data_format(calc_data)
-})
-
 test_that("mc_prep_rename_sensor", {
     data <- mc_read_csv("data/flat/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
@@ -91,7 +92,7 @@ test_that("mc_prep_rename_sensor", {
     cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T2="T2"), serial_numbers="94184102")
     expect_true("T2" %in% names(cleaned_data$main$loggers[[1]]$sensors))
     expect_false("T2" %in% names(cleaned_data$main$loggers[[2]]$sensors))
-    expect_warning(calc_data <- mc_prep_flat(cleaned_data))
-    calc_data <- mc_prep_rename_sensor(calc_data, list(TMS_T3_001="TMS_T3_secondary"), localities="main")
-    expect_true("TMS_T3_secondary" %in% names(calc_data$main$sensors))
+    expect_warning(calc_data <- mc_agg(cleaned_data))
+    calc_data <- mc_prep_rename_sensor(calc_data, list(TMS_T3_1="TMS_T3_secondary"), localities="main")
+    expect_true("TMS_T3_secondary" %in% names(calc_data$localities$main$sensors))
 })
