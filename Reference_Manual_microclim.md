@@ -8,7 +8,7 @@ ledna 06, 2022
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.5
+Version: 0.0.6
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -76,6 +76,7 @@ Argument      |Description
 
 If first or last period isn't full filled, data are cropped and a warning is shown. New sensors have
  same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
+ Aggregation functions return NA for empty vector. Except count, it return 0.
 
 
 ## Value
@@ -302,12 +303,12 @@ example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E
 
 # `mc_info_clean`
 
-Get all clean table
+get clean info table
 
 
 ## Description
 
-This function return dataframe with all clean info about loggers
+This function return dataframe with info about cleaning loggers
 
 
 ## Usage
@@ -327,13 +328,6 @@ Argument      |Description
 ## Value
 
 dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
-
-
-## Examples
-
-```r
-log_table <- mc_prep_logs(cleaned_example_tomst_data1)
-```
 
 
 # `mc_info_count`
@@ -370,6 +364,35 @@ data.frame with count localities, loggers and sensors
 ```r
 count_table <- mc_info_count(example_tomst_data1)
 ```
+
+
+# `mc_info`
+
+get sensors info table
+
+
+## Description
+
+This function return dataframe with info about sensors
+
+
+## Usage
+
+```r
+mc_info(data)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for preparing or calculation
+
+
+## Value
+
+dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, min_value, max_value, count_values, count_na
 
 
 # `mc_LocalityMetadata-class`

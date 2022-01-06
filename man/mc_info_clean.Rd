@@ -2,7 +2,7 @@
 % Please edit documentation in R/info.R
 \name{mc_info_clean}
 \alias{mc_info_clean}
-\title{Get all clean table}
+\title{get clean info table}
 \usage{
 mc_info_clean(data)
 }
@@ -13,8 +13,5 @@ mc_info_clean(data)
 dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
 }
 \description{
-This function return dataframe with all clean info about loggers
-}
-\examples{
-log_table <- mc_prep_logs(cleaned_example_tomst_data1)
+This function return dataframe with info about cleaning loggers
 }

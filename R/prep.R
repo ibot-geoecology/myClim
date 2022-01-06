@@ -216,7 +216,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     }
     item$datetime <- table$datetime
     item$sensors <- purrr::map(item$sensors, function(sensor) {
-        sensor$values <- table[[sensor$metadata@sensor_id]]
+        sensor$values <- table[[sensor$metadata@name]]
         sensor})
     item
 }

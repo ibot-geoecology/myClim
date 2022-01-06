@@ -15,8 +15,12 @@ calc_data <- mc_agg(cleaned_data)
 # calculating new snow sensor
 calc_data <- mc_calc_snow(calc_data, "TMS_T2", output_sensor="snow")
 calc_data <- mc_calc_snow(calc_data, "TMS_T2_secondary", output_sensor="snow_secondary", localities="LOC1")
+# sensors overview
+mc_info(calc_data)
 # calculating snow day overview
 mc_calc_snow_agg(calc_data, snow_sensor="snow")
 mc_calc_snow_agg(calc_data, snow_sensor="snow_secondary", localities="LOC1")
 # add new aggregated localities with median of day values
-calc_data <- mc_calc_agg(calc_data, quantile, "day", probs = 0.5, na.rm=TRUE, suffix="_day")
+calc_data <- mc_agg(calc_data, c("min", "percentile"), "day", percentiles=c(50, 95), na.rm=TRUE, use_utc=FALSE)
+# sensors overview
+mc_info(calc_data)

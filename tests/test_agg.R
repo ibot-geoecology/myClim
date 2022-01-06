@@ -4,6 +4,7 @@ source("test.R")
 
 test_that("mc_agg UTC", {
     data <- mc_read_directory("data/clean-datetime_step", "TOMST")
+    expect_error(hour_data <- mc_agg(data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), na.rm=TRUE))
     cleaned_data <- mc_prep_clean(data, silent=T)
     expect_warning(hour_data <- mc_agg(cleaned_data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), na.rm=TRUE))
     test_calc_data_format(hour_data)
@@ -51,4 +52,15 @@ test_that("mc_agg solar aggregation", {
     test_calc_data_format(agg_data)
     expect_equal(length(agg_data$localities$A1E05$sensors), 2)
     test_calc_data_format(agg_data)
+})
+
+test_that("mc_agg UTC many NA", {
+    data <- mc_read_files("data/clean-datetime_step/data_94184165_0.csv", "TOMST")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_warning(agg_data <- mc_agg(cleaned_data, c("min", "max", "mean", "percentile", "sum", "count", "coverage"), "hour", percentiles=50, na.rm=TRUE))
+    expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_min$values[[2]]))
+    expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_max$values[[2]]))
+    expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_mean$values[[2]]))
+    expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_percentile50$values[[2]]))
+    expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_sum$values[[2]]))
 })

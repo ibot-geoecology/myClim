@@ -37,15 +37,13 @@ mc_info_count <- function(data) {
     result
 }
 
-#' Get all clean table
+#' get clean info table
 #'
-#' This function return dataframe with all clean info about loggers
+#' This function return dataframe with info about cleaning loggers
 #'
 #' @param data in format for preparing
 #' @return dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
 #' @export
-#' @examples
-#' log_table <- mc_prep_logs(cleaned_example_tomst_data1)
 mc_info_clean <- function(data) {
     microclim:::.common_stop_if_not_prep_format(data)
 
@@ -71,5 +69,55 @@ mc_info_clean <- function(data) {
                end_date=microclim:::.common_as_utc_posixct(unlist(columns[[4]])),
                step=unlist(columns[[5]]), count_duplicits=unlist(columns[[6]]),
                count_missed=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]))
+}
+
+
+#' get sensors info table
+#'
+#' This function return dataframe with info about sensors
+#'
+#' @param data in format for preparing or calculation
+#' @return dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, min_value, max_value, count_values, count_na
+#' @export
+mc_info <- function(data) {
+    is_prep_format <- microclim:::.common_is_prep_format(data)
+
+    sensors_item_function <- function(locality_id, item, step) {
+        serial_number <- NA_character_
+        if(is_prep_format) {
+            serial_number <- item$metadata@serial_number
+            step <- as.integer(item$clean_info@step)
+        }
+
+        count <- length(item$sensors)
+        tibble::tibble(locality_id=rep(locality_id, count),
+                       serial_number=rep(serial_number, count),
+                       sensor_id=map_chr(item$sensors, function(x) x$metadata@sensor_id),
+                       sensor_name=names(item$sensors),
+                       start_date=rep(min(item$datetime), count),
+                       end_date=rep(max(item$datetime), count),
+                       step=rep(step, count),
+                       min_value=map_dbl(item$sensors, function(x) min(x$values, na.rm=TRUE)),
+                       max_value=map_dbl(item$sensors, function(x) max(x$values, na.rm=TRUE)),
+                       count_values=map_int(item$sensors, function(x) length(x$values[!is.na(x$values)])),
+                       count_na=map_int(item$sensors, function(x) length(x$values[is.na(x$values)])))
+    }
+
+    prep_locality_function <- function(locality) {
+        purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
+                             item=locality$loggers,
+                             step=NA_integer_),
+                        sensors_item_function)
+    }
+
+    if(is_prep_format) {
+        result <- purrr::map_dfr(data, prep_locality_function)
+    } else {
+        result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
+                                       item=data$localities,
+                                       step=as.integer(data$metadata@step)),
+                                  sensors_item_function)
+    }
+    result
 }
 

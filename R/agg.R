@@ -5,6 +5,7 @@
 #'
 #' If first or last period isn't full filled, data are cropped and a warning is shown. New sensors have
 #' same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
+#' Aggregation functions return NA for empty vector. Except count, it return 0.
 #'
 #' @param data in format for preparing or calculation
 #' @param fun aggregation function ("min", "max", "mean", "percentile", "sum", "count", "coverage")
@@ -68,14 +69,17 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(microclim:::.common_is_calc_format(data)) {
         return(data$metadata@step)
     }
-    if(!is.null(fun) && !is.null(period)) {
-        return(NA_integer_)
-    }
     locality_function <- function(locality) {
         purrr::map_int(locality$loggers, function(.x) as.integer(.x$clean_info@step))
     }
     steps <- as.numeric(purrr::flatten(purrr::map(data, locality_function)))
-    if(any(is.na(steps)) || (length(steps) > 1 && var(steps) != 0)) {
+    if(any(is.na(steps))) {
+        stop("All steps must be set. Cleaning is required.")
+    }
+    if(!is.null(fun) && !is.null(period)) {
+        return(NA_integer_)
+    }
+    if(length(steps) > 1 && var(steps) != 0) {
         stop("All steps in loggers must be same.")
     }
     dplyr::first(steps)
@@ -236,21 +240,47 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 
 .agg_convert_function <- function(function_text, percentiles, na.rm) {
     if(function_text == "min") {
-        return(list(min=function(x) min(x, na.rm=na.rm)))
+        return(list(min=function(x) {
+            x <- .agg_function_prepare_data(x, na.rm)
+            if(length(x) == 0) return(NA)
+            min(x)
+        }))
     } else if(function_text == "max") {
-        return(list(max=function(x) max(x, na.rm=na.rm)))
+        return(list(max=function(x){
+            x <- .agg_function_prepare_data(x, na.rm)
+            if(length(x) == 0) return(NA)
+            max(x)
+        }))
     } else if(function_text == "mean") {
-        return(list(mean=function(x) mean(x, na.rm=na.rm)))
+        return(list(mean=function(x) {
+            x <- .agg_function_prepare_data(x, na.rm)
+            if(length(x) == 0) return(NA)
+            mean(x)
+        }))
     } else if(function_text == "percentile") {
         return(.agg_convert_percentile_functions(percentiles, na.rm))
     } else if(function_text == "sum") {
-        return(list(sum=function(x) sum(x, na.rm=na.rm)))
+        return(list(sum=function(x) {
+            x <- .agg_function_prepare_data(x, na.rm)
+            if(length(x) == 0) return(NA)
+            sum(x)
+        }))
     } else if(function_text == "count") {
         return(list(count=function(x) length(x[!is.na(x)])))
     } else if(function_text == "coverage") {
-        return(list(coverage=function(x) length(x[!is.na(x)]) / length(x)))
+        return(list(coverage=function(x) {
+            if(length(x) == 0) return(NA)
+            length(x[!is.na(x)]) / length(x)
+        }))
     }
     NULL
+}
+
+.agg_function_prepare_data <- function(values, na.rm) {
+    if(na.rm){
+        return(values[!is.na(values)])
+    }
+    values
 }
 
 .agg_convert_percentile_functions <- function(percentiles, na.rm) {

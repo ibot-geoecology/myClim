@@ -47,6 +47,7 @@ function only convert source data to format for calculation.
 \details{
 If first or last period isn't full filled, data are cropped and a warning is shown. New sensors have
 same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
+Aggregation functions return NA for empty vector. Except count, it return 0.
 }
 \examples{
 example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c(min, max, percentile), "hour", percentiles = 50, na.rm=TRUE)
