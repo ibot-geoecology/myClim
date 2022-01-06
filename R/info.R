@@ -92,15 +92,15 @@ mc_info <- function(data) {
         count <- length(item$sensors)
         tibble::tibble(locality_id=rep(locality_id, count),
                        serial_number=rep(serial_number, count),
-                       sensor_id=map_chr(item$sensors, function(x) x$metadata@sensor_id),
+                       sensor_id=purrr::map_chr(item$sensors, function(x) x$metadata@sensor_id),
                        sensor_name=names(item$sensors),
                        start_date=rep(min(item$datetime), count),
                        end_date=rep(max(item$datetime), count),
                        step=rep(step, count),
-                       min_value=map_dbl(item$sensors, function(x) min(x$values, na.rm=TRUE)),
-                       max_value=map_dbl(item$sensors, function(x) max(x$values, na.rm=TRUE)),
-                       count_values=map_int(item$sensors, function(x) length(x$values[!is.na(x$values)])),
-                       count_na=map_int(item$sensors, function(x) length(x$values[is.na(x$values)])))
+                       min_value=purrr::map_dbl(item$sensors, function(x) min(x$values, na.rm=TRUE)),
+                       max_value=purrr::map_dbl(item$sensors, function(x) max(x$values, na.rm=TRUE)),
+                       count_values=purrr::map_int(item$sensors, function(x) length(x$values[!is.na(x$values)])),
+                       count_na=purrr::map_int(item$sensors, function(x) length(x$values[is.na(x$values)])))
     }
 
     prep_locality_function <- function(locality) {
