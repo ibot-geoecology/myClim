@@ -21,4 +21,4 @@ generate-html:
 	R -e 'pkgdown::build_site()'
 
 test:
-	R -e 'testthat::test_dir("tests")'
+	R --vanilla -e 'testthat::test_dir("tests")'

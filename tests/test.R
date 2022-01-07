@@ -1,10 +1,9 @@
-library(purrr)
 library(testthat)
 library(microclim)
 
 test_prep_data_format <- function(data) {
     expect_equal(class(data), "list")
-    walk(data, test_prep_locality)
+    purrr::walk(data, test_prep_locality)
 }
 
 test_calc_data_format <- function(data) {
@@ -12,7 +11,7 @@ test_calc_data_format <- function(data) {
     expect_equal(names(data), c("metadata", "localities"))
     expect_equal(class(data$metadata)[[1]], "mc_MainMetadata")
     expect_equal(class(data$localities), "list")
-    walk(data$localities, test_calc_locality)
+    purrr::walk(data$localities, test_calc_locality)
 }
 
 test_prep_locality <- function(locality) {
@@ -20,7 +19,7 @@ test_prep_locality <- function(locality) {
     expect_equal(names(locality), c("metadata", "loggers"))
     expect_equal(class(locality$metadata)[[1]], "mc_LocalityMetadata")
     expect_equal(class(locality$loggers), "list")
-    walk(locality$loggers, test_logger)
+    purrr::walk(locality$loggers, test_logger)
 }
 
 test_calc_locality <- function(locality) {
@@ -31,7 +30,7 @@ test_calc_locality <- function(locality) {
     expect_true(all(!is.na(locality$datetime)))
     expect_equal(class(locality$sensors), "list")
     test_data_length(locality)
-    walk(locality$sensors, test_sensor)
+    purrr::walk(locality$sensors, test_sensor)
 }
 
 test_logger <- function(logger) {
@@ -45,12 +44,12 @@ test_logger <- function(logger) {
     expect_true(length(logger$sensors) > 0)
     test_data_length(logger)
     test_cleaning(logger)
-    walk(logger$sensors, test_sensor)
+    purrr::walk(logger$sensors, test_sensor)
 }
 
 test_data_length <- function(item) {
     datetime_length <- length(item$datetime)
-    walk(item$sensors, ~ {expect_equal(length(.x$values), datetime_length)})
+    purrr::walk(item$sensors, ~ {expect_equal(length(.x$values), datetime_length)})
 }
 
 test_cleaning <- function(logger) {
