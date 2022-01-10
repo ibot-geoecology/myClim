@@ -177,6 +177,7 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
                              stringsAsFactors = FALSE,
                              na.strings = data_format@na_strings)
     data_format <- microclim:::.model_load_data_format_params_from_data(data_format, data_table)
+    data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
     if(any(is.na(datetime))) {
         stop(stringr::str_glue("It isn't possible read datetimes from {filename}."))
@@ -188,6 +189,20 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
          clean_info = mc_LoggerCleanInfo(),
          datetime = datetime,
          sensors = .read_get_sensors(data_table, data_format))
+}
+
+.read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {
+    values_function <- function(column_index) {
+        if(!(column_index %in% data_format@columns) || is.numeric(data_table[[column_index]])) {
+            return(data_table[[column_index]])
+        }
+        if(is.character(data_table[[column_index]])) {
+            result <- sub(",", ".", data_table[[column_index]])
+            return(as.numeric(result))
+        }
+        stop(stringr::str_glue("It isn't possible load sensor data from {column_index}. column in file {filename}."))
+    }
+    as.data.frame(purrr::map(seq(ncol(data_table)), values_function))
 }
 
 .read_get_sensors <- function(data_table, data_format){

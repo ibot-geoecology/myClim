@@ -7,6 +7,8 @@ mc_const_TZ_SOLAR <- "solar"
 #' @export
 mc_const_TZ_USER_DEFINED <- "user defined"
 
+.model_const_COUNT_TEST_VALUES <- 100
+
 # classes ================================================================================
 
 #' Class for sensor definition
@@ -243,7 +245,8 @@ setMethod(
 .change_tomst_columns_and_logger_type <- function(object, data){
     tm_columns = list(TM_T = 4)
     tms_columns = list(TMS_T1 = 4, TMS_T2 = 5, TMS_T3 = 6, TMS_TMSmoisture = 7)
-    if(data[1, tms_columns$TMS_T2] == -200) {
+    test_values <- .model_get_test_values(data, tms_columns$TMS_T2)
+    if(all(is.na(test_values))) {
         object@columns <- tm_columns
         object@logger_type <- "ThermoDatalogger"
     }
@@ -252,6 +255,13 @@ setMethod(
         object@logger_type <- "TMS"
     }
     object
+}
+
+.model_get_test_values <- function (data, column) {
+    if(nrow(data) < .model_const_COUNT_TEST_VALUES) {
+        return(data[column])
+    }
+    data[1:.model_const_COUNT_TEST_VALUES, column]
 }
 
 setMethod(

@@ -40,3 +40,8 @@ test_that("mc_read_TMS_directory", {
     expect_equal(length(data), 4)
     expect_equal(length(data[[1]]$loggers), 1)
 })
+
+test_that("mc_read_TMS_files comma in number", {
+    data <- mc_read_files(c("data/comma_TOMST/data_91212414_0.csv", "data/comma_TOMST/data_94214606_0.csv"), "TOMST")
+    test_prep_data_format(data)
+})

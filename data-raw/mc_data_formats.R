@@ -11,9 +11,9 @@ mc_data_formats <- list(
       has_header = FALSE,
       separator = ";",
       date_column = 2,
-      na_strings = c("NA", " NA"),
+      na_strings = c("NA", " NA", "-200"),
       filename_serial_number_pattern = "data_(\\d+)_\\d+\\.csv$",
-      data_row_pattern = "^\\d+;[\\d.: ]+;\\d+;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;\\d+;\\d+;\\d+.*$"
+      data_row_pattern = "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
     )
 )
 
