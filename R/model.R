@@ -188,6 +188,11 @@ mc_DataFormat <- setClass("mc_DataFormat",
 #' @exportClass mc_TOMSTDataFormat
 mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 
+#' Class for source file data format for joined TOMST logger
+#' @export mc_TOMSTJoinDataFormat
+#' @exportClass mc_TOMSTJoinDataFormat
+mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_DataFormat")
+
 # generics ================================================================================
 
 setGeneric(
@@ -245,8 +250,8 @@ setMethod(
 .change_tomst_columns_and_logger_type <- function(object, data){
     tm_columns = list(TM_T = 4)
     tms_columns = list(TMS_T1 = 4, TMS_T2 = 5, TMS_T3 = 6, TMS_TMSmoisture = 7)
-    test_values <- .model_get_test_values(data, tms_columns$TMS_T2)
-    if(all(is.na(test_values))) {
+    data <- head(data, .model_const_COUNT_TEST_VALUES)
+    if(all(is.na(data[[tms_columns$TMS_T2]]))) {
         object@columns <- tm_columns
         object@logger_type <- "ThermoDatalogger"
     }
@@ -257,11 +262,32 @@ setMethod(
     object
 }
 
-.model_get_test_values <- function (data, column) {
-    if(nrow(data) < .model_const_COUNT_TEST_VALUES) {
-        return(data[column])
+setMethod(
+    ".model_load_data_format_params_from_data",
+    "mc_TOMSTJoinDataFormat",
+    function(object, data) {
+        .change_tomst_join_columns_and_logger_type(object, data)
     }
-    data[1:.model_const_COUNT_TEST_VALUES, column]
+)
+
+.change_tomst_join_columns_and_logger_type <- function(object, data){
+    tmj_columns = list(TM_T = 5)
+    tmsj_columns = list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, TMS_moisture = 9)
+    data <- head(data, .model_const_COUNT_TEST_VALUES)
+    if(all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
+         all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T3]])) {
+        object@columns <- tmj_columns
+        object@logger_type <- "ThermoDatalogger"
+        return(object)
+    }
+    object@logger_type <- "TMS"
+    moisture = data[[tmsj_columns$TMS_moisture]]
+    if(all(moisture == 0)) {
+        object@columns <- within(tmsj_columns, rm(TMS_moisture))
+        return(object)
+    }
+    object@columns <- tmsj_columns
+    object
 }
 
 setMethod(
@@ -271,7 +297,7 @@ setMethod(
         if(is.null(object@filename_serial_number_pattern)) {
           stop(stringr::str_glue("It is not possible identify serial_number from file {filename}."))
         }
-        stringr::str_match(filename, object@filename_serial_number_pattern)[1, 2]
+        stringr::str_match(basename(filename), object@filename_serial_number_pattern)[1, 2]
     }
 )
 

@@ -14,7 +14,7 @@ mc_data_physical <- list(
     moisture = mc_Physical(
        name = "moisture",
        description = "Volum. soil moisture",
-       units = "%"
+       units = "rate"
     )
 )
 

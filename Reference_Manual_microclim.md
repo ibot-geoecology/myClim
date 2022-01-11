@@ -1,6 +1,6 @@
 <!-- toc -->
 
-ledna 10, 2022
+ledna 11, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@ ledna 10, 2022
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.7
+Version: 0.0.8
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -196,7 +196,7 @@ Formats of source data files
 
 ## Format
 
-An object of class `list` of length 2.
+An object of class `list` of length 3.
 
 
 ## Usage
@@ -1006,6 +1006,16 @@ Class for source file data format for TOMST logger
 ## Description
 
 Class for source file data format for TOMST logger
+
+
+# `mc_TOMSTJoinDataFormat-class`
+
+Class for source file data format for joined TOMST logger
+
+
+## Description
+
+Class for source file data format for joined TOMST logger
 
 
 # `microclim-package`

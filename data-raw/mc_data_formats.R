@@ -11,9 +11,18 @@ mc_data_formats <- list(
       has_header = FALSE,
       separator = ";",
       date_column = 2,
-      na_strings = c("NA", " NA", "-200"),
+      na_strings = "-200",
       filename_serial_number_pattern = "data_(\\d+)_\\d+\\.csv$",
       data_row_pattern = "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
+    ),
+    TOMST_join = mc_TOMSTJoinDataFormat(
+        has_header = FALSE,
+        separator = ";",
+        date_column = 4,
+        date_format = "%d.%m.%Y %H:%M",
+        na_strings = c("NA"),
+        filename_serial_number_pattern = "(.+)\\.csv$",
+        data_row_pattern = "^\\d+;.+;.+;[\\d.: ]+;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;\\d+;\\d+\\.?\\d*;.*$"
     )
 )
 

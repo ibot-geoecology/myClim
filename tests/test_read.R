@@ -33,7 +33,7 @@ test_that("mc_read_csv", {
     expect_equal(data$A6W79$metadata@tz_type, mc_const_TZ_USER_DEFINED)
 })
 
-test_that("mc_read_TMS_directory", {
+test_that("mc_read_directory TOMST", {
     expect_warning(data <- mc_read_directory("data/TOMST", "TOMST"))
     test_prep_data_format(data)
     expect_equal(data[[1]]$metadata@tz_type, mc_const_TZ_UTC)
@@ -41,7 +41,16 @@ test_that("mc_read_TMS_directory", {
     expect_equal(length(data[[1]]$loggers), 1)
 })
 
-test_that("mc_read_TMS_files comma in number", {
+test_that("mc_read_files TOMST comma in number", {
     data <- mc_read_files(c("data/comma_TOMST/data_91212414_0.csv", "data/comma_TOMST/data_94214606_0.csv"), "TOMST")
     test_prep_data_format(data)
+})
+
+test_that("mc_read_rectory joined TOMST", {
+    data <- mc_read_directory("data/joined_TOMST", "TOMST_join")
+    test_prep_data_format(data)
+    expect_equal(names(data), c("A1W14_TMS", "CZ2_HRADEC_TMS", "CZ2_HRADEC_TS"))
+    expect_equal(names(data$A1W14_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture"))
+    expect_equal(names(data$CZ2_HRADEC_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture", "TMS_moisture"))
+    expect_equal(names(data$CZ2_HRADEC_TS$loggers[[1]]$sensors), "TM_T")
 })
