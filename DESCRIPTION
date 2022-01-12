@@ -18,5 +18,8 @@ Imports:
     tibble,
     dplyr,
     purrr,
+    ggplot2,
+    ggforce,
+    viridis,
     runner
 Roxygen: list(markdown = TRUE)

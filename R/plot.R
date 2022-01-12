@@ -4,7 +4,7 @@
 #'
 #' Function plot loggers to directory
 #'
-#' @param data all data in standard format
+#' @param data in format for preparing
 #' @param directory output directory
 #' @param localities names of localities; if empty then all
 #' @param sensors names of sensors; if empty then all
@@ -13,6 +13,7 @@
 #' @examples
 #' mc_plot_loggers(example_tomst_data1, "Figures")
 mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c(NA, NA)) {
+    microclim:::.common_stop_if_not_prep_format(data)
     data <- mc_filter(data, localities, sensors)
     microclim:::.prep_warn_if_datetime_step_unprocessed(data)
     loggers <- microclim:::.common_get_loggers(data)
@@ -135,7 +136,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 #'
 #' Function plot data to file with image function
 #'
-#' @param data all data in standard format
+#' @param data in format for preparing or calculation
 #' @param filename output filename
 #' @param title of plot
 #' @param localities names of localities; if empty then all
@@ -146,7 +147,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 #' @examples
 #' mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
 mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, height=1900, left_margin=12) {
-    data_table <- microclim::mc_reshape_wide(data, localities, sensors)
+    data_table <- mc_reshape_wide(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
     png(filename=filename,width=1900, height=height, res=200)
     x_labels <- substr(data_table$datetime[seq(1, nrow(data_table), len=20)], 1, 10)
@@ -168,4 +169,44 @@ mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, 
            legend_values, fill = hcl.colors(12, "viridis", rev = TRUE), xpd = NA)
     title(main=title, line=0.5, cex.lab=1.2)
     dev.off()
+}
+
+#' Plot data - ggplot2 geom_raster
+#'
+#' Function plot data to file with image function
+#'
+#' @param data in format for preparing or calculation
+#' @param filename output pdf filename
+#' @param title of plot
+#' @param sensor_name name of sensor
+#' @export
+mc_plot_raster <- function(data, filename, title, sensor_name) {
+    data <- mc_filter(data, sensors=sensor_name)
+    data_table <-mc_reshape_long(data)
+    data_table <- dplyr::mutate(data_table, date = lubridate::date(datetime),
+                                            hour = lubridate::hour(datetime))
+    plot <- ggplot2::ggplot(data_table, ggplot2::aes(date, hour, na.rm = FALSE))
+    plot <- plot + ggplot2::geom_raster(ggplot2::aes(fill=value))
+    plot <- .plot_set_ggplot_physical_colors(data, sensor_name, plot)
+    plot <- .plot_set_ggplot_theme(plot)
+    plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
+}
+
+.plot_set_ggplot_physical_colors <- function(data, sensor_name, plot) {
+    sensor_metadata <- dplyr::first(microclim:::.common_get_localities(data))$sensors[[sensor_name]]
+    sensor <- mc_data_sensors[[sensor_metadata@sensor_id]]
+    physical <- mc_data_physical[[sensor$physical]]
+    plot + viridis::scale_fill_viridis(name=physical@description, option=physical@viridis_color_map, direction=1)
+}
+
+.plot_set_ggplot_theme <- function(plot) {
+    plot + theme(strip.text.y = element_text(angle = 0),
+                 axis.ticks.y=element_blank(),
+                 axis.text.y = element_blank(),
+                 legend.position="bottom",
+                 legend.key.width= unit(2, 'cm'),
+                 legend.key.height= unit(0.4, 'cm'),
+                 panel.border = element_blank(),
+                 panel.grid.major = element_blank(),
+                 panel.grid.minor = element_blank())
 }

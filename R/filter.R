@@ -28,6 +28,9 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE) {
             data <- .filter_prep_sensors(data, sensors, reverse)
         }
     }
+    if(length(microclim:::.common_get_localities(data)) == 0) {
+        stop("All data are removed by filter.")
+    }
     data
 }
 

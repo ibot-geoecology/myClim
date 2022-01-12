@@ -40,13 +40,15 @@ mc_Sensor <- setClass("mc_Sensor",
 #' @slot name of physical
 #' @slot description
 #' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
+#' @slot viridis_color_map viridis color map option
 #' @export mc_Physical
 #' @exportClass mc_Physical
 mc_Physical <- setClass("mc_Physical",
          representation(
            name = "character",
            description = "character",
-           units = "character"
+           units = "character",
+           viridis_color_map = "character"
          ))
 
 #' Class for main metadata in data format for calculation
