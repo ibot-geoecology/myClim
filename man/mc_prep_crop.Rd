@@ -7,7 +7,7 @@
 mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 }
 \arguments{
-\item{data}{in format for preparing}
+\item{data}{in format for preparing or calculation}
 
 \item{start}{POSIXct datetime in UTC; is optional; start datetime is included}
 

@@ -66,6 +66,10 @@ test_that("mc_prep_crop", {
     test_prep_data_format(cropped_data)
     expect_equal(length(cropped_data$A2E32$loggers[[1]]$datetime), 7)
     expect_equal(length(cropped_data$A2E32$loggers[[1]]$sensors$TMS_T1$values), 7)
+    data_clean <- mc_prep_clean(data, silent=T)
+    data_calc <- mc_agg(data_clean)
+    cropped_calc_data <- mc_prep_crop(data_calc, start=as.POSIXct("2020-10-16 06:00", tz="UTC"), end=as.POSIXct("2020-10-16 08:00", tz="UTC"))
+    test_calc_data_format(cropped_calc_data)
 })
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {

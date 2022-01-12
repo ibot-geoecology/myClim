@@ -1,6 +1,6 @@
 <!-- toc -->
 
-ledna 11, 2022
+ledna 12, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@ ledna 11, 2022
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.8
+Version: 0.0.10
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -590,7 +590,7 @@ mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in format for preparing
+`data`     |     in format for preparing or calculation
 `start`     |     POSIXct datetime in UTC; is optional; start datetime is included
 `end`     |     POSIXct datetime in UTC; is optional
 `end_included`     |     if TRUE then  end datetime is included (default TRUE)

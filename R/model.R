@@ -276,8 +276,9 @@ setMethod(
     tmj_columns = list(TM_T = 5)
     tmsj_columns = list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, TMS_moisture = 9)
     data <- head(data, .model_const_COUNT_TEST_VALUES)
-    if(all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
-         all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T3]])) {
+    if((all(is.na(data[[tmsj_columns$TMS_T2]])) && all(is.na(data[[tmsj_columns$TMS_T3]]))) ||
+       (all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
+           all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T3]]))) {
         object@columns <- tmj_columns
         object@logger_type <- "ThermoDatalogger"
         return(object)
