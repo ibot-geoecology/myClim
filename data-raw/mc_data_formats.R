@@ -22,7 +22,8 @@ mc_data_formats <- list(
         date_format = "%d.%m.%Y %H:%M",
         na_strings = c("NA"),
         filename_serial_number_pattern = "(.+)\\.csv$",
-        data_row_pattern = "^\\d+;.+;.+;[\\d.: ]+;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;-?\\d+\\.?\\d*;\\d+;\\d+\\.?\\d*;.*$"
+        #                        ;  ;  ;datetime ;T1            ;T2            ;T3            ;mois;mois        ;
+        data_row_pattern = "^\\d+;.+;.+;[\\d.: ]+;-?\\d+\\.?\\d*;-?\\d*\\.?\\d*;-?\\d*\\.?\\d*;\\d+;\\d+\\.?\\d*;.*$"
     )
 )
 

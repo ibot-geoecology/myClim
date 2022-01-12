@@ -1,6 +1,6 @@
 <!-- toc -->
 
-ledna 11, 2022
+ledna 12, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@ ledna 11, 2022
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.8
+Version: 0.0.9
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
