@@ -179,7 +179,7 @@ mc_prep_solar_tz <- function(data) {
 #'
 #' This function crop data by datetime
 #'
-#' @param data in format for preparing
+#' @param data in format for preparing or calculation
 #' @param start POSIXct datetime in UTC; is optional; start datetime is included
 #' @param end POSIXct datetime in UTC; is optional
 #' @param end_included if TRUE then  end datetime is included (default TRUE)
@@ -194,16 +194,22 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     if(!is.null(end) && format(end, format="%Z") != "UTC") {
         warning(stringr::str_glue("end datetime is not in UTC"))
     }
-    logger_function <- function(logger) {
-        .prep_crop_data(logger, start, end, end_included)
+
+    sensors_item_function <- function(item) {
+        .prep_crop_data(item, start, end, end_included)
     }
 
-    locality_function <- function(locality) {
-        locality$loggers <- purrr::map(locality$loggers, logger_function)
+    prep_locality_function <- function(locality) {
+        locality$loggers <- purrr::map(locality$loggers, sensors_item_function)
         locality
     }
 
-    purrr::map(data, locality_function)
+    if(microclim:::.common_is_calc_format(data)) {
+        data$localities <- purrr::map(data$localities, sensors_item_function)
+        return(data)
+    } else {
+        return(purrr::map(data, prep_locality_function))
+    }
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {
