@@ -8,7 +8,7 @@ ledna 13, 2022
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.11
+Version: 0.0.12
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)

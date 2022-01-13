@@ -194,7 +194,7 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
         y_name <- "time"
     }
     plot <- ggplot2::ggplot(data_table, ggplot2::aes(date, y_values, na.rm = FALSE))
-    plot <- plot + ylab(y_name)
+    plot <- plot + ggplot2::ylab(y_name)
     plot <- plot + ggplot2::geom_raster(ggplot2::aes(fill=value))
     plot <- .plot_set_ggplot_physical_colors(data, plot)
     plot <- .plot_set_ggplot_theme(plot)
@@ -226,15 +226,15 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
 }
 
 .plot_set_ggplot_theme <- function(plot) {
-    plot + theme(strip.text.y = element_text(angle = 0),
-                 axis.ticks.y=element_blank(),
-                 axis.text.y = element_blank(),
-                 legend.position="bottom",
-                 legend.key.width= unit(2, 'cm'),
-                 legend.key.height= unit(0.4, 'cm'),
-                 panel.border = element_blank(),
-                 panel.grid.major = element_blank(),
-                 panel.grid.minor = element_blank())
+    plot + ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0),
+                          axis.ticks.y=ggplot2::element_blank(),
+                          axis.text.y = ggplot2::element_blank(),
+                          legend.position="bottom",
+                          legend.key.width= ggplot2::unit(2, 'cm'),
+                          legend.key.height= ggplot2::unit(0.4, 'cm'),
+                          panel.border = ggplot2::element_blank(),
+                          panel.grid.major = ggplot2::element_blank(),
+                          panel.grid.minor = ggplot2::element_blank())
 }
 
 .plot_get_file_type <- function(filename) {
