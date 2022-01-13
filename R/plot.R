@@ -173,29 +173,55 @@ mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, 
 
 #' Plot data - ggplot2 geom_raster
 #'
-#' Function plot data to file with image function
+#' Function plot data to file with ggplot2 geom_raster
 #'
 #' @param data in format for preparing or calculation
-#' @param filename output pdf filename
-#' @param title of plot
-#' @param sensor_name name of sensor
+#' @param filename output - supported formats are pdf and png
+#' @param sensors names of sensor; should have same unit
+#' @param by_hour if TRUE, then y axis is hour, alse time (default TRUE)
+#' @param png_width width for png output (default 1900)
+#' @param png_height height for png output (default 1900)
 #' @export
-mc_plot_raster <- function(data, filename, title, sensor_name) {
-    data <- mc_filter(data, sensors=sensor_name)
+mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900) {
+    data <- mc_filter(data, sensors=sensors)
     data_table <-mc_reshape_long(data)
-    data_table <- dplyr::mutate(data_table, date = lubridate::date(datetime),
-                                            hour = lubridate::hour(datetime))
-    plot <- ggplot2::ggplot(data_table, ggplot2::aes(date, hour, na.rm = FALSE))
+    data_table <- dplyr::mutate(data_table, date = lubridate::date(datetime))
+    if(by_hour) {
+        data_table <- dplyr::mutate(data_table, y_values = lubridate::hour(datetime))
+        y_name <- "hour"
+    } else {
+        data_table <- dplyr::mutate(data_table, y_values = format(datetime, format = "%H:%M:%S"))
+        y_name <- "time"
+    }
+    plot <- ggplot2::ggplot(data_table, ggplot2::aes(date, y_values, na.rm = FALSE))
+    plot <- plot + ylab(y_name)
     plot <- plot + ggplot2::geom_raster(ggplot2::aes(fill=value))
-    plot <- .plot_set_ggplot_physical_colors(data, sensor_name, plot)
+    plot <- .plot_set_ggplot_physical_colors(data, plot)
     plot <- .plot_set_ggplot_theme(plot)
     plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
+    file_type <- .plot_get_file_type(filename)
+    if(file_type == "pdf"){
+        .plot_print_pdf(filename, plot)
+    } else if(file_type == "png") {
+        .plot_print_png(filename, plot, png_width, png_height)
+    } else {
+        stop(stringr::str_glue("Format of {filename} isn't supported."))
+    }
 }
 
-.plot_set_ggplot_physical_colors <- function(data, sensor_name, plot) {
-    sensor_metadata <- dplyr::first(microclim:::.common_get_localities(data))$sensors[[sensor_name]]
+.plot_set_ggplot_physical_colors <- function(data, plot) {
+    locality <- dplyr::first(microclim:::.common_get_localities(data))
+    if(.common_is_calc_format(data)) {
+        item <- locality
+    } else {
+        item <- dplyr::first(locality$loggers)
+    }
+    sensor_metadata <- dplyr::first(item$sensors)$metadata
+    if(is.na(sensor_metadata@sensor_id)) {
+        return(plot + viridis::scale_fill_viridis(name=sensor_metadata@name, option="D", direction=1))
+    }
     sensor <- mc_data_sensors[[sensor_metadata@sensor_id]]
-    physical <- mc_data_physical[[sensor$physical]]
+    physical <- mc_data_physical[[sensor@physical]]
     plot + viridis::scale_fill_viridis(name=physical@description, option=physical@viridis_color_map, direction=1)
 }
 
@@ -209,4 +235,24 @@ mc_plot_raster <- function(data, filename, title, sensor_name) {
                  panel.border = element_blank(),
                  panel.grid.major = element_blank(),
                  panel.grid.minor = element_blank())
+}
+
+.plot_get_file_type <- function(filename) {
+    match <- stringr::str_match(filename, ".+\\.([^.]+)$")
+    match[[2]]
+}
+
+.plot_print_pdf <- function(filename, plot) {
+    plot <- plot + ggforce::facet_grid_paginate(locality_id ~ sensor, ncol = 1, nrow = 40, page = 1, drop = FALSE, byrow = FALSE)
+    n_pages <- ggforce::n_pages(plot)
+    pdf(filename, family="ArialMT", paper="a4", w=210/25.4, h=297/25.4)
+    purrr::walk(seq(1:n_pages), function (x) print(plot + ggforce::facet_grid_paginate(locality_id ~ sensor, ncol = 1, nrow = 40, page = x, drop = TRUE, byrow = FALSE)))
+    dev.off()
+}
+
+.plot_print_png <- function(filename, plot, width, height) {
+    plot <- plot + ggforce::facet_grid_paginate(locality_id ~ sensor, ncol = 1, byrow = FALSE)
+    png(filename, width=width, height=height, res=200)
+    print(plot)
+    dev.off()
 }

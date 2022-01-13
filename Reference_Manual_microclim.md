@@ -1,6 +1,6 @@
 <!-- toc -->
 
-ledna 12, 2022
+ledna 13, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@ ledna 12, 2022
 Package: microclim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.10
+Version: 0.0.11
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -25,6 +25,9 @@ Imports:
     tibble,
     dplyr,
     purrr,
+    ggplot2,
+    ggforce,
+    viridis,
     runner
 Roxygen: list(markdown = TRUE)```
 
@@ -474,7 +477,7 @@ mc_plot_image(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in standard format
+`data`     |     in format for preparing or calculation
 `filename`     |     output filename
 `title`     |     of plot
 `localities`     |     names of localities; if empty then all
@@ -517,7 +520,7 @@ mc_plot_loggers(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     all data in standard format
+`data`     |     in format for preparing
 `directory`     |     output directory
 `localities`     |     names of localities; if empty then all
 `sensors`     |     names of sensors; if empty then all
@@ -529,6 +532,42 @@ Argument      |Description
 ```r
 mc_plot_loggers(example_tomst_data1, "Figures")
 ```
+
+
+# `mc_plot_raster`
+
+Plot data - ggplot2 geom_raster
+
+
+## Description
+
+Function plot data to file with ggplot2 geom_raster
+
+
+## Usage
+
+```r
+mc_plot_raster(
+  data,
+  filename,
+  sensors = NULL,
+  by_hour = TRUE,
+  png_width = 1900,
+  png_height = 1900
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for preparing or calculation
+`filename`     |     output - supported formats are pdf and png
+`sensors`     |     names of sensor; should have same unit
+`by_hour`     |     if TRUE, then y axis is hour, alse time (default TRUE)
+`png_width`     |     width for png output (default 1900)
+`png_height`     |     height for png output (default 1900)
 
 
 # `mc_prep_clean`

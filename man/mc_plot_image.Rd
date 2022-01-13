@@ -15,7 +15,7 @@ mc_plot_image(
 )
 }
 \arguments{
-\item{data}{all data in standard format}
+\item{data}{in format for preparing or calculation}
 
 \item{filename}{output filename}
 

@@ -31,7 +31,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     .calc_warn_if_overwriting(locality, output_sensor)
     day_max_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-    values <- (day_range_temp < dr) & (day_max_temp < tmax)
+    values <- as.numeric((day_range_temp < dr) & (day_max_temp < tmax))
     locality$sensors[[output_sensor]] <- microclim:::.common_get_new_sensor(output_sensor, values=values)
     return(locality)
 }

@@ -13,7 +13,7 @@ mc_plot_loggers(
 )
 }
 \arguments{
-\item{data}{all data in standard format}
+\item{data}{in format for preparing}
 
 \item{directory}{output directory}
 
