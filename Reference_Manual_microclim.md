@@ -5,11 +5,10 @@ ledna 13, 2022
 # DESCRIPTION
 
 ```
-Package: microclim
+Package: myClim
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.0.12
-Author: Who wrote it
+Title: R package for processing microclimatic data
+Author: GISlab
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
@@ -39,7 +38,7 @@ Agregate data by function
 
 ## Description
 
-Function create aggregated data in format for calculation. If fun is NULL and period is NULL, than
+Function prepares data for calculation and optionally aggregates data into user specified steps. If fun is NULL and period is NULL, than
  function only convert source data to format for calculation.
 
 
@@ -61,13 +60,13 @@ mc_agg(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in format for preparing or calculation
-`fun`     |     aggregation function ("min", "max", "mean", "percentile", "sum", "count", "coverage") Can be character vector of function names or list. if NULL than no aggregation.  
+`data`     |     in cleaned data format
+`fun`     |     aggregation function ("min", "max", "mean", "percentile", "sum", "count", "coverage") Can be character vector of function names or list. if NULL than function do not do any aggregation, but prepare data for further calculation. DEFAULT is fun = NULL 
 
 *  functions are applied to all sensors. Sensors aren't renamed. 
 
 *  Names of items in list are sensor_names and items are vectors of functions applied to sensors. Names of new sensors are in format sensor_name _ function .   function coverage is count_values/count_all_records
-`period`     |     of aggregation - same as breaks in cut.POSIXt; if NULL then no aggregation
+`period`     |     of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 `use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default TRUE); Non-UTC time can by used only for period `day` and bigger.
 `percentiles`     |      
 
@@ -96,12 +95,12 @@ example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c(min, max, per
 
 # `mc_calc_snow_agg`
 
-Snow detection summary
+Summary about snow detected with mc_calc_snow()
 
 
 ## Description
 
-Function return summary info about snow detection
+Function returns summary about snow detected with mc_calc_snow() aggregated over the whole period
 
 
 ## Usage
@@ -135,7 +134,7 @@ data.frame with columns locality, snow_days, first_day, last_day, first_day_peri
 ## Examples
 
 ```r
-snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")
+snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2")
 ```
 
 
@@ -146,7 +145,7 @@ Snow detection
 
 ## Description
 
-Function add sensor to locality with snow detection
+Function add new virtual sensor to locality with information about snow detection
 
 
 ## Usage
@@ -183,7 +182,7 @@ input data with added snow sensor
 ## Examples
 
 ```r
-snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")
+snow <- mc_calc_snow(example_tomst_data1, "TMS_T2")
 ```
 
 
