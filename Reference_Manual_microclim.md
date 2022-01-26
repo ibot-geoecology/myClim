@@ -67,7 +67,7 @@ Argument      |Description
 *  functions are applied to all sensors. Sensors aren't renamed. 
 
 *  Names of items in list are sensor_names and items are vectors of functions applied to sensors. Names of new sensors are in format sensor_name _ function .   function coverage is count_values/count_all_records
-`period`     |     of aggregation - same as breaks in cut.POSIXt; if NULL then no aggregation
+`period`     |     of aggregation - same as breaks in cut.POSIXt; if NULL then no aggregation  start day of week is monday
 `use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default TRUE); Non-UTC time can by used only for period `day` and bigger.
 `percentiles`     |      
 
@@ -146,7 +146,7 @@ Snow detection
 
 ## Description
 
-Function add sensor to locality with snow detection
+Function add sensor to locality with snow detection.
 
 
 ## Usage
@@ -173,6 +173,11 @@ Argument      |Description
 `localities`     |     names for calculation; if empty then all
 `dr`     |     delta range
 `tmax`     |     maximal temperature
+
+
+## Details
+
+Maximal step length of data is day.
 
 
 ## Value

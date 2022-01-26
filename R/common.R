@@ -30,7 +30,7 @@
 
 .common_stop_if_not_calc_format <- function(data) {
     if(!.common_is_calc_format(data)) {
-        stop("Format of data isn't right for calculation.")
+        stop("Format of data isn't right for calculation. It is required convert the data with function mc_agg.")
     }
 }
 
@@ -40,7 +40,7 @@
 
 .common_stop_if_not_prep_format <- function(data) {
     if(!.common_is_prep_format(data)) {
-        stop("Format of data isn't right for preparing.")
+        stop("Format of data isn't right for preparing. Use data before converting with function mc_agg.")
     }
 }
 

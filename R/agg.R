@@ -16,6 +16,8 @@
 #'
 #' function coverage is count_values/count_all_records
 #' @param period of aggregation - same as breaks in cut.POSIXt; if NULL then no aggregation
+#'
+#' start day of week is monday
 #' @param use_utc if set FALSE then datetime changed by locality tz_offset (default TRUE);
 #' Non-UTC time can by used only for period `day` and bigger.
 #' @param percentiles - vector of percentile numbers; numbers are from range 0-100; every number generate new sensor
@@ -25,6 +27,7 @@
 #' @examples
 #' example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c(min, max, percentile), "hour", percentiles = 50, na.rm=TRUE)
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE) {
+    options(lubridate.week.start = 1)
     .agg_check_fun_period(fun, period, use_utc)
     if(!use_utc) {
         microclim:::.prep_warn_if_unset_tz_offset(data)
@@ -137,7 +140,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(is.null(item)) {
         return(item)
     }
-    by_aggregate <- list(step=cut(item$datetime, breaks=period))
+    by_aggregate <- list(step=cut(item$datetime, breaks=period, start.on.monday = TRUE))
     item$datetime <- aggregate(item$datetime, by_aggregate, min)$x
     sensor_function <- function(sensor) {
         functions <- .agg_get_functions(sensor, fun, percentiles, na.rm)

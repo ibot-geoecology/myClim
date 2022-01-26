@@ -1,6 +1,10 @@
 #' Snow detection
 #'
-#' Function add sensor to locality with snow detection
+#' @description
+#' Function add sensor to locality with snow detection.
+#'
+#' @details
+#' Maximal step length of data is day.
 #'
 #' @param data in format for calculation
 #' @param sensor name of temperature sensor
@@ -14,6 +18,9 @@
 #' snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr=2, tmax=0.5) {
     microclim:::.common_stop_if_not_calc_format(data)
+    if(.calc_is_step_bigger_then(data, lubridate::days(1))) {
+        stop(stringr::str_glue("Step {data$metadata@step_text} in data is too long. Maximal step is day."))
+    }
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
@@ -22,6 +29,11 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     }
     data$localities <- purrr::map(data$localities, locality_function)
     data
+}
+
+.calc_is_step_bigger_then <- function(data, max_period) {
+    data_period <- lubridate::period(data$metadata@step_text)
+    return(data_period > max_period)
 }
 
 .calc_add_snow_to_locality <- function(locality, sensor, output_sensor, dr, tmax) {

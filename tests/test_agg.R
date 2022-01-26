@@ -65,10 +65,15 @@ test_that("mc_agg UTC many NA", {
     expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_sum$values[[2]]))
 })
 
-test_that("mc_agg month", {
+test_that("mc_agg long period", {
     data <- mc_read_directory("data/agg-month", "TOMST")
     data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_user_tz(data, list(`91184101`=60))
+    expect_warning(agg_data <- mc_agg(data, "mean", "week", use_utc=FALSE, na.rm=FALSE))
+    test_calc_data_format(agg_data)
+    expect_equal(agg_data$metadata@step_text, "week")
+    expect_false(is.na(agg_data$metadata@step))
+    expect_false(any(is.na(agg_data$localities[["91184101"]]$sensors$TM_T_mean$values)))
     expect_warning(agg_data <- mc_agg(data, "mean", "month", use_utc=FALSE, na.rm=FALSE))
     test_calc_data_format(agg_data)
     expect_equal(agg_data$metadata@step_text, "month")
