@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{mc_calc_snow_agg}
 \alias{mc_calc_snow_agg}
-\title{Snow detection summary}
+\title{Summary about snow detected with mc_calc_snow()}
 \usage{
 mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
 }
@@ -21,11 +21,11 @@ mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
 data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
 }
 \description{
-Function return summary info about snow detection
+Function returns summary about snow detected with mc_calc_snow() aggregated over the whole period
 }
 \details{
 If snow_sensor isn't in locality, then skipped.
 }
 \examples{
-snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")
+snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")
 }

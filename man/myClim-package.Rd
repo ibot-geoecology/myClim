@@ -4,7 +4,7 @@
 \name{myClim-package}
 \alias{myClim}
 \alias{myClim-package}
-\title{myClim: What the Package Does (Title Case)}
+\title{myClim: R package for processing microclimatic data}
 \description{
 More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.

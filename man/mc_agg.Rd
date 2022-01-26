@@ -14,10 +14,11 @@ mc_agg(
 )
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{in cleaned data format}
 
 \item{fun}{aggregation function ("min", "max", "mean", "percentile", "sum", "count", "coverage")
-Can be character vector of function names or list. if NULL than no aggregation.
+Can be character vector of function names or list. if NULL than function do not do any aggregation,
+but prepare data for further calculation. DEFAULT is fun = NULL.
 \itemize{
 \item functions are applied to all sensors. Sensors aren't renamed.
 \item Names of items in list are sensor_names and items are vectors of functions applied to sensors.
@@ -26,7 +27,7 @@ Names of new sensors are in format {sensor_name}_{function}.
 
 function coverage is count_values/count_all_records}
 
-\item{period}{of aggregation - same as breaks in cut.POSIXt; if NULL then no aggregation
+\item{period}{of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 
 start day of week is monday}
 

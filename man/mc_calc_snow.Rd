@@ -30,11 +30,11 @@ mc_calc_snow(
 input data with added snow sensor
 }
 \description{
-Function add sensor to locality with snow detection.
+Function add new virtual sensor to locality with information about snow detection.
 }
 \details{
 Maximal step length of data is day.
 }
 \examples{
-snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")
+snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
 }

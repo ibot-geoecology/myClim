@@ -1,7 +1,7 @@
 #' Snow detection
 #'
 #' @description
-#' Function add sensor to locality with snow detection.
+#' Function add new virtual sensor to locality with information about snow detection.
 #'
 #' @details
 #' Maximal step length of data is day.
@@ -15,7 +15,7 @@
 #' @return input data with added snow sensor
 #' @export
 #' @examples
-#' snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")
+#' snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr=2, tmax=0.5) {
     myClim:::.common_stop_if_not_calc_format(data)
     if(.calc_is_step_bigger_then(data, lubridate::days(1))) {
@@ -54,10 +54,10 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     }
 }
 
-#' Snow detection summary
+#' Summary about snow detected with mc_calc_snow()
 #'
 #' @description
-#' Function return summary info about snow detection
+#' Function returns summary about snow detected with mc_calc_snow() aggregated over the whole period
 #'
 #' @details
 #' If snow_sensor isn't in locality, then skipped.
@@ -70,7 +70,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 #' @return data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
 #' @export
 #' @examples
-#' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")
+#' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_utc=F) {
     myClim:::.common_stop_if_not_calc_format(data)
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)

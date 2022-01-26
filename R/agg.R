@@ -7,15 +7,16 @@
 #' same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
 #' Aggregation functions return NA for empty vector. Except count, it return 0.
 #'
-#' @param data in format for preparing or calculation
+#' @param data in cleaned data format
 #' @param fun aggregation function ("min", "max", "mean", "percentile", "sum", "count", "coverage")
-#' Can be character vector of function names or list. if NULL than no aggregation.
+#' Can be character vector of function names or list. if NULL than function do not do any aggregation,
+#' but prepare data for further calculation. DEFAULT is fun = NULL.
 #' * functions are applied to all sensors. Sensors aren't renamed.
 #' * Names of items in list are sensor_names and items are vectors of functions applied to sensors.
 #'   Names of new sensors are in format {sensor_name}_{function}.
 #'
 #' function coverage is count_values/count_all_records
-#' @param period of aggregation - same as breaks in cut.POSIXt; if NULL then no aggregation
+#' @param period of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 #'
 #' start day of week is monday
 #' @param use_utc if set FALSE then datetime changed by locality tz_offset (default TRUE);
