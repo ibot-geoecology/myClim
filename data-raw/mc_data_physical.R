@@ -8,8 +8,8 @@ T@viridis_color_map <- "C"
 
 TMSmoisture <- new("mc_Physical")
 TMSmoisture@name <- "TMSmoisture"
-TMSmoisture@description <- "Soil moisture (TDR counts)"
-TMSmoisture@units <- "TDR counts"
+TMSmoisture@description <- "Soil moisture (TDT signal)"
+TMSmoisture@units <- "TDT signal"
 TMSmoisture@viridis_color_map < "D"
 
 moisture <- new("mc_Physical")
