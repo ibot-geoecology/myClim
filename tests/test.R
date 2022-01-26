@@ -1,5 +1,5 @@
 library(testthat)
-library(microclim)
+library(myClim)
 
 test_prep_data_format <- function(data) {
     expect_equal(class(data), "list")
@@ -53,7 +53,7 @@ test_data_length <- function(item) {
 }
 
 test_cleaning <- function(logger) {
-    if(!microclim:::.prep_is_logger_cleaned(logger)) {
+    if(!myClim:::.prep_is_logger_cleaned(logger)) {
         return()
     }
     expect_equal(logger$clean_info@count_missed, length(purrr::keep(logger$sensors[[1]]$values, ~ is.na(.x))))

@@ -1,4 +1,4 @@
-library(microclim)
+library(myClim)
 
 data <- mc_read_csv("examples/data/calc/files_table.csv")
 cleaned_data <- mc_prep_clean(data)

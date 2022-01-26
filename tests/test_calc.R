@@ -1,5 +1,5 @@
 library(testthat)
-library(microclim)
+library(myClim)
 
 source("test.R")
 

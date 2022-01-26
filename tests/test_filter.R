@@ -1,5 +1,5 @@
 library(testthat)
-library(microclim)
+library(myClim)
 source("test.R")
 
 test_that("mc_filter prep format", {

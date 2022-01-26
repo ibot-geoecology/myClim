@@ -14,8 +14,8 @@ do kterého se rozbalí zdrojové soubory knihovny.
 ```R
 # directory to unzip source files
 setwd("C:/path/to/directory") # !EDIT IT!
-zip_file <- "microclim.zip"
-dir_name <- "microclim"
+zip_file <- "myClim.zip"
+dir_name <- "myClim"
 download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
 subdir <- unzip(zip_file, list=TRUE)$Name[1]
 unzip(zip_file)
@@ -82,4 +82,4 @@ Zde je jednotná struktura, ve kterých si balíček drží načtená data.
             * `values` - vektor hodnot, který má stejnou délku jako `datetime` 
 
 # Dokumentace
-[Dokumentace balíčku](Reference_Manual_microclim.md)
+[Dokumentace balíčku](Reference_Manual_myClim.md)

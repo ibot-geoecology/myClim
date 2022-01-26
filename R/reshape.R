@@ -19,7 +19,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 }
 
 .reshape_get_all_datetimes <- function(data){
-    is_calc_format <- microclim:::.common_is_calc_format(data)
+    is_calc_format <- myClim:::.common_is_calc_format(data)
     locality_function <- function(locality) {
         if(is_calc_format) {
             return(locality$datetime)
@@ -27,20 +27,20 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
         datetimes <- purrr::map(locality$loggers, function(x) x$datetime)
         purrr::reduce(datetimes, union)
     }
-    locality_datetimes <- purrr::map(microclim:::.common_get_localities(data), locality_function)
+    locality_datetimes <- purrr::map(myClim:::.common_get_localities(data), locality_function)
     datetimes <- purrr::reduce(locality_datetimes, union)
     datetimes <- sort(datetimes)
-    microclim:::.common_as_utc_posixct(datetimes)
+    myClim:::.common_as_utc_posixct(datetimes)
 }
 
 .reshape_get_sensor_tables <- function(data) {
     sensors_function <- function(item, name_prefix) {
-        table <- microclim:::.common_sensor_values_as_tibble(item)
+        table <- myClim:::.common_sensor_values_as_tibble(item)
         colnames(table)[-1] <- purrr::map_chr(colnames(table)[-1], function(x) stringr::str_glue("{name_prefix}-{x}"))
         table
     }
 
-    if(microclim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_calc_format(data)) {
         return(purrr::map2(data$localities, names(data$localities), sensors_function))
     }
 
@@ -62,10 +62,10 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 #' @return data.frame with columns locality_id, serial_number, sensor, datetime, value
 #' @export
 #' @examples
-#' example_tms_t1_table <- microclim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+#' example_tms_t1_table <- myClim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     data <- mc_filter(data, localities, sensors)
-    is_prep_format <- microclim:::.common_is_prep_format(data)
+    is_prep_format <- myClim:::.common_is_prep_format(data)
 
     sensor_function <- function(locality_id, serial_number, datetime, sensor_item) {
         count <- length(datetime)

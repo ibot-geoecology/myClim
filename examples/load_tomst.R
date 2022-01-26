@@ -1,4 +1,4 @@
-library(microclim)
+library(myClim)
 
 # The table in the examples/data/TOMST/files_table.csv file is used to load data.
 example_tomst_data1 <- mc_read_csv("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")

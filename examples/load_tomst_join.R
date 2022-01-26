@@ -1,4 +1,4 @@
-library(microclim)
+library(myClim)
 
 example_tomst_join_data <- mc_read_directory("examples/data/joined_TOMST", dataformat_name = "TOMST_join")
 # cleaning datetime step

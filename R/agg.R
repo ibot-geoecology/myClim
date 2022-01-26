@@ -30,10 +30,10 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     options(lubridate.week.start = 1)
     .agg_check_fun_period(fun, period, use_utc)
     if(!use_utc) {
-        microclim:::.prep_warn_if_unset_tz_offset(data)
+        myClim:::.prep_warn_if_unset_tz_offset(data)
     }
     original_step_period <- .agg_check_steps_and_get_original_period(data, fun, period)
-    is_prep <- microclim:::.common_is_prep_format(data)
+    is_prep <- myClim:::.common_is_prep_format(data)
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_prep) {
@@ -82,7 +82,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_check_steps_and_get_original_period <- function(data, fun, period) {
-    if(microclim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_calc_format(data)) {
         return(lubridate::period(data$metadata@step_text))
     }
     locality_function <- function(locality) {
@@ -135,7 +135,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(is.null(fun) || length(item$datetime) == 0) {
         return(item)
     }
-    item$datetime <- microclim:::.calc_get_datetimes_with_offset(item$datetime, tz_offset)
+    item$datetime <- myClim:::.calc_get_datetimes_with_offset(item$datetime, tz_offset)
     item <- .agg_crop_data_to_whole_periods(item, period, original_step_period)
     if(is.null(item)) {
         return(item)
@@ -181,11 +181,11 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     min_datetime_function <- function(.x) {
         if(length(.x$datetime) == 0) return(NA_integer_)
         as.integer(.x$datetime[[1]])}
-    min_datetime <- microclim:::.common_as_utc_posixct(min(purrr::map_int(loggers, min_datetime_function), na.rm=TRUE))
+    min_datetime <- myClim:::.common_as_utc_posixct(min(purrr::map_int(loggers, min_datetime_function), na.rm=TRUE))
     max_datetime_function <- function(.x) {
         if(length(.x$datetime) == 0) return(NA_integer_)
         as.integer(tail(.x$datetime, n=1))}
-    max_datetime <- microclim:::.common_as_utc_posixct(max(purrr::map_int(loggers, max_datetime_function), na.rm=TRUE))
+    max_datetime <- myClim:::.common_as_utc_posixct(max(purrr::map_int(loggers, max_datetime_function), na.rm=TRUE))
     datetimes <- seq(min_datetime, max_datetime, by=step_text)
     sensor_name_function <- function(original_sensor_name, logger_index, logger_serial_number) {
         sensor_name <- .agg_get_flat_sensor_name(original_sensor_name, names(result$sensor_names),
@@ -194,7 +194,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         sensor_name
     }
     logger_table_function <- function(logger, idx) {
-        result <- microclim:::.common_sensor_values_as_tibble(logger)
+        result <- myClim:::.common_sensor_values_as_tibble(logger)
         sensor_names <- purrr::map_chr(logger$sensors, function(.x) sensor_name_function(.x$metadata@name, idx, logger$metadata@serial_number))
         colnames(result) <- c("datetime", sensor_names)
         result
@@ -238,14 +238,14 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         end <- last_period_next
     }
     if(cropping) {
-        item_id <- microclim:::.common_get_id_of_item_with_sensors(item)
+        item_id <- myClim:::.common_get_id_of_item_with_sensors(item)
         if(start >= end) {
             warning(stringr::str_glue("{item_id} is without valid data. It is removed."))
             return(NULL)
         }
-        item_id <- microclim:::.common_get_id_of_item_with_sensors(item)
+        item_id <- myClim:::.common_get_id_of_item_with_sensors(item)
         warning(stringr::str_glue("{item_id} is cropped to range ({start}, {end})."))
-        item <- microclim:::.prep_crop_data(item, start, end, end_included=FALSE)
+        item <- myClim:::.prep_crop_data(item, start, end, end_included=FALSE)
     }
     item
 }

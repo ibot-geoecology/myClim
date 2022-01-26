@@ -22,7 +22,7 @@ mc_info_count <- function(data) {
         purrr::walk(locality$loggers, sensors_item_function)
     }
 
-    if(microclim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_calc_format(data)) {
         purrr::walk(data$localities, sensors_item_function)
     } else {
         purrr::walk(data, prep_locality_function)
@@ -31,7 +31,7 @@ mc_info_count <- function(data) {
     result <- data.frame(item=c("localities", "loggers", "sensors"),
                          count=c(count_env$localities, count_env$loggers, count_env$sensors))
 
-    if(microclim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_calc_format(data)) {
         result <- result[-2, ]
     }
     result
@@ -45,7 +45,7 @@ mc_info_count <- function(data) {
 #' @return dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
 #' @export
 mc_info_clean <- function(data) {
-    microclim:::.common_stop_if_not_prep_format(data)
+    myClim:::.common_stop_if_not_prep_format(data)
 
     logger_function <- function (logger) {
         list(logger$metadata@serial_number,
@@ -65,8 +65,8 @@ mc_info_clean <- function(data) {
     rows <- purrr::flatten(purrr::map(data, locality_function))
     columns <- purrr::transpose(rows)
     data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
-               start_date=microclim:::.common_as_utc_posixct(unlist(columns[[3]])),
-               end_date=microclim:::.common_as_utc_posixct(unlist(columns[[4]])),
+               start_date=myClim:::.common_as_utc_posixct(unlist(columns[[3]])),
+               end_date=myClim:::.common_as_utc_posixct(unlist(columns[[4]])),
                step=unlist(columns[[5]]), count_duplicits=unlist(columns[[6]]),
                count_missed=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]))
 }
@@ -80,7 +80,7 @@ mc_info_clean <- function(data) {
 #' @return dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, min_value, max_value, count_values, count_na
 #' @export
 mc_info <- function(data) {
-    is_prep_format <- microclim:::.common_is_prep_format(data)
+    is_prep_format <- myClim:::.common_is_prep_format(data)
 
     sensors_item_function <- function(locality_id, item, step) {
         serial_number <- NA_character_

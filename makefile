@@ -7,7 +7,7 @@ install: generate
 	R -e 'install.packages(".", repos = NULL)'
 
 remove:
-	R -e 'remove.packages("microclim")'
+	R -e 'remove.packages("myClim")'
 
 generate:
 	Rscript data-raw/mc_data_formats.R

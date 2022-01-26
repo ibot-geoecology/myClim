@@ -1,4 +1,4 @@
-library(microclim)
+library(myClim)
 
 example_tomst_data <- mc_read_csv("examples/data/TOMST/files_table.csv")
 example_cleaned_tomst_data <- mc_prep_clean(example_tomst_data)

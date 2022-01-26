@@ -20,5 +20,5 @@ data.frame with columns locality_id, serial_number, sensor, datetime, value
 This function create data.frame with values of sensor
 }
 \examples{
-example_tms_t1_table <- microclim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+example_tms_t1_table <- myClim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 }

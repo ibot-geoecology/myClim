@@ -71,7 +71,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     if(!.prep_clean_was_error_in_logger(logger)){
         return(logger)
     }
-    table <- microclim:::.common_sensor_values_as_tibble(logger)
+    table <- myClim:::.common_sensor_values_as_tibble(logger)
     table <- dplyr::arrange(table, datetime)
     grouped_table <- dplyr::group_by(table, datetime)
     table_noduplicits <- dplyr::summarise_all(grouped_table, dplyr::first)
@@ -130,7 +130,7 @@ mc_prep_user_tz <- function(data, tz_offsets) {
     for (locality_id in names(tz_offsets))
     {
         data[[locality_id]]$metadata@tz_offset <- tz_offsets[[locality_id]]
-        data[[locality_id]]$metadata@tz_type <- microclim::mc_const_TZ_USER_DEFINED
+        data[[locality_id]]$metadata@tz_type <- myClim::mc_const_TZ_USER_DEFINED
     }
     data
 }
@@ -154,16 +154,16 @@ mc_prep_solar_tz <- function(data) {
             return(locality)
         }
         locality$metadata@tz_offset <- round(locality$metadata@lon_wgs84 / 180 * 12 * 60)
-        locality$metadata@tz_type <- microclim::mc_const_TZ_SOLAR
+        locality$metadata@tz_type <- myClim::mc_const_TZ_SOLAR
         locality
     }
 
-    localities <- purrr::map(microclim:::.common_get_localities(data), locality_function)
-    microclim:::.common_set_localities(data, localities)
+    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, localities)
 }
 
 .prep_get_utc_localities <- function(data) {
-    items <- purrr::keep(microclim:::.common_get_localities(data), function(x) x$metadata@tz_type == mc_const_TZ_UTC)
+    items <- purrr::keep(myClim:::.common_get_localities(data), function(x) x$metadata@tz_type == mc_const_TZ_UTC)
     unname(purrr::map_chr(items, function(x) x$metadata@locality_id))
 }
 
@@ -204,7 +204,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
         locality
     }
 
-    if(microclim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_calc_format(data)) {
         data$localities <- purrr::map(data$localities, sensors_item_function)
         return(data)
     } else {
@@ -213,7 +213,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {
-    table <- microclim:::.common_sensor_values_as_tibble(item)
+    table <- myClim:::.common_sensor_values_as_tibble(item)
     if(!is.null(start)) {
         table <- dplyr::filter(table, datetime >= start)
     }
@@ -241,7 +241,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' @examples
 #'
 mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_numbers=NULL) {
-    is_calc_format <- microclim:::.common_is_calc_format(data)
+    is_calc_format <- myClim:::.common_is_calc_format(data)
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
@@ -253,8 +253,8 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
         .prepare_process_sensor_renaming_in_loggers(locality, serial_numbers, sensor_names)
     }
 
-    localities <- purrr::map(microclim:::.common_get_localities(data), locality_function)
-    microclim:::.common_set_localities(data, localities)
+    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, localities)
 }
 
 .prepare_process_sensor_renaming <- function(item, sensor_names) {

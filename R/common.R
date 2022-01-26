@@ -8,7 +8,7 @@
 }
 
 .common_get_sensor_info <- function(sensor_metadata) {
-    microclim::mc_data_sensors[[sensor_metadata@sensor_id]]
+    myClim::mc_data_sensors[[sensor_metadata@sensor_id]]
 }
 
 .common_as_utc_posixct <- function(datetime) {

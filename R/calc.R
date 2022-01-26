@@ -17,7 +17,7 @@
 #' @examples
 #' snow <- mc_calc_snow(example_tomst_data1, "TMS_T3")
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr=2, tmax=0.5) {
-    microclim:::.common_stop_if_not_calc_format(data)
+    myClim:::.common_stop_if_not_calc_format(data)
     if(.calc_is_step_bigger_then(data, lubridate::days(1))) {
         stop(stringr::str_glue("Step {data$metadata@step_text} in data is too long. Maximal step is day."))
     }
@@ -44,7 +44,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     day_max_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
     values <- as.numeric((day_range_temp < dr) & (day_max_temp < tmax))
-    locality$sensors[[output_sensor]] <- microclim:::.common_get_new_sensor(output_sensor, values=values)
+    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(output_sensor, values=values)
     return(locality)
 }
 
@@ -72,13 +72,13 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 #' @examples
 #' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")
 mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_utc=F) {
-    microclim:::.common_stop_if_not_calc_format(data)
+    myClim:::.common_stop_if_not_calc_format(data)
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
     if(length(data$localities) == 0) {
         stop("Sensor doesn't exist in any locality.")
     }
     if(!use_utc) {
-        microclim:::.prep_warn_if_unset_tz_offset(data)
+        myClim:::.prep_warn_if_unset_tz_offset(data)
     }
     locality_function <- function(locality) {
         .calc_get_snow_agg_row(locality, snow_sensor, period, use_utc)

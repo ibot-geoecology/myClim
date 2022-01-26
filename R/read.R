@@ -9,7 +9,7 @@
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_read_directory("examples/data/TOMST/", "TOMST")
+#' example_tomst_data <- myClim::mc_read_directory("examples/data/TOMST/", "TOMST")
 mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
     files <-list.files(directory, pattern=".+\\.[cC][sS][vV]$", recursive=recursive, full.names=TRUE)
     mc_read_files(files, dataformat_name)
@@ -24,7 +24,7 @@ mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+#' example_tomst_data <- myClim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 mc_read_files <- function(files, dataformat_name) {
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name, serial_number=NA_character_)
     mc_read_dataframe(files_table)
@@ -39,7 +39,7 @@ mc_read_files <- function(files, dataformat_name) {
 #' @return data in standard format
 #' @export
 #' @examples
-#' example_tomst_data <- microclim::mc_read_csv("examples/data/TOMST/files_table.csv")
+#' example_tomst_data <- myClim::mc_read_csv("examples/data/TOMST/files_table.csv")
 mc_read_csv <- function(csv_files_table, csv_localities_table=NULL) {
     files_table <- read.table(csv_files_table,
                               header = TRUE,
@@ -75,7 +75,7 @@ mc_read_csv <- function(csv_files_table, csv_localities_table=NULL) {
 #' @return data in standard format
 #' @export
 mc_read_dataframe <- function(files_table, localities_table=NULL) {
-    files_table <- microclim:::.common_convert_factors_in_dataframe(files_table)
+    files_table <- myClim:::.common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {
         return(list())
@@ -103,7 +103,7 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
             warning(stringr::str_glue("It is unknown format {data_format} for {path}. File is skipped."))
             return(FALSE)
         }
-        if(!microclim:::.model_is_file_in_right_format(mc_data_formats[[data_format]], path)) {
+        if(!myClim:::.model_is_file_in_right_format(mc_data_formats[[data_format]], path)) {
             warning(stringr::str_glue("File {path} dosn't have right format. File is skipped."))
             return(FALSE)
         }
@@ -117,7 +117,7 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
         if(!is.na(serial_number)) {
             return(serial_number)
         }
-        serial_number <- microclim:::.model_get_serial_number_from_filename(mc_data_formats[[data_format]], path)
+        serial_number <- myClim:::.model_get_serial_number_from_filename(mc_data_formats[[data_format]], path)
         if(is.na(serial_number))
         {
             stop(stringr::str_glue("It isn't possible detect serial_number for {path}."))
@@ -159,7 +159,7 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
 }
 
 .read_get_new_locality <- function(locality_id, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
-    tz_type <- if(is.na(tz_offset)) microclim::mc_const_TZ_UTC else microclim::mc_const_TZ_USER_DEFINED
+    tz_type <- if(is.na(tz_offset)) myClim::mc_const_TZ_UTC else myClim::mc_const_TZ_USER_DEFINED
     metadata <- new("mc_LocalityMetadata")
     metadata@locality_id <- locality_id
     metadata@altitude <- altitude
@@ -177,7 +177,7 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
                              skip = skip,
                              stringsAsFactors = FALSE,
                              na.strings = data_format@na_strings)
-    data_format <- microclim:::.model_load_data_format_params_from_data(data_format, data_table)
+    data_format <- myClim:::.model_load_data_format_params_from_data(data_format, data_table)
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
     if(any(is.na(datetime))) {
@@ -217,5 +217,5 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
 
 .read_get_sensor <- function(data_table, data_format, sensor_name){
     values <- data_table[[data_format@columns[[sensor_name]]]]
-    microclim:::.common_get_new_sensor(sensor_name, sensor_name, values)
+    myClim:::.common_get_new_sensor(sensor_name, sensor_name, values)
 }

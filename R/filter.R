@@ -12,10 +12,10 @@
 #' @examples
 #' example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
-    is_calc_format <- microclim:::.common_is_calc_format(data)
+    is_calc_format <- myClim:::.common_is_calc_format(data)
     if(!is.null(localities)) {
         filter_function <- if(reverse) purrr::discard else purrr::keep
-        localities <- filter_function(microclim:::.common_get_localities(data), function(.x) .x$metadata@locality_id %in% localities)
+        localities <- filter_function(myClim:::.common_get_localities(data), function(.x) .x$metadata@locality_id %in% localities)
         if(is_calc_format) {
             data$localities <- localities
         } else {
@@ -29,7 +29,7 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_i
             data <- .filter_prep_sensors(data, sensors, reverse)
         }
     }
-    if(stop_if_empty && length(microclim:::.common_get_localities(data)) == 0) {
+    if(stop_if_empty && length(myClim:::.common_get_localities(data)) == 0) {
         stop("All data are removed by filter.")
     }
     data

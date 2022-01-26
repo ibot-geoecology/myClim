@@ -5,10 +5,10 @@ ledna 26, 2022
 # DESCRIPTION
 
 ```
-Package: microclim
+Package: myClim
 Type: Package
 Title: What the Package Does (Title Case)
-Version: 0.0.12
+Version: 0.0.13
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -817,7 +817,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tomst_data <- microclim::mc_read_csv("examples/data/TOMST/files_table.csv")
+example_tomst_data <- myClim::mc_read_csv("examples/data/TOMST/files_table.csv")
 ```
 
 
@@ -904,7 +904,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tomst_data <- microclim::mc_read_directory("examples/data/TOMST/", "TOMST")
+example_tomst_data <- myClim::mc_read_directory("examples/data/TOMST/", "TOMST")
 ```
 
 
@@ -941,7 +941,7 @@ data in standard format
 ## Examples
 
 ```r
-example_tomst_data <- microclim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+example_tomst_data <- myClim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 ```
 
 
@@ -979,7 +979,7 @@ data.frame with columns locality_id, serial_number, sensor, datetime, value
 ## Examples
 
 ```r
-example_tms_t1_table <- microclim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+example_tms_t1_table <- myClim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 ```
 
 
@@ -1071,9 +1071,9 @@ Class for source file data format for joined TOMST logger
 Class for source file data format for joined TOMST logger
 
 
-# `microclim-package`
+# `myClim-package`
 
-microclim: What the Package Does (Title Case)
+myClim: What the Package Does (Title Case)
 
 
 ## Description

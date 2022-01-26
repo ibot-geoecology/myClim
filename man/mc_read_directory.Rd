@@ -21,5 +21,5 @@ This function read csv data files from directory of one logger type.
 If csv file is not in correct format, is skipped. Locality is set to serial_number of logger.
 }
 \examples{
-example_tomst_data <- microclim::mc_read_directory("examples/data/TOMST/", "TOMST")
+example_tomst_data <- myClim::mc_read_directory("examples/data/TOMST/", "TOMST")
 }

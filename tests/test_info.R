@@ -1,5 +1,5 @@
 library(testthat)
-library(microclim)
+library(myClim)
 
 test_that("mc_info_count", {
     data <- mc_read_csv("data/TOMST/files_table.csv")

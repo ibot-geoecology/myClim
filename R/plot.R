@@ -13,10 +13,10 @@
 #' @examples
 #' mc_plot_loggers(example_tomst_data1, "Figures")
 mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c(NA, NA)) {
-    microclim:::.common_stop_if_not_prep_format(data)
+    myClim:::.common_stop_if_not_prep_format(data)
     data <- mc_filter(data, localities, sensors)
-    microclim:::.prep_warn_if_datetime_step_unprocessed(data)
-    loggers <- microclim:::.common_get_loggers(data)
+    myClim:::.prep_warn_if_datetime_step_unprocessed(data)
+    loggers <- myClim:::.common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {
         filename <- file.path(directory, paste0(logger$metadata@serial_number, ".png"))
@@ -41,7 +41,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 
 .plot_get_logger_sensors_by_physical <- function(logger) {
     physical <- sapply(logger$sensors, function(x) {
-        microclim:::.common_get_sensor_info(x$metadata)@physical})
+        myClim:::.common_get_sensor_info(x$metadata)@physical})
     sensor_names <- names(logger$sensors)
     tapply(sensor_names, physical, c, simplify = FALSE)
 }
@@ -69,7 +69,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
     if(is.na(result[[2]])) {
         result[[2]] <- max(datetime)
     }
-    microclim:::.common_as_utc_posixct(result)
+    myClim:::.common_as_utc_posixct(result)
 }
 
 .plot_logger_temperature <- function(logger, xlimit, months, sensors)
@@ -79,7 +79,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
     }
     else {
         sensor_info <- sapply(sensors, function(x) {
-            microclim:::.common_get_sensor_info(logger$sensors[[x]]$metadata)})
+            myClim:::.common_get_sensor_info(logger$sensors[[x]]$metadata)})
         values_range <- .plot_get_values_range(logger, sensors)
         ylimit = c(min(c(-15, values_range[[1]]), na.rm=T), max(c(30, values_range[[2]]), na.rm=T))
     }
@@ -101,8 +101,8 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 
 .plot_logger_moisture <- function(logger, xlimit, months, sensor)
 {
-    sensor_info <- microclim:::.common_get_sensor_info(logger$sensors[[sensor]]$metadata)
-    physical <- microclim::mc_data_physical[[sensor_info@physical]]
+    sensor_info <- myClim:::.common_get_sensor_info(logger$sensors[[sensor]]$metadata)
+    physical <- myClim::mc_data_physical[[sensor_info@physical]]
     right_margin <- 8
     par(mar=c(5, 5, 0.25, right_margin))
     par(new=F)
@@ -210,7 +210,7 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
 }
 
 .plot_set_ggplot_physical_colors <- function(data, plot) {
-    locality <- dplyr::first(microclim:::.common_get_localities(data))
+    locality <- dplyr::first(myClim:::.common_get_localities(data))
     if(.common_is_calc_format(data)) {
         item <- locality
     } else {
