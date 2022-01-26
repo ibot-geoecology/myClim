@@ -26,7 +26,7 @@
 #' @return aggregated data in format for calculating
 #' @export
 #' @examples
-#' example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c(min, max, percentile), "hour", percentiles = 50, na.rm=TRUE)
+#' example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE) {
     options(lubridate.week.start = 1)
     .agg_check_fun_period(fun, period, use_utc)

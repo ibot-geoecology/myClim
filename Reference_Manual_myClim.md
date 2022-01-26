@@ -90,7 +90,7 @@ aggregated data in format for calculating
 ## Examples
 
 ```r
-example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c(min, max, percentile), "hour", percentiles = 50, na.rm=TRUE)
+example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
 ```
 
 

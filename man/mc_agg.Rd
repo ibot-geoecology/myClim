@@ -53,5 +53,5 @@ same sensor_id as source one. It is usefull for detecting source sensor. Sensors
 Aggregation functions return NA for empty vector. Except count, it return 0.
 }
 \examples{
-example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c(min, max, percentile), "hour", percentiles = 50, na.rm=TRUE)
+example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
 }
