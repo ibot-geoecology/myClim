@@ -29,14 +29,14 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(!use_utc) {
         microclim:::.prep_warn_if_unset_tz_offset(data)
     }
-    step <- .agg_check_steps_and_get_one(data, fun, period)
+    original_step_period <- .agg_check_steps_and_get_original_period(data, fun, period)
     is_prep <- microclim:::.common_is_prep_format(data)
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_prep) {
             return(.agg_aggregate_prep_locality(locality, fun, period, percentiles, na.rm, tz_offset))
         } else {
-            return(.agg_aggregate_item(locality, fun, period, percentiles, na.rm, tz_offset, step))
+            return(.agg_aggregate_item(locality, fun, period, percentiles, na.rm, tz_offset, original_step_period))
         }
     }
     if(is_prep) {
@@ -49,25 +49,38 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(length(new_localities) == 0) {
         stop("Data are empty.")
     }
-    if(!is.null(fun)) {
+    if(!is.null(period)) {
+        step_text <- period
         step <- .agg_get_step_from_period(period)
+    } else {
+        step <- as.integer(as.numeric(original_step_period) / 60)
+        step_text <- stringr::str_glue("{step} min")
     }
-    metadata <- mc_MainMetadata(step=step)
+    metadata <- new("mc_MainMetadata")
+    metadata@step_text <- step_text
+    metadata@step <- step
     list(metadata=metadata, localities=new_localities)
 }
 
 .agg_check_fun_period <- function(fun, period, use_utc) {
-    if((is.null(fun) && !is.null(period)) || (!is.null(fun) && is.null(period))) {
+    if(is.null(period) && is.null(fun)) {
+        return()
+    }
+    if(is.null(fun) || is.null(period)) {
         stop("Parameters fun and period must be both NULL or must be both set.")
     }
-    if(!is.null(period) && !use_utc && .agg_get_step_from_period(period) < 60*24) {
+    period_object <- lubridate::period(period)
+    if(as.numeric(period_object) == 0) {
+        stop("Period cannot be 0.")
+    }
+    if(!use_utc && period_object@year == 0 && period_object@month == 0 && period_object@day == 0) {
         stop("Non-UTC time zone can be used only for period day and bigger.")
     }
 }
 
-.agg_check_steps_and_get_one <- function(data, fun, period) {
+.agg_check_steps_and_get_original_period <- function(data, fun, period) {
     if(microclim:::.common_is_calc_format(data)) {
-        return(data$metadata@step)
+        return(lubridate::period(data$metadata@step_text))
     }
     locality_function <- function(locality) {
         purrr::map_int(locality$loggers, function(.x) as.integer(.x$clean_info@step))
@@ -77,43 +90,50 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         stop("All steps must be set. Cleaning is required.")
     }
     if(!is.null(fun) && !is.null(period)) {
-        return(NA_integer_)
+        return(NULL)
     }
     if(length(steps) > 1 && var(steps) != 0) {
         stop("All steps in loggers must be same.")
     }
-    dplyr::first(steps)
+    lubridate::minutes(dplyr::first(steps))
 }
 
 .agg_aggregate_prep_locality <- function(locality, fun, period, percentiles, na.rm, tz_offset)
 {
     logger_function <- function (logger) {
-        step <- logger$clean_info@step
-        logger <- .agg_aggregate_item(logger, fun, period, percentiles, na.rm, tz_offset, step)
+        original_step_period <- lubridate::minutes(logger$clean_info@step)
+        logger <- .agg_aggregate_item(logger, fun, period, percentiles, na.rm, tz_offset, original_step_period)
         if(is.null(logger)) {
             return(logger)
         }
-        logger$clean_info@step <- .agg_get_step_from_period(period)
+        logger$clean_info@step <- NA_integer_
         logger
     }
     if(!is.null(fun)){
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         locality$loggers <- purrr::keep(locality$loggers, function (x) !is.null(x))
+        step_text <- period
+    } else {
+        step_text <- stringr::str_glue("{locality$loggers[[1]]$clean_info@step} min")
     }
-    .agg_get_flat_locality(locality)
+    .agg_get_flat_locality(locality, step_text)
 }
 
 .agg_get_step_from_period <- function(period) {
-    as.integer(lubridate::duration(period)) / 60
+    period_object <- lubridate::period(period)
+    if(period_object@year > 0 || period_object@month > 0) {
+        return(NA_integer_)
+    }
+    as.integer(as.numeric(period_object) / 60)
 }
 
-.agg_aggregate_item <- function(item, fun, period, percentiles, na.rm, tz_offset, step)
+.agg_aggregate_item <- function(item, fun, period, percentiles, na.rm, tz_offset, original_step_period)
 {
     if(is.null(fun) || length(item$datetime) == 0) {
         return(item)
     }
     item$datetime <- microclim:::.calc_get_datetimes_with_offset(item$datetime, tz_offset)
-    item <- .agg_crop_data_to_whole_periods(item, period, step)
+    item <- .agg_crop_data_to_whole_periods(item, period, original_step_period)
     if(is.null(item)) {
         return(item)
     }
@@ -126,8 +146,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     item$sensors <- purrr::flatten(purrr::map(item$sensors, sensor_function))
     item
 }
-.agg_get_flat_locality <- function(locality) {
-    new_sensors <- .agg_get_flat_sensors(locality)
+.agg_get_flat_locality <- function(locality, step_text) {
+    new_sensors <- .agg_get_flat_sensors(locality, step_text)
     if(length(new_sensors$sensor_names) == 0) {
         warning(stringr::str_glue("Locality {locality$metadata@locality_id} is without valid data. It is removed."))
         return(NULL)
@@ -148,7 +168,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
          sensors = sensors)
 }
 
-.agg_get_flat_sensors <- function(locality) {
+.agg_get_flat_sensors <- function(locality, step_text) {
     result <- new.env()
     result$sensor_names=list()
     loggers <- purrr::keep(locality$loggers, function(x) length(x$datetime) > 0)
@@ -163,7 +183,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         if(length(.x$datetime) == 0) return(NA_integer_)
         as.integer(tail(.x$datetime, n=1))}
     max_datetime <- microclim:::.common_as_utc_posixct(max(purrr::map_int(loggers, max_datetime_function), na.rm=TRUE))
-    datetimes <- seq(min_datetime, max_datetime, by=stringr::str_glue("{loggers[[1]]$clean_info@step} min"))
+    datetimes <- seq(min_datetime, max_datetime, by=step_text)
     sensor_name_function <- function(original_sensor_name, logger_index, logger_serial_number) {
         sensor_name <- .agg_get_flat_sensor_name(original_sensor_name, names(result$sensor_names),
                                                  logger_serial_number)
@@ -196,18 +216,18 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     sensor_name
 }
 
-.agg_crop_data_to_whole_periods <- function(item, period, step) {
+.agg_crop_data_to_whole_periods <- function(item, period, original_step_period) {
     start <- item$datetime[[1]]
     cropping <- FALSE
     first_period <- lubridate::floor_date(start, period)
-    first_period_previous <- lubridate::floor_date(start - step * 60, period)
+    first_period_previous <- lubridate::floor_date(start - original_step_period, period)
     if(first_period == first_period_previous) {
         cropping <- TRUE
         start <- lubridate::ceiling_date(start, period)
     }
     end <- dplyr::last(item$datetime)
     last_period <- lubridate::floor_date(end, period)
-    last_period_next <- lubridate::floor_date(end + step * 60, period)
+    last_period_next <- lubridate::floor_date(end + original_step_period, period)
     if(last_period == last_period_next) {
         cropping <- TRUE
         end <- last_period

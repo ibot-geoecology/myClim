@@ -45,8 +45,9 @@
 }
 
 .common_get_new_sensor <- function(sensor_name, sensor_id=NA_character_, values=NULL){
-    metadata <- mc_SensorMetadata(sensor_id = sensor_id,
-                                  name = sensor_name)
+    metadata <- new("mc_SensorMetadata")
+    metadata@sensor_id <- sensor_id
+    metadata@name <- sensor_name
     item <- list(metadata = metadata,
                  values = values,
                  states = list())

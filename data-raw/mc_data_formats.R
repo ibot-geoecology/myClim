@@ -1,30 +1,27 @@
 source("R/model.R")
 
-## code to prepare `source_data_formats` dataset goes here
+TOMST <- new("mc_TOMSTDataFormat")
+TOMST@has_header <- FALSE
+TOMST@separator <- ";"
+TOMST@date_column <- 2
+TOMST@na_strings <- "-200"
+TOMST@filename_serial_number_pattern <- "data_(\\d+)_\\d+\\.csv$"
+#                               ;datetime ;    ;T1             ;T2             ;T3             ;mois;    ;
+TOMST@data_row_pattern <- "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
+
+TOMST_join <- new("mc_TOMSTJoinDataFormat")
+TOMST_join@has_header <- FALSE
+TOMST_join@separator <- ";"
+TOMST_join@date_column <- 4
+TOMST_join@date_format <- "%d.%m.%Y %H:%M"
+TOMST_join@na_strings <- c("NA")
+TOMST_join@filename_serial_number_pattern <- "(.+)\\.csv$"
+#                                    ;  ;  ;datetime ;T1            ;T2            ;T3            ;mois;mois        ;
+TOMST_join@data_row_pattern <- "^\\d+;.+;.+;[\\d.: ]+;-?\\d+\\.?\\d*;-?\\d*\\.?\\d*;-?\\d*\\.?\\d*;\\d+;\\d+\\.?\\d*;.*$"
+
 mc_data_formats <- list(
-    HOBO_RH = mc_DataFormat(
-               has_header = TRUE,
-               separator = ";",
-               date_column = 1
-    ),
-    TOMST = mc_TOMSTDataFormat(
-      has_header = FALSE,
-      separator = ";",
-      date_column = 2,
-      na_strings = "-200",
-      filename_serial_number_pattern = "data_(\\d+)_\\d+\\.csv$",
-      data_row_pattern = "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
-    ),
-    TOMST_join = mc_TOMSTJoinDataFormat(
-        has_header = FALSE,
-        separator = ";",
-        date_column = 4,
-        date_format = "%d.%m.%Y %H:%M",
-        na_strings = c("NA"),
-        filename_serial_number_pattern = "(.+)\\.csv$",
-        #                        ;  ;  ;datetime ;T1            ;T2            ;T3            ;mois;mois        ;
-        data_row_pattern = "^\\d+;.+;.+;[\\d.: ]+;-?\\d+\\.?\\d*;-?\\d*\\.?\\d*;-?\\d*\\.?\\d*;\\d+;\\d+\\.?\\d*;.*$"
-    )
+    TOMST = TOMST,
+    TOMST_join = TOMST_join
 )
 
 usethis::use_data(mc_data_formats, overwrite = TRUE)

@@ -160,12 +160,13 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
 
 .read_get_new_locality <- function(locality_id, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
     tz_type <- if(is.na(tz_offset)) microclim::mc_const_TZ_UTC else microclim::mc_const_TZ_USER_DEFINED
-    metadata <- mc_LocalityMetadata(locality_id=locality_id,
-                                    altitude=altitude,
-                                    lon_wgs84=lon_wgs84,
-                                    lat_wgs84=lat_wgs84,
-                                    tz_offset=tz_offset,
-                                    tz_type=tz_type)
+    metadata <- new("mc_LocalityMetadata")
+    metadata@locality_id <- locality_id
+    metadata@altitude <- altitude
+    metadata@lon_wgs84 <- lon_wgs84
+    metadata@lat_wgs84 <- lat_wgs84
+    metadata@tz_offset <- tz_offset
+    metadata@tz_type <- tz_type
     list(metadata = metadata, loggers=list())
 }
 
@@ -182,11 +183,11 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
     if(any(is.na(datetime))) {
         stop(stringr::str_glue("It isn't possible read datetimes from {filename}."))
     }
-    metadata <- mc_LoggerMetadata(
-                    serial_number = serial_number,
-                    type = data_format@logger_type)
+    metadata <- new("mc_LoggerMetadata")
+    metadata@serial_number <- serial_number
+    metadata@type <- data_format@logger_type
     list(metadata = metadata,
-         clean_info = mc_LoggerCleanInfo(),
+         clean_info = new("mc_LoggerCleanInfo"),
          datetime = datetime,
          sensors = .read_get_sensors(data_table, data_format))
 }

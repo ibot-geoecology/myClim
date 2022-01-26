@@ -1,6 +1,6 @@
 <!-- toc -->
 
-ledna 13, 2022
+ledna 26, 2022
 
 # DESCRIPTION
 
@@ -199,7 +199,7 @@ Formats of source data files
 
 ## Format
 
-An object of class `list` of length 3.
+An object of class `list` of length 2.
 
 
 ## Usage

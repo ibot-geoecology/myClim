@@ -21,20 +21,22 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 #' @export mc_Sensor
 #' @exportClass mc_Sensor
 mc_Sensor <- setClass("mc_Sensor",
-         representation (
-           sensor_id = "character",
-           logger = "character",
-           physical = "character",
-           default_height = "numeric",
-           min_value = "numeric",
-           max_value = "numeric",
-           plot_color = "character",
-           plot_line_width = "numeric"
-         ),
-         prototype (
-            plot_color = "",
-            plot_line_width = 1
-         ))
+                      slots = c(sensor_id = "character",
+                                logger = "character",
+                                physical = "character",
+                                default_height = "numeric",
+                                min_value = "numeric",
+                                max_value = "numeric",
+                                plot_color = "character",
+                                plot_line_width = "numeric"))
+
+setMethod(f="initialize",
+          signature="mc_Sensor",
+          definition=function(.Object) {
+              .Object@plot_color <- ""
+              .Object@plot_line_width <- 1
+              return(.Object)
+          })
 
 #' Class for physical
 #' @slot name of physical
@@ -44,23 +46,19 @@ mc_Sensor <- setClass("mc_Sensor",
 #' @export mc_Physical
 #' @exportClass mc_Physical
 mc_Physical <- setClass("mc_Physical",
-         representation(
-           name = "character",
-           description = "character",
-           units = "character",
-           viridis_color_map = "character"
-         ))
+                        slots = c(
+                            name = "character",
+                            description = "character",
+                            units = "character",
+                            viridis_color_map = "character"))
 
 #' Class for main metadata in data format for calculation
 #' @slot step of data
 #' @export mc_MainMetadata
 #' @exportClass mc_MainMetadata
 mc_MainMetadata <- setClass("mc_MainMetadata",
-                            representation(
-                                    step = "numeric"
-                                ),
-                                prototype (
-                                ))
+                            slots = c(step = "numeric",
+                                      step_text = "character"))
 
 #' Class for locality metadata
 #' @slot id name of loacality
@@ -73,23 +71,25 @@ mc_MainMetadata <- setClass("mc_MainMetadata",
 #' @export mc_LocalityMetadata
 #' @exportClass mc_LocalityMetadata
 mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
-         representation(
-            locality_id = "character",
-            altitude = "numeric",
-            lat_wgs84 = "numeric",
-            lon_wgs84 = "numeric",
-            tz_offset = "numeric",
-            tz_type = "character",
-            user_data = "list"
-         ),
-         prototype (
-            altitude = NA_real_,
-            lat_wgs84 = NA_real_,
-            lon_wgs84 = NA_real_,
-            tz_offset = NA_integer_,
-            tz_type = mc_const_TZ_UTC,
-            user_data = list()
-         ))
+                                slots = c(locality_id = "character",
+                                          altitude = "numeric",
+                                          lat_wgs84 = "numeric",
+                                          lon_wgs84 = "numeric",
+                                          tz_offset = "numeric",
+                                          tz_type = "character",
+                                          user_data = "list"))
+
+setMethod("initialize",
+          "mc_LocalityMetadata",
+          function(.Object) {
+              .Object@altitude <- NA_real_
+              .Object@lat_wgs84 <- NA_real_
+              .Object@lon_wgs84 <- NA_real_
+              .Object@tz_offset <- NA_integer_
+              .Object@tz_type <- mc_const_TZ_UTC
+              .Object@user_data <- list()
+              return(.Object)
+          })
 
 #' Class for logger metadata
 #' @slot type of logger (TMS, ThermoDatalogger)
@@ -97,10 +97,8 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
 #' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
-                              representation(
-                                type = "character",
-                                serial_number = "character"),
-)
+                              slots = c(type = "character",
+                                        serial_number = "character"),)
 
 #' Class for logger clean info
 #' @slot step of series in minutes
@@ -110,32 +108,37 @@ mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
 #' @export mc_LoggerCleanInfo
 #' @exportClass mc_LoggerCleanInfo
 mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
-                              representation(
-                                  step = "numeric",
-                                  count_duplicits = "numeric",
-                                  count_missed = "numeric",
-                                  count_disordered = "numeric"),
-                              prototype(
-                                  step = NA_integer_,
-                                  count_duplicits = NA_integer_,
-                                  count_missed = NA_integer_,
-                                  count_disordered = NA_integer_),
-)
+                               slots = c(step = "numeric",
+                                         count_duplicits = "numeric",
+                                         count_missed = "numeric",
+                                         count_disordered = "numeric"))
+
+setMethod("initialize",
+          "mc_LoggerCleanInfo",
+          function(.Object) {
+              .Object@step <- NA_integer_
+              .Object@count_duplicits <- NA_integer_
+              .Object@count_missed <- NA_integer_
+              .Object@count_disordered <- NA_integer_
+              return(.Object)
+          })
 
 #' Class for sensor metadata
 #' @export mc_SensorMetadata
 #' @exportClass mc_SensorMetadata
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
-         representation(
-           sensor_id = "character",
-           name = "character",
-           height = "numeric",
-           calibrated = "logical"
-         ),
-         prototype (
-             height = NA_integer_,
-             calibrated = FALSE
-         ))
+                              slots = c(sensor_id = "character",
+                                        name = "character",
+                                        height = "numeric",
+                                        calibrated = "logical"))
+
+setMethod("initialize",
+          "mc_SensorMetadata",
+          function(.Object) {
+              .Object@height <- NA_integer_
+              .Object@calibrated <- FALSE
+              return(.Object)
+          })
 
 #' Class for state of sensor
 #' @slot tag
@@ -145,11 +148,9 @@ mc_SensorMetadata <- setClass("mc_SensorMetadata",
 #' @export mc_SensorState
 #' @exportClass mc_SensorState
 mc_SensorState <- setClass("mc_SensorState",
-         representation(
-           tag = "character",
-           start = "POSIXct",
-           end = "POSIXct"
-         ))
+                           slots = c(tag = "character",
+                                     start = "POSIXct",
+                                     end = "POSIXct"))
 
 #' Class for source file data format
 #' @slot has_header columns separator
@@ -163,27 +164,29 @@ mc_SensorState <- setClass("mc_SensorState",
 #' @export mc_DataFormat
 #' @exportClass mc_DataFormat
 mc_DataFormat <- setClass("mc_DataFormat",
-         representation(
-           has_header = "logical",
-           separator = "character",
-           date_column = "numeric",
-           date_format = "character",
-           na_strings = "character",
-           columns = "list",
-           filename_serial_number_pattern = "character",
-           data_row_pattern = "character",
-           logger_type = "character"
-         ),
-         prototype(
-           has_header = TRUE,
-           separator = ";",
-           date_column = NA_integer_,
-           date_format = NA_character_,
-           na_strings = NA_character_,
-           columns = list(),
-           filename_serial_number_pattern = NA_character_,
-           logger_type = NA_character_
-         ))
+                          slots = c(has_header = "logical",
+                                    separator = "character",
+                                    date_column = "numeric",
+                                    date_format = "character",
+                                    na_strings = "character",
+                                    columns = "list",
+                                    filename_serial_number_pattern = "character",
+                                    data_row_pattern = "character",
+                                    logger_type = "character"))
+
+setMethod("initialize",
+          "mc_DataFormat",
+          function(.Object) {
+              .Object@has_header <- TRUE
+              .Object@separator <- ";"
+              .Object@date_column <- NA_integer_
+              .Object@date_format <- NA_character_
+              .Object@na_strings <- NA_character_
+              .Object@columns <- list()
+              .Object@filename_serial_number_pattern <- NA_character_
+              .Object@logger_type < NA_character_
+              return(.Object)
+          })
 
 #' Class for source file data format for TOMST logger
 #' @export mc_TOMSTDataFormat
