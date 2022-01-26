@@ -46,4 +46,11 @@ test_that("mc_calc_snow_agg", {
     expect_true(is.na(snow_agg[2, 5]))
 })
 
+test_that("mc_calc_snow_agg no sensor", {
+    data <- mc_read_directory("data/eco-snow", "TOMST")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    expect_error(snow_agg <- mc_calc_snow_agg(calc_data, "snow"))
+})
+
 

@@ -24,7 +24,7 @@ data.frame with columns locality, snow_days, first_day, last_day, first_day_peri
 Function return summary info about snow detection
 }
 \details{
-If snow_sensor isn't in locality, then NA returned.
+If snow_sensor isn't in locality, then skipped.
 }
 \examples{
 snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")

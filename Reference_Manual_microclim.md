@@ -124,7 +124,7 @@ Argument      |Description
 
 ## Details
 
-If snow_sensor isn't in locality, then NA returned.
+If snow_sensor isn't in locality, then skipped.
 
 
 ## Value
@@ -281,7 +281,13 @@ This function filter data by localities and sensors
 ## Usage
 
 ```r
-mc_filter(data, localities = NULL, sensors = NULL, reverse = FALSE)
+mc_filter(
+  data,
+  localities = NULL,
+  sensors = NULL,
+  reverse = FALSE,
+  stop_if_empty = TRUE
+)
 ```
 
 
@@ -295,6 +301,9 @@ Argument      |Description
 `reverse`     |      
 
 *  if TRUE then filtered discard else keeped (default FALSE)
+`stop_if_empty`     |      
+
+*  if TRUE then error for empty output (default TRUE)
 
 
 ## Value

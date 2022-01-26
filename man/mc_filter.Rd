@@ -4,7 +4,13 @@
 \alias{mc_filter}
 \title{Filter data}
 \usage{
-mc_filter(data, localities = NULL, sensors = NULL, reverse = FALSE)
+mc_filter(
+  data,
+  localities = NULL,
+  sensors = NULL,
+  reverse = FALSE,
+  stop_if_empty = TRUE
+)
 }
 \arguments{
 \item{data}{in format for preparing or calculation}
@@ -15,6 +21,10 @@ mc_filter(data, localities = NULL, sensors = NULL, reverse = FALSE)
 
 \item{reverse}{\itemize{
 \item if TRUE then filtered discard else keeped (default FALSE)
+}}
+
+\item{stop_if_empty}{\itemize{
+\item if TRUE then error for empty output (default TRUE)
 }}
 }
 \value{

@@ -6,11 +6,12 @@
 #' @param localities locality_ids for filtering data; if NULL then do nothing
 #' @param sensors sensor_ids for filtering data; if NULL then do nothing
 #' @param reverse - if TRUE then filtered discard else keeped (default FALSE)
+#' @param stop_if_empty - if TRUE then error for empty output (default TRUE)
 #' @return filtered data in same format as input
 #' @export
 #' @examples
 #' example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
-mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE) {
+mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_calc_format <- microclim:::.common_is_calc_format(data)
     if(!is.null(localities)) {
         filter_function <- if(reverse) purrr::discard else purrr::keep
@@ -28,7 +29,7 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE) {
             data <- .filter_prep_sensors(data, sensors, reverse)
         }
     }
-    if(length(microclim:::.common_get_localities(data)) == 0) {
+    if(stop_if_empty && length(microclim:::.common_get_localities(data)) == 0) {
         stop("All data are removed by filter.")
     }
     data

@@ -60,7 +60,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 #' Function return summary info about snow detection
 #'
 #' @details
-#' If snow_sensor isn't in locality, then NA returned.
+#' If snow_sensor isn't in locality, then skipped.
 #'
 #' @param data in format for calculation
 #' @param snow_sensor name of snow sensor created by function mc_calc_snow
@@ -73,7 +73,10 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 #' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T3")
 mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_utc=F) {
     microclim:::.common_stop_if_not_calc_format(data)
-    data <- mc_filter(data, localities)
+    data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
+    if(length(data$localities) == 0) {
+        stop("Sensor doesn't exist in any locality.")
+    }
     if(!use_utc) {
         microclim:::.prep_warn_if_unset_tz_offset(data)
     }
@@ -90,9 +93,6 @@ mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_u
                    last_day = NA,
                    first_day_period = NA,
                    last_day_period = NA)
-    if(!(snow_sensor %in% names(locality$sensors))) {
-        return(result)
-    }
     snow_table <- tibble::tibble(datetime=locality$datetime, snow=locality$sensors[[snow_sensor]]$values)
     snow_table <- dplyr::filter(snow_table, !is.na(snow))
     if(!use_utc) {
