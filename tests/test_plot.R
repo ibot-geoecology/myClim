@@ -22,6 +22,7 @@ test_that("all plots", {
 
     mc_plot_image(data, "plots/image.png", "T1 sensors", sensors="TMS_T1")
     mc_plot_image(data_agg, "plots/image.png", "T1 sensors", sensors="TMS_T1")
+    mc_plot_image(data_agg, "plots/image.png")
 
     mc_plot_raster(data, "plots/raster.pdf", sensors = c("TMS_T1", "TMS_T2"))
     mc_plot_raster(data_agg, "plots/raster.png", sensors = c("TMS_T1", "TMS_T2"), png_height = 500)

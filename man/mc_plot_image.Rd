@@ -7,7 +7,7 @@
 mc_plot_image(
   data,
   filename,
-  title,
+  title = "",
   localities = NULL,
   sensors = NULL,
   height = 1900,
@@ -19,7 +19,7 @@ mc_plot_image(
 
 \item{filename}{output filename}
 
-\item{title}{of plot}
+\item{title}{of plot; default is empty}
 
 \item{localities}{names of localities; if empty then all}
 

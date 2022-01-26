@@ -478,7 +478,7 @@ Function plot data to file with image function
 mc_plot_image(
   data,
   filename,
-  title,
+  title = "",
   localities = NULL,
   sensors = NULL,
   height = 1900,
@@ -493,7 +493,7 @@ Argument      |Description
 ------------- |----------------
 `data`     |     in format for preparing or calculation
 `filename`     |     output filename
-`title`     |     of plot
+`title`     |     of plot; default is empty
 `localities`     |     names of localities; if empty then all
 `sensors`     |     names of sensors; if empty then all
 `height`     |     of image; default = 1900

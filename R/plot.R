@@ -138,7 +138,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 #'
 #' @param data in format for preparing or calculation
 #' @param filename output filename
-#' @param title of plot
+#' @param title of plot; default is empty
 #' @param localities names of localities; if empty then all
 #' @param sensors names of sensors; if empty then all
 #' @param height of image; default = 1900
@@ -146,7 +146,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
 #' @export
 #' @examples
 #' mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
-mc_plot_image <- function(data, filename, title, localities=NULL, sensors=NULL, height=1900, left_margin=12) {
+mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NULL, height=1900, left_margin=12) {
     data_table <- mc_reshape_wide(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
     png(filename=filename,width=1900, height=height, res=200)
