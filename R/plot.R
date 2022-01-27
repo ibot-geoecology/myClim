@@ -181,8 +181,18 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' @param by_hour if TRUE, then y axis is hour, alse time (default TRUE)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
+#' @param viridis_color_map viridis color map option; if NULL, then used value from mc_data_physical
+#'
+#' * "A" - magma
+#' * "B" - inferno
+#' * "C" - plasma
+#' * "D" - viridis
+#' * "E" - cividis
+#' * "F" - rocket
+#' * "G" - mako
+#' * "H" - turbo
 #' @export
-mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900) {
+mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900, viridis_color_map=NULL) {
     data <- mc_filter(data, sensors=sensors)
     data_table <-mc_reshape_long(data)
     data_table <- dplyr::mutate(data_table, date = lubridate::date(datetime))
@@ -196,7 +206,7 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     plot <- ggplot2::ggplot(data_table, ggplot2::aes(date, y_values, na.rm = FALSE))
     plot <- plot + ggplot2::ylab(y_name)
     plot <- plot + ggplot2::geom_raster(ggplot2::aes(fill=value))
-    plot <- .plot_set_ggplot_physical_colors(data, plot)
+    plot <- .plot_set_ggplot_physical_colors(data, plot, viridis_color_map)
     plot <- .plot_set_ggplot_theme(plot)
     plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
     file_type <- .plot_get_file_type(filename)
@@ -209,7 +219,7 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     }
 }
 
-.plot_set_ggplot_physical_colors <- function(data, plot) {
+.plot_set_ggplot_physical_colors <- function(data, plot, viridis_color_map) {
     locality <- dplyr::first(myClim:::.common_get_localities(data))
     if(.common_is_calc_format(data)) {
         item <- locality
@@ -218,11 +228,17 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     }
     sensor_metadata <- dplyr::first(item$sensors)$metadata
     if(is.na(sensor_metadata@sensor_id)) {
-        return(plot + viridis::scale_fill_viridis(name=sensor_metadata@name, option="D", direction=1))
+        if(is.null(viridis_color_map)) {
+            viridis_color_map <- "D"
+        }
+        return(plot + viridis::scale_fill_viridis(name=sensor_metadata@name, option=viridis_color_map, direction=1))
     }
     sensor <- mc_data_sensors[[sensor_metadata@sensor_id]]
     physical <- mc_data_physical[[sensor@physical]]
-    plot + viridis::scale_fill_viridis(name=physical@description, option=physical@viridis_color_map, direction=1)
+    if(is.null(viridis_color_map)) {
+        viridis_color_map <- physical@viridis_color_map
+    }
+    plot + viridis::scale_fill_viridis(name=physical@description, option=viridis_color_map, direction=1)
 }
 
 .plot_set_ggplot_theme <- function(plot) {

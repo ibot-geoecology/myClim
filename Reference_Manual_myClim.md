@@ -567,7 +567,8 @@ mc_plot_raster(
   sensors = NULL,
   by_hour = TRUE,
   png_width = 1900,
-  png_height = 1900
+  png_height = 1900,
+  viridis_color_map = NULL
 )
 ```
 
@@ -582,6 +583,23 @@ Argument      |Description
 `by_hour`     |     if TRUE, then y axis is hour, alse time (default TRUE)
 `png_width`     |     width for png output (default 1900)
 `png_height`     |     height for png output (default 1900)
+`viridis_color_map`     |     viridis color map option; if NULL, then used value from mc_data_physical  
+
+*  "A" - magma 
+
+*  "B" - inferno 
+
+*  "C" - plasma 
+
+*  "D" - viridis 
+
+*  "E" - cividis 
+
+*  "F" - rocket 
+
+*  "G" - mako 
+
+*  "H" - turbo
 
 
 # `mc_prep_clean`

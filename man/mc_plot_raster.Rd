@@ -10,7 +10,8 @@ mc_plot_raster(
   sensors = NULL,
   by_hour = TRUE,
   png_width = 1900,
-  png_height = 1900
+  png_height = 1900,
+  viridis_color_map = NULL
 )
 }
 \arguments{
@@ -25,6 +26,18 @@ mc_plot_raster(
 \item{png_width}{width for png output (default 1900)}
 
 \item{png_height}{height for png output (default 1900)}
+
+\item{viridis_color_map}{viridis color map option; if NULL, then used value from mc_data_physical
+\itemize{
+\item "A" - magma
+\item "B" - inferno
+\item "C" - plasma
+\item "D" - viridis
+\item "E" - cividis
+\item "F" - rocket
+\item "G" - mako
+\item "H" - turbo
+}}
 }
 \description{
 Function plot data to file with ggplot2 geom_raster
