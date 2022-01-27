@@ -82,7 +82,15 @@ mc_info_clean <- function(data) {
 mc_info <- function(data) {
     is_prep_format <- myClim:::.common_is_prep_format(data)
 
-    sensors_item_function <- function(locality_id, item, step) {
+    function_with_check_empty <- function(values, f) {
+        values <- values[!is.na(values)]
+        if(length(values) == 0) {
+            return(NA_real_)
+        }
+        f(values)
+    }
+
+    sensors_item_function <- function(locality_id, item, step, step_text) {
         serial_number <- NA_character_
         if(is_prep_format) {
             serial_number <- item$metadata@serial_number
@@ -90,6 +98,7 @@ mc_info <- function(data) {
         }
 
         count <- length(item$sensors)
+
         tibble::tibble(locality_id=rep(locality_id, count),
                        serial_number=rep(serial_number, count),
                        sensor_id=purrr::map_chr(item$sensors, function(x) x$metadata@sensor_id),
@@ -97,8 +106,9 @@ mc_info <- function(data) {
                        start_date=rep(min(item$datetime), count),
                        end_date=rep(max(item$datetime), count),
                        step=rep(step, count),
-                       min_value=purrr::map_dbl(item$sensors, function(x) min(x$values, na.rm=TRUE)),
-                       max_value=purrr::map_dbl(item$sensors, function(x) max(x$values, na.rm=TRUE)),
+                       step_text=rep(step_text, count),
+                       min_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, min)),
+                       max_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, max)),
                        count_values=purrr::map_int(item$sensors, function(x) length(x$values[!is.na(x$values)])),
                        count_na=purrr::map_int(item$sensors, function(x) length(x$values[is.na(x$values)])))
     }
@@ -106,7 +116,8 @@ mc_info <- function(data) {
     prep_locality_function <- function(locality) {
         purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
                              item=locality$loggers,
-                             step=NA_integer_),
+                             step=NA_integer_,
+                             step_text=NA_character_),
                         sensors_item_function)
     }
 
@@ -115,9 +126,10 @@ mc_info <- function(data) {
     } else {
         result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
                                        item=data$localities,
-                                       step=as.integer(data$metadata@step)),
+                                       step=as.integer(data$metadata@step),
+                                       step_text=data$metadata@step_text),
                                   sensors_item_function)
     }
-    result
+    as.data.frame(result)
 }
 
