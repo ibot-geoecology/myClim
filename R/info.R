@@ -77,7 +77,7 @@ mc_info_clean <- function(data) {
 #' This function return dataframe with info about sensors
 #'
 #' @param data in format for preparing or calculation
-#' @return dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, min_value, max_value, count_values, count_na
+#' @return dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, step_text, min_value, max_value, count_values, count_na
 #' @export
 mc_info <- function(data) {
     is_prep_format <- myClim:::.common_is_prep_format(data)

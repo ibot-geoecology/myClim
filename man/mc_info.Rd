@@ -10,7 +10,7 @@ mc_info(data)
 \item{data}{in format for preparing or calculation}
 }
 \value{
-dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, min_value, max_value, count_values, count_na
+dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, step_text, min_value, max_value, count_values, count_na
 }
 \description{
 This function return dataframe with info about sensors
