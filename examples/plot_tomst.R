@@ -7,6 +7,7 @@ mc_plot_image(example_cleaned_tomst_data, "plots/image.png", "T1 sensors", senso
 mc_plot_loggers(example_cleaned_tomst_data, "plots")
 
 mc_plot_raster(example_cleaned_tomst_data, "plots/T1T2.pdf", sensors = c("TMS_T1", "TMS_T2"))
+mc_plot_raster(example_cleaned_tomst_data, "plots/moisture.pdf", sensors = "TMS_TMSmoisture")
 mc_plot_raster(example_cleaned_tomst_data, "plots/T1T2.png", sensors = c("TMS_T1", "TMS_T2"), png_height = 500)
 
 example_hour_data <- mc_agg(example_cleaned_tomst_data, "mean", period="hour")

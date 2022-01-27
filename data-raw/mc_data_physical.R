@@ -10,13 +10,13 @@ TMSmoisture <- new("mc_Physical")
 TMSmoisture@name <- "TMSmoisture"
 TMSmoisture@description <- "Soil moisture (TDT signal)"
 TMSmoisture@units <- "TDT signal"
-TMSmoisture@viridis_color_map < "D"
+TMSmoisture@viridis_color_map <- "D"
 
 moisture <- new("mc_Physical")
 moisture@name <- "moisture"
 moisture@description <- "Volum. soil moisture"
 moisture@units <- "ratio"
-moisture@viridis_color_map < "D"
+moisture@viridis_color_map <- "D"
 
 mc_data_physical <- list(
     T = T,
