@@ -76,3 +76,17 @@
     localities
 }
 
+.common_get_cleaned_data_range <- function(data) {
+    datetime_items_function <- function(item) {
+        list(start=dplyr::first(item$datetime),
+             end=dplyr::last(item$datetime))
+    }
+    if(.common_is_calc_format(data)) {
+        items <- data$localities
+    } else {
+        items <- purrr::flatten(purrr::map(data, ~ .x$loggers))
+    }
+    table <- purrr::map_dfr(items, datetime_items_function)
+    lubridate::interval(min(table$start), max(table$end))
+}
+

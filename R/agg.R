@@ -18,7 +18,9 @@
 #' function coverage is count_values/count_all_records
 #' @param period of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 #'
-#' start day of week is monday
+#' There is special period "all" for one value from whole range.
+#'
+#' Start day of week is monday.
 #' @param use_utc if set FALSE then datetime changed by locality tz_offset (default TRUE);
 #' Non-UTC time can by used only for period `day` and bigger.
 #' @param percentiles - vector of percentile numbers; numbers are from range 0-100; every number generate new sensor
@@ -29,18 +31,23 @@
 #' example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE) {
     options(lubridate.week.start = 1)
-    .agg_check_fun_period(fun, period, use_utc)
+    use_interval <- NULL
+    if(!is.null(period) && period == "all") {
+        use_interval <- myClim:::.common_get_cleaned_data_range(data)
+    }
+    period_object <- .agg_get_period_object(use_interval, period)
+    .agg_check_fun_period(fun, period_object, use_utc)
     if(!use_utc) {
         myClim:::.prep_warn_if_unset_tz_offset(data)
     }
-    original_step_period <- .agg_check_steps_and_get_original_period(data, fun, period)
+    original_step_period <- .agg_check_steps_and_get_original_period(data, fun, period_object)
     is_prep <- myClim:::.common_is_prep_format(data)
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_prep) {
-            return(.agg_aggregate_prep_locality(locality, fun, period, percentiles, na.rm, tz_offset))
+            return(.agg_aggregate_prep_locality(locality, fun, period, use_interval, percentiles, na.rm, tz_offset))
         } else {
-            return(.agg_aggregate_item(locality, fun, period, percentiles, na.rm, tz_offset, original_step_period))
+            return(.agg_aggregate_item(locality, fun, period, use_interval, percentiles, na.rm, tz_offset, original_step_period))
         }
     }
     if(is_prep) {
@@ -53,12 +60,18 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(length(new_localities) == 0) {
         stop("Data are empty.")
     }
-    if(!is.null(period)) {
-        step_text <- period
-        step <- .agg_get_step_from_period(period)
+
+    if(is.null(period)) {
+        number_of_seconds <- as.numeric(original_step_period)
+        step <- as.integer(number_of_seconds / 60)
+        step_text <- as.character(lubridate::seconds_to_period(number_of_seconds))
+    } else if(period == "all") {
+        number_of_seconds <- as.numeric(use_interval)
+        step <- as.integer(number_of_seconds / 60)
+        step_text <- as.character(lubridate::seconds_to_period(number_of_seconds))
     } else {
-        step <- as.integer(as.numeric(original_step_period) / 60)
-        step_text <- stringr::str_glue("{step} min")
+        step_text <- period
+        step <- .agg_get_step_from_period_object(period_object)
     }
     metadata <- new("mc_MainMetadata")
     metadata@step_text <- step_text
@@ -66,14 +79,23 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     list(metadata=metadata, localities=new_localities)
 }
 
-.agg_check_fun_period <- function(fun, period, use_utc) {
-    if(is.null(period) && is.null(fun)) {
+.agg_get_period_object <- function(use_interval, period) {
+    if(is.null(period)) {
+        return(NULL)
+    }
+    if(!is.null(use_interval)) {
+        return(lubridate::as.period(use_interval))
+    }
+    lubridate::period(period)
+}
+
+.agg_check_fun_period <- function(fun, period_object, use_utc) {
+    if(is.null(period_object) && is.null(fun)) {
         return()
     }
-    if(is.null(fun) || is.null(period)) {
+    if(is.null(fun) || is.null(period_object)) {
         stop("Parameters fun and period must be both NULL or must be both set.")
     }
-    period_object <- lubridate::period(period)
     if(as.numeric(period_object) == 0) {
         stop("Period cannot be 0.")
     }
@@ -82,7 +104,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     }
 }
 
-.agg_check_steps_and_get_original_period <- function(data, fun, period) {
+.agg_check_steps_and_get_original_period <- function(data, fun, period_object) {
     if(myClim:::.common_is_calc_format(data)) {
         return(lubridate::period(data$metadata@step_text))
     }
@@ -93,7 +115,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(any(is.na(steps))) {
         stop("All steps must be set. Cleaning is required.")
     }
-    if(!is.null(fun) && !is.null(period)) {
+    if(!is.null(fun) && !is.null(period_object)) {
         return(NULL)
     }
     if(length(steps) > 1 && var(steps) != 0) {
@@ -102,11 +124,11 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     lubridate::minutes(dplyr::first(steps))
 }
 
-.agg_aggregate_prep_locality <- function(locality, fun, period, percentiles, na.rm, tz_offset)
+.agg_aggregate_prep_locality <- function(locality, fun, period, use_interval, percentiles, na.rm, tz_offset)
 {
     logger_function <- function (logger) {
         original_step_period <- lubridate::minutes(logger$clean_info@step)
-        logger <- .agg_aggregate_item(logger, fun, period, percentiles, na.rm, tz_offset, original_step_period)
+        logger <- .agg_aggregate_item(logger, fun, period, use_interval, percentiles, na.rm, tz_offset, original_step_period)
         if(is.null(logger)) {
             return(logger)
         }
@@ -116,32 +138,40 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(!is.null(fun)){
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         locality$loggers <- purrr::keep(locality$loggers, function (x) !is.null(x))
-        step_text <- period
+        if(period == "all") {
+            step_text <- stringr::str_glue("{as.numeric(use_interval) / 60} min")
+        } else {
+            step_text <- period
+        }
     } else {
         step_text <- stringr::str_glue("{locality$loggers[[1]]$clean_info@step} min")
     }
-    .agg_get_flat_locality(locality, step_text)
+    .agg_get_flat_locality(locality, step_text, use_interval)
 }
 
-.agg_get_step_from_period <- function(period) {
-    period_object <- lubridate::period(period)
+.agg_get_step_from_period_object <- function(period_object) {
     if(period_object@year > 0 || period_object@month > 0) {
         return(NA_integer_)
     }
     as.integer(as.numeric(period_object) / 60)
 }
 
-.agg_aggregate_item <- function(item, fun, period, percentiles, na.rm, tz_offset, original_step_period)
+.agg_aggregate_item <- function(item, fun, period, use_interval, percentiles, na.rm, tz_offset, original_step_period)
 {
     if(is.null(fun) || length(item$datetime) == 0) {
         return(item)
     }
     item$datetime <- myClim:::.calc_get_datetimes_with_offset(item$datetime, tz_offset)
-    item <- .agg_crop_data_to_whole_periods(item, period, original_step_period)
+    item <- .agg_crop_data_to_whole_periods(item, period, use_interval, original_step_period)
     if(is.null(item)) {
         return(item)
     }
-    by_aggregate <- list(step=cut(item$datetime, breaks=period, start.on.monday = TRUE))
+    if(is.null(use_interval)) {
+        by_aggregate <- list(step=cut(item$datetime, breaks=period, start.on.monday = TRUE))
+    } else {
+        count <- length(item$datetime)
+        by_aggregate <- list(step=as.factor(rep(lubridate::int_start(use_interval), count)))
+    }
     item$datetime <- aggregate(item$datetime, by_aggregate, min)$x
     sensor_function <- function(sensor) {
         functions <- .agg_get_functions(sensor, fun, percentiles, na.rm)
@@ -150,8 +180,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     item$sensors <- purrr::flatten(purrr::map(item$sensors, sensor_function))
     item
 }
-.agg_get_flat_locality <- function(locality, step_text) {
-    new_sensors <- .agg_get_flat_sensors(locality, step_text)
+.agg_get_flat_locality <- function(locality, step_text, use_interval) {
+    new_sensors <- .agg_get_flat_sensors(locality, step_text, use_interval)
     if(length(new_sensors$sensor_names) == 0) {
         warning(stringr::str_glue("Locality {locality$metadata@locality_id} is without valid data. It is removed."))
         return(NULL)
@@ -172,22 +202,18 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
          sensors = sensors)
 }
 
-.agg_get_flat_sensors <- function(locality, step_text) {
+.agg_get_flat_sensors <- function(locality, step_text, use_interval) {
     result <- new.env()
     result$sensor_names=list()
     loggers <- purrr::keep(locality$loggers, function(x) length(x$datetime) > 0)
     if(length(loggers) == 0) {
         return(result)
     }
-    min_datetime_function <- function(.x) {
-        if(length(.x$datetime) == 0) return(NA_integer_)
-        as.integer(.x$datetime[[1]])}
-    min_datetime <- myClim:::.common_as_utc_posixct(min(purrr::map_int(loggers, min_datetime_function), na.rm=TRUE))
-    max_datetime_function <- function(.x) {
-        if(length(.x$datetime) == 0) return(NA_integer_)
-        as.integer(tail(.x$datetime, n=1))}
-    max_datetime <- myClim:::.common_as_utc_posixct(max(purrr::map_int(loggers, max_datetime_function), na.rm=TRUE))
-    datetimes <- seq(min_datetime, max_datetime, by=step_text)
+    if(is.null(use_interval)) {
+        datetimes <- .agg_get_datetimes_from_loggers(loggers, step_text)
+    } else {
+        datetimes <- lubridate::int_start(use_interval)
+    }
     sensor_name_function <- function(original_sensor_name, logger_index, logger_serial_number) {
         sensor_name <- .agg_get_flat_sensor_name(original_sensor_name, names(result$sensor_names),
                                                  logger_serial_number)
@@ -207,6 +233,18 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     result
 }
 
+.agg_get_datetimes_from_loggers <- function(loggers, step_text) {
+    min_datetime_function <- function(.x) {
+        if(length(.x$datetime) == 0) return(NA_integer_)
+        as.integer(.x$datetime[[1]])}
+    min_datetime <- myClim:::.common_as_utc_posixct(min(purrr::map_int(loggers, min_datetime_function), na.rm=TRUE))
+    max_datetime_function <- function(.x) {
+        if(length(.x$datetime) == 0) return(NA_integer_)
+        as.integer(tail(.x$datetime, n=1))}
+    max_datetime <- myClim:::.common_as_utc_posixct(max(purrr::map_int(loggers, max_datetime_function), na.rm=TRUE))
+    seq(min_datetime, max_datetime, by=step_text)
+}
+
 .agg_get_flat_sensor_name <- function(original_sensor_name, existed_names, logger_serial_number) {
     sensor_name <- original_sensor_name
     number <- 1
@@ -220,24 +258,20 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     sensor_name
 }
 
-.agg_crop_data_to_whole_periods <- function(item, period, original_step_period) {
-    start <- item$datetime[[1]]
-    cropping <- FALSE
-    first_period <- lubridate::floor_date(start, period)
-    first_period_previous <- lubridate::floor_date(start - original_step_period, period)
-    if(first_period == first_period_previous) {
-        cropping <- TRUE
-        start <- lubridate::ceiling_date(start, period)
-    }
+.agg_crop_data_to_whole_periods <- function(item, period, use_interval, original_step_period) {
+    start <- dplyr::first(item$datetime)
     end <- dplyr::last(item$datetime)
-    last_period <- lubridate::floor_date(end, period)
-    last_period_next <- lubridate::floor_date(end + original_step_period, period)
-    if(last_period == last_period_next) {
-        cropping <- TRUE
-        end <- last_period
+    if(is.null(use_interval)) {
+        cropping_info <- .agg_get_cropping_info_by_period_and_original_step(start, end, period, original_step_period)
+        cropping <- cropping_info$cropping
+        start <- cropping_info$start
+        end <- cropping_info$end
     } else {
-        end <- last_period_next
+        cropping <- (start < lubridate::int_start(use_interval) || end > lubridate::int_end(use_interval))
+        start <- lubridate::int_start(use_interval)
+        end <- lubridate::int_end(use_interval)
     }
+
     if(cropping) {
         item_id <- myClim:::.common_get_id_of_item_with_sensors(item)
         if(start >= end) {
@@ -249,6 +283,25 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         item <- myClim:::.prep_crop_data(item, start, end, end_included=FALSE)
     }
     item
+}
+
+.agg_get_cropping_info_by_period_and_original_step <- function(start, end, period, original_step_period) {
+    cropping <- FALSE
+    first_period <- lubridate::floor_date(start, period)
+    first_period_previous <- lubridate::floor_date(start - original_step_period, period)
+    if(first_period == first_period_previous) {
+        cropping <- TRUE
+        start <- lubridate::ceiling_date(start, period)
+    }
+    last_period <- lubridate::floor_date(end, period)
+    last_period_next <- lubridate::floor_date(end + original_step_period, period)
+    if(last_period == last_period_next) {
+        cropping <- TRUE
+        end <- last_period
+    } else {
+        end <- last_period_next
+    }
+    list(start=start, end=end, cropping=cropping)
 }
 
 .agg_get_functions <- function(sensor, fun, percentiles, na.rm) {

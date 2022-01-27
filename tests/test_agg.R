@@ -72,11 +72,22 @@ test_that("mc_agg long period", {
     expect_warning(agg_data <- mc_agg(data, "mean", "week", use_utc=FALSE, na.rm=FALSE))
     test_calc_data_format(agg_data)
     expect_equal(agg_data$metadata@step_text, "week")
+    expect_equal(agg_data$localities$`91184101`$datetime[[1]], lubridate::ymd_h("2020-11-02 00"))
     expect_false(is.na(agg_data$metadata@step))
     expect_false(any(is.na(agg_data$localities[["91184101"]]$sensors$TM_T_mean$values)))
     expect_warning(agg_data <- mc_agg(data, "mean", "month", use_utc=FALSE, na.rm=FALSE))
     test_calc_data_format(agg_data)
     expect_equal(agg_data$metadata@step_text, "month")
     expect_true(is.na(agg_data$metadata@step))
+})
+
+test_that("mc_agg all period", {
+    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_prep_clean(data, silent=T)
+    all_data <- mc_agg(data, "mean", "all")
+    test_calc_data_format(all_data)
+    expect_equal(all_data$metadata@step_text, "30d 23H 45M 0S")
+    expect_equal(length(all_data$localities$`94184102`$datetime), 1)
+    expect_equal(length(all_data$localities$`94184103`$datetime), 1)
 })
 

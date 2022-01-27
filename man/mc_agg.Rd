@@ -29,7 +29,9 @@ function coverage is count_values/count_all_records}
 
 \item{period}{of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 
-start day of week is monday}
+There is special period "all" for one value from whole range.
+
+Start day of week is monday.}
 
 \item{use_utc}{if set FALSE then datetime changed by locality tz_offset (default TRUE);
 Non-UTC time can by used only for period \code{day} and bigger.}

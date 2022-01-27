@@ -1,6 +1,6 @@
 <!-- toc -->
 
-ledna 26, 2022
+ledna 27, 2022
 
 # DESCRIPTION
 
@@ -67,7 +67,7 @@ Argument      |Description
 *  functions are applied to all sensors. Sensors aren't renamed. 
 
 *  Names of items in list are sensor_names and items are vectors of functions applied to sensors. Names of new sensors are in format sensor_name _ function .   function coverage is count_values/count_all_records
-`period`     |     of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation  start day of week is monday
+`period`     |     of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation  There is special period "all" for one value from whole range.  Start day of week is monday.
 `use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default TRUE); Non-UTC time can by used only for period `day` and bigger.
 `percentiles`     |      
 
