@@ -568,7 +568,9 @@ mc_plot_raster(
   by_hour = TRUE,
   png_width = 1900,
   png_height = 1900,
-  viridis_color_map = NULL
+  viridis_color_map = NULL,
+  start_crop = NULL,
+  end_crop = NULL
 )
 ```
 
@@ -600,6 +602,8 @@ Argument      |Description
 *  "G" - mako 
 
 *  "H" - turbo
+`start_crop`     |     POSIXct datetime for crop data (default NULL)
+`end_crop`     |     POSIXct datetime for crop data (default NULL)
 
 
 # `mc_prep_clean`

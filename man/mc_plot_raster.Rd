@@ -11,7 +11,9 @@ mc_plot_raster(
   by_hour = TRUE,
   png_width = 1900,
   png_height = 1900,
-  viridis_color_map = NULL
+  viridis_color_map = NULL,
+  start_crop = NULL,
+  end_crop = NULL
 )
 }
 \arguments{
@@ -38,6 +40,10 @@ mc_plot_raster(
 \item "G" - mako
 \item "H" - turbo
 }}
+
+\item{start_crop}{POSIXct datetime for crop data (default NULL)}
+
+\item{end_crop}{POSIXct datetime for crop data (default NULL)}
 }
 \description{
 Function plot data to file with ggplot2 geom_raster

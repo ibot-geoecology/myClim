@@ -191,10 +191,16 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' * "F" - rocket
 #' * "G" - mako
 #' * "H" - turbo
+#' @param start_crop POSIXct datetime for crop data (default NULL)
+#' @param end_crop POSIXct datetime for crop data (default NULL)
 #' @export
-mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900, viridis_color_map=NULL) {
+mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900,
+                           viridis_color_map=NULL, start_crop=NULL, end_crop=NULL) {
     data <- mc_filter(data, sensors=sensors)
-    data_table <-mc_reshape_long(data)
+    if(!is.null(start_crop) || !is.null(end_crop)) {
+        data <- mc_prep_crop(data, start_crop, end_crop)
+    }
+    data_table <-mc_reshape_long(data, )
     data_table <- dplyr::mutate(data_table, date = lubridate::date(datetime))
     if(by_hour) {
         data_table <- dplyr::mutate(data_table, y_values = lubridate::hour(datetime))

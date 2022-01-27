@@ -7,7 +7,8 @@ mc_plot_image(example_cleaned_tomst_data, "plots/image.png", "T1 sensors", senso
 mc_plot_loggers(example_cleaned_tomst_data, "plots")
 
 mc_plot_raster(example_cleaned_tomst_data, "plots/T1T2.pdf", sensors = c("TMS_T1", "TMS_T2"))
-mc_plot_raster(example_cleaned_tomst_data, "plots/moisture.pdf", sensors = "TMS_TMSmoisture", viridis_color_map = "B")
+mc_plot_raster(example_cleaned_tomst_data, "plots/moisture.pdf", sensors = "TMS_TMSmoisture",
+               viridis_color_map = "B", start_crop = lubridate::ymd_h("2021-01-15 00"), end_crop = lubridate::ymd_h("2021-03-17 00"))
 mc_plot_raster(example_cleaned_tomst_data, "plots/T1T2.png", sensors = c("TMS_T1", "TMS_T2"), png_height = 500)
 
 example_hour_data <- mc_agg(example_cleaned_tomst_data, "mean", period="hour")
