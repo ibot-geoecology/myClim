@@ -96,3 +96,10 @@ test_that("mc_agg all period", {
     expect_false(is.na(all_data$localities$`94184103`$sensors$TMS_T1_mean$values[[1]]))
 })
 
+test_that("mc_agg agregate from longer to shorter period", {
+    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_prep_clean(data, silent=T)
+    agg_data <- mc_agg(data, "min", "day", na.rm = TRUE)
+    expect_error(mc_agg(agg_data, "min", "hour", na.rm = TRUE))
+})
+

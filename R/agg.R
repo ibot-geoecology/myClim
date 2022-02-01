@@ -161,6 +161,10 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(is.null(fun) || length(item$datetime) == 0) {
         return(item)
     }
+    output_period <- lubridate::as.period(if(is.null(use_interval)) period else use_interval)
+    if(output_period < lubridate::as.period(original_step_text)) {
+        stop("It isn't possible aggregate from longer period to shorter one.")
+    }
     item$datetime <- myClim:::.calc_get_datetimes_with_offset(item$datetime, tz_offset)
     item <- .agg_crop_data_to_whole_periods(item, period, use_interval, original_step_text)
     if(is.null(item)) {
