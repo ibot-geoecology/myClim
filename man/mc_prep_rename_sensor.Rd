@@ -27,6 +27,3 @@ data with changed sensor names
 \description{
 This function rename sensors. It is usefull for flatting data format.
 }
-\examples{
-
-}

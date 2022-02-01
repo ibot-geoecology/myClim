@@ -238,8 +238,6 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' preparing format of data
 #' @return data with changed sensor names
 #' @export
-#' @examples
-#'
 mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_numbers=NULL) {
     is_calc_format <- myClim:::.common_is_calc_format(data)
 
@@ -280,5 +278,69 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
     }
     locality$loggers <- purrr::map(locality$loggers, logger_function)
     locality
+}
+
+#' Merge data
+#'
+#' @description
+#' This function merge two instances of data to one
+#'
+#' @details
+#' If data1 and data2 contains locality with same locality_id, than locality_id from data2 is renamed.
+#'
+#' @param data1 in format for preparing or calculation
+#' @param data2 in format for preparing or calculation but same as data1
+#' @return merged data
+#' @export
+mc_prep_merge <- function(data1, data2) {
+    .prep_merge_check_data(data1, data2)
+
+    localities1 <- unname(myClim:::.common_get_localities(data1))
+    localities2 <- unname(myClim:::.common_get_localities(data2))
+    localities <- c(localities1, localities2)
+    existed <- new.env()
+    existed$ids <- list()
+
+    locality_function <- function(locality) {
+        locality_name <- .prep_merge_get_locality_id(locality$metadata@locality_id, existed$ids)
+        locality$metadata@locality_id <- locality_name
+        existed$ids <- c(existed$ids, locality_name)
+        locality
+    }
+
+    localities <- purrr::map(localities, locality_function)
+    names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
+    if(myClim:::.common_is_prep_format(data1)) {
+        return(localities)
+    }
+    data1$localities <- localities
+    data1
+}
+
+.prep_merge_check_data <- function(data1, data2) {
+    is_data1_calc_format <- myClim:::.common_is_calc_format(data1)
+    is_data2_calc_format <- myClim:::.common_is_calc_format(data2)
+
+    if(xor(is_data1_calc_format, is_data2_calc_format)) {
+        stop("There is different format in data1 and data2.")
+    }
+
+    if(is_data1_calc_format &&
+        (lubridate::as.period(data1$metadata@step_text) != lubridate::as.period(data2$metadata@step_text))) {
+        stop("There is different step in data1 and data2.")
+    }
+}
+
+.prep_merge_get_locality_id <- function(original_locality_name, existed_names) {
+    locality_name <- original_locality_name
+    number <- 1
+    while(locality_name %in% existed_names) {
+        locality_name <- stringr::str_glue("{original_locality_name}_{number}")
+        number <- number + 1
+    }
+    if(locality_name != original_locality_name) {
+        warning(stringr::str_glue("locality {original_locality_name} is renamed to {locality_name}"))
+    }
+    locality_name
 }
 

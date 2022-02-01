@@ -100,3 +100,37 @@ test_that("mc_prep_rename_sensor", {
     calc_data <- mc_prep_rename_sensor(calc_data, list(TMS_T3_1="TMS_T3_secondary"), localities="main")
     expect_true("TMS_T3_secondary" %in% names(calc_data$localities$main$sensors))
 })
+
+test_that("mc_prep_merge wrong", {
+    data <- mc_read_csv("data/TOMST/files_table.csv")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    expect_error(mc_prep_merge(data, calc_data))
+    expect_warning(hour_data <- mc_agg(calc_data, "max", "hour"))
+    expect_error(mc_prep_merge(calc_data, hour_data))
+})
+
+test_that("mc_prep_merge", {
+    data1 <- mc_read_files(c("data/TOMST/data_91184101_0.csv", "data/TOMST/data_94184102_0.csv"), "TOMST")
+    data2 <- mc_read_files("data/TOMST/data_94184103_0.csv", "TOMST")
+    merged_data <- mc_prep_merge(data1, data2)
+    test_prep_data_format(merged_data)
+    expect_equal(length(merged_data), 3)
+    data1 <- mc_prep_clean(data1, silent=T)
+    data2 <- mc_prep_clean(data2, silent=T)
+    merged_data <- mc_prep_merge(data1, data2)
+    test_prep_data_format(merged_data)
+    expect_equal(length(merged_data), 3)
+    expect_warning(hour_data1 <- mc_agg(data1, c("min", "max"), "hour"))
+    expect_warning(hour_data2 <- mc_agg(data2, c("min", "max"), "hour"))
+    merged_hour_data <- mc_prep_merge(hour_data1, hour_data2)
+    test_calc_data_format(merged_hour_data)
+    expect_equal(length(merged_hour_data$localities), 3)
+})
+
+test_that("mc_prep_merge same name", {
+    data <- mc_read_csv("data/TOMST/files_table.csv")
+    expect_warning(merged_data <- mc_prep_merge(data, data))
+    test_prep_data_format(merged_data)
+    expect_equal(names(merged_data), c("A1E05", "A2E32", "A6W79", "A1E05_1", "A2E32_1", "A6W79_1"))
+})

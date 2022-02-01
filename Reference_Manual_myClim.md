@@ -683,6 +683,41 @@ cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct(
 ```
 
 
+# `mc_prep_merge`
+
+Merge data
+
+
+## Description
+
+This function merge two instances of data to one
+
+
+## Usage
+
+```r
+mc_prep_merge(data1, data2)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data1`     |     in format for preparing or calculation
+`data2`     |     in format for preparing or calculation but same as data1
+
+
+## Details
+
+If data1 and data2 contains locality with same locality_id, than locality_id from data2 is renamed.
+
+
+## Value
+
+merged data
+
+
 # `mc_prep_rename_sensor`
 
 Rename sensor
@@ -718,13 +753,6 @@ Argument      |Description
 ## Value
 
 data with changed sensor names
-
-
-## Examples
-
-```r
-
-```
 
 
 # `mc_prep_solar_tz`
