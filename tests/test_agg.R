@@ -84,10 +84,15 @@ test_that("mc_agg long period", {
 test_that("mc_agg all period", {
     data <- mc_read_directory("data/eco-snow", "TOMST")
     data <- mc_prep_clean(data, silent=T)
-    all_data <- mc_agg(data, "mean", "all")
+    all_data <- mc_agg(data, "mean", "all", na.rm = FALSE)
     test_calc_data_format(all_data)
     expect_equal(all_data$metadata@step_text, "30d 23H 45M 0S")
     expect_equal(length(all_data$localities$`94184102`$datetime), 1)
     expect_equal(length(all_data$localities$`94184103`$datetime), 1)
+    expect_false(is.na(all_data$localities$`94184102`$sensors$TMS_T1_mean$values[[1]]))
+    expect_true(is.na(all_data$localities$`94184103`$sensors$TMS_T1_mean$values[[1]]))
+    all_data <- mc_agg(data, "mean", "all", na.rm = TRUE)
+    expect_false(is.na(all_data$localities$`94184102`$sensors$TMS_T1_mean$values[[1]]))
+    expect_false(is.na(all_data$localities$`94184103`$sensors$TMS_T1_mean$values[[1]]))
 })
 
