@@ -101,6 +101,11 @@ test_that("mc_prep_rename_sensor", {
     expect_true("TMS_T3_secondary" %in% names(calc_data$localities$main$sensors))
 })
 
+test_that("mc_prep_rename_sensor wrong", {
+    data <- mc_read_csv("data/flat/files_table.csv")
+    expect_error(data <- mc_prep_rename_sensor(data, list(TMS_T1="TMS_T2")))
+})
+
 test_that("mc_prep_merge wrong", {
     data <- mc_read_csv("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
@@ -143,4 +148,9 @@ test_that("mc_prep_rename_locality", {
     expect_warning(data <- mc_agg(data, c("min", "max"), "hour"))
     data <- mc_prep_rename_locality(data, list(ABC05="AAA05"))
     expect_equal(names(data$localities), c("AAA05", "CDE32", "A6W79"))
+})
+
+test_that("mc_prep_rename_locality wrong", {
+    data <- mc_read_csv("data/TOMST/files_table.csv")
+    expect_error(data <- mc_prep_rename_locality(data, list(A1E05="A6W79")))
 })

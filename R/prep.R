@@ -267,6 +267,10 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
     }
     if(is_changed) {
         names(item$sensors) <- purrr::map_chr(item$sensors, function(x) x$metadata@name)
+        unique_names <- unique(names(item$sensors))
+        if(length(unique_names) != length(names(item$sensors))) {
+            stop("Sensor names must be unique.")
+        }
     }
     item
 }
@@ -366,5 +370,9 @@ mc_prep_rename_locality <- function(data, locality_ids) {
 
     localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
+    unique_names <- unique(names(localities))
+    if(length(unique_names) != length(names(localities))) {
+        stop("Locality_ids must be unique.")
+    }
     myClim:::.common_set_localities(data, localities)
 }
