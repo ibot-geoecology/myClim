@@ -1,6 +1,6 @@
 <!-- toc -->
 
-února 01, 2022
+února 02, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@
 Package: myClim
 Type: Package
 Title: R package for processing microclimatic data
-Version: 0.0.15
+Version: 0.0.16
 Author: GISlab
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -718,6 +718,50 @@ If data1 and data2 contains locality with same locality_id, than locality_id fro
 merged data
 
 
+## Examples
+
+```r
+merged_tomst_data <- mc_prep_merge(example_tomst_data1, example_tomst_data2)
+```
+
+
+# `mc_prep_rename_locality`
+
+rename locality_id
+
+
+## Description
+
+This function change locality_ids.
+
+
+## Usage
+
+```r
+mc_prep_rename_locality(data, locality_ids)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for preparing or calculation
+`locality_ids`     |     list with new locality_ids; names of items are old ones
+
+
+## Value
+
+data with changed locality_ids
+
+
+## Examples
+
+```r
+data <- mc_prep_rename_locality(example_tomst_data1, list(A1E05="ABC05", A2E32="CDE32"))
+```
+
+
 # `mc_prep_rename_sensor`
 
 Rename sensor
@@ -725,7 +769,7 @@ Rename sensor
 
 ## Description
 
-This function rename sensors. It is usefull for flatting data format.
+This function rename sensors.
 
 
 ## Usage

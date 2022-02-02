@@ -20,3 +20,6 @@ This function merge two instances of data to one
 \details{
 If data1 and data2 contains locality with same locality_id, than locality_id from data2 is renamed.
 }
+\examples{
+merged_tomst_data <- mc_prep_merge(example_tomst_data1, example_tomst_data2)
+}

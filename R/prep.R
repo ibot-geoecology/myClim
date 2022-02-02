@@ -229,7 +229,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 
 #' Rename sensor
 #'
-#' This function rename sensors. It is usefull for flatting data format.
+#' This function rename sensors.
 #'
 #' @param data in format for preparing or calculation
 #' @param sensor_names list with new names of sensors; names of items are old ones
@@ -237,6 +237,8 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' @param serial_numbers vector of serial_numbers; if NULL than all (default NULL); parameter is usefull only for
 #' preparing format of data
 #' @return data with changed sensor names
+#' @example
+#' data <- mc_prep_rename_sensor(example_tomst_data1, list(TMS_T1="TMS_Tsoil"))
 #' @export
 mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_numbers=NULL) {
     is_calc_format <- myClim:::.common_is_calc_format(data)
@@ -251,8 +253,8 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
         .prepare_process_sensor_renaming_in_loggers(locality, serial_numbers, sensor_names)
     }
 
-    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, localities)
+    locality_items <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, locality_items)
 }
 
 .prepare_process_sensor_renaming <- function(item, sensor_names) {
@@ -291,6 +293,8 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
 #' @param data1 in format for preparing or calculation
 #' @param data2 in format for preparing or calculation but same as data1
 #' @return merged data
+#' @examples
+#' merged_tomst_data <- mc_prep_merge(example_tomst_data1, example_tomst_data2)
 #' @export
 mc_prep_merge <- function(data1, data2) {
     .prep_merge_check_data(data1, data2)
@@ -310,11 +314,7 @@ mc_prep_merge <- function(data1, data2) {
 
     localities <- purrr::map(localities, locality_function)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
-    if(myClim:::.common_is_prep_format(data1)) {
-        return(localities)
-    }
-    data1$localities <- localities
-    data1
+    myClim:::.common_set_localities(data1, localities)
 }
 
 .prep_merge_check_data <- function(data1, data2) {
@@ -344,3 +344,27 @@ mc_prep_merge <- function(data1, data2) {
     locality_name
 }
 
+#' rename locality_id
+#'
+#' @description
+#' This function change locality_ids.
+#'
+#' @param data in format for preparing or calculation
+#' @param locality_ids list with new locality_ids; names of items are old ones
+#' @return data with changed locality_ids
+#' @examples
+#' data <- mc_prep_rename_locality(example_tomst_data1, list(A1E05="ABC05", A2E32="CDE32"))
+#' @export
+mc_prep_rename_locality <- function(data, locality_ids) {
+    locality_function <- function(locality) {
+        if(!(locality$metadata@locality_id %in% names(locality_ids))) {
+            return(locality)
+        }
+        locality$metadata@locality_id <- locality_ids[[locality$metadata@locality_id]]
+        locality
+    }
+
+    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
+    myClim:::.common_set_localities(data, localities)
+}

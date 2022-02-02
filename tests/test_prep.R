@@ -134,3 +134,13 @@ test_that("mc_prep_merge same name", {
     test_prep_data_format(merged_data)
     expect_equal(names(merged_data), c("A1E05", "A2E32", "A6W79", "A1E05_1", "A2E32_1", "A6W79_1"))
 })
+
+test_that("mc_prep_rename_locality", {
+    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_prep_rename_locality(data, list(A1E05="ABC05", A2E32="CDE32"))
+    expect_equal(names(data), c("ABC05", "CDE32", "A6W79"))
+    data <- mc_prep_clean(data, silent=T)
+    expect_warning(data <- mc_agg(data, c("min", "max"), "hour"))
+    data <- mc_prep_rename_locality(data, list(ABC05="AAA05"))
+    expect_equal(names(data$localities), c("AAA05", "CDE32", "A6W79"))
+})
