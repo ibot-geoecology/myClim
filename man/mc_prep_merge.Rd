@@ -4,12 +4,10 @@
 \alias{mc_prep_merge}
 \title{Merge data}
 \usage{
-mc_prep_merge(data1, data2)
+mc_prep_merge(data_items)
 }
 \arguments{
-\item{data1}{in format for preparing or calculation}
-
-\item{data2}{in format for preparing or calculation but same as data1}
+\item{data_items}{list of data in format for preparing or calculation; Format of data must be same.}
 }
 \value{
 merged data
@@ -21,5 +19,5 @@ This function merge two instances of data to one
 If data1 and data2 contains locality with same locality_id, than locality_id from data2 is renamed.
 }
 \examples{
-merged_tomst_data <- mc_prep_merge(example_tomst_data1, example_tomst_data2)
+merged_tomst_data <- mc_prep_merge(list(example_tomst_data1, example_tomst_data2))
 }

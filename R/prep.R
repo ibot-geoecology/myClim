@@ -294,13 +294,16 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
 #' @details
 #' If data1 and data2 contains locality with same locality_id, than locality_id from data2 is renamed.
 #'
-#' @param data1 in format for preparing or calculation
-#' @param data2 in format for preparing or calculation but same as data1
+#' @param data_items list of data in format for preparing or calculation; Format of data must be same.
 #' @return merged data
 #' @examples
-#' merged_tomst_data <- mc_prep_merge(example_tomst_data1, example_tomst_data2)
+#' merged_tomst_data <- mc_prep_merge(list(example_tomst_data1, example_tomst_data2))
 #' @export
-mc_prep_merge <- function(data1, data2) {
+mc_prep_merge <- function(data_items) {
+    purrr::reduce(data_items, .prep_do_merge)
+}
+
+.prep_do_merge <- function(data1, data2) {
     .prep_merge_check_data(data1, data2)
 
     localities1 <- unname(myClim:::.common_get_localities(data1))

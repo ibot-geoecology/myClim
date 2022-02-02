@@ -696,7 +696,7 @@ This function merge two instances of data to one
 ## Usage
 
 ```r
-mc_prep_merge(data1, data2)
+mc_prep_merge(data_items)
 ```
 
 
@@ -704,8 +704,7 @@ mc_prep_merge(data1, data2)
 
 Argument      |Description
 ------------- |----------------
-`data1`     |     in format for preparing or calculation
-`data2`     |     in format for preparing or calculation but same as data1
+`data_items`     |     list of data in format for preparing or calculation; Format of data must be same.
 
 
 ## Details
@@ -721,7 +720,7 @@ merged data
 ## Examples
 
 ```r
-merged_tomst_data <- mc_prep_merge(example_tomst_data1, example_tomst_data2)
+merged_tomst_data <- mc_prep_merge(list(example_tomst_data1, example_tomst_data2))
 ```
 
 
