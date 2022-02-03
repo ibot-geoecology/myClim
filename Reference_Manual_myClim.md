@@ -66,7 +66,7 @@ Argument      |Description
 
 *  functions are applied to all sensors. Sensors aren't renamed. 
 
-*  Names of items in list are sensor_names and items are vectors of functions applied to sensors. Names of new sensors are in format sensor_name _ function .   function coverage is count_values/count_all_records
+*  Names of items in list are sensor_names and items are vectors of functions applied to sensors. Names of new sensors are in format sensor_name _ function .   Function coverage is count_values/count_all_records. Result sensor of functions `min` , `max` , `mean` , `percentile` and `sum` has same sensor_id and value_type as source sensor. Result sensor of function `count` has sensor_id `count` and type `integer` . Result sensor of function `coverage` has sensor_id `coverage` and type `real` .
 `period`     |     of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation  There is special period "all" for one value from whole range.  Start day of week is monday.
 `use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default TRUE); Non-UTC time can by used only for period `day` and bigger.
 `percentiles`     |      
@@ -77,8 +77,7 @@ Argument      |Description
 
 ## Details
 
-If first or last period isn't full filled, data are cropped and a warning is shown. New sensors have
- same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
+If first or last period isn't full filled, data are cropped and a warning is shown. Sensors without data are excluded.
  Aggregation functions return NA for empty vector. Except count, it return 0.
 
 
@@ -306,7 +305,7 @@ Sensors definition
 
 ## Format
 
-An object of class `list` of length 7.
+An object of class `list` of length 9.
 
 
 ## Usage

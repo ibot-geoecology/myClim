@@ -3,8 +3,7 @@
 #' Function create aggregated data in format for calculation. If fun is NULL and period is NULL, than
 #' function only convert source data to format for calculation.
 #'
-#' If first or last period isn't full filled, data are cropped and a warning is shown. New sensors have
-#' same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
+#' If first or last period isn't full filled, data are cropped and a warning is shown. Sensors without data are excluded.
 #' Aggregation functions return NA for empty vector. Except count, it return 0.
 #'
 #' @param data in cleaned data format
@@ -15,7 +14,10 @@
 #' * Names of items in list are sensor_names and items are vectors of functions applied to sensors.
 #'   Names of new sensors are in format {sensor_name}_{function}.
 #'
-#' function coverage is count_values/count_all_records
+#' Function coverage is count_values/count_all_records.
+#' Result sensor of functions `min`, `max`, `mean`, `percentile` and `sum` has same sensor_id and value_type as source
+#' sensor. Result sensor of function `count` has sensor_id `count` and type `integer`. Result sensor of function
+#' `coverage` has sensor_id `coverage` and type `real`.
 #' @param period of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 #'
 #' There is special period "all" for one value from whole range.
@@ -350,35 +352,36 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     } else {
         return(NULL)
     }
-    purrr::flatten(purrr::map(functions_to_convert, function(x) .agg_convert_function(x, percentiles, na.rm)))
+    value_type <- mc_data_sensors[[sensor$metadata@sensor_id]]@value_type
+    purrr::flatten(purrr::map(functions_to_convert, function(x) .agg_convert_function(x, percentiles, na.rm, value_type)))
 }
 
-.agg_convert_function <- function(function_text, percentiles, na.rm) {
+.agg_convert_function <- function(function_text, percentiles, na.rm, value_type) {
     if(function_text == "min") {
         return(list(min=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
-            min(x)
+            .agg_function_convert_result(min(x), value_type)
         }))
     } else if(function_text == "max") {
         return(list(max=function(x){
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
-            max(x)
+            .agg_function_convert_result(max(x), value_type)
         }))
     } else if(function_text == "mean") {
         return(list(mean=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
-            mean(x)
+            .agg_function_convert_result(mean(x), value_type)
         }))
     } else if(function_text == "percentile") {
-        return(.agg_convert_percentile_functions(percentiles, na.rm))
+        return(.agg_convert_percentile_functions(percentiles, na.rm, value_type))
     } else if(function_text == "sum") {
         return(list(sum=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
-            sum(x)
+            .agg_function_convert_result(sum(x), value_type)
         }))
     } else if(function_text == "count") {
         return(list(count=function(x) length(x[!is.na(x)])))
@@ -398,14 +401,24 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     values
 }
 
-.agg_convert_percentile_functions <- function(percentiles, na.rm) {
+.agg_function_convert_result <- function(values, value_type) {
+    if(value_type == "logical"){
+        return(as.logical(round(values)))
+    }
+    if(value_type == "integer"){
+        return(round(values))
+    }
+    values
+}
+
+.agg_convert_percentile_functions <- function(percentiles, na.rm, value_type) {
     percentile_function <- function(percentile) {
         quantile <- percentile / 100
         function(x) {
             if(!na.rm && any(is.na(x))) {
                 return(NA)
             }
-            unname(quantile(x, quantile, na.rm=na.rm))
+            .agg_function_convert_result(unname(quantile(x, quantile, na.rm=na.rm)), value_type)
         }
     }
     result <- purrr::map(percentiles, percentile_function)
@@ -416,6 +429,9 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 .agg_agregate_sensor <- function(sensor, functions, by_aggregate) {
     sensor_function <- function(.x, .y) {
         new_sensor <- sensor
+        if(.y %in% c("count", "coverage")) {
+            new_sensor$metadata@sensor_id <- .y
+        }
         new_sensor$metadata@name <- stringr::str_glue("{new_sensor$metadata@name}_{.y}")
         new_sensor$values <- aggregate(new_sensor$values, by_aggregate, .x)$x
         new_sensor

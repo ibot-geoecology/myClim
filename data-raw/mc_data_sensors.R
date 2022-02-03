@@ -62,6 +62,14 @@ snow <- new("mc_Sensor")
 snow@sensor_id <- "snow"
 snow@value_type <- "logical"
 
+count <- new("mc_Sensor")
+count@sensor_id <- "count"
+count@value_type <- "integer"
+
+coverage <- new("mc_Sensor")
+coverage@sensor_id <- "coverage"
+coverage@value_type <- "real"
+
 mc_data_sensors <- list(
     TMS_T1 = TMS_T1,
     TMS_T2 = TMS_T2,
@@ -69,7 +77,9 @@ mc_data_sensors <- list(
     TMS_TMSmoisture = TMS_TMSmoisture,
     moisture = moisture,
     TM_T = TM_T,
-    snow = snow
+    snow = snow,
+    count = count,
+    coverage = coverage
 )
 
 usethis::use_data(mc_data_sensors, overwrite = TRUE)

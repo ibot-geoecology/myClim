@@ -25,7 +25,10 @@ but prepare data for further calculation. DEFAULT is fun = NULL.
 Names of new sensors are in format {sensor_name}_{function}.
 }
 
-function coverage is count_values/count_all_records}
+Function coverage is count_values/count_all_records.
+Result sensor of functions \code{min}, \code{max}, \code{mean}, \code{percentile} and \code{sum} has same sensor_id and value_type as source
+sensor. Result sensor of function \code{count} has sensor_id \code{count} and type \code{integer}. Result sensor of function
+\code{coverage} has sensor_id \code{coverage} and type \code{real}.}
 
 \item{period}{of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 
@@ -50,8 +53,7 @@ Function create aggregated data in format for calculation. If fun is NULL and pe
 function only convert source data to format for calculation.
 }
 \details{
-If first or last period isn't full filled, data are cropped and a warning is shown. New sensors have
-same sensor_id as source one. It is usefull for detecting source sensor. Sensors without data are excluded.
+If first or last period isn't full filled, data are cropped and a warning is shown. Sensors without data are excluded.
 Aggregation functions return NA for empty vector. Except count, it return 0.
 }
 \examples{
