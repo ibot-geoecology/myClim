@@ -4,18 +4,24 @@
 \alias{mc_calc_snow_agg}
 \title{Summary about snow detected with mc_calc_snow()}
 \usage{
-mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
+mc_calc_snow_agg(
+  data,
+  snow_sensor = "snow",
+  localities = NULL,
+  period = 3,
+  use_utc = F
+)
 }
 \arguments{
 \item{data}{in format for calculation}
 
-\item{snow_sensor}{name of snow sensor created by function mc_calc_snow}
+\item{snow_sensor}{name of snow sensor created by function mc_calc_snow (default "snow")}
 
-\item{localities}{names of localities; if empty then all}
+\item{localities}{list of locality_ids; if NULL then all (default NULL)}
 
 \item{period}{count days for continuous cover of snow (default 3)}
 
-\item{use_utc}{if set FALSE then datetime changed by locality tz_offset; default FALSE}
+\item{use_utc}{if set FALSE then datetime changed by locality tz_offset (default FALSE)}
 }
 \value{
 data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period

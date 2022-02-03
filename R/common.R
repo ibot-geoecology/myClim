@@ -44,14 +44,32 @@
     }
 }
 
-.common_get_new_sensor <- function(sensor_name, sensor_id=NA_character_, values=NULL){
+.common_get_new_sensor <- function(sensor_id, sensor_name, values=NULL, calibrated=FALSE){
     metadata <- new("mc_SensorMetadata")
     metadata@sensor_id <- sensor_id
     metadata@name <- sensor_name
+    metadata@calibrated <- calibrated
+    calibration <- .common_get_calibration_to_new_sensor(sensor_id)
     item <- list(metadata = metadata,
                  values = values,
+                 calibration = calibration,
                  states = list())
     item
+}
+
+.common_get_calibration_to_new_sensor <- function(sensor_id) {
+    if(is.na(sensor_id)) {
+        return(NULL)
+    }
+    sensor_info <- mc_data_sensors[[sensor_id]]
+    if(is.na(sensor_info@physical)) {
+        return(NULL)
+    }
+    physical <- mc_data_physical[[sensor_info@physical]]
+    if(is.na(physical@calibration_class)) {
+        return(NULL)
+    }
+    new(physical@calibration_class)
 }
 
 .common_get_localities <- function(data) {

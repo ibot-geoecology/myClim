@@ -33,20 +33,20 @@ TMS_TMSmoisture@sensor_id <- "TMS_TMSmoisture"
 TMS_TMSmoisture@logger <- "TMS"
 TMS_TMSmoisture@physical <- "TMSmoisture"
 TMS_TMSmoisture@default_height <- -0.07
+TMS_TMSmoisture@value_type <- "integer"
 TMS_TMSmoisture@min_value <- 0
 TMS_TMSmoisture@max_value <- 4000
 TMS_TMSmoisture@plot_color <- "steelblue"
 TMS_TMSmoisture@plot_line_width <- 2
 
-TMS_moisture <- new("mc_Sensor")
-TMS_moisture@sensor_id <- "TMS_moisture"
-TMS_moisture@logger <- "TMS"
-TMS_moisture@physical <- "moisture"
-TMS_moisture@default_height <- -0.07
-TMS_moisture@min_value <- 0
-TMS_moisture@max_value <- 1
-TMS_moisture@plot_color <- "steelblue"
-TMS_moisture@plot_line_width <- 2
+moisture <- new("mc_Sensor")
+moisture@sensor_id <- "moisture"
+moisture@physical <- "moisture"
+moisture@default_height <- -0.07
+moisture@min_value <- 0
+moisture@max_value <- 1
+moisture@plot_color <- "steelblue"
+moisture@plot_line_width <- 2
 
 TM_T <- new("mc_Sensor")
 TM_T@sensor_id <- "TM_T"
@@ -58,13 +58,18 @@ TM_T@max_value <- 60
 TM_T@plot_color <- "#2000EEB0"
 TM_T@plot_line_width <- 2
 
+snow <- new("mc_Sensor")
+snow@sensor_id <- "snow"
+snow@value_type <- "logical"
+
 mc_data_sensors <- list(
     TMS_T1 = TMS_T1,
     TMS_T2 = TMS_T2,
     TMS_T3 = TMS_T3,
     TMS_TMSmoisture = TMS_TMSmoisture,
-    TMS_moisture = TMS_moisture,
-    TM_T = TM_T
+    moisture = moisture,
+    TM_T = TM_T,
+    snow = snow
 )
 
 usethis::use_data(mc_data_sensors, overwrite = TRUE)

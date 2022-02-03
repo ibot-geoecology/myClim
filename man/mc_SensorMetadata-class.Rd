@@ -8,3 +8,15 @@
 \description{
 Class for sensor metadata
 }
+\section{Slots}{
+
+\describe{
+\item{\code{sensor_id}}{character}
+
+\item{\code{name}}{character}
+
+\item{\code{height}}{in meters}
+
+\item{\code{calibrated}}{logical - detect if sensor is calibrated}
+}}
+

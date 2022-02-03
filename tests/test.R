@@ -61,7 +61,7 @@ test_cleaning <- function(logger) {
 
 test_sensor <- function(sensor) {
     expect_equal(class(sensor), "list")
-    expect_equal(names(sensor), c("metadata", "values", "states"))
+    expect_equal(names(sensor), c("metadata", "values", "calibration", "states"))
     expect_equal(class(sensor$metadata)[[1]], "mc_SensorMetadata")
     expect_equal(class(sensor$states), "list")
     expect_true(is.numeric(sensor$values))

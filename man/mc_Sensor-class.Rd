@@ -11,16 +11,22 @@ Class for sensor definition
 \section{Slots}{
 
 \describe{
-\item{\code{sensor_id}}{of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moisture, ...)}
+\item{\code{sensor_id}}{of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)}
 
-\item{\code{logger}}{name of logger (TMS, ...)}
+\item{\code{logger}}{name of logger (TMS, ...) (default NA)}
 
-\item{\code{physical}}{measurement (T, TMS_moisture, ...)}
+\item{\code{physical}}{measurement (T, TMSmoisture, ...) (default NA)}
 
-\item{\code{default_height}}{default height of sensor in m}
+\item{\code{default_height}}{default height of sensor in m (default NA)}
 
-\item{\code{min_value}}{minimal value}
+\item{\code{value_type}}{type of values (real, integer, logical) (default real)}
 
-\item{\code{max_value}}{maximal value}
+\item{\code{min_value}}{minimal value (default NA)}
+
+\item{\code{max_value}}{maximal value (default NA)}
+
+\item{\code{plot_color}}{color in pot (default "")}
+
+\item{\code{plot_line_width}}{width of line in plot (default 1)}
 }}
 

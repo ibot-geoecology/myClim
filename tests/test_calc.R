@@ -11,6 +11,7 @@ test_that("mc_calc_snow", {
     calc_data <- mc_calc_snow(calc_data, "TMS_T3", output_sensor="T3_snow", dr=1.5, tmax=0.5)
     expect_true(is.na(calc_data$localities[["94184102"]]$sensors$T3_snow$values[[1]]))
     expect_false(is.na(calc_data$localities[["94184102"]]$sensors$T3_snow$values[[4 * 24 + 1]]))
+    expect_equal(class(calc_data$localities[["94184102"]]$sensors$T3_snow$values), "logical")
 })
 
 test_that("mc_calc_snow long period", {
@@ -24,7 +25,7 @@ test_that("mc_calc_snow_logger_without_sensor", {
     expect_warning(data <- mc_read_directory("data/TOMST", "TOMST"))
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
-    calc_data <- mc_calc_snow(calc_data, "TMS_T3", output_sensor="T3_snow", dr=1.5, tmax=0.5)
+    expect_warning(calc_data <- mc_calc_snow(calc_data, "TMS_T3", output_sensor="T3_snow", dr=1.5, tmax=0.5))
     expect_equal(length(calc_data$localities[["91184101"]]$sensors), 1)
 })
 

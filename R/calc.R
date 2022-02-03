@@ -9,7 +9,7 @@
 #' @param data in format for calculation
 #' @param sensor name of temperature sensor
 #' @param output_sensor name of new snow sensor (default "snow")
-#' @param localities names for calculation; if empty then all
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @param dr delta range
 #' @param tmax maximal temperature
 #' @return input data with added snow sensor
@@ -38,13 +38,14 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 
 .calc_add_snow_to_locality <- function(locality, sensor, output_sensor, dr, tmax) {
     if(!(sensor %in% names(locality$sensors))){
+        warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {sensor}. It is skipped."))
         return(locality)
     }
     .calc_warn_if_overwriting(locality, output_sensor)
     day_max_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-    values <- as.numeric((day_range_temp < dr) & (day_max_temp < tmax))
-    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(output_sensor, values=values)
+    values <- (day_range_temp < dr) & (day_max_temp < tmax)
+    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor("snow", output_sensor, values=values)
     return(locality)
 }
 
@@ -63,15 +64,15 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 #' If snow_sensor isn't in locality, then skipped.
 #'
 #' @param data in format for calculation
-#' @param snow_sensor name of snow sensor created by function mc_calc_snow
-#' @param localities names of localities; if empty then all
+#' @param snow_sensor name of snow sensor created by function mc_calc_snow (default "snow")
+#' @param localities list of locality_ids; if NULL then all (default NULL)
 #' @param period count days for continuous cover of snow (default 3)
-#' @param use_utc if set FALSE then datetime changed by locality tz_offset; default FALSE
+#' @param use_utc if set FALSE then datetime changed by locality tz_offset (default FALSE)
 #' @return data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
 #' @export
 #' @examples
 #' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")
-mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_utc=F) {
+mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=F) {
     myClim:::.common_stop_if_not_calc_format(data)
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
     if(length(data$localities) == 0) {
@@ -125,3 +126,97 @@ mc_calc_snow_agg <- function(data, snow_sensor, localities=NULL, period=3, use_u
     datetimes + (tz_offset * 60)
 }
 
+#' Converting soil moisture from TDT signal to volumetric water content
+#'
+#' @description
+#' Function converting soil moisture from TDT signal to volumetric water content.
+#'
+#' @details
+#'
+#' @param data in format for calculation
+#' @param moist_sensor name of soil moisture sensor (default "TMS_TMSmoisture")
+#'
+#' Soil moisture sensor must be in TMSmoisture physical. If sensor$calibration@intercept
+#' and sensor$calibration@intercept are set, then parameters are used in calculation.
+#' Value sensor$metadata@calibrated is derived from calibration parameters.
+#' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
+#'
+#' Temperature sensor must be in T physical.
+#' @param output_sensor name of new snow sensor (default "vwc_moisture")
+#' @param soiltype value from mc_data_vwc_parameters in column soiltype (default "universal")
+#'
+#' Parameters a, b and c are used in calculation.
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @param t_ref (default 24)
+#' @param acor_t (default 1.91132689118)
+#' @param wcor_t (default 0.64108)
+#' @return input data with added VWC moisture sensor
+#' @export
+#' @examples
+mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T1",
+                        output_sensor="vwc_moisture",
+                        soiltype="universal", localities=NULL,
+                        t_ref=24, acor_t=1.91132689118, wcor_t=0.64108) {
+    myClim:::.common_stop_if_not_calc_format(data)
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+    }
+    data$localities <- purrr::map(data$localities, locality_function)
+    data
+}
+
+.calc_add_vwc_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
+                                      soiltype_value, t_ref, acor_t, wcor_t) {
+    skip <- .calc_vwc_check_sensors_get_skip(locality, moist_sensor, temp_sensor, output_sensor)
+    if(skip) {
+        return(locality)
+    }
+    soil_row <- dplyr::filter(mc_data_vwc_parameters, soiltype == soiltype_value)
+    if(nrow(soil_row) != 1) {
+        stop(stringr::str_glue("Soiltype {soiltype_value} is unknown."))
+    }
+    calibration <- locality$sensors[[moist_sensor]]$calibration
+    is_calibrated <- !is.na(calibration@intercept) && !is.na(calibration@slope)
+    values <- .calc_get_vwc_values(raw_values = locality$sensors[[moist_sensor]]$values,
+                                   temp_values = locality$sensors[[temp_sensor]]$values,
+                                   cal_intercept = if(is_calibrated) calibration@intercept else 0,
+                                   cal_slope = if(is_calibrated) calibration@slope else 0,
+                                   a = soil_row$a, b = soil_row$b, c = soil_row$c,
+                                   t_ref = t_ref, acor_t = acor_t, wcor_t = wcor_t)
+    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor("moisture", output_sensor,
+                                                                         values=values, calibrated = is_calibrated)
+    return(locality)
+}
+
+.calc_vwc_check_sensors_get_skip <- function(locality, moist_sensor, temp_sensor, output_sensor){
+    if(!(moist_sensor %in% names(locality$sensors))){
+        warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {moist_sensor}. It is skipped."))
+        return(TRUE)
+    }
+    moist_sensor_physical <- mc_data_sensors[[ocality$sensors[[moist_sensor]]$metadata$sensor_id]]@physical
+    if(moist_sensor_physical != "TMSmoisture"){
+        stop(stringr::str_glue("Physical of {moist_sensor} isn't TMSmoisture."))
+    }
+    if(!(temp_sensor %in% names(locality$sensors))){
+        warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {temp_sensor}. It is skipped."))
+        return(TRUE)
+    }
+    temp_sensor_physical <- mc_data_sensors[[ocality$sensors[[temp_sensor]]$metadata$sensor_id]]@physical
+    if(temp_sensor_physical != "T"){
+        stop(stringr::str_glue("Physical of {temp_sensor} isn't T."))
+    }
+    .calc_warn_if_overwriting(locality, output_sensor)
+    return(FALSE)
+}
+
+.calc_get_vwc_values <- function(raw_values, temp_values, cal_intercept, cal_slope,
+                                 a, b, c, t_ref, acor_t, wcor_t) {
+    vwc <- a * raw_values^2 + b * raw_values + c
+    dcor_t <- wcor_t - acor_t
+    tcor <- raw_values + (temp_values - t_ref) * (acor_t + dcor_t * vwc)
+    vwc_cor = a * (tcor + cal_intercept + cal_slope * vwc)^2 + b * (tcor + cal_intercept + cal_slope * vwc) + c
+    pmin(pmax(vwc_cor, 0), 1)
+}

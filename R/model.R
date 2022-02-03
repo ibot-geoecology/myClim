@@ -12,12 +12,15 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 # classes ================================================================================
 
 #' Class for sensor definition
-#' @slot sensor_id of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moisture, ...)
-#' @slot logger name of logger (TMS, ...)
-#' @slot physical measurement (T, TMS_moisture, ...)
-#' @slot default_height default height of sensor in m
-#' @slot min_value minimal value
-#' @slot max_value maximal value
+#' @slot sensor_id of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)
+#' @slot logger name of logger (TMS, ...) (default NA)
+#' @slot physical measurement (T, TMSmoisture, ...) (default NA)
+#' @slot default_height default height of sensor in m (default NA)
+#' @slot value_type type of values (real, integer, logical) (default real)
+#' @slot min_value minimal value (default NA)
+#' @slot max_value maximal value (default NA)
+#' @slot plot_color color in pot (default "")
+#' @slot plot_line_width width of line in plot (default 1)
 #' @export mc_Sensor
 #' @exportClass mc_Sensor
 mc_Sensor <- setClass("mc_Sensor",
@@ -25,6 +28,7 @@ mc_Sensor <- setClass("mc_Sensor",
                                 logger = "character",
                                 physical = "character",
                                 default_height = "numeric",
+                                value_type = "character",
                                 min_value = "numeric",
                                 max_value = "numeric",
                                 plot_color = "character",
@@ -33,6 +37,12 @@ mc_Sensor <- setClass("mc_Sensor",
 setMethod(f="initialize",
           signature="mc_Sensor",
           definition=function(.Object) {
+              .Object@logger <- NA_character_
+              .Object@physical <- NA_character_
+              .Object@default_height <- NA_real_
+              .Object@value_type <- "real"
+              .Object@min_value <- NA_real_
+              .Object@max_value <- NA_real_
               .Object@plot_color <- ""
               .Object@plot_line_width <- 1
               return(.Object)
@@ -42,6 +52,7 @@ setMethod(f="initialize",
 #' @slot name of physical
 #' @slot description
 #' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
+#' @slot calibration_class class for calibration
 #' @slot viridis_color_map viridis color map option
 #' @export mc_Physical
 #' @exportClass mc_Physical
@@ -50,7 +61,46 @@ mc_Physical <- setClass("mc_Physical",
                             name = "character",
                             description = "character",
                             units = "character",
+                            calibration_class = "character",
                             viridis_color_map = "character"))
+
+setMethod("initialize",
+          "mc_Physical",
+          function(.Object) {
+              .Object@calibration_class <- NA_character_
+              return(.Object)
+          })
+
+#' Class for calibration with offset
+#' @slot offset numeric
+#' @export mc_OffsetCalibration
+#' @exportClass mc_OffsetCalibration
+mc_OffsetCalibration <- setClass("mc_OffsetCalibration",
+                                 slots = c(offset = "numeric"))
+
+setMethod("initialize",
+          "mc_OffsetCalibration",
+          function(.Object) {
+              .Object@offset <- NA_real_
+              return(.Object)
+          })
+
+#' Class for calibration of TMSmoisture sensor
+#' @slot intercept numeric
+#' @slot slope numeric
+#' @export mc_TMSmoistureCalibration
+#' @exportClass mc_TMSmoistureCalibration
+mc_TMSmoistureCalibration <- setClass("mc_TMSmoistureCalibration",
+                                      slots = c(intercept = "numeric",
+                                                slope = "numeric"))
+
+setMethod("initialize",
+          "mc_TMSmoistureCalibration",
+          function(.Object) {
+              .Object@intercept <- NA_real_
+              .Object@slope <- NA_real_
+              return(.Object)
+          })
 
 #' Class for main metadata in data format for calculation
 #' @slot step of data
@@ -124,6 +174,10 @@ setMethod("initialize",
           })
 
 #' Class for sensor metadata
+#' @slot sensor_id character
+#' @slot name character
+#' @slot height in meters
+#' @slot calibrated logical - detect if sensor is calibrated
 #' @export mc_SensorMetadata
 #' @exportClass mc_SensorMetadata
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
@@ -277,7 +331,7 @@ setMethod(
 
 .change_tomst_join_columns_and_logger_type <- function(object, data){
     tmj_columns = list(TM_T = 5)
-    tmsj_columns = list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, TMS_moisture = 9)
+    tmsj_columns = list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, moisture = 9)
     data <- head(data, .model_const_COUNT_TEST_VALUES)
     if((all(is.na(data[[tmsj_columns$TMS_T2]])) && all(is.na(data[[tmsj_columns$TMS_T3]]))) ||
        (all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
@@ -287,9 +341,9 @@ setMethod(
         return(object)
     }
     object@logger_type <- "TMS"
-    moisture = data[[tmsj_columns$TMS_moisture]]
+    moisture = data[[tmsj_columns$moisture]]
     if(all(moisture == 0)) {
-        object@columns <- within(tmsj_columns, rm(TMS_moisture))
+        object@columns <- within(tmsj_columns, rm(moisture))
         return(object)
     }
     object@columns <- tmsj_columns

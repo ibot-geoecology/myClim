@@ -13,6 +13,7 @@ generate:
 	Rscript data-raw/mc_data_formats.R
 	Rscript data-raw/mc_data_sensors.R
 	Rscript data-raw/mc_data_physical.R
+	Rscript data-raw/mc_data_vwc_parameters.R
 	$(RM) NAMESPACE
 	R -e 'devtools::document()'
 	R -e 'Rd2md::ReferenceManual()'

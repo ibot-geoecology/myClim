@@ -20,7 +20,7 @@ mc_calc_snow(
 
 \item{output_sensor}{name of new snow sensor (default "snow")}
 
-\item{localities}{names for calculation; if empty then all}
+\item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 
 \item{dr}{delta range}
 

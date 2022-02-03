@@ -15,6 +15,8 @@ Class for physical
 
 \item{\code{units}}{measurument (°C, \\%, m3/m3, raw, mm, ...)}
 
+\item{\code{calibration_class}}{class for calibration}
+
 \item{\code{viridis_color_map}}{viridis color map option}
 }}
 

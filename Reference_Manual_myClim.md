@@ -1,6 +1,6 @@
 <!-- toc -->
 
-února 02, 2022
+února 03, 2022
 
 # DESCRIPTION
 
@@ -107,7 +107,13 @@ Function returns summary about snow detected with mc_calc_snow() aggregated over
 ## Usage
 
 ```r
-mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
+mc_calc_snow_agg(
+  data,
+  snow_sensor = "snow",
+  localities = NULL,
+  period = 3,
+  use_utc = F
+)
 ```
 
 
@@ -116,10 +122,10 @@ mc_calc_snow_agg(data, snow_sensor, localities = NULL, period = 3, use_utc = F)
 Argument      |Description
 ------------- |----------------
 `data`     |     in format for calculation
-`snow_sensor`     |     name of snow sensor created by function mc_calc_snow
-`localities`     |     names of localities; if empty then all
+`snow_sensor`     |     name of snow sensor created by function mc_calc_snow (default "snow")
+`localities`     |     list of locality_ids; if NULL then all (default NULL)
 `period`     |     count days for continuous cover of snow (default 3)
-`use_utc`     |     if set FALSE then datetime changed by locality tz_offset; default FALSE
+`use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default FALSE)
 
 
 ## Details
@@ -170,7 +176,7 @@ Argument      |Description
 `data`     |     in format for calculation
 `sensor`     |     name of temperature sensor
 `output_sensor`     |     name of new snow sensor (default "snow")
-`localities`     |     names for calculation; if empty then all
+`localities`     |     list of locality_ids for calculation; if NULL then all (default NULL)
 `dr`     |     delta range
 `tmax`     |     maximal temperature
 
@@ -190,6 +196,58 @@ input data with added snow sensor
 ```r
 snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
 ```
+
+
+# `mc_calc_vwc`
+
+Converting soil moisture from TDT signal to volumetric water content
+
+
+## Description
+
+Function converting soil moisture from TDT signal to volumetric water content.
+
+
+## Usage
+
+```r
+mc_calc_vwc(
+  data,
+  moist_sensor = "TMS_TMSmoisture",
+  temp_sensor = "TMS_T1",
+  output_sensor = "vwc_moisture",
+  soiltype = "universal",
+  localities = NULL,
+  t_ref = 24,
+  acor_t = 1.91132689118,
+  wcor_t = 0.64108
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for calculation
+`moist_sensor`     |     name of soil moisture sensor (default "TMS_TMSmoisture")  Soil moisture sensor must be in TMSmoisture physical. If sensor$calibration@intercept and sensor$calibration@intercept are set, then parameters are used in calculation. Value sensor$metadata@calibrated is derived from calibration parameters.
+`temp_sensor`     |     name of soil temperature sensor (default "TMS_T1")  Temperature sensor must be in T physical.
+`output_sensor`     |     name of new snow sensor (default "vwc_moisture")
+`soiltype`     |     value from mc_data_vwc_parameters in column soiltype (default "universal")  Parameters a, b and c are used in calculation.
+`localities`     |     list of locality_ids for calculation; if NULL then all (default NULL)
+`t_ref`     |     (default 24)
+`acor_t`     |     (default 1.91132689118)
+`wcor_t`     |     (default 0.64108)
+
+
+## Details
+
+
+
+
+## Value
+
+input data with added VWC moisture sensor
 
 
 # `mc_data_formats`
@@ -248,13 +306,54 @@ Sensors definition
 
 ## Format
 
-An object of class `list` of length 6.
+An object of class `list` of length 7.
 
 
 ## Usage
 
 ```r
 mc_data_sensors
+```
+
+
+# `mc_data_vwc_parameters`
+
+Volumetric water content parameters
+
+
+## Description
+
+data.frame with columns:
+  
+
+*  soiltype 
+
+*  a 
+
+*  b 
+
+*  c 
+
+*  rho 
+
+*  clay 
+
+*  silt 
+
+*  sand 
+
+*  ref
+
+
+## Format
+
+An object of class `data.frame` with 13 rows and 9 columns.
+
+
+## Usage
+
+```r
+mc_data_vwc_parameters
 ```
 
 
@@ -450,6 +549,16 @@ Class for main metadata in data format for calculation
 ## Description
 
 Class for main metadata in data format for calculation
+
+
+# `mc_OffsetCalibration-class`
+
+Class for calibration with offset
+
+
+## Description
+
+Class for calibration with offset
 
 
 # `mc_Physical-class`
@@ -1142,6 +1251,16 @@ Class for state of sensor
 ## Description
 
 Class for state of sensor
+
+
+# `mc_TMSmoistureCalibration-class`
+
+Class for calibration of TMSmoisture sensor
+
+
+## Description
+
+Class for calibration of TMSmoisture sensor
 
 
 # `mc_TOMSTDataFormat-class`
