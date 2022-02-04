@@ -52,3 +52,6 @@ Function converting soil moisture from TDT signal to volumetric water content.
 \details{
 
 }
+\examples{
+calc_data <- mc_calc_vwc(calc_data, soiltype="sand", localities="A2E32")
+}

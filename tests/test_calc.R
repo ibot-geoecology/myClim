@@ -54,4 +54,20 @@ test_that("mc_calc_snow_agg no sensor", {
     expect_error(snow_agg <- mc_calc_snow_agg(calc_data, "snow"))
 })
 
+test_that("mc_calc_vwc", {
+    data <- mc_read_csv("data/TOMST/files_table.csv")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    expect_warning(calc_data <- mc_calc_vwc(calc_data, localities=c("A1E05", "A2E32")))
+    test_calc_data_format(calc_data)
+})
+
+test_that("mc_calc_vwc wrong", {
+    data <- mc_read_csv("data/TOMST/files_table.csv")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    expect_error(calc_data <- mc_calc_vwc(calc_data, temp_sensor="TMS_TMSmoisture", localities="A2E32"))
+    expect_error(calc_data <- mc_calc_vwc(calc_data, moist_sensor="TMS_T1", localities="A2E32"))
+})
+
 

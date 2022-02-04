@@ -1,6 +1,6 @@
 <!-- toc -->
 
-února 03, 2022
+února 04, 2022
 
 # DESCRIPTION
 
@@ -247,6 +247,13 @@ Argument      |Description
 ## Value
 
 input data with added VWC moisture sensor
+
+
+## Examples
+
+```r
+calc_data <- mc_calc_vwc(calc_data, soiltype="sand", localities="A2E32")
+```
 
 
 # `mc_data_formats`

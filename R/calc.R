@@ -153,6 +153,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @return input data with added VWC moisture sensor
 #' @export
 #' @examples
+#' calc_data <- mc_calc_vwc(calc_data, soiltype="sand", localities="A2E32")
 mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T1",
                         output_sensor="vwc_moisture",
                         soiltype="universal", localities=NULL,
@@ -163,6 +164,8 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
+        .calc_add_vwc_to_locality(locality, moist_sensor, temp_sensor, output_sensor,
+                                  soiltype, t_ref, acor_t, wcor_t)
     }
     data$localities <- purrr::map(data$localities, locality_function)
     data
@@ -196,7 +199,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
         warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {moist_sensor}. It is skipped."))
         return(TRUE)
     }
-    moist_sensor_physical <- mc_data_sensors[[ocality$sensors[[moist_sensor]]$metadata$sensor_id]]@physical
+    moist_sensor_physical <- mc_data_sensors[[locality$sensors[[moist_sensor]]$metadata@sensor_id]]@physical
     if(moist_sensor_physical != "TMSmoisture"){
         stop(stringr::str_glue("Physical of {moist_sensor} isn't TMSmoisture."))
     }
@@ -204,7 +207,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
         warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {temp_sensor}. It is skipped."))
         return(TRUE)
     }
-    temp_sensor_physical <- mc_data_sensors[[ocality$sensors[[temp_sensor]]$metadata$sensor_id]]@physical
+    temp_sensor_physical <- mc_data_sensors[[locality$sensors[[temp_sensor]]$metadata@sensor_id]]@physical
     if(temp_sensor_physical != "T"){
         stop(stringr::str_glue("Physical of {temp_sensor} isn't T."))
     }
