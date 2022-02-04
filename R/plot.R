@@ -6,13 +6,13 @@
 #'
 #' @param data in format for preparing
 #' @param directory output directory
-#' @param localities names of localities; if empty then all
-#' @param sensors names of sensors; if empty then all
+#' @param localities names of localities; if NULL then all
+#' @param sensors names of sensors; if NULL then all
 #' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
 #' @export
 #' @examples
 #' mc_plot_loggers(example_tomst_data1, "Figures")
-mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c(NA, NA)) {
+mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
     myClim:::.common_stop_if_not_prep_format(data)
     data <- mc_filter(data, localities, sensors)
     myClim:::.prep_warn_if_datetime_step_unprocessed(data)
@@ -81,7 +81,7 @@ mc_plot_loggers <- function(data, directory, localities=c(), sensors=c(), crop=c
         sensor_info <- sapply(sensors, function(x) {
             myClim:::.common_get_sensor_info(logger$sensors[[x]]$metadata)})
         values_range <- .plot_get_values_range(logger, sensors)
-        ylimit = c(min(c(-15, values_range[[1]]), na.rm=T), max(c(30, values_range[[2]]), na.rm=T))
+        ylimit <- c(min(c(-15, values_range[[1]]), na.rm=T), max(c(30, values_range[[2]]), na.rm=T))
     }
     plot(logger$datetime, rep(NA, length(logger$datetime)), type="n", xaxt="n", xlab=NA, ylab="Temperature (°C)",
          main=logger$metadata@serial_number, xlim=xlimit, ylim=ylimit)
@@ -158,8 +158,8 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
     image(values_matrix, xaxt ="n", yaxt="n", col = hcl.colors(12, "viridis", rev = FALSE))
     axis(side = 1, at=seq(0, 1, len=20), labels=x_labels, las=3)
     cex.axis_function <- function() {
-        ref_value = 50
-        current_value = height / (ncol(data_table) - 1)
+        ref_value <- 50
+        current_value <- height / (ncol(data_table) - 1)
         if(current_value >= ref_value) return(1)
         current_value / ref_value
     }

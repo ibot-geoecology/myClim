@@ -154,3 +154,18 @@ test_that("mc_prep_rename_locality wrong", {
     data <- mc_read_csv("data/TOMST/files_table.csv")
     expect_error(data <- mc_prep_rename_locality(data, list(A1E05="A6W79")))
 })
+
+test_that("mc_prep_calib_load", {
+    data <- mc_read_csv("data/TOMST/files_table.csv")
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number,          ~sensor_id,                         ~datetime, ~slope, ~intercept,
+            "91184101",              "TM_T",          lubridate::ymd(20201028),      1,        0.1,
+            "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),   0.95,          0,
+            "94184102",            "TMS_T1",          lubridate::ymd(20201016),    1.1,       0.12,
+            "94184102",            "TMS_T2",          lubridate::ymd(20201016),   1.05,       0.15,
+            "94184102",            "TMS_T3",          lubridate::ymd(20201016),      1,        0.2,
+            "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),      1,        100,
+    ))
+    calib_data <- mc_prep_calib_load(data, calib_table)
+    test_prep_data_format(calib_data)
+})

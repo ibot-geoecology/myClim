@@ -63,7 +63,10 @@ test_sensor <- function(sensor) {
     expect_equal(class(sensor), "list")
     expect_equal(names(sensor), c("metadata", "values", "calibration", "states"))
     expect_equal(class(sensor$metadata)[[1]], "mc_SensorMetadata")
-    expect_equal(class(sensor$states), "list")
+    expect_equal(class(sensor$calibration), "data.frame")
+    expect_true(nrow(sensor$calibration) == 0 || colnames(sensor$calibration) == c("datetime", "intercept", "slope"))
+    expect_equal(class(sensor$states), "data.frame")
+    expect_true(nrow(sensor$states) == 0 || colnames(sensor$states) == c("tag", "start", "end"))
     expect_true(is.numeric(sensor$values))
 }
 

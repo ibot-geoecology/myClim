@@ -61,44 +61,11 @@ mc_Physical <- setClass("mc_Physical",
                             name = "character",
                             description = "character",
                             units = "character",
-                            calibration_class = "character",
                             viridis_color_map = "character"))
 
 setMethod("initialize",
           "mc_Physical",
           function(.Object) {
-              .Object@calibration_class <- NA_character_
-              return(.Object)
-          })
-
-#' Class for calibration with offset
-#' @slot offset numeric
-#' @export mc_OffsetCalibration
-#' @exportClass mc_OffsetCalibration
-mc_OffsetCalibration <- setClass("mc_OffsetCalibration",
-                                 slots = c(offset = "numeric"))
-
-setMethod("initialize",
-          "mc_OffsetCalibration",
-          function(.Object) {
-              .Object@offset <- NA_real_
-              return(.Object)
-          })
-
-#' Class for calibration of TMSmoisture sensor
-#' @slot intercept numeric
-#' @slot slope numeric
-#' @export mc_TMSmoistureCalibration
-#' @exportClass mc_TMSmoistureCalibration
-mc_TMSmoistureCalibration <- setClass("mc_TMSmoistureCalibration",
-                                      slots = c(intercept = "numeric",
-                                                slope = "numeric"))
-
-setMethod("initialize",
-          "mc_TMSmoistureCalibration",
-          function(.Object) {
-              .Object@intercept <- NA_real_
-              .Object@slope <- NA_real_
               return(.Object)
           })
 
@@ -193,18 +160,6 @@ setMethod("initialize",
               .Object@calibrated <- FALSE
               return(.Object)
           })
-
-#' Class for state of sensor
-#' @slot tag
-#' @slot start
-#' @slot end
-#' @slot tag
-#' @export mc_SensorState
-#' @exportClass mc_SensorState
-mc_SensorState <- setClass("mc_SensorState",
-                           slots = c(tag = "character",
-                                     start = "POSIXct",
-                                     end = "POSIXct"))
 
 #' Class for source file data format
 #' @slot has_header columns separator
@@ -307,8 +262,8 @@ setMethod(
 }
 
 .change_tomst_columns_and_logger_type <- function(object, data){
-    tm_columns = list(TM_T = 4)
-    tms_columns = list(TMS_T1 = 4, TMS_T2 = 5, TMS_T3 = 6, TMS_TMSmoisture = 7)
+    tm_columns <- list(TM_T = 4)
+    tms_columns <- list(TMS_T1 = 4, TMS_T2 = 5, TMS_T3 = 6, TMS_TMSmoisture = 7)
     data <- head(data, .model_const_COUNT_TEST_VALUES)
     if(all(is.na(data[[tms_columns$TMS_T2]]))) {
         object@columns <- tm_columns
@@ -330,8 +285,8 @@ setMethod(
 )
 
 .change_tomst_join_columns_and_logger_type <- function(object, data){
-    tmj_columns = list(TM_T = 5)
-    tmsj_columns = list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, moisture = 9)
+    tmj_columns <- list(TM_T = 5)
+    tmsj_columns <- list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, moisture = 9)
     data <- head(data, .model_const_COUNT_TEST_VALUES)
     if((all(is.na(data[[tmsj_columns$TMS_T2]])) && all(is.na(data[[tmsj_columns$TMS_T3]]))) ||
        (all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
@@ -341,7 +296,7 @@ setMethod(
         return(object)
     }
     object@logger_type <- "TMS"
-    moisture = data[[tmsj_columns$moisture]]
+    moisture <- data[[tmsj_columns$moisture]]
     if(all(moisture == 0)) {
         object@columns <- within(tmsj_columns, rm(moisture))
         return(object)
@@ -365,10 +320,10 @@ setMethod(
     ".model_is_file_in_right_format",
     signature("mc_DataFormat"),
     function(object, filename) {
-        con = file(filename, "r")
+        con <- file(filename, "r")
         skip <- object@has_header
         while (TRUE) {
-            line = readLines(con, n = 1)
+            line <- readLines(con, n = 1)
             if ( length(line) == 0 ) {
                 close(con)
                 return(FALSE)

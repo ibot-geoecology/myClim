@@ -7,8 +7,8 @@
 mc_plot_loggers(
   data,
   directory,
-  localities = c(),
-  sensors = c(),
+  localities = NULL,
+  sensors = NULL,
   crop = c(NA, NA)
 )
 }
@@ -17,9 +17,9 @@ mc_plot_loggers(
 
 \item{directory}{output directory}
 
-\item{localities}{names of localities; if empty then all}
+\item{localities}{names of localities; if NULL then all}
 
-\item{sensors}{names of sensors; if empty then all}
+\item{sensors}{names of sensors; if NULL then all}
 
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
 }

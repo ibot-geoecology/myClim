@@ -14,8 +14,6 @@ test_that("mc_read_csv", {
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 75)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors), 4)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1), 4)
-    expect_equal(class(data$A2E32$loggers[[1]]$sensors$TMS_T1$calibration)[[1]], "mc_OffsetCalibration")
-    expect_equal(class(data$A2E32$loggers[[1]]$sensors$TMS_TMSmoisture$calibration)[[1]], "mc_TMSmoistureCalibration")
     expect_equal(length(data$A1E05$loggers[[1]]$datetime), 11)
     expect_equal(length(data$A1E05$loggers[[1]]$sensors), 1)
     expect_true(is.na(data$A1E05$metadata@altitude))

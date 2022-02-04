@@ -557,16 +557,6 @@ Class for main metadata in data format for calculation
 Class for main metadata in data format for calculation
 
 
-# `mc_OffsetCalibration-class`
-
-Class for calibration with offset
-
-
-## Description
-
-Class for calibration with offset
-
-
 # `mc_Physical-class`
 
 Class for physical
@@ -638,8 +628,8 @@ Function plot loggers to directory
 mc_plot_loggers(
   data,
   directory,
-  localities = c(),
-  sensors = c(),
+  localities = NULL,
+  sensors = NULL,
   crop = c(NA, NA)
 )
 ```
@@ -651,8 +641,8 @@ Argument      |Description
 ------------- |----------------
 `data`     |     in format for preparing
 `directory`     |     output directory
-`localities`     |     names of localities; if empty then all
-`sensors`     |     names of sensors; if empty then all
+`localities`     |     names of localities; if NULL then all
+`sensors`     |     names of sensors; if NULL then all
 `crop`     |     datetime range for plot, not cropping if NA (default c(NA, NA))
 
 
@@ -719,6 +709,41 @@ Argument      |Description
 *  "H" - turbo
 `start_crop`     |     POSIXct datetime for crop data (default NULL)
 `end_crop`     |     POSIXct datetime for crop data (default NULL)
+
+
+# `mc_prep_calib_load`
+
+load calibration parameters
+
+
+## Description
+
+This function load calibration parameters from data.frame
+
+
+## Usage
+
+```r
+mc_prep_calib_load(data, calib_table)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for preparing
+`calib_table`     |     data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
+
+
+## Details
+
+It is not possble change calibration parameters in calibrated sensor.
+
+
+## Value
+
+data with loaded calibration informations.
 
 
 # `mc_prep_clean`
@@ -1247,26 +1272,6 @@ Class for sensor metadata
 ## Description
 
 Class for sensor metadata
-
-
-# `mc_SensorState-class`
-
-Class for state of sensor
-
-
-## Description
-
-Class for state of sensor
-
-
-# `mc_TMSmoistureCalibration-class`
-
-Class for calibration of TMSmoisture sensor
-
-
-## Description
-
-Class for calibration of TMSmoisture sensor
 
 
 # `mc_TOMSTDataFormat-class`

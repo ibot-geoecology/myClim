@@ -217,7 +217,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 
 .agg_get_flat_sensors <- function(locality, step_text, use_interval) {
     result <- new.env()
-    result$sensor_names=list()
+    result$sensor_names <- list()
     loggers <- purrr::keep(locality$loggers, function(x) length(x$datetime) > 0)
     if(length(loggers) == 0) {
         return(result)

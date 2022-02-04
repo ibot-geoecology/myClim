@@ -220,6 +220,6 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     vwc <- a * raw_values^2 + b * raw_values + c
     dcor_t <- wcor_t - acor_t
     tcor <- raw_values + (temp_values - t_ref) * (acor_t + dcor_t * vwc)
-    vwc_cor = a * (tcor + cal_intercept + cal_slope * vwc)^2 + b * (tcor + cal_intercept + cal_slope * vwc) + c
+    vwc_cor <- a * (tcor + cal_intercept + cal_slope * vwc)^2 + b * (tcor + cal_intercept + cal_slope * vwc) + c
     pmin(pmax(vwc_cor, 0), 1)
 }

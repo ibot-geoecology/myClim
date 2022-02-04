@@ -14,7 +14,7 @@ TOMST_join@has_header <- FALSE
 TOMST_join@separator <- ";"
 TOMST_join@date_column <- 4
 TOMST_join@date_format <- "%d.%m.%Y %H:%M"
-TOMST_join@na_strings <- c("NA")
+TOMST_join@na_strings <- "NA"
 TOMST_join@filename_serial_number_pattern <- "(.+)\\.csv$"
 #                                    ;  ;  ;datetime ;T1            ;T2            ;T3            ;mois;mois        ;
 TOMST_join@data_row_pattern <- "^\\d+;.+;.+;[\\d.: ]+;-?\\d+\\.?\\d*;-?\\d*\\.?\\d*;-?\\d*\\.?\\d*;\\d+;\\d+\\.?\\d*;.*$"

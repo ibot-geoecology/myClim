@@ -379,3 +379,51 @@ mc_prep_rename_locality <- function(data, locality_ids) {
     }
     myClim:::.common_set_localities(data, localities)
 }
+
+#' load calibration parameters
+#'
+#' @description
+#' This function load calibration parameters from data.frame
+#'
+#' @details
+#' It is not possble change calibration parameters in calibrated sensor.
+#'
+#' @param data in format for preparing
+#' @param calib_table data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
+#' @return data with loaded calibration informations.
+#' @examples
+#' @export
+mc_prep_calib_load <- function(data, calib_table) {
+    myClim:::.common_stop_if_not_prep_format(data)
+    calib_table <- dplyr::group_nest(dplyr::group_by(calib_table, serial_number))
+
+    sensor_function <- function(sensor, logger_calib_table) {
+        sensor_calib_table <- dplyr::filter(logger_calib_table, sensor_id == sensor$metadata@sensor_id)
+        if(nrow(sensor_calib_table) == 0) {
+            return(rensor)
+        }
+        if(sensor$metadata@calibrated) {
+            stop("It is not possible change calibration parameters in calibrated sensor.")
+        }
+        sensor_calib_table <- select(sensor_calib_table, datetime, slope, intercept)
+        sensor$calibration <- as.data.frame(dplyr::arrange(sensor_calib_table, datetime))
+        sensor
+    }
+
+    logger_function <- function(logger) {
+        filtered_table <- dplyr::filter(calib_table, serial_number == logger$metadata@serial_number)
+        if(nrow(filtered_table) == 0) {
+            return(logger)
+        }
+        logger_calib_table <- filtered_table$data[[1]]
+        logger$sensors <- purrr::map(logger$sensors, ~ sensor_function(.x, logger_calib_table))
+        logger
+    }
+
+    locality_function <- function(locality) {
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        locality
+    }
+
+    purrr::map(data, locality_function)
+}
