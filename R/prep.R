@@ -405,7 +405,7 @@ mc_prep_calib_load <- function(data, calib_table) {
         if(sensor$metadata@calibrated) {
             stop("It is not possible change calibration parameters in calibrated sensor.")
         }
-        sensor_calib_table <- select(sensor_calib_table, datetime, slope, intercept)
+        sensor_calib_table <- dplyr::select(sensor_calib_table, datetime, slope, intercept)
         sensor$calibration <- as.data.frame(dplyr::arrange(sensor_calib_table, datetime))
         sensor
     }

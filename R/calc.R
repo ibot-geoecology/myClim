@@ -181,16 +181,24 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     if(nrow(soil_row) != 1) {
         stop(stringr::str_glue("Soiltype {soiltype_value} is unknown."))
     }
+    values_table <- tibble::tibble(datetime = locality$datetime,
+                                   raw = locality$sensors[[moist_sensor]]$values,
+                                   temp = locality$sensors[[temp_sensor]]$values)
     calibration <- locality$sensors[[moist_sensor]]$calibration
-    is_calibrated <- !is.na(calibration@intercept) && !is.na(calibration@slope)
-    values <- .calc_get_vwc_values(raw_values = locality$sensors[[moist_sensor]]$values,
-                                   temp_values = locality$sensors[[temp_sensor]]$values,
-                                   cal_intercept = if(is_calibrated) calibration@intercept else 0,
-                                   cal_slope = if(is_calibrated) calibration@slope else 0,
-                                   a = soil_row$a, b = soil_row$b, c = soil_row$c,
-                                   t_ref = t_ref, acor_t = acor_t, wcor_t = wcor_t)
+    input_data <- .calc_split_data_by_calibration(values_table, calibration)
+    data_function <- function(intercept, slope, data){
+        is_calibrated <- !is.na(intercept) && !is.na(slope)
+        .calc_get_vwc_values(raw_values = data$raw,
+                             temp_values = data$temp,
+                             cal_intercept = if(is_calibrated) intercept else 0,
+                             cal_slope = if(is_calibrated) slope else 0,
+                             a = soil_row$a, b = soil_row$b, c = soil_row$c,
+                             t_ref = t_ref, acor_t = acor_t, wcor_t = wcor_t)
+    }
+    values <- purrr::pmap(dplyr::select(input_data, intercept, slope, data), data_function)
+    is_calibrated <- nrow(calibration) > 0
     locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor("moisture", output_sensor,
-                                                                         values=values, calibrated = is_calibrated)
+                                                                         values=purrr::flatten_dbl(values), calibrated = is_calibrated)
     return(locality)
 }
 
@@ -213,6 +221,26 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     }
     .calc_warn_if_overwriting(locality, output_sensor)
     return(FALSE)
+}
+
+.calc_split_data_by_calibration <- function(values_table, calib_table) {
+    if(nrow(calib_table) == 0) {
+        calib_table <- tibble::tibble(datetime = dplyr::first(values_table$datetime),
+                                      slope = NA_real_,
+                                      intercept = NA_real_)
+    } else if (dplyr::first(values_table$datetime) < dplyr::first(calib_table$datetime)) {
+        calib_table <- tibble::add_row(calib_table,
+                                       datetime = dplyr::first(values_table$datetime),
+                                       slope = NA_real_,
+                                       intercept = NA_real_,
+                                       .before = 1)
+    }
+    calib_table[["end_datetime"]] <- c(as.numeric(calib_table$datetime), Inf)[-1]
+    subset_function <- function(start, end) {
+        dplyr::filter(values_table, datetime >= start & datetime < end)
+    }
+    calib_table$data <- purrr::map2(calib_table$datetime, calib_table$end_datetime, subset_function)
+    calib_table
 }
 
 .calc_get_vwc_values <- function(raw_values, temp_values, cal_intercept, cal_slope,
