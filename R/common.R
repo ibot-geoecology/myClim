@@ -44,14 +44,15 @@
     }
 }
 
-.common_get_new_sensor <- function(sensor_id, sensor_name, values=NULL, calibrated=FALSE){
+.common_get_new_sensor <- function(sensor_id, sensor_name, values=NULL,
+                                   calibrated=FALSE, calibration=data.frame()){
     metadata <- new("mc_SensorMetadata")
     metadata@sensor_id <- sensor_id
     metadata@name <- sensor_name
     metadata@calibrated <- calibrated
     item <- list(metadata = metadata,
                  values = values,
-                 calibration = data.frame(),
+                 calibration = calibration,
                  states = data.frame())
     item
 }

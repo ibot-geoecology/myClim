@@ -136,8 +136,8 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param data in format for calculation
 #' @param moist_sensor name of soil moisture sensor (default "TMS_TMSmoisture")
 #'
-#' Soil moisture sensor must be in TMSmoisture physical. If sensor$calibration@intercept
-#' and sensor$calibration@intercept are set, then parameters are used in calculation.
+#' Soil moisture sensor must be in TMSmoisture physical. Function use sensor$calibration table for calculation values
+#' of new sensor and copy table to new_sensor.
 #' Value sensor$metadata@calibrated is derived from calibration parameters.
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
 #'
@@ -198,7 +198,8 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     values <- purrr::pmap(dplyr::select(input_data, intercept, slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
     locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor("moisture", output_sensor,
-                                                                         values=purrr::flatten_dbl(values), calibrated = is_calibrated)
+                                                                         values=purrr::flatten_dbl(values), calibrated = is_calibrated,
+                                                                         calibration=locality$sensors[[moist_sensor]]$calibration)
     return(locality)
 }
 

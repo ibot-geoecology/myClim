@@ -21,8 +21,8 @@ mc_calc_vwc(
 
 \item{moist_sensor}{name of soil moisture sensor (default "TMS_TMSmoisture")
 
-Soil moisture sensor must be in TMSmoisture physical. If sensor$calibration@intercept
-and sensor$calibration@intercept are set, then parameters are used in calculation.
+Soil moisture sensor must be in TMSmoisture physical. Function use sensor$calibration table for calculation values
+of new sensor and copy table to new_sensor.
 Value sensor$metadata@calibrated is derived from calibration parameters.}
 
 \item{temp_sensor}{name of soil temperature sensor (default "TMS_T1")

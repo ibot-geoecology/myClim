@@ -164,7 +164,7 @@ test_that("mc_prep_calib_load", {
             "94184102",            "TMS_T1",          lubridate::ymd(20201016),    1.1,       0.12,
             "94184102",            "TMS_T2",          lubridate::ymd(20201016),   1.05,       0.15,
             "94184102",            "TMS_T3",          lubridate::ymd(20201016),      1,        0.2,
-            "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),      1,        100,
+            "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),      1,        0.01,
     ))
     calib_data <- mc_prep_calib_load(data, calib_table)
     test_prep_data_format(calib_data)

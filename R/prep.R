@@ -400,7 +400,7 @@ mc_prep_calib_load <- function(data, calib_table) {
     sensor_function <- function(sensor, logger_calib_table) {
         sensor_calib_table <- dplyr::filter(logger_calib_table, sensor_id == sensor$metadata@sensor_id)
         if(nrow(sensor_calib_table) == 0) {
-            return(rensor)
+            return(sensor)
         }
         if(sensor$metadata@calibrated) {
             stop("It is not possible change calibration parameters in calibrated sensor.")

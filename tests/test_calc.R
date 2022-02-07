@@ -57,9 +57,19 @@ test_that("mc_calc_snow_agg no sensor", {
 test_that("mc_calc_vwc", {
     data <- mc_read_csv("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number,          ~sensor_id,                         ~datetime, ~slope, ~intercept,
+            "94184103",   "TMS_TMSmoisture",          lubridate::ymd(20201016),    1.1,       0.02,
+            "94184103",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 14"),      1,     -0.015,
+    ))
+    cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_vwc(calc_data, localities=c("A1E05", "A2E32")))
     test_calc_data_format(calc_data)
+    expect_false(calc_data$localities$A2E32$sensors$TMS_TMSmoisture$metadata@calibrated)
+    expect_true(calc_data$localities$A2E32$sensors$vwc_moisture$metadata@calibrated)
+    expect_equal(calc_data$localities$A2E32$sensors$TMS_TMSmoisture$calibration,
+                 calc_data$localities$A2E32$sensors$vwc_moisture$calibration)
 })
 
 test_that("mc_calc_vwc wrong", {

@@ -229,7 +229,7 @@ mc_calc_vwc(
 Argument      |Description
 ------------- |----------------
 `data`     |     in format for calculation
-`moist_sensor`     |     name of soil moisture sensor (default "TMS_TMSmoisture")  Soil moisture sensor must be in TMSmoisture physical. If sensor$calibration@intercept and sensor$calibration@intercept are set, then parameters are used in calculation. Value sensor$metadata@calibrated is derived from calibration parameters.
+`moist_sensor`     |     name of soil moisture sensor (default "TMS_TMSmoisture")  Soil moisture sensor must be in TMSmoisture physical. Function use sensor$calibration table for calculation values of new sensor and copy table to new_sensor. Value sensor$metadata@calibrated is derived from calibration parameters.
 `temp_sensor`     |     name of soil temperature sensor (default "TMS_T1")  Temperature sensor must be in T physical.
 `output_sensor`     |     name of new snow sensor (default "vwc_moisture")
 `soiltype`     |     value from mc_data_vwc_parameters in column soiltype (default "universal")  Parameters a, b and c are used in calculation.
