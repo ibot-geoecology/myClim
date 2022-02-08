@@ -147,8 +147,8 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #'
 #' Parameters a, b and c are used in calculation.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @param t_ref (default 24)
-#' @param acor_t (default 1.91132689118)
+#' @param ref_t (default 24)
+#' @param acor_t (default 1.91132689118083)
 #' @param wcor_t (default 0.64108)
 #' @return input data with added VWC moisture sensor
 #' @export
@@ -157,7 +157,9 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T1",
                         output_sensor="vwc_moisture",
                         soiltype="universal", localities=NULL,
-                        t_ref=24, acor_t=1.91132689118, wcor_t=0.64108) {
+                        ref_t=myClim:::.calib_MOIST_REF_T,
+                        acor_t=myClim:::.calib_MOIST_ACOR_T,
+                        wcor_t=myClim:::.calib_MOIST_WCOR_T) {
     myClim:::.common_stop_if_not_calc_format(data)
 
     locality_function <- function(locality) {
@@ -165,14 +167,14 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
             return(locality)
         }
         .calc_add_vwc_to_locality(locality, moist_sensor, temp_sensor, output_sensor,
-                                  soiltype, t_ref, acor_t, wcor_t)
+                                  soiltype, ref_t, acor_t, wcor_t)
     }
     data$localities <- purrr::map(data$localities, locality_function)
     data
 }
 
 .calc_add_vwc_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
-                                      soiltype_value, t_ref, acor_t, wcor_t) {
+                                      soiltype_value, ref_t, acor_t, wcor_t) {
     skip <- .calc_vwc_check_sensors_get_skip(locality, moist_sensor, temp_sensor, output_sensor)
     if(skip) {
         return(locality)
@@ -193,7 +195,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
                              cal_intercept = if(is_calibrated) intercept else 0,
                              cal_slope = if(is_calibrated) slope else 0,
                              a = soil_row$a, b = soil_row$b, c = soil_row$c,
-                             t_ref = t_ref, acor_t = acor_t, wcor_t = wcor_t)
+                             ref_t = ref_t, acor_t = acor_t, wcor_t = wcor_t)
     }
     values <- purrr::pmap(dplyr::select(input_data, intercept, slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
@@ -223,10 +225,10 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
 }
 
 .calc_get_vwc_values <- function(raw_values, temp_values, cal_intercept, cal_slope,
-                                 a, b, c, t_ref, acor_t, wcor_t) {
+                                 a, b, c, ref_t, acor_t, wcor_t) {
     vwc <- a * raw_values^2 + b * raw_values + c
     dcor_t <- wcor_t - acor_t
-    tcor <- raw_values + (temp_values - t_ref) * (acor_t + dcor_t * vwc)
+    tcor <- raw_values + (temp_values - ref_t) * (acor_t + dcor_t * vwc)
     vwc_cor <- a * (tcor + cal_intercept + cal_slope * vwc)^2 + b * (tcor + cal_intercept + cal_slope * vwc) + c
     pmin(pmax(vwc_cor, 0), 1)
 }

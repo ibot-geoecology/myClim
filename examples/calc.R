@@ -10,8 +10,23 @@ cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T1="TMS_T1_secondar
                                                          TMS_T3="TMS_T3_secondary",
                                                          TMS_TMSmoisture="TMS_TMSmoisture_secondary"),
                                       serial_numbers=c("94184103", "94184105"))
+# loading calibration values to TM_T
+calib_table <- as.data.frame(tibble::tribble(
+    ~serial_number,          ~sensor_id,                             ~datetime, ~slope, ~intercept,
+        "94184102",            "TMS_T1", lubridate::ymd_hm("2020-10-28 08:45"),      1,        0.1,
+        "94184102",            "TMS_T1",          lubridate::ymd("2021-01-01"),   0.98,      -0.05,
+        "94184102",   "TMS_TMSmoisture",     lubridate::ymd_h("2021-01-01 09"),   -1.2,       -0.5,
+))
+cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
+# calibrating of sensor TM_T
+cleaned_data <- mc_prep_calib(cleaned_data, sensors = "TMS_T1")
+
 # flatting data - loggers are deleted and sensors are moved under locality
 calc_data <- mc_agg(cleaned_data)
+
+# calculating vwc_moisture sensor from TMS_TMSmoisture and TMS_T1
+calc_data <- mc_calc_vwc(calc_data, soiltype = "universal")
+
 # calculating new snow sensor
 calc_data <- mc_calc_snow(calc_data, "TMS_T2", output_sensor="snow")
 calc_data <- mc_calc_snow(calc_data, "TMS_T2_secondary", output_sensor="snow_secondary", localities="LOC1")

@@ -11,9 +11,9 @@ mc_calc_vwc(
   output_sensor = "vwc_moisture",
   soiltype = "universal",
   localities = NULL,
-  t_ref = 24,
-  acor_t = 1.91132689118,
-  wcor_t = 0.64108
+  ref_t = myClim:::.calib_MOIST_REF_T,
+  acor_t = myClim:::.calib_MOIST_ACOR_T,
+  wcor_t = myClim:::.calib_MOIST_WCOR_T
 )
 }
 \arguments{
@@ -37,9 +37,9 @@ Parameters a, b and c are used in calculation.}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 
-\item{t_ref}{(default 24)}
+\item{ref_t}{(default 24)}
 
-\item{acor_t}{(default 1.91132689118)}
+\item{acor_t}{(default 1.91132689118083)}
 
 \item{wcor_t}{(default 0.64108)}
 }

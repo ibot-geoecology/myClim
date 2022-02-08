@@ -8,7 +8,7 @@
 Package: myClim
 Type: Package
 Title: R package for processing microclimatic data
-Version: 0.0.16
+Version: 0.0.17
 Author: GISlab
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -217,9 +217,9 @@ mc_calc_vwc(
   output_sensor = "vwc_moisture",
   soiltype = "universal",
   localities = NULL,
-  t_ref = 24,
-  acor_t = 1.91132689118,
-  wcor_t = 0.64108
+  ref_t = myClim:::.calib_MOIST_REF_T,
+  acor_t = myClim:::.calib_MOIST_ACOR_T,
+  wcor_t = myClim:::.calib_MOIST_WCOR_T
 )
 ```
 
@@ -234,8 +234,8 @@ Argument      |Description
 `output_sensor`     |     name of new snow sensor (default "vwc_moisture")
 `soiltype`     |     value from mc_data_vwc_parameters in column soiltype (default "universal")  Parameters a, b and c are used in calculation.
 `localities`     |     list of locality_ids for calculation; if NULL then all (default NULL)
-`t_ref`     |     (default 24)
-`acor_t`     |     (default 1.91132689118)
+`ref_t`     |     (default 24)
+`acor_t`     |     (default 1.91132689118083)
 `wcor_t`     |     (default 0.64108)
 
 
@@ -254,6 +254,58 @@ input data with added VWC moisture sensor
 ```r
 calc_data <- mc_calc_vwc(calc_data, soiltype="sand", localities="A2E32")
 ```
+
+
+# `mc_calib_moisture`
+
+Calculation slope and intercept parameters of TMSmoisture sensor
+
+
+## Description
+
+Function calculate slope and intercept parameters from measuring moisture in water and air.
+
+
+## Usage
+
+```r
+mc_calib_moisture(
+  raw_air,
+  raw_water,
+  t_air = 24,
+  t_water = 24,
+  ref_air = 114.534,
+  ref_water = 3634.723,
+  ref_t = .calib_MOIST_REF_T,
+  acor_t = .calib_MOIST_ACOR_T,
+  wcor_t = .calib_MOIST_WCOR_T
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`raw_air`     |     TDT signal in air
+`raw_water`     |     TDT signal in water
+`t_air`     |     temperature of air (default 24)
+`t_water`     |     temperature of air (default 24)
+`ref_air`     |     (default 114.534)
+`ref_water`     |     (default 3634.723)
+`ref_t`     |     (default 24)
+`acor_t`     |     (default 1.91132689118083)
+`wcor_t`     |     (default 0.64108)
+
+
+## Details
+
+
+
+
+## Value
+
+list with slope and intercept parameters
 
 
 # `mc_data_formats`
