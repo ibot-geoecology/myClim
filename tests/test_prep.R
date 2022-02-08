@@ -162,7 +162,7 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
             "91184101",              "TM_T",          lubridate::ymd(20201028),      1,        0.1,
             "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),   0.95,          0,
             "94184102",            "TMS_T1",          lubridate::ymd(20201016),    1.1,       0.12,
-            "94184102",            "TMS_T2",          lubridate::ymd(20201016),   1.05,       0.15,
+            "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),   1.05,       0.15,
             "94184102",            "TMS_T3",          lubridate::ymd(20201016),      1,        0.2,
             "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),      1,        0.01,
     ))
