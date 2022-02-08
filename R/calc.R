@@ -185,7 +185,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
                                    raw = locality$sensors[[moist_sensor]]$values,
                                    temp = locality$sensors[[temp_sensor]]$values)
     calibration <- locality$sensors[[moist_sensor]]$calibration
-    input_data <- .calc_split_data_by_calibration(values_table, calibration)
+    input_data <- myClim:::.prep_split_data_by_calibration(values_table, calibration)
     data_function <- function(intercept, slope, data){
         is_calibrated <- !is.na(intercept) && !is.na(slope)
         .calc_get_vwc_values(raw_values = data$raw,
@@ -208,40 +208,18 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
         warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {moist_sensor}. It is skipped."))
         return(TRUE)
     }
-    moist_sensor_physical <- mc_data_sensors[[locality$sensors[[moist_sensor]]$metadata@sensor_id]]@physical
-    if(moist_sensor_physical != "TMSmoisture"){
+    if(!myClim:::.model_is_physical_TMSmoisture(locality$sensors[[moist_sensor]]$metadata)){
         stop(stringr::str_glue("Physical of {moist_sensor} isn't TMSmoisture."))
     }
     if(!(temp_sensor %in% names(locality$sensors))){
         warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {temp_sensor}. It is skipped."))
         return(TRUE)
     }
-    temp_sensor_physical <- mc_data_sensors[[locality$sensors[[temp_sensor]]$metadata@sensor_id]]@physical
-    if(temp_sensor_physical != "T"){
+    if(!myClim:::.model_is_physical_T(locality$sensors[[temp_sensor]]$metadata)){
         stop(stringr::str_glue("Physical of {temp_sensor} isn't T."))
     }
     .calc_warn_if_overwriting(locality, output_sensor)
     return(FALSE)
-}
-
-.calc_split_data_by_calibration <- function(values_table, calib_table) {
-    if(nrow(calib_table) == 0) {
-        calib_table <- tibble::tibble(datetime = dplyr::first(values_table$datetime),
-                                      slope = NA_real_,
-                                      intercept = NA_real_)
-    } else if (dplyr::first(values_table$datetime) < dplyr::first(calib_table$datetime)) {
-        calib_table <- tibble::add_row(calib_table,
-                                       datetime = dplyr::first(values_table$datetime),
-                                       slope = NA_real_,
-                                       intercept = NA_real_,
-                                       .before = 1)
-    }
-    calib_table[["end_datetime"]] <- c(as.numeric(calib_table$datetime), Inf)[-1]
-    subset_function <- function(start, end) {
-        dplyr::filter(values_table, datetime >= start & datetime < end)
-    }
-    calib_table$data <- purrr::map2(calib_table$datetime, calib_table$end_datetime, subset_function)
-    calib_table
 }
 
 .calc_get_vwc_values <- function(raw_values, temp_values, cal_intercept, cal_slope,

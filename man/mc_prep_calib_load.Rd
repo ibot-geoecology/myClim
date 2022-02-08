@@ -18,5 +18,5 @@ data with loaded calibration informations.
 This function load calibration parameters from data.frame
 }
 \details{
-It is not possble change calibration parameters in calibrated sensor.
+It is not possible change calibration parameters in calibrated sensor.
 }

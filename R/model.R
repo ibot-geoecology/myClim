@@ -161,6 +161,54 @@ setMethod("initialize",
               return(.Object)
           })
 
+setGeneric(
+    ".model_is_physical_TMSmoisture",
+    function(object, data){
+        standardGeneric(".model_is_physical_TMSmoisture")
+    }
+)
+
+setMethod(
+    ".model_is_physical_TMSmoisture",
+    "mc_SensorMetadata",
+    function(object) {
+        physical_id <- mc_data_sensors[[object@sensor_id]]@physical
+        return(physical_id == "TMSmoisture")
+    }
+)
+
+setGeneric(
+    ".model_is_physical_T",
+    function(object, data){
+        standardGeneric(".model_is_physical_T")
+    }
+)
+
+setMethod(
+    ".model_is_physical_T",
+    "mc_SensorMetadata",
+    function(object) {
+        physical_id <- mc_data_sensors[[object@sensor_id]]@physical
+        return(physical_id == "T")
+    }
+)
+
+setGeneric(
+    ".model_is_type_real",
+    function(object, data){
+        standardGeneric(".model_is_type_real")
+    }
+)
+
+setMethod(
+    ".model_is_type_real",
+    "mc_SensorMetadata",
+    function(object) {
+        value_type <- mc_data_sensors[[object@sensor_id]]@value_type
+        return(value_type == "real")
+    }
+)
+
 #' Class for source file data format
 #' @slot has_header columns separator
 #' @slot separator columns separator

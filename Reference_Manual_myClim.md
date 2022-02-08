@@ -1,6 +1,6 @@
 <!-- toc -->
 
-února 07, 2022
+února 08, 2022
 
 # DESCRIPTION
 
@@ -738,12 +738,49 @@ Argument      |Description
 
 ## Details
 
-It is not possble change calibration parameters in calibrated sensor.
+It is not possible change calibration parameters in calibrated sensor.
 
 
 ## Value
 
 data with loaded calibration informations.
+
+
+# `mc_prep_calib`
+
+Sensor calibration
+
+
+## Description
+
+This function calibrate values of sensor by sensor$calibration parameters. Values are changed
+ and parameter sensor$metadata@calibrated is set to TRUE. It isn't possible calibrate calibrated sensor again.
+
+
+## Usage
+
+```r
+mc_prep_calib(data, sensors, localities = NULL)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for preparing or calculation
+`sensors`     |     vector of sensor names for calibration  It is not possible calibrate TMSmoisture sensor with this function. Calibration of TMSmoisture sensor is processed in mc_calc_vwc during conversion to volumetric water content. Only sensors with real value type can be calibrated.
+`localities`     |     vector of locality_ids, if NULL, then calibrate in all localities (default NULL)
+
+
+## Details
+
+
+
+
+## Value
+
+data with calibrated sensors.
 
 
 # `mc_prep_clean`

@@ -155,7 +155,7 @@ test_that("mc_prep_rename_locality wrong", {
     expect_error(data <- mc_prep_rename_locality(data, list(A1E05="A6W79")))
 })
 
-test_that("mc_prep_calib_load", {
+test_that("mc_prep_calib_load, mc_prep_calib", {
     data <- mc_read_csv("data/TOMST/files_table.csv")
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                         ~datetime, ~slope, ~intercept,
@@ -166,6 +166,18 @@ test_that("mc_prep_calib_load", {
             "94184102",            "TMS_T3",          lubridate::ymd(20201016),      1,        0.2,
             "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),      1,        0.01,
     ))
-    calib_data <- mc_prep_calib_load(data, calib_table)
+    param_data <- mc_prep_calib_load(data, calib_table)
+    test_prep_data_format(param_data)
+    calib_data <- mc_prep_calib(param_data, sensors = "TM_T")
     test_prep_data_format(calib_data)
+    expect_true(calib_data$A1E05$loggers[[1]]$sensors$TM_T$metadata@calibrated)
+    expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TM_T$values[[1]], 9.875 + 0.1)
+    expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TM_T$values[[6]], 6.875 * 0.95)
+    cleaned_data <- mc_prep_clean(param_data, silent = TRUE)
+    calc_data <- mc_agg(cleaned_data)
+    calib_data <- mc_prep_calib(calc_data, sensors = "TM_T")
+    test_calc_data_format(calib_data)
+    expect_true(calib_data$localities$A1E05$sensors$TM_T$metadata@calibrated)
+    expect_equal(calib_data$localities$A1E05$sensors$TM_T$values[[1]], 9.875 + 0.1)
+    expect_equal(calib_data$localities$A1E05$sensors$TM_T$values[[6]], 6.875 * 0.95)
 })

@@ -30,7 +30,7 @@ test_calc_locality <- function(locality) {
     expect_true(all(!is.na(locality$datetime)))
     expect_equal(class(locality$sensors), "list")
     test_data_length(locality)
-    purrr::walk(locality$sensors, test_sensor)
+    test_sensors(locality$sensors)
 }
 
 test_logger <- function(logger) {
@@ -44,7 +44,7 @@ test_logger <- function(logger) {
     expect_true(length(logger$sensors) > 0)
     test_data_length(logger)
     test_cleaning(logger)
-    purrr::walk(logger$sensors, test_sensor)
+    test_sensors(logger$sensors)
 }
 
 test_data_length <- function(item) {
@@ -57,6 +57,12 @@ test_cleaning <- function(logger) {
         return()
     }
     expect_equal(logger$clean_info@count_missed, length(purrr::keep(logger$sensors[[1]]$values, ~ is.na(.x))))
+}
+
+test_sensors <- function(sensors) {
+    sensor_names <- unname(purrr::map_chr(sensors, ~ .x$metadata@name))
+    expect_equal(names(sensors), sensor_names)
+    purrr::walk(sensors, test_sensor)
 }
 
 test_sensor <- function(sensor) {

@@ -386,7 +386,7 @@ mc_prep_rename_locality <- function(data, locality_ids) {
 #' This function load calibration parameters from data.frame
 #'
 #' @details
-#' It is not possble change calibration parameters in calibrated sensor.
+#' It is not possible change calibration parameters in calibrated sensor.
 #'
 #' @param data in format for preparing
 #' @param calib_table data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
@@ -427,3 +427,99 @@ mc_prep_calib_load <- function(data, calib_table) {
 
     purrr::map(data, locality_function)
 }
+
+#' Sensor calibration
+#'
+#' @description
+#' This function calibrate values of sensor by sensor$calibration parameters. Values are changed
+#' and parameter sensor$metadata@calibrated is set to TRUE. It isn't possible calibrate calibrated sensor again.
+#'
+#' @details
+#'
+#' @param data in format for preparing or calculation
+#' @param sensors vector of sensor names for calibration
+#'
+#' It is not possible calibrate TMSmoisture sensor with this function.
+#' Calibration of TMSmoisture sensor is processed in mc_calc_vwc during conversion to volumetric water content.
+#' Only sensors with real value type can be calibrated.
+#' @param localities vector of locality_ids, if NULL, then calibrate in all localities (default NULL)
+#' @return data with calibrated sensors.
+#' @examples
+#' @export
+mc_prep_calib <- function(data, sensors, localities=NULL) {
+    is_prep_format <- myClim:::.common_is_prep_format(data)
+
+    sensor_function <- function(sensor, datetime, locality_id) {
+        if(!(sensor$metadata@name %in% sensors)) {
+            return(sensor)
+        }
+        if(nrow(sensor$calibration) == 0) {
+            warning(stringr::str_glue("Calibration parameters missed in sensor {sensor$metadata@name} in {locality_id}."))
+            return(sensor)
+        }
+        if(myClim:::.model_is_physical_TMSmoisture(sensor$metadata)) {
+            stop(stringr::str_glue("Sensor {sensor$metadata@name} has physical TMSmoisture it is prohibited."))
+        }
+        if(sensor$metadata@calibrated) {
+            stop(stringr::str_glue("Sensor {sensor$metadata@name} is calibrated. It isn't possible recalibrate sensor."))
+        }
+        if(!myClim:::.model_is_type_real(sensor$metadata)) {
+            stop(stringr::str_glue("Value type of sensor {sensor$metadata@name} isn't real."))
+        }
+
+        values_table <- tibble::tibble(datetime = datetime,
+                                       values = sensor$values)
+        input_data <- .prep_split_data_by_calibration(values_table, sensor$calibration)
+        data_function <- function(intercept, slope, data){
+            if(is.na(intercept) || is.na(slope)) {
+                return(data$values)
+            }
+            data$values * slope + intercept
+        }
+        values <- purrr::pmap(dplyr::select(input_data, intercept, slope, data), data_function)
+        sensor$values <- purrr::flatten_dbl(values)
+        sensor$metadata@calibrated <- TRUE
+        sensor
+    }
+
+    logger_function <- function(logger, locality_id) {
+        logger$sensors <- purrr::map(logger$sensors, ~ sensor_function(.x, logger$datetime, locality_id))
+        logger
+    }
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+           return(locality)
+        }
+        if(is_prep_format) {
+            locality$loggers <- purrr::map(locality$loggers, ~ logger_function(.x, locality$metadata@locality_id))
+        } else {
+            locality$sensors <- purrr::map(locality$sensors, ~ sensor_function(.x, locality$datetime, locality$metadata@locality_id))
+        }
+        locality
+    }
+
+    data_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, data_localities)
+}
+
+.prep_split_data_by_calibration <- function(values_table, calib_table) {
+    if(nrow(calib_table) == 0) {
+        calib_table <- tibble::tibble(datetime = dplyr::first(values_table$datetime),
+                                      slope = NA_real_,
+                                      intercept = NA_real_)
+    } else if (dplyr::first(values_table$datetime) < dplyr::first(calib_table$datetime)) {
+        calib_table <- tibble::add_row(calib_table,
+                                       datetime = dplyr::first(values_table$datetime),
+                                       slope = NA_real_,
+                                       intercept = NA_real_,
+                                       .before = 1)
+    }
+    calib_table[["end_datetime"]] <- c(as.numeric(calib_table$datetime), Inf)[-1]
+    subset_function <- function(start, end) {
+        dplyr::filter(values_table, datetime >= start & datetime < end)
+    }
+    calib_table$data <- purrr::map2(calib_table$datetime, calib_table$end_datetime, subset_function)
+    calib_table
+}
+
