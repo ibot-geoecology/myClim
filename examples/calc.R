@@ -25,7 +25,7 @@ cleaned_data <- mc_prep_calib(cleaned_data, sensors = "TMS_T1")
 calc_data <- mc_agg(cleaned_data)
 
 # calculating vwc_moisture sensor from TMS_TMSmoisture and TMS_T1
-calc_data <- mc_calc_vwc(calc_data)
+calc_data <- mc_calc_vwc(calc_data, soiltype = "universal")
 
 # calculating new snow sensor
 calc_data <- mc_calc_snow(calc_data, "TMS_T2", output_sensor="snow")
