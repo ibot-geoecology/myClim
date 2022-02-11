@@ -70,6 +70,14 @@ coverage <- new("mc_Sensor")
 coverage@sensor_id <- "coverage"
 coverage@value_type <- "real"
 
+GDD <- new("mc_Sensor")
+GDD@sensor_id <- "GDD"
+GDD@value_type <- "real"
+
+FDD <- new("mc_Sensor")
+FDD@sensor_id <- "FDD"
+FDD@value_type <- "real"
+
 mc_data_sensors <- list(
     TMS_T1 = TMS_T1,
     TMS_T2 = TMS_T2,
@@ -79,7 +87,9 @@ mc_data_sensors <- list(
     TM_T = TM_T,
     snow = snow,
     count = count,
-    coverage = coverage
+    coverage = coverage,
+    GDD = GDD,
+    FDD = FDD
 )
 
 usethis::use_data(mc_data_sensors, overwrite = TRUE)

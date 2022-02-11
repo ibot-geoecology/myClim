@@ -1,6 +1,6 @@
 <!-- toc -->
 
-února 08, 2022
+února 11, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@
 Package: myClim
 Type: Package
 Title: R package for processing microclimatic data
-Version: 0.0.17
+Version: 0.0.18
 Author: GISlab
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -91,6 +91,82 @@ aggregated data in format for calculating
 ```r
 example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
 ```
+
+
+# `mc_calc_fdd`
+
+Freezing Degree Days
+
+
+## Description
+
+Function add new virtual sensor with values of FDD Freezing Degree Days.
+
+
+## Usage
+
+```r
+mc_calc_fdd(data, sensor, output_prefix = "FDD", t_base = 0, localities = NULL)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for calculation
+`sensor`     |     name of temperature sensor
+`output_prefix`     |     name prefix of new FDD sensor (default "FDD")  name of output sensor consists of output_prefix and value t_base
+`t_base`     |     threshold temperaturefor calculation FDD (default 0)
+`localities`     |     list of locality_ids for calculation; if NULL then all (default NULL)
+
+
+## Details
+
+Maximal step length of data is day.
+
+
+## Value
+
+input data with added FDD sensor
+
+
+# `mc_calc_gdd`
+
+Growing Degree Days
+
+
+## Description
+
+Function add new virtual sensor with values of GDD Growing Degree Days.
+
+
+## Usage
+
+```r
+mc_calc_gdd(data, sensor, output_prefix = "GDD", t_base = 5, localities = NULL)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for calculation
+`sensor`     |     name of temperature sensor
+`output_prefix`     |     name prefix of new GDD sensor (default "GDD")  name of output sensor consists of output_prefix and value t_base
+`t_base`     |     threshold temperaturefor calculation GDD (default 5)
+`localities`     |     list of locality_ids for calculation; if NULL then all (default NULL)
+
+
+## Details
+
+Maximal step length of data is day.
+
+
+## Value
+
+input data with added GDD sensor
 
 
 # `mc_calc_snow_agg`
@@ -364,7 +440,7 @@ Sensors definition
 
 ## Format
 
-An object of class `list` of length 9.
+An object of class `list` of length 11.
 
 
 ## Usage

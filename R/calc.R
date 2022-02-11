@@ -1,3 +1,10 @@
+.calc_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {locality$metadata@locality_id} doesn't contains sensor {sensor}. It is skipped."
+.calc_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@step_text} in data is too long. Maximal step is day."
+.calc_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
+.calc_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
+.calc_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
+.calc_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
+
 #' Snow detection
 #'
 #' @description
@@ -18,17 +25,22 @@
 #' snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr=2, tmax=0.5) {
     myClim:::.common_stop_if_not_calc_format(data)
-    if(.calc_is_step_bigger_then(data, lubridate::days(1))) {
-        stop(stringr::str_glue("Step {data$metadata@step_text} in data is too long. Maximal step is day."))
-    }
+    .calc_check_maximal_day_step(data)
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_snow_to_locality(locality, sensor, output_sensor, dr, tmax)
+        .calc_add_sensor_to_locality(locality, sensor, "snow", output_sensor, "T",
+                                     .calc_snow_values_function, dr=dr, tmax=tmax)
     }
     data$localities <- purrr::map(data$localities, locality_function)
     data
+}
+
+.calc_check_maximal_day_step <- function(data) {
+    if(.calc_is_step_bigger_then(data, lubridate::days(1))) {
+        stop(stringr::str_glue(.calc_MESSAGE_STEP_LONGER_DAY))
+    }
 }
 
 .calc_is_step_bigger_then <- function(data, max_period) {
@@ -36,22 +48,40 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     return(data_period > max_period)
 }
 
-.calc_add_snow_to_locality <- function(locality, sensor, output_sensor, dr, tmax) {
-    if(!(sensor %in% names(locality$sensors))){
-        warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {sensor}. It is skipped."))
-        return(locality)
-    }
-    .calc_warn_if_overwriting(locality, output_sensor)
+.calc_snow_values_function <- function(locality, sensor, dr, tmax) {
     day_max_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-    values <- (day_range_temp < dr) & (day_max_temp < tmax)
-    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor("snow", output_sensor, values=values)
+    (day_range_temp < dr) & (day_max_temp < tmax)
+}
+
+.calc_add_sensor_to_locality <- function(locality, sensor, output_sensor_id, output_sensor_name, sensor_physical, values_function, ...) {
+    if(!.calc_check_sensor_in_locality(locality, sensor)){
+        return(locality)
+    }
+    if(!myClim:::.model_is_physical_T(locality$sensors[[sensor]]$metadata)){
+        .calc_wrong_physical_error_function(sensor, sensor_physical)
+    }
+    .calc_warn_if_overwriting(locality, output_sensor_name)
+    values <- values_function(locality, sensor, ...)
+    locality$sensors[[output_sensor_name]] <- myClim:::.common_get_new_sensor(output_sensor_id, output_sensor_name, values=values)
     return(locality)
+}
+
+.calc_check_sensor_in_locality <- function(locality, sensor) {
+    result <- sensor %in% names(locality$sensors)
+    if(!result){
+        warning(stringr::str_glue(.calc_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR))
+    }
+    result
+}
+
+.calc_wrong_physical_error_function <- function(sensor_name, unit_name) {
+    stop(stringr::str_glue(.calc_MESSAGE_WRONG_PHYSICAL_UNIT))
 }
 
 .calc_warn_if_overwriting <- function(locality, output_sensor) {
     if(output_sensor %in% names(locality$sensors)) {
-        warning(stringr::str_glue("Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."))
+        warning(stringr::str_glue(.calc_MESSAGE_OVERWRITE_SENSOR))
     }
 }
 
@@ -76,7 +106,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
     myClim:::.common_stop_if_not_calc_format(data)
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
     if(length(data$localities) == 0) {
-        stop("Sensor doesn't exist in any locality.")
+        stop(.calc_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES)
     }
     if(!use_utc) {
         myClim:::.prep_warn_if_unset_tz_offset(data)
@@ -181,7 +211,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     }
     soil_row <- dplyr::filter(mc_data_vwc_parameters, soiltype == soiltype_value)
     if(nrow(soil_row) != 1) {
-        stop(stringr::str_glue("Soiltype {soiltype_value} is unknown."))
+        stop(stringr::str_glue(.calc_MESSAGE_UNKNONW_SIOLTYPE))
     }
     values_table <- tibble::tibble(datetime = locality$datetime,
                                    raw = locality$sensors[[moist_sensor]]$values,
@@ -206,19 +236,17 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
 }
 
 .calc_vwc_check_sensors_get_skip <- function(locality, moist_sensor, temp_sensor, output_sensor){
-    if(!(moist_sensor %in% names(locality$sensors))){
-        warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {moist_sensor}. It is skipped."))
+    if(!.calc_check_sensor_in_locality(locality, moist_sensor)){
         return(TRUE)
     }
     if(!myClim:::.model_is_physical_TMSmoisture(locality$sensors[[moist_sensor]]$metadata)){
-        stop(stringr::str_glue("Physical of {moist_sensor} isn't TMSmoisture."))
+        .calc_wrong_physical_error_function(moist_sensor, "TMSmoisture")
     }
-    if(!(temp_sensor %in% names(locality$sensors))){
-        warning(stringr::str_glue("Locality {locality$metadata@locality_id} doesn't contain sensor {temp_sensor}. It is skipped."))
+    if(!.calc_check_sensor_in_locality(locality, temp_sensor)){
         return(TRUE)
     }
     if(!myClim:::.model_is_physical_T(locality$sensors[[temp_sensor]]$metadata)){
-        stop(stringr::str_glue("Physical of {temp_sensor} isn't T."))
+        .calc_wrong_physical_error_function(temp_sensor, "T")
     }
     .calc_warn_if_overwriting(locality, output_sensor)
     return(FALSE)
@@ -232,3 +260,74 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     vwc_cor <- a * (tcor + cal_intercept + cal_slope * vwc)^2 + b * (tcor + cal_intercept + cal_slope * vwc) + c
     pmin(pmax(vwc_cor, 0), 1)
 }
+
+#' Growing Degree Days
+#'
+#' @description
+#' Function add new virtual sensor with values of GDD Growing Degree Days.
+#'
+#' @details
+#' Maximal step length of data is day.
+#'
+#' @param data in format for calculation
+#' @param sensor name of temperature sensor
+#' @param output_prefix name prefix of new GDD sensor (default "GDD")
+#'
+#' name of output sensor consists of output_prefix and value t_base
+#' @param t_base threshold temperaturefor calculation GDD (default 5)
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return input data with added GDD sensor
+#' @export
+#' @examples
+mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=NULL) {
+    .calc_xdd(data, sensor, output_prefix, t_base, localities, .calc_gdd_values_function)
+}
+
+.calc_xdd <- function(data, sensor, output_prefix, t_base, localities, values_function) {
+    myClim:::.common_stop_if_not_calc_format(data)
+    .calc_check_maximal_day_step(data)
+
+    output_sensor <- stringr::str_glue("{output_prefix}{t_base}")
+    step_part_day <- data$metadata@step / (24 * 60)
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        .calc_add_sensor_to_locality(locality, sensor, "GDD", output_sensor, "T",
+                                     values_function, t_base=t_base, step_part_day=step_part_day)
+    }
+    data$localities <- purrr::map(data$localities, locality_function)
+    data
+}
+
+.calc_gdd_values_function <- function(locality, sensor, t_base, step_part_day) {
+    pmax(locality$sensors[[sensor]]$values - t_base, 0) * step_part_day
+}
+
+#' Freezing Degree Days
+#'
+#' @description
+#' Function add new virtual sensor with values of FDD Freezing Degree Days.
+#'
+#' @details
+#' Maximal step length of data is day.
+#'
+#' @param data in format for calculation
+#' @param sensor name of temperature sensor
+#' @param output_prefix name prefix of new FDD sensor (default "FDD")
+#'
+#' name of output sensor consists of output_prefix and value t_base
+#' @param t_base threshold temperaturefor calculation FDD (default 0)
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return input data with added FDD sensor
+#' @export
+#' @examples
+mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=NULL) {
+    .calc_xdd(data, sensor, output_prefix, t_base, localities, .calc_fdd_values_function)
+}
+
+.calc_fdd_values_function <- function(locality, sensor, t_base, step_part_day) {
+    pmax(t_base - locality$sensors[[sensor]]$values, 0) * step_part_day
+}
+

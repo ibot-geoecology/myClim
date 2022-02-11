@@ -80,4 +80,22 @@ test_that("mc_calc_vwc wrong", {
     expect_error(calc_data <- mc_calc_vwc(calc_data, moist_sensor="TMS_T1", localities="A2E32"))
 })
 
+test_that("mc_calc_gdd", {
+    data <- mc_read_directory("data/calc-gdd", "TOMST")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_error(mc_calc_gdd(cleaned_data, "TM_T"))
+    calc_data <- mc_agg(cleaned_data)
+    calc_data <- mc_calc_gdd(calc_data, "TM_T")
+    expect_equal(calc_data$localities$`91184101`$sensors$GDD5$values[1], (12.4375 - 5) * 15/(60*24))
+    expect_equal(calc_data$localities$`91184101`$sensors$GDD5$values[176], 0)
+})
 
+test_that("mc_calc_fdd", {
+    data <- mc_read_directory("data/calc-gdd", "TOMST")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_error(mc_calc_fdd(cleaned_data, "TM_T"))
+    calc_data <- mc_agg(cleaned_data)
+    calc_data <- mc_calc_fdd(calc_data, "TM_T")
+    expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[1], 0)
+    expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[288], (0.5) * 15/(60*24))
+})
