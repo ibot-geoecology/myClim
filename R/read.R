@@ -194,7 +194,8 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
 
 .read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {
     values_function <- function(column_index) {
-        if(!(column_index %in% data_format@columns) || is.numeric(data_table[[column_index]])) {
+        if(!(column_index %in% data_format@columns) || is.numeric(data_table[[column_index]]) ||
+             all(is.na(data_table[[column_index]]))) {
             return(data_table[[column_index]])
         }
         if(is.character(data_table[[column_index]])) {

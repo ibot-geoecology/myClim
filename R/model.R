@@ -336,16 +336,18 @@ setMethod(
     tmj_columns <- list(TM_T = 5)
     tmsj_columns <- list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, moisture = 9)
     data <- head(data, .model_const_COUNT_TEST_VALUES)
-    if((all(is.na(data[[tmsj_columns$TMS_T2]])) && all(is.na(data[[tmsj_columns$TMS_T3]]))) ||
-       (all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
-           all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T3]]))) {
+    is_T1_NA <- all(is.na(data[[tmsj_columns$TMS_T1]]))
+    is_NA_T2_T3 <- all(is.na(data[[tmsj_columns$TMS_T2]])) && all(is.na(data[[tmsj_columns$TMS_T3]]))
+    is_T1_T2_T3_equals <- (all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
+                           all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T3]]))
+    if(!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals)) {
         object@columns <- tmj_columns
         object@logger_type <- "ThermoDatalogger"
         return(object)
     }
     object@logger_type <- "TMS"
     moisture <- data[[tmsj_columns$moisture]]
-    if(all(moisture == 0)) {
+    if(!any(is.na(moisture)) && all(moisture == 0)) {
         object@columns <- within(tmsj_columns, rm(moisture))
         return(object)
     }

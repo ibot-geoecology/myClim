@@ -73,7 +73,7 @@ test_sensor <- function(sensor) {
     expect_true(nrow(sensor$calibration) == 0 || colnames(sensor$calibration) == c("datetime", "intercept", "slope"))
     expect_equal(class(sensor$states), "data.frame")
     expect_true(nrow(sensor$states) == 0 || colnames(sensor$states) == c("tag", "start", "end"))
-    expect_true(is.numeric(sensor$values))
+    expect_true(is.numeric(sensor$values) || all(is.na(sensor$values)))
 }
 
 get_empty_prep_data <- function() {

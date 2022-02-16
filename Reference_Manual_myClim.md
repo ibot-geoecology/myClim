@@ -1,6 +1,6 @@
 <!-- toc -->
 
-února 11, 2022
+února 16, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@
 Package: myClim
 Type: Package
 Title: R package for processing microclimatic data
-Version: 0.0.18
+Version: 0.0.19
 Author: GISlab
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
