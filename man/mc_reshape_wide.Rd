@@ -14,7 +14,9 @@ mc_reshape_wide(data, localities = NULL, sensors = NULL)
 \item{sensors}{names of sensors; if NULL then all (default NULL)}
 }
 \value{
-data.frame with datetime column and columns for every sensor
+data.frame with datetime column and columns for every sensor; Name of column is in format
+{locality_id}\emph{{serial_number}}{sensor_name} for preparing format and
+{locality_id}_{sensor_name} for calculation format.
 }
 \description{
 This function create data.frame with values of sensor in wide format.

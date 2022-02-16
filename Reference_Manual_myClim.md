@@ -1423,7 +1423,9 @@ Argument      |Description
 
 ## Value
 
-data.frame with datetime column and columns for every sensor
+data.frame with datetime column and columns for every sensor; Name of column is in format
+ locality_id list("serial_number") sensor_name for preparing format and
+ locality_id _ sensor_name for calculation format.
 
 
 ## Examples

@@ -5,7 +5,9 @@
 #' @param data in format for preparing or calculation
 #' @param localities names of localities; if NULL then all (default NULL)
 #' @param sensors names of sensors; if NULL then all (default NULL)
-#' @return data.frame with datetime column and columns for every sensor
+#' @return data.frame with datetime column and columns for every sensor; Name of column is in format
+#' {locality_id}_{serial_number}_{sensor_name} for preparing format and
+#' {locality_id}_{sensor_name} for calculation format.
 #' @export
 #' @examples
 #' example_tms_wideformat <- mc_reshape_wide(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
@@ -36,7 +38,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 .reshape_get_sensor_tables <- function(data) {
     sensors_function <- function(item, name_prefix) {
         table <- myClim:::.common_sensor_values_as_tibble(item)
-        colnames(table)[-1] <- purrr::map_chr(colnames(table)[-1], function(x) stringr::str_glue("{name_prefix}-{x}"))
+        colnames(table)[-1] <- purrr::map_chr(colnames(table)[-1], function(x) stringr::str_glue("{name_prefix}_{x}"))
         table
     }
 
@@ -45,7 +47,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
     }
 
     prep_locality_function <- function(locality) {
-        prefixes <- purrr::map_chr(locality$loggers, function(x) stringr::str_glue("{locality$metadata@locality_id}-{x$metadata@serial_number}"))
+        prefixes <- purrr::map_chr(locality$loggers, function(x) stringr::str_glue("{locality$metadata@locality_id}_{x$metadata@serial_number}"))
         purrr::map2(locality$loggers, prefixes, sensors_function)
     }
     result <- purrr::map(data, prep_locality_function)
