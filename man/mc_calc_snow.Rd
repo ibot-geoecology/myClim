@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{mc_calc_snow}
 \alias{mc_calc_snow}
-\title{Snow detection}
+\title{Snow detection from temperature}
 \usage{
 mc_calc_snow(
   data,
@@ -14,26 +14,28 @@ mc_calc_snow(
 )
 }
 \arguments{
-\item{data}{in format for calculation}
+\item{data}{myClim object in calculation format. See \code{\link[=mc_agg]{mc_agg()}}}
 
-\item{sensor}{name of temperature sensor}
+\item{sensor}{name of temperature sensor used for snow estimation. (e.g. TMS_T2)}
 
-\item{output_sensor}{name of new snow sensor (default "snow")}
+\item{output_sensor}{name of output snow sensor (default "snow")}
 
-\item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
+\item{localities}{list of locality_ids where snow sill be calculated; if NULL then all (default NULL)}
 
-\item{dr}{delta range}
+\item{dr}{delta range (maximal daily temperature range on sensor covered by snow)}
 
-\item{tmax}{maximal temperature}
+\item{tmax}{maximal daily temperature on sensor covered by snow}
 }
 \value{
-input data with added snow sensor
+The new myClim data object, identical as input with added snow sensor. Time step is not modified.
 }
 \description{
-Function add new virtual sensor to locality with information about snow detection.
+Function accept only myClim objects in calculation format. See \code{\link[=mc_agg]{mc_agg()}}. Function \code{mc_calc_snow} creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.
 }
 \details{
-Maximal step length of data is day.
+Function was designed estimate to snow presence from temperature in situation when temperature sensor is covered by snow. Snow detection algorithm combines daily range \code{dr}of temperature with the maximal daily temperature \code{tmax}. I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C and daily maximal temperature is lower than 0.5 °C.
+
+TRUE/FALSE = Snow/non-snow information is returned in original time step (e.g. 15 min, 1 h...) despite function operate with daily temperature range and maximum. Because of dependency on daily temperatures, the longest time step for snow detection allowed is day.
 }
 \examples{
 snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
