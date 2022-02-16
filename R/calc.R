@@ -5,21 +5,23 @@
 .calc_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
 .calc_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
 
-#' Snow detection
+#' Snow detection from temperature
 #'
 #' @description
-#' Function add new virtual sensor to locality with information about snow detection.
+#' Function accept only myClim objects in calculation format. See [myClim::mc_agg()]. Function `mc_calc_snow` creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.  
 #'
 #' @details
-#' Maximal step length of data is day.
+#' Function was designed estimate to snow presence from temperature in situation when temperature sensor is covered by snow. Snow detection algorithm combines daily range `dr`of temperature with the maximal daily temperature `tmax`. I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C and daily maximal temperature is lower than 0.5 °C.
+#' 
+#' TRUE/FALSE = Snow/non-snow information is returned in original time step (e.g. 15 min, 1 h...) despite function operate with daily temperature range and maximum. Because of dependency on daily temperatures, the longest time step for snow detection allowed is day. 
 #'
-#' @param data in format for calculation
-#' @param sensor name of temperature sensor
-#' @param output_sensor name of new snow sensor (default "snow")
-#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @param dr delta range
-#' @param tmax maximal temperature
-#' @return input data with added snow sensor
+#' @param data myClim object in calculation format. See [myClim::mc_agg()]
+#' @param sensor name of temperature sensor used for snow estimation. (e.g. TMS_T2)
+#' @param output_sensor name of output snow sensor (default "snow")
+#' @param localities list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
+#' @param dr delta range (maximal daily temperature range on sensor covered by snow)
+#' @param tmax maximal daily temperature on sensor covered by snow
+#' @return The new myClim data object, identical as input with added snow sensor. Time step is not modified.
 #' @export
 #' @examples
 #' snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")

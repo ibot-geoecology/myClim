@@ -1,11 +1,18 @@
 #' Agregate data by function
 #'
-#' Function has two basic uses: i.) aggregate time step of microclimatic records from fine to coarser with specified function (e. g. daily mean from 15 min records); 
-#' ii) convert myClim object from preparation to calculation format without records modification, this behaviour appears wen fun=NULL, period=NULL. Any output of mc_agg is in calculation format. See Details. 
+#' Function has two basic uses: 
+#' * aggregate time step of microclimatic records from fine to coarser with specified function (e. g. daily mean from 15 min records); 
+#' * convert myClim object from preparation to calculation format without records modification, this behaviour appears wen fun=NULL, period=NULL. Any output of mc_agg is in calculation format. See Details. 
 #'
 #' Function returns new myClim object.
-#' Any output of mc_agg is in computation format. That means the structure of myClim object is flattened. Hierarchical level of logger is removed (Locality->Logger->Sensor->Record), and all microclimatic records within the sensors are joined directly to the level of locality (Locality->Sensor->Record). This is called computation format and is only acceptable format for mc_calc functions family. In case mc_agg is used only for conversion from preparation to computation format (fun=NULL, period=NULL) then microclimatic records are not modified. 
-#' When fun and period is specified, microclimatic records are aggregated based on function into new period. Aggregated time step is marked by a first element of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00…); week = c(2022-12-19 00:00, 2022-12-28 00:00…); month = c(2022-11-01 00:00, 2022-12-01 00:00…); year = c(2021-01-01 00:00, 2022-01-01 00:00…). When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown (e.g. in when original data starting on 2021-11-28 00:00 and period = ”month” then November is deleted and aggregation starts in December). Empty sensors with no records are excluded. Aggregation functions return NA for empty vector except from count which returns 0. Aggregation functions are applied to all sensors in provided myClim object. Aggregation function creates new sensors on localities with used aggregation function in its name {sensor_name}_{function} e. g. (TMS_T1_max), sensors keep original sensor_id in sensor metadata (e.g. TMS_T1) after aggregation.
+#' 
+#' Any output of mc_agg is in computation format. That means the structure of myClim object is flattened. Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within the sensors are joined directly to the level of locality (Locality<-Sensor<-Record). This is called computation format and is only acceptable format for `mc_calc` functions family. 
+#' 
+#' In case `mc_agg` is used only for conversion from preparation to computation format (fun=NULL, period=NULL) then microclimatic records are not modified. 
+#' 
+#' When fun and period is specified, microclimatic records are aggregated based on function into new period. Aggregated time step is marked by a first element of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...); week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...); year = c(2021-01-01 00:00, 2022-01-01 00:00...). When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted and aggregation starts in December). 
+#' 
+#' Empty sensors with no records are excluded. Aggregation functions return NA for empty vector except from count which returns 0. Aggregation functions are applied to all sensors in provided myClim object. Aggregation function creates new sensors on localities with used aggregation function in its name (sensor_name)_(function) e.g. (TMS_T1_max), after aggregation sensors keep original sensor_id in sensor metadata (e.g. TMS_T1).
 #' * sensors created with functions `min`, `max`, `mean`, `percentile`, `sum` keeps identical sensor_id and value_type as original input sensors 
 #' * sensors created with functions `count` has sensor_id `count` and value_type `integer`, function  `coverage` has sensor_id `coverage` and value_type `real`
 #' * coverage returns the ratio of non NA records/all records 
@@ -21,7 +28,7 @@
 #' Start day of week is Monday.
 #' @param use_utc default TRUE, if set FALSE forced to use UTC time,instead possibly available time offset (in locality metadata: tz_offset) local or solar time see (e.g. `mc_prep_solar_tz`, `mc_prep_user_tz`);
 #' Non-UTC time can by used only for period `day` and longer. 
-#' @param percentiles - vector of percentile numbers; numbers are from range 0-100; every number generate new sensor, see details
+#' @param percentiles vector of percentile numbers; numbers are from range 0-100; every number generate new sensor, see details
 #' @param na.rm parameter for aggregation function; Not used for count and coverage.
 #' @return Returns new myClim object in calculation format ready for mc_calc functions family. When fun=NULL, period=NULL records are not modified but only converted to calc format. When fun and period provided then time step is aggregated based on function. 
 #' @export
