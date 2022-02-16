@@ -39,8 +39,12 @@ Agregate data by function
 
 ## Description
 
-Function create aggregated data in format for calculation. If fun is NULL and period is NULL, than
- function only convert source data to format for calculation.
+Function has two basic uses:
+  
+
+*  aggregate time step of microclimatic records from fine to coarser with specified function (e. g. daily mean from 15 min records); 
+
+*  convert myClim object from preparation to calculation format without records modification, this behaviour appears wen fun=NULL, period=NULL. Any output of mc_agg is in calculation format. See Details.
 
 
 ## Usage
@@ -61,29 +65,37 @@ mc_agg(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in cleaned data format
-`fun`     |     aggregation function ("min", "max", "mean", "percentile", "sum", "count", "coverage") Can be character vector of function names or list. if NULL than function do not do any aggregation, but prepare data for further calculation. DEFAULT is fun = NULL.  
-
-*  functions are applied to all sensors. Sensors aren't renamed. 
-
-*  Names of items in list are sensor_names and items are vectors of functions applied to sensors. Names of new sensors are in format sensor_name _ function .   Function coverage is count_values/count_all_records. Result sensor of functions `min` , `max` , `mean` , `percentile` and `sum` has same sensor_id and value_type as source sensor. Result sensor of function `count` has sensor_id `count` and type `integer` . Result sensor of function `coverage` has sensor_id `coverage` and type `real` .
-`period`     |     of aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation  There is special period "all" for one value from whole range.  Start day of week is monday.
-`use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default TRUE); Non-UTC time can by used only for period `day` and bigger.
-`percentiles`     |      
-
-*  vector of percentile numbers; numbers are from range 0-100; every number generate new sensor
-`na.rm`     |     parameter for aggregation function; It isn't used for count and coverage.
+`data`     |     cleaned myClim object (output of mc_clean)
+`fun`     |     aggregation function; one of ("min", "max", "mean", "percentile", "sum", "count", "coverage") See details. Can be single function name, character vector of function names or list of function names. if NULL records are not aggregated, but converted to calculation format. See details.
+`period`     |     Time period for aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation  There is special period "all" returning single value for each sensor based on function applied across all records within the sensor.  Start day of week is Monday.
+`use_utc`     |     default TRUE, if set FALSE forced to use UTC time,instead possibly available time offset (in locality metadata: tz_offset) local or solar time see (e.g. `mc_prep_solar_tz` , `mc_prep_user_tz` ); Non-UTC time can by used only for period `day` and longer.
+`percentiles`     |     vector of percentile numbers; numbers are from range 0-100; every number generate new sensor, see details
+`na.rm`     |     parameter for aggregation function; Not used for count and coverage.
 
 
 ## Details
 
-If first or last period isn't full filled, data are cropped and a warning is shown. Sensors without data are excluded.
- Aggregation functions return NA for empty vector. Except count, it return 0.
+Function returns new myClim object.
+ 
+ Any output of mc_agg is in computation format. That means the structure of myClim object is flattened. Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within the sensors are joined directly to the level of locality (Locality<-Sensor<-Record). This is called computation format and is only acceptable format for `mc_calc` functions family.
+ 
+ In case `mc_agg` is used only for conversion from preparation to computation format (fun=NULL, period=NULL) then microclimatic records are not modified.
+ 
+ When fun and period is specified, microclimatic records are aggregated based on function into new period. Aggregated time step is marked by a first element of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...); week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...); year = c(2021-01-01 00:00, 2022-01-01 00:00...). When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted and aggregation starts in December).
+ 
+ Empty sensors with no records are excluded. Aggregation functions return NA for empty vector except from count which returns 0. Aggregation functions are applied to all sensors in provided myClim object. Aggregation function creates new sensors on localities with used aggregation function in its name (sensor_name)_(function) e.g. (TMS_T1_max), after aggregation sensors keep original sensor_id in sensor metadata (e.g. TMS_T1).
+  
+
+*  sensors created with functions `min` , `max` , `mean` , `percentile` , `sum` keeps identical sensor_id and value_type as original input sensors 
+
+*  sensors created with functions `count` has sensor_id `count` and value_type `integer` , function `coverage` has sensor_id `coverage` and value_type `real`  
+
+*  coverage returns the ratio of non NA records/all records
 
 
 ## Value
 
-aggregated data in format for calculating
+Returns new myClim object in calculation format ready for mc_calc functions family. When fun=NULL, period=NULL records are not modified but only converted to calc format. When fun and period provided then time step is aggregated based on function.
 
 
 ## Examples
@@ -222,12 +234,12 @@ snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")
 
 # `mc_calc_snow`
 
-Snow detection
+Snow detection from temperature
 
 
 ## Description
 
-Function add new virtual sensor to locality with information about snow detection.
+Function accept only myClim objects in calculation format. See [`mc_agg()`](#mcagg()) . Function `mc_calc_snow` creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.
 
 
 ## Usage
@@ -248,22 +260,24 @@ mc_calc_snow(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in format for calculation
-`sensor`     |     name of temperature sensor
-`output_sensor`     |     name of new snow sensor (default "snow")
-`localities`     |     list of locality_ids for calculation; if NULL then all (default NULL)
-`dr`     |     delta range
-`tmax`     |     maximal temperature
+`data`     |     myClim object in calculation format. See [`mc_agg()`](#mcagg())
+`sensor`     |     name of temperature sensor used for snow estimation. (e.g. TMS_T2)
+`output_sensor`     |     name of output snow sensor (default "snow")
+`localities`     |     list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
+`dr`     |     delta range (maximal daily temperature range on sensor covered by snow)
+`tmax`     |     maximal daily temperature on sensor covered by snow
 
 
 ## Details
 
-Maximal step length of data is day.
+Function was designed estimate to snow presence from temperature in situation when temperature sensor is covered by snow. Snow detection algorithm combines daily range `dr` of temperature with the maximal daily temperature `tmax` . I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C and daily maximal temperature is lower than 0.5 °C.
+ 
+ TRUE/FALSE = Snow/non-snow information is returned in original time step (e.g. 15 min, 1 h...) despite function operate with daily temperature range and maximum. Because of dependency on daily temperatures, the longest time step for snow detection allowed is day.
 
 
 ## Value
 
-input data with added snow sensor
+The new myClim data object, identical as input with added snow sensor. Time step is not modified.
 
 
 ## Examples
