@@ -2,21 +2,22 @@
 % Please edit documentation in R/prep.R
 \name{mc_prep_solar_tz}
 \alias{mc_prep_solar_tz}
-\title{Solar TZ offset}
+\title{Set solar time offset against original time}
 \usage{
 mc_prep_solar_tz(data)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in raw, clean, or calculation format}
 }
 \value{
-data with changed TZ offset in same format as input data
+MyClim object in the same format as input, with \code{tz_offset} filled in locality metadata
 }
 \description{
-This function compute TZ offset in localities by solar time
+This function calculates the offset against UTC on the locality  to get the solar time. This is based on coordinates. If coordinates not provided, then not working.
 }
 \details{
-The function require filled longitude of locality in slot lon_wgs84 of metadata.
+The function require at least longitude provided in locality metadata slot \code{lon_wgs84}. If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see \code{\link[=mc_read_data_frame]{mc_read_data_frame()}}, \code{\link[=mc_read_csv]{mc_read_csv()}}
+
 TZ offset in minutes is calculated as \code{longitude / 180 * 12 * 60}.
 }
 \examples{

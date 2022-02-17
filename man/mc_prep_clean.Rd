@@ -7,16 +7,28 @@
 mc_prep_clean(data, silent = FALSE)
 }
 \arguments{
-\item{data}{in format for preparing}
+\item{data}{myClim object in raw format (output of \code{mc_read} functions family) see e.g. \code{\link[=mc_read_directory]{mc_read_directory()}}}
 
-\item{silent}{if true, then informations aren't printed (default FALSE)}
+\item{silent}{if true, then cleaning log table is not printed in console (default FALSE), see \code{\link[=mc_info_clean]{mc_info_clean()}}}
 }
 \value{
-cleaned data in standard format
+\itemize{
+\item myClim object in clean format
+\item cleaning log is by default printed in console, and can be called ex post by \code{\link[=mc_info_clean]{mc_info_clean()}}
+}
 }
 \description{
-This function change datetime and values series. Result series has constant
-step without duplicits and missed values are filled in as NA.
+This function guess time step from regular time series. After that produce perfectly regular time series based on guessed step together with the first and last record.
+Using clean time series, function check weather the original time series is continual without missing values, check duplicated and disordered records.
+Resulting myClim object time series has constant step without duplicated and disordered records. Resulting time series is nicely rounded. See details. Disordered records are reordered chronologically, missing values are filled with NAs.
+}
+\details{
+\code{mc_prep_clean} is initial, mandatory step before further work with data in \code{myClim} library.
+
+This function guarantee time series with constant time step, without duplicated and disordered records which is crucial for next steps in data analysis.
+\code{mc_prep_clean} assume constant time step in microclimatic records. The step is guessed from input time series based on last 100 records. In case of microclimatic logger with irregular time series, function returns warning and skip logger.
+
+In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).
 }
 \examples{
 cleaned_example_tomst_data1 <- mc_prep_clean(example_tomst_data1)

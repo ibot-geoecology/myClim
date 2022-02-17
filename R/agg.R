@@ -17,7 +17,7 @@
 #' * sensors created with functions `count` has sensor_id `count` and value_type `integer`, function  `coverage` has sensor_id `coverage` and value_type `real`
 #' * coverage returns the ratio of non NA records/all records 
 #'
-#' @param data cleaned myClim object (output of mc_clean)
+#' @param data cleaned myClim object: output of [myClim::mc_prep_clean()]
 #' @param fun aggregation function; one of ("min", "max", "mean", "percentile", "sum", "count", "coverage") See details.
 #' Can be single function name, character vector of function names or list of function names. if NULL records are not aggregated, but converted to calculation format. See details.
 #'

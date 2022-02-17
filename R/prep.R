@@ -4,12 +4,25 @@
 
 #' Cleaning datetime series
 #'
-#' This function change datetime and values series. Result series has constant
-#' step without duplicits and missed values are filled in as NA.
-#'
-#' @param data in format for preparing
-#' @param silent if true, then informations aren't printed (default FALSE)
-#' @return cleaned data in standard format
+#' @description
+#' This function guess time step from regular time series. After that produce perfectly regular time series based on guessed step together with the first and last record. 
+#' Using clean time series, function check weather the original time series is continual without missing values, check duplicated and disordered records. 
+#' Resulting myClim object time series has constant step without duplicated and disordered records. Resulting time series is nicely rounded. See details. Disordered records are reordered chronologically, missing values are filled with NAs. 
+#' 
+#' 
+#' @details
+#' `mc_prep_clean` is initial, mandatory step before further work with data in `myClim` library. 
+#' 
+#' This function guarantee time series with constant time step, without duplicated and disordered records which is crucial for next steps in data analysis. 
+#' `mc_prep_clean` assume constant time step in microclimatic records. The step is guessed from input time series based on last 100 records. In case of microclimatic logger with irregular time series, function returns warning and skip logger. 
+#' 
+#' In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).   
+#' 
+#' @param data myClim object in raw format (output of `mc_read` functions family) see e.g. [myClim::mc_read_directory()]
+#' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
+#' @return 
+#' * myClim object in clean format
+#' * cleaning log is by default printed in console, and can be called ex post by [myClim::mc_info_clean()]
 #' @export
 #' @examples
 #' cleaned_example_tomst_data1 <- mc_prep_clean(example_tomst_data1)
@@ -116,13 +129,21 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
 }
 
-#' Set user defined TZ offset
-#'
-#' This function set user defined TZ offsets in localities
-#'
-#' @param data in standard format
-#' @param tz_offsets named list (name: locality_id, item: tz_offset in rounded minutes)
-#' @return data with changed TZ offset in standard format
+#' Set user defined offset against original time 
+#' 
+#' @description
+#' This function allow user to set the offset in minutes against original time series of microclimatic records. `MyClim` generally assume the records are in UTM Time Zone. When offset is provided, myClim functions by default use the time corrected with this offset in calculations. See details.
+#' 
+#' @details 
+#' For analysis of microclimatic data it is important to think of time zones because of diurnal or seasonal microclimatic rhythms. `mc_prep_user_tz` allow user to set time offset for individual localities to harmonize e.g.day/night cycles across vhole data set.
+#' 
+#' This function can be used also inversely, for heterogeneous data sets containing loggers recording in local time and user wish to unify them by setting individual offest e.g. to UTM. This function is also useful for corrections of shifted loggers time series e.g. due to technical issue. 
+#' 
+#' In case user is sure, the loggers recorded in UTC and wants to harmonize data set to solar time, there is [myClim::mc_prep_solar_tz()] calculating offset based on coordinates to harmonize the midday across vhole dataset.
+#' 
+#' @param data myClim object in raw, clean, or calculation format
+#' @param tz_offsets named list (name: `locality_id`, list item: `tz_offset` in rounded minutes)
+#' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata 
 #' @export
 #' @examples
 #' example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(`91184101`=60))
@@ -135,15 +156,18 @@ mc_prep_user_tz <- function(data, tz_offsets) {
     data
 }
 
-#' Solar TZ offset
-#'
-#' This function compute TZ offset in localities by solar time
-#'
-#' The function require filled longitude of locality in slot lon_wgs84 of metadata.
+#' Set solar time offset against original time 
+#' 
+#' @description
+#' This function calculates the offset against UTC on the locality  to get the solar time. This is based on coordinates. If coordinates not provided, then not working.
+#' 
+#' @details
+#' The function require at least longitude provided in locality metadata slot `lon_wgs84`. If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see [myClim::mc_read_data_frame()], [myClim::mc_read_csv()]
+#' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
-#' @param data in format for preparing or calculation
-#' @return data with changed TZ offset in same format as input data
+#' @param data myClim object in raw, clean, or calculation format
+#' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata 
 #' @export
 #' @examples
 #' cleaned_example_tomst_data1 <- mc_prep_solar_tz(cleaned_example_tomst_data1)
