@@ -30,6 +30,7 @@ calc_data <- mc_calc_vwc(calc_data, soiltype = "universal")
 # calculating new snow sensor
 calc_data <- mc_calc_snow(calc_data, "TMS_T2", output_sensor="snow")
 calc_data <- mc_calc_snow(calc_data, "TMS_T2_secondary", output_sensor="snow_secondary", localities="LOC1")
+
 # sensors overview
 mc_info(calc_data)
 # calculating snow day overview

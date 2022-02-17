@@ -213,13 +213,13 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     plot <- plot + ggplot2::ylab(y_name)
     plot <- plot + ggplot2::geom_raster(ggplot2::aes(fill=value))
     plot <- .plot_set_ggplot_physical_colors(data, plot, viridis_color_map)
-    plot <- .plot_set_ggplot_theme(plot)
+    plot <- plot + .plot_set_ggplot_raster_theme()
     plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
     file_type <- .plot_get_file_type(filename)
     if(file_type == "pdf"){
-        .plot_print_pdf(filename, plot)
+        .plot_print_pdf(filename, plot, locality_id ~ sensor, 40)
     } else if(file_type == "png") {
-        .plot_print_png(filename, plot, png_width, png_height)
+        .plot_print_png(filename, plot, png_width, png_height, locality_id ~ sensor)
     } else {
         stop(stringr::str_glue("Format of {filename} isn't supported."))
     }
@@ -247,16 +247,16 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     plot + viridis::scale_fill_viridis(name=physical@description, option=viridis_color_map, direction=1)
 }
 
-.plot_set_ggplot_theme <- function(plot) {
-    plot + ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0),
-                          axis.ticks.y=ggplot2::element_blank(),
-                          axis.text.y = ggplot2::element_blank(),
-                          legend.position="bottom",
-                          legend.key.width= ggplot2::unit(2, 'cm'),
-                          legend.key.height= ggplot2::unit(0.4, 'cm'),
-                          panel.border = ggplot2::element_blank(),
-                          panel.grid.major = ggplot2::element_blank(),
-                          panel.grid.minor = ggplot2::element_blank())
+.plot_set_ggplot_raster_theme <- function() {
+    ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0),
+                   axis.ticks.y=ggplot2::element_blank(),
+                   axis.text.y = ggplot2::element_blank(),
+                   legend.position="bottom",
+                   legend.key.width= ggplot2::unit(2, 'cm'),
+                   legend.key.height= ggplot2::unit(0.4, 'cm'),
+                   panel.border = ggplot2::element_blank(),
+                   panel.grid.major = ggplot2::element_blank(),
+                   panel.grid.minor = ggplot2::element_blank())
 }
 
 .plot_get_file_type <- function(filename) {
@@ -264,17 +264,171 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     match[[2]]
 }
 
-.plot_print_pdf <- function(filename, plot) {
-    plot <- plot + ggforce::facet_grid_paginate(locality_id ~ sensor, ncol = 1, nrow = 40, page = 1, drop = FALSE, byrow = FALSE)
+.plot_print_pdf <- function(filename, plot, facets, nrow) {
+    plot <- plot + ggforce::facet_grid_paginate(facets, ncol = 1, nrow = nrow, page = 1, drop = FALSE, byrow = FALSE)
     n_pages <- ggforce::n_pages(plot)
     pdf(filename, family="ArialMT", paper="a4", w=210/25.4, h=297/25.4)
-    purrr::walk(seq(1:n_pages), function (x) print(plot + ggforce::facet_grid_paginate(locality_id ~ sensor, ncol = 1, nrow = 40, page = x, drop = TRUE, byrow = FALSE)))
+    purrr::walk(seq(1:n_pages), function (x) print(plot + ggforce::facet_grid_paginate(facets, ncol = 1, nrow = nrow, page = x, drop = TRUE, byrow = FALSE)))
     dev.off()
 }
 
-.plot_print_png <- function(filename, plot, width, height) {
-    plot <- plot + ggforce::facet_grid_paginate(locality_id ~ sensor, ncol = 1, byrow = FALSE)
+.plot_print_png <- function(filename, plot, width, height, facets) {
+    plot <- plot + ggforce::facet_grid_paginate(facets, ncol = 1, byrow = FALSE)
     png(filename, width=width, height=height, res=200)
     print(plot)
     dev.off()
 }
+
+#' Plot data - ggplot2 geom_line
+#'
+#' Function plot data to file with ggplot2 geom_line
+#'
+#' Maximal number of physical units of sensors is two. Main and secondary y axis.
+#'
+#' @param data in format for preparing or calculation
+#' @param filename output - supported formats are pdf and png
+#' @param sensors names of sensor
+#' @param scale_coeff scale coefficient for secondary axis (default NULL)
+#'
+#' Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL
+#' than function try detects scale coefficient from physical unit of sensors.
+#' @param png_width width for png output (default 1900)
+#' @param png_height height for png output (default 1900)
+#' @param start_crop POSIXct datetime for crop data (default NULL)
+#' @param end_crop POSIXct datetime for crop data (default NULL)
+#' @export
+mc_plot_line <- function(data, filename, sensors=NULL,
+                         scale_coeff=NULL,
+                         png_width=1900, png_height=1900,
+                         start_crop=NULL, end_crop=NULL) {
+    data <- mc_filter(data, sensors=sensors)
+    if(!is.null(start_crop) || !is.null(end_crop)) {
+        data <- mc_prep_crop(data, start_crop, end_crop)
+    }
+    sensors_table <- .plot_get_sensors_table(data)
+    sensors_table <- .plot_add_coeff_to_sensors_table(sensors_table, scale_coeff)
+    data_table <- mc_reshape_long(data)
+    plot <- ggplot2::ggplot()
+
+    line_function <- function(sensor, color, coeff) {
+        sensor_name <- sensor
+        data_plot <- dplyr::filter(data_table, sensor == sensor_name)
+        ggplot2::geom_line(data_plot, mapping = ggplot2::aes(x=datetime, y=value*coeff, group=sensor, color=sensor))
+    }
+
+    plots <- purrr::pmap(dplyr::select(sensors_table, sensor, color, coeff), line_function)
+    plot <- purrr::reduce(plots, `+`, .init=plot)
+    plot <- plot + ggplot2::scale_color_manual(values=sensors_table$color)
+    plot <- plot + .plot_set_ggplot_line_theme()
+    plot <- plot + .plot_line_set_y_axes(sensors_table)
+
+    file_type <- .plot_get_file_type(filename)
+    if(file_type == "pdf"){
+        .plot_print_pdf(filename, plot, ggplot2::vars(locality_id), 8)
+    } else if(file_type == "png") {
+        .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(locality_id))
+    } else {
+        stop(stringr::str_glue("Format of {filename} isn't supported."))
+    }
+}
+
+.plot_get_sensors_table <- function(data) {
+    is_prep_format <- myClim:::.common_is_prep_format(data)
+
+    sensors_item_function <- function(item) {
+        physical_function <- function(sensor) {
+            sensor_info <- mc_data_sensors[[sensor$metadata@sensor_id]]
+            if(!is.na(sensor_info@physical)) {
+                return(sensor_info@physical)
+            }
+            if(sensor_info@value_type == "logical") {
+                return(sensor_info@value_type)
+            }
+            sensor$metadata@sensor_id
+        }
+
+        color_function <- function(sensor) {
+            sensor_info <- mc_data_sensors[[sensor$metadata@sensor_id]]
+            if(is.na(sensor_info@plot_color)) {
+                return("black")
+            }
+            sensor_info@plot_color
+        }
+
+        sensor_names <- names(item$sensors)
+        physicals <- purrr::map_chr(item$sensors, physical_function)
+        colors <- purrr::map_chr(item$sensors, color_function)
+        tibble::tibble(sensor=sensor_names, physical=physicals, color=colors)
+    }
+
+    prep_locality_function <- function(locality) {
+        purrr::map_dfr(locality$loggers, sensors_item_function)
+    }
+
+    if(is_prep_format) {
+        table <- purrr::map_dfr(data, prep_locality_function)
+    } else {
+        table <- purrr::map_dfr(data$localities, sensors_item_function)
+    }
+    table <- dplyr::distinct(table)
+    physicals <- unique(table$physical)
+    if(length(physicals) > 2) {
+        stop("There are more then two physical units.")
+    }
+    main_physical <- physicals[[1]]
+    if(myClim:::.model_const_PHYSICAL_T %in% physicals) {
+        main_physical <- myClim:::.model_const_PHYSICAL_T
+    }
+    table$main_axis <- (table$physical == main_physical)
+    table
+}
+
+.plot_add_coeff_to_sensors_table <- function(sensors_table, scale_coeff) {
+    physical_table <- dplyr::distinct(dplyr::select(sensors_table, physical, main_axis))
+
+    get_scale_coeff <- function(selector) {
+        physical <- physical_table$physical[selector]
+        if(physical %in% names(mc_data_physical)) {
+            return(mc_data_physical[[physical]]@scale_coeff)
+        }
+        1
+    }
+
+    if(is.null(scale_coeff) && nrow(physical_table) > 1) {
+        main_scale_coeff <- get_scale_coeff(physical_table$main_axis)
+        secondary_scale_coeff <- get_scale_coeff(!physical_table$main_axis)
+        scale_coeff <- 1 / main_scale_coeff * secondary_scale_coeff
+    }
+
+    sensors_table$coeff <- purrr::map_dbl(sensors_table$main_axis, ~ if(.x) 1 else scale_coeff)
+    sensors_table
+}
+
+.plot_line_set_y_axes <- function(sensors_table) {
+    physical_table <- dplyr::distinct(dplyr::select(sensors_table, physical, main_axis, coeff))
+    sec.axis <- ggplot2::waiver()
+    if(nrow(physical_table) == 2) {
+        physical <- physical_table$physical[!physical_table$main_axis]
+        coeff <- physical_table$coeff[!physical_table$main_axis]
+        description <- physical
+        if(physical %in% names(mc_data_physical)) {
+            description <- mc_data_physical[[physical]]@description
+        }
+        sec.axis <- ggplot2::sec_axis(~./coeff, name=description)
+    }
+    main_physical <- physical_table$physical[physical_table$main_axis]
+    main_description <- main_physical
+    if(main_physical %in% names(mc_data_physical)) {
+        main_description <- mc_data_physical[[main_physical]]@description
+    }
+    ggplot2::scale_y_continuous(name=main_description, sec.axis=sec.axis)
+}
+
+.plot_set_ggplot_line_theme <- function() {
+    ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0),
+                   legend.position="bottom",
+                   legend.key.width= ggplot2::unit(2, 'cm'),
+                   legend.key.height= ggplot2::unit(0.4, 'cm'),
+                   panel.border = ggplot2::element_blank())
+}
+

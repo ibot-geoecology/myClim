@@ -1,6 +1,6 @@
 <!-- toc -->
 
-února 16, 2022
+února 17, 2022
 
 # DESCRIPTION
 
@@ -8,7 +8,7 @@
 Package: myClim
 Type: Package
 Title: R package for processing microclimatic data
-Version: 0.0.19
+Version: 0.0.20
 Author: GISlab
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
@@ -738,6 +738,51 @@ Argument      |Description
 ```r
 mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
 ```
+
+
+# `mc_plot_line`
+
+Plot data - ggplot2 geom_line
+
+
+## Description
+
+Function plot data to file with ggplot2 geom_line
+
+
+## Usage
+
+```r
+mc_plot_line(
+  data,
+  filename,
+  sensors = NULL,
+  scale_coeff = NULL,
+  png_width = 1900,
+  png_height = 1900,
+  start_crop = NULL,
+  end_crop = NULL
+)
+```
+
+
+## Arguments
+
+Argument      |Description
+------------- |----------------
+`data`     |     in format for preparing or calculation
+`filename`     |     output - supported formats are pdf and png
+`sensors`     |     names of sensor
+`scale_coeff`     |     scale coefficient for secondary axis (default NULL)  Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL than function try detects scale coefficient from physical unit of sensors.
+`png_width`     |     width for png output (default 1900)
+`png_height`     |     height for png output (default 1900)
+`start_crop`     |     POSIXct datetime for crop data (default NULL)
+`end_crop`     |     POSIXct datetime for crop data (default NULL)
+
+
+## Details
+
+Maximal number of physical units of sensors is two. Main and secondary y axis.
 
 
 # `mc_plot_loggers`
