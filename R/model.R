@@ -9,6 +9,8 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_COUNT_TEST_VALUES <- 100
 
+.model_const_PHYSICAL_T <- "T"
+
 # classes ================================================================================
 
 #' Class for sensor definition
@@ -43,7 +45,7 @@ setMethod(f="initialize",
               .Object@value_type <- "real"
               .Object@min_value <- NA_real_
               .Object@max_value <- NA_real_
-              .Object@plot_color <- ""
+              .Object@plot_color <- NA_character_
               .Object@plot_line_width <- 1
               return(.Object)
           })
@@ -54,6 +56,7 @@ setMethod(f="initialize",
 #' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
 #' @slot calibration_class class for calibration
 #' @slot viridis_color_map viridis color map option
+#' @slot scale_coeff coefficient for plot; value * scale_coef is in range 0-1
 #' @export mc_Physical
 #' @exportClass mc_Physical
 mc_Physical <- setClass("mc_Physical",
@@ -61,11 +64,13 @@ mc_Physical <- setClass("mc_Physical",
                             name = "character",
                             description = "character",
                             units = "character",
-                            viridis_color_map = "character"))
+                            viridis_color_map = "character",
+                            scale_coeff = "numeric"))
 
 setMethod("initialize",
           "mc_Physical",
           function(.Object) {
+              .Object@scale_coeff <- 1
               return(.Object)
           })
 

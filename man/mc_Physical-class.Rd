@@ -18,5 +18,7 @@ Class for physical
 \item{\code{calibration_class}}{class for calibration}
 
 \item{\code{viridis_color_map}}{viridis color map option}
+
+\item{\code{scale_coeff}}{coefficient for plot; value * scale_coef is in range 0-1}
 }}
 

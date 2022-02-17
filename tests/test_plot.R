@@ -27,5 +27,9 @@ test_that("all plots", {
     mc_plot_raster(data, "plots/raster.pdf", sensors = c("TMS_T1", "TMS_T2"))
     mc_plot_raster(data_agg, "plots/raster.png", sensors = c("TMS_T1", "TMS_T2"), png_height = 500)
 
+    mc_plot_line(data, "plots/line.pdf")
+    mc_plot_line(data_agg, "plots/line_T1.png", png_height = 500, sensors="TMS_T1")
+    mc_plot_line(data_agg, "plots/line.png", png_height = 500)
+
     expect_true(TRUE)
 })

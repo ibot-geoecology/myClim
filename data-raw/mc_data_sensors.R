@@ -3,7 +3,7 @@ source("R/model.R")
 TMS_T1 <- new("mc_Sensor")
 TMS_T1@sensor_id <- "TMS_T1"
 TMS_T1@logger <- "TMS"
-TMS_T1@physical <- "T"
+TMS_T1@physical <- .model_const_PHYSICAL_T
 TMS_T1@default_height <- -0.08
 TMS_T1@min_value <- -40
 TMS_T1@max_value <- 60
@@ -13,7 +13,7 @@ TMS_T1@plot_line_width <- 2
 TMS_T2 <- new("mc_Sensor")
 TMS_T2@sensor_id <- "TMS_T2"
 TMS_T2@logger <- "TMS"
-TMS_T2@physical <- "T"
+TMS_T2@physical <- .model_const_PHYSICAL_T
 TMS_T2@default_height <- 0
 TMS_T2@min_value <- -50
 TMS_T2@max_value <- 60
@@ -22,7 +22,7 @@ TMS_T2@plot_color <- "green4"
 TMS_T3 <- new("mc_Sensor")
 TMS_T3@sensor_id <- "TMS_T3"
 TMS_T3@logger <- "TMS"
-TMS_T3@physical <- "T"
+TMS_T3@physical <- .model_const_PHYSICAL_T
 TMS_T3@default_height <- 0.15
 TMS_T3@min_value <- -50
 TMS_T3@max_value <- 60
@@ -51,7 +51,7 @@ moisture@plot_line_width <- 2
 TM_T <- new("mc_Sensor")
 TM_T@sensor_id <- "TM_T"
 TM_T@logger <- "ThermoDatalogger"
-TM_T@physical <- "T"
+TM_T@physical <- .model_const_PHYSICAL_T
 TM_T@default_height <- -0.08
 TM_T@min_value <- -40
 TM_T@max_value <- 60
