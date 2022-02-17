@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{mc_calc_snow_agg}
 \alias{mc_calc_snow_agg}
-\title{Summary about snow detected with mc_calc_snow()}
+\title{Summary of TRUE/FALSE snow sensor}
 \usage{
 mc_calc_snow_agg(
   data,
@@ -13,24 +13,32 @@ mc_calc_snow_agg(
 )
 }
 \arguments{
-\item{data}{in format for calculation}
+\item{data}{myClim object in calculation format (see \code{\link[=mc_agg]{mc_agg()}}) with TRUE/FALSE snow sensor see \code{\link[=mc_calc_snow]{mc_calc_snow()}}}
 
-\item{snow_sensor}{name of snow sensor created by function mc_calc_snow (default "snow")}
+\item{snow_sensor}{name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function \code{mc_calc_snow}; (default "snow")}
 
-\item{localities}{list of locality_ids; if NULL then all (default NULL)}
+\item{localities}{optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)}
 
-\item{period}{count days for continuous cover of snow (default 3)}
+\item{period}{number of days defining the continuous snow cover period of interest (default 3 days)}
 
-\item{use_utc}{if set FALSE then datetime changed by locality tz_offset (default FALSE)}
+\item{use_utc}{if set FALSE then time is corrected based on offset provided in locality metadata \code{tz_offset}, see e. g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_user_tz]{mc_prep_user_tz()}}; (default FALSE)}
 }
 \value{
-data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
+Returns data.frame with columns:
+\itemize{
+\item locality - locality name
+\item snow_days - number of days with snow cover
+\item first_day - first day with snow
+\item last_day - last day with snow
+\item first_day_period - first day of period with continual snow cover based on \code{period} parameter
+\item last_day_period - last day of period with continual snow cover based on \code{period} parameter
+}
 }
 \description{
-Function returns summary about snow detected with mc_calc_snow() aggregated over the whole period
+Accept only myClim objects in calculation format. See \code{\link[=mc_agg]{mc_agg()}}. \code{mc_calc_snow_agg} was primary designed to work with the virtual snow sensor of TRUE/FALSE which is the output of \code{\link[=mc_calc_snow]{mc_calc_snow()}}. \code{mc_calc_snow_agg}returns the summary table of snow sensor (e.g number of days with snow cover, the longest continual snow period...). The snow summary is returned for whole date range provided.
 }
 \details{
-If snow_sensor isn't in locality, then skipped.
+Primary designed for virtual snow sensor created by \code{\link[=mc_calc_snow]{mc_calc_snow()}}, but accepts any sensor with TRUE/FLAST snow event detection. If \code{snow_sensor} on the locality missing, then locality is skipped.
 }
 \examples{
 snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")

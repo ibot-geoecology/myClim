@@ -14,7 +14,7 @@ mc_agg(
 )
 }
 \arguments{
-\item{data}{cleaned myClim object (output of mc_clean)}
+\item{data}{cleaned myClim object: output of \code{\link[=mc_prep_clean]{mc_prep_clean()}}}
 
 \item{fun}{aggregation function; one of ("min", "max", "mean", "percentile", "sum", "count", "coverage") See details.
 Can be single function name, character vector of function names or list of function names. if NULL records are not aggregated, but converted to calculation format. See details.}

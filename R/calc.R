@@ -87,20 +87,28 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     }
 }
 
-#' Summary about snow detected with mc_calc_snow()
+#' Summary of TRUE/FALSE snow sensor
 #'
 #' @description
-#' Function returns summary about snow detected with mc_calc_snow() aggregated over the whole period
+#' Accept only myClim objects in calculation format. See [myClim::mc_agg()]. `mc_calc_snow_agg` was primary designed to work with the virtual snow sensor of TRUE/FALSE which is the output of [myClim::mc_calc_snow()]. `mc_calc_snow_agg`returns the summary table of snow sensor (e.g number of days with snow cover, the longest continual snow period...). The snow summary is returned for whole date range provided. 
 #'
 #' @details
-#' If snow_sensor isn't in locality, then skipped.
+#' Primary designed for virtual snow sensor created by [myClim::mc_calc_snow()], but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor` on the locality missing, then locality is skipped.
 #'
-#' @param data in format for calculation
-#' @param snow_sensor name of snow sensor created by function mc_calc_snow (default "snow")
-#' @param localities list of locality_ids; if NULL then all (default NULL)
-#' @param period count days for continuous cover of snow (default 3)
-#' @param use_utc if set FALSE then datetime changed by locality tz_offset (default FALSE)
-#' @return data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
+#' @param data myClim object in calculation format (see [myClim::mc_agg()]) with TRUE/FALSE snow sensor see [myClim::mc_calc_snow()]
+#' @param snow_sensor name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function `mc_calc_snow`; (default "snow")
+#' @param localities optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)
+#' @param period number of days defining the continuous snow cover period of interest (default 3 days)
+#' @param use_utc if set FALSE then time is corrected based on offset provided in locality metadata `tz_offset`, see e. g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_user_tz()]; (default FALSE)
+#' @return 
+#' Returns data.frame with columns:
+#' * locality - locality name
+#' * snow_days - number of days with snow cover
+#' * first_day - first day with snow
+#' * last_day - last day with snow 
+#' * first_day_period - first day of period with continual snow cover based on `period` parameter
+#' * last_day_period - last day of period with continual snow cover based on `period` parameter
+#' 
 #' @export
 #' @examples
 #' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")
