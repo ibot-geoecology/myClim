@@ -65,7 +65,7 @@ mc_agg(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     cleaned myClim object (output of mc_clean)
+`data`     |     cleaned myClim object: output of [`mc_prep_clean()`](#mcprepclean())
 `fun`     |     aggregation function; one of ("min", "max", "mean", "percentile", "sum", "count", "coverage") See details. Can be single function name, character vector of function names or list of function names. if NULL records are not aggregated, but converted to calculation format. See details.
 `period`     |     Time period for aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation  There is special period "all" returning single value for each sensor based on function applied across all records within the sensor.  Start day of week is Monday.
 `use_utc`     |     default TRUE, if set FALSE forced to use UTC time,instead possibly available time offset (in locality metadata: tz_offset) local or solar time see (e.g. `mc_prep_solar_tz` , `mc_prep_user_tz` ); Non-UTC time can by used only for period `day` and longer.
@@ -183,12 +183,12 @@ input data with added GDD sensor
 
 # `mc_calc_snow_agg`
 
-Summary about snow detected with mc_calc_snow()
+Summary of TRUE/FALSE snow sensor
 
 
 ## Description
 
-Function returns summary about snow detected with mc_calc_snow() aggregated over the whole period
+Accept only myClim objects in calculation format. See [`mc_agg()`](#mcagg()) . `mc_calc_snow_agg` was primary designed to work with the virtual snow sensor of TRUE/FALSE which is the output of [`mc_calc_snow()`](#mccalcsnow()) . `mc_calc_snow_agg` returns the summary table of snow sensor (e.g number of days with snow cover, the longest continual snow period...). The snow summary is returned for whole date range provided.
 
 
 ## Usage
@@ -208,21 +208,34 @@ mc_calc_snow_agg(
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in format for calculation
-`snow_sensor`     |     name of snow sensor created by function mc_calc_snow (default "snow")
-`localities`     |     list of locality_ids; if NULL then all (default NULL)
-`period`     |     count days for continuous cover of snow (default 3)
-`use_utc`     |     if set FALSE then datetime changed by locality tz_offset (default FALSE)
+`data`     |     myClim object in calculation format (see [`mc_agg()`](#mcagg()) ) with TRUE/FALSE snow sensor see [`mc_calc_snow()`](#mccalcsnow())
+`snow_sensor`     |     name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function `mc_calc_snow` ; (default "snow")
+`localities`     |     optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)
+`period`     |     number of days defining the continuous snow cover period of interest (default 3 days)
+`use_utc`     |     if set FALSE then time is corrected based on offset provided in locality metadata `tz_offset` , see e. g. [`mc_prep_solar_tz()`](#mcprepsolartz()) , [`mc_prep_user_tz()`](#mcprepusertz()) ; (default FALSE)
 
 
 ## Details
 
-If snow_sensor isn't in locality, then skipped.
+Primary designed for virtual snow sensor created by [`mc_calc_snow()`](#mccalcsnow()) , but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor` on the locality missing, then locality is skipped.
 
 
 ## Value
 
-data.frame with columns locality, snow_days, first_day, last_day, first_day_period, last_day_period
+Returns data.frame with columns:
+  
+
+*  locality - locality name 
+
+*  snow_days - number of days with snow cover 
+
+*  first_day - first day with snow 
+
+*  last_day - last day with snow 
+
+*  first_day_period - first day of period with continual snow cover based on `period` parameter 
+
+*  last_day_period - last day of period with continual snow cover based on `period` parameter
 
 
 ## Examples
@@ -977,8 +990,9 @@ Cleaning datetime series
 
 ## Description
 
-This function change datetime and values series. Result series has constant
- step without duplicits and missed values are filled in as NA.
+This function guess time step from regular time series. After that produce perfectly regular time series based on guessed step together with the first and last record.
+ Using clean time series, function check weather the original time series is continual without missing values, check duplicated and disordered records.
+ Resulting myClim object time series has constant step without duplicated and disordered records. Resulting time series is nicely rounded. See details. Disordered records are reordered chronologically, missing values are filled with NAs.
 
 
 ## Usage
@@ -992,13 +1006,25 @@ mc_prep_clean(data, silent = FALSE)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in format for preparing
-`silent`     |     if true, then informations aren't printed (default FALSE)
+`data`     |     myClim object in raw format (output of `mc_read` functions family) see e.g. [`mc_read_directory()`](#mcreaddirectory())
+`silent`     |     if true, then cleaning log table is not printed in console (default FALSE), see [`mc_info_clean()`](#mcinfoclean())
+
+
+## Details
+
+`mc_prep_clean` is initial, mandatory step before further work with data in `myClim` library.
+ 
+ This function guarantee time series with constant time step, without duplicated and disordered records which is crucial for next steps in data analysis.
+ `mc_prep_clean` assume constant time step in microclimatic records. The step is guessed from input time series based on last 100 records. In case of microclimatic logger with irregular time series, function returns warning and skip logger.
+ 
+ In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).
 
 
 ## Value
 
-cleaned data in standard format
+*  myClim object in clean format 
+
+*  cleaning log is by default printed in console, and can be called ex post by [`mc_info_clean()`](#mcinfoclean())
 
 
 ## Examples
@@ -1164,12 +1190,12 @@ data with changed sensor names
 
 # `mc_prep_solar_tz`
 
-Solar TZ offset
+Set solar time offset against original time
 
 
 ## Description
 
-This function compute TZ offset in localities by solar time
+This function calculates the offset against UTC on the locality  to get the solar time. This is based on coordinates. If coordinates not provided, then not working.
 
 
 ## Usage
@@ -1183,18 +1209,19 @@ mc_prep_solar_tz(data)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in format for preparing or calculation
+`data`     |     myClim object in raw, clean, or calculation format
 
 
 ## Details
 
-The function require filled longitude of locality in slot lon_wgs84 of metadata.
+The function require at least longitude provided in locality metadata slot `lon_wgs84` . If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see [`mc_read_data_frame()`](#mcreaddataframe()) , [`mc_read_csv()`](#mcreadcsv()) 
+ 
  TZ offset in minutes is calculated as `longitude / 180 * 12 * 60` .
 
 
 ## Value
 
-data with changed TZ offset in same format as input data
+MyClim object in the same format as input, with `tz_offset` filled in locality metadata
 
 
 ## Examples
@@ -1206,12 +1233,12 @@ cleaned_example_tomst_data1 <- mc_prep_solar_tz(cleaned_example_tomst_data1)
 
 # `mc_prep_user_tz`
 
-Set user defined TZ offset
+Set user defined offset against original time
 
 
 ## Description
 
-This function set user defined TZ offsets in localities
+This function allow user to set the offset in minutes against original time series of microclimatic records. `MyClim` generally assume the records are in UTM Time Zone. When offset is provided, myClim functions by default use the time corrected with this offset in calculations. See details.
 
 
 ## Usage
@@ -1225,13 +1252,22 @@ mc_prep_user_tz(data, tz_offsets)
 
 Argument      |Description
 ------------- |----------------
-`data`     |     in standard format
-`tz_offsets`     |     named list (name: locality_id, item: tz_offset in rounded minutes)
+`data`     |     myClim object in raw, clean, or calculation format
+`tz_offsets`     |     named list (name: `locality_id` , list item: `tz_offset` in rounded minutes)
+
+
+## Details
+
+For analysis of microclimatic data it is important to think of time zones because of diurnal or seasonal microclimatic rhythms. `mc_prep_user_tz` allow user to set time offset for individual localities to harmonize e.g.day/night cycles across vhole data set.
+ 
+ This function can be used also inversely, for heterogeneous data sets containing loggers recording in local time and user wish to unify them by setting individual offest e.g. to UTM. This function is also useful for corrections of shifted loggers time series e.g. due to technical issue.
+ 
+ In case user is sure, the loggers recorded in UTC and wants to harmonize data set to solar time, there is [`mc_prep_solar_tz()`](#mcprepsolartz()) calculating offset based on coordinates to harmonize the midday across vhole dataset.
 
 
 ## Value
 
-data with changed TZ offset in standard format
+MyClim object in the same format as input, with `tz_offset` filled in locality metadata
 
 
 ## Examples
