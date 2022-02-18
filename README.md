@@ -35,6 +35,7 @@ se nachází soubory a skripty pro ukázku funkcionality.
 V souboru [examples/load_tomst.R](examples/load_tomst.R) je ukázka načtení dat z TOMST čidel.
 Stručný popis se nachází v komentářích.
 V souboru [examples/plot_tomst.R](examples/plot_tomst.R) je ukázka generování grafů.
+V souboru [examples/calc.R](examples/calc.R) je ukázka použití funkcí z modulu `mc_calc`.
 
 Spuštění příkladů je možné následujícím kódem:
 
@@ -51,35 +52,6 @@ Program je pokryt unit testy, které je možné spustit příkazem:
 ```R
 testthat::test_dir("tests")
 ```
-
-# Formát načtených dat
-
-Zde je jednotná struktura, ve kterých si balíček drží načtená data.
-
-* seznam lokalit - jméno položky je id lokality; každá lokalita je seznam o dvou položkách
-    * `metadata` - instance třídy `mc_LocalityMetadata`
-        * `id`
-        * `altitude`
-        * `lat_wgs84`
-        * `lon_wgs84`
-        * `user_data`
-    * `loggers` - seznam loggerů v lokalitě bez jmen; logger je tvořen seznamem o třech položkách
-        * `metadata` - instance třídy `mc_LoggerMetadata`
-            * `type`
-            * `serial_number`
-            * `step` - krok času v minutách
-        * `clean_log` - seznam: log změn v procesu čištění
-        * `datetime` - vector data a času ve fromátu POSIXct
-        * `sensors` - seznam senzorů patřících pod logger; položky jsou pojmenované; každý senzor je seznam o třech položkách`
-            * `metadata` - instance třídy `mc_SensorMetadata`
-                * `sensor` - název senzoru 
-                * `height` - výška senzoru 
-                * `calibrated` - logický příznak, jestli je kalibrovaný 
-            * `states` - instance třídy `mc_SensorState`
-                * `tag` - příznak 
-                * `start` - začátek stavu 
-                * `end` - konec stavu
-            * `values` - vektor hodnot, který má stejnou délku jako `datetime` 
 
 # Dokumentace
 [Dokumentace balíčku](Reference_Manual_myClim.md)
