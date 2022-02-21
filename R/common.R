@@ -90,6 +90,6 @@
         items <- purrr::flatten(purrr::map(data, ~ .x$loggers))
     }
     table <- purrr::map_dfr(items, datetime_items_function)
-    lubridate::interval(min(table$start), max(table$end))
+    lubridate::interval(min(table$start, na.rm=TRUE), max(table$end, na.rm=TRUE))
 }
 

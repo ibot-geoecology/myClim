@@ -1,10 +1,12 @@
-.Rproj.user
-.idea
-plots
 .Rhistory
 .RData
 .Ruserdata
-*.swp
-/tests/plots
 microclim.Rproj
 myClim.Rproj
+*.swp
+
+.Rproj.user
+.idea
+docs
+plots
+/tests/plots
