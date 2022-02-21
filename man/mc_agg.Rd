@@ -56,6 +56,7 @@ Empty sensors with no records are excluded. Aggregation functions return NA for 
 \item sensors created with functions \code{min}, \code{max}, \code{mean}, \code{percentile}, \code{sum} keeps identical sensor_id and value_type as original input sensors
 \item sensors created with functions \code{count} has sensor_id \code{count} and value_type \code{integer}, function  \code{coverage} has sensor_id \code{coverage} and value_type \code{real}
 \item coverage returns the ratio of non NA records/all records
+\item pokus
 }
 }
 \examples{
