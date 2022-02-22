@@ -16,10 +16,9 @@ generate:
 	Rscript data-raw/mc_data_vwc_parameters.R
 	$(RM) NAMESPACE
 	R -e 'devtools::document()'
-	R -e 'Rd2md::ReferenceManual()'
 
 generate-html:
-	R -e 'pkgdown::build_site()'
+	R -e 'pkgdown::build_site(examples=FALSE)'
 
 test:
 	R --vanilla -e 'testthat::test_dir("tests")'

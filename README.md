@@ -54,4 +54,3 @@ testthat::test_dir("tests")
 ```
 
 # Dokumentace
-[Dokumentace balíčku](Reference_Manual_myClim.md)
