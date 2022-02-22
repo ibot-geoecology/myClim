@@ -5,7 +5,7 @@
 #' loggers and sensors. Function mc_agg converts data to calc-format. Calc-format doesn't contain loggers metadata.
 #' Sensors are organized in localities. Calc-format is focused to analyzing data and calculation new virtual sensors.
 #'
-#' Prep-format
+#' **Prep-format**
 #' \preformatted{
 #' +--------------------------------------------------------------------------+
 #' | locality[1]                                                              |
@@ -84,7 +84,12 @@
 #' | locality[n]                                                              |
 #' +--------------------------------------------------------------------------+}
 #'
-#' Calc-format
+#' **Calc-format**
+#'
+#' All localities have same step. Step is saved in metadata of calc-format in minutes (`data$metadata@step`).
+#' Some steps can not be represented in minutes. For example step `month` has variable number of minutes.
+#' Therefore, metadata contains textual a representation of the step (`data$metadata@step_text`).
+#'
 #' \preformatted{
 #'             +-------------------------+
 #' $metadata   | mc_MainMetadata - class |

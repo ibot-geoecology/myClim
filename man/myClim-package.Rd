@@ -11,7 +11,7 @@ Loaded data from source files by read functions are in prep-format. It Contains 
 loggers and sensors. Function mc_agg converts data to calc-format. Calc-format doesn't contain loggers metadata.
 Sensors are organized in localities. Calc-format is focused to analyzing data and calculation new virtual sensors.
 
-Prep-format
+\strong{Prep-format}
 \preformatted{
 +--------------------------------------------------------------------------+
 | locality[1]                                                              |
@@ -90,7 +90,12 @@ Prep-format
 | locality[n]                                                              |
 +--------------------------------------------------------------------------+}
 
-Calc-format
+\strong{Calc-format}
+
+All localities have same step. Step is saved in metadata of calc-format in minutes (\code{data$metadata@step}).
+Some steps can not be represented in minutes. For example step \code{month} has variable number of minutes.
+Therefore, metadata contains textual a representation of the step (\code{data$metadata@step_text}).
+
 \preformatted{
             +-------------------------+
 $metadata   | mc_MainMetadata - class |
