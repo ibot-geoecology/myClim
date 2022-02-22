@@ -135,3 +135,11 @@ test_that("mc_agg integer sensor", {
     expect_equal(calc_data$localities$`94184102`$sensors$TMS_TMSmoisture_coverage$metadata@sensor_id, "coverage")
 })
 
+test_that("mc_agg reaggregate", {
+    expect_warning(data <- mc_read_directory("data/TOMST/", "TOMST"))
+    data <- mc_prep_clean(data, silent=T)
+    agg_data <- mc_agg(data)
+    agg_all <- mc_agg(agg_data, period = "all", fun = "mean")
+    test_calc_data_format(agg_all)
+})
+

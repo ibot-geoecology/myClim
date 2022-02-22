@@ -330,7 +330,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     datetime <- tryCatch({
             seq(start, end, by=original_step_text)
         },
-        error = {
+        error = function(e){
             seconds <- as.numeric(lubridate::as.period(original_step_text))
             seq(start, end, by=stringr::str_glue("{seconds} sec"))
         })
