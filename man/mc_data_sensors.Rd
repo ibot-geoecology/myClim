@@ -5,7 +5,7 @@
 \alias{mc_data_sensors}
 \title{Sensors definition}
 \format{
-An object of class \code{list} of length 11.
+An object of class \code{environment} of length 17.
 }
 \usage{
 mc_data_sensors

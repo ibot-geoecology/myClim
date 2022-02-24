@@ -18,7 +18,7 @@ generate:
 	R -e 'devtools::document()'
 
 generate-html:
-	R -e 'pkgdown::build_site(examples=FALSE)'
+	R -e 'pkgdown::build_site(examples=FALSE, override = list(destination = "../docs"))'
 
 test:
 	R --vanilla -e 'testthat::test_dir("tests")'

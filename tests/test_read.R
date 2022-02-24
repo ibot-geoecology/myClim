@@ -46,7 +46,7 @@ test_that("mc_read_files TOMST comma in number", {
     test_prep_data_format(data)
 })
 
-test_that("mc_read_rectory joined TOMST", {
+test_that("mc_read_directory joined TOMST", {
     data <- mc_read_directory("data/joined_TOMST", "TOMST_join")
     test_prep_data_format(data)
     expect_equal(names(data), c("A1E01_TS", "A1W14_TMS", "A4E53_TMS", "CKras_Loc_2_15", "CZ2_HRADEC_TMS", "CZ2_HRADEC_TS"))

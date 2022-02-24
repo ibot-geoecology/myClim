@@ -32,7 +32,8 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_sensor_to_locality(locality, sensor, "snow", output_sensor, "T",
+        .calc_add_sensor_to_locality(locality, sensor, myClim:::.model_const_SENSOR_snow_bool, output_sensor,
+                                     myClim:::.model_const_PHYSICAL_T_C,
                                      .calc_snow_values_function, dr=dr, tmax=tmax)
     }
     data$localities <- purrr::map(data$localities, locality_function)
@@ -60,7 +61,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     if(!.calc_check_sensor_in_locality(locality, sensor)){
         return(locality)
     }
-    if(!myClim:::.model_is_physical_T(locality$sensors[[sensor]]$metadata)){
+    if(!myClim:::.model_is_physical_T_C(locality$sensors[[sensor]]$metadata)){
         .calc_wrong_physical_error_function(sensor, sensor_physical)
     }
     .calc_warn_if_overwriting(locality, output_sensor_name)
@@ -255,7 +256,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     if(!.calc_check_sensor_in_locality(locality, temp_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical_T(locality$sensors[[temp_sensor]]$metadata)){
+    if(!myClim:::.model_is_physical_T_C(locality$sensors[[temp_sensor]]$metadata)){
         .calc_wrong_physical_error_function(temp_sensor, "T")
     }
     .calc_warn_if_overwriting(locality, output_sensor)
@@ -290,10 +291,10 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
 #' @export
 #' @examples
 mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=NULL) {
-    .calc_xdd(data, sensor, output_prefix, t_base, localities, .calc_gdd_values_function)
+    .calc_xdd(data, sensor, myClim:::.model_const_SENSOR_GDD, output_prefix, t_base, localities, .calc_gdd_values_function)
 }
 
-.calc_xdd <- function(data, sensor, output_prefix, t_base, localities, values_function) {
+.calc_xdd <- function(data, sensor, output_sensor_id, output_prefix, t_base, localities, values_function) {
     myClim:::.common_stop_if_not_calc_format(data)
     .calc_check_maximal_day_step(data)
 
@@ -304,7 +305,8 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_sensor_to_locality(locality, sensor, "GDD", output_sensor, "T",
+        .calc_add_sensor_to_locality(locality, sensor, output_sensor_id, output_sensor,
+                                     myClim:::.model_const_PHYSICAL_T_C,
                                      values_function, t_base=t_base, step_part_day=step_part_day)
     }
     data$localities <- purrr::map(data$localities, locality_function)
@@ -334,7 +336,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' @export
 #' @examples
 mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=NULL) {
-    .calc_xdd(data, sensor, output_prefix, t_base, localities, .calc_fdd_values_function)
+    .calc_xdd(data, sensor, myClim:::.model_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
 }
 
 .calc_fdd_values_function <- function(locality, sensor, t_base, step_part_day) {

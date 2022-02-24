@@ -9,7 +9,42 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_COUNT_TEST_VALUES <- 100
 
-.model_const_PHYSICAL_T <- "T"
+.model_const_PHYSICAL_T_C <- "T_C"
+.model_const_PHYSICAL_moisture <- "moisture"
+.model_const_PHYSICAL_TMSmoisture <- "TMSmoisture"
+.model_const_PHYSICAL_RH_perc <- "RH_perc"
+.model_const_PHYSICAL_l_cm <- "l_cm"
+.model_const_PHYSICAL_l_mm <- "l_mm"
+.model_const_PHYSICAL_v <- "v"
+.model_const_PHYSICAL_t_h <- "t_h"
+
+# logger sensors
+.model_const_SENSOR_TMS_T1 <- "TMS_T1"
+.model_const_SENSOR_TMS_T2 <- "TMS_T2"
+.model_const_SENSOR_TMS_T3 <- "TMS_T3"
+.model_const_SENSOR_TMS_TMSmoisture <- "TMS_TMSmoisture"
+.model_const_SENSOR_TM_T <- "TM_T"
+# universal sensors
+.model_const_SENSOR_snow_bool <- "snow_bool"
+.model_const_SENSOR_count <- "count"
+.model_const_SENSOR_coverage <- "coverage"
+.model_const_SENSOR_GDD <- "GDD"
+.model_const_SENSOR_FDD <- "FDD"
+# physical sensors
+.model_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
+.model_const_SENSOR_moisture <- .model_const_PHYSICAL_moisture
+.model_const_SENSOR_RH_perc <- .model_const_PHYSICAL_RH_perc
+.model_const_SENSOR_l_cm <- .model_const_PHYSICAL_l_cm
+.model_const_SENSOR_l_mm <- .model_const_PHYSICAL_l_mm
+.model_const_SENSOR_v <- .model_const_PHYSICAL_v
+.model_const_SENSOR_t_h <- .model_const_PHYSICAL_t_h
+
+.model_const_LOGGER_TOMST_TMS <- "TMS"
+.model_const_LOGGER_TOMST_THERMODATALOGGER <- "ThermoDatalogger"
+
+.model_const_VALUE_TYPE_REAL <- "real"
+.model_const_VALUE_TYPE_INTEGER <- "integer"
+.model_const_VALUE_TYPE_LOGICAL <- "logical"
 
 # classes ================================================================================
 
@@ -42,7 +77,7 @@ setMethod(f="initialize",
               .Object@logger <- NA_character_
               .Object@physical <- NA_character_
               .Object@default_height <- NA_real_
-              .Object@value_type <- "real"
+              .Object@value_type <- .model_const_VALUE_TYPE_REAL
               .Object@min_value <- NA_real_
               .Object@max_value <- NA_real_
               .Object@plot_color <- NA_character_
@@ -178,23 +213,23 @@ setMethod(
     "mc_SensorMetadata",
     function(object) {
         physical_id <- mc_data_sensors[[object@sensor_id]]@physical
-        return(physical_id == "TMSmoisture")
+        return(physical_id == .model_const_PHYSICAL_TMSmoisture)
     }
 )
 
 setGeneric(
-    ".model_is_physical_T",
+    ".model_is_physical_T_C",
     function(object, data){
-        standardGeneric(".model_is_physical_T")
+        standardGeneric(".model_is_physical_T_C")
     }
 )
 
 setMethod(
-    ".model_is_physical_T",
+    ".model_is_physical_T_C",
     "mc_SensorMetadata",
     function(object) {
         physical_id <- mc_data_sensors[[object@sensor_id]]@physical
-        return(physical_id == "T")
+        return(physical_id == .model_const_PHYSICAL_T_C)
     }
 )
 
@@ -210,7 +245,7 @@ setMethod(
     "mc_SensorMetadata",
     function(object) {
         value_type <- mc_data_sensors[[object@sensor_id]]@value_type
-        return(value_type == "real")
+        return(value_type == .model_const_VALUE_TYPE_REAL)
     }
 )
 
@@ -315,16 +350,19 @@ setMethod(
 }
 
 .change_tomst_columns_and_logger_type <- function(object, data){
-    tm_columns <- list(TM_T = 4)
-    tms_columns <- list(TMS_T1 = 4, TMS_T2 = 5, TMS_T3 = 6, TMS_TMSmoisture = 7)
+    tm_columns <- list(4)
+    names(tm_columns) <- .model_const_SENSOR_TM_T
+    tms_columns <- list(4, 5, 6, 7)
+    names(tms_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2,.model_const_SENSOR_TMS_T3,
+                            .model_const_SENSOR_TMS_TMSmoisture)
     data <- head(data, .model_const_COUNT_TEST_VALUES)
-    if(all(is.na(data[[tms_columns$TMS_T2]]))) {
+    if(all(is.na(data[[tms_columns[[.model_const_SENSOR_TMS_T2]]]]))) {
         object@columns <- tm_columns
-        object@logger_type <- "ThermoDatalogger"
+        object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
     }
     else {
         object@columns <- tms_columns
-        object@logger_type <- "TMS"
+        object@logger_type <- .model_const_LOGGER_TOMST_TMS
     }
     object
 }
@@ -338,20 +376,24 @@ setMethod(
 )
 
 .change_tomst_join_columns_and_logger_type <- function(object, data){
-    tmj_columns <- list(TM_T = 5)
-    tmsj_columns <- list(TMS_T1 = 5, TMS_T2 = 6, TMS_T3 = 7, TMS_TMSmoisture = 8, moisture = 9)
+    tmj_columns <- list(5)
+    names(tmj_columns) <- .model_const_SENSOR_TM_T
+    tmsj_columns <- list(5, 6, 7, 8, 9)
+    names(tmsj_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2,.model_const_SENSOR_TMS_T3,
+                             .model_const_SENSOR_TMS_TMSmoisture, .model_const_SENSOR_moisture)
     data <- head(data, .model_const_COUNT_TEST_VALUES)
-    is_T1_NA <- all(is.na(data[[tmsj_columns$TMS_T1]]))
-    is_NA_T2_T3 <- all(is.na(data[[tmsj_columns$TMS_T2]])) && all(is.na(data[[tmsj_columns$TMS_T3]]))
-    is_T1_T2_T3_equals <- (all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T2]]) &&
-                           all(data[[tmsj_columns$TMS_T1]] == data[[tmsj_columns$TMS_T3]]))
+    is_T1_NA <- all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]]))
+    is_NA_T2_T3 <- all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T2]]]])) &&
+        all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
+    is_T1_T2_T3_equals <- (all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T2]]]]) &&
+                           all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
     if(!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals)) {
         object@columns <- tmj_columns
-        object@logger_type <- "ThermoDatalogger"
+        object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
         return(object)
     }
-    object@logger_type <- "TMS"
-    moisture <- data[[tmsj_columns$moisture]]
+    object@logger_type <- .model_const_LOGGER_TOMST_TMS
+    moisture <- data[[tmsj_columns[[.model_const_SENSOR_moisture]]]]
     if(!any(is.na(moisture)) && all(moisture == 0)) {
         object@columns <- within(tmsj_columns, rm(moisture))
         return(object)

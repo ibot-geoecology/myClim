@@ -6,11 +6,11 @@ test_that(".plot_get_logger_sensors_by_physical", {
     test_function <- if(exists(".plot_get_logger_sensors_by_physical")) .plot_get_logger_sensors_by_physical else myClim:::.plot_get_logger_sensors_by_physical
     physical <- test_function(data$A6W79$loggers[[1]])
     expect_equal(length(physical), 2)
-    expect_equal(physical$T, c("TMS_T1", "TMS_T2", "TMS_T3"))
+    expect_equal(physical$T_C, c("TMS_T1", "TMS_T2", "TMS_T3"))
     expect_equal(physical$TMSmoisture, "TMS_TMSmoisture")
     physical <- test_function(data$A1E05$loggers[[1]])
     expect_equal(length(physical), 1)
-    expect_equal(physical$T, "TM_T")
+    expect_equal(physical$T_C, "TM_T")
 })
 
 test_that("all plots", {

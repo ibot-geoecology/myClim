@@ -1,4 +1,5 @@
-.plot_const_MOISTURE_PHYSICAL <- c("TMSmoisture", "moisture")
+.plot_const_MOISTURE_PHYSICAL <- c(myClim:::.model_const_PHYSICAL_TMSmoisture,
+                                   myClim:::.model_const_PHYSICAL_moisture)
 
 #' Plot data from loggers
 #'
@@ -31,7 +32,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
     .plot_logger_set_parameters(physical, moisture_physical)
     xlimit <- .plot_get_xlimit(logger$datetime, crop)
     months <- .plot_get_months_from_xlimit(xlimit)
-    .plot_logger_temperature(logger, xlimit, months, physical[["T"]])
+    .plot_logger_temperature(logger, xlimit, months, physical[[myClim:::.model_const_PHYSICAL_T_C]])
     if(length(moisture_physical) > 0){
         .plot_logger_moisture(logger, xlimit, months, physical[[moisture_physical[[1]]]])
     }
@@ -376,8 +377,8 @@ mc_plot_line <- function(data, filename, sensors=NULL,
         stop("There are more then two physical units.")
     }
     main_physical <- physicals[[1]]
-    if(myClim:::.model_const_PHYSICAL_T %in% physicals) {
-        main_physical <- myClim:::.model_const_PHYSICAL_T
+    if(myClim:::.model_const_PHYSICAL_T_C %in% physicals) {
+        main_physical <- myClim:::.model_const_PHYSICAL_T_C
     }
     table$main_axis <- (table$physical == main_physical)
     table
