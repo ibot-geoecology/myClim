@@ -18,6 +18,10 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_PHYSICAL_v <- "v"
 .model_const_PHYSICAL_t_h <- "t_h"
 
+.model_const_VALUE_TYPE_REAL <- "real"
+.model_const_VALUE_TYPE_INTEGER <- "integer"
+.model_const_VALUE_TYPE_LOGICAL <- "logical"
+
 # logger sensors
 .model_const_SENSOR_TMS_T1 <- "TMS_T1"
 .model_const_SENSOR_TMS_T2 <- "TMS_T2"
@@ -35,21 +39,13 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_wind <- "wind"
 .model_const_SENSOR_GDD <- "GDD"
 .model_const_SENSOR_FDD <- "FDD"
-# physical sensors
-.model_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
 .model_const_SENSOR_moisture <- .model_const_PHYSICAL_moisture
-.model_const_SENSOR_RH_perc <- .model_const_PHYSICAL_RH_perc
-.model_const_SENSOR_l_cm <- .model_const_PHYSICAL_l_cm
-.model_const_SENSOR_l_mm <- .model_const_PHYSICAL_l_mm
-.model_const_SENSOR_v <- .model_const_PHYSICAL_v
-.model_const_SENSOR_t_h <- .model_const_PHYSICAL_t_h
+.model_const_SENSOR_real <- .model_const_VALUE_TYPE_REAL
+.model_const_SENSOR_integer <- .model_const_VALUE_TYPE_INTEGER
+.model_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
 .model_const_LOGGER_TOMST_THERMODATALOGGER <- "ThermoDatalogger"
-
-.model_const_VALUE_TYPE_REAL <- "real"
-.model_const_VALUE_TYPE_INTEGER <- "integer"
-.model_const_VALUE_TYPE_LOGICAL <- "logical"
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"

@@ -9,7 +9,7 @@ mc_read_files(files, dataformat_name)
 \arguments{
 \item{files}{vector of character - files with data}
 
-\item{dataformat_name}{character - data format of logger (TOMST)}
+\item{dataformat_name}{character - data format of logger (TOMST, TOMST_join)}
 }
 \value{
 data in standard format

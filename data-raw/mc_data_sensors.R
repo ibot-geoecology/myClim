@@ -110,12 +110,6 @@ mc_data_sensors[[.model_const_SENSOR_FDD]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_FDD]]@sensor_id <- .model_const_SENSOR_FDD
 mc_data_sensors[[.model_const_SENSOR_GDD]]@description <- "Freezing degree days"
 
-# physical sensors ================================================================================
-
-mc_data_sensors[[.model_const_SENSOR_T_C]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_T_C]]@sensor_id <- .model_const_SENSOR_T_C
-mc_data_sensors[[.model_const_SENSOR_T_C]]@physical <- .model_const_PHYSICAL_T_C
-
 mc_data_sensors[[.model_const_SENSOR_moisture]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_moisture]]@sensor_id <- .model_const_SENSOR_moisture
 mc_data_sensors[[.model_const_SENSOR_moisture]]@physical <- .model_const_PHYSICAL_moisture
@@ -124,26 +118,16 @@ mc_data_sensors[[.model_const_SENSOR_moisture]]@max_value <- 1
 mc_data_sensors[[.model_const_SENSOR_moisture]]@plot_color <- "steelblue"
 mc_data_sensors[[.model_const_SENSOR_moisture]]@plot_line_width <- 2
 
-mc_data_sensors[[.model_const_SENSOR_RH_perc]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@sensor_id <- .model_const_SENSOR_RH_perc
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@physical <- .model_const_PHYSICAL_RH_perc
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@min_value <- 0
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@max_value <- 100
+mc_data_sensors[[.model_const_SENSOR_real]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_real]]@sensor_id <- .model_const_SENSOR_real
+mc_data_sensors[[.model_const_SENSOR_real]]@value_type <- .model_const_VALUE_TYPE_REAL
 
-mc_data_sensors[[.model_const_SENSOR_l_cm]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_l_cm]]@sensor_id <- .model_const_SENSOR_l_cm
-mc_data_sensors[[.model_const_SENSOR_l_cm]]@physical <- .model_const_PHYSICAL_l_cm
+mc_data_sensors[[.model_const_SENSOR_integer]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_integer]]@sensor_id <- .model_const_SENSOR_integer
+mc_data_sensors[[.model_const_SENSOR_integer]]@value_type <- .model_const_VALUE_TYPE_INTEGER
 
-mc_data_sensors[[.model_const_SENSOR_l_mm]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_l_mm]]@sensor_id <- .model_const_SENSOR_l_mm
-mc_data_sensors[[.model_const_SENSOR_l_mm]]@physical <- .model_const_PHYSICAL_l_mm
-
-mc_data_sensors[[.model_const_SENSOR_v]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_v]]@sensor_id <- .model_const_SENSOR_v
-mc_data_sensors[[.model_const_SENSOR_v]]@physical <- .model_const_PHYSICAL_v
-
-mc_data_sensors[[.model_const_SENSOR_t_h]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_t_h]]@sensor_id <- .model_const_SENSOR_t_h
-mc_data_sensors[[.model_const_SENSOR_t_h]]@physical <- .model_const_PHYSICAL_t_h
+mc_data_sensors[[.model_const_SENSOR_logical]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_logical]]@sensor_id <- .model_const_SENSOR_logical
+mc_data_sensors[[.model_const_SENSOR_logical]]@value_type <- .model_const_VALUE_TYPE_LOGICAL
 
 usethis::use_data(mc_data_sensors, overwrite = TRUE)

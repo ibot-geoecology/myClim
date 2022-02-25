@@ -9,7 +9,7 @@ mc_read_directory(directory, dataformat_name, recursive = TRUE)
 \arguments{
 \item{directory}{character}
 
-\item{dataformat_name}{character - data format of logger (TOMST)}
+\item{dataformat_name}{character - data format of logger (TOMST, TOMST_join)}
 
 \item{recursive}{logical - recursive search in subdirectories}
 }

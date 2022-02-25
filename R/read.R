@@ -4,7 +4,7 @@
 #' If csv file is not in correct format, is skipped. Locality is set to serial_number of logger.
 #'
 #' @param directory character
-#' @param dataformat_name character - data format of logger (TOMST)
+#' @param dataformat_name character - data format of logger (TOMST, TOMST_join)
 #' @param recursive logical - recursive search in subdirectories
 #' @return data in standard format
 #' @export
@@ -20,7 +20,7 @@ mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
 #' This function read data files of one logger type. Locality is set to serial_number of logger.
 #'
 #' @param files vector of character - files with data
-#' @param dataformat_name character - data format of logger (TOMST)
+#' @param dataformat_name character - data format of logger (TOMST, TOMST_join)
 #' @return data in standard format
 #' @export
 #' @examples
@@ -60,12 +60,14 @@ mc_read_csv <- function(csv_files_table, csv_localities_table=NULL) {
 #' This function read raw data from loggers by data.frame with files description.
 #'
 #' @param files_table data.frame which describe data files
+#'
 #' Columns:
 #' * path - path to file
 #' * locality_id
 #' * data_format
 #' * serial_number - can be NA, than try detect
 #' @param localities_table data.frame which describe localities
+#'
 #' Columns:
 #' * locality_id
 #' * altitude

@@ -8,6 +8,7 @@ mc_read_dataframe(files_table, localities_table = NULL)
 }
 \arguments{
 \item{files_table}{data.frame which describe data files
+
 Columns:
 \itemize{
 \item path - path to file
@@ -17,6 +18,7 @@ Columns:
 }}
 
 \item{localities_table}{data.frame which describe localities
+
 Columns:
 \itemize{
 \item locality_id
