@@ -1,0 +1,48 @@
+url: http://tubedb.ibot.cas.cz:8000
+
+reference:
+  - title: Package
+    desc: Description of package with definition of data structure
+    contents:
+      - myClim-package
+
+  - title: Classes
+    contents:
+      - ends_with("-class")
+
+  - title: Data
+    contents:
+      - starts_with("mc_data")
+
+  - title: Read functions
+    contents:
+      - starts_with("mc_read")
+
+  - title: Info functions
+    contents:
+      - starts_with("mc_info")
+
+  - title: Reshape functions
+    contents:
+      - starts_with("mc_reshape")
+
+  - title: Preparing functions
+    contents:
+      - starts_with("mc_prep")
+
+  - title: Aggregation function
+    contents:
+      - starts_with("mc_agg")
+
+  - title: Calculation functions
+    contents:
+      - starts_with("mc_calc")
+
+  - title: Plot functions
+    contents:
+      - starts_with("mc_plot")
+
+  - title: Other functions
+    contents:
+      - starts_with("mc_filter")
+      - starts_with("mc_calib")
