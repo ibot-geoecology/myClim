@@ -25,36 +25,36 @@ mc_data_physical[[.model_const_PHYSICAL_moisture]]@scale_coeff <- 1
 
 mc_data_physical[[.model_const_PHYSICAL_RH_perc]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@name <- .model_const_PHYSICAL_RH_perc
-mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@description <- "Relative humidity"
+mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@description <- "Relative humidity %"
 mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@units <- "%"
 mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@scale_coeff <- 1
 
 mc_data_physical[[.model_const_PHYSICAL_l_cm]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_l_cm]]@name <- .model_const_PHYSICAL_l_cm
-mc_data_physical[[.model_const_PHYSICAL_l_cm]]@description <- "Length"
+mc_data_physical[[.model_const_PHYSICAL_l_cm]]@description <- "Length cm"
 mc_data_physical[[.model_const_PHYSICAL_l_cm]]@units <- "cm"
 mc_data_physical[[.model_const_PHYSICAL_l_cm]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_l_cm]]@scale_coeff <- 1/10
 
 mc_data_physical[[.model_const_PHYSICAL_l_mm]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_l_mm]]@name <- .model_const_PHYSICAL_l_mm
-mc_data_physical[[.model_const_PHYSICAL_l_mm]]@description <- "Length"
+mc_data_physical[[.model_const_PHYSICAL_l_mm]]@description <- "Length mm"
 mc_data_physical[[.model_const_PHYSICAL_l_mm]]@units <- "mm"
 mc_data_physical[[.model_const_PHYSICAL_l_mm]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_l_mm]]@scale_coeff <- 1/10
 
 mc_data_physical[[.model_const_PHYSICAL_v]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_v]]@name <- .model_const_PHYSICAL_v
-mc_data_physical[[.model_const_PHYSICAL_v]]@description <- "Speed"
+mc_data_physical[[.model_const_PHYSICAL_v]]@description <- "Speed m/s"
 mc_data_physical[[.model_const_PHYSICAL_v]]@units <- "m/s"
 mc_data_physical[[.model_const_PHYSICAL_v]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_v]]@scale_coeff <- 1/10
 
 mc_data_physical[[.model_const_PHYSICAL_t_h]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@name <- .model_const_PHYSICAL_t_h
-mc_data_physical[[.model_const_PHYSICAL_t_h]]@description <- "Time"
-mc_data_physical[[.model_const_PHYSICAL_t_h]]@units <- "hours"
+mc_data_physical[[.model_const_PHYSICAL_t_h]]@description <- "Time hour"
+mc_data_physical[[.model_const_PHYSICAL_t_h]]@units <- "hour"
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@scale_coeff <- 1/24
 

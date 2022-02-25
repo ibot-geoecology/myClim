@@ -25,9 +25,14 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_TMS_TMSmoisture <- "TMS_TMSmoisture"
 .model_const_SENSOR_TM_T <- "TM_T"
 # universal sensors
-.model_const_SENSOR_snow_bool <- "snow_bool"
 .model_const_SENSOR_count <- "count"
 .model_const_SENSOR_coverage <- "coverage"
+.model_const_SENSOR_snow_bool <- "snow_bool"
+.model_const_SENSOR_snow_fresh <- "snow_fresh"
+.model_const_SENSOR_snow_total <- "snow_total"
+.model_const_SENSOR_precipitation <- "precipitation"
+.model_const_SENSOR_sun_shine <- "sun_shine"
+.model_const_SENSOR_wind <- "wind"
 .model_const_SENSOR_GDD <- "GDD"
 .model_const_SENSOR_FDD <- "FDD"
 # physical sensors
@@ -46,12 +51,16 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_VALUE_TYPE_INTEGER <- "integer"
 .model_const_VALUE_TYPE_LOGICAL <- "logical"
 
+.model_const_DATA_FORMAT_TOMST <- "TOMST"
+.model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
+
 # classes ================================================================================
 
 #' Class for sensor definition
-#' @slot sensor_id of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)
-#' @slot logger name of logger (TMS, ...) (default NA)
-#' @slot physical measurement (T, TMSmoisture, ...) (default NA)
+#' @slot sensor_id unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)
+#' @slot logger name of logger (TMS, ...)
+#' @slot physical unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)
+#' @slot description
 #' @slot default_height default height of sensor in m (default NA)
 #' @slot value_type type of values (real, integer, logical) (default real)
 #' @slot min_value minimal value (default NA)
@@ -64,6 +73,7 @@ mc_Sensor <- setClass("mc_Sensor",
                       slots = c(sensor_id = "character",
                                 logger = "character",
                                 physical = "character",
+                                description = "character",
                                 default_height = "numeric",
                                 value_type = "character",
                                 min_value = "numeric",

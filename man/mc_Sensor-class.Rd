@@ -11,11 +11,11 @@ Class for sensor definition
 \section{Slots}{
 
 \describe{
-\item{\code{sensor_id}}{of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)}
+\item{\code{sensor_id}}{unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)}
 
-\item{\code{logger}}{name of logger (TMS, ...) (default NA)}
+\item{\code{logger}}{name of logger (TMS, ...)}
 
-\item{\code{physical}}{measurement (T, TMSmoisture, ...) (default NA)}
+\item{\code{physical}}{unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)}
 
 \item{\code{default_height}}{default height of sensor in m (default NA)}
 
