@@ -54,3 +54,5 @@ testthat::test_dir("tests")
 ```
 
 # Dokumentace
+
+Z vnitřní sítě nebo VPN je dostupná [webová dokumentace](http://tubedb.ibot.cas.cz:8000/index.html).

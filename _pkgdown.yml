@@ -15,18 +15,22 @@ reference:
       - starts_with("mc_data")
 
   - title: Read functions
+    desc: Read functions are used to reading source data files.
     contents:
       - starts_with("mc_read")
 
   - title: Info functions
+    desc: Functions return data.frame with information about data.
     contents:
       - starts_with("mc_info")
 
   - title: Reshape functions
+    desc: Functions convert data to data.frame.
     contents:
       - starts_with("mc_reshape")
 
   - title: Preparing functions
+    desc: Functions are used to prepare input data for aggregation.
     contents:
       - starts_with("mc_prep")
 
@@ -35,6 +39,7 @@ reference:
       - starts_with("mc_agg")
 
   - title: Calculation functions
+    desc: Functions are used to calculation new sensors derived from anothers.
     contents:
       - starts_with("mc_calc")
 
