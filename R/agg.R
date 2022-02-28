@@ -18,8 +18,11 @@
 #' * coverage returns the ratio of non NA records/all records 
 #'
 #' @param data cleaned myClim object: output of [myClim::mc_prep_clean()]
-#' @param fun aggregation function; one of ("min", "max", "mean", "percentile", "sum", "count", "coverage") See details.
-#' Can be single function name, character vector of function names or list of function names. if NULL records are not aggregated, but converted to calculation format. See details.
+#' @param fun aggregation function; one of ("min", "max", "mean", "percentile", "sum", "range", "count", "coverage") See details.
+#' Can be single function name, character vector of function names or named list of vector function names.
+#' Named list of functions allows use another function for different sensors.
+#' For example `list(TMS_T1=c("max", "min"), TMS_T2="mean")`
+#' if NULL records are not aggregated, but converted to calculation format. See details.
 #'
 #' @param period Time period for aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 #'
@@ -33,7 +36,8 @@
 #' @return Returns new myClim object in calculation format ready for mc_calc functions family. When fun=NULL, period=NULL records are not modified but only converted to calc format. When fun and period provided then time step is aggregated based on function. 
 #' @export
 #' @examples
-#' example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
+#' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
+#' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", na.rm=FALSE)
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE) {
     options(lubridate.week.start = 1)
     use_interval <- NULL
@@ -385,6 +389,12 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(sum(x), value_type)
+        }))
+    } else if(function_text == "range") {
+        return(list(range=function(x) {
+            x <- .agg_function_prepare_data(x, na.rm)
+            if(length(x) == 0) return(NA)
+            .agg_function_convert_result(max(x) - min(x), value_type)
         }))
     } else if(function_text == "count") {
         return(list(count=function(x) length(x[!is.na(x)])))

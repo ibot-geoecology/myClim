@@ -16,8 +16,11 @@ mc_agg(
 \arguments{
 \item{data}{cleaned myClim object: output of \code{\link[=mc_prep_clean]{mc_prep_clean()}}}
 
-\item{fun}{aggregation function; one of ("min", "max", "mean", "percentile", "sum", "count", "coverage") See details.
-Can be single function name, character vector of function names or list of function names. if NULL records are not aggregated, but converted to calculation format. See details.}
+\item{fun}{aggregation function; one of ("min", "max", "mean", "percentile", "sum", "range", "count", "coverage") See details.
+Can be single function name, character vector of function names or named list of vector function names.
+Named list of functions allows use another function for different sensors.
+For example \code{list(TMS_T1=c("max", "min"), TMS_T2="mean")}
+if NULL records are not aggregated, but converted to calculation format. See details.}
 
 \item{period}{Time period for aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
 
@@ -59,5 +62,6 @@ Empty sensors with no records are excluded. Aggregation functions return NA for 
 }
 }
 \examples{
-example_cleaned_tomst_data <- mc_agg(example_cleaned_tomst_data, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
+hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
+day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", na.rm=FALSE)
 }
