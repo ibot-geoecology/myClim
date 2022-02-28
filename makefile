@@ -3,7 +3,7 @@
 install-gitlab:
 	R -e 'devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="5N6cg1k2TNczNj85xf15")'
 
-install: generate
+install:
 	R -e 'install.packages(".", repos = NULL)'
 
 remove:
