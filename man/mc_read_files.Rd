@@ -4,18 +4,24 @@
 \alias{mc_read_files}
 \title{Reading files}
 \usage{
-mc_read_files(files, dataformat_name)
+mc_read_files(paths, dataformat_name, recursive = TRUE)
 }
 \arguments{
-\item{files}{vector of character - files with data}
+\item{paths}{vector of paths to files or directories
+
+If paths are directories, then function search logger files.
+It isn't possible combine files and directories.}
 
 \item{dataformat_name}{character - data format of logger (TOMST, TOMST_join)}
+
+\item{recursive}{logical - recursive search in subdirectories (default TRUE)}
 }
 \value{
 data in standard format
 }
 \description{
-This function read data files of one logger type. Locality is set to serial_number of logger.
+This function read data files of one logger type. If file is not in correct format, is skipped.
+Locality is set to serial_number of logger.
 }
 \examples{
 example_tomst_data <- myClim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")

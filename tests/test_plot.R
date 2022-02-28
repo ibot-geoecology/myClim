@@ -2,7 +2,7 @@ library(testthat)
 library(myClim)
 
 test_that(".plot_get_logger_sensors_by_physical", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     test_function <- if(exists(".plot_get_logger_sensors_by_physical")) .plot_get_logger_sensors_by_physical else myClim:::.plot_get_logger_sensors_by_physical
     physical <- test_function(data$A6W79$loggers[[1]])
     expect_equal(length(physical), 2)
@@ -14,7 +14,7 @@ test_that(".plot_get_logger_sensors_by_physical", {
 })
 
 test_that("all plots", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     data <- mc_prep_clean(data, silent = T)
     data_agg <- mc_agg(data)
 

@@ -18,7 +18,7 @@
 #' 
 #' In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).   
 #' 
-#' @param data myClim object in raw format (output of `mc_read` functions family) see e.g. [myClim::mc_read_directory()]
+#' @param data myClim object in raw format (output of `mc_read` functions family) see e.g. [myClim::mc_read_files()]
 #' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @return 
 #' * myClim object in clean format
@@ -162,7 +162,7 @@ mc_prep_user_tz <- function(data, tz_offsets) {
 #' This function calculates the offset against UTC on the locality  to get the solar time. This is based on coordinates. If coordinates not provided, then not working.
 #' 
 #' @details
-#' The function require at least longitude provided in locality metadata slot `lon_wgs84`. If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see [myClim::mc_read_data_frame()], [myClim::mc_read_csv()]
+#' The function require at least longitude provided in locality metadata slot `lon_wgs84`. If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see [myClim::mc_read_data_frame()], [myClim::mc_read_data()]
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'

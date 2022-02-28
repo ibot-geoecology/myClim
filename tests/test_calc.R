@@ -4,7 +4,7 @@ library(myClim)
 source("test.R")
 
 test_that("mc_calc_snow", {
-    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_read_files("data/eco-snow", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
     expect_error(mc_calc_snow(cleaned_data, "TMS_T3", output_sensor="T3_snow", dr=1.5, tmax=0.5))
     calc_data <- mc_agg(cleaned_data)
@@ -15,14 +15,14 @@ test_that("mc_calc_snow", {
 })
 
 test_that("mc_calc_snow long period", {
-    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_read_files("data/eco-snow", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
     expect_warning(calc_data <- mc_agg(cleaned_data, "mean", "week"))
     expect_error(calc_data <- mc_calc_snow(calc_data, "TMS_T3_mean", output_sensor="T3_snow", dr=1.5, tmax=0.5))
 })
 
 test_that("mc_calc_snow_logger_without_sensor", {
-    expect_warning(data <- mc_read_directory("data/TOMST", "TOMST"))
+    expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_snow(calc_data, "TMS_T3", output_sensor="T3_snow", dr=1.5, tmax=0.5))
@@ -30,7 +30,7 @@ test_that("mc_calc_snow_logger_without_sensor", {
 })
 
 test_that("mc_calc_snow_agg", {
-    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_read_files("data/eco-snow", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
     cleaned_data <- mc_prep_user_tz(cleaned_data, list(`94184102`=60, `94184103`=60))
     calc_data <- mc_agg(cleaned_data)
@@ -48,14 +48,14 @@ test_that("mc_calc_snow_agg", {
 })
 
 test_that("mc_calc_snow_agg no sensor", {
-    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_read_files("data/eco-snow", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     expect_error(snow_agg <- mc_calc_snow_agg(calc_data, "snow"))
 })
 
 test_that("mc_calc_vwc", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                         ~datetime, ~slope, ~intercept,
@@ -73,7 +73,7 @@ test_that("mc_calc_vwc", {
 })
 
 test_that("mc_calc_vwc wrong", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     expect_error(calc_data <- mc_calc_vwc(calc_data, temp_sensor="TMS_TMSmoisture", localities="A2E32"))
@@ -81,7 +81,7 @@ test_that("mc_calc_vwc wrong", {
 })
 
 test_that("mc_calc_gdd", {
-    data <- mc_read_directory("data/calc-gdd", "TOMST")
+    data <- mc_read_files("data/calc-gdd", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
     expect_error(mc_calc_gdd(cleaned_data, "TM_T"))
     calc_data <- mc_agg(cleaned_data)
@@ -91,7 +91,7 @@ test_that("mc_calc_gdd", {
 })
 
 test_that("mc_calc_fdd", {
-    data <- mc_read_directory("data/calc-gdd", "TOMST")
+    data <- mc_read_files("data/calc-gdd", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
     expect_error(mc_calc_fdd(cleaned_data, "TM_T"))
     calc_data <- mc_agg(cleaned_data)

@@ -1,72 +1,55 @@
-#' Reading files from directory
-#'
-#' This function read csv data files from directory of one logger type.
-#' If csv file is not in correct format, is skipped. Locality is set to serial_number of logger.
-#'
-#' @param directory character
-#' @param dataformat_name character - data format of logger (TOMST, TOMST_join)
-#' @param recursive logical - recursive search in subdirectories
-#' @return data in standard format
-#' @export
-#' @examples
-#' example_tomst_data <- myClim::mc_read_directory("examples/data/TOMST/", "TOMST")
-mc_read_directory <- function(directory, dataformat_name, recursive=TRUE) {
-    files <-list.files(directory, pattern=".+\\.[cC][sS][vV]$", recursive=recursive, full.names=TRUE)
-    mc_read_files(files, dataformat_name)
-}
+.read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible combine files and directories"
 
 #' Reading files
 #'
-#' This function read data files of one logger type. Locality is set to serial_number of logger.
+#' This function read data files of one logger type. If file is not in correct format, is skipped.
+#' Locality is set to serial_number of logger.
 #'
-#' @param files vector of character - files with data
+#' @param paths vector of paths to files or directories
+#'
+#' If paths are directories, then function search logger files.
+#' It isn't possible combine files and directories.
 #' @param dataformat_name character - data format of logger (TOMST, TOMST_join)
+#' @param recursive logical - recursive search in subdirectories (default TRUE)
 #' @return data in standard format
 #' @export
 #' @examples
 #' example_tomst_data <- myClim::mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
-mc_read_files <- function(files, dataformat_name) {
+mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
+    if(all(dir.exists(paths))) {
+        files <- .read_get_csv_files_from_directory(paths, recursive)
+    } else if(any(dir.exists(paths))) {
+        stop(.read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES)
+    } else {
+        files <- paths
+    }
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name, serial_number=NA_character_)
-    mc_read_dataframe(files_table)
+    mc_read_data(files_table)
 }
 
-#' Data files reading by CSV
-#'
-#' This function read raw data from loggers by table saved in CSV file
-#'
-#' @param csv_files_table data.frame
-#' @param csv_localities_table data.frame
-#' @return data in standard format
-#' @export
-#' @examples
-#' example_tomst_data <- myClim::mc_read_csv("examples/data/TOMST/files_table.csv")
-mc_read_csv <- function(csv_files_table, csv_localities_table=NULL) {
-    files_table <- read.table(csv_files_table,
-                              header = TRUE,
-                              sep = ",",
-                              stringsAsFactors = FALSE)
-    localities_table <- NULL
-    if(!is.null(csv_localities_table)){
-        localities_table <- read.table(csv_localities_table,
-                                       header = TRUE,
-                                       sep = ",",
-                                       stringsAsFactors = FALSE)
+.read_get_csv_files_from_directory <- function(paths, recursive) {
+    files_function <- function (directory) {
+        list.files(directory, pattern=".+\\.[cC][sS][vV]$", recursive=recursive, full.names=TRUE)
     }
-    mc_read_dataframe(files_table, localities_table)
+    purrr::flatten_chr(purrr::map(paths, files_function))
 }
 
 #' Data files reading
 #'
-#' This function read raw data from loggers by data.frame with files description.
+#' This function read raw data from loggers by data.frame or csv file with files description.
 #'
-#' @param files_table data.frame which describe data files
+#' @param files_table csv file path or data.frame which describe data files
+#'
+#' Csv file required header row. Column separator is ",".
 #'
 #' Columns:
 #' * path - path to file
 #' * locality_id
 #' * data_format
 #' * serial_number - can be NA, than try detect
-#' @param localities_table data.frame which describe localities
+#' @param localities_table csv file path or data.frame which describe localities
+#'
+#' Csv file required header row. Column separator is ",".
 #'
 #' Columns:
 #' * locality_id
@@ -76,7 +59,10 @@ mc_read_csv <- function(csv_files_table, csv_localities_table=NULL) {
 #' * tz_offset
 #' @return data in standard format
 #' @export
-mc_read_dataframe <- function(files_table, localities_table=NULL) {
+mc_read_data <- function(files_table, localities_table=NULL) {
+    if(is.character(files_table)) {
+        files_table <- .read_get_table_from_csv(files_table)
+    }
     files_table <- myClim:::.common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {
@@ -85,12 +71,22 @@ mc_read_dataframe <- function(files_table, localities_table=NULL) {
     localities <- list()
     if(!is.null(localities_table))
     {
+        if(is.character(localities_table)) {
+            localities_table <- .read_get_table_from_csv(localities_table)
+        }
         localities <- .read_init_localities_from_table(localities_table)
     }
     files_table <- dplyr::filter(files_table, .read_is_data_format_ok(path, data_format))
     files_table$serial_number <- .read_get_edited_serial_numbers(files_table)
     files_table$locality_id <- .read_get_edited_locality_ids(files_table)
     .read_get_output_data(files_table, localities)
+}
+
+.read_get_table_from_csv <- function(csv_path) {
+    files_table <- read.table(csv_path,
+                              header = TRUE,
+                              sep = ",",
+                              stringsAsFactors = FALSE)
 }
 
 .read_init_localities_from_table <- function(localities_table) {

@@ -3,7 +3,7 @@ library(myClim)
 source("test.R")
 
 test_that("mc_agg UTC", {
-    data <- mc_read_directory("data/clean-datetime_step", "TOMST")
+    data <- mc_read_files("data/clean-datetime_step", "TOMST")
     expect_error(hour_data <- mc_agg(data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), na.rm=TRUE))
     cleaned_data <- mc_prep_clean(data, silent=T)
     expect_warning(hour_data <- mc_agg(cleaned_data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), na.rm=TRUE))
@@ -18,7 +18,7 @@ test_that("mc_agg UTC", {
 })
 
 test_that("mc_agg day functions", {
-    data <- mc_read_directory("data/agg", "TOMST")
+    data <- mc_read_files("data/agg", "TOMST")
     data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_user_tz(data, list(`91184101`=60))
     agg_data <- mc_agg(data, c("min", "max", "mean", "percentile", "sum", "count", "coverage"), "day", percentiles=50, use_utc=FALSE, na.rm=FALSE)
@@ -38,13 +38,13 @@ test_that("mc_agg day functions", {
 test_that("mc_agg empty data", {
     data <- get_empty_prep_data()
     expect_error(expect_warning(calc_data <- mc_agg(data)))
-    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_clean(data, silent=T)
     expect_error(expect_warning(calc_data <- mc_agg(data, "min", "day", use_utc = TRUE, na.rm=TRUE)))
 })
 
 test_that("mc_agg solar aggregation", {
-    data <- mc_read_csv("data/solar_agg/files_table.csv", "data/solar_agg/localities_table.csv")
+    data <- mc_read_data("data/solar_agg/files_table.csv", "data/solar_agg/localities_table.csv")
     data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_solar_tz(data)
     expect_error(agg_data <- mc_agg(data, c("min", "max"), "hour", use_utc=FALSE, na.rm=FALSE))
@@ -66,7 +66,7 @@ test_that("mc_agg UTC many NA", {
 })
 
 test_that("mc_agg long period", {
-    data <- mc_read_directory("data/agg-month", "TOMST")
+    data <- mc_read_files("data/agg-month", "TOMST")
     data <- mc_prep_clean(data, silent=T)
     data <- mc_prep_user_tz(data, list(`91184101`=60))
     expect_warning(agg_data <- mc_agg(data, "mean", "week", use_utc=FALSE, na.rm=FALSE))
@@ -82,7 +82,7 @@ test_that("mc_agg long period", {
 })
 
 test_that("mc_agg all period", {
-    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_read_files("data/eco-snow", "TOMST")
     data <- mc_prep_clean(data, silent=T)
     all_data <- mc_agg(data, "mean", "all", na.rm = FALSE)
     test_calc_data_format(all_data)
@@ -97,7 +97,7 @@ test_that("mc_agg all period", {
 })
 
 test_that("mc_agg agregate from longer to shorter period", {
-    data <- mc_read_directory("data/eco-snow", "TOMST")
+    data <- mc_read_files("data/eco-snow", "TOMST")
     data <- mc_prep_clean(data, silent=T)
     agg_data <- mc_agg(data, "min", "day", na.rm = TRUE)
     expect_error(mc_agg(agg_data, "min", "hour", na.rm = TRUE))
@@ -136,7 +136,7 @@ test_that("mc_agg integer sensor", {
 })
 
 test_that("mc_agg reaggregate", {
-    expect_warning(data <- mc_read_directory("data/TOMST/", "TOMST"))
+    expect_warning(data <- mc_read_files("data/TOMST/", "TOMST"))
     data <- mc_prep_clean(data, silent=T)
     agg_data <- mc_agg(data)
     agg_all <- mc_agg(agg_data, period = "all", fun = "mean")

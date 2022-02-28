@@ -3,7 +3,7 @@ library(myClim)
 source("test.R")
 
 test_that("mc_filter prep format", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     filtered <- mc_filter(data, c("A6W79", "A2E32", "A1E05"), "TMS_T2")
     test_prep_data_format(filtered)
     expect_equal(length(filtered), 2)
@@ -14,7 +14,7 @@ test_that("mc_filter prep format", {
 })
 
 test_that("mc_filter reverse prep format", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     filtered <- mc_filter(data, "A6W79", "TM_T", reverse=T)
     test_prep_data_format(filtered)
     expect_equal(length(filtered), 1)
@@ -22,7 +22,7 @@ test_that("mc_filter reverse prep format", {
 })
 
 test_that("mc_filter calc format", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     filtered <- mc_filter(calc_data, c("A6W79", "A2E32", "A1E05"), "TMS_T2")
@@ -35,7 +35,7 @@ test_that("mc_filter calc format", {
 })
 
 test_that("mc_filter reverse calc format", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     filtered <- mc_filter(calc_data, "A6W79", "TM_T", reverse=T)

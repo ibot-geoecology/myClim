@@ -1,6 +1,6 @@
 library(myClim)
 
-data <- mc_read_csv("examples/data/calc/files_table.csv")
+data <- mc_read_data("examples/data/calc/files_table.csv")
 cleaned_data <- mc_prep_clean(data)
 # user defined tz offset - 60 minutes for both localities
 cleaned_data <- mc_prep_user_tz(cleaned_data, list(LOC1=60, LOC2=60))

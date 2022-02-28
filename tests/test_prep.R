@@ -3,7 +3,7 @@ library(myClim)
 source("test.R")
 
 test_that("mc_prep_clean", {
-    data <- mc_read_directory("data/clean-datetime_step", "TOMST")
+    data <- mc_read_files("data/clean-datetime_step", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
     test_prep_data_format(cleaned_data)
     expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@count_duplicits, 1)
@@ -23,7 +23,7 @@ test_that("mc_prep_clean", {
 })
 
 test_that("mc_prep_clean one record", {
-    data <- mc_read_directory("data/clean-one-record", "TOMST")
+    data <- mc_read_files("data/clean-one-record", "TOMST")
     expect_warning(cleaned_data <- mc_prep_clean(data, silent=T))
     expect_true(is.na(cleaned_data[["94208611"]]$loggers[[1]]$clean_info@step))
     expect_true(is.na(cleaned_data[["94208611"]]$loggers[[1]]$clean_info@count_duplicits))
@@ -39,21 +39,21 @@ test_that("mc_prep_clean ok", {
 })
 
 test_that("mc_prep_solar_tz", {
-    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_solar_tz(data)
     test_prep_data_format(data)
     expect_equal(data$A1E05$metadata@tz_offset, 57)
 })
 
 test_that("mc_prep_user_tz", {
-    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     data <- mc_prep_user_tz(data, list(A1E05=50))
     test_prep_data_format(data)
     expect_equal(data$A1E05$metadata@tz_offset, 50)
 })
 
 test_that("mc_prep_crop", {
-    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     cropped_data <- mc_prep_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
     test_prep_data_format(cropped_data)
     expect_equal(length(cropped_data$A2E32$loggers[[1]]$datetime), 68)
@@ -73,7 +73,7 @@ test_that("mc_prep_crop", {
 })
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
-    data <- mc_read_csv("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     test_function <- if(exists(".prep_get_uncleaned_loggers")) .prep_get_uncleaned_loggers else myClim:::.prep_get_uncleaned_loggers
     expect_equal(test_function(data), c("91184101", "94184103", "94184102"))
     data_clean <- mc_prep_clean(data, silent=T)
@@ -81,7 +81,7 @@ test_that(".prep_get_loggers_datetime_step_unprocessed", {
 })
 
 test_that(".prep_get_utc_localities", {
-    expect_warning(data <- mc_read_directory("data/TOMST", "TOMST"))
+    expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
     test_function <- if(exists(".prep_get_utc_localities")) .prep_get_utc_localities else myClim:::.prep_get_utc_localities
     expect_equal(test_function(data), c("91184101", "94184102", "94184103", "94184104"))
     data_clean <- mc_prep_user_tz(data, list(`91184101`=60, `94184102`=60, `94184103`=60, `94184104`=60))
@@ -89,7 +89,7 @@ test_that(".prep_get_utc_localities", {
 })
 
 test_that("mc_prep_rename_sensor", {
-    data <- mc_read_csv("data/flat/files_table.csv")
+    data <- mc_read_data("data/flat/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
     cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T1="TMS_Tsoil"))
     expect_true("TMS_Tsoil" %in% names(cleaned_data$main$loggers[[1]]$sensors))
@@ -102,12 +102,12 @@ test_that("mc_prep_rename_sensor", {
 })
 
 test_that("mc_prep_rename_sensor wrong", {
-    data <- mc_read_csv("data/flat/files_table.csv")
+    data <- mc_read_data("data/flat/files_table.csv")
     expect_error(data <- mc_prep_rename_sensor(data, list(TMS_T1="TMS_T2")))
 })
 
 test_that("mc_prep_merge wrong", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     expect_error(mc_prep_merge(data, calc_data))
@@ -134,14 +134,14 @@ test_that("mc_prep_merge", {
 })
 
 test_that("mc_prep_merge same name", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     expect_warning(merged_data <- mc_prep_merge(list(data, data)))
     test_prep_data_format(merged_data)
     expect_equal(names(merged_data), c("A1E05", "A2E32", "A6W79", "A1E05_1", "A2E32_1", "A6W79_1"))
 })
 
 test_that("mc_prep_rename_locality", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     data <- mc_prep_rename_locality(data, list(A1E05="ABC05", A2E32="CDE32"))
     expect_equal(names(data), c("ABC05", "CDE32", "A6W79"))
     data <- mc_prep_clean(data, silent=T)
@@ -151,12 +151,12 @@ test_that("mc_prep_rename_locality", {
 })
 
 test_that("mc_prep_rename_locality wrong", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     expect_error(data <- mc_prep_rename_locality(data, list(A1E05="A6W79")))
 })
 
 test_that("mc_prep_calib_load, mc_prep_calib", {
-    data <- mc_read_csv("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table.csv")
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                         ~datetime, ~slope, ~intercept,
             "91184101",              "TM_T",          lubridate::ymd(20201028),      1,        0.1,

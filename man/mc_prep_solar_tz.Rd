@@ -16,7 +16,7 @@ MyClim object in the same format as input, with \code{tz_offset} filled in local
 This function calculates the offset against UTC on the locality  to get the solar time. This is based on coordinates. If coordinates not provided, then not working.
 }
 \details{
-The function require at least longitude provided in locality metadata slot \code{lon_wgs84}. If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see \code{\link[=mc_read_data_frame]{mc_read_data_frame()}}, \code{\link[=mc_read_csv]{mc_read_csv()}}
+The function require at least longitude provided in locality metadata slot \code{lon_wgs84}. If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see \code{\link[=mc_read_data_frame]{mc_read_data_frame()}}, \code{\link[=mc_read_data]{mc_read_data()}}
 
 TZ offset in minutes is calculated as \code{longitude / 180 * 12 * 60}.
 }
