@@ -10,15 +10,12 @@ remove:
 	R -e 'remove.packages("myClim")'
 
 generate:
-	Rscript data-raw/mc_data_formats.R
-	Rscript data-raw/mc_data_sensors.R
-	Rscript data-raw/mc_data_physical.R
-	Rscript data-raw/mc_data_vwc_parameters.R
+	Rscript data-raw/mc_data_*.R
 	$(RM) NAMESPACE
 	R -e 'devtools::document()'
 
 generate-html:
-	R -e 'pkgdown::build_site(examples=FALSE, override = list(destination = "../docs"))'
+	R -e 'pkgdown::build_site(override = list(destination = "../docs"))'
 
 test:
 	R --vanilla -e 'testthat::test_dir("tests")'

@@ -38,3 +38,6 @@ data in standard format
 \description{
 This function read raw data from loggers by data.frame or csv file with files description.
 }
+\examples{
+tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")
+}
