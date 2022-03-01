@@ -7,23 +7,23 @@
 mc_prep_calib(data, sensors, localities = NULL)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-format having calibration data in metadata slot \code{sensor$calibration}}
 
-\item{sensors}{vector of sensor names for calibration
+\item{sensors}{vector of sensor names where to perform calibration}
 
-It is not possible calibrate TMSmoisture sensor with this function.
-Calibration of TMSmoisture sensor is processed in mc_calc_vwc during conversion to volumetric water content.
-Only sensors with real value type can be calibrated.}
-
-\item{localities}{vector of locality_ids, if NULL, then calibrate in all localities (default NULL)}
+\item{localities}{vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)}
 }
 \value{
-data with calibrated sensors.
+same myClim object as input but with calibrated sensor values.
 }
 \description{
-This function calibrate values of sensor by sensor$calibration parameters. Values are changed
-and parameter sensor$metadata@calibrated is set to TRUE. It isn't possible calibrate calibrated sensor again.
+This function calibrate values of sensor (microclimatic records) with the myClim object sensor$calibration parameters provided by \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
+Microclimatic records are changed and myClim object parameter sensor$metadata@calibrated is set to TRUE. It isn't possible to calibrate sensor multiple times.
 }
 \details{
+This function performs callibartion itself. It uses the calibration values (slope, intercept) stored in myClim object sensor metadata sensor$calibration loaded with \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
 
+It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function. For TMSmoisture calibration (conversion to volumetric water content) use \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
+
+Only sensors with real value type can be calibrated. see \code{\link[=mc_data_sensors]{mc_data_sensors()}}
 }

@@ -7,7 +7,7 @@
 mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
 
 \item{start}{POSIXct datetime in UTC; is optional; start datetime is included}
 
@@ -16,10 +16,13 @@ mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 \item{end_included}{if TRUE then  end datetime is included (default TRUE)}
 }
 \value{
-cropped data in standard format
+cropped data in the same myClim format as input.
 }
 \description{
 This function crop data by datetime
+}
+\details{
+Function is able to crop data from start and end together but also only from start and end left as is or vice versa.
 }
 \examples{
 cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01", tz="UTC"))

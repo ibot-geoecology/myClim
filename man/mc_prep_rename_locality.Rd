@@ -7,12 +7,12 @@
 mc_prep_rename_locality(data, locality_ids)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-format see \link{myClim-package}}
 
-\item{locality_ids}{list with new locality_ids; names of items are old ones}
+\item{locality_ids}{list with new locality_ids; names of items are old ones e.g. \code{list(A1E05="ABC05", A2E32="CDE32")}}
 }
 \value{
-data with changed locality_ids
+The same myClim object as input but with changed locality_ids
 }
 \description{
 This function change locality_ids.

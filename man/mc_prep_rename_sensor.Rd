@@ -12,17 +12,17 @@ mc_prep_rename_sensor(
 )
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim onject in Prep-format or Calc-format see \link{myClim-package}}
 
-\item{sensor_names}{list with new names of sensors; names of items are old ones}
+\item{sensor_names}{named list with new names of sensors; names of items are old ones e.g. \code{list(TMS_T1="TMS_Tsoil")}}
 
-\item{localities}{vector of locality_ids; if NULL than all (default NULL)}
+\item{localities}{vector of locality_ids where to rename sensors; if NULL than all localities (default NULL)}
 
-\item{serial_numbers}{vector of serial_numbers; if NULL than all (default NULL); parameter is usefull only for
-preparing format of data}
+\item{serial_numbers}{vector of serial_numbers of loggers; if NULL than all loggers (default NULL); parameter is useful only for
+Prep-format of myClim having the level of logger see \link{myClim-package}}
 }
 \value{
-data with changed sensor names
+the same myClim object as input with changed sensor names
 }
 \description{
 This function rename sensors.

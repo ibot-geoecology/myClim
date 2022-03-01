@@ -4,13 +4,14 @@
 \name{myClim-package}
 \alias{myClim}
 \alias{myClim-package}
-\title{myClim: R package for processing microclimatic data}
+\title{#' @description}
 \description{
 Package myClim use data in two formats. Names of formats are prep-format and calc-format.
 Loaded data from source files by read functions are in prep-format. It Contains information about localities,
 loggers and sensors. Function mc_agg converts data to calc-format. Calc-format doesn't contain loggers metadata.
 Sensors are organized in localities. Calc-format is focused to analyzing data and calculation new virtual sensors.
-
+}
+\details{
 \strong{Prep-format}
 \preformatted{
 +--------------------------------------------------------------------------+

@@ -1,4 +1,4 @@
-#' @description
+#' #' @description
 #'
 #' Package myClim use data in two formats. Names of formats are prep-format and calc-format.
 #' Loaded data from source files by read functions are in prep-format. It Contains information about localities,

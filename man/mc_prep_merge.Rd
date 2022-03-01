@@ -2,21 +2,23 @@
 % Please edit documentation in R/prep.R
 \name{mc_prep_merge}
 \alias{mc_prep_merge}
-\title{Merge data}
+\title{Merge myClim objects}
 \usage{
 mc_prep_merge(data_items)
 }
 \arguments{
-\item{data_items}{list of data in format for preparing or calculation; Format of data must be same.}
+\item{data_items}{list of myClim objects in Prep-format or Calc-format see \link{myClim-package}; Format of merged objects must be same.}
 }
 \value{
-merged data
+merged myClim object in the same format as input objects
 }
 \description{
-This function merge two instances of data to one
+This function is designed to merge two myClim objects into one.
 }
 \details{
-If data1 and data2 contains locality with same locality_id, than locality_id from data2 is renamed.
+This function works only when the input myClim objects have the same format (Prep-format, Calc-format) and the same time step.
+This function do not join the time component of the data but is primary designed to merge different localities.
+If data1 and data2 contains locality with same names (locality_id), than locality_id from data2 is renamed, data on identical localities are not merged.
 }
 \examples{
 merged_tomst_data <- mc_prep_merge(list(example_tomst_data1, example_tomst_data2))
