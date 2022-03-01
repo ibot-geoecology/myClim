@@ -35,7 +35,7 @@ Returns data.frame with columns:
 }
 }
 \description{
-Accept only myClim objects in calculation format. See \code{\link[=mc_agg]{mc_agg()}}. \code{mc_calc_snow_agg} was primary designed to work with the virtual snow sensor of TRUE/FALSE which is the output of \code{\link[=mc_calc_snow]{mc_calc_snow()}}. \code{mc_calc_snow_agg}returns the summary table of snow sensor (e.g number of days with snow cover, the longest continual snow period...). The snow summary is returned for whole date range provided.
+Accept only myClim objects in Calc-format. See \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}. \code{mc_calc_snow_agg} was primary designed to work with the virtual snow sensor of TRUE/FALSE which is the output of \code{\link[=mc_calc_snow]{mc_calc_snow()}}. \code{mc_calc_snow_agg}returns the summary table of snow sensor (e.g number of days with snow cover, the longest continual snow period...). The snow summary is returned for whole date range provided.
 }
 \details{
 Primary designed for virtual snow sensor created by \code{\link[=mc_calc_snow]{mc_calc_snow()}}, but accepts any sensor with TRUE/FLAST snow event detection. If \code{snow_sensor} on the locality missing, then locality is skipped.

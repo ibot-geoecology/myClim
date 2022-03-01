@@ -2,7 +2,7 @@
 % Please edit documentation in R/calib.R
 \name{mc_calib_moisture}
 \alias{mc_calib_moisture}
-\title{Calculation slope and intercept parameters of TMSmoisture sensor}
+\title{Calculate slope and intercept for TMSmoisture conversion}
 \usage{
 mc_calib_moisture(
   raw_air,
@@ -23,7 +23,7 @@ mc_calib_moisture(
 
 \item{t_air}{temperature of air (default 24)}
 
-\item{t_water}{temperature of air (default 24)}
+\item{t_water}{temperature of water (default 24)}
 
 \item{ref_air}{(default 114.534)}
 
@@ -42,5 +42,6 @@ list with slope and intercept parameters
 Function calculate slope and intercept parameters from measuring moisture in water and air.
 }
 \details{
-
+This is highly specialized service function designed to derive calibration/conversion parameters \code{slope} and \code{intercept} from soil moisture records of TMS loggers measuring on the air and in the water.
+Slope and intercept derived from this function could be used as sensor specific alternative in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}} function instead of universal defaults. But this must be done in code, by had. Standard user is not allowed to modify slope and intercept in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}.
 }

@@ -1,11 +1,17 @@
-#' #' @description
+#' @description
 #'
-#' Package myClim use data in two formats. Names of formats are prep-format and calc-format.
-#' Loaded data from source files by read functions are in prep-format. It Contains information about localities,
-#' loggers and sensors. Function mc_agg converts data to calc-format. Calc-format doesn't contain loggers metadata.
-#' Sensors are organized in localities. Calc-format is focused to analyzing data and calculation new virtual sensors.
-#'
+#' Package myClim has two native data formats of myClim objects. Names of formats are Prep-format and Calc-format. 
+#' Prep-format is designed for data preparation. Mainly data cleaning, metadata gathering, time zones handling 
+#' and multiple downloading missions from single localities joining. Loaded data from source files by 
+#' read functions [myClim::mc_read_files()] and [myClim::mc_read_data()] are in Prep-format.
+#' Prep-format contains information about localities, loggers and sensors. 
+#' Function [myClim::mc_agg()] converts data from Prep-format to Calc-format. Calc-format is designed mainly for calculations, 
+#' analysis and virtual loggers derivations on the basis of cleaned, final microclimatic data. Calc-formt does not 
+#' have the level of loggers and their metadata. In Calc-format sensors are organized directly in localities. 
+#' 
 #' **Prep-format**
+#' 
+#' Is the output of reading functions [myClim::mc_read_files()] and [myClim::mc_read_data()].
 #' \preformatted{
 #' +--------------------------------------------------------------------------+
 #' | locality[1]                                                              |
@@ -86,9 +92,10 @@
 #'
 #' **Calc-format**
 #'
-#' All localities have same step. Step is saved in metadata of calc-format in minutes (`data$metadata@step`).
-#' Some steps can not be represented in minutes. For example step `month` has variable number of minutes.
-#' Therefore, metadata contains textual a representation of the step (`data$metadata@step_text`).
+#' Is the output of [myClim::mc_agg()] function.  
+#' All localities have same time step. Step is stored in metadata of Calc-format in minutes (`data$metadata@step`).
+#' Some steps can not be represented by minutes. For example step `month` has variable number of minutes.
+#' Therefore, metadata contains also text representation of the step (`data$metadata@step_text`).
 #'
 #' \preformatted{
 #'             +-------------------------+

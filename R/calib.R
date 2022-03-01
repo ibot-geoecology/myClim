@@ -2,18 +2,20 @@
 .calib_MOIST_ACOR_T <- 1.91132689118083
 .calib_MOIST_WCOR_T <- 0.64108
 
-#' Calculation slope and intercept parameters of TMSmoisture sensor
+#' Calculate slope and intercept for TMSmoisture conversion
 #'
 #' @description
 #' Function calculate slope and intercept parameters from measuring moisture in water and air.
 #'
 #' @details
+#'This is highly specialized service function designed to derive calibration/conversion parameters `slope` and `intercept` from soil moisture records of TMS loggers measuring on the air and in the water. 
+#'Slope and intercept derived from this function could be used as sensor specific alternative in [myClim::mc_calc_vwc()] function instead of universal defaults. But this must be done in code, by had. Standard user is not allowed to modify slope and intercept in [myClim::mc_calc_vwc()].    
 #'
 #' @param raw_air TDT signal in air
 #' @param raw_water TDT signal in water
 #' @param t_air temperature of air (default 24)
-#' @param t_water temperature of air (default 24)
-#' @param ref_air (default 114.534)
+#' @param t_water temperature of water (default 24)
+#' @param ref_air (default 114.534) 
 #' @param ref_water (default 3634.723)
 #' @param ref_t (default 24)
 #' @param acor_t (default 1.91132689118083)

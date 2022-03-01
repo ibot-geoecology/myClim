@@ -7,24 +7,25 @@
 mc_calc_gdd(data, sensor, output_prefix = "GDD", t_base = 5, localities = NULL)
 }
 \arguments{
-\item{data}{in format for calculation}
+\item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
-\item{sensor}{name of temperature sensor}
+\item{sensor}{name of temperature sensor used fot GDD calculation e.g. TMS_T3}
 
 \item{output_prefix}{name prefix of new GDD sensor (default "GDD")
 
-name of output sensor consists of output_prefix and value t_base}
+name of output sensor consists of output_prefix and value t_base e.g. GDD_5}
 
-\item{t_base}{threshold temperaturefor calculation GDD (default 5)}
+\item{t_base}{base temperature for calculation of GDD (default 5)}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 }
 \value{
-input data with added GDD sensor
+The same myClim object as input but with added GDD sensor
 }
 \description{
-Function add new virtual sensor with values of GDD Growing Degree Days.
+Function add new virtual sensor with values of GDD (Growing Degree Days).
 }
 \details{
-Maximal step length of data is day.
+Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than growing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the GDD value is the contribution of the interval to the growing degree day.
+Be careful while aggregating growing degree days to longer periods see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum}, but user is allowed to apply anything.
 }
