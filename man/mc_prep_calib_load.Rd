@@ -15,19 +15,22 @@ mc_prep_calib_load(data, calib_table)
 myClim object with loaded calibration information in metadata. Microclimatic records are not calibrated, only ready for calibration. To calibrate records run \code{\link[=mc_prep_calib]{mc_prep_calib()}}
 }
 \description{
-This function load calibration parameters from data.frame and write them into myClim object metadata. This function does not calibrate data. For calibration itself run \code{\link[=mc_prep_calib]{mc_prep_calib()}}
+This function load calibration parameters from data.frame and write them into myClim object metadata. This function
+does not calibrate data. For calibration itself run \code{\link[=mc_prep_calib]{mc_prep_calib()}}
 }
 \details{
-It is a good idea to care about the microclimatic sensors/loggers calibration as the records can be shifted from various reasons. This function allows user to provide calibration values either from DIY or certified calibration procedure.
-Calibration data have by default the form of linear function determined by the slope and intercept. \code{calibrated = intercept + (1+slope)*original} This is useful in case of multi-point calibration typically performed by certified calibration labs.
-In case of one-point calibration typically DIY calibrations only intercept is used and slope=0. One point calibration is thus addition of correction factor.
+It is a good idea to care about the microclimatic sensors/loggers calibration as the records can be shifted from various reasons.
+This function allows user to provide calibration values either from DIY or certified calibration procedure.
+Calibration data have by default the form of linear function determined by the \code{cor_factor} and \code{cor_slope}.
+\code{calibrated = original * (cor_slope + 1) + cor_factor} This is useful in case of multi-point calibration typically performed by certified calibration labs.
+In case of one-point calibration typically DIY calibrations only \code{cor_factor} is used and \code{cor_slope=0}. One point calibration is thus addition of correction factor.
 This function loads sensor specific calibration values from data frame and writs them into myClim Prep-format object metadata. The structure of input data frame is as follows:
 \itemize{
 \item serial_number = unique identificator of logger hosting the sensors e.g. 91184101
 \item sensor_id = the name of sensor to calibrate e.g. TMS_T1
 \item datetime = the date of the calibration
-\item slope = the slope of calibration curve (in case of one-point calibration slope = 0)
-\item intercept = the intercept of calibration curve, in case of one-point calibration intercept = corrction factor.
+\item cor_factor = the correction factor, in case of multi-point calibration the intercept of calibration curve.
+\item cor_slope = the slope of calibration curve (in case of one-point calibration slope = 0)
 }
 
 It is not possible to change calibration parameters for already calibrated sensor. This prevents repeted calibrations.

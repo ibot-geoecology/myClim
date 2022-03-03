@@ -46,18 +46,30 @@ myClim object same as input but with added VWC moisture sensor
 Function converts the soil moisture from raw TMS units (scaled TDT signal) to volumetric water content.
 }
 \details{
-This function is suitable for TMS loggers measuring soil moisture in raw TDT units (TMS units). Raw TDT units represents inverted and scaled (1-4095) number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz) sent through a ca 30 cm long circuit within a 640-microsecond time window. For more details see (Wild et al. 2019).
-Pulses counted is directly related to the soil moisture content, with higher soil moisture. Therefore, based on experimental calibration curves, it is possible to directly convert to standardized volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
+This function is suitable for TMS loggers measuring soil moisture in raw TDT units (TMS units).
+Raw TDT units represents inverted and scaled (1-4095) number of high frequency-shaped electromagnetic
+pulses (ca 2.5 GHz) sent through a ca 30 cm long circuit within a 640-microsecond time window.
+For more details see (Wild et al. 2019). Pulses counted is directly related to the soil moisture content,
+with higher soil moisture. Therefore, based on experimental calibration curves, it is possible to directly
+convert to standardized volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
 
-The function uses experimentally derived calibration curves under reference temperatures for several soil types. For the volumetric water content conversion the reference temperature is corrected with the actual soil temperature using TMS_T1 soil temperature sensor records.
-As the calibration curves were derived for several soil types, in case user know specific soil type, where the logger was measuring, then it is possible to chose the closest existing calibration curve for specific soil type instead of default "universal".
-Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water, universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019). For full table of function parameters see \code{mc_data_vwc_parameters}
+The function uses experimentally derived calibration curves under reference temperatures for several soil types.
+For the volumetric water content conversion the reference temperature is corrected with the actual soil temperature
+using TMS_T1 soil temperature sensor records. As the calibration curves were derived for several soil types,
+in case user know specific soil type, where the logger was measuring, then it is possible to chose the closest
+existing calibration curve for specific soil type instead of default "universal".
+Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
+universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
+For full table of function parameters see \code{mc_data_vwc_parameters}
 }
 \examples{
-calc_data <- mc_calc_vwc(calc_data, soiltype="sand", localities="A2E32")
+calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
 }
 \references{
-Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales: A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47. https://doi.org/10.1016/j.agrformet.2018.12.018
+Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:
+A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
+https://doi.org/10.1016/j.agrformet.2018.12.018
 
-Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
+Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil
+moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 }

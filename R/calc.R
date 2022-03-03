@@ -173,12 +173,21 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' Function converts the soil moisture from raw TMS units (scaled TDT signal) to volumetric water content. 
 #'
 #' @details
-#'This function is suitable for TMS loggers measuring soil moisture in raw TDT units (TMS units). Raw TDT units represents inverted and scaled (1-4095) number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz) sent through a ca 30 cm long circuit within a 640-microsecond time window. For more details see (Wild et al. 2019). 
-#'Pulses counted is directly related to the soil moisture content, with higher soil moisture. Therefore, based on experimental calibration curves, it is possible to directly convert to standardized volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
+#'This function is suitable for TMS loggers measuring soil moisture in raw TDT units (TMS units).
+#' Raw TDT units represents inverted and scaled (1-4095) number of high frequency-shaped electromagnetic
+#' pulses (ca 2.5 GHz) sent through a ca 30 cm long circuit within a 640-microsecond time window.
+#' For more details see (Wild et al. 2019). Pulses counted is directly related to the soil moisture content,
+#' with higher soil moisture. Therefore, based on experimental calibration curves, it is possible to directly
+#' convert to standardized volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
 #'
-#' The function uses experimentally derived calibration curves under reference temperatures for several soil types. For the volumetric water content conversion the reference temperature is corrected with the actual soil temperature using TMS_T1 soil temperature sensor records. 
-#' As the calibration curves were derived for several soil types, in case user know specific soil type, where the logger was measuring, then it is possible to chose the closest existing calibration curve for specific soil type instead of default "universal". 
-#' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water, universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019). For full table of function parameters see `mc_data_vwc_parameters`
+#' The function uses experimentally derived calibration curves under reference temperatures for several soil types.
+#' For the volumetric water content conversion the reference temperature is corrected with the actual soil temperature
+#' using TMS_T1 soil temperature sensor records. As the calibration curves were derived for several soil types,
+#' in case user know specific soil type, where the logger was measuring, then it is possible to chose the closest
+#' existing calibration curve for specific soil type instead of default "universal".
+#' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
+#' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
+#' For full table of function parameters see `mc_data_vwc_parameters`
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture")
@@ -196,12 +205,15 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @return myClim object same as input but with added VWC moisture sensor
 #' @export
 #' @references
-#' Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales: A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47. https://doi.org/10.1016/j.agrformet.2018.12.018
+#' Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:
+#' A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
+#' https://doi.org/10.1016/j.agrformet.2018.12.018
 #' 
-#' Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
+#' Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil
+#' moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 #' 
 #' @examples
-#' calc_data <- mc_calc_vwc(calc_data, soiltype="sand", localities="A2E32")
+#' calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
 mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T1",
                         output_sensor="vwc_moisture",
                         soiltype="universal", localities=NULL,
@@ -236,16 +248,16 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
                                    temp = locality$sensors[[temp_sensor]]$values)
     calibration <- locality$sensors[[moist_sensor]]$calibration
     input_data <- myClim:::.prep_split_data_by_calibration(values_table, calibration)
-    data_function <- function(intercept, slope, data){
-        is_calibrated <- !is.na(intercept) && !is.na(slope)
+    data_function <- function(cor_factor, cor_slope, data){
+        is_calibrated <- !is.na(cor_factor) && !is.na(cor_slope)
         .calc_get_vwc_values(raw_values = data$raw,
                              temp_values = data$temp,
-                             cal_intercept = if(is_calibrated) intercept else 0,
-                             cal_slope = if(is_calibrated) slope else 0,
+                             cal_cor_factor = if(is_calibrated) cor_factor else 0,
+                             cal_cor_slope = if(is_calibrated) cor_slope else 0,
                              a = soil_row$a, b = soil_row$b, c = soil_row$c,
                              ref_t = ref_t, acor_t = acor_t, wcor_t = wcor_t)
     }
-    values <- purrr::pmap(dplyr::select(input_data, intercept, slope, data), data_function)
+    values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
     locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor("moisture", output_sensor,
                                                                          values=purrr::flatten_dbl(values), calibrated = is_calibrated,
@@ -270,12 +282,12 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     return(FALSE)
 }
 
-.calc_get_vwc_values <- function(raw_values, temp_values, cal_intercept, cal_slope,
+.calc_get_vwc_values <- function(raw_values, temp_values, cal_cor_factor, cal_cor_slope,
                                  a, b, c, ref_t, acor_t, wcor_t) {
     vwc <- a * raw_values^2 + b * raw_values + c
     dcor_t <- wcor_t - acor_t
     tcor <- raw_values + (temp_values - ref_t) * (acor_t + dcor_t * vwc)
-    vwc_cor <- a * (tcor + cal_intercept + cal_slope * vwc)^2 + b * (tcor + cal_intercept + cal_slope * vwc) + c
+    vwc_cor <- a * (tcor + cal_cor_factor + cal_cor_slope * vwc)^2 + b * (tcor + cal_cor_factor + cal_cor_slope * vwc) + c
     pmin(pmax(vwc_cor, 0), 1)
 }
 

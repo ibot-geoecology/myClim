@@ -14,7 +14,9 @@
 #' @return data in standard format
 #' @export
 #' @examples
+#' \dontrun{
 #' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+#' }
 mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
     if(all(dir.exists(paths))) {
         files <- .read_get_csv_files_from_directory(paths, recursive)
@@ -60,7 +62,9 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
 #' @return data in standard format
 #' @export
 #' @examples
+#' \dontrun{
 #' tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")
+#' }
 mc_read_data <- function(files_table, localities_table=NULL) {
     if(is.character(files_table)) {
         files_table <- .read_get_table_from_csv(files_table)

@@ -24,5 +24,7 @@ This function read data files of one logger type. If file is not in correct form
 Locality is set to serial_number of logger.
 }
 \examples{
+\dontrun{
 tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+}
 }

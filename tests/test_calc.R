@@ -58,9 +58,9 @@ test_that("mc_calc_vwc", {
     data <- mc_read_data("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calib_table <- as.data.frame(tibble::tribble(
-        ~serial_number,          ~sensor_id,                         ~datetime, ~slope, ~intercept,
-            "94184103",   "TMS_TMSmoisture",          lubridate::ymd(20201016),    1.1,       0.02,
-            "94184103",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 14"),      1,     -0.015,
+        ~serial_number,          ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
+            "94184103",   "TMS_TMSmoisture",          lubridate::ymd(20201016),        0.02,        1.1,
+            "94184103",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 14"),      -0.015,          1,
     ))
     cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
     calc_data <- mc_agg(cleaned_data)

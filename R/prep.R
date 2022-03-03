@@ -25,7 +25,7 @@
 #' * cleaning log is by default printed in console, and can be called ex post by [myClim::mc_info_clean()]
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_prep_clean(example_tomst_data1)
+#' cleaned_data <- mc_prep_clean(mc_data_example_source)
 mc_prep_clean <- function(data, silent=FALSE) {
     logger_function <- function(logger) {
         .prep_clean_logger(logger)
@@ -412,20 +412,23 @@ mc_prep_rename_locality <- function(data, locality_ids) {
 #' load calibration parameters to correct microclimatic records
 #'
 #' @description
-#' This function load calibration parameters from data.frame and write them into myClim object metadata. This function does not calibrate data. For calibration itself run [myClim::mc_prep_calib()] 
+#' This function load calibration parameters from data.frame and write them into myClim object metadata. This function
+#' does not calibrate data. For calibration itself run [myClim::mc_prep_calib()]
 #'
 #' @details
-#' It is a good idea to care about the microclimatic sensors/loggers calibration as the records can be shifted from various reasons. This function allows user to provide calibration values either from DIY or certified calibration procedure.
-#' Calibration data have by default the form of linear function determined by the slope and intercept. `calibrated = intercept + (1+slope)*original` This is useful in case of multi-point calibration typically performed by certified calibration labs.
-#' In case of one-point calibration typically DIY calibrations only intercept is used and slope=0. One point calibration is thus addition of correction factor. 
+#' It is a good idea to care about the microclimatic sensors/loggers calibration as the records can be shifted from various reasons.
+#' This function allows user to provide calibration values either from DIY or certified calibration procedure.
+#' Calibration data have by default the form of linear function determined by the `cor_factor` and `cor_slope`.
+#' `calibrated = original * (cor_slope + 1) + cor_factor` This is useful in case of multi-point calibration typically performed by certified calibration labs.
+#' In case of one-point calibration typically DIY calibrations only `cor_factor` is used and `cor_slope=0`. One point calibration is thus addition of correction factor.
 #' This function loads sensor specific calibration values from data frame and writs them into myClim Prep-format object metadata. The structure of input data frame is as follows: 
 #'
 #'  * serial_number = unique identificator of logger hosting the sensors e.g. 91184101 
 #'  * sensor_id = the name of sensor to calibrate e.g. TMS_T1
 #'  * datetime = the date of the calibration
-#'  * slope = the slope of calibration curve (in case of one-point calibration slope = 0)
-#'  * intercept = the intercept of calibration curve, in case of one-point calibration intercept = corrction factor. 
-#'     
+#'  * cor_factor = the correction factor, in case of multi-point calibration the intercept of calibration curve.
+#'  * cor_slope = the slope of calibration curve (in case of one-point calibration slope = 0)
+#'
 #' It is not possible to change calibration parameters for already calibrated sensor. This prevents repeted calibrations. 
 #'
 #' @param data myClim object Prep-format. see [myClim-package]
@@ -445,7 +448,10 @@ mc_prep_calib_load <- function(data, calib_table) {
         if(sensor$metadata@calibrated) {
             stop("It is not possible change calibration parameters in calibrated sensor.")
         }
-        sensor_calib_table <- dplyr::select(sensor_calib_table, datetime, slope, intercept)
+        if(!("cor_slope" %in% colnames(sensor_calib_table))) {
+            sensor_calib_table$cor_slope <- 0
+        }
+        sensor_calib_table <- dplyr::select(sensor_calib_table, datetime, cor_factor, cor_slope)
         sensor$calibration <- as.data.frame(dplyr::arrange(sensor_calib_table, datetime))
         sensor
     }
@@ -475,7 +481,7 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' Microclimatic records are changed and myClim object parameter sensor$metadata@calibrated is set to TRUE. It isn't possible to calibrate sensor multiple times.
 #'
 #' @details
-#' This function performs callibartion itself. It uses the calibration values (slope, intercept) stored in myClim object sensor metadata sensor$calibration loaded with [myClim::mc_prep_calib_load()].
+#' This function performs callibartion itself. It uses the calibration values (cor_factor, cor_slope) stored in myClim object sensor metadata sensor$calibration loaded with [myClim::mc_prep_calib_load()].
 #' 
 #' It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function. For TMSmoisture calibration (conversion to volumetric water content) use [myClim::mc_calc_vwc()]
 #' 
@@ -511,13 +517,13 @@ mc_prep_calib <- function(data, sensors, localities=NULL) {
         values_table <- tibble::tibble(datetime = datetime,
                                        values = sensor$values)
         input_data <- .prep_split_data_by_calibration(values_table, sensor$calibration)
-        data_function <- function(intercept, slope, data){
-            if(is.na(intercept) || is.na(slope)) {
+        data_function <- function(cor_factor, cor_slope, data){
+            if(is.na(cor_factor) || is.na(cor_slope)) {
                 return(data$values)
             }
-            data$values * slope + intercept
+            data$values * (cor_slope + 1) + cor_factor
         }
-        values <- purrr::pmap(dplyr::select(input_data, intercept, slope, data), data_function)
+        values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
         sensor$values <- purrr::flatten_dbl(values)
         sensor$metadata@calibrated <- TRUE
         sensor
@@ -547,13 +553,13 @@ mc_prep_calib <- function(data, sensors, localities=NULL) {
 .prep_split_data_by_calibration <- function(values_table, calib_table) {
     if(nrow(calib_table) == 0) {
         calib_table <- tibble::tibble(datetime = dplyr::first(values_table$datetime),
-                                      slope = NA_real_,
-                                      intercept = NA_real_)
+                                      cor_factor = NA_real_,
+                                      cor_slope = NA_real_)
     } else if (dplyr::first(values_table$datetime) < dplyr::first(calib_table$datetime)) {
         calib_table <- tibble::add_row(calib_table,
                                        datetime = dplyr::first(values_table$datetime),
-                                       slope = NA_real_,
-                                       intercept = NA_real_,
+                                       cor_factor = NA_real_,
+                                       cor_slope = NA_real_,
                                        .before = 1)
     }
     calib_table[["end_datetime"]] <- c(as.numeric(calib_table$datetime), Inf)[-1]

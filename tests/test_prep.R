@@ -158,13 +158,24 @@ test_that("mc_prep_rename_locality wrong", {
 test_that("mc_prep_calib_load, mc_prep_calib", {
     data <- mc_read_data("data/TOMST/files_table.csv")
     calib_table <- as.data.frame(tibble::tribble(
-        ~serial_number,          ~sensor_id,                         ~datetime, ~slope, ~intercept,
-            "91184101",              "TM_T",          lubridate::ymd(20201028),      1,        0.1,
-            "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),   0.95,          0,
-            "94184102",            "TMS_T1",          lubridate::ymd(20201016),    1.1,       0.12,
-            "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),   1.05,       0.15,
-            "94184102",            "TMS_T3",          lubridate::ymd(20201016),      1,        0.2,
-            "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),      1,        0.01,
+        ~serial_number,          ~sensor_id,                     ~datetime, ~cor_factor,
+        "91184101",              "TM_T",          lubridate::ymd(20201028),         0.1,
+        "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),           0,
+        "94184102",            "TMS_T1",          lubridate::ymd(20201016),        0.12,
+        "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,
+        "94184102",            "TMS_T3",          lubridate::ymd(20201016),         0.2,
+        "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),        0.01,
+    ))
+    param_data <- mc_prep_calib_load(data, calib_table)
+    test_prep_data_format(param_data)
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number,          ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
+            "91184101",              "TM_T",          lubridate::ymd(20201028),         0.1,          0,
+            "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),           0,      -0.05,
+            "94184102",            "TMS_T1",          lubridate::ymd(20201016),        0.12,        0.1,
+            "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,       0.05,
+            "94184102",            "TMS_T3",          lubridate::ymd(20201016),         0.2,          0,
+            "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),        0.01,          0,
     ))
     param_data <- mc_prep_calib_load(data, calib_table)
     test_prep_data_format(param_data)

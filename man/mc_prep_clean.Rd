@@ -31,5 +31,5 @@ This function guarantee time series with constant time step, without duplicated 
 In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).
 }
 \examples{
-cleaned_example_tomst_data1 <- mc_prep_clean(example_tomst_data1)
+cleaned_data <- mc_prep_clean(mc_data_example_source)
 }

@@ -21,7 +21,7 @@ This function calibrate values of sensor (microclimatic records) with the myClim
 Microclimatic records are changed and myClim object parameter sensor$metadata@calibrated is set to TRUE. It isn't possible to calibrate sensor multiple times.
 }
 \details{
-This function performs callibartion itself. It uses the calibration values (slope, intercept) stored in myClim object sensor metadata sensor$calibration loaded with \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
+This function performs callibartion itself. It uses the calibration values (cor_factor, cor_slope) stored in myClim object sensor metadata sensor$calibration loaded with \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
 
 It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function. For TMSmoisture calibration (conversion to volumetric water content) use \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
 

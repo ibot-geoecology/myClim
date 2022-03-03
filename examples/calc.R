@@ -12,10 +12,10 @@ cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T1="TMS_T1_secondar
                                       serial_numbers=c("94184103", "94184105"))
 # loading calibration values to TM_T
 calib_table <- as.data.frame(tibble::tribble(
-    ~serial_number,          ~sensor_id,                             ~datetime, ~slope, ~intercept,
-        "94184102",            "TMS_T1", lubridate::ymd_hm("2020-10-28 08:45"),      1,        0.1,
-        "94184102",            "TMS_T1",          lubridate::ymd("2021-01-01"),   0.98,      -0.05,
-        "94184102",   "TMS_TMSmoisture",     lubridate::ymd_h("2021-01-01 09"),   -1.2,       -0.5,
+    ~serial_number,          ~sensor_id,                             ~datetime, ~cor_factor, ~cor_slope,
+        "94184102",            "TMS_T1", lubridate::ymd_hm("2020-10-28 08:45"),         0.1,          1,
+        "94184102",            "TMS_T1",          lubridate::ymd("2021-01-01"),       -0.05,       0.98,
+        "94184102",   "TMS_TMSmoisture",     lubridate::ymd_h("2021-01-01 09"),        -0.5,       -1.2,
 ))
 cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
 # calibrating of sensor TM_T
