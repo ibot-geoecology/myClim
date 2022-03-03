@@ -505,7 +505,7 @@ mc_prep_calib <- function(data, sensors, localities=NULL) {
             return(sensor)
         }
         if(myClim:::.model_is_physical_TMSmoisture(sensor$metadata)) {
-            stop(stringr::str_glue("Sensor {sensor$metadata@name} has physical TMSmoisture it is prohibited."))
+            warning(stringr::str_glue("Using simple linear correction of raw moisture values in sensor {sensor$metadata@name}, for more precisse correction use function mc_calc_vwc."))
         }
         if(sensor$metadata@calibrated) {
             stop(stringr::str_glue("Sensor {sensor$metadata@name} is calibrated. It isn't possible recalibrate sensor."))

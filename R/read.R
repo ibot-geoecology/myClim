@@ -1,4 +1,6 @@
 .read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible combine files and directories"
+.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
+.read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
 
 #' Reading files
 #'
@@ -187,13 +189,8 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     if(any(is.na(datetime))) {
         stop(stringr::str_glue("It isn't possible read datetimes from {filename}."))
     }
-    metadata <- new("mc_LoggerMetadata")
-    metadata@serial_number <- serial_number
-    metadata@type <- data_format@logger_type
-    list(metadata = metadata,
-         clean_info = new("mc_LoggerCleanInfo"),
-         datetime = datetime,
-         sensors = .read_get_sensors(data_table, data_format))
+    sensors <- .read_get_sensors_from_data_format(data_table, data_format)
+    .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type)
 }
 
 .read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {
@@ -211,16 +208,64 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     as.data.frame(purrr::map(seq(ncol(data_table)), values_function))
 }
 
-.read_get_sensors <- function(data_table, data_format){
+.read_get_new_logger <- function(datetime, sensors, serial_number=NA_character_, logger_type=NA_character_) {
+    metadata <- new("mc_LoggerMetadata")
+    metadata@serial_number <- serial_number
+    metadata@type <- logger_type
+    list(metadata = metadata,
+         clean_info = new("mc_LoggerCleanInfo"),
+         datetime = datetime,
+         sensors = sensors)
+}
+
+.read_get_sensors_from_data_format <- function(data_table, data_format){
     result <- list()
     for(sensor_name in names(data_format@columns))
     {
-        result[[sensor_name]] <- .read_get_sensor(data_table, data_format, sensor_name)
+        result[[sensor_name]] <- .read_get_sensor_from_data_format(data_table, data_format, sensor_name)
     }
     result
 }
 
-.read_get_sensor <- function(data_table, data_format, sensor_name){
+.read_get_sensor_from_data_format <- function(data_table, data_format, sensor_name){
     values <- data_table[[data_format@columns[[sensor_name]]]]
     myClim:::.common_get_new_sensor(sensor_name, sensor_name, values)
+}
+
+#' Reading universal data from wide data.frame
+#'
+#' This function read data from data.frame. There is datetime column. Other columns mean locality values.
+#' Name of column mean name of locality. All values are from one sensor.
+#'
+#' @param data_table data.frame with values
+#'
+#' Columns:
+#' * datetime column - POSIXct and UTC timezone is required
+#' * Name of locality[1] - values
+#' * ...
+#' * Name of locality[n] - values
+#' @param sensor_id name of sensor from [myClim::mc_data_sensors] (default real)
+#' @param sensor_name custom name of sensor; if NULL than `sensor_name <- sensor_id` (default NULL)
+#' @return data in prep-format
+#' @export
+#' @examples
+mc_read_table_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL) {
+    if(ncol(data_table) <= 1) {
+       stop(.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE)
+    }
+    if(!lubridate::is.POSIXct(data_table[[1]]) || attr(data_table[[1]],"tzone") != "UTC"){
+        stop(.read_const_MESSAGE_DATETIME_TYPE)
+    }
+    if(is.null(sensor_name)) {
+        sensor_name <- sensor_id
+    }
+    result <- purrr::map(colnames(data_table)[-1], .read_get_new_locality)
+    names(result) <- purrr::map_chr(result, ~ .x$metadata@locality_id)
+    locality_function <- function(locality) {
+        sensors <- list()
+        sensors[[sensor_name]] <- myClim:::.common_get_new_sensor(sensor_id, sensor_name, data_table[[locality$metadata@locality_id]])
+        locality$loggers[[1]] <- .read_get_new_logger(data_table[[1]], sensors)
+        locality
+    }
+    purrr::map(result, locality_function)
 }

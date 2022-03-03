@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_data_sensors}
 \alias{mc_data_sensors}
-\title{Sensors definition}
+\title{Sensors definition. Names of items are sensor_ids.}
 \format{
 An object of class \code{environment} of length 18.
 }
@@ -11,6 +11,28 @@ An object of class \code{environment} of length 18.
 mc_data_sensors
 }
 \description{
-Sensors definition
+Sensors:
+\itemize{
+\item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}
+\item coverage - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}
+\item FDD - result of function \code{\link[=mc_calc_fdd]{mc_calc_fdd()}}
+\item GDD - result of function \code{\link[=mc_calc_gdd]{mc_calc_gdd()}}
+\item integer - universal sensor with integer values
+\item logical - universal sensor with logical values
+\item moisture - volumetric soil moisture (ratio)
+\item precipitation in (mm)
+\item real - universal sensor with real values
+\item snow_bool - result of function \code{\link[=mc_calc_snow]{mc_calc_snow()}}
+\item snow_fresh - new snow in (cm)
+\item snow_total - total hight snow (cm)
+\item sun_shine - time of sun shine (hours)
+\item T_C - universal temperature sensor (°C)
+\item TM_T - temperature sensor in TOMST ThermoDatalogger (°C)
+\item TMS_T1 - soil temperature sensor in TOMST TMS (°C)
+\item TMS_T2 - surface temperature sensor in TOMST TMS (°C)
+\item TMS_T3 - air temperature sensor in TOMST TMS (°C)
+\item TMS_TMSmoisture - soil moisture sensor in TOMST TMS (TDT signal)
+\item wind - speed of wind (m/s)
+}
 }
 \keyword{datasets}

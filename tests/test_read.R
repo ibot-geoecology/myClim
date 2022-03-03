@@ -58,3 +58,17 @@ test_that("mc_read_files joined TOMST direcory", {
     expect_equal(names(data$CZ2_HRADEC_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture", "moisture"))
     expect_equal(names(data$CZ2_HRADEC_TS$loggers[[1]]$sensors), "TM_T")
 })
+
+test_that("mc_read_table_wide", {
+    data_table <- readRDS("data/read_table/precip.Rds")
+    expect_error(data <- mc_read_table_wide(data_table, myClim:::.model_const_SENSOR_precipitation))
+    dates <- data_table$date
+    data_table$date <- as.POSIXct(lubridate::ymd(dates))
+    expect_error(data <- mc_read_table_wide(data_table, myClim:::.model_const_SENSOR_precipitation))
+    data_table$date <- as.POSIXct(lubridate::ymd(dates, tz="UTC"))
+    data <- mc_read_table_wide(data_table, myClim:::.model_const_SENSOR_precipitation)
+    test_prep_data_format(data)
+    expect_equal(length(data), 49)
+    expect_equal(names(data$B1BLAT01$loggers[[1]]$sensors), myClim:::.model_const_SENSOR_precipitation)
+    expect_equal(data$B1BLAT01$loggers[[1]]$sensors[[1]]$values[[1]], 0.7)
+})

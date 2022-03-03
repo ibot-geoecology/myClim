@@ -10,7 +10,29 @@
 #' Formats of source data files
 "mc_data_formats"
 
-#' Sensors definition
+#' Sensors definition. Names of items are sensor_ids.
+#'
+#' Sensors:
+#' * count - result of `count` function [myClim::mc_agg()]
+#' * coverage - result of `count` function [myClim::mc_agg()]
+#' * FDD - result of function [myClim::mc_calc_fdd()]
+#' * GDD - result of function [myClim::mc_calc_gdd()]
+#' * integer - universal sensor with integer values
+#' * logical - universal sensor with logical values
+#' * moisture - volumetric soil moisture (ratio)
+#' * precipitation in (mm)
+#' * real - universal sensor with real values
+#' * snow_bool - result of function [myClim::mc_calc_snow()]
+#' * snow_fresh - new snow in (cm)
+#' * snow_total - total hight snow (cm)
+#' * sun_shine - time of sun shine (hours)
+#' * T_C - universal temperature sensor (°C)
+#' * TM_T - temperature sensor in TOMST ThermoDatalogger (°C)
+#' * TMS_T1 - soil temperature sensor in TOMST TMS (°C)
+#' * TMS_T2 - surface temperature sensor in TOMST TMS (°C)
+#' * TMS_T3 - air temperature sensor in TOMST TMS (°C)
+#' * TMS_TMSmoisture - soil moisture sensor in TOMST TMS (TDT signal)
+#' * wind - speed of wind (m/s)
 "mc_data_sensors"
 
 #' Physical quantities definition

@@ -78,11 +78,11 @@ mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@value_type <- .model_const_VAL
 mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@physical <- .model_const_PHYSICAL_l_cm
 mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@description <- "Height of newly fallen snow"
 
-mc_data_sensors[[.model_const_SENSOR_snow_fresh]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@sensor_id <- .model_const_SENSOR_snow_total
-mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@value_type <- .model_const_VALUE_TYPE_REAL
-mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@physical <- .model_const_PHYSICAL_l_cm
-mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@description <- "Height of snow"
+mc_data_sensors[[.model_const_SENSOR_snow_total]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_snow_total]]@sensor_id <- .model_const_SENSOR_snow_total
+mc_data_sensors[[.model_const_SENSOR_snow_total]]@value_type <- .model_const_VALUE_TYPE_REAL
+mc_data_sensors[[.model_const_SENSOR_snow_total]]@physical <- .model_const_PHYSICAL_l_cm
+mc_data_sensors[[.model_const_SENSOR_snow_total]]@description <- "Height of snow"
 
 mc_data_sensors[[.model_const_SENSOR_precipitation]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_precipitation]]@sensor_id <- .model_const_SENSOR_precipitation
@@ -117,6 +117,11 @@ mc_data_sensors[[.model_const_SENSOR_moisture]]@min_value <- 0
 mc_data_sensors[[.model_const_SENSOR_moisture]]@max_value <- 1
 mc_data_sensors[[.model_const_SENSOR_moisture]]@plot_color <- "steelblue"
 mc_data_sensors[[.model_const_SENSOR_moisture]]@plot_line_width <- 2
+
+mc_data_sensors[[.model_const_SENSOR_T_C]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_T_C]]@sensor_id <- .model_const_SENSOR_T_C
+mc_data_sensors[[.model_const_SENSOR_T_C]]@physical <- .model_const_PHYSICAL_T_C
+mc_data_sensors[[.model_const_SENSOR_T_C]]@plot_color <- "red"
 
 mc_data_sensors[[.model_const_SENSOR_real]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_real]]@sensor_id <- .model_const_SENSOR_real
