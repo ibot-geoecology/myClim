@@ -24,6 +24,7 @@
 #' * moisture - volumetric soil moisture (ratio)
 #' * precipitation in (mm)
 #' * real - universal sensor with real values
+#' * RH_perc - Relative humidity sensor (%)
 #' * snow_bool - result of function [myClim::mc_calc_snow()]
 #' * snow_fresh - new snow in (cm)
 #' * snow_total - total hight snow (cm)

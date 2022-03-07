@@ -41,6 +41,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_FDD <- "FDD"
 .model_const_SENSOR_moisture <- .model_const_PHYSICAL_moisture
 .model_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
+.model_const_SENSOR_RH_perc <- .model_const_PHYSICAL_RH_perc
 .model_const_SENSOR_real <- .model_const_VALUE_TYPE_REAL
 .model_const_SENSOR_integer <- .model_const_VALUE_TYPE_INTEGER
 .model_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
