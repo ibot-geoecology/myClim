@@ -13,13 +13,14 @@ mc_prep_merge(data_items)
 merged myClim object in the same format as input objects
 }
 \description{
-This function is designed to merge two myClim objects into one.
+This function is designed to merge myClim objects into one.
 }
 \details{
 This function works only when the input myClim objects have the same format (Prep-format, Calc-format) and the same time step.
-This function do not join the time component of the data but is primary designed to merge different localities.
-If data1 and data2 contains locality with same names (locality_id), than locality_id from data2 is renamed, data on identical localities are not merged.
+It is required same step in Calc-Format data. If some two data objects contains locality with same names (locality_id) in Prep-format,
+than list of loggers are merged. If some two data objects contains locality with same names in Calc-format, than list os sensors are merged.
+Sensors with same names are renamed.
 }
 \examples{
-merged_tomst_data <- mc_prep_merge(list(example_tomst_data1, example_tomst_data2))
+merged_data <- mc_prep_merge(list(mc_data_example_source, mc_data_example_source))
 }

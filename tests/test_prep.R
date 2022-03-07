@@ -133,11 +133,23 @@ test_that("mc_prep_merge", {
     expect_equal(length(merged_hour_data$localities), 3)
 })
 
-test_that("mc_prep_merge same name", {
+test_that("mc_prep_merge prep-format same name", {
     data <- mc_read_data("data/TOMST/files_table.csv")
-    expect_warning(merged_data <- mc_prep_merge(list(data, data)))
+    merged_data <- mc_prep_merge(list(data, data))
     test_prep_data_format(merged_data)
-    expect_equal(names(merged_data), c("A1E05", "A2E32", "A6W79", "A1E05_1", "A2E32_1", "A6W79_1"))
+    expect_equal(names(merged_data), c("A1E05", "A2E32", "A6W79"))
+    expect_equal(length(merged_data$A1E05$loggers), 2)
+})
+
+test_that("mc_prep_merge calc-format same name", {
+    data <- mc_read_data("data/TOMST/files_table.csv")
+    data <- mc_prep_clean(data, silent=T)
+    expect_warning(day_data_1 <- mc_agg(data, "mean", "hour"))
+    expect_warning(day_data_2 <- mc_agg(data, c("mean", "max"), "hour"))
+    expect_warning(merged_data <- mc_prep_merge(list(day_data_1, day_data_2)))
+    test_calc_data_format(merged_data)
+    expect_equal(names(merged_data$localities), c("A1E05", "A2E32", "A6W79"))
+    expect_equal(length(merged_data$localities$A2E32$sensors), 12)
 })
 
 test_that("mc_prep_rename_locality", {

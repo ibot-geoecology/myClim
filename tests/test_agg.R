@@ -87,7 +87,7 @@ test_that("mc_agg all period", {
     data <- mc_prep_clean(data, silent=T)
     all_data <- mc_agg(data, "mean", "all", na.rm = FALSE)
     test_calc_data_format(all_data)
-    expect_equal(all_data$metadata@step_text, "30d 23H 45M 0S")
+    expect_equal(all_data$metadata@step_text, "44625 min")
     expect_equal(length(all_data$localities$`94184102`$datetime), 1)
     expect_equal(length(all_data$localities$`94184103`$datetime), 1)
     expect_false(is.na(all_data$localities$`94184102`$sensors$TMS_T1_mean$values[[1]]))
@@ -142,5 +142,15 @@ test_that("mc_agg reaggregate", {
     agg_data <- mc_agg(data)
     agg_all <- mc_agg(agg_data, period = "all", fun = "mean")
     test_calc_data_format(agg_all)
+})
+
+test_that("mc_agg merging loggers", {
+    files_table <- read.table("data/TOMST/files_table.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
+    files_table$locality_id <- "A6W79"
+    data <- mc_read_data(files_table)
+    data <- mc_prep_clean(data, silent=T)
+    expect_warning(agg_data <- mc_agg(data))
+    test_calc_data_format(agg_data)
+    expect_equal(length(agg_data$localities$A6W79$sensors), 9)
 })
 

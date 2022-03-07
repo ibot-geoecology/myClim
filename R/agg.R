@@ -1,3 +1,5 @@
+.agg_const_MESSAGE_LOCALITY_WITHOUT_DATA <- "Locality {locality$metadata@locality_id} is without valid data. It is removed."
+
 #' Aggregate data by function
 #'
 #' Function has two basic uses: 
@@ -75,11 +77,11 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(is.null(period)) {
         number_of_seconds <- as.numeric(lubridate::as.period(original_step_text))
         step <- as.integer(number_of_seconds / 60)
-        step_text <- as.character(lubridate::seconds_to_period(number_of_seconds))
+        step_text <- stringr::str_glue("{step} min")
     } else if(period == "all") {
         number_of_seconds <- as.numeric(use_interval)
         step <- as.integer(number_of_seconds / 60)
-        step_text <- as.character(lubridate::seconds_to_period(number_of_seconds))
+        step_text <- stringr::str_glue("{step} min")
     } else {
         step_text <- period
         step <- .agg_get_step_from_period_object(period_object)
@@ -202,82 +204,91 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     item$sensors <- purrr::flatten(purrr::map(item$sensors, sensor_function))
     item
 }
+
 .agg_get_flat_locality <- function(locality, step_text, use_interval) {
-    new_sensors <- .agg_get_flat_sensors(locality, step_text, use_interval)
-    if(length(new_sensors$sensor_names) == 0) {
-        warning(stringr::str_glue("Locality {locality$metadata@locality_id} is without valid data. It is removed."))
+    loggers <- purrr::keep(locality$loggers, function(x) length(x$datetime) > 0)
+    if(length(loggers) == 0) {
+        warning(stringr::str_glue(.agg_const_MESSAGE_LOCALITY_WITHOUT_DATA))
+        return(NULL)
+    } else if(length(loggers) == 1) {
+        datetime <- loggers[[1]]$datetime
+        sensors <- loggers[[1]]$sensors
+    } else {
+        datetime <- .agg_get_locality_datetime(loggers, step_text, use_interval)
+        sensors <- .agg_get_merged_sensors(datetime, loggers)
+    }
+    if(length(sensors) == 0) {
+        warning(stringr::str_glue(.agg_const_MESSAGE_LOCALITY_WITHOUT_DATA))
         return(NULL)
     }
-    sensor_function <- function(sensor_name) {
-        sensor_names_item <- new_sensors$sensor_names[[sensor_name]]
-        sensor <- locality$loggers[[sensor_names_item$logger_index]]$sensors[[sensor_names_item$original_name]]
-        sensor$metadata@name <- sensor_name
-        sensor$values <- new_sensors$table[[sensor_name]]
-        sensor
-    }
-
-    sensors <- purrr::map(colnames(new_sensors$table)[-1], sensor_function)
-    names(sensors) <- purrr::map(sensors, function(.x) .x$metadata@name)
 
     list(metadata = locality$metadata,
-         datetime = new_sensors$table$datetime,
+         datetime = datetime,
          sensors = sensors)
 }
 
-.agg_get_flat_sensors <- function(locality, step_text, use_interval) {
-    result <- new.env()
-    result$sensor_names <- list()
-    loggers <- purrr::keep(locality$loggers, function(x) length(x$datetime) > 0)
-    if(length(loggers) == 0) {
-        return(result)
-    }
+.agg_get_locality_datetime <- function(loggers, step_text, use_interval) {
     if(is.null(use_interval)) {
-        datetimes <- .agg_get_datetimes_from_loggers(loggers, step_text)
-    } else {
-        datetimes <- lubridate::int_start(use_interval)
+        return(.agg_get_datetimes_from_sensor_items(loggers, step_text))
     }
-    sensor_name_function <- function(original_sensor_name, logger_index, logger_serial_number) {
-        sensor_name <- .agg_get_flat_sensor_name(original_sensor_name, names(result$sensor_names),
-                                                 logger_serial_number)
-        result$sensor_names[[sensor_name]] <- list(logger_index=logger_index, original_name=original_sensor_name)
-        sensor_name
-    }
-    logger_table_function <- function(logger, idx) {
-        result <- myClim:::.common_sensor_values_as_tibble(logger)
-        sensor_names <- purrr::map_chr(logger$sensors, function(.x) sensor_name_function(.x$metadata@name, idx, logger$metadata@serial_number))
-        colnames(result) <- c("datetime", sensor_names)
-        result
-    }
-    tables <- c(tibble::as_tibble(datetimes), purrr::imap(loggers, logger_table_function))
-    tables[[1]] <- tibble::as_tibble(tables[[1]])
-    colnames(tables[[1]]) <- "datetime"
-    result$table <- purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime"))
-    result
+    lubridate::int_start(use_interval)
 }
 
-.agg_get_datetimes_from_loggers <- function(loggers, step_text) {
+.agg_get_datetimes_from_sensor_items <- function(items, step_text) {
     min_datetime_function <- function(.x) {
         if(length(.x$datetime) == 0) return(NA_integer_)
         as.integer(.x$datetime[[1]])}
-    min_datetime <- myClim:::.common_as_utc_posixct(min(purrr::map_int(loggers, min_datetime_function), na.rm=TRUE))
+    min_datetime <- myClim:::.common_as_utc_posixct(min(purrr::map_int(items, min_datetime_function), na.rm=TRUE))
     max_datetime_function <- function(.x) {
         if(length(.x$datetime) == 0) return(NA_integer_)
         as.integer(tail(.x$datetime, n=1))}
-    max_datetime <- myClim:::.common_as_utc_posixct(max(purrr::map_int(loggers, max_datetime_function), na.rm=TRUE))
+    max_datetime <- myClim:::.common_as_utc_posixct(max(purrr::map_int(items, max_datetime_function), na.rm=TRUE))
     seq(min_datetime, max_datetime, by=step_text)
 }
 
-.agg_get_flat_sensor_name <- function(original_sensor_name, existed_names, logger_serial_number) {
-    sensor_name <- original_sensor_name
-    number <- 1
-    while(sensor_name %in% existed_names) {
-        sensor_name <- stringr::str_glue("{original_sensor_name}_{number}")
-        number <- number + 1
+.agg_get_merged_sensors <- function(datetime, sensor_items) {
+    sensor_items <- .agg_get_items_with_renamed_sensors(sensor_items)
+    tables <- c(list(tibble::tibble(datetime=datetime)), purrr::map(sensor_items, myClim:::.common_sensor_values_as_tibble))
+    table_values <- purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime"))
+
+    sensor_function <- function (sensor) {
+        sensor$values <- table_values[[sensor$metadata@name]]
+        sensor
     }
-    if(sensor_name != original_sensor_name) {
-        warning(stringr::str_glue("sensor {original_sensor_name} from {logger_serial_number} is renamed to {sensor_name}"))
+
+    item_function <- function (item) {
+        purrr::map(item$sensors, sensor_function)
     }
-    sensor_name
+
+    purrr::flatten(purrr::map(sensor_items, item_function))
+}
+
+.agg_get_items_with_renamed_sensors <- function(sensor_items) {
+    existed_names <- new.env()
+
+    rename_sensor_name_function <- function(sensor) {
+        original_sensor_name <- sensor$metadata@name
+        sensor_name <- original_sensor_name
+        number <- 1
+        while(!is.null(existed_names[[sensor_name]])) {
+            sensor_name <- stringr::str_glue("{original_sensor_name}_{number}")
+            number <- number + 1
+        }
+        if(sensor_name != original_sensor_name) {
+            warning(stringr::str_glue("sensor {original_sensor_name} is renamed to {sensor_name}"))
+            sensor$metadata@name <- sensor_name
+        }
+        existed_names[[sensor_name]] <- TRUE
+        sensor
+    }
+
+    rename_sensors_in_item_function <- function(item) {
+        item$sensors <- purrr::map(item$sensors, rename_sensor_name_function)
+        names(item$sensors) <- purrr::map_chr(item$sensors, ~ .x$metadata@name)
+        item
+    }
+
+    purrr::map(sensor_items, rename_sensors_in_item_function)
 }
 
 .agg_crop_data_to_whole_periods <- function(item, period, use_interval, original_step_text) {

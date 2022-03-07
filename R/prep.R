@@ -316,17 +316,18 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
 #' Merge myClim objects
 #'
 #' @description
-#' This function is designed to merge two myClim objects into one.
+#' This function is designed to merge myClim objects into one.
 #' 
 #' @details
-#' This function works only when the input myClim objects have the same format (Prep-format, Calc-format) and the same time step. 
-#' This function do not join the time component of the data but is primary designed to merge different localities. 
-#' If data1 and data2 contains locality with same names (locality_id), than locality_id from data2 is renamed, data on identical localities are not merged. 
+#' This function works only when the input myClim objects have the same format (Prep-format, Calc-format) and the same time step.
+#' It is required same step in Calc-Format data. If some two data objects contains locality with same names (locality_id) in Prep-format,
+#' than list of loggers are merged. If some two data objects contains locality with same names in Calc-format, than list os sensors are merged.
+#' Sensors with same names are renamed.
 #'
 #' @param data_items list of myClim objects in Prep-format or Calc-format see [myClim-package]; Format of merged objects must be same.
 #' @return merged myClim object in the same format as input objects
 #' @examples
-#' merged_tomst_data <- mc_prep_merge(list(example_tomst_data1, example_tomst_data2))
+#' merged_data <- mc_prep_merge(list(mc_data_example_source, mc_data_example_source))
 #' @export
 mc_prep_merge <- function(data_items) {
     purrr::reduce(data_items, .prep_do_merge)
@@ -334,21 +335,25 @@ mc_prep_merge <- function(data_items) {
 
 .prep_do_merge <- function(data1, data2) {
     .prep_merge_check_data(data1, data2)
+    is_prep_format <- myClim:::.common_is_prep_format(data1)
 
-    localities1 <- unname(myClim:::.common_get_localities(data1))
-    localities2 <- unname(myClim:::.common_get_localities(data2))
-    localities <- c(localities1, localities2)
-    existed <- new.env()
-    existed$ids <- list()
+    localities1 <- myClim:::.common_get_localities(data1)
+    localities2 <- myClim:::.common_get_localities(data2)
+    common_locality_ids <- intersect(names(localities1), names(localities2))
 
-    locality_function <- function(locality) {
-        locality_name <- .prep_merge_get_locality_id(locality$metadata@locality_id, existed$ids)
-        locality$metadata@locality_id <- locality_name
-        existed$ids <- c(existed$ids, locality_name)
-        locality
+    merge_localities_function <- function (locality_id) {
+        locality1 <- localities1[[locality_id]]
+        locality2 <- localities2[[locality_id]]
+        if(is_prep_format) {
+            return(.prep_merge_prep_localities(locality1, locality2))
+        }
+        .prep_merge_calc_localities(locality1, locality2, data1$metadata@step_text)
     }
 
-    localities <- purrr::map(localities, locality_function)
+    common_localities <- purrr::map(common_locality_ids, merge_localities_function)
+    localities <- c(purrr::discard(localities1, ~ .x$metadata@locality_id %in% common_locality_ids),
+                    purrr::discard(localities2, ~ .x$metadata@locality_id %in% common_locality_ids),
+                    common_localities)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
     myClim:::.common_set_localities(data1, localities)
 }
@@ -367,17 +372,18 @@ mc_prep_merge <- function(data_items) {
     }
 }
 
-.prep_merge_get_locality_id <- function(original_locality_name, existed_names) {
-    locality_name <- original_locality_name
-    number <- 1
-    while(locality_name %in% existed_names) {
-        locality_name <- stringr::str_glue("{original_locality_name}_{number}")
-        number <- number + 1
-    }
-    if(locality_name != original_locality_name) {
-        warning(stringr::str_glue("locality {original_locality_name} is renamed to {locality_name}"))
-    }
-    locality_name
+.prep_merge_prep_localities <- function(locality1, locality2){
+    locality1$loggers <- c(locality1$loggers, locality2$loggers)
+    locality1
+}
+
+.prep_merge_calc_localities <- function(locality1, locality2, step_text){
+    localities <- list(locality1, locality2)
+    datetime <- myClim:::.agg_get_datetimes_from_sensor_items(localities, step_text)
+    sensors <- myClim:::.agg_get_merged_sensors(datetime, localities)
+    locality1$datetime <- datetime
+    locality1$sensors <- sensors
+    locality1
 }
 
 #' rename locality_id
