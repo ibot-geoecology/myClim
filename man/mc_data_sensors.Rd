@@ -22,6 +22,7 @@ Sensors:
 \item moisture - volumetric soil moisture (ratio)
 \item precipitation in (mm)
 \item real - universal sensor with real values
+\item RH_perc - Relative humidity sensor (\%)
 \item snow_bool - result of function \code{\link[=mc_calc_snow]{mc_calc_snow()}}
 \item snow_fresh - new snow in (cm)
 \item snow_total - total hight snow (cm)
