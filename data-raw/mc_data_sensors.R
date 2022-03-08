@@ -123,6 +123,12 @@ mc_data_sensors[[.model_const_SENSOR_T_C]]@sensor_id <- .model_const_SENSOR_T_C
 mc_data_sensors[[.model_const_SENSOR_T_C]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[.model_const_SENSOR_T_C]]@plot_color <- "red"
 
+mc_data_sensors[[.model_const_SENSOR_RH_perc]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_RH_perc]]@sensor_id <- .model_const_SENSOR_RH_perc
+mc_data_sensors[[.model_const_SENSOR_RH_perc]]@physical <- .model_const_PHYSICAL_RH_perc
+mc_data_sensors[[.model_const_SENSOR_RH_perc]]@min_value <- 0
+mc_data_sensors[[.model_const_SENSOR_RH_perc]]@max_value <- 100
+
 mc_data_sensors[[.model_const_SENSOR_real]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_real]]@sensor_id <- .model_const_SENSOR_real
 mc_data_sensors[[.model_const_SENSOR_real]]@value_type <- .model_const_VALUE_TYPE_REAL

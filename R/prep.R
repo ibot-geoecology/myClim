@@ -56,7 +56,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
         warning(stringr::str_glue("step cannot be detected for logger {logger$metadata@serial_number} - skip"))
         return(logger)
     }
-    logger$datetime <- lubridate::round_date(logger$datetime, stringr::str_glue("{logger$clean_info@step} min"))
+    logger$datetime <- lubridate::round_date(logger$datetime, lubridate::seconds_to_period(logger$clean_info@step * 60))
     logger <- .prep_clean_write_info(logger)
     logger <- .prep_clean_edit_series(logger)
     logger
