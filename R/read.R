@@ -1,6 +1,7 @@
 .read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible combine files and directories"
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
 .read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
+.read_const_MESSAGE_SENSORS_MULTIPLE_ID <- "Sensor(s) {} have multiple sensor_ids."
 
 #' Reading files
 #'
@@ -249,13 +250,11 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 #' @return data in prep-format
 #' @export
 #' @examples
-mc_read_table_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL) {
+mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL) {
     if(ncol(data_table) <= 1) {
        stop(.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE)
     }
-    if(!lubridate::is.POSIXct(data_table[[1]]) || attr(data_table[[1]],"tzone") != "UTC"){
-        stop(.read_const_MESSAGE_DATETIME_TYPE)
-    }
+    .read_check_datetime(data_table[[1]])
     if(is.null(sensor_name)) {
         sensor_name <- sensor_id
     }
@@ -268,4 +267,61 @@ mc_read_table_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSO
         locality
     }
     purrr::map(result, locality_function)
+}
+
+.read_check_datetime <- function(datetime) {
+    if(!lubridate::is.POSIXct(datetime) || attr(datetime,"tzone") != "UTC"){
+        stop(.read_const_MESSAGE_DATETIME_TYPE)
+    }
+}
+
+#' Reading universal data from long data.frame
+#'
+#' This function read data from data.frame in long format.
+#'
+#' @param data_table data.frame with values
+#'
+#' Columns:
+#' * locality_id
+#' * sensor_name
+#' * datetime - POSIXct and UTC timezone is required
+#' * value
+#' @param sensor_ids list with relations between sensor_names and sensor_ids; Sensor_id is key from [myClim::mc_data_sensors].
+#'
+#' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
+#' @return data in prep-format
+#' @export
+#' @examples
+mc_read_long <- function(data_table, sensor_ids) {
+    .read_check_datetime(data_table$datetime)
+
+    data_table <- dplyr::group_by(data_table, locality_id)
+    localities <- dplyr::group_map(data_table, .read_long_locality, sensor_ids=sensor_ids)
+    names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
+    localities
+}
+
+.read_long_locality <- function(locality_table, locality_id, sensor_ids) {
+    locality_id <- locality_id$locality_id[[1]]
+    sensor_names <- unique(locality_table$sensor_name)
+    sensor_table_function <- function(name) {
+        data <- dplyr::filter(locality_table, sensor_name == name)
+        result <- dplyr::select(data, datetime, value)
+        names(result)[2] <- name
+        result
+    }
+
+    datetime <- sort(unique(locality_table$datetime))
+    tables <- c(list(tibble::tibble(datetime=datetime)), purrr::map(sensor_names, sensor_table_function))
+    table_values <- purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime"))
+    result <- .read_get_new_locality(locality_id)
+
+    sensor_function <- function(sensor_name) {
+        myClim:::.common_get_new_sensor(sensor_ids[[sensor_name]], sensor_name, table_values[[sensor_name]])
+    }
+
+    sensors <- purrr::map(sensor_names, sensor_function)
+    names(sensors) <- purrr::map_chr(sensors, ~ .x$metadata@name)
+    result$loggers[[1]] <- .read_get_new_logger(table_values$datetime, sensors)
+    result
 }
