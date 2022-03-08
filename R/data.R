@@ -10,7 +10,9 @@
 #' Formats of source data files
 "mc_data_formats"
 
-#' Sensors definition. Names of items are sensor_ids.
+#' Sensors definition.
+#'
+#' Names of items are sensor_ids.
 #'
 #' Sensors:
 #' * count - result of `count` function [myClim::mc_agg()]

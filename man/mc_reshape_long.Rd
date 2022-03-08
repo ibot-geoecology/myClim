@@ -14,11 +14,20 @@ mc_reshape_long(data, localities = NULL, sensors = NULL)
 \item{sensors}{names of sensors; if NULL then all (default NULL)}
 }
 \value{
-data.frame with columns locality_id, serial_number, sensor, datetime, value
+data.frame
+
+columns:
+\itemize{
+\item locality_id
+\item serial_number
+\item sensor_name
+\item datetime
+\item value
+}
 }
 \description{
 This function create data.frame with values of sensor
 }
 \examples{
-example_tms_t1_table <- myClim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)
 }

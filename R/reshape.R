@@ -61,10 +61,17 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 #' @param data in format for preparing or calculation
 #' @param localities locality_ids; if NULL then all (default NULL)
 #' @param sensors names of sensors; if NULL then all (default NULL)
-#' @return data.frame with columns locality_id, serial_number, sensor, datetime, value
+#' @return data.frame
+#'
+#' columns:
+#' * locality_id
+#' * serial_number
+#' * sensor_name
+#' * datetime
+#' * value
 #' @export
 #' @examples
-#' example_tms_t1_table <- myClim::mc_reshape_long(example_tomst_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+#' head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)
 mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     data <- mc_filter(data, localities, sensors)
     is_prep_format <- myClim:::.common_is_prep_format(data)
@@ -73,7 +80,7 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
         count <- length(datetime)
         tibble::tibble(locality_id=rep(locality_id, count),
                        serial_number=rep(serial_number, count),
-                       sensor=rep(sensor_item$metadata@name, count),
+                       sensor_name=rep(sensor_item$metadata@name, count),
                        datetime=datetime,
                        value=sensor_item$values)
     }

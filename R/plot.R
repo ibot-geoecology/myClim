@@ -218,9 +218,9 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
     file_type <- .plot_get_file_type(filename)
     if(file_type == "pdf"){
-        .plot_print_pdf(filename, plot, locality_id ~ sensor, 40)
+        .plot_print_pdf(filename, plot, locality_id ~ sensor_name, 40)
     } else if(file_type == "png") {
-        .plot_print_png(filename, plot, png_width, png_height, locality_id ~ sensor)
+        .plot_print_png(filename, plot, png_width, png_height, locality_id ~ sensor_name)
     } else {
         stop(stringr::str_glue("Format of {filename} isn't supported."))
     }

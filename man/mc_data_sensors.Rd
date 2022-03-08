@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_data_sensors}
 \alias{mc_data_sensors}
-\title{Sensors definition. Names of items are sensor_ids.}
+\title{Sensors definition.}
 \format{
 An object of class \code{environment} of length 18.
 }
@@ -11,6 +11,9 @@ An object of class \code{environment} of length 18.
 mc_data_sensors
 }
 \description{
+Names of items are sensor_ids.
+}
+\details{
 Sensors:
 \itemize{
 \item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}
