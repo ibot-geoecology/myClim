@@ -23,3 +23,7 @@ Imports:
     viridis,
     runner
 Roxygen: list(markdown = TRUE)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

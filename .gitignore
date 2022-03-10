@@ -10,3 +10,6 @@ myClim.Rproj
 docs
 plots
 /tests/plots
+inst/doc
+/doc/
+/Meta/

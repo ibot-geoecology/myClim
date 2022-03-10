@@ -13,6 +13,7 @@ generate:
 	Rscript data-raw/mc_data_*.R
 	$(RM) NAMESPACE
 	R -e 'devtools::document()'
+	R -e 'devtools::build_vignettes()'
 
 generate-html:
 	R -e 'pkgdown::build_site(override = list(destination = "../docs"))'

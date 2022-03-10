@@ -1,0 +1,26 @@
+---
+title: "myClim demo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{myClim demo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(myClim)
+```
+
+First step of using myClim package is loading data. There are several functions which begin with `mc_read_`.
+
+```{r}
+setwd("..")
+tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+```
