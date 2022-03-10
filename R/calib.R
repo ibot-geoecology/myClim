@@ -5,11 +5,11 @@
 #' Calculate slope and intercept for TMSmoisture conversion
 #'
 #' @description
-#' Function calculate slope and intercept parameters from measuring moisture in water and air.
+#' Function calculate correction parameters (slope and intercept) from TMS moisture measurements in pure water and air.
 #'
 #' @details
-#'This is highly specialized service function designed to derive calibration/conversion parameters `slope` and `intercept` from soil moisture records of TMS loggers measuring on the air and in the water. 
-#'Slope and intercept derived from this function could be used as sensor specific alternative in [myClim::mc_calc_vwc()] function instead of universal defaults. But this must be done in code, by had. Standard user is not allowed to modify slope and intercept in [myClim::mc_calc_vwc()].    
+#'This is highly specialized service function designed to derive correction parameters `slope` and `intercept` for soil moisture sensor of TMS loggers measuring on the air and in the water. 
+#'Slope and intercept derived from this function could be used as sensor-specific alternative in [myClim::mc_calc_vwc()] function instead of universal defaults. But this must be done in code, by had. Standard user is not allowed to modify slope and intercept in [myClim::mc_calc_vwc()].    
 #'
 #' @param raw_air TDT signal in air
 #' @param raw_water TDT signal in water
