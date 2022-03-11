@@ -1,5 +1,5 @@
 ---
-title: "myClim demo"
+title: "myClim: microclimatic data in R"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{myClim demo}
@@ -13,14 +13,65 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+This vignette describes the handling of microclimatic data in R with myClim library. myClim workflow begin at the reading data primary from microclimatic dataloggers but can be also reding of meteorological station data from files. Cleaning time step, time zone settings and metadata collecting is the next step of the workflow. Microclimatic data are stored in mcClim objects of regular R structure consists of classes and lists slightly resembling database scheme. #(see my-clim package)#
+With myClim tools one can crop, join, downscale, and convert microclimatic data form and format, sort them into localities, call descriptive characteristics and compute microclimatic derivates. Handy plotting functions are provided with smart defaults.   
 
-```{r setup}
+## Install
+
+```{r setup, eval=FALSE}
+# Install dependencies
+
+requiered_packages <- c("stringr", "lubridate", "tibble",
+                        "dplyr", "purrr", "ggplot2", "ggforce",
+                        "viridis", "runner")
+missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
+if(length(missing_packages)) install.packages(missing_packages)
+
+# install myClim
+
+dir.create("c:\\Users\\matej.man\\Downloads\\microclim0.24")
+setwd("c:\\Users\\matej.man\\Downloads\\microclim0.24")
+
+# directory to unzip source files
+setwd("C:/path/to/directory") # !EDIT IT!
+
+zip_file <- "myClim.zip"
+dir_name <- "myClim"
+download.file(  
+  "https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", 
+  destfile=zip_file, mode="wb")
+subdir <- unzip(zip_file, list=TRUE)$Name[1]
+unzip(zip_file)
+file.remove(zip_file)
+unlink(dir_name, recursive=TRUE)
+file.rename(subdir, dir_name)
+install.packages(dir_name, repos=NULL, type="source")
+setwd(dir_name)
 library(myClim)
 ```
 
-First step of using myClim package is loading data. There are several functions which begin with `mc_read_`.
+## Input data files
+Let’s say we have microclimatic data from the filed data loggers. It can be single file from single datalogger hosting single or multiple sensors.  It can be few csv files downloaded once or multiple times from single locality hosting single or multiple dataloggers. It can be many files from many localities downloaded just once or any combination of all mentioned. This can be load into r to single myClim object file by file or file directories. Besides loading csv files myClim object can be created also from tidy wide or long tables from R environment. This is useful in case you already have miroclimatic time series in R and when query microclimatic data form database. 
+
+
+## Read microclimatic data
+myClim can read multiple formats of data downloaded from various loggers (Tomst, HOBO, IButton…) read functions require downloaded data in defined column order, separator etc. Supported formats are defined by R class with several slots and thus is easily extendable to read almost any format user is able to define. See `mc_DataFormat-class` While reading data, user must specify `dataformat_name=` one of `r names(myClim::mc_data_formats)`.
+reading with metadata. 
+what happens while reading without metadata
 
 ```{r}
-setwd("..")
-tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+# setwd("..")
+library(myClim)
+setwd("D:/Git/microclim")
+# read from files
+tms.f <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv",
+                              "examples/data/TOMST/data_94184102_0.csv"), dataformat_name="TOMST")
+
+# read from directory
+tms.d <- mc_read_files(c("examples/"), dataformat_name="TOMST")
+
+# read from data.frame
+load("D:/Git/microclim/examples/data/chmi/airTmax_merged.RData") #airTmax
+
 ```
+
