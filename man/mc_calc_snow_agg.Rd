@@ -21,7 +21,7 @@ mc_calc_snow_agg(
 
 \item{period}{number of days defining the continuous snow cover period of interest (default 3 days)}
 
-\item{use_utc}{if set FALSE then time is corrected based on offset provided in locality metadata \code{tz_offset}, see e. g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_user_tz]{mc_prep_user_tz()}}; (default FALSE)}
+\item{use_utc}{if set FALSE then time is corrected based on offset provided in locality metadata \code{tz_offset}, see e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta]{mc_prep_meta()}}; (default FALSE)}
 }
 \value{
 Returns data.frame with columns:

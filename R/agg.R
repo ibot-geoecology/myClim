@@ -33,11 +33,13 @@
 #' There is special period "all" returning single value for each sensor based on function applied across all records within the sensor.
 #'
 #' Start day of week is Monday.
-#' @param use_utc default TRUE, if set FALSE forced to use UTC time,instead possibly available time offset (in locality metadata: tz_offset) local or solar time see (e.g. `mc_prep_solar_tz`, `mc_prep_user_tz`);
+#' @param use_utc default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
+#' (in locality metadata: tz_offset) local or solar time see (e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta()]);
 #' Non-UTC time can by used only for period `day` and longer. 
 #' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
 #' @param na.rm parameter for aggregation function; Not used for count and coverage.
-#' @return Returns new myClim object in Calc-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function. 
+#' @return Returns new myClim object in Calc-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
+#' records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
 #' @export
 #' @examples
 #' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)

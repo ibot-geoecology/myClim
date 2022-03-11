@@ -100,7 +100,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 #' @param snow_sensor name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function `mc_calc_snow`; (default "snow")
 #' @param localities optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)
 #' @param period number of days defining the continuous snow cover period of interest (default 3 days)
-#' @param use_utc if set FALSE then time is corrected based on offset provided in locality metadata `tz_offset`, see e. g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_user_tz()]; (default FALSE)
+#' @param use_utc if set FALSE then time is corrected based on offset provided in locality metadata `tz_offset`, see e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta()]; (default FALSE)
 #' @return 
 #' Returns data.frame with columns:
 #' * locality - locality name
