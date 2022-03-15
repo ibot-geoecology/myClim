@@ -164,7 +164,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' @return MyClim object in the same format as input, with locality metadata filled in
 #' @export
 #' @examples
-#' data <- mc_prep_meta(mc_data_example_source, list(`91184101`=60), param_name="tz_offset")
+#' data <- mc_prep_meta(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
 mc_prep_meta <- function(data, metadata, param_name=NULL) {
     if(!is.data.frame(metadata)) {
         metadata <- tibble::tibble(locality_id=names(metadata),
