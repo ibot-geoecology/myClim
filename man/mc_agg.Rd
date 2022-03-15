@@ -27,7 +27,8 @@ There is special period "all" returning single value for each sensor based on fu
 
 Start day of week is Monday.}
 
-\item{use_utc}{default TRUE, if set FALSE forced to use UTC time,instead possibly available time offset (in locality metadata: tz_offset) local or solar time see (e.g. \code{mc_prep_solar_tz}, \code{mc_prep_user_tz});
+\item{use_utc}{default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
+(in locality metadata: tz_offset) local or solar time see (e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta]{mc_prep_meta()}});
 Non-UTC time can by used only for period \code{day} and longer.}
 
 \item{percentiles}{vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details}
@@ -35,7 +36,8 @@ Non-UTC time can by used only for period \code{day} and longer.}
 \item{na.rm}{parameter for aggregation function; Not used for count and coverage.}
 }
 \value{
-Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
+Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL
+records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
 }
 \description{
 Function has two basic uses:

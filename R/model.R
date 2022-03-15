@@ -8,6 +8,7 @@ mc_const_TZ_SOLAR <- "solar"
 mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_COUNT_TEST_VALUES <- 100
+.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("altitude", "lat_wgs84", "lon_wgs84", "tz_offset")
 
 .model_const_PHYSICAL_T_C <- "T_C"
 .model_const_PHYSICAL_moisture <- "moisture"

@@ -45,11 +45,32 @@ test_that("mc_prep_solar_tz", {
     expect_equal(data$A1E05$metadata@tz_offset, 57)
 })
 
-test_that("mc_prep_user_tz", {
+test_that("mc_prep_meta", {
     data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
-    data <- mc_prep_user_tz(data, list(A1E05=50))
-    test_prep_data_format(data)
-    expect_equal(data$A1E05$metadata@tz_offset, 50)
+    expect_error(changed_data <- mc_prep_meta(data, list(A1E05=50)))
+    changed_data <- mc_prep_meta(data, list(A1E05=50), param_name="tz_offset")
+    test_prep_data_format(changed_data)
+    expect_equal(changed_data$A1E05$metadata@tz_offset, 50)
+    expect_equal(changed_data$A1E05$metadata@tz_type, mc_const_TZ_USER_DEFINED)
+    changed_data <- mc_prep_meta(data, list(A1E05="abc", A2E32="def"), param_name="my_super_param")
+    test_prep_data_format(changed_data)
+    expect_equal(changed_data$A1E05$metadata@user_data[["my_super_param"]], "abc")
+    metadata <- as.data.frame(tibble::tribble(
+        ~locality_id, ~lat_wgs84, ~lon_wgs84, ~my,
+        "A1E05"     ,          1,          2,  NA,
+        "A2E32"     ,          3,          4,  0
+    ))
+    expect_error(changed_data <- mc_prep_meta(data, metadata, param_name="tz_offset"))
+    changed_data <- mc_prep_meta(data, metadata)
+    test_prep_data_format(changed_data)
+    expect_equal(changed_data$A1E05$metadata@lat_wgs84, 1)
+    expect_equal(changed_data$A1E05$metadata@lon_wgs84, 2)
+    expect_true(is.na(changed_data$A1E05$metadata@user_data[["my"]]))
+    data_clean <- mc_prep_clean(data, silent=T)
+    data_calc <- mc_agg(data_clean)
+    changed_data <- mc_prep_meta(data_calc, metadata)
+    test_calc_data_format(changed_data)
+    expect_equal(changed_data$localities$A1E05$metadata@lat_wgs84, 1)
 })
 
 test_that("mc_prep_crop", {
@@ -84,7 +105,7 @@ test_that(".prep_get_utc_localities", {
     expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
     test_function <- if(exists(".prep_get_utc_localities")) .prep_get_utc_localities else myClim:::.prep_get_utc_localities
     expect_equal(test_function(data), c("91184101", "94184102", "94184103", "94184104"))
-    data_clean <- mc_prep_user_tz(data, list(`91184101`=60, `94184102`=60, `94184103`=60, `94184104`=60))
+    data_clean <- mc_prep_meta(data, list(`91184101`=60, `94184102`=60, `94184103`=60, `94184104`=60), "tz_offset")
     expect_equal(length(test_function(data_clean)), 0)
 })
 

@@ -2,6 +2,9 @@
 
 .prep_const_DETECT_STEP_LENGTH <- 100
 
+.prep_const_MESSAGE_PARAM_NAME_NOT_NULL <- "param_name can not be NULL"
+.prep_const_MESSAGE_PARAM_NAME_NULL <- "param_name must be NULL"
+
 #' Cleaning datetime series
 #'
 #' @description
@@ -129,48 +132,92 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
 }
 
-#' Set user defined offset against original time 
+#' Set metadata of localities
 #' 
 #' @description
-#' This function allow user to set the offset in minutes against original time series of microclimatic records. `MyClim` generally assume the records are in UTM Time Zone. When offset is provided, myClim functions by default use the time corrected with this offset in calculations. See details.
+#' MUST BE CHANGED - is from mc_prep_user_tz
+#' This function allow user to set the offset in minutes against original time series of microclimatic records.
+#' `MyClim` generally assume the records are in UTM Time Zone. When offset is provided, myClim functions by default use
+#' the time corrected with this offset in calculations. See details.
 #' 
-#' @details 
-#' For analysis of microclimatic data it is important to think of time zones because of diurnal or seasonal microclimatic rhythms. `mc_prep_user_tz` allow user to set time offset for individual localities to harmonize e.g.day/night cycles across vhole data set.
+#' @details
+#' If is set tz_offset value, than tz_type is set to `user defined` value.
+#'
+#' MUST BE CHANGED - is from mc_prep_user_tz
+#' For analysis of microclimatic data it is important to think of time zones because of diurnal or seasonal microclimatic rhythms.
+#' `mc_prep_user_tz` allow user to set time offset for individual localities to harmonize e.g.day/night cycles across vhole data set.
 #' 
-#' This function can be used also inversely, for heterogeneous data sets containing loggers recording in local time and user wish to unify them by setting individual offest e.g. to UTM. This function is also useful for corrections of shifted loggers time series e.g. due to technical issue. 
+#' This function can be used also inversely, for heterogeneous data sets containing loggers recording in local time
+#' and user wish to unify them by setting individual offest e.g. to UTM. This function is also useful for corrections
+#' of shifted loggers time series e.g. due to technical issue.
 #' 
-#' In case user is sure, the loggers recorded in UTC and wants to harmonize data set to solar time, there is [myClim::mc_prep_solar_tz()] calculating offset based on coordinates to harmonize the midday across vhole dataset.
+#' In case user is sure, the loggers recorded in UTC and wants to harmonize data set to solar time,
+#' there is [myClim::mc_prep_solar_tz()] calculating offset based on coordinates to harmonize the midday across vhole dataset.
 #' 
-#' @param data myClim object in raw, clean, or calculation format
-#' @param tz_offsets named list (name: `locality_id`, list item: `tz_offset` in rounded minutes)
-#' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata 
+#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param metadata for localities can be named list or table
+#'
+#' * named list: `metadata <- list(locality_id=value)`; `param_name` must be set
+#' * table with column `locality_id` and another columns named by metadata parameter name; `param_name` must be NULL
+#' @param param_name name of locality metadata parameter; Default names are `altitude`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
+#' Another names are inserted to `user_data` list. see [myClim::mc_LocalityMetadata]
+#' @return MyClim object in the same format as input, with locality metadata filled in
 #' @export
 #' @examples
-#' example_tomst_data2 <- mc_prep_solar_tz(example_tomst_data2, list(`91184101`=60))
-mc_prep_user_tz <- function(data, tz_offsets) {
-    for (locality_id in names(tz_offsets))
-    {
-        data[[locality_id]]$metadata@tz_offset <- tz_offsets[[locality_id]]
-        data[[locality_id]]$metadata@tz_type <- myClim::mc_const_TZ_USER_DEFINED
+#' data <- mc_prep_meta(mc_data_example_source, list(`91184101`=60), param_name="tz_offset")
+mc_prep_meta <- function(data, metadata, param_name=NULL) {
+    if(!is.data.frame(metadata)) {
+        metadata <- tibble::tibble(locality_id=names(metadata),
+                                   value=metadata)
+        if(is.null(param_name)) {
+            stop(.prep_const_MESSAGE_PARAM_NAME_NOT_NULL)
+        }
+        names(metadata)[2] <- param_name
+    } else if(!is.null(param_name)) {
+        stop(.prep_const_MESSAGE_PARAM_NAME_NULL)
     }
-    data
+
+    localities <- as.environment(myClim:::.common_get_localities(data))
+
+    change_param_function <- function(locality_id, slot_name, value){
+        if(!(slot_name %in% myClim:::.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS)) {
+            localities[[locality_id]]$metadata@user_data[[slot_name]] <- value
+            return()
+        }
+        slot(localities[[locality_id]]$metadata, slot_name) <- value
+        if(slot_name == "tz_offset") {
+            localities[[locality_id]]$metadata@tz_type <- myClim::mc_const_TZ_USER_DEFINED
+        }
+    }
+
+    for(slot_name in colnames(metadata)[-1]) {
+        purrr::pwalk(list(locality_id=metadata$locality_id,
+                          slot_name=slot_name,
+                          value=metadata[[slot_name]]),
+                     change_param_function)
+    }
+
+    myClim:::.common_set_localities(data, as.list(localities))
 }
 
 #' Set solar time offset against original time 
 #' 
 #' @description
-#' This function calculates the offset against UTC on the locality to get the solar time. This is based on coordinates. If coordinates not provided, then not working.
+#' This function calculates the offset against UTC on the locality to get the solar time.
+#' This is based on coordinates. If coordinates not provided, then not working.
 #' 
 #' @details
-#' myClim librarry presumes the data in UTC by default. This function require at least longitude provided in locality metadata slot `lon_wgs84`. If longitude not provided, function not works. Coordinates of locality can be provided e. g. during data reading see [myClim::mc_read_data()]
+#' myClim librarry presumes the data in UTC by default. This function require at least longitude provided in locality
+#' metadata slot `lon_wgs84`. If longitude not provided, function not works. Coordinates of locality can be provided
+#' e. g. during data reading see [myClim::mc_read_data()]
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
-#' @param data myClim object in Prep-format or Calc-format
-#' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata 
+#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_prep_solar_tz(cleaned_example_tomst_data1)
+#' data_solar <- mc_prep_solar_tz(mc_data_example_clean)
 mc_prep_solar_tz <- function(data) {
     locality_function <- function(locality) {
         if(is.na(locality$metadata@lon_wgs84)) {
