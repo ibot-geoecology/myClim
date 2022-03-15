@@ -42,5 +42,5 @@ In case user is sure, the loggers recorded in UTC and wants to harmonize data se
 there is \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}} calculating offset based on coordinates to harmonize the midday across vhole dataset.
 }
 \examples{
-data <- mc_prep_meta(mc_data_example_source, list(`91184101`=60), param_name="tz_offset")
+data <- mc_prep_meta(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
 }
