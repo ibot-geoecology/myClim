@@ -10,7 +10,7 @@ remove:
 	R -e 'remove.packages("myClim")'
 
 generate:
-	Rscript data-raw/mc_data_*.R
+	for filename in data-raw/mc_data_*.R; do Rscript "$$filename"; done
 	$(RM) NAMESPACE
 	R -e 'devtools::document()'
 

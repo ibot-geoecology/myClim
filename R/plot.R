@@ -234,12 +234,14 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
         item <- dplyr::first(locality$loggers)
     }
     sensor_metadata <- dplyr::first(item$sensors)$metadata
-    if(is.na(sensor_metadata@sensor_id)) {
+    if(is.na(sensor_metadata@sensor_id) || !(sensor_metadata@sensor_id %in% names(mc_data_sensors)) ||
+        is.na(mc_data_sensors[[sensor_metadata@sensor_id]]@physical)) {
         if(is.null(viridis_color_map)) {
             viridis_color_map <- "D"
         }
         return(plot + viridis::scale_fill_viridis(name=sensor_metadata@name, option=viridis_color_map, direction=1))
     }
+
     sensor <- mc_data_sensors[[sensor_metadata@sensor_id]]
     physical <- mc_data_physical[[sensor@physical]]
     if(is.null(viridis_color_map)) {
