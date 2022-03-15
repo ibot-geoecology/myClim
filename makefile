@@ -4,7 +4,7 @@ install-gitlab:
 	R -e 'devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="5N6cg1k2TNczNj85xf15")'
 
 install:
-	R -e 'install.packages(".", repos = NULL)'
+	R -e 'pkg_file <- devtools::build("."); install.packages(pkg_file, repos = NULL, build_vignettes=TRUE)'
 
 remove:
 	R -e 'remove.packages("myClim")'
@@ -13,7 +13,6 @@ generate:
 	Rscript data-raw/mc_data_*.R
 	$(RM) NAMESPACE
 	R -e 'devtools::document()'
-	R -e 'devtools::build_vignettes()'
 
 generate-html:
 	R -e 'pkgdown::build_site(override = list(destination = "../docs"))'

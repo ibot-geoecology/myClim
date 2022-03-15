@@ -18,7 +18,7 @@ With myClim tools one can crop, join, downscale, and convert microclimatic data 
 
 ## Install
 
-```{r setup, eval=FALSE}
+```r
 # Install dependencies
 
 requiered_packages <- c("stringr", "lubridate", "tibble",
@@ -62,7 +62,7 @@ what happens while reading without metadata
 ```{r}
 # setwd("..")
 library(myClim)
-setwd("D:/Git/microclim")
+setwd("..")
 # read from files
 tms.f <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv",
                               "examples/data/TOMST/data_94184102_0.csv"), dataformat_name="TOMST")
@@ -71,7 +71,7 @@ tms.f <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv",
 tms.d <- mc_read_files(c("examples/"), dataformat_name="TOMST")
 
 # read from data.frame
-load("D:/Git/microclim/examples/data/chmi/airTmax_merged.RData") #airTmax
+load("examples/data/chmi/airTmax_merged.RData") #airTmax
 
 ```
 

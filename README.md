@@ -3,7 +3,7 @@
 Ruční instalace nenainstaluje automaticky závislosti. Můžete nainstalovat pomocí:
 
 ```R
-requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr", "ggplot2", "ggforce", "viridis", "runner")
+requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr", "ggplot2", "ggforce", "viridis", "runner", "rmarkdown", "knitr")
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
 ```
@@ -22,8 +22,9 @@ unzip(zip_file)
 file.remove(zip_file)
 unlink(dir_name, recursive=TRUE)
 file.rename(subdir, dir_name)
-install.packages(dir_name, repos=NULL, type="source")
 setwd(dir_name)
+pkg_file <- devtools::build(".")
+install.packages(pkg_file, repos = NULL)
 ```
 
 V RStudiu je možné aktualizovat balíček v menu Build -> Install and restart.
@@ -36,14 +37,7 @@ V souboru [examples/load_tomst.R](examples/load_tomst.R) je ukázka načtení da
 Stručný popis se nachází v komentářích.
 V souboru [examples/plot_tomst.R](examples/plot_tomst.R) je ukázka generování grafů.
 V souboru [examples/calc.R](examples/calc.R) je ukázka použití funkcí z modulu `mc_calc`.
-
-Spuštění příkladů je možné následujícím kódem:
-
-```R
-source("examples/load_tomst.R")
-source("examples/plot_tomst.R")
-source("examples/calc.R")
-```
+V souboru [examples/load_chmi.R](examples/load_chmi.R) je ukázka načtení dat z ČHMI.
 
 # Testy
 
