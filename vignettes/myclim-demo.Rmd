@@ -59,7 +59,7 @@ myClim read multiple formats of data downloaded from various loggers (for testin
 When user not provide metadata and localities, using functions `mc_read_files()`, `mc_read_wide()`, `mc_read_long()` myClim automatically generates localities from each data file. Such localities are named after loaded data files (loggers) or locality from wide, long format and have no metadata.
 When user provides metadata using function `mc_read_data()` than two specific tables are required. 1. table with logger files paths, logger type and locality, 2. table with locality metadata like e.g. coordinates, altitude, time zone information. See help for `mc_read_data()`
 
-After reading, created myClim object is in Prep-format. See `help("myClim")`.
+Output of reading functions is myClim object in Prep-format designed for data cleaning and joining. See `help("myClim")`. 
 
 ```{r eval=FALSE}
 # setwd("..")
@@ -68,35 +68,36 @@ setwd("..")
 setwd("d:/Git/myClim/")
 
 ## Read without metadata
-# read from files, no metadata provided
+# read from files
 tms.f <- mc_read_files(c("d:/Git/myClim/examples/data/TOMST/data_91184101_0.csv",
                          "d:/Git/myClim/examples/data/TOMST/data_94184102_0.csv"),
                        dataformat_name="TOMST")
 
-
-# read from directory, no metadata
+# read from directory
 tms.d <- mc_read_files(c("d:/Git/myClim/examples/"), dataformat_name="TOMST")
-# warning about file format control, files not matching foramt are skipped. 
-airTmax$date[1]
+# warning about file format control, files not matching format are skipped. 
 
-# read from data.frame, no metadata
+# read from data.frame
 load("d:/Git/myClim/examples/data/chmi/airTmax_merged.RData") #airTmax
 airTmax$date<-as.POSIXct(airTmax$date,tz="UTC")
 meteo<-mc_read_wide(airTmax,sensor_id = "T_C", sensor_name = "airTmax")
 
 
 ## Read with metadata
-# provide one table with file paths and one with locality metadata
-tms.f <- mc_read_data(files_table = "d:/Git/myClim/examples/data/TOMST/files_table.csv",
+# provide two tables. 1. table with file paths and 2. table with locality metadata
+tms.m <- mc_read_data(files_table = "d:/Git/myClim/examples/data/TOMST/files_table.csv",
                       localities_table = "d:/Git/myClim/examples/data/TOMST/localities_table.csv")
 
 ```
 
 
 ## Data cleaning and wrangling
-
+After reading logger files or data frame into myClim object, such object is in Prep-format, format dedicated for preparations for analysis. Cleaning time series, handling time zones, cropping time, measured data calibration, conversion, adding metadata or joining multiple downloads of single logger in time (not implemented yet). 
 
 ```{r}
+tms.clean<-mc_prep_clean(tms.d)
+meteo.clean<-mc_prep_clean(meteo)
+mc_info_count(tms.clean)
 
 ```
 

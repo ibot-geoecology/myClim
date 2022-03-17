@@ -2,16 +2,29 @@
 % Please edit documentation in R/info.R
 \name{mc_info_clean}
 \alias{mc_info_clean}
-\title{get clean info table}
+\title{Call cleaning log}
 \usage{
 mc_info_clean(data)
 }
 \arguments{
-\item{data}{in format for preparing}
+\item{data}{myClim object in Prep-format (see \link{myClim-package})}
 }
 \value{
-dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
+data.frame with columns:
+\itemize{
+\item locality_id - when provided by user then locality ID, when not provided identical with serial number
+\item serial_number - serial number of logger when provided or automatically detected from file name or header
+\item start_date - date of the first record on the logger
+\item end_date  - date of the last record on the logger
+\item step - detected time step in minutes of the logger measurements.
+\item count_duplicits - number of duplicated records (identical time and value)
+\item count_missed - number of missing records (logger outage in time it should record)
+\item count_disordered - number of records incorrectly ordered in time (newer followed by older)
+}
 }
 \description{
-This function return dataframe with info about cleaning loggers
+This function return data.frame with information from cleaning the loggers time series
+}
+\details{
+
 }
