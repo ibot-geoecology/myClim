@@ -12,5 +12,11 @@ Class for logger clean info
 
 \describe{
 \item{\code{step}}{of series in minutes}
+
+\item{\code{count_duplicits}}{count duplicits of data - values with same date}
+
+\item{\code{count_missed}}{count missed data records; Period between all measuring should be same.}
+
+\item{\code{count_disordered}}{count data records which time os older then previous ones}
 }}
 

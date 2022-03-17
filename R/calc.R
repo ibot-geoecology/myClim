@@ -297,8 +297,11 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
 #' Function add new virtual sensor with values of GDD (Growing Degree Days).
 #'
 #' @details
-#' Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than growing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the GDD value is the contribution of the interval to the growing degree day. 
-#' Be careful while aggregating growing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.   
+#' Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with
+#' the same time step as input data. I. e. when the time step is shorter than a day than growing degree day is divided
+#' into smaller time step but still summing the day. For shorter intervals than the day the GDD value is the contribution
+#' of the interval to the growing degree day. Be careful while aggregating growing degree days to longer periods
+#' see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot GDD calculation e.g. TMS_T3
@@ -310,6 +313,8 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
 #' @return The same myClim object as input but with added GDD sensor
 #' @export
 #' @examples
+#' gdd_data <- mc_calc_gdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
+#' gdd_agg <- mc_agg(gdd_data, list(TMS_T3=c("min", "max"), GDD5="sum"), period="day")
 mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=NULL) {
     .calc_xdd(data, sensor, myClim:::.model_const_SENSOR_GDD, output_prefix, t_base, localities, .calc_gdd_values_function)
 }
@@ -356,6 +361,8 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' @return The same myClim object as input but with added GDD sensor
 #' @export
 #' @examples
+#' fdd_data <- mc_calc_fdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
+#' fdd_agg <- mc_agg(fdd_data, list(TMS_T3=c("min", "max"), FDD5="sum"), period="day")
 mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=NULL) {
     .calc_xdd(data, sensor, myClim:::.model_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
 }

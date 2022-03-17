@@ -23,6 +23,7 @@
 #' @return list with slope and intercept parameters
 #' @export
 #' @examples
+#' mc_calib_moisture(120, 3650)
 mc_calib_moisture <- function(raw_air, raw_water,
                               t_air=24, t_water=24,
                               ref_air=114.534, ref_water=3634.723,

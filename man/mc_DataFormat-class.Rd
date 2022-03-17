@@ -6,25 +6,27 @@
 \alias{mc_DataFormat}
 \title{Class for source file data format}
 \description{
-Class for source file data format
+By this class is parsed source data file.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{has_header}}{columns separator}
+\item{\code{has_header}}{detects if table contains header (default TRUE)}
 
-\item{\code{separator}}{columns separator}
+\item{\code{separator}}{columns separator (default ";")}
 
-\item{\code{date_column}}{index of date column}
+\item{\code{date_column}}{index of date column (default NA)}
 
-\item{\code{date_format}}{format of date}
+\item{\code{date_format}}{format of date (default NA)}
 
-\item{\code{na_strings}}{strings for NA values}
+\item{\code{na_strings}}{strings for NA values (default NA)}
 
-\item{\code{columns}}{list with names and indexes of value columns}
+\item{\code{columns}}{list with names and indexes of value columns (default list())}
 
-\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from filename}
+\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from filename (default NA)}
 
 \item{\code{data_row_pattern}}{character pattern for detecting right file format}
+
+\item{\code{logger_type}}{type of logger: TMS, ThermoDatalogger (default NA)}
 }}
 

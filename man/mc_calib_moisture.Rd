@@ -45,3 +45,6 @@ Function calculate correction parameters (slope and intercept) from TMS moisture
 This is highly specialized service function designed to derive correction parameters \code{slope} and \code{intercept} for soil moisture sensor of TMS loggers measuring on the air and in the water.
 Slope and intercept derived from this function could be used as sensor-specific alternative in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}} function instead of universal defaults. But this must be done in code, by had. Standard user is not allowed to modify slope and intercept in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}.
 }
+\examples{
+mc_calib_moisture(120, 3650)
+}

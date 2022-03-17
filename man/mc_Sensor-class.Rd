@@ -13,9 +13,11 @@ Class for sensor definition
 \describe{
 \item{\code{sensor_id}}{unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)}
 
-\item{\code{logger}}{name of logger (TMS, ...)}
+\item{\code{logger}}{name of logger (TMS, ThermoDatalogger, ...)}
 
 \item{\code{physical}}{unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)}
+
+\item{\code{description}}{character info}
 
 \item{\code{default_height}}{default height of sensor in m (default NA)}
 

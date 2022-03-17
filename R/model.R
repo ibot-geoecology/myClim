@@ -57,9 +57,9 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 #' Class for sensor definition
 #' @slot sensor_id unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)
-#' @slot logger name of logger (TMS, ...)
+#' @slot logger name of logger (TMS, ThermoDatalogger, ...)
 #' @slot physical unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)
-#' @slot description
+#' @slot description character info
 #' @slot default_height default height of sensor in m (default NA)
 #' @slot value_type type of values (real, integer, logical) (default real)
 #' @slot min_value minimal value (default NA)
@@ -96,7 +96,7 @@ setMethod(f="initialize",
 
 #' Class for physical
 #' @slot name of physical
-#' @slot description
+#' @slot description character info
 #' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
 #' @slot calibration_class class for calibration
 #' @slot viridis_color_map viridis color map option
@@ -159,7 +159,7 @@ setMethod("initialize",
 
 #' Class for logger metadata
 #' @slot type of logger (TMS, ThermoDatalogger)
-#' @slot serial_number
+#' @slot serial_number serial number of logger
 #' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
@@ -168,9 +168,9 @@ mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
 
 #' Class for logger clean info
 #' @slot step of series in minutes
-#' @slot count_duplicits
-#' @slot count_missed
-#' @slot count_disordered
+#' @slot count_duplicits count duplicits of data - values with same date
+#' @slot count_missed count missed data records; Period between all measuring should be same.
+#' @slot count_disordered count data records which time os older then previous ones
 #' @export mc_LoggerCleanInfo
 #' @exportClass mc_LoggerCleanInfo
 mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
@@ -259,14 +259,18 @@ setMethod(
 )
 
 #' Class for source file data format
-#' @slot has_header columns separator
-#' @slot separator columns separator
-#' @slot date_column index of date column
-#' @slot date_format format of date
-#' @slot na_strings strings for NA values
-#' @slot columns list with names and indexes of value columns
-#' @slot filename_serial_number_pattern character pattern for detecting serial_number from filename
+#'
+#' By this class is parsed source data file.
+#'
+#' @slot has_header detects if table contains header (default TRUE)
+#' @slot separator columns separator (default ";")
+#' @slot date_column index of date column (default NA)
+#' @slot date_format format of date (default NA)
+#' @slot na_strings strings for NA values (default NA)
+#' @slot columns list with names and indexes of value columns (default list())
+#' @slot filename_serial_number_pattern character pattern for detecting serial_number from filename (default NA)
 #' @slot data_row_pattern character pattern for detecting right file format
+#' @slot logger_type type of logger: TMS, ThermoDatalogger (default NA)
 #' @export mc_DataFormat
 #' @exportClass mc_DataFormat
 mc_DataFormat <- setClass("mc_DataFormat",

@@ -26,6 +26,13 @@ The same myClim object as input but with added GDD sensor
 Function add new virtual sensor with values of GDD (Growing Degree Days).
 }
 \details{
-Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than growing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the GDD value is the contribution of the interval to the growing degree day.
-Be careful while aggregating growing degree days to longer periods see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum}, but user is allowed to apply anything.
+Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with
+the same time step as input data. I. e. when the time step is shorter than a day than growing degree day is divided
+into smaller time step but still summing the day. For shorter intervals than the day the GDD value is the contribution
+of the interval to the growing degree day. Be careful while aggregating growing degree days to longer periods
+see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum}, but user is allowed to apply anything.
+}
+\examples{
+gdd_data <- mc_calc_gdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
+gdd_agg <- mc_agg(gdd_data, list(TMS_T3=c("min", "max"), GDD5="sum"), period="day")
 }

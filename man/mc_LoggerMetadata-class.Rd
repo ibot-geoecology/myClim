@@ -12,5 +12,7 @@ Class for logger metadata
 
 \describe{
 \item{\code{type}}{of logger (TMS, ThermoDatalogger)}
+
+\item{\code{serial_number}}{serial number of logger}
 }}
 

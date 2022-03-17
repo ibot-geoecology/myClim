@@ -13,6 +13,8 @@ Class for physical
 \describe{
 \item{\code{name}}{of physical}
 
+\item{\code{description}}{character info}
+
 \item{\code{units}}{measurument (°C, \\%, m3/m3, raw, mm, ...)}
 
 \item{\code{calibration_class}}{class for calibration}

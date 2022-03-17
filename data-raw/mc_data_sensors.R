@@ -19,7 +19,7 @@ mc_data_sensors[[.model_const_SENSOR_TMS_T2]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_TMS_T2]]@sensor_id <- .model_const_SENSOR_TMS_T2
 mc_data_sensors[[.model_const_SENSOR_TMS_T2]]@logger <- .model_const_LOGGER_TOMST_TMS
 mc_data_sensors[[.model_const_SENSOR_TMS_T2]]@physical <- .model_const_PHYSICAL_T_C
-mc_data_sensors[[.model_const_SENSOR_TMS_T1]]@description <- "Temperature on surface of soil"
+mc_data_sensors[[.model_const_SENSOR_TMS_T2]]@description <- "Temperature on surface of soil"
 mc_data_sensors[[.model_const_SENSOR_TMS_T2]]@default_height <- 0
 mc_data_sensors[[.model_const_SENSOR_TMS_T2]]@min_value <- -50
 mc_data_sensors[[.model_const_SENSOR_TMS_T2]]@max_value <- 60
@@ -29,7 +29,7 @@ mc_data_sensors[[.model_const_SENSOR_TMS_T3]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@sensor_id <- .model_const_SENSOR_TMS_T3
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@logger <- .model_const_LOGGER_TOMST_TMS
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@physical <- .model_const_PHYSICAL_T_C
-mc_data_sensors[[.model_const_SENSOR_TMS_T1]]@description <- "Temperature of air"
+mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@description <- "Temperature of air"
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@default_height <- 0.15
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@min_value <- -40
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@max_value <- 60
