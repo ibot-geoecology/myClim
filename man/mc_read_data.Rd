@@ -2,16 +2,12 @@
 % Please edit documentation in R/read.R
 \name{mc_read_data}
 \alias{mc_read_data}
-\title{Data files reading}
+\title{Reading files with locality metadata}
 \usage{
 mc_read_data(files_table, localities_table = NULL)
 }
 \arguments{
-\item{files_table}{csv file path or data.frame which describe data files
-
-Csv file required header row. Column separator is ",".
-
-Columns:
+\item{files_table}{path to csv file or data.frame object containing 4 columns:
 \itemize{
 \item path - path to file
 \item locality_id
@@ -19,11 +15,7 @@ Columns:
 \item serial_number - can be NA, than try detect
 }}
 
-\item{localities_table}{csv file path or data.frame which describe localities
-
-Csv file required header row. Column separator is ",".
-
-Columns:
+\item{localities_table}{path to csv file or data.frame object containing 5 columns:
 \itemize{
 \item locality_id
 \item altitude
@@ -33,10 +25,16 @@ Columns:
 }}
 }
 \value{
-data in standard format
+myClim object in Prep-format see \link{myClim-package}
 }
 \description{
-This function read raw data from loggers by data.frame or csv file with files description.
+This function requires two tables. i.) \code{files_table} with paths pointing to raw
+csv logger files, specification of data format (logger type) and locality name.
+ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
+}
+\details{
+When loading \code{files_table} and \code{localities_table} from external CSV it
+must have header, column separator must be column ","
 }
 \examples{
 \dontrun{

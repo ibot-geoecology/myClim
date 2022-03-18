@@ -2,7 +2,7 @@
 % Please edit documentation in R/read.R
 \name{mc_read_wide}
 \alias{mc_read_wide}
-\title{Reading universal data from wide data.frame}
+\title{Reading data from wide data.frame}
 \usage{
 mc_read_wide(
   data_table,
@@ -11,7 +11,8 @@ mc_read_wide(
 )
 }
 \arguments{
-\item{data_table}{data.frame with values
+\item{data_table}{data.frame with first column of POSIXct time format UTC timezone,
+followed by columns with microclimatic records. See details.
 
 Columns:
 \itemize{
@@ -21,14 +22,19 @@ Columns:
 \item Name of locality\link{n} - values
 }}
 
-\item{sensor_id}{name of sensor from \link{mc_data_sensors} (default real)}
+\item{sensor_id}{define the sensor type, one of \link{mc_data_sensors} (default \code{real})}
 
 \item{sensor_name}{custom name of sensor; if NULL than \code{sensor_name <- sensor_id} (default NULL)}
 }
 \value{
-data in prep-format
+myClim object in Prep-format
 }
 \description{
-This function read data from data.frame. There is datetime column. Other columns mean locality values.
-Name of column mean name of locality. All values are from one sensor.
+This is universal function designed to read time series and values
+from wide data.frame to myClim object.
+}
+\details{
+The first column of input data.frame must be datetime column in POSIXct time format UTC timezone.
+Following columns represents localities. Column names are the localities.
+All values in wide data.frame represents the same sensor, e.g. air temperature.
 }

@@ -3,18 +3,23 @@
 .read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
 .read_const_MESSAGE_SENSORS_MULTIPLE_ID <- "Sensor(s) {} have multiple sensor_ids."
 
-#' Reading files
+#' Reading files or directories
 #'
-#' This function read data files of one logger type. If file is not in correct format, is skipped.
-#' Locality is set to serial_number of logger.
+#' This function read one or more csv files or directories of identical, 
+#' pre-defined logger type (format) see [mc_DataFormat]. 
+#' This function does not allow use to provide additional locality or sensor metadata. 
+#' Metadata can be load through [myClim::mc_read_files()] or 
+#' can be provided later with function [myClim::mc_prep_meta()]
+#' 
+#' @details 
+#' If file is not in expected format, then file is skipped and warning printed in console. 
+#' CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.    
+#' Localities are named after serial_number of logger.
 #'
 #' @param paths vector of paths to files or directories
-#'
-#' If paths are directories, then function search logger files.
-#' It isn't possible combine files and directories.
-#' @param dataformat_name character - data format of logger (TOMST, TOMST_join)
-#' @param recursive logical - recursive search in subdirectories (default TRUE)
-#' @return data in standard format
+#' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join)
+#' @param recursive logical - recursive search in sub-directories (default TRUE)
+#' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
 #' \dontrun{
@@ -39,30 +44,29 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
     purrr::flatten_chr(purrr::map(paths, files_function))
 }
 
-#' Data files reading
+#' Reading files with locality metadata
 #'
-#' This function read raw data from loggers by data.frame or csv file with files description.
+#' This function requires two tables. i.) `files_table` with paths pointing to raw
+#' csv logger files, specification of data format (logger type) and locality name. 
+#' ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
+#' 
+#' @details 
+#' When loading `files_table` and `localities_table` from external CSV it 
+#' must have header, column separator must be column "," 
 #'
-#' @param files_table csv file path or data.frame which describe data files
-#'
-#' Csv file required header row. Column separator is ",".
-#'
-#' Columns:
+#' @param files_table path to csv file or data.frame object containing 4 columns: 
 #' * path - path to file
 #' * locality_id
 #' * data_format
 #' * serial_number - can be NA, than try detect
-#' @param localities_table csv file path or data.frame which describe localities
-#'
-#' Csv file required header row. Column separator is ",".
-#'
-#' Columns:
+#' 
+#' @param localities_table path to csv file or data.frame object containing 5 columns:
 #' * locality_id
 #' * altitude
 #' * lon_wgs84
 #' * lat_wgs84
 #' * tz_offset
-#' @return data in standard format
+#' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
 #' \dontrun{
@@ -233,21 +237,26 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     myClim:::.common_get_new_sensor(sensor_name, sensor_name, values)
 }
 
-#' Reading universal data from wide data.frame
+#' Reading data from wide data.frame
 #'
-#' This function read data from data.frame. There is datetime column. Other columns mean locality values.
-#' Name of column mean name of locality. All values are from one sensor.
+#' This is universal function designed to read time series and values 
+#' from wide data.frame to myClim object. 
+#' 
+#' @details The first column of input data.frame must be datetime column in POSIXct time format UTC timezone.
+#' Following columns represents localities. Column names are the localities. 
+#' All values in wide data.frame represents the same sensor, e.g. air temperature. 
 #'
-#' @param data_table data.frame with values
+#' @param data_table data.frame with first column of POSIXct time format UTC timezone, 
+#' followed by columns with microclimatic records. See details.  
 #'
 #' Columns:
 #' * datetime column - POSIXct and UTC timezone is required
 #' * Name of locality[1] - values
 #' * ...
 #' * Name of locality[n] - values
-#' @param sensor_id name of sensor from [myClim::mc_data_sensors] (default real)
+#' @param sensor_id define the sensor type, one of [myClim::mc_data_sensors] (default `real`)
 #' @param sensor_name custom name of sensor; if NULL than `sensor_name <- sensor_id` (default NULL)
-#' @return data in prep-format
+#' @return myClim object in Prep-format
 #' @export
 #' @examples
 mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL) {
@@ -275,21 +284,24 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
     }
 }
 
-#' Reading universal data from long data.frame
+#' Reading data from long data.frame
 #'
-#' This function read data from data.frame in long format.
+#' This is universal function designed to read time series and values 
+#' from long data.frame to myClim object. 
 #'
-#' @param data_table data.frame with values
+#' @details Similar like [myClim::read_wide] but is capable to read multiple sensor types. 
+#'
+#' @param data_table long data.frame with values
 #'
 #' Columns:
 #' * locality_id
 #' * sensor_name
 #' * datetime - POSIXct and UTC timezone is required
 #' * value
-#' @param sensor_ids list with relations between sensor_names and sensor_ids; Sensor_id is key from [myClim::mc_data_sensors].
-#'
+#' @param sensor_ids list with relations between sensor_names and sensor_ids; 
+#' Sensor_id is key from [myClim::mc_data_sensors]
 #' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
-#' @return data in prep-format
+#' @return myClim object in Prep-format
 #' @export
 #' @examples
 mc_read_long <- function(data_table, sensor_ids) {
