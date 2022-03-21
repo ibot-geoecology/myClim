@@ -13,8 +13,8 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-This vignette describes the handling of microclimatic data in R with myClim library. myClim workflow begin at the reading data primary from microclimatic dataloggers but can be also reding of meteorological station data from files. Cleaning time step, time zone settings and metadata collecting is the next step of the workflow. Microclimatic data are stored in mcClim objects of regular R structure consists of classes and lists slightly resembling database scheme. #(see my-clim package)#
-With myClim tools one can crop, join, downscale, and convert microclimatic data form and format, sort them into localities, call descriptive characteristics and compute microclimatic derivates. Handy plotting functions are provided with smart defaults.   
+This vignette describes the handling of microclimatic data in R with myClim library. myClim work flow begin at the reading data primary from microclimatic dataloggers but can be also reading of meteorological station data from files. Cleaning time step, time zone settings and metadata collecting is the next step of the work flow. Microclimatic data are stored in myClim objects of regular R structure consists of classes and lists slightly resembling database scheme. #(see my-clim package)#
+With myClim tools one can crop, join, downscale, and convert microclimatic data form and format, sort them into localities, call descriptive characteristics and compute microclimatic variables. Handy plotting functions are provided with smart defaults.   
 
 ## Install
 
@@ -51,6 +51,22 @@ browseVignettes("myClim")
 
 ## Input data files
 Let’s say we have microclimatic data from the filed data loggers. It can be single file from single datalogger hosting single or multiple sensors.  It can be few csv files downloaded once or multiple times from single locality hosting single or multiple dataloggers. It can be many files from many localities downloaded just once or any combination of all mentioned. This can be load into r to single myClim object file by file or file directories. Besides loading csv files myClim object can be created also from tidy wide or long tables from R environment. This is useful in case you already have miroclimatic time series in R and when query microclimatic data form database. 
+
+## myClim objects
+We implemented two slightly different data formats of myClim objects calling them: 
+Prep-format and Calc-format. 
+Prep-format is designed for data preparations. Mainly data cleaning, 
+metadata gathering, time zones handling and multiple downloads joining. 
+Output myClim object from read functions 
+`mc_read_files()`and `mc_read_data()` is a Prep-format.
+Prep-format contains information about localities, loggers and sensors. 
+Function `mc_agg()` converts data from Prep-format to Calc-format. 
+Calc-format is designed mainly for calculations, analysis and virtual 
+loggers calculations on the basis of cleaned, alligned microclimatic data. 
+Calc-formt is missing the level of logger. 
+In Calc-format sensors are organized directly in localities. 
+  
+For detailed description and schema of myClim Prep-format or Calc-format see `help("myClim")`  
 
 
 ## Read microclimatic data

@@ -118,17 +118,21 @@ setMethod("initialize",
               return(.Object)
           })
 
-#' Class for main metadata in data format for calculation
-#' @slot step of data
+#' Class for myClim object metadata in Calc-format
+#' @slot step time step of data in minutes
+#' @slot step_text time step of data in text for irregular periods (e.g. month)
 #' @export mc_MainMetadata
 #' @exportClass mc_MainMetadata
+#' @seealso Calc-format section of [myClim-package]
 mc_MainMetadata <- setClass("mc_MainMetadata",
                             slots = c(step = "numeric",
                                       step_text = "character"))
 
 #' Class for locality metadata
-#' @slot id name of loacality
-#' @slot altitude of loacality
+#' @details When reading without metadata, then locality is named after file
+#' where the data come from, or after the sensor id where the data come form.  
+#' @slot id name of locality
+#' @slot altitude of locality
 #' @slot lat_wgs84 latitude of locality in WGS-84
 #' @slot lon_wgs84 longitude of locality in WGS-84
 #' @slot tz_offset offset from UTC in minutes
@@ -136,6 +140,7 @@ mc_MainMetadata <- setClass("mc_MainMetadata",
 #' @slot user_data list for user data
 #' @export mc_LocalityMetadata
 #' @exportClass mc_LocalityMetadata
+#' @seealso [myClim-package], [mc_LoggerMetadata], [mc_SensorMetadata]
 mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
                                 slots = c(locality_id = "character",
                                           altitude = "numeric",
@@ -158,8 +163,8 @@ setMethod("initialize",
           })
 
 #' Class for logger metadata
-#' @slot type of logger (TMS, ThermoDatalogger)
-#' @slot serial_number serial number of logger
+#' @slot type of logger (TMS, ThermoDatalogger, HOBO, ibutton)
+#' @slot serial_number serial number of the logger 
 #' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
@@ -190,12 +195,16 @@ setMethod("initialize",
           })
 
 #' Class for sensor metadata
-#' @slot sensor_id character
-#' @slot name character
+#' @details `sensor_id` must be one of the defined id in myClim. see [mc_data_sensors]. 
+#' It is useful to select on of predefined, because it makes plotting and calculaton easier. 
+#' Through `sensor_id` myClim assign pre-deined physicyl units or plotting colors see [mc_Sensor].  
+#' @slot sensor_id unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...) [mc_data_sensors] e.g. TMS_T1, TMS_TMSmoisture, snow_fresh...
+#' @slot name character, could be same as `sensor_id` but also defined by function or user.  
 #' @slot height in meters
 #' @slot calibrated logical - detect if sensor is calibrated
 #' @export mc_SensorMetadata
 #' @exportClass mc_SensorMetadata
+#' @seealso [myClim-package], [mc_LoggerMetadata], [mc_data_sensors]
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
                               slots = c(sensor_id = "character",
                                         name = "character",

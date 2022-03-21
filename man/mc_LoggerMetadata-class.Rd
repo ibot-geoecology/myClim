@@ -11,8 +11,8 @@ Class for logger metadata
 \section{Slots}{
 
 \describe{
-\item{\code{type}}{of logger (TMS, ThermoDatalogger)}
+\item{\code{type}}{of logger (TMS, ThermoDatalogger, HOBO, ibutton)}
 
-\item{\code{serial_number}}{serial number of logger}
+\item{\code{serial_number}}{serial number of the logger}
 }}
 
