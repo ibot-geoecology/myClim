@@ -1,4 +1,4 @@
-.PHONY: install, remove, generate, test, generate-html
+.PHONY: install, remove, generate, test, generate-html, generate-documentation, generate-source
 
 install-gitlab:
 	R -e 'devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="5N6cg1k2TNczNj85xf15")'
@@ -9,12 +9,16 @@ install:
 remove:
 	R -e 'remove.packages("myClim")'
 
-generate:
+generate: generate-source generate-documentation
+
+generate-source:
 	for filename in data-raw/mc_data_*.R; do Rscript "$$filename"; done
 	$(RM) NAMESPACE
+
+generate-documentation:
 	R -e 'devtools::document()'
 
-generate-html:
+generate-html: generate-documentation
 	R -e 'pkgdown::build_site(override = list(destination = "../docs"))'
 
 test:
