@@ -2,18 +2,18 @@
 % Please edit documentation in R/info.R
 \name{mc_info_count}
 \alias{mc_info_count}
-\title{count data}
+\title{Count data}
 \usage{
 mc_info_count(data)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-format (see \link{myClim-package})}
 }
 \value{
-data.frame with count localities, loggers and sensors
+data.frame with count of localities, loggers and sensors
 }
 \description{
-This function return count of localities, loggers and sensors
+This function return data.frame with the number of localities, loggers and sensors of input myClim object.
 }
 \examples{
 count_table <- mc_info_count(example_tomst_data1)

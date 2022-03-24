@@ -1,9 +1,9 @@
-#' count data
+#' Count data
 #'
-#' This function return count of localities, loggers and sensors
+#' This function return data.frame with the number of localities, loggers and sensors of input myClim object. 
 #'
-#' @param data in format for preparing or calculation
-#' @return data.frame with count localities, loggers and sensors
+#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
+#' @return data.frame with count of localities, loggers and sensors
 #' @export
 #' @examples
 #' count_table <- mc_info_count(example_tomst_data1)
@@ -37,12 +37,25 @@ mc_info_count <- function(data) {
     result
 }
 
-#' get clean info table
+#' Call cleaning log
 #'
-#' This function return dataframe with info about cleaning loggers
-#'
-#' @param data in format for preparing
-#' @return dataframe with columns locality_id, serial_number, start_date, end_date, step, count_duplicits, count_missed, count_disordered
+#' @description 
+#' This function return data.frame with information from cleaning the loggers time series 
+#' 
+#' @details
+#' 
+#' 
+#' @param data myClim object in Prep-format (see [myClim-package])
+#' @return data.frame with columns:
+#' * locality_id - when provided by user then locality ID, when not provided identical with serial number
+#' * serial_number - serial number of logger when provided or automatically detected from file name or header
+#' * start_date - date of the first record on the logger
+#' * end_date  - date of the last record on the logger
+#' * step - detected time step in minutes of the logger measurements. 
+#' * count_duplicits - number of duplicated records (identical time and value)
+#' * count_missed - number of missing records (logger outage in time it should record)
+#' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
+#' 
 #' @export
 mc_info_clean <- function(data) {
     myClim:::.common_stop_if_not_prep_format(data)

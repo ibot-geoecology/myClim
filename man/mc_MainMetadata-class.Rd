@@ -4,13 +4,18 @@
 \name{mc_MainMetadata-class}
 \alias{mc_MainMetadata-class}
 \alias{mc_MainMetadata}
-\title{Class for main metadata in data format for calculation}
+\title{Class for myClim object metadata in Calc-format}
 \description{
-Class for main metadata in data format for calculation
+Class for myClim object metadata in Calc-format
 }
 \section{Slots}{
 
 \describe{
-\item{\code{step}}{of data}
+\item{\code{step}}{time step of data in minutes}
+
+\item{\code{step_text}}{time step of data in text for irregular periods (e.g. month)}
 }}
 
+\seealso{
+Calc-format section of \link{myClim-package}
+}

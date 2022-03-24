@@ -2,26 +2,31 @@
 % Please edit documentation in R/read.R
 \name{mc_read_files}
 \alias{mc_read_files}
-\title{Reading files}
+\title{Reading files or directories}
 \usage{
 mc_read_files(paths, dataformat_name, recursive = TRUE)
 }
 \arguments{
-\item{paths}{vector of paths to files or directories
+\item{paths}{vector of paths to files or directories}
 
-If paths are directories, then function search logger files.
-It isn't possible combine files and directories.}
+\item{dataformat_name}{character - data format of logger one of (TOMST, TOMST_join)}
 
-\item{dataformat_name}{character - data format of logger (TOMST, TOMST_join)}
-
-\item{recursive}{logical - recursive search in subdirectories (default TRUE)}
+\item{recursive}{logical - recursive search in sub-directories (default TRUE)}
 }
 \value{
-data in standard format
+myClim object in Prep-format see \link{myClim-package}
 }
 \description{
-This function read data files of one logger type. If file is not in correct format, is skipped.
-Locality is set to serial_number of logger.
+This function read one or more csv files or directories of identical,
+pre-defined logger type (format) see \link{mc_DataFormat}.
+This function does not allow use to provide additional locality or sensor metadata.
+Metadata can be load through \code{\link[=mc_read_files]{mc_read_files()}} or
+can be provided later with function \code{\link[=mc_prep_meta]{mc_prep_meta()}}
+}
+\details{
+If file is not in expected format, then file is skipped and warning printed in console.
+CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.
+Localities are named after serial_number of logger.
 }
 \examples{
 \dontrun{

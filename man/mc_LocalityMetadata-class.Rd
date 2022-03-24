@@ -8,12 +8,16 @@
 \description{
 Class for locality metadata
 }
+\details{
+When reading without metadata, then locality is named after file
+where the data come from, or after the sensor id where the data come form.
+}
 \section{Slots}{
 
 \describe{
-\item{\code{id}}{name of loacality}
+\item{\code{id}}{name of locality}
 
-\item{\code{altitude}}{of loacality}
+\item{\code{altitude}}{of locality}
 
 \item{\code{lat_wgs84}}{latitude of locality in WGS-84}
 
@@ -26,3 +30,6 @@ Class for locality metadata
 \item{\code{user_data}}{list for user data}
 }}
 
+\seealso{
+\link{myClim-package}, \link{mc_LoggerMetadata}, \link{mc_SensorMetadata}
+}

@@ -13,12 +13,12 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-This vignette describes the handling of microclimatic data in R with myClim library. myClim workflow begin at the reading data primary from microclimatic dataloggers but can be also reding of meteorological station data from files. Cleaning time step, time zone settings and metadata collecting is the next step of the workflow. Microclimatic data are stored in mcClim objects of regular R structure consists of classes and lists slightly resembling database scheme. #(see my-clim package)#
-With myClim tools one can crop, join, downscale, and convert microclimatic data form and format, sort them into localities, call descriptive characteristics and compute microclimatic derivates. Handy plotting functions are provided with smart defaults.   
+This vignette describes the handling of microclimatic data in R with myClim library. myClim work flow begin at the reading data primary from microclimatic dataloggers but can be also reading of meteorological station data from files. Cleaning time step, time zone settings and metadata collecting is the next step of the work flow. Microclimatic data are stored in myClim objects of regular R structure consists of classes and lists slightly resembling database scheme. #(see my-clim package)#
+With myClim tools one can crop, join, downscale, and convert microclimatic data form and format, sort them into localities, call descriptive characteristics and compute microclimatic variables. Handy plotting functions are provided with smart defaults.   
 
 ## Install
 
-```r
+```{r eval=FALSE}
 # Install dependencies
 
 requiered_packages <- c("stringr", "lubridate", "tibble",
@@ -27,51 +27,225 @@ requiered_packages <- c("stringr", "lubridate", "tibble",
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
 
-# install myClim
-
-dir.create("c:\\Users\\matej.man\\Downloads\\microclim0.24")
-setwd("c:\\Users\\matej.man\\Downloads\\microclim0.24")
-
 # directory to unzip source files
-setwd("C:/path/to/directory") # !EDIT IT!
+dir.create("c:\\Users\\Doga\\Downloads\\microclim0.25")
+setwd("c:\\Users\\Doga\\Downloads\\microclim0.25")
 
 zip_file <- "myClim.zip"
 dir_name <- "myClim"
-download.file(  
-  "https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", 
-  destfile=zip_file, mode="wb")
+download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
 subdir <- unzip(zip_file, list=TRUE)$Name[1]
 unzip(zip_file)
 file.remove(zip_file)
 unlink(dir_name, recursive=TRUE)
 file.rename(subdir, dir_name)
-install.packages(dir_name, repos=NULL, type="source")
 setwd(dir_name)
+pkg_file <- devtools::build(".")
+install.packages(pkg_file, repos = NULL)
+
+
 library(myClim)
+browseVignettes("myClim")
+
 ```
 
 ## Input data files
 Let’s say we have microclimatic data from the filed data loggers. It can be single file from single datalogger hosting single or multiple sensors.  It can be few csv files downloaded once or multiple times from single locality hosting single or multiple dataloggers. It can be many files from many localities downloaded just once or any combination of all mentioned. This can be load into r to single myClim object file by file or file directories. Besides loading csv files myClim object can be created also from tidy wide or long tables from R environment. This is useful in case you already have miroclimatic time series in R and when query microclimatic data form database. 
 
+## myClim objects
+We implemented two slightly different data formats of myClim objects calling them: 
+Prep-format and Calc-format. 
+Prep-format is designed for data preparations. Mainly data cleaning, 
+metadata gathering, time zones handling and multiple downloads joining. 
+Output myClim object from read functions 
+`mc_read_files()`and `mc_read_data()` is a Prep-format.
+Prep-format contains information about localities, loggers and sensors. 
+Function `mc_agg()` converts data from Prep-format to Calc-format. 
+Calc-format is designed mainly for calculations, analysis and virtual 
+loggers calculations on the basis of cleaned, alligned microclimatic data. 
+Calc-formt is missing the level of logger. 
+In Calc-format sensors are organized directly in localities. 
+  
+For detailed description and schema of myClim Prep-format or Calc-format see `help("myClim")`  
+
 
 ## Read microclimatic data
-myClim can read multiple formats of data downloaded from various loggers (Tomst, HOBO, IButton…) read functions require downloaded data in defined column order, separator etc. Supported formats are defined by R class with several slots and thus is easily extendable to read almost any format user is able to define. See `mc_DataFormat-class` While reading data, user must specify `dataformat_name=` one of `r names(myClim::mc_data_formats)`.
-reading with metadata. 
-what happens while reading without metadata
+myClim read multiple formats of data downloaded from various loggers (for testing only Tomst format is supported, but we are preparing also HOBO, ibutton, lascar etc) read functions require downloaded data in defined format as is specific column order, separator, date format, number format atc. Logger output files are specified in R class with several slots. User can principially extend supported file formats defining custom class. See `mc_DataFormat-class` While reading data, user must specify `dataformat_name=` one of `r names(myClim::mc_data_formats)`. For testing supported only Tomst files. 
+ 
+When user not provide metadata and localities, using functions `mc_read_files()`, `mc_read_wide()`, `mc_read_long()` myClim automatically generates localities from each data file. Such localities are named after loaded data files (loggers) or locality from wide, long format and have no metadata.
+When user provides metadata using function `mc_read_data()` than two specific tables are required. 1. table with logger files paths, logger type and locality, 2. table with locality metadata like e.g. coordinates, altitude, time zone information. See help for `mc_read_data()`
 
-```{r}
+Output of reading functions is myClim object in Prep-format designed for data cleaning and joining. See `help("myClim")`. 
+
+```{r eval=FALSE}
 # setwd("..")
 library(myClim)
 setwd("..")
+setwd("d:/Git/myClim/")
+
+## Read without metadata
 # read from files
-tms.f <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv",
-                              "examples/data/TOMST/data_94184102_0.csv"), dataformat_name="TOMST")
+tms.f <- mc_read_files(c("d:/Git/myClim/examples/data/TOMST/data_91184101_0.csv",
+                         "d:/Git/myClim/examples/data/TOMST/data_94184102_0.csv"),
+                       dataformat_name="TOMST")
 
 # read from directory
-tms.d <- mc_read_files(c("examples/"), dataformat_name="TOMST")
+tms.d <- mc_read_files(c("d:/Git/myClim/examples/"), dataformat_name="TOMST")
+# warning about file format control, files not matching format are skipped. 
 
 # read from data.frame
-load("examples/data/chmi/airTmax_merged.RData") #airTmax
+load("d:/Git/myClim/examples/data/chmi/airTmax_merged.RData") #airTmax
+airTmax$date<-as.POSIXct(airTmax$date,tz="UTC")
+at<-airTmax[19000:nrow(airTmax),]
+sel<-colSums(!is.na(at[,-1]))>2000
+at<-at[,c("date",names(sel))]
+
+meteo<-mc_read_wide(at,sensor_id = "T_C", sensor_name = "airTmax")
+
+## Read with metadata
+# provide two tables. 1. table with file paths and 2. table with locality metadata
+
+## Matej Helper 
+# files_table = read.table("d:/Git/myClim/examples/data/TOMST/files_table.csv",
+#                          sep=",",header = T)
+# files_table<-files_table[order(files_table$path),]
+# 
+# fi<-list.files("d:/Git/myClim/examples/data/TOMST/"
+#                ,pattern = "data",
+#                full.names = T)
+# files_table$path<-fi
+# write.table(files_table,"d:/Git/myClim/examples/data/TOMST/files_table1.csv",
+#                          sep=",",row.names = F)
+
+tms.m <- mc_read_data(files_table = 
+                        "d:/Git/myClim/examples/data/TOMST/files_table1.csv",
+                      localities_table =
+                        "d:/Git/myClim/examples/data/TOMST/localities_table.csv")
+
+# tms.m <- mc_read_data(files_table = 
+#                         "/examples/data/TOMST/files_table.csv",
+#                       localities_table =
+#                         "/examples/data/TOMST/localities_table.csv")
+
 
 ```
 
+
+## Preparation 
+After reading logger files or data.frame into myClim object, such object is in Prep-format. Prep-format is dedicated for preparations to the upcoming analysis. 
+
+* **Cleaning time series:** `mc_prep_clean()` checks the order and continuity of microclimatic records, prints cleaning summary in console. Cleaning summary can be called ex post `mc_info_clean()`.   
+
+* **Handling time zones:** `mc_prep_solar_tz()` expect input data in UTC time. Then calculates the time offset in minutes from the solar time on the locality and UTC. Solar time can be used only when user provides coordinates in locality metadata. This is ecologically very useful especially while handling records from large spatial scales but all recorded in UTC. `mc_prep_meta(param_name="tz_offset")` can do the good job when when user want to set custom time zone offset e.g. UTS to local political time or also in cases the data is in local time and user wish to standardize to the UTC. 
+
+* **Sensor calibration:** It is a good idea to be critical to the sensors and calibrate them. Either laboratory or DIY. In case you have calibration data (offsets) you can correct field records. Use `mc_prep_calib_load()` to upload calibration data (offsets) into myClim object. Then use `mc_prep_calib()` to apply the offset correction. See instructive help of the calibration functions. 
+
+* **Cropping, filtering, renaming and merging:** For data wrangling it useful to call `mc_info_count()` which returns the number of localities, loggers and sensors in myClim object  and `mc_info()` returning data.frame with handy summary per sensor. For filtering and sub-setting of  myClim sensors and localities use `mc_filter()`. To merge localities or add sensors to localities use `mc_prep_merge()`. Sometimes before merging it is useful to rename  locality `mc_prep_rename_locality()` or sensor `mc_prep_rename_sensor()` especially in cases when loading logger files without metadata. 
+
+* **Updating metadata** Besides providing custom time zone offset as shown above, it is also  possible to import or update metadata of myClim locality `mc_prep_meta()`. Via `mc_prep_meta(param_name="user_data")` it is possible to appedn almost whatever to myClim locality e.g. topographic, geological or vegetation data, notes etc.   Importing and modifying metadata of sensors (depth, error flag) is not implemented yet. 
+
+ 
+* **Joining in time**  Not implemented yet in myClim. We are working on it.  
+
+
+```{r eval=FALSE}
+
+## Time series cleaning
+tms<-mc_prep_clean(tms.m) # clean series
+tms.info<-mc_info_clean(tms) # call cleaning log
+
+## Time zone 
+tms<-mc_prep_solar_tz(tms) # calculate local (solar) time
+
+## Calibration
+# simulate calibration data
+i<-mc_info(tms)
+calib_table<-data.frame(serial_number=i$serial_number,
+                        sensor_id=i$sensor_id,
+                        datetime=as.POSIXct("2016-11-29"),
+                        cor_factor=0.398,
+                        cor_slope=0)
+
+# load calibration to myClim metadata 
+tms.load<-mc_prep_calib_load(tms,calib_table)
+
+# run calibration
+tms<-mc_prep_calib(tms.load,sensors = c("TM_T",
+                                        "TMS_T1",
+                                        "TMS_T2",
+                                        "TMS_T3"))
+
+## Cropping, renaming, merging, and filtering
+
+tms.i<-mc_info(tms) # call info: per sensor metadata
+tms.in<-mc_info_count(tms) # number of locality, logger, sensor
+
+# crop the time extent for all localities
+start<-as.POSIXct("2021-01-01",tz="UTC")
+end<-as.POSIXct("2021-03-31",tz="UTC")
+tms<-mc_prep_crop(tms,start,end)
+
+tms.ic<-mc_info(tms) # call info 
+
+# simulate another myClim object and rename some localities and sensors
+tms1<-tms
+names(tms1)
+tms1<-mc_prep_rename_locality(tms1,list(A1E05="ABC05", A2E32="CDE32"))
+tms1<-mc_prep_rename_sensor(tms1,sensor_names = list(TMS_T1="TMS_Tsoil",
+                                                     TMS_T2="TMS_Tair"),
+                            localities = "A6W79" )
+
+# merge two myClim objects Prep-format
+tms.m<-mc_prep_merge(list(tms,tms1))
+tms.im<-mc_info(tms.m) # call info 
+# duplicated loggers on share locality
+
+# Filtering: remove data from two sensors on one locality. 
+tms.m<-mc_filter(tms.m,localities = "A6W79", sensors = c("TMS_T2","TMS_T3"),
+                 reverse = T)
+
+tms.if<-mc_info(tms.m) # call info 
+
+
+## Updating locality metadata
+
+# load data without metadata
+tms.d <- mc_read_files(c("d:/Git/myClim/examples/"), dataformat_name="TOMST")
+names(tms.d)
+
+# construct metadata table
+meta<-read.table("d:/Git/myClim/examples/data/TOMST/localities_table.csv"
+                 ,sep=",", header = T)
+me<-read.table("d:/Git/myClim/examples/data/TOMST/files_table1.csv"
+                 ,sep=",", header = T)
+mer<-merge(me,meta,by="locality_id")
+mer$id_auto<-substr(me$path,nchar(me$path)-13,nchar(me$path)-6)
+
+metadata<-data.frame(locality_id=mer$id_auto,
+                     lat_wgs84=mer$lat_wgs84,
+                     lon_wgs84=mer$lon_wgs84)
+
+# upload metadata from data  frame
+tms.d<-mc_prep_meta(tms.d,metadata = metadata)
+
+# update metedata one by one
+# nefunguje
+# tms.d<-mc_prep_meta(tms.d,list(paste0(mer$id_auto," = ", paste0(mer$locality_id))),
+#                     param_name = "locality_id")
+
+
+
+```
+
+## Aggregation 
+
+```{r,eval=FALSE}
+
+```
+
+
+## Calculation
+
+```{r,eval=FALSE}
+
+```

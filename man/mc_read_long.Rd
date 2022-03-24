@@ -2,12 +2,12 @@
 % Please edit documentation in R/read.R
 \name{mc_read_long}
 \alias{mc_read_long}
-\title{Reading universal data from long data.frame}
+\title{Reading data from long data.frame}
 \usage{
 mc_read_long(data_table, sensor_ids)
 }
 \arguments{
-\item{data_table}{data.frame with values
+\item{data_table}{long data.frame with values
 
 Columns:
 \itemize{
@@ -17,13 +17,17 @@ Columns:
 \item value
 }}
 
-\item{sensor_ids}{list with relations between sensor_names and sensor_ids; Sensor_id is key from \link{mc_data_sensors}.
-
+\item{sensor_ids}{list with relations between sensor_names and sensor_ids;
+Sensor_id is key from \link{mc_data_sensors}
 \code{sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)}}
 }
 \value{
-data in prep-format
+myClim object in Prep-format
 }
 \description{
-This function read data from data.frame in long format.
+This is universal function designed to read time series and values
+from long data.frame to myClim object.
+}
+\details{
+Similar like \link{read_wide} but is capable to read multiple sensor types.
 }
