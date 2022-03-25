@@ -135,24 +135,28 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' Set metadata of localities
 #' 
 #' @description
-#' MUST BE CHANGED - is from mc_prep_user_tz
-#' This function allow user to set the offset in minutes against original time series of microclimatic records.
-#' `MyClim` generally assume the records are in UTM Time Zone. When offset is provided, myClim functions by default use
-#' the time corrected with this offset in calculations. See details.
-#' 
+#' This function allows you to add or modify locality metadata. See [mc_LocalityMetadata] 
+#' You can import metadata from named list or from data frame. See details. 
+#'  
 #' @details
-#' If is set tz_offset value, than tz_type is set to `user defined` value.
-#'
-#' MUST BE CHANGED - is from mc_prep_user_tz
-#' For analysis of microclimatic data it is important to think of time zones because of diurnal or seasonal microclimatic rhythms.
-#' `mc_prep_user_tz` allow user to set time offset for individual localities to harmonize e.g.day/night cycles across vhole data set.
+#' Locality metadata is especially useful for handling time zones, considering temporal cycling.
+#' E.g. while providing coordinates, and in case you are sure, the loggers recorded in UTC, 
+#' you can harmonize all data to the solar time (midday) with [myClim::mc_prep_solar_tz()] 
+#' calculating offset to the UTC based on coordinates. Or you can directly provide 
+#' the offset in minutes yourself for individual localities. This is useful e.g. 
+#' for heterogeneous data sets containing loggers recording in local time
+#' and you wish to unify them by setting individual offset e.g. back to UTC. 
+#' If tz_offset is set manually, than tz_type is set to `user defined`.  
 #' 
-#' This function can be used also inversely, for heterogeneous data sets containing loggers recording in local time
-#' and user wish to unify them by setting individual offest e.g. to UTM. This function is also useful for corrections
-#' of shifted loggers time series e.g. due to technical issue.
+#' For minor metadata modification it is practical to use named list in combination
+#' with `param_name` specification. E.g. when you wish to modify only time zone offset,  
+#' then set `param_name="tz_offset"` and provide named list with locality name and 
+#' offset value `list(A1E05=60)`. Simillarly for other metadata slots [mc_LocalityMetadata].
 #' 
-#' In case user is sure, the loggers recorded in UTC and wants to harmonize data set to solar time,
-#' there is [myClim::mc_prep_solar_tz()] calculating offset based on coordinates to harmonize the midday across vhole dataset.
+#' For batch or generally more complex metadata modification you can provide data.frame
+#' with columns specifying `locality_id` and one of `altitude, lat_wgs84, lon_wgs84, tz_offset`. 
+#' Provide locality_id (name) and the value in column of metadata you wish to update. 
+#' In case of using data.frame use `param_name = NULL`  
 #' 
 #' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
 #' @param metadata for localities can be named list or table
@@ -161,7 +165,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' * table with column `locality_id` and another columns named by metadata parameter name; `param_name` must be NULL
 #' @param param_name name of locality metadata parameter; Default names are `altitude`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
 #' Another names are inserted to `user_data` list. see [myClim::mc_LocalityMetadata]
-#' @return MyClim object in the same format as input, with locality metadata filled in
+#' @return myClim object in the same format as input, with locality metadata filled in
 #' @export
 #' @examples
 #' data <- mc_prep_meta(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
