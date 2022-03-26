@@ -49,6 +49,7 @@ browseVignettes("myClim")
 
 ```
 
+
 ## Input data files
 Let’s say we have microclimatic data from the filed data loggers. It can be single file from single datalogger hosting single or multiple sensors.  It can be few csv files downloaded once or multiple times from single locality hosting single or multiple dataloggers. It can be many files from many localities downloaded just once or any combination of all mentioned. This can be load into r to single myClim object file by file or file directories. Besides loading csv files myClim object can be created also from tidy wide or long tables from R environment. This is useful in case you already have miroclimatic time series in R and when query microclimatic data form database. 
 
@@ -131,7 +132,7 @@ tms.m <- mc_read_data(files_table =
 ```
 
 
-## Preparation 
+## Preparation
 After reading logger files or data.frame into myClim object, such object is in Prep-format. Prep-format is dedicated for preparations to the upcoming analysis. 
 
 * **Cleaning time series:** `mc_prep_clean()` checks the order and continuity of microclimatic records, prints cleaning summary in console. Cleaning summary can be called ex post `mc_info_clean()`.   
@@ -237,15 +238,75 @@ tms.d<-mc_prep_meta(tms.d,metadata = metadata)
 
 ```
 
-## Aggregation 
+## Plotting
+`myClim` is equipped with handy plotting tools mainly from ggplot. It is possible to plot raster report for all localities with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports only one or two different  physical units to be plotted. Plotting functions save pdf or png files on your drive. 
 
 ```{r,eval=FALSE}
+# lines
+mc_plot_line(tms.calc,filename = "./lines.pdf",sensors = c("TMS_T3","TMS_TMSmoisture"))
 
+# raster
+mc_plot_raster(tms.calc,filename = "./raster.pdf",sensors = c("TMS_T3","TM_T"))
+
+```
+
+
+## Aggregation
+After reading data into myClim object and cleaning them it is time for aggregation and analysis. 
+Technically aggregation in myClim is switching from Prep-format to Calc-foramt (logger level is removed, sensors are organized directly on localities, see section above: `myClim objects`). The only way how to switch from Prep to Calc is through `mc_agg()` see detailed help. You can only switch the format and left data as they were, but you can also upscale the time step (aggregate the time step) e.g. form 15 min records aggregate to daily, weekly monthly... mean,max, min...  
+
+
+```{r,eval=FALSE}
+tms.ag<-mc_agg(tms) # by default convert from Prep to Calc only
+
+# aggregate to daily mean, range, coverage, and 95 percentile. 
+tms.day<-mc_agg(tms, fun=c("mean","range","coverage","percentile"),
+                percentiles = 95, period = "day")
+i.day<-mc_info(tms.day)
+
+# aggregate all time range, return one value per sensor.
+tms.all<-mc_agg(tms, fun=c("mean","range","coverage","percentile"),
+                percentiles = 95, period = "all")
+i.all<-mc_info(tms.all)
 ```
 
 
 ## Calculation
+With myClim Calc-format objects it is possible to calculate new (virtual) sensors from existing sensors. myClim Calc functions were designed especially to calculate environmental variables from microclimatic records e.g. volumetric water content, growing degree days, snow. Only few Calc functions were implemented yet for testing version. We are working on it. 
 
 ```{r,eval=FALSE}
 
+# calculate volumetric water content from raw tms moisture
+tms.calc<-mc_calc_vwc(tms.ag)
+
+# calculate growing and freezing degree days
+tms.calc<-mc_calc_gdd(tms.calc,sensor = "TMS_T3",)
+tms.calc<-mc_calc_fdd(tms.calc,sensor = "TMS_T3")
+
+# estimate snow presence from surface temperature 
+tms.calc<-mc_calc_snow(tms.calc,sensor = "TMS_T2")
+
+# summary data.frame of snow estimation
+tms.snow<-mc_calc_snow_agg(tms.calc)
+
 ```
+
+## Reshaping
+Microclimatic records from `myClim` objects can be flattened (reshaped) into wide or long data frame. Wide format `mc_reshape_wide()`is a table with data from single or multiple sensors, where rows represent time, columns are combination of localities and sensors. First column is datetime. Long format supports more sensors `mc_reshape_long()` having columns: `locality_id, serial_number, sensor_name, datetime, value`. 
+
+
+```{r, eval=FALSE}
+
+# wide table of air temperature and soil moisture
+tms.wide<-mc_reshape_wide(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
+
+# long table of air temperature and soil moisture
+tms.long<-mc_reshape_long(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
+
+```
+
+## General notes
+
+* `myClim` package was written using R, we dind not design any function in other programming language. 
+* `myClim` functions always return new `myClim` object instead of updating existing.
+* Some `myClim` functions works only with Prep-format, some only with Calc-formats and will complain when you mess up, but other functions can handle both. 

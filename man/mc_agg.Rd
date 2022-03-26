@@ -42,28 +42,27 @@ records are not modified but only converted to Calc-format. When fun and period 
 \description{
 Function has two basic uses:
 \itemize{
-\item aggregate time step of microclimatic records from fine to coarser with specified function (e. g. 15 min records to daily means);
+\item aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min records to daily means);
 \item convert myClim object from Prep-format to Calc-format see \link{myClim-package} without records modification, this behavior appears wen fun=NULL, period=NULL.
 }
 }
 \details{
-Function returns new myClim object.
-
 Any output of mc_agg is in Calc-format. That means the structure of myClim object is flattened. Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within the sensors are joined directly to the level of locality (Locality<-Sensor<-Record). This is called Calc-format and is only acceptable format for \code{mc_calc} functions family. See \link{myClim-package}.
 
-In case \code{mc_agg} is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic records are not modified.
+In case \code{mc_agg()} is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic records are not modified.
 
 When fun and period is specified, microclimatic records are aggregated based on function into new period. Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...); week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...); year = c(2021-01-01 00:00, 2022-01-01 00:00...).
 When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted and aggregation starts in December).
 
-Empty sensors with no records are excluded. Aggregation functions return NA for empty vector except from count which returns 0.
-When aggregation functions are provided as vector or list, than they are applied to all sensors of input myClim object. When named list (names of sensors) of functions is provided then function apply selected functions to selected sensors specified in namend list.
-Aggregation function creates new sensors on localities with used aggregation function in its name (sensor_name)_(function) e.g. (TMS_T1_max), after aggregation sensors keep original sensor_id in sensor metadata (e.g. TMS_T1).
-\itemize{
-\item sensors created with functions \code{min}, \code{max}, \code{mean}, \code{percentile}, \code{sum}, \code{range} keeps identical sensor_id and value_type as original input sensors
-\item sensors created with functions \code{count} has sensor_id \code{count} and value_type \code{integer}, function  \code{coverage} has sensor_id \code{coverage} and value_type \code{real}
-\item coverage returns the ratio of non NA records/all records
-}
+Empty sensors with no records are excluded. \code{mc_agg()} return NA for empty vector except from count which returns 0.
+When aggregation functions are provided as vector or list e.g. c(mean,min,maxx), than they are applied to all sensors of input myClim object. When named list (names are the sensor ids) of functions is provided then \code{mc_agg()} apply specific functions to the specific sensors based on the named list.
+Aggregation function creates new sensors on localities putting aggregation
+function in its name (TMS_T1 -> TMS_T1_max), despite sensor names contains aggregation
+function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1).
+Sensors created with functions \code{min}, \code{max}, \code{mean}, \code{percentile}, \code{sum}, \code{range}
+keeps identical sensor_id and value_type as original input sensors. Sensors created
+with functions \code{count} has sensor_id \code{count} and value_type \code{integer},
+function  \code{coverage} has sensor_id \code{coverage} and value_type \code{real}
 }
 \examples{
 hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
