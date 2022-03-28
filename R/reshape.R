@@ -1,13 +1,20 @@
 #' Wideformat of sensor values
 #'
-#' This function create data.frame with values of sensor in wide format.
-#'
-#' @param data in format for preparing or calculation
+#' This function converts myClim object to data.frame with values of sensor in wide format.
+#' @details First columnt of the output data.frame is datetime followed by the
+#' columns for every sensor. Name of the column is in format:
+#' * localityid_serialnumber_sensorname for Prep-format
+#' * localityid_sensorname for Calc-format
+#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
 #' @param localities names of localities; if NULL then all (default NULL)
 #' @param sensors names of sensors; if NULL then all (default NULL)
-#' @return data.frame with datetime column and columns for every sensor; Name of column is in format
-#' {locality_id}_{serial_number}_{sensor_name} for preparing format and
-#' {locality_id}_{sensor_name} for calculation format.
+#' @return data.frame with columns:
+#' * datetime 
+#' * locality1_sensor1
+#' * ...
+#' * ...
+#' * localityn_sensorn
+#' 
 #' @export
 #' @examples
 #' example_tms_wideformat <- mc_reshape_wide(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
@@ -54,11 +61,11 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
     purrr::flatten(result)
 }
 
-#' Longformat of sensor values
+#' Long format of sensor values
 #'
-#' This function create data.frame with values of sensor
+#' This function converts myClim object to long data.frame with sensor records.
 #'
-#' @param data in format for preparing or calculation
+#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
 #' @param localities locality_ids; if NULL then all (default NULL)
 #' @param sensors names of sensors; if NULL then all (default NULL)
 #' @return data.frame

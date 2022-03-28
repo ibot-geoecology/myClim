@@ -7,19 +7,32 @@
 mc_reshape_wide(data, localities = NULL, sensors = NULL)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-format (see \link{myClim-package})}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
 \item{sensors}{names of sensors; if NULL then all (default NULL)}
 }
 \value{
-data.frame with datetime column and columns for every sensor; Name of column is in format
-{locality_id}\emph{{serial_number}}{sensor_name} for preparing format and
-{locality_id}_{sensor_name} for calculation format.
+data.frame with columns:
+\itemize{
+\item datetime
+\item locality1_sensor1
+\item ...
+\item ...
+\item localityn_sensorn
+}
 }
 \description{
-This function create data.frame with values of sensor in wide format.
+This function converts myClim object to data.frame with values of sensor in wide format.
+}
+\details{
+First columnt of the output data.frame is datetime followed by the
+columns for every sensor. Name of the column is in format:
+\itemize{
+\item localityid_serialnumber_sensorname for Prep-format
+\item localityid_sensorname for Calc-format
+}
 }
 \examples{
 example_tms_wideformat <- mc_reshape_wide(example_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))

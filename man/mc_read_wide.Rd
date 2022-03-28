@@ -36,5 +36,10 @@ from wide data.frame to myClim object.
 \details{
 The first column of input data.frame must be datetime column in POSIXct time format UTC timezone.
 Following columns represents localities. Column names are the localities.
-All values in wide data.frame represents the same sensor, e.g. air temperature.
+All values in wide data.frame represents the same sensor, e.g. air temperature. If you wish to
+read multiple sensors use \link{mc_read_long} or use \link{mc_read_wide} multiple times separately
+for each sensor and that merge myClim objects with \link{mc_prep_merge}
+}
+\seealso{
+\link{mc_read_long}
 }

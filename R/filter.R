@@ -2,7 +2,7 @@
 #'
 #' This function filter data by localities and sensors
 #'
-#' @param data in format for preparing or calculation
+#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
 #' @param localities locality_ids for filtering data; if NULL then do nothing
 #' @param sensors sensor_ids for filtering data; if NULL then do nothing
 #' @param reverse - if TRUE then filtered discard else keeped (default FALSE)
@@ -10,7 +10,7 @@
 #' @return filtered data in same format as input
 #' @export
 #' @examples
-#' example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
+#' \donotrun{example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_calc_format <- myClim:::.common_is_calc_format(data)
     if(!is.null(localities)) {

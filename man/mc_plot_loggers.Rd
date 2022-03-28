@@ -13,19 +13,20 @@ mc_plot_loggers(
 )
 }
 \arguments{
-\item{data}{in format for preparing}
+\item{data}{myClim object in Prep-format \link{myClim-package}}
 
 \item{directory}{output directory}
 
-\item{localities}{names of localities; if NULL then all}
+\item{localities}{filter of localities c("loc1","loc2"); if NULL then all}
 
-\item{sensors}{names of sensors; if NULL then all}
+\item{sensors}{filter of sensors c("TMS_T1","TMS_T2"); if NULL then all}
 
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
 }
 \description{
-Function plot loggers to directory
+Function save separate file for the loggers to the directory. Only Prep-format supported.
+For Calc-format use \code{\link[=mc_plot_line]{mc_plot_line()}}
 }
 \examples{
-mc_plot_loggers(example_tomst_data1, "Figures")
+\dontrun{mc_plot_loggers(example_tomst_data1, "Figures")}
 }

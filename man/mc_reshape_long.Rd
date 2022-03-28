@@ -2,12 +2,12 @@
 % Please edit documentation in R/reshape.R
 \name{mc_reshape_long}
 \alias{mc_reshape_long}
-\title{Longformat of sensor values}
+\title{Long format of sensor values}
 \usage{
 mc_reshape_long(data, localities = NULL, sensors = NULL)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-format (see \link{myClim-package})}
 
 \item{localities}{locality_ids; if NULL then all (default NULL)}
 
@@ -26,7 +26,7 @@ columns:
 }
 }
 \description{
-This function create data.frame with values of sensor
+This function converts myClim object to long data.frame with sensor records.
 }
 \examples{
 head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)

@@ -17,13 +17,13 @@ mc_plot_raster(
 )
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
 
-\item{filename}{output - supported formats are pdf and png}
+\item{filename}{output with the extension - supported formats are .pdf and .png}
 
 \item{sensors}{names of sensor; should have same unit}
 
-\item{by_hour}{if TRUE, then y axis is hour, alse time (default TRUE)}
+\item{by_hour}{if TRUE, then y axis is plotted as an hour, else original time step (default TRUE)}
 
 \item{png_width}{width for png output (default 1900)}
 
@@ -47,4 +47,12 @@ mc_plot_raster(
 }
 \description{
 Function plot data to file with ggplot2 geom_raster
+}
+\details{
+PDF format is recommended as it can distribute the plots on the pages, which is especially useful
+for bigger data. In case of plotting multiple sensors, it is plotted by sensor. All localities from sensor1
+followed by all localities of sensor2 etc. When plotting only few localities, but multiple sensors,
+each sensor has own page. E.g. when plotting data from one locality, and 3 senosrs resulting PDF has 3 pages.
+In case of plotting PNG all loclaities and sensors are plotted in one image. Be careful with bigger data in PNG.
+Play with \code{png_height} and \code{png_width}. When too small, image does not fit ad is plotted broken.
 }

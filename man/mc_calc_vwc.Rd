@@ -43,6 +43,7 @@ Parameters a, b and c are used in calculation.}
 myClim object same as input but with added VWC moisture sensor
 }
 \description{
+This function creates new virtual sensor on locality within myClim data object.
 Function converts the soil moisture from raw TMS units (scaled TDT signal) to volumetric water content.
 }
 \details{
@@ -60,7 +61,7 @@ in case user know specific soil type, where the logger was measuring, then it is
 existing calibration curve for specific soil type instead of default "universal".
 Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
 universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
-For full table of function parameters see \code{mc_data_vwc_parameters}
+For full table of function parameters see \link{mc_data_vwc_parameters}
 }
 \examples{
 calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
@@ -72,4 +73,7 @@ https://doi.org/10.1016/j.agrformet.2018.12.018
 
 Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil
 moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
+}
+\seealso{
+\link{mc_data_vwc_parameters}
 }

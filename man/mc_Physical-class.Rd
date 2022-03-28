@@ -4,9 +4,22 @@
 \name{mc_Physical-class}
 \alias{mc_Physical-class}
 \alias{mc_Physical}
-\title{Class for physical}
+\title{Class for physical
+Class defining the element of the records (temperature, volumetric water content, height...)}
 \description{
 Class for physical
+Class defining the element of the records (temperature, volumetric water content, height...)
+}
+\details{
+See e.g. definition of temperature. Similarly as the definition of new loggers, new
+physicals cn be added like modules.
+\preformatted{
+Slot "name": "T_C"
+slot "description": "Temperature °C"
+Slot "units": "°C"
+Slot "viridis_color_map": "C"
+Slot "scale_coeff": 0.03333333
+}
 }
 \section{Slots}{
 
@@ -24,3 +37,6 @@ Class for physical
 \item{\code{scale_coeff}}{coefficient for plot; value * scale_coef is in range 0-1}
 }}
 
+\seealso{
+\link{mc_data_physical}
+}

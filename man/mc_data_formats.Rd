@@ -3,7 +3,10 @@
 \docType{data}
 \name{mc_data_formats}
 \alias{mc_data_formats}
-\title{Formats of source data files}
+\title{Formats of source data files
+R object of class environment with the definitions how to
+parse specific microclimatic logger files. In case you would like to add
+new, unsupported logger, this is the place where the reading key is stored.}
 \format{
 An object of class \code{environment} of length 2.
 }
@@ -12,5 +15,11 @@ mc_data_formats
 }
 \description{
 Formats of source data files
+R object of class environment with the definitions how to
+parse specific microclimatic logger files. In case you would like to add
+new, unsupported logger, this is the place where the reading key is stored.
+}
+\seealso{
+\link{mc_DataFormat},\linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}
 }
 \keyword{datasets}

@@ -56,6 +56,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 # classes ================================================================================
 
 #' Class for sensor definition
+#' Sensor definitions intslevesl are stored in [mc_data_sensors].
 #' @slot sensor_id unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)
 #' @slot logger name of logger (TMS, ThermoDatalogger, ...)
 #' @slot physical unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)
@@ -68,6 +69,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 #' @slot plot_line_width width of line in plot (default 1)
 #' @export mc_Sensor
 #' @exportClass mc_Sensor
+#' @seealso [mc_data_sensors]
 mc_Sensor <- setClass("mc_Sensor",
                       slots = c(sensor_id = "character",
                                 logger = "character",
@@ -95,6 +97,16 @@ setMethod(f="initialize",
           })
 
 #' Class for physical
+#' Class defining the element of the records (temperature, volumetric water content, height...)
+#' @details See e.g. definition of temperature. Similarly as the definition of new loggers, new
+#' physicals cn be added like modules. 
+#'  \preformatted{
+#' Slot "name": "T_C"
+#' slot "description": "Temperature °C"
+#' Slot "units": "°C"
+#' Slot "viridis_color_map": "C"
+#' Slot "scale_coeff": 0.03333333
+#' }
 #' @slot name of physical
 #' @slot description character info
 #' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
@@ -103,6 +115,7 @@ setMethod(f="initialize",
 #' @slot scale_coeff coefficient for plot; value * scale_coef is in range 0-1
 #' @export mc_Physical
 #' @exportClass mc_Physical
+#' @seealso [mc_data_physical] 
 mc_Physical <- setClass("mc_Physical",
                         slots = c(
                             name = "character",
@@ -172,10 +185,10 @@ mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                                         serial_number = "character"),)
 
 #' Class for logger clean info
-#' @slot step of series in minutes
-#' @slot count_duplicits count duplicits of data - values with same date
-#' @slot count_missed count missed data records; Period between all measuring should be same.
-#' @slot count_disordered count data records which time os older then previous ones
+#' @slot step Time step of microclimatic data series in minutes
+#' @slot count_duplicits count of duplicated records - values with same date
+#' @slot count_missed count of missing records; Period between the records should be the same length. If not, than missing. 
+#' @slot count_disordered count of records incorrectly ordered in time. In table, newer record is followed by the older. 
 #' @export mc_LoggerCleanInfo
 #' @exportClass mc_LoggerCleanInfo
 mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
@@ -267,11 +280,29 @@ setMethod(
     }
 )
 
-#' Class for source file data format
+#' Class for logger file data format
 #'
-#' By this class is parsed source data file.
-#'
-#' @slot has_header detects if table contains header (default TRUE)
+#' The Class used for parsing source data files. Typically the csv files downloaded from microclimatic loggers. 
+#' Each supported logger has established own specific object of class "mc_TOMSTDataFormat" defining the parameters.   
+#' @details The logger definitions are stored in R environment object ./data/mc_data_formats.rda 
+#' And thus it easy to add the ability of reading new, unsupported logger just by defining its Class parameters. 
+#' An object of class "mc_TOMSTDataFormat"
+#' Below see e.g. the Class defining TOMST file format. 
+#'  
+#' \preformatted{
+#' An object of class "mc_TOMSTDataFormat"
+#' attr(,"has_header"): FALSE
+#' attr(,"separator"): ";"
+#' attr(,"date_column"): 2
+#' attr(,"date_format"): NA
+#' attr(,"na_strings"): "-200"
+#' attr(,"columns"): list()
+#' attr(,"filename_serial_number_pattern"): "data_(\\d+)_\\d+\\.csv$"
+#' attr(,"data_row_pattern"): "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
+#' attr(,"logger_type"): character(0)
+#' }
+#' 
+#' @slot has_header detects if table has header (default TRUE)
 #' @slot separator columns separator (default ";")
 #' @slot date_column index of date column (default NA)
 #' @slot date_format format of date (default NA)
@@ -282,6 +313,7 @@ setMethod(
 #' @slot logger_type type of logger: TMS, ThermoDatalogger (default NA)
 #' @export mc_DataFormat
 #' @exportClass mc_DataFormat
+#' @seealso [mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
                           slots = c(has_header = "logical",
                                     separator = "character",
@@ -307,14 +339,25 @@ setMethod("initialize",
               return(.Object)
           })
 
-#' Class for source file data format for TOMST logger
+#' Class for reading TOMST logger files
+#' Provides the key for the column in source files. Where is the date, 
+#' in what format is the date, in which columns are records of which sensors.
+#' The code defining the class is in section methods ./R/model.R  
+#' 
 #' @export mc_TOMSTDataFormat
 #' @exportClass mc_TOMSTDataFormat
+#' @seealso [myClim::mc_DataFormat],[mc_data_formats], [mc_TOMSTJoinDataFormat-class]
 mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 
-#' Class for source file data format for joined TOMST logger
+#' Class for reading TMS join files
+#' Provides the key for the column in source files. Where is the date, 
+#' in what format is the date, in which columns are records of which sensors.
+#' The code defining the class is in section methods ./R/model.R
+#' 
+#' TMS join file format is the output of IBOT internal post-processing of TOMST logger files.  
 #' @export mc_TOMSTJoinDataFormat
 #' @exportClass mc_TOMSTJoinDataFormat
+#' @seealso [myClim::mc_DataFormat],[mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_DataFormat")
 
 # generics ================================================================================

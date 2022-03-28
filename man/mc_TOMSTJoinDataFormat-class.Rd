@@ -4,7 +4,13 @@
 \name{mc_TOMSTJoinDataFormat-class}
 \alias{mc_TOMSTJoinDataFormat-class}
 \alias{mc_TOMSTJoinDataFormat}
-\title{Class for source file data format for joined TOMST logger}
+\title{Class for reading TMS join files
+Provides the key for the column in source files. Where is the date,
+in what format is the date, in which columns are records of which sensors.
+The code defining the class is in section methods ./R/model.R}
 \description{
-Class for source file data format for joined TOMST logger
+TMS join file format is the output of IBOT internal post-processing of TOMST logger files.
+}
+\seealso{
+\link{mc_DataFormat},\link{mc_data_formats},\linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}
 }

@@ -40,7 +40,7 @@ mc_info_count <- function(data) {
 #' Call cleaning log
 #'
 #' @description 
-#' This function return data.frame with information from cleaning the loggers time series 
+#' This function return data.frame with information from cleaning the loggers time series see [myClim::mc_prep_clean()] 
 #' 
 #' @details
 #' 
@@ -55,7 +55,7 @@ mc_info_count <- function(data) {
 #' * count_duplicits - number of duplicated records (identical time and value)
 #' * count_missed - number of missing records (logger outage in time it should record)
 #' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
-#' 
+#' @seealso [myClim::mc_prep_clean()]
 #' @export
 mc_info_clean <- function(data) {
     myClim:::.common_stop_if_not_prep_format(data)
@@ -85,12 +85,24 @@ mc_info_clean <- function(data) {
 }
 
 
-#' get sensors info table
+#' Get sensors info table
 #'
-#' This function return dataframe with info about sensors
+#' This function return data.frame with info about sensors
 #'
-#' @param data in format for preparing or calculation
-#' @return dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, step_text, min_value, max_value, count_values, count_na
+#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
+#' @return data.frame with columns:
+#' * locality_id 
+#' * serial_number
+#' * sensor_id
+#' * sensor_name
+#' * start_date - the oldest record on the sensor  
+#' * end_date - the newest record on the sensor
+#' * step - time step of records series (minutes)
+#' * step_text - time step of records series (text) 
+#' * min_value - minimal recorded values
+#' * max_value - maximal recorded value
+#' * count_values - number of non NA records
+#' * count_na - number of NA records
 #' @export
 mc_info <- function(data) {
     is_prep_format <- myClim:::.common_is_prep_format(data)

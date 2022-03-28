@@ -33,8 +33,8 @@ csv logger files, specification of data format (logger type) and locality name.
 ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
 }
 \details{
-When loading \code{files_table} and \code{localities_table} from external CSV it
-must have header, column separator must be column ","
+The input tables could be R data.frames or csv files. When loading \code{files_table} and \code{localities_table} from external CSV it
+must have header, column separator must be comma ","
 }
 \examples{
 \dontrun{

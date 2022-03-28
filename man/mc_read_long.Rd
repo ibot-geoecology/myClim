@@ -7,9 +7,7 @@
 mc_read_long(data_table, sensor_ids)
 }
 \arguments{
-\item{data_table}{long data.frame with values
-
-Columns:
+\item{data_table}{long data.frame with Columns:
 \itemize{
 \item locality_id
 \item sensor_name
@@ -29,5 +27,8 @@ This is universal function designed to read time series and values
 from long data.frame to myClim object.
 }
 \details{
-Similar like \link{read_wide} but is capable to read multiple sensor types.
+Similar like \link{mc_read_wide} but is capable to read multiple sensors.
+}
+\seealso{
+\link{mc_read_wide}
 }

@@ -16,40 +16,6 @@ knitr::opts_chunk$set(
 This vignette describes the handling of microclimatic data in R with myClim library. myClim work flow begin at the reading data primary from microclimatic dataloggers but can be also reading of meteorological station data from files. Cleaning time step, time zone settings and metadata collecting is the next step of the work flow. Microclimatic data are stored in myClim objects of regular R structure consists of classes and lists slightly resembling database scheme. #(see my-clim package)#
 With myClim tools one can crop, join, downscale, and convert microclimatic data form and format, sort them into localities, call descriptive characteristics and compute microclimatic variables. Handy plotting functions are provided with smart defaults.   
 
-## Install
-
-```{r eval=FALSE}
-# Install dependencies
-
-requiered_packages <- c("stringr", "lubridate", "tibble",
-                        "dplyr", "purrr", "ggplot2", "ggforce",
-                        "viridis", "runner")
-missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
-if(length(missing_packages)) install.packages(missing_packages)
-
-# directory to unzip source files
-dir.create("c:\\Users\\Doga\\Downloads\\microclim0.25")
-setwd("c:\\Users\\Doga\\Downloads\\microclim0.25")
-
-zip_file <- "myClim.zip"
-dir_name <- "myClim"
-download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=HEAD&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
-subdir <- unzip(zip_file, list=TRUE)$Name[1]
-unzip(zip_file)
-file.remove(zip_file)
-unlink(dir_name, recursive=TRUE)
-file.rename(subdir, dir_name)
-setwd(dir_name)
-pkg_file <- devtools::build(".")
-install.packages(pkg_file, repos = NULL)
-
-
-library(myClim)
-browseVignettes("myClim")
-
-```
-
-
 ## Input data files
 Let’s say we have microclimatic data from the filed data loggers. It can be single file from single datalogger hosting single or multiple sensors.  It can be few csv files downloaded once or multiple times from single locality hosting single or multiple dataloggers. It can be many files from many localities downloaded just once or any combination of all mentioned. This can be load into r to single myClim object file by file or file directories. Besides loading csv files myClim object can be created also from tidy wide or long tables from R environment. This is useful in case you already have miroclimatic time series in R and when query microclimatic data form database. 
 
@@ -146,7 +112,7 @@ After reading logger files or data.frame into myClim object, such object is in P
 * **Updating metadata** Besides providing custom time zone offset as shown above, it is also  possible to import or update metadata of myClim locality `mc_prep_meta()`. Via `mc_prep_meta(param_name="user_data")` it is possible to appedn almost whatever to myClim locality e.g. topographic, geological or vegetation data, notes etc.   Importing and modifying metadata of sensors (depth, error flag) is not implemented yet. 
 
  
-* **Joining in time**  Not implemented yet in myClim. We are working on it.  
+* **Joining in time**  Not implemented yet in myClim. We are working on it. This function will join the data in complete, clean time series in case you have your loggers data in multiple files. I.e. you have one sensor measuring 10 years and you dowloded the data onece a year. Here is many problems we are coding the sloutions righn now e.g. overlapping data, logger replacement with problems of overlapping data from in-situ mission and from storage... 
 
 
 ```{r eval=FALSE}
@@ -310,3 +276,11 @@ tms.long<-mc_reshape_long(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
 * `myClim` package was written using R, we dind not design any function in other programming language. 
 * `myClim` functions always return new `myClim` object instead of updating existing.
 * Some `myClim` functions works only with Prep-format, some only with Calc-formats and will complain when you mess up, but other functions can handle both. 
+
+## To do (work in progress)
+
+* function for joining data from multiple downloads in time
+* reading iButton, HOBO, Lascar... files
+* more calculation functions (VPD...)
+
+

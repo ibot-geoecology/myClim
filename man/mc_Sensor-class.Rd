@@ -4,9 +4,11 @@
 \name{mc_Sensor-class}
 \alias{mc_Sensor-class}
 \alias{mc_Sensor}
-\title{Class for sensor definition}
+\title{Class for sensor definition
+Sensor definitions intslevesl are stored in \link{mc_data_sensors}.}
 \description{
 Class for sensor definition
+Sensor definitions intslevesl are stored in \link{mc_data_sensors}.
 }
 \section{Slots}{
 
@@ -32,3 +34,6 @@ Class for sensor definition
 \item{\code{plot_line_width}}{width of line in plot (default 1)}
 }}
 
+\seealso{
+\link{mc_data_sensors}
+}

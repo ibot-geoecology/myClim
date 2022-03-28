@@ -15,23 +15,26 @@ mc_plot_image(
 )
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
 
-\item{filename}{output filename}
+\item{filename}{output file name (file path)}
 
 \item{title}{of plot; default is empty}
 
-\item{localities}{names of localities; if empty then all}
+\item{localities}{filter the localities; if empty then all}
 
-\item{sensors}{names of sensors; if empty then all}
+\item{sensors}{filter the sensors; if empty then all}
 
 \item{height}{of image; default = 1900}
 
 \item{left_margin}{width of space for sensor_labels; default = 12}
 }
 \description{
-Function plot data to file with image function
+Function plot myClim data into file with image function.
+}
+\details{
+Be careful with bigger data. Can take some time.
 }
 \examples{
-mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
+\dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
 }

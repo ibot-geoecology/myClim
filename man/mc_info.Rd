@@ -2,16 +2,30 @@
 % Please edit documentation in R/info.R
 \name{mc_info}
 \alias{mc_info}
-\title{get sensors info table}
+\title{Get sensors info table}
 \usage{
 mc_info(data)
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-format (see \link{myClim-package})}
 }
 \value{
-dataframe with columns locality_id, serial_number, sensor_id, sensor_name, start_date, end_date, step, step_text, min_value, max_value, count_values, count_na
+data.frame with columns:
+\itemize{
+\item locality_id
+\item serial_number
+\item sensor_id
+\item sensor_name
+\item start_date - the oldest record on the sensor
+\item end_date - the newest record on the sensor
+\item step - time step of records series (minutes)
+\item step_text - time step of records series (text)
+\item min_value - minimal recorded values
+\item max_value - maximal recorded value
+\item count_values - number of non NA records
+\item count_na - number of NA records
+}
 }
 \description{
-This function return dataframe with info about sensors
+This function return data.frame with info about sensors
 }

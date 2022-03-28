@@ -16,16 +16,13 @@ mc_plot_line(
 )
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
 
 \item{filename}{output - supported formats are pdf and png}
 
-\item{sensors}{names of sensor}
+\item{sensors}{select the names of sensors to be plotted (max 2)}
 
-\item{scale_coeff}{scale coefficient for secondary axis (default NULL)
-
-Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL
-than function try detects scale coefficient from physical unit of sensors.}
+\item{scale_coeff}{scale coefficient for secondary axis (default NULL)}
 
 \item{png_width}{width for png output (default 1900)}
 
@@ -39,5 +36,8 @@ than function try detects scale coefficient from physical unit of sensors.}
 Function plot data to file with ggplot2 geom_line
 }
 \details{
-Maximal number of physical units of sensors is two. Main and secondary y axis.
+Maximal number of physical units (elements) of sensors to be plotted  is two. Main and secondary y axis.
+Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL
+than function try detects scale coefficient from physical unit of sensors see \linkS4class{mc_Physical}.
+Scaling is useful when plotting together e.g. temperature and moisture.
 }
