@@ -44,24 +44,21 @@ When user provides metadata using function `mc_read_data()` than two specific ta
 
 Output of reading functions is myClim object in Prep-format designed for data cleaning and joining. See `help("myClim")`. 
 
-```{r eval=FALSE}
-# setwd("..")
+```{r eval=TRUE}
 library(myClim)
 setwd("..")
-setwd("d:/Git/myClim/")
 
 ## Read without metadata
 # read from files
-tms.f <- mc_read_files(c("d:/Git/myClim/examples/data/TOMST/data_91184101_0.csv",
-                         "d:/Git/myClim/examples/data/TOMST/data_94184102_0.csv"),
+tms.f <- mc_read_files(c("./examples/data_91184101_0.csv","./examples/data_94184102_0.csv"),
                        dataformat_name="TOMST")
 
 # read from directory
-tms.d <- mc_read_files(c("d:/Git/myClim/examples/"), dataformat_name="TOMST")
+tms.d <- mc_read_files(c("./examples/"), dataformat_name="TOMST")
 # warning about file format control, files not matching format are skipped. 
 
 # read from data.frame
-load("d:/Git/myClim/examples/data/chmi/airTmax_merged.RData") #airTmax
+load("./examples/data/chmi/airTmax_merged.RData") #airTmax
 airTmax$date<-as.POSIXct(airTmax$date,tz="UTC")
 at<-airTmax[19000:nrow(airTmax),]
 sel<-colSums(!is.na(at[,-1]))>2000
@@ -72,28 +69,10 @@ meteo<-mc_read_wide(at,sensor_id = "T_C", sensor_name = "airTmax")
 ## Read with metadata
 # provide two tables. 1. table with file paths and 2. table with locality metadata
 
-## Matej Helper 
-# files_table = read.table("d:/Git/myClim/examples/data/TOMST/files_table.csv",
-#                          sep=",",header = T)
-# files_table<-files_table[order(files_table$path),]
-# 
-# fi<-list.files("d:/Git/myClim/examples/data/TOMST/"
-#                ,pattern = "data",
-#                full.names = T)
-# files_table$path<-fi
-# write.table(files_table,"d:/Git/myClim/examples/data/TOMST/files_table1.csv",
-#                          sep=",",row.names = F)
-
 tms.m <- mc_read_data(files_table = 
-                        "d:/Git/myClim/examples/data/TOMST/files_table1.csv",
+                        "./examples/data/TOMST/files_table.csv",
                       localities_table =
-                        "d:/Git/myClim/examples/data/TOMST/localities_table.csv")
-
-# tms.m <- mc_read_data(files_table = 
-#                         "/examples/data/TOMST/files_table.csv",
-#                       localities_table =
-#                         "/examples/data/TOMST/localities_table.csv")
-
+                        "./examples/data/TOMST/localities_table.csv")
 
 ```
 

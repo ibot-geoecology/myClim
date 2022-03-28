@@ -4,10 +4,8 @@
 \name{mc_Sensor-class}
 \alias{mc_Sensor-class}
 \alias{mc_Sensor}
-\title{Class for sensor definition
-Sensor definitions intslevesl are stored in \link{mc_data_sensors}.}
+\title{Class for sensor definition}
 \description{
-Class for sensor definition
 Sensor definitions intslevesl are stored in \link{mc_data_sensors}.
 }
 \section{Slots}{

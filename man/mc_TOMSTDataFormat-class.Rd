@@ -4,12 +4,8 @@
 \name{mc_TOMSTDataFormat-class}
 \alias{mc_TOMSTDataFormat-class}
 \alias{mc_TOMSTDataFormat}
-\title{Class for reading TOMST logger files
-Provides the key for the column in source files. Where is the date,
-in what format is the date, in which columns are records of which sensors.
-The code defining the class is in section methods ./R/model.R}
+\title{Class for reading TOMST logger files}
 \description{
-Class for reading TOMST logger files
 Provides the key for the column in source files. Where is the date,
 in what format is the date, in which columns are records of which sensors.
 The code defining the class is in section methods ./R/model.R

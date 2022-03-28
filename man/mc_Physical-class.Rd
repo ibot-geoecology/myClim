@@ -4,10 +4,8 @@
 \name{mc_Physical-class}
 \alias{mc_Physical-class}
 \alias{mc_Physical}
-\title{Class for physical
-Class defining the element of the records (temperature, volumetric water content, height...)}
+\title{Class for physical}
 \description{
-Class for physical
 Class defining the element of the records (temperature, volumetric water content, height...)
 }
 \details{

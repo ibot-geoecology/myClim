@@ -56,6 +56,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 # classes ================================================================================
 
 #' Class for sensor definition
+#' 
 #' Sensor definitions intslevesl are stored in [mc_data_sensors].
 #' @slot sensor_id unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)
 #' @slot logger name of logger (TMS, ThermoDatalogger, ...)
@@ -97,6 +98,7 @@ setMethod(f="initialize",
           })
 
 #' Class for physical
+#' 
 #' Class defining the element of the records (temperature, volumetric water content, height...)
 #' @details See e.g. definition of temperature. Similarly as the definition of new loggers, new
 #' physicals cn be added like modules. 
@@ -340,6 +342,7 @@ setMethod("initialize",
           })
 
 #' Class for reading TOMST logger files
+#' 
 #' Provides the key for the column in source files. Where is the date, 
 #' in what format is the date, in which columns are records of which sensors.
 #' The code defining the class is in section methods ./R/model.R  
@@ -350,6 +353,7 @@ setMethod("initialize",
 mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 
 #' Class for reading TMS join files
+#' 
 #' Provides the key for the column in source files. Where is the date, 
 #' in what format is the date, in which columns are records of which sensors.
 #' The code defining the class is in section methods ./R/model.R
