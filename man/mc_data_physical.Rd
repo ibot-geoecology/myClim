@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_data_physical}
 \alias{mc_data_physical}
-\title{Physical quantities definition}
+\title{Physical units definition}
 \format{
 An object of class \code{environment} of length 8.
 }
@@ -11,6 +11,16 @@ An object of class \code{environment} of length 8.
 mc_data_physical
 }
 \description{
-Physical quantities definition
+Physical units:
+\itemize{
+\item T_C - Temperature in °C
+\item moisture - moisture in ratio 0-1
+\item TMSmoisture - TDT signal from TMS moisture sensor
+\item RH_perc - Relative humidity in \%
+\item l_cm - length in cm
+\item l_mm - lenght in mm
+\item v - speed in m/s
+\item t_h - time in hours
+}
 }
 \keyword{datasets}

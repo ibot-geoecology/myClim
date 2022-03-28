@@ -38,7 +38,17 @@
 #' * wind - speed of wind (m/s)
 "mc_data_sensors"
 
-#' Physical quantities definition
+#' Physical units definition
+#'
+#' Physical units:
+#' * T_C - Temperature in °C
+#' * moisture - moisture in ratio 0-1
+#' * TMSmoisture - TDT signal from TMS moisture sensor
+#' * RH_perc - Relative humidity in %
+#' * l_cm - length in cm
+#' * l_mm - lenght in mm
+#' * v - speed in m/s
+#' * t_h - time in hours
 "mc_data_physical"
 
 #' Volumetric water content parameters
