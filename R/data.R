@@ -8,13 +8,20 @@
 "mc_data_example_calc"
 
 #' Formats of source data files
+#' R object of class environment with the definitions how to 
+#' parse specific microclimatic logger files. In case you would like to add
+#' new, unsupported logger, this is the place where the reading key is stored.
+#' @seealso [myClim::mc_DataFormat],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 "mc_data_formats"
 
 #' Sensors definition.
-#'
+#''R object of class environment with the definitions of (micro)climatic sensors. 
+#' see [mc_Sensor-class]. Similarly as in case of logger format definitions [mc_DataFormat-class] it is easy
+#' to add new, unsupported sensor here. There is also universal sensor `real` where you can store any real values. 
+#' 
 #' Names of items are sensor_ids.
 #'
-#' Sensors:
+#' Currently supported sensors:
 #' * count - result of `count` function [myClim::mc_agg()]
 #' * coverage - result of `count` function [myClim::mc_agg()]
 #' * FDD - result of function [myClim::mc_calc_fdd()]
@@ -39,10 +46,21 @@
 "mc_data_sensors"
 
 #' Physical quantities definition
+#' R object of class environment with the definitions of physical elements
+#' for recording the microclimate e.g. temperature, speed, depth, volumetric water content...
+#' see [mc_Physical-class]. Similarly as in case of logger format definitions [mc_DataFormat-class] it is easy
+#' to add new, unsupported physical here.
+#' @seealso [mc_Physical-class]
 "mc_data_physical"
 
 #' Volumetric water content parameters
 #'
+#' Data frame hosting the coefficients enable the conversion of TMS raw moisture data to
+#' volumetric warer content. The coefficients come from laboratory calibration for several
+#' soil types. For the best performance you should specify the soil type in case you know it 
+#' and in case it could be approximated to the available calibration e.g sand, loam, loamy sand.... 
+#' See [myClim::mc_calc_vwc()]    
+#' 
 #' data.frame with columns:
 #' - soiltype
 #' - a
@@ -53,4 +71,5 @@
 #' - silt
 #' - sand
 #' - ref
+#' 
 "mc_data_vwc_parameters"

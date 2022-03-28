@@ -18,9 +18,9 @@ myClim object in Prep-format see \link{myClim-package}
 }
 \description{
 This function read one or more csv files or directories of identical,
-pre-defined logger type (format) see \link{mc_DataFormat}.
-This function does not allow use to provide additional locality or sensor metadata.
-Metadata can be load through \code{\link[=mc_read_files]{mc_read_files()}} or
+pre-defined logger type (format) see \link{mc_DataFormat} and \link{mc_data_formats}.
+This function does not allow you to provide additional locality or sensor metadata.
+Metadata can be load through \code{\link[=mc_read_data]{mc_read_data()}} or
 can be provided later with function \code{\link[=mc_prep_meta]{mc_prep_meta()}}
 }
 \details{

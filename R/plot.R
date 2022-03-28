@@ -3,16 +3,17 @@
 
 #' Plot data from loggers
 #'
-#' Function plot loggers to directory
+#' Function save separate file for the loggers to the directory. Only Prep-format supported. 
+#' For Calc-format use [myClim::mc_plot_line()]
 #'
-#' @param data in format for preparing
+#' @param data myClim object in Prep-format [myClim-package]
 #' @param directory output directory
-#' @param localities names of localities; if NULL then all
-#' @param sensors names of sensors; if NULL then all
+#' @param localities filter of localities c("loc1","loc2"); if NULL then all
+#' @param sensors filter of sensors c("TMS_T1","TMS_T2"); if NULL then all
 #' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
 #' @export
 #' @examples
-#' mc_plot_loggers(example_tomst_data1, "Figures")
+#' \dontrun{mc_plot_loggers(example_tomst_data1, "Figures")}
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
     myClim:::.common_stop_if_not_prep_format(data)
     data <- mc_filter(data, localities, sensors)
@@ -135,18 +136,18 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 
 #' Plot data - image
 #'
-#' Function plot data to file with image function
-#'
-#' @param data in format for preparing or calculation
-#' @param filename output filename
+#' Function plot myClim data into file with image function.
+#' @details Be careful with bigger data. Can take some time. 
+#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param filename output file name (file path)
 #' @param title of plot; default is empty
-#' @param localities names of localities; if empty then all
-#' @param sensors names of sensors; if empty then all
+#' @param localities filter the localities; if empty then all
+#' @param sensors filter the sensors; if empty then all
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
 #' @export
 #' @examples
-#' mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")
+#' \dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
 mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NULL, height=1900, left_margin=12) {
     data_table <- mc_reshape_wide(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
@@ -175,11 +176,17 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' Plot data - ggplot2 geom_raster
 #'
 #' Function plot data to file with ggplot2 geom_raster
-#'
-#' @param data in format for preparing or calculation
-#' @param filename output - supported formats are pdf and png
+#' @details PDF format is recommended as it can distribute the plots on the pages, which is especially useful
+#' for bigger data. In case of plotting multiple sensors, it is plotted by sensor. All localities from sensor1
+#' followed by all localities of sensor2 etc. When plotting only few localities, but multiple sensors,
+#' each sensor has own page. E.g. when plotting data from one locality, and 3 senosrs resulting PDF has 3 pages. 
+#' In case of plotting PNG all loclaities and sensors are plotted in one image. Be careful with bigger data in PNG. 
+#' Play with `png_height` and `png_width`. When too small, image does not fit ad is plotted broken.  
+#' 
+#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param filename output with the extension - supported formats are .pdf and .png
 #' @param sensors names of sensor; should have same unit
-#' @param by_hour if TRUE, then y axis is hour, alse time (default TRUE)
+#' @param by_hour if TRUE, then y axis is plotted as an hour, else original time step (default TRUE)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
 #' @param viridis_color_map viridis color map option; if NULL, then used value from mc_data_physical
@@ -286,15 +293,14 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
 #'
 #' Function plot data to file with ggplot2 geom_line
 #'
-#' Maximal number of physical units of sensors is two. Main and secondary y axis.
-#'
-#' @param data in format for preparing or calculation
-#' @param filename output - supported formats are pdf and png
-#' @param sensors names of sensor
-#' @param scale_coeff scale coefficient for secondary axis (default NULL)
-#'
+#' Maximal number of physical units (elements) of sensors to be plotted  is two. Main and secondary y axis.
 #' Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL
-#' than function try detects scale coefficient from physical unit of sensors.
+#' than function try detects scale coefficient from physical unit of sensors see [mc_Physical-class].
+#' Scaling is useful when plotting together e.g. temperature and moisture.  
+#' @param data  myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param filename output - supported formats are pdf and png
+#' @param sensors select the names of sensors to be plotted (max 2)
+#' @param scale_coeff scale coefficient for secondary axis (default NULL)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
 #' @param start_crop POSIXct datetime for crop data (default NULL)

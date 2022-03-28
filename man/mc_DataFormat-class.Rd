@@ -4,14 +4,34 @@
 \name{mc_DataFormat-class}
 \alias{mc_DataFormat-class}
 \alias{mc_DataFormat}
-\title{Class for source file data format}
+\title{Class for logger file data format}
 \description{
-By this class is parsed source data file.
+The Class used for parsing source data files. Typically the csv files downloaded from microclimatic loggers.
+Each supported logger has established own specific object of class "mc_TOMSTDataFormat" defining the parameters.
+}
+\details{
+The logger definitions are stored in R environment object ./data/mc_data_formats.rda
+And thus it easy to add the ability of reading new, unsupported logger just by defining its Class parameters.
+An object of class "mc_TOMSTDataFormat"
+Below see e.g. the Class defining TOMST file format.
+
+\preformatted{
+An object of class "mc_TOMSTDataFormat"
+attr(,"has_header"): FALSE
+attr(,"separator"): ";"
+attr(,"date_column"): 2
+attr(,"date_format"): NA
+attr(,"na_strings"): "-200"
+attr(,"columns"): list()
+attr(,"filename_serial_number_pattern"): "data_(\\d+)_\\d+\\.csv$"
+attr(,"data_row_pattern"): "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
+attr(,"logger_type"): character(0)
+}
 }
 \section{Slots}{
 
 \describe{
-\item{\code{has_header}}{detects if table contains header (default TRUE)}
+\item{\code{has_header}}{detects if table has header (default TRUE)}
 
 \item{\code{separator}}{columns separator (default ";")}
 
@@ -30,3 +50,6 @@ By this class is parsed source data file.
 \item{\code{logger_type}}{type of logger: TMS, ThermoDatalogger (default NA)}
 }}
 
+\seealso{
+\link{mc_data_formats},\linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}
+}

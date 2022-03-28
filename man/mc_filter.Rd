@@ -13,7 +13,7 @@ mc_filter(
 )
 }
 \arguments{
-\item{data}{in format for preparing or calculation}
+\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
 
 \item{localities}{locality_ids for filtering data; if NULL then do nothing}
 
@@ -34,5 +34,5 @@ filtered data in same format as input
 This function filter data by localities and sensors
 }
 \examples{
-example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
+\donotrun{example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
 }

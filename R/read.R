@@ -6,9 +6,9 @@
 #' Reading files or directories
 #'
 #' This function read one or more csv files or directories of identical, 
-#' pre-defined logger type (format) see [mc_DataFormat]. 
-#' This function does not allow use to provide additional locality or sensor metadata. 
-#' Metadata can be load through [myClim::mc_read_files()] or 
+#' pre-defined logger type (format) see [mc_DataFormat] and [mc_data_formats]. 
+#' This function does not allow you to provide additional locality or sensor metadata. 
+#' Metadata can be load through [myClim::mc_read_data()] or 
 #' can be provided later with function [myClim::mc_prep_meta()]
 #' 
 #' @details 
@@ -51,8 +51,8 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
 #' ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
 #' 
 #' @details 
-#' When loading `files_table` and `localities_table` from external CSV it 
-#' must have header, column separator must be column "," 
+#' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
+#' must have header, column separator must be comma "," 
 #'
 #' @param files_table path to csv file or data.frame object containing 4 columns: 
 #' * path - path to file
@@ -240,11 +240,14 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 #' Reading data from wide data.frame
 #'
 #' This is universal function designed to read time series and values 
-#' from wide data.frame to myClim object. 
+#' from wide data.frame to myClim object.
+#' 
 #' 
 #' @details The first column of input data.frame must be datetime column in POSIXct time format UTC timezone.
 #' Following columns represents localities. Column names are the localities. 
-#' All values in wide data.frame represents the same sensor, e.g. air temperature. 
+#' All values in wide data.frame represents the same sensor, e.g. air temperature. If you wish to 
+#' read multiple sensors use [myClim::mc_read_long] or use [myClim::mc_read_wide] multiple times separately
+#' for each sensor and that merge myClim objects with [myClim::mc_prep_merge]
 #'
 #' @param data_table data.frame with first column of POSIXct time format UTC timezone, 
 #' followed by columns with microclimatic records. See details.  
@@ -258,6 +261,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 #' @param sensor_name custom name of sensor; if NULL than `sensor_name <- sensor_id` (default NULL)
 #' @return myClim object in Prep-format
 #' @export
+#' @seealso [myClim::mc_read_long]
 #' @examples
 mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL) {
     if(ncol(data_table) <= 1) {
@@ -289,11 +293,9 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' This is universal function designed to read time series and values 
 #' from long data.frame to myClim object. 
 #'
-#' @details Similar like [myClim::read_wide] but is capable to read multiple sensor types. 
+#' @details Similar like [myClim::mc_read_wide] but is capable to read multiple sensors. 
 #'
-#' @param data_table long data.frame with values
-#'
-#' Columns:
+#' @param data_table long data.frame with Columns:
 #' * locality_id
 #' * sensor_name
 #' * datetime - POSIXct and UTC timezone is required
@@ -303,6 +305,7 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
 #' @return myClim object in Prep-format
 #' @export
+#' @seealso [myClim::mc_read_wide]
 #' @examples
 mc_read_long <- function(data_table, sensor_ids) {
     .read_check_datetime(data_table$datetime)

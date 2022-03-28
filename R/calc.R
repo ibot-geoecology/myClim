@@ -8,7 +8,7 @@
 #' Snow detection from temperature
 #'
 #' @description
-#' Function accept only myClim objects in Calc-format. See [myClim::mc_agg()]. Function `mc_calc_snow` creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.  
+#' This function creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.  
 #'
 #' @details
 #' Function was designed to estimate snow presence from temperature in situation when temperature sensor is covered by snow. Snow detection algorithm combines daily range `dr`of temperature with the maximal daily temperature `tmax`. I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C and daily maximal temperature is lower than 0.5 °C.
@@ -91,10 +91,17 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 #' Summary of TRUE/FALSE snow sensor
 #'
 #' @description
-#' Accept only myClim objects in Calc-format. See [myClim::mc_agg()] and [myClim-package]. `mc_calc_snow_agg` was primary designed to work with the virtual snow sensor of TRUE/FALSE which is the output of [myClim::mc_calc_snow()]. `mc_calc_snow_agg`returns the summary table of snow sensor (e.g number of days with snow cover, the longest continual snow period...). The snow summary is returned for whole date range provided. 
+#' This function works with the virtual snow sensor of TRUE/FALSE 
+#' which is the output of [myClim::mc_calc_snow()]. So, before calling 
+#' `mc_calc_snow_agg` you need to calculate or import TRUE/FALSE snow detection sensor.  
+#' `mc_calc_snow_agg`returns the summary table of snow sensor 
+#' (e.g number of days with snow cover, the longest continual snow period...). 
+#' The snow summary is returned for whole date range provided. 
 #'
 #' @details
-#' Primary designed for virtual snow sensor created by [myClim::mc_calc_snow()], but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor` on the locality missing, then locality is skipped.
+#' Primary designed for virtual snow sensor created by [myClim::mc_calc_snow()], 
+#' but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor` 
+#' on the locality missing, then locality is skipped.
 #'
 #' @param data myClim object in calculation format (see [myClim::mc_agg()]) with TRUE/FALSE snow sensor see [myClim::mc_calc_snow()]
 #' @param snow_sensor name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function `mc_calc_snow`; (default "snow")
@@ -170,6 +177,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' Converting soil moisture from raw TMS units to volumetric water content
 #'
 #' @description
+#' This function creates new virtual sensor on locality within myClim data object.
 #' Function converts the soil moisture from raw TMS units (scaled TDT signal) to volumetric water content. 
 #'
 #' @details
@@ -187,7 +195,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' existing calibration curve for specific soil type instead of default "universal".
 #' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
 #' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
-#' For full table of function parameters see `mc_data_vwc_parameters`
+#' For full table of function parameters see [mc_data_vwc_parameters]
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture")
@@ -204,6 +212,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param wcor_t (default 0.64108) correction temperature while sensor in the water [myClim::mc_calib_moisture()]
 #' @return myClim object same as input but with added VWC moisture sensor
 #' @export
+#' @seealso [mc_data_vwc_parameters]
 #' @references
 #' Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:
 #' A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
@@ -294,14 +303,17 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
 #' Growing Degree Days
 #'
 #' @description
-#' Function add new virtual sensor with values of GDD (Growing Degree Days).
+#' This function creates new virtual sensor on locality within myClim data object. New virtual sensor 
+#' hosts values of GDD (Growing Degree Days) in Celsius degrees in original time step. see details 
 #'
 #' @details
 #' Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with
-#' the same time step as input data. I. e. when the time step is shorter than a day than growing degree day is divided
-#' into smaller time step but still summing the day. For shorter intervals than the day the GDD value is the contribution
-#' of the interval to the growing degree day. Be careful while aggregating growing degree days to longer periods
-#' see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.
+#' the same time step as input data. I. e. when the time step is shorter than a day (whch is not very intuitive for growing degree **days**) 
+#' than growing degree day is divided into smaller time step but still summing the day. 
+#' For shorter intervals (steps) than the day, the GDD value is the contribution
+#' of the interval to the growing degree day.
+#' Be careful while aggregating growing degree days to longer periods
+#' see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but myClim let you apply anything.
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot GDD calculation e.g. TMS_T3

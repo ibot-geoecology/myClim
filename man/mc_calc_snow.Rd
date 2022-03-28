@@ -30,7 +30,7 @@ mc_calc_snow(
 The new myClim data object, identical as input but with added snow sensor. Time step is not modified.
 }
 \description{
-Function accept only myClim objects in Calc-format. See \code{\link[=mc_agg]{mc_agg()}}. Function \code{mc_calc_snow} creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.
+This function creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.
 }
 \details{
 Function was designed to estimate snow presence from temperature in situation when temperature sensor is covered by snow. Snow detection algorithm combines daily range \code{dr}of temperature with the maximal daily temperature \code{tmax}. I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C and daily maximal temperature is lower than 0.5 °C.

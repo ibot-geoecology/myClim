@@ -11,6 +11,13 @@ An object of class \code{data.frame} with 13 rows and 9 columns.
 mc_data_vwc_parameters
 }
 \description{
+Data frame hosting the coefficients enable the conversion of TMS raw moisture data to
+volumetric warer content. The coefficients come from laboratory calibration for several
+soil types. For the best performance you should specify the soil type in case you know it
+and in case it could be approximated to the available calibration e.g sand, loam, loamy sand....
+See \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
+}
+\details{
 data.frame with columns:
 \itemize{
 \item soiltype

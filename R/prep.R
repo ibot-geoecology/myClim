@@ -213,7 +213,7 @@ mc_prep_meta <- function(data, metadata, param_name=NULL) {
 #' @details
 #' myClim librarry presumes the data in UTC by default. This function require at least longitude provided in locality
 #' metadata slot `lon_wgs84`. If longitude not provided, function not works. Coordinates of locality can be provided
-#' e. g. during data reading see [myClim::mc_read_data()]
+#' e. g. during data reading see [myClim::mc_read_data()] or ex post with [myClim::mc_prep_meta()] function.
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
@@ -371,9 +371,14 @@ mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_nu
 #' 
 #' @details
 #' This function works only when the input myClim objects have the same format (Prep-format, Calc-format) and the same time step.
-#' It is required same step in Calc-Format data. If some two data objects contains locality with same names (locality_id) in Prep-format,
-#' than list of loggers are merged. If some two data objects contains locality with same names in Calc-format, than list os sensors are merged.
-#' Sensors with same names are renamed.
+#' It is required same step in Calc-Format data. 
+#' 
+#' When the two merged myClim objects in Prep-format contains locality with same names (locality_id),
+#' than list of loggers are merged on the locality. Sensors with the same name does not matter here. 
+#' Loggers with the same name are allowed in the Prep-format. 
+#' 
+#' When the two merged myClim objects in Calc-format contains locality with same names (locality_id).
+#' than the sensors are merged on the locality. Sensors with same names are renamed.
 #'
 #' @param data_items list of myClim objects in Prep-format or Calc-format see [myClim-package]; Format of merged objects must be same.
 #' @return merged myClim object in the same format as input objects

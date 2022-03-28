@@ -11,12 +11,12 @@ Class for logger clean info
 \section{Slots}{
 
 \describe{
-\item{\code{step}}{of series in minutes}
+\item{\code{step}}{Time step of microclimatic data series in minutes}
 
-\item{\code{count_duplicits}}{count duplicits of data - values with same date}
+\item{\code{count_duplicits}}{count of duplicated records - values with same date}
 
-\item{\code{count_missed}}{count missed data records; Period between all measuring should be same.}
+\item{\code{count_missed}}{count of missing records; Period between the records should be the same length. If not, than missing.}
 
-\item{\code{count_disordered}}{count data records which time os older then previous ones}
+\item{\code{count_disordered}}{count of records incorrectly ordered in time. In table, newer record is followed by the older.}
 }}
 
