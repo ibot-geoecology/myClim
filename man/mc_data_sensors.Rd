@@ -17,6 +17,10 @@ to add new, unsupported sensor here. There is also universal sensor \code{real} 
 }
 \details{
 Names of items are sensor_ids.
+<<<<<<< HEAD
+=======
+
+>>>>>>> 37f2b055bd7bd344be3d8e10cb88eab0f8e6c71c
 Currently supported sensors:
 \itemize{
 \item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}

@@ -18,5 +18,17 @@ to add new, unsupported physical here.
 }
 \seealso{
 \linkS4class{mc_Physical}
+
+Currently supported physical quantities:
+\itemize{
+\item T_C - Temperature in °C
+\item moisture - moisture in ratio 0-1
+\item TMSmoisture - TDT signal from TMS moisture sensor
+\item RH_perc - Relative humidity in \%
+\item l_cm - length in cm
+\item l_mm - lenght in mm
+\item v - speed in m/s
+\item t_h - time in hours
+}
 }
 \keyword{datasets}
