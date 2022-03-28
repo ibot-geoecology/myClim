@@ -315,8 +315,9 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' @param serial_numbers vector of serial_numbers of loggers; if NULL than all loggers (default NULL); parameter is useful only for
 #' Prep-format of myClim having the level of logger see [myClim-package]
 #' @return the same myClim object as input with changed sensor names
-#' @example
-#' data <- mc_prep_rename_sensor(example_tomst_data1, list(TMS_T1="TMS_Tsoil"))
+#' @examples
+#' load("data/mc_data_example_calc.rda")
+#' data <- mc_prep_rename_sensor(c_data_example_calc, list(TMS_T1="TMS_Tsoil"))
 #' @export
 mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_numbers=NULL) {
     is_calc_format <- myClim:::.common_is_calc_format(data)
@@ -496,7 +497,6 @@ mc_prep_rename_locality <- function(data, locality_ids) {
 #' @param data myClim object Prep-format. see [myClim-package]
 #' @param calib_table data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
 #' @return myClim object with loaded calibration information in metadata. Microclimatic records are not calibrated, only ready for calibration. To calibrate records run [myClim::mc_prep_calib()]
-#' @examples
 #' @export
 mc_prep_calib_load <- function(data, calib_table) {
     myClim:::.common_stop_if_not_prep_format(data)
@@ -553,7 +553,6 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' @param sensors vector of sensor names where to perform calibration
 #' @param localities vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)
 #' @return same myClim object as input but with calibrated sensor values.
-#' @examples
 #' @export
 mc_prep_calib <- function(data, sensors, localities=NULL) {
     is_prep_format <- myClim:::.common_is_prep_format(data)

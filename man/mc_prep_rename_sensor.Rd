@@ -27,3 +27,7 @@ the same myClim object as input with changed sensor names
 \description{
 This function rename sensors.
 }
+\examples{
+load("data/mc_data_example_calc.rda")
+data <- mc_prep_rename_sensor(c_data_example_calc, list(TMS_T1="TMS_Tsoil"))
+}

@@ -11,16 +11,12 @@ An object of class \code{environment} of length 21.
 mc_data_sensors
 }
 \description{
-'R object of class environment with the definitions of (micro)climatic sensors.
+R object of class environment with the definitions of (micro)climatic sensors.
 see \linkS4class{mc_Sensor}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
 to add new, unsupported sensor here. There is also universal sensor \code{real} where you can store any real values.
 }
 \details{
 Names of items are sensor_ids.
-<<<<<<< HEAD
-=======
-
->>>>>>> 37f2b055bd7bd344be3d8e10cb88eab0f8e6c71c
 Currently supported sensors:
 \itemize{
 \item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}

@@ -9,8 +9,8 @@
 #' @param stop_if_empty - if TRUE then error for empty output (default TRUE)
 #' @return filtered data in same format as input
 #' @export
-#' @examples
-#' \donotrun{example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
+#' @examples 
+#' \dontrun{mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_calc_format <- myClim:::.common_is_calc_format(data)
     if(!is.null(localities)) {

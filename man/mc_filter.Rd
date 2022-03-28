@@ -34,5 +34,5 @@ filtered data in same format as input
 This function filter data by localities and sensors
 }
 \examples{
-\donotrun{example_tomst_data1 <- mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
+\dontrun{mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
 }

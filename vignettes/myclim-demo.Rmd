@@ -44,7 +44,7 @@ When user provides metadata using function `mc_read_data()` than two specific ta
 
 Output of reading functions is myClim object in Prep-format designed for data cleaning and joining. See `help("myClim")`. 
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 library(myClim)
 setwd("..")
 

@@ -262,7 +262,6 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_long]
-#' @examples
 mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL) {
     if(ncol(data_table) <= 1) {
        stop(.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE)
@@ -306,7 +305,6 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_wide]
-#' @examples
 mc_read_long <- function(data_table, sensor_ids) {
     .read_check_datetime(data_table$datetime)
 

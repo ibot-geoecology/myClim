@@ -26,7 +26,7 @@ Slot "scale_coeff": 0.03333333
 
 \item{\code{description}}{character info}
 
-\item{\code{units}}{measurument (°C, \\%, m3/m3, raw, mm, ...)}
+\item{\code{units}}{measurument (°C, \%, m3/m3, raw, mm, ...)}
 
 \item{\code{calibration_class}}{class for calibration}
 
