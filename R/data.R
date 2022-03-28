@@ -8,26 +8,16 @@
 "mc_data_example_calc"
 
 #' Formats of source data files
-<<<<<<< HEAD
 #' 
-#' R object of class environment with the definitions how to 
-=======
-#'
 #' R object of class environment with the definitions how to
->>>>>>> 37f2b055bd7bd344be3d8e10cb88eab0f8e6c71c
 #' parse specific microclimatic logger files. In case you would like to add
 #' new, unsupported logger, this is the place where the reading key is stored.
 #' @seealso [myClim::mc_DataFormat],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 "mc_data_formats"
 
 #' Sensors definition.
-<<<<<<< HEAD
 #' 
-#''R object of class environment with the definitions of (micro)climatic sensors. 
-=======
-#'
-#''R object of class environment with the definitions of (micro)climatic sensors.
->>>>>>> 37f2b055bd7bd344be3d8e10cb88eab0f8e6c71c
+#' R object of class environment with the definitions of (micro)climatic sensors.
 #' see [mc_Sensor-class]. Similarly as in case of logger format definitions [mc_DataFormat-class] it is easy
 #' to add new, unsupported sensor here. There is also universal sensor `real` where you can store any real values.
 #'
@@ -57,11 +47,7 @@
 "mc_data_sensors"
 
 #' Physical quantities definition
-<<<<<<< HEAD
 #' 
-=======
-#'
->>>>>>> 37f2b055bd7bd344be3d8e10cb88eab0f8e6c71c
 #' R object of class environment with the definitions of physical elements
 #' for recording the microclimate e.g. temperature, speed, depth, volumetric water content...
 #' see [mc_Physical-class]. Similarly as in case of logger format definitions [mc_DataFormat-class] it is easy

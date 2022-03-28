@@ -102,7 +102,7 @@ setMethod(f="initialize",
 #' Class defining the element of the records (temperature, volumetric water content, height...)
 #' @details See e.g. definition of temperature. Similarly as the definition of new loggers, new
 #' physicals cn be added like modules. 
-#'  \preformatted{
+#' \preformatted{
 #' Slot "name": "T_C"
 #' slot "description": "Temperature °C"
 #' Slot "units": "°C"
@@ -111,7 +111,7 @@ setMethod(f="initialize",
 #' }
 #' @slot name of physical
 #' @slot description character info
-#' @slot units measurument (°C, \%, m3/m3, raw, mm, ...)
+#' @slot units measurument (°C, %, m3/m3, raw, mm, ...)
 #' @slot calibration_class class for calibration
 #' @slot viridis_color_map viridis color map option
 #' @slot scale_coeff coefficient for plot; value * scale_coef is in range 0-1
