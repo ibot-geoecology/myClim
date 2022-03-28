@@ -90,7 +90,7 @@ After reading logger files or data.frame into myClim object, such object is in P
 * **Joining in time**  Not implemented yet in myClim. We are working on it. This function will join the data in complete, clean time series in case you have your loggers data in multiple files. I.e. you have one sensor measuring 10 years and you dowloded the data onece a year. Here is many problems we are coding the sloutions righn now e.g. overlapping data, logger replacement with problems of overlapping data from in-situ mission and from storage... 
 
 
-```{r eval=TRUE}
+```{r eval=FALSE}
 
 ## Time series cleaning
 tms<-mc_prep_clean(tms.m) # clean series
