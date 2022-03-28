@@ -3,10 +3,7 @@
 \docType{data}
 \name{mc_data_sensors}
 \alias{mc_data_sensors}
-\title{Sensors definition.
-'R object of class environment with the definitions of (micro)climatic sensors.
-see \linkS4class{mc_Sensor}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
-to add new, unsupported sensor here. There is also universal sensor \code{real} where you can store any real values.}
+\title{Sensors definition.}
 \format{
 An object of class \code{environment} of length 21.
 }
@@ -14,9 +11,13 @@ An object of class \code{environment} of length 21.
 mc_data_sensors
 }
 \description{
-Names of items are sensor_ids.
+'R object of class environment with the definitions of (micro)climatic sensors.
+see \linkS4class{mc_Sensor}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
+to add new, unsupported sensor here. There is also universal sensor \code{real} where you can store any real values.
 }
 \details{
+Names of items are sensor_ids.
+
 Currently supported sensors:
 \itemize{
 \item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}

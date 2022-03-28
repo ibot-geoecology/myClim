@@ -3,11 +3,7 @@
 \docType{data}
 \name{mc_data_physical}
 \alias{mc_data_physical}
-\title{Physical quantities definition
-R object of class environment with the definitions of physical elements
-for recording the microclimate e.g. temperature, speed, depth, volumetric water content...
-see \linkS4class{mc_Physical}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
-to add new, unsupported physical here.}
+\title{Physical quantities definition}
 \format{
 An object of class \code{environment} of length 8.
 }
@@ -15,7 +11,6 @@ An object of class \code{environment} of length 8.
 mc_data_physical
 }
 \description{
-Physical quantities definition
 R object of class environment with the definitions of physical elements
 for recording the microclimate e.g. temperature, speed, depth, volumetric water content...
 see \linkS4class{mc_Physical}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
@@ -23,5 +18,17 @@ to add new, unsupported physical here.
 }
 \seealso{
 \linkS4class{mc_Physical}
+
+Currently supported physical quantities:
+\itemize{
+\item T_C - Temperature in °C
+\item moisture - moisture in ratio 0-1
+\item TMSmoisture - TDT signal from TMS moisture sensor
+\item RH_perc - Relative humidity in \%
+\item l_cm - length in cm
+\item l_mm - lenght in mm
+\item v - speed in m/s
+\item t_h - time in hours
+}
 }
 \keyword{datasets}
