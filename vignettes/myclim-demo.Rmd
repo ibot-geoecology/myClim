@@ -46,19 +46,17 @@ Output of reading functions is myClim object in Prep-format designed for data cl
 
 ```{r eval=TRUE}
 library(myClim)
-setwd("..")
-
 ## Read without metadata
 # read from files
-tms.f <- mc_read_files(c("examples/data_91184101_0.csv","examples/data_94184102_0.csv"),
+tms.f <- mc_read_files(c("data_91184101_0.csv","data_94184102_0.csv"),
                        dataformat_name="TOMST")
 
 # read from directory
-tms.d <- mc_read_files(c("examples/"), dataformat_name="TOMST")
+tms.d <- mc_read_files(".", dataformat_name="TOMST")
 # warning about file format control, files not matching format are skipped. 
 
 # read from data.frame
-load("examples/data/chmi/airTmax_merged.RData") #airTmax
+load("airTmax_merged.RData") #airTmax
 airTmax$date<-as.POSIXct(airTmax$date,tz="UTC")
 at<-airTmax[19000:nrow(airTmax),]
 sel<-colSums(!is.na(at[,-1]))>2000
@@ -69,10 +67,8 @@ meteo<-mc_read_wide(at,sensor_id = "T_C", sensor_name = "airTmax")
 ## Read with metadata
 # provide two tables. 1. table with file paths and 2. table with locality metadata
 
-tms.m <- mc_read_data(files_table = 
-                        "examples/data/TOMST/files_table.csv",
-                      localities_table =
-                        "examples/data/TOMST/localities_table.csv")
+tms.m <- mc_read_data(files_table = "files_table.csv",
+                      localities_table ="localities_table.csv")
 
 ```
 
@@ -156,7 +152,7 @@ tms.if<-mc_info(tms.m) # call info
 ## Updating locality metadata
 
 # load data without metadata
-tms.d <- mc_read_files(c("d:/Git/myClim/examples/"), dataformat_name="TOMST")
+tms.d <- mc_read_files(c("/examples"), dataformat_name="TOMST")
 names(tms.d)
 
 # construct metadata table
