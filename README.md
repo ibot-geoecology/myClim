@@ -2,7 +2,7 @@
 
 While installing from GitLab it is necessary to manually install dependencies first. 
 ```R
-requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr", "ggplot2", "ggforce", "viridis", "runner", "rmarkdown", "knitr")
+requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr", "ggplot2", "ggforce", "viridis", "runner", "rmarkdown", "knitr", "kableExtra")
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
 ```

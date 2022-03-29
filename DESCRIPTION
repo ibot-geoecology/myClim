@@ -25,5 +25,6 @@ Imports:
 Roxygen: list(markdown = TRUE)
 Suggests: 
     rmarkdown,
-    knitr
+    knitr,
+    kableExtra
 VignetteBuilder: knitr
