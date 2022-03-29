@@ -9,7 +9,7 @@
 #' @param data myClim object in Prep-format [myClim-package]
 #' @param directory output directory
 #' @param localities filter of localities c("loc1","loc2"); if NULL then all
-#' @param sensors filter of sensors c("TMS_T1","TMS_T2"); if NULL then all
+#' @param sensors filter of sensors c("TMS_T1","TMS_T2"); if NULL then all see `names(mc_data_sensors)`
 #' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
 #' @export
 #' @examples
@@ -142,7 +142,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @param filename output file name (file path)
 #' @param title of plot; default is empty
 #' @param localities filter the localities; if empty then all
-#' @param sensors filter the sensors; if empty then all
+#' @param sensors filter the sensors; if empty then all see `names(mc_data_sensors)`
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
 #' @export
@@ -185,8 +185,8 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' 
 #' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
 #' @param filename output with the extension - supported formats are .pdf and .png
-#' @param sensors names of sensor; should have same unit
-#' @param by_hour if TRUE, then y axis is plotted as an hour, else original time step (default TRUE)
+#' @param sensors names of sensor; should have same unit see `names(mc_data_sensors)`
+#' @param by_hour if TRUE, then y axis is plotted as an hour, else original time step (default TRUE) 
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
 #' @param viridis_color_map viridis color map option; if NULL, then used value from mc_data_physical
@@ -299,7 +299,7 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
 #' Scaling is useful when plotting together e.g. temperature and moisture.  
 #' @param data  myClim object in Prep-format or Calc-formt see [myClim-package]
 #' @param filename output - supported formats are pdf and png
-#' @param sensors select the names of sensors to be plotted (max 2)
+#' @param sensors select the names of sensors to be plotted (max 2) see `names(mc_data_sensors)`
 #' @param scale_coeff scale coefficient for secondary axis (default NULL)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)

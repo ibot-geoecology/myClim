@@ -310,7 +310,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' This function rename sensors.
 #'
 #' @param data myClim onject in Prep-format or Calc-format see [myClim-package] 
-#' @param sensor_names named list with new names of sensors; names of items are old ones e.g. `list(TMS_T1="TMS_Tsoil")`
+#' @param sensor_names named list with new names of sensors; names of items are old ones e.g. `list(TMS_T1="TMS_Tsoil")`== `list("Old"="New")`
 #' @param localities vector of locality_ids where to rename sensors; if NULL than all localities (default NULL) 
 #' @param serial_numbers vector of serial_numbers of loggers; if NULL than all loggers (default NULL); parameter is useful only for
 #' Prep-format of myClim having the level of logger see [myClim-package]
@@ -449,7 +449,7 @@ mc_prep_merge <- function(data_items) {
 #' This function change locality_ids.
 #'
 #' @param data myClim object in Prep-format or Calc-format see [myClim-package]
-#' @param locality_ids list with new locality_ids; names of items are old ones e.g. `list(A1E05="ABC05", A2E32="CDE32")`
+#' @param locality_ids list with new locality_ids; names of items are old ones e.g. `list(A1E05="ABC05", A2E32="CDE32")`; `list("Old"="New")`
 #' @return The same myClim object as input but with changed locality_ids
 #' @examples
 #' data <- mc_prep_rename_locality(example_tomst_data1, list(A1E05="ABC05", A2E32="CDE32"))
@@ -550,7 +550,7 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' Only sensors with real value type can be calibrated. see [myClim::mc_data_sensors()]
 #' 
 #' @param data myClim object in Prep-format or Calc-format having calibration data in metadata slot `sensor$calibration`
-#' @param sensors vector of sensor names where to perform calibration
+#' @param sensors vector of sensor names where to perform calibration see `names(mc_data_sensors)`
 #' @param localities vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)
 #' @return same myClim object as input but with calibrated sensor values.
 #' @export

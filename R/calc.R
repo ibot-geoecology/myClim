@@ -198,8 +198,8 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' For full table of function parameters see [mc_data_vwc_parameters]
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
-#' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture")
-#' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
+#' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`
+#' @param temp_sensor name of soil temperature sensor (default "TMS_T1") see `names(mc_data_sensors)`
 #'
 #' Temperature sensor must be in T physical.
 #' @param output_sensor name of new snow sensor (default "vwc_moisture")
@@ -316,7 +316,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
 #' see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but myClim let you apply anything.
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
-#' @param sensor name of temperature sensor used fot GDD calculation e.g. TMS_T3
+#' @param sensor name of temperature sensor used fot GDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
 #' @param output_prefix name prefix of new GDD sensor (default "GDD")
 #'
 #' name of output sensor consists of output_prefix and value t_base e.g. GDD_5
@@ -364,7 +364,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.   
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
-#' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3
+#' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
 #' @param output_prefix name prefix of new FDD sensor (default "FDD")
 #'
 #' name of output sensor consists of output_prefix and value t_base
