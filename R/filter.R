@@ -4,7 +4,7 @@
 #'
 #' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
 #' @param localities locality_ids for filtering data; if NULL then do nothing
-#' @param sensors sensor_ids for filtering data; if NULL then do nothing
+#' @param sensors sensor_ids for filtering data; if NULL then do nothing see `names(mc_data_sensors)`
 #' @param reverse - if TRUE then filtered discard else keeped (default FALSE)
 #' @param stop_if_empty - if TRUE then error for empty output (default TRUE)
 #' @return filtered data in same format as input

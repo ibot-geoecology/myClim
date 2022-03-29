@@ -17,7 +17,7 @@
 #' Localities are named after serial_number of logger.
 #'
 #' @param paths vector of paths to files or directories
-#' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join)
+#' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join) see `names(mc_data_formats)`
 #' @param recursive logical - recursive search in sub-directories (default TRUE)
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
@@ -57,7 +57,7 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
 #' @param files_table path to csv file or data.frame object containing 4 columns: 
 #' * path - path to file
 #' * locality_id
-#' * data_format
+#' * data_format see `names(mc_data_formats)`
 #' * serial_number - can be NA, than try detect
 #' 
 #' @param localities_table path to csv file or data.frame object containing 5 columns:
@@ -257,8 +257,8 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 #' * Name of locality[1] - values
 #' * ...
 #' * Name of locality[n] - values
-#' @param sensor_id define the sensor type, one of [myClim::mc_data_sensors] (default `real`)
-#' @param sensor_name custom name of sensor; if NULL than `sensor_name <- sensor_id` (default NULL)
+#' @param sensor_id define the sensor type, one of `names(mc_data_sensors)` (default `real`)
+#' @param sensor_name custom name of sensor; if NULL (default) than `sensor_name == sensor_id`
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_long]
@@ -296,11 +296,11 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #'
 #' @param data_table long data.frame with Columns:
 #' * locality_id
-#' * sensor_name
+#' * sensor_name  - see `names(mc_data_sensors)`
 #' * datetime - POSIXct and UTC timezone is required
 #' * value
 #' @param sensor_ids list with relations between sensor_names and sensor_ids; 
-#' Sensor_id is key from [myClim::mc_data_sensors]
+#' Sensor_id is key from `names(mc_data_sensors)`
 #' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
 #' @return myClim object in Prep-format
 #' @export

@@ -7,7 +7,7 @@
 #' * localityid_sensorname for Calc-format
 #' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
 #' @param localities names of localities; if NULL then all (default NULL)
-#' @param sensors names of sensors; if NULL then all (default NULL)
+#' @param sensors names of sensors; if NULL then all (default NULL) see `names(mc_data_sensors)`
 #' @return data.frame with columns:
 #' * datetime 
 #' * locality1_sensor1
@@ -67,7 +67,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 #'
 #' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
 #' @param localities locality_ids; if NULL then all (default NULL)
-#' @param sensors names of sensors; if NULL then all (default NULL)
+#' @param sensors names of sensors; if NULL then all (default NULL) see `names(mc_data_sensors)`
 #' @return data.frame
 #'
 #' columns:
