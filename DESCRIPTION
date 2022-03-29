@@ -2,7 +2,7 @@ Package: myClim
 Type: Package
 Title: R package for processing microclimatic data
 Version: 0.0.25
-Author@R: c(
+Authors@R: c(
     person("Vojtěch", "Kalčík", email = "Vojtech.Kalcik@ibot.cas.cz", role = "cre"),
     person("Matěj", "Man", email = "Matej.Man@ibot.cas.cz", role = "aut"),
     person("Martin", "Macek", email = "Martin.Macek@ibot.cas.cz", role = "aut"),
