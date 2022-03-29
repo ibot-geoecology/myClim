@@ -22,9 +22,9 @@ Columns:
 \item Name of locality\link{n} - values
 }}
 
-\item{sensor_id}{define the sensor type, one of \link{mc_data_sensors} (default \code{real})}
+\item{sensor_id}{define the sensor type, one of \code{names(mc_data_sensors)} (default \code{real})}
 
-\item{sensor_name}{custom name of sensor; if NULL than \code{sensor_name <- sensor_id} (default NULL)}
+\item{sensor_name}{custom name of sensor; if NULL (default) than \code{sensor_name == sensor_id}}
 }
 \value{
 myClim object in Prep-format

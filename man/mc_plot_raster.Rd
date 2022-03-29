@@ -21,7 +21,7 @@ mc_plot_raster(
 
 \item{filename}{output with the extension - supported formats are .pdf and .png}
 
-\item{sensors}{names of sensor; should have same unit}
+\item{sensors}{names of sensor; should have same unit see \code{names(mc_data_sensors)}}
 
 \item{by_hour}{if TRUE, then y axis is plotted as an hour, else original time step (default TRUE)}
 

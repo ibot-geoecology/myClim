@@ -19,7 +19,7 @@ mc_plot_loggers(
 
 \item{localities}{filter of localities c("loc1","loc2"); if NULL then all}
 
-\item{sensors}{filter of sensors c("TMS_T1","TMS_T2"); if NULL then all}
+\item{sensors}{filter of sensors c("TMS_T1","TMS_T2"); if NULL then all see \code{names(mc_data_sensors)}}
 
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
 }

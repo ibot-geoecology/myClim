@@ -23,7 +23,7 @@ mc_plot_image(
 
 \item{localities}{filter the localities; if empty then all}
 
-\item{sensors}{filter the sensors; if empty then all}
+\item{sensors}{filter the sensors; if empty then all see \code{names(mc_data_sensors)}}
 
 \item{height}{of image; default = 1900}
 

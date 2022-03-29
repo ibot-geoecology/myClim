@@ -20,7 +20,7 @@ mc_plot_line(
 
 \item{filename}{output - supported formats are pdf and png}
 
-\item{sensors}{select the names of sensors to be plotted (max 2)}
+\item{sensors}{select the names of sensors to be plotted (max 2) see \code{names(mc_data_sensors)}}
 
 \item{scale_coeff}{scale coefficient for secondary axis (default NULL)}
 

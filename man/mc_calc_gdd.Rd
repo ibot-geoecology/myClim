@@ -9,7 +9,7 @@ mc_calc_gdd(data, sensor, output_prefix = "GDD", t_base = 5, localities = NULL)
 \arguments{
 \item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
-\item{sensor}{name of temperature sensor used fot GDD calculation e.g. TMS_T3}
+\item{sensor}{name of temperature sensor used fot GDD calculation e.g. TMS_T3 see \code{names(mc_data_sensors)}}
 
 \item{output_prefix}{name prefix of new GDD sensor (default "GDD")
 

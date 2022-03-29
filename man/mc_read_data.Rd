@@ -11,7 +11,7 @@ mc_read_data(files_table, localities_table = NULL)
 \itemize{
 \item path - path to file
 \item locality_id
-\item data_format
+\item data_format see \code{names(mc_data_formats)}
 \item serial_number - can be NA, than try detect
 }}
 

@@ -17,7 +17,7 @@ mc_filter(
 
 \item{localities}{locality_ids for filtering data; if NULL then do nothing}
 
-\item{sensors}{sensor_ids for filtering data; if NULL then do nothing}
+\item{sensors}{sensor_ids for filtering data; if NULL then do nothing see \code{names(mc_data_sensors)}}
 
 \item{reverse}{\itemize{
 \item if TRUE then filtered discard else keeped (default FALSE)

@@ -10,13 +10,13 @@ mc_read_long(data_table, sensor_ids)
 \item{data_table}{long data.frame with Columns:
 \itemize{
 \item locality_id
-\item sensor_name
+\item sensor_name  - see \code{names(mc_data_sensors)}
 \item datetime - POSIXct and UTC timezone is required
 \item value
 }}
 
 \item{sensor_ids}{list with relations between sensor_names and sensor_ids;
-Sensor_id is key from \link{mc_data_sensors}
+Sensor_id is key from \code{names(mc_data_sensors)}
 \code{sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)}}
 }
 \value{

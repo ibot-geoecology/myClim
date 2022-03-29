@@ -11,7 +11,7 @@ mc_reshape_wide(data, localities = NULL, sensors = NULL)
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
-\item{sensors}{names of sensors; if NULL then all (default NULL)}
+\item{sensors}{names of sensors; if NULL then all (default NULL) see \code{names(mc_data_sensors)}}
 }
 \value{
 data.frame with columns:

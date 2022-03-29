@@ -11,7 +11,7 @@ mc_reshape_long(data, localities = NULL, sensors = NULL)
 
 \item{localities}{locality_ids; if NULL then all (default NULL)}
 
-\item{sensors}{names of sensors; if NULL then all (default NULL)}
+\item{sensors}{names of sensors; if NULL then all (default NULL) see \code{names(mc_data_sensors)}}
 }
 \value{
 data.frame

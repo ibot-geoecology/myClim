@@ -19,9 +19,9 @@ mc_calc_vwc(
 \arguments{
 \item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
-\item{moist_sensor}{name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture")}
+\item{moist_sensor}{name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see \code{names(mc_data_sensors)}}
 
-\item{temp_sensor}{name of soil temperature sensor (default "TMS_T1")
+\item{temp_sensor}{name of soil temperature sensor (default "TMS_T1") see \code{names(mc_data_sensors)}
 
 Temperature sensor must be in T physical.}
 

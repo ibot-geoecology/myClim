@@ -9,7 +9,7 @@ mc_read_files(paths, dataformat_name, recursive = TRUE)
 \arguments{
 \item{paths}{vector of paths to files or directories}
 
-\item{dataformat_name}{character - data format of logger one of (TOMST, TOMST_join)}
+\item{dataformat_name}{character - data format of logger one of (TOMST, TOMST_join) see \code{names(mc_data_formats)}}
 
 \item{recursive}{logical - recursive search in sub-directories (default TRUE)}
 }

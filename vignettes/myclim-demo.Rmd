@@ -2,7 +2,7 @@
 title: "myClim: microclimatic data in R"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{myClim demo}
+  %\VignetteIndexEntry{myClim: microclimatic data in R}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

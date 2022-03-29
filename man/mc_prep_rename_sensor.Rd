@@ -14,7 +14,7 @@ mc_prep_rename_sensor(
 \arguments{
 \item{data}{myClim onject in Prep-format or Calc-format see \link{myClim-package}}
 
-\item{sensor_names}{named list with new names of sensors; names of items are old ones e.g. \code{list(TMS_T1="TMS_Tsoil")}}
+\item{sensor_names}{named list with new names of sensors; names of items are old ones e.g. \code{list(TMS_T1="TMS_Tsoil")}== \code{list("Old"="New")}}
 
 \item{localities}{vector of locality_ids where to rename sensors; if NULL than all localities (default NULL)}
 
