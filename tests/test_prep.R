@@ -58,17 +58,18 @@ test_that("mc_prep_meta", {
     metadata <- as.data.frame(tibble::tribble(
         ~locality_id, ~lat_wgs84, ~lon_wgs84, ~my,
         "A1E05"     ,          1,          2,  NA,
-        "A2E32"     ,          3,          4,  0
+        "A2E32"     ,          3,          4,  0,
+        "TEST"      ,          1,          1, 10
     ))
     expect_error(changed_data <- mc_prep_meta(data, metadata, param_name="tz_offset"))
-    changed_data <- mc_prep_meta(data, metadata)
+    expect_warning(changed_data <- mc_prep_meta(data, metadata))
     test_prep_data_format(changed_data)
     expect_equal(changed_data$A1E05$metadata@lat_wgs84, 1)
     expect_equal(changed_data$A1E05$metadata@lon_wgs84, 2)
     expect_true(is.na(changed_data$A1E05$metadata@user_data[["my"]]))
     data_clean <- mc_prep_clean(data, silent=T)
     data_calc <- mc_agg(data_clean)
-    changed_data <- mc_prep_meta(data_calc, metadata)
+    expect_warning(changed_data <- mc_prep_meta(data_calc, metadata))
     test_calc_data_format(changed_data)
     expect_equal(changed_data$localities$A1E05$metadata@lat_wgs84, 1)
 })

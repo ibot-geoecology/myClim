@@ -29,7 +29,7 @@ pkg_file <- devtools::build(".")
 install.packages(pkg_file, repos = NULL)
 ```
 # Documentation & user manual
-Functions documentation is available in Reference section [online here](http://tubedb.ibot.cas.cz:8000/index.html).   
+Functions documentation is available in Reference section [online here](http://labgis.ibot.cas.cz/myclim/index.html).   
 In Articles section there is also vignette = user manual with running examples. 
 
 # Examples

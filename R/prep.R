@@ -4,6 +4,7 @@
 
 .prep_const_MESSAGE_PARAM_NAME_NOT_NULL <- "param_name can not be NULL"
 .prep_const_MESSAGE_PARAM_NAME_NULL <- "param_name must be NULL"
+.prep_const_MESSAGE_UNEXISTED_LOCALITY <- "There isn't locality {locality_id}."
 
 #' Cleaning datetime series
 #'
@@ -184,6 +185,10 @@ mc_prep_meta <- function(data, metadata, param_name=NULL) {
     localities <- as.environment(myClim:::.common_get_localities(data))
 
     change_param_function <- function(locality_id, slot_name, value){
+        if(!(locality_id %in% names(localities))) {
+            warning(stringr::str_glue(.prep_const_MESSAGE_UNEXISTED_LOCALITY))
+            return()
+        }
         if(!(slot_name %in% myClim:::.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS)) {
             localities[[locality_id]]$metadata@user_data[[slot_name]] <- value
             return()
