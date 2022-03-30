@@ -1,3 +1,5 @@
+.common_const_MESSAGE_UNKNOWN_SENSOR_ID <- "Sensor_id {sensor_id} is unknown."
+
 .common_convert_factors_in_dataframe <- function(dataframe) {
     factor_columns <- sapply(dataframe, is.factor)
     if(!any(factor_columns)) {
@@ -46,6 +48,9 @@
 
 .common_get_new_sensor <- function(sensor_id, sensor_name, values=NULL,
                                    calibrated=FALSE, calibration=data.frame()){
+    if(!(sensor_id %in% names(mc_data_sensors))) {
+        warning(stringr::str_glue(.common_const_MESSAGE_UNKNOWN_SENSOR_ID))
+    }
     metadata <- new("mc_SensorMetadata")
     metadata@sensor_id <- sensor_id
     metadata@name <- sensor_name

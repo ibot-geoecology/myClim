@@ -4,7 +4,7 @@
 \alias{mc_read_long}
 \title{Reading data from long data.frame}
 \usage{
-mc_read_long(data_table, sensor_ids)
+mc_read_long(data_table, sensor_ids = list())
 }
 \arguments{
 \item{data_table}{long data.frame with Columns:
@@ -15,8 +15,10 @@ mc_read_long(data_table, sensor_ids)
 \item value
 }}
 
-\item{sensor_ids}{list with relations between sensor_names and sensor_ids;
-Sensor_id is key from \code{names(mc_data_sensors)}
+\item{sensor_ids}{list with relations between sensor_names and sensor_ids (default list());
+sensor_id is key from \code{names(mc_data_sensors)}. If sensor_name is the same as sensor_id,
+it does not have to be in the list.
+
 \code{sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)}}
 }
 \value{

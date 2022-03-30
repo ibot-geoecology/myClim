@@ -1,7 +1,6 @@
 .read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible combine files and directories"
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
 .read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
-.read_const_MESSAGE_SENSORS_MULTIPLE_ID <- "Sensor(s) {} have multiple sensor_ids."
 
 #' Reading files or directories
 #'
@@ -299,13 +298,15 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' * sensor_name  - see `names(mc_data_sensors)`
 #' * datetime - POSIXct and UTC timezone is required
 #' * value
-#' @param sensor_ids list with relations between sensor_names and sensor_ids; 
-#' Sensor_id is key from `names(mc_data_sensors)`
+#' @param sensor_ids list with relations between sensor_names and sensor_ids (default list());
+#' sensor_id is key from `names(mc_data_sensors)`. If sensor_name is the same as sensor_id,
+#' it does not have to be in the list.
+#'
 #' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_wide]
-mc_read_long <- function(data_table, sensor_ids) {
+mc_read_long <- function(data_table, sensor_ids=list()) {
     .read_check_datetime(data_table$datetime)
 
     data_table <- dplyr::group_by(data_table, locality_id)
@@ -330,7 +331,11 @@ mc_read_long <- function(data_table, sensor_ids) {
     result <- .read_get_new_locality(locality_id)
 
     sensor_function <- function(sensor_name) {
-        myClim:::.common_get_new_sensor(sensor_ids[[sensor_name]], sensor_name, table_values[[sensor_name]])
+        sensor_id <- sensor_name
+        if(sensor_name %in% names(sensor_ids)) {
+            sensor_id <- sensor_ids[[sensor_name]]
+        }
+        myClim:::.common_get_new_sensor(sensor_id, sensor_name, table_values[[sensor_name]])
     }
 
     sensors <- purrr::map(sensor_names, sensor_function)

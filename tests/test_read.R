@@ -79,12 +79,12 @@ test_that("mc_read_long", {
     data_table_precip$sensor_name <- "precip"
     data_table_fresh_snow <- readRDS("data/read_table/fresh_snow.Rds")[1:10]
     data_table_fresh_snow <- tidyr::gather(data_table_fresh_snow, "locality_id", "value", -date)
-    data_table_fresh_snow$sensor_name <- "fresh_snow"
+    data_table_fresh_snow$sensor_name <- "snow_fresh"
     data_table <- dplyr::union_all(data_table_precip, data_table_fresh_snow)
     data_table <- dplyr::rename(data_table, datetime=date)
     data_table <- dplyr::select(data_table, locality_id, sensor_name, datetime, value)
     data_table$datetime <- as.POSIXct(lubridate::ymd(data_table$datetime, tz="UTC"))
-    data <- mc_read_long(data_table, list(precip="precipitation", fresh_snow="snow_fresh"))
+    data <- mc_read_long(data_table, list(precip="precipitation"))
     test_prep_data_format(data)
     expect_equal(length(data), 9)
 })
