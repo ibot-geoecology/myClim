@@ -11,9 +11,14 @@ Authors@R: c(
     person("Josef", "Bruna", email = "Josef.Bruna@ibot.cas.cz", role = "aut"),
     person("Lucia", "Hederova", email = "Lucia.Hederova@ibot.cas.cz", role = "aut"),
     person("Institute of Botany of the Czech Academy of Sciences", role = "cph"))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Description: Package myClim was designed for handling the microclimatic data in R.
+    myClim workflow begin at the reading data primary from microclimatic dataloggers,
+    but can be also reading of meteorological station data from files.
+    Cleaning time step, time zone settings and metadata collecting is the next step of the work flow.
+    With myClim tools one can crop, join, downscale, and convert microclimatic data formats, sort them into localities,
+    request descriptive characteristics and compute microclimatic variables.
+    Handy plotting functions are provided with smart defaults.
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
