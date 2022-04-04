@@ -32,11 +32,3 @@ install.packages(pkg_file, repos = NULL)
 Functions documentation is available in Reference section [online here](http://labgis.ibot.cas.cz/myclim/index.html).   
 In Articles section there is also vignette = user manual with running examples. 
 
-# Examples
-In [examples](https://git.sorbus.ibot.cas.cz/microclimate_r/microclim/-/tree/main/examples) folder there are example script with example data e.g. 
-
-* [examples/load_tomst.R](examples/load_tomst.R) is the tutorial how to read TMS logger data. 
-* [examples/plot_tomst.R](examples/plot_tomst.R) plotting tutorial
-* [examples/calc.R](examples/calc.R) example of using `mc_calc` functions
-* [examples/load_chmi.R](examples/load_chmi.R) example of reading data from wide data.frame
-
