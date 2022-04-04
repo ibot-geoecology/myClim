@@ -7,9 +7,9 @@ Authors@R: c(
     person("Vojtěch", "Kalčík", email = "Vojtech.Kalcik@ibot.cas.cz", role = c("aut", "cre")),
     person("Martin", "Macek", email = "Martin.Macek@ibot.cas.cz", role = "aut"),
     person("Jan", "Wild", email = "Jan.Wild@ibot.cas.cz", role = "aut"),
-    person("Martin", "Kopecky", email = "Martin.Kopecky@ibot.cas.cz", role = "aut"),
-    person("Josef", "Bruna", email = "Josef.Bruna@ibot.cas.cz", role = "aut"),
-    person("Lucia", "Hederova", email = "Lucia.Hederova@ibot.cas.cz", role = "aut"),
+    person("Martin", "Kopecký", email = "Martin.Kopecky@ibot.cas.cz", role = "aut"),
+    person("Josef", "Brůna", email = "Josef.Bruna@ibot.cas.cz", role = "aut"),
+    person("Lucia", "Hederová", email = "Lucia.Hederova@ibot.cas.cz", role = "aut"),
     person("Institute of Botany of the Czech Academy of Sciences", role = "cph"))
 Description: Package myClim was designed for handling the microclimatic data in R.
     myClim workflow begin at the reading data primary from microclimatic dataloggers,
