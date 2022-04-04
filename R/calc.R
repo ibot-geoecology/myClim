@@ -360,8 +360,8 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Function add new virtual sensor with values of FDD Freezing Degree Days.
 #'
 #' @details
-#' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value is the contribution of the interval to the freezing degree day. 
-#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.   
+#' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value is the contribution of the interval to the freezing degree day.
+#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
@@ -381,5 +381,49 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 
 .calc_fdd_values_function <- function(locality, sensor, t_base, step_part_day) {
     pmax(t_base - locality$sensors[[sensor]]$values, 0) * step_part_day
+}
+
+#' Cumulative sum
+#'
+#' @description
+#' Function calculate cumulative sum for sensors and add output as new sensors.
+#' Names of new sensors are original sensor name + `outpus_suffix`.
+#'
+#' @details
+#' If value type of sensor is logical, then output type is integer.
+#'
+#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param sensors names of sensors for which is calculated cumulative sum
+#' @param output_suffix name suffix for new names (default "_cumsum")
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return The same myClim object as input but with added cumsum sensors.
+#' @export
+#' @examples
+#' cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))
+mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NULL) {
+    myClim:::.common_stop_if_not_calc_format(data)
+
+    sensor_function <- function(locality, sensor_name) {
+        if(!(sensor_name %in% names(locality$sensors))) {
+            return(locality)
+        }
+
+        origin_sensor <- locality$sensors[[sensor_name]]
+        sensor_id <- origin_sensor$metadata@sensor_id
+        values <- cumsum(origin_sensor$values)
+        if(is.logical(origin_sensor$values) && !is.logical(values)) {
+            sensor_id = myClim:::.model_const_SENSOR_integer
+        }
+        s
+    }
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    data
 }
 
