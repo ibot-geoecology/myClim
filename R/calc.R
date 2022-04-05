@@ -51,21 +51,21 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     return(data_period > max_period)
 }
 
-.calc_snow_values_function <- function(locality, sensor, dr, tmax) {
-    day_max_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
-    day_range_temp <- runner::runner(locality$sensors[[sensor]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
+.calc_snow_values_function <- function(locality, sensor_name, dr, tmax) {
+    day_max_temp <- runner::runner(locality$sensors[[sensor_name]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    day_range_temp <- runner::runner(locality$sensors[[sensor_name]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
     (day_range_temp < dr) & (day_max_temp < tmax)
 }
 
-.calc_add_sensor_to_locality <- function(locality, sensor, output_sensor_id, output_sensor_name, sensor_physical, values_function, ...) {
-    if(!.calc_check_sensor_in_locality(locality, sensor)){
+.calc_add_sensor_to_locality <- function(locality, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
+    if(!.calc_check_sensor_in_locality(locality, sensor_name)){
         return(locality)
     }
-    if(!myClim:::.model_is_physical_T_C(locality$sensors[[sensor]]$metadata)){
-        .calc_wrong_physical_error_function(sensor, sensor_physical)
+    if(!is.null(sensor_physical) && !myClim:::.model_is_physical(locality$sensors[[sensor_name]]$metadata, sensor_physical)){
+        .calc_wrong_physical_error_function(sensor_name, sensor_physical)
     }
     .calc_warn_if_overwriting(locality, output_sensor_name)
-    values <- values_function(locality, sensor, ...)
+    values <- values_function(locality, sensor_name, ...)
     locality$sensors[[output_sensor_name]] <- myClim:::.common_get_new_sensor(output_sensor_id, output_sensor_name, values=values)
     return(locality)
 }
@@ -350,8 +350,8 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
     data
 }
 
-.calc_gdd_values_function <- function(locality, sensor, t_base, step_part_day) {
-    pmax(locality$sensors[[sensor]]$values - t_base, 0) * step_part_day
+.calc_gdd_values_function <- function(locality, sensor_name, t_base, step_part_day) {
+    pmax(locality$sensors[[sensor_name]]$values - t_base, 0) * step_part_day
 }
 
 #' Freezing Degree Days
@@ -360,8 +360,8 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Function add new virtual sensor with values of FDD Freezing Degree Days.
 #'
 #' @details
-#' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value is the contribution of the interval to the freezing degree day. 
-#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.   
+#' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value is the contribution of the interval to the freezing degree day.
+#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
@@ -379,7 +379,62 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
     .calc_xdd(data, sensor, myClim:::.model_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
 }
 
-.calc_fdd_values_function <- function(locality, sensor, t_base, step_part_day) {
-    pmax(t_base - locality$sensors[[sensor]]$values, 0) * step_part_day
+.calc_fdd_values_function <- function(locality, sensor_name, t_base, step_part_day) {
+    pmax(t_base - locality$sensors[[sensor_name]]$values, 0) * step_part_day
+}
+
+#' Cumulative sum
+#'
+#' @description
+#' Function calculate cumulative sum for sensors and add output as new sensors.
+#' Names of new sensors are original sensor name + `outpus_suffix`.
+#'
+#' @details
+#' If value type of sensor is logical, then output type is integer.
+#'
+#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param sensors names of sensors for which is calculated cumulative sum
+#' @param output_suffix name suffix for new names (default "_cumsum")
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return The same myClim object as input but with added cumsum sensors.
+#' @export
+#' @examples
+#' cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))
+mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NULL) {
+    myClim:::.common_stop_if_not_calc_format(data)
+
+    values_function <- function(locality, sensor_name) {
+        cumsum(locality$sensors[[sensor_name]]$values)
+    }
+
+    sensor_function <- function(locality, sensor_name) {
+        if(!.calc_check_sensor_in_locality(locality, sensor_name)){
+            return(locality)
+        }
+        origin_sensor <- locality$sensors[[sensor_name]]
+        output_sensor_id <- origin_sensor$metadata@sensor_id
+        output_sensor_name <- stringr::str_glue("{origin_sensor$metadata@name}{output_suffix}")
+        locality <- .calc_add_sensor_to_locality(locality, sensor_name, output_sensor_id, output_sensor_name,
+                                                 values_function = values_function)
+        if(is.logical(origin_sensor$values) && !is.logical(locality$sensors[[output_sensor_name]]$values)) {
+            locality$sensors[[output_sensor_name]]$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
+        }
+        locality
+    }
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+
+        for (sensor_name in sensors) {
+            locality <- sensor_function(locality, sensor_name)
+        }
+
+        locality
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    data
 }
 

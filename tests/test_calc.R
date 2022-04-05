@@ -101,3 +101,14 @@ test_that("mc_calc_fdd", {
     expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[1], 0)
     expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[288], (0.5) * 15/(60*24))
 })
+
+test_that("mc_calc_cumsum", {
+    data <- mc_read_data("data/TOMST/files_table.csv")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    expect_warning(calc_data <- mc_calc_snow(calc_data, "TMS_T3", dr=1.5, tmax=0.5))
+    expect_warning(cumsum_data <- mc_calc_cumsum(calc_data, c("TMS_T1", "TMS_T2", "snow")))
+    test_calc_data_format(calc_data)
+    expect_equal(cumsum(cumsum_data$localities$A2E32$sensors$TMS_T1$values), cumsum_data$localities$A2E32$sensors$TMS_T1_cumsum$values)
+    expect_equal(cumsum_data$localities$A2E32$sensors$snow_cumsum$metadata@sensor_id, myClim:::.model_const_SENSOR_integer)
+})

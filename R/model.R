@@ -235,8 +235,24 @@ setMethod("initialize",
           })
 
 setGeneric(
+    ".model_is_physical",
+    function(object, physical){
+        standardGeneric(".model_is_physical")
+    }
+)
+
+setMethod(
+    ".model_is_physical",
+    "mc_SensorMetadata",
+    function(object, physical) {
+        physical_id <- mc_data_sensors[[object@sensor_id]]@physical
+        return(physical_id == physical)
+    }
+)
+
+setGeneric(
     ".model_is_physical_TMSmoisture",
-    function(object, data){
+    function(object){
         standardGeneric(".model_is_physical_TMSmoisture")
     }
 )
@@ -245,14 +261,13 @@ setMethod(
     ".model_is_physical_TMSmoisture",
     "mc_SensorMetadata",
     function(object) {
-        physical_id <- mc_data_sensors[[object@sensor_id]]@physical
-        return(physical_id == .model_const_PHYSICAL_TMSmoisture)
+        .model_is_physical(object, .model_const_PHYSICAL_TMSmoisture)
     }
 )
 
 setGeneric(
     ".model_is_physical_T_C",
-    function(object, data){
+    function(object){
         standardGeneric(".model_is_physical_T_C")
     }
 )
@@ -261,14 +276,13 @@ setMethod(
     ".model_is_physical_T_C",
     "mc_SensorMetadata",
     function(object) {
-        physical_id <- mc_data_sensors[[object@sensor_id]]@physical
-        return(physical_id == .model_const_PHYSICAL_T_C)
+        .model_is_physical(object, .model_const_PHYSICAL_T_C)
     }
 )
 
 setGeneric(
     ".model_is_type_real",
-    function(object, data){
+    function(object){
         standardGeneric(".model_is_type_real")
     }
 )
