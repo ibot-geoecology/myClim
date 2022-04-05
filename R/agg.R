@@ -201,7 +201,9 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         }
         min(x)
     }
-    item$datetime <- aggregate(item$datetime, by_aggregate, datetime_function)$x
+    agg_table <- data.frame(datetime=item$datetime, by_aggregate)
+    groupped_table <- dplyr::group_by(agg_table, step)
+    item$datetime <- dplyr::summarise(groupped_table, x=datetime_function(datetime))$x
     sensor_function <- function(sensor) {
         functions <- .agg_get_functions(sensor, fun, percentiles, na.rm)
         .agg_agregate_sensor(sensor, functions, by_aggregate)
