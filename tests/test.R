@@ -26,8 +26,7 @@ test_calc_locality <- function(locality) {
     expect_equal(class(locality), "list")
     expect_equal(names(locality), c("metadata", "datetime", "sensors"))
     expect_equal(class(locality$metadata)[[1]], "mc_LocalityMetadata")
-    expect_equal(class(locality$datetime), c("POSIXct", "POSIXt"))
-    expect_true(all(!is.na(locality$datetime)))
+    test_datetime(locality$datetime)
     expect_equal(class(locality$sensors), "list")
     test_data_length(locality)
     test_sensors(locality$sensors)
@@ -38,13 +37,18 @@ test_logger <- function(logger) {
     expect_equal(names(logger), c("metadata", "clean_info", "datetime", "sensors"))
     expect_equal(class(logger$metadata)[[1]], "mc_LoggerMetadata")
     expect_equal(class(logger$clean_info)[[1]], "mc_LoggerCleanInfo")
-    expect_equal(class(logger$datetime), c("POSIXct", "POSIXt"))
-    expect_true(all(!is.na(logger$datetime)))
+    test_datetime(logger$datetime)
     expect_equal(class(logger$sensors), "list")
     expect_true(length(logger$sensors) > 0)
     test_data_length(logger)
     test_cleaning(logger)
     test_sensors(logger$sensors)
+}
+
+test_datetime <- function(datetime) {
+    expect_equal(class(datetime), c("POSIXct", "POSIXt"))
+    expect_true(all(!is.na(datetime)))
+    expect_equal(attr(datetime, "tzone"), "UTC")
 }
 
 test_data_length <- function(item) {
