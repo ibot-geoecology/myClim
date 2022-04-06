@@ -104,6 +104,8 @@ mc_info_clean <- function(data) {
 #' * count_values - number of non NA records
 #' * count_na - number of NA records
 #' @export
+#' @examples
+#' mc_info(mc_data_example_calc)
 mc_info <- function(data) {
     is_prep_format <- myClim:::.common_is_prep_format(data)
 
@@ -158,3 +160,32 @@ mc_info <- function(data) {
     as.data.frame(result)
 }
 
+#' Get localities metadata table
+#'
+#' This function return data.frame with localities metadata
+#'
+#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
+#' @return data.frame with columns:
+#' * locality_id
+#' * lon_wgs84
+#' * lat_wgs84
+#' * altitude
+#' * tz_offset
+#' @export
+#' @examples
+#' mc_info_meta(mc_data_example_calc)
+mc_info_meta <- function(data) {
+    localities <- myClim:::.common_get_localities(data)
+
+    locality_function <- function (locality) {
+        list(locality_id = locality$metadata@locality_id,
+             lon_wgs84 = locality$metadata@lon_wgs84,
+             lat_wgs84 = locality$metadata@lat_wgs84,
+             altitude = locality$metadata@altitude,
+             tz_offset = locality$metadata@tz_offset
+        )
+    }
+
+    result <- purrr::map_dfr(localities, locality_function)
+    as.data.frame(result)
+}

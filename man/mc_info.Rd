@@ -29,3 +29,6 @@ data.frame with columns:
 \description{
 This function return data.frame with info about sensors
 }
+\examples{
+mc_info(mc_data_example_calc)
+}

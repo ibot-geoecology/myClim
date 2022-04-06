@@ -39,3 +39,14 @@ test_that("mc_info no data FIX", {
     expect_equal(nrow(table), 8)
 })
 
+test_that("mc_info_meta", {
+    data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    meta_info <- mc_info_meta(data)
+    expect_equal(colnames(meta_info), c("locality_id", "lon_wgs84", "lat_wgs84", "altitude", "tz_offset"))
+    expect_equal(nrow(meta_info), 3)
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    agg_data <- mc_agg(cleaned_data)
+    agg_meta_info <- mc_info_meta(agg_data)
+    expect_equal(agg_meta_info, meta_info)
+})
+
