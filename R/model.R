@@ -52,6 +52,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
+.model_const_DATA_FORMAT_HOBO <- "HOBO"
 
 # classes ================================================================================
 
@@ -345,13 +346,14 @@ setMethod("initialize",
           "mc_DataFormat",
           function(.Object) {
               .Object@has_header <- TRUE
-              .Object@separator <- ";"
+              .Object@separator <- NA_character_
               .Object@date_column <- NA_integer_
               .Object@date_format <- NA_character_
               .Object@na_strings <- NA_character_
               .Object@columns <- list()
               .Object@filename_serial_number_pattern <- NA_character_
-              .Object@logger_type < NA_character_
+              .Object@data_row_pattern <- NA_character_
+              .Object@logger_type <- NA_character_
               return(.Object)
           })
 
@@ -378,7 +380,25 @@ mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 #' @seealso [myClim::mc_DataFormat],[mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_DataFormat")
 
+#' Class for reading HOBO logger files
+#'
+#' Provides the key for the column in source files. Where is the date,
+#' in what format is the date, in which columns are records of which sensors.
+#' The code defining the class is in section methods ./R/model.R
+#'
+#' @export mc_HOBODataFormat
+#' @exportClass mc_HOBODataFormat
+#' @seealso [myClim::mc_DataFormat],[mc_data_formats]
+mc_HOBODataFormat <- setClass("mc_HOBODataFormat", contains = "mc_DataFormat")
+
 # generics ================================================================================
+
+setGeneric(
+    ".model_load_data_format_params_from_file",
+    function(object, path){
+        standardGeneric(".model_load_data_format_params_from_file")
+    }
+)
 
 setGeneric(
   ".model_load_data_format_params_from_data",
@@ -402,6 +422,14 @@ setGeneric(
 )
 
 # methods ================================================================================
+
+setMethod(
+    ".model_load_data_format_params_from_file",
+    "mc_DataFormat",
+    function(object, path) {
+        object
+    }
+)
 
 setMethod(
     ".model_load_data_format_params_from_data",

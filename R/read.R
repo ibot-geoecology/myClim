@@ -1,6 +1,7 @@
 .read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible combine files and directories"
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
 .read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
+.read_const_MESSAGE_ANY_FILE <- "There isn't any source file."
 
 #' Reading files or directories
 #'
@@ -88,10 +89,17 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         }
         localities <- .read_init_localities_from_table(localities_table)
     }
-    files_table <- dplyr::filter(files_table, .read_is_data_format_ok(path, data_format))
-    files_table$serial_number <- .read_get_edited_serial_numbers(files_table)
+
+    data_formats <- .read_get_data_formats(files_table)
+    condition <- purrr::map_lgl(data_formats, ~ !is.null(.x))
+    files_table <- files_table[condition, ]
+    data_formats <- data_formats[condition]
+    if(nrow(files_table) == 0) {
+        stop(.read_const_MESSAGE_ANY_FILE)
+    }
+    files_table$serial_number <- .read_get_edited_serial_numbers(files_table, data_formats)
     files_table$locality_id <- .read_get_edited_locality_ids(files_table)
-    .read_get_output_data(files_table, localities)
+    .read_get_output_data(files_table, localities, data_formats)
 }
 
 .read_get_table_from_csv <- function(csv_path) {
@@ -107,27 +115,30 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     result
 }
 
-.read_is_data_format_ok <- function(paths, data_formats) {
-    item_function <- function(path, data_format) {
+.read_get_data_formats <- function(files_table) {
+    file_function <- function (path, data_format) {
         if(!(data_format %in% names(mc_data_formats))){
             warning(stringr::str_glue("It is unknown format {data_format} for {path}. File is skipped."))
-            return(FALSE)
+            return(NULL)
         }
-        if(!myClim:::.model_is_file_in_right_format(mc_data_formats[[data_format]], path)) {
+        data_format_object <- mc_data_formats[[data_format]]
+        data_format_object <- myClim:::.model_load_data_format_params_from_file(data_format_object, path)
+        if(!myClim:::.model_is_file_in_right_format(data_format_object, path)) {
             warning(stringr::str_glue("File {path} dosn't have right format. File is skipped."))
-            return(FALSE)
+            return(NULL)
         }
-        TRUE
+        return(data_format_object)
     }
-    purrr::map2_lgl(paths, data_formats, item_function)
+
+    purrr::map2(files_table$path, files_table$data_format, file_function)
 }
 
-.read_get_edited_serial_numbers <- function(files_table) {
+.read_get_edited_serial_numbers <- function(files_table, data_formats) {
     row_function <- function(path, locality_id, data_format, serial_number) {
         if(!is.na(serial_number)) {
             return(serial_number)
         }
-        serial_number <- myClim:::.model_get_serial_number_from_filename(mc_data_formats[[data_format]], path)
+        serial_number <- myClim:::.model_get_serial_number_from_filename(data_format, path)
         if(is.na(serial_number))
         {
             stop(stringr::str_glue("It isn't possible detect serial_number for {path}."))
@@ -135,7 +146,12 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         serial_number
     }
 
-    purrr::pmap_chr(files_table, row_function)
+    parameters <- list(path = files_table$path,
+                       locality_id = files_table$locality_id,
+                       data_format = data_formats,
+                       serial_number = files_table$serial_number)
+
+    purrr::pmap_chr(parameters, row_function)
 }
 
 .read_get_edited_locality_ids <- function(files_table) {
@@ -149,10 +165,11 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     purrr::map2_chr(files_table$locality_id, files_table$serial_number, row_function)
 }
 
-.read_get_output_data <- function(files_table, localities) {
+.read_get_output_data <- function(files_table, localities, data_formats) {
+    files_table$index <- 1:nrow(files_table)
     groupped_files <- dplyr::group_by(files_table, locality_id)
     row_function <- function(path, data_format, serial_number) {
-        .read_logger(path, mc_data_formats[[data_format]], serial_number)
+        .read_logger(path, data_format, serial_number)
     }
     locality_function <- function(.x, .y) {
         if(.y$locality_id %in% names(localities)) {
@@ -160,7 +177,10 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         } else {
             locality <- .read_get_new_locality(.y$locality_id)
         }
-        locality$loggers <- purrr::pmap(.x, row_function)
+        parameters = list(path = .x$path,
+                          data_format = data_formats[.x$index],
+                          serial_number = .x$serial_number)
+        locality$loggers <- purrr::pmap(parameters, row_function)
         locality
     }
     result <- dplyr::group_map(groupped_files, locality_function)

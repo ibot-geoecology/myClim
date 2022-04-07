@@ -21,4 +21,7 @@ mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@filename_serial_number_pa
 #                                                                                ;  ;  ;datetime ;T1            ;T2            ;T3            ;mois;mois        ;
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@data_row_pattern <- "^\\d+;.+;.+;[\\d.: ]+;-?\\d*\\.?\\d*;-?\\d*\\.?\\d*;-?\\d*\\.?\\d*;\\d*;\\d*\\.?\\d*;.*$"
 
+mc_data_formats[[.model_const_DATA_FORMAT_HOBO]] <- new("mc_HOBODataFormat")
+mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@has_header <- TRUE
+
 usethis::use_data(mc_data_formats, overwrite = TRUE)
