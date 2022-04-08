@@ -201,7 +201,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 }
 
 .read_logger <- function(filename, data_format, serial_number) {
-    skip <- if(data_format@has_header) 1 else 0
+    skip <- data_format@skip_rows
     data_table <- read.table(filename,
                              sep = data_format@separator,
                              skip = skip,

@@ -308,7 +308,7 @@ setMethod(
 #'  
 #' \preformatted{
 #' An object of class "mc_TOMSTDataFormat"
-#' attr(,"has_header"): FALSE
+#' attr(,"skip_rows"): 0
 #' attr(,"separator"): ";"
 #' attr(,"date_column"): 2
 #' attr(,"date_format"): NA
@@ -319,8 +319,8 @@ setMethod(
 #' attr(,"logger_type"): character(0)
 #' }
 #' 
-#' @slot has_header detects if table has header (default TRUE)
-#' @slot separator columns separator (default ";")
+#' @slot skip_rows number of rows before data - header etc. (default 1)
+#' @slot separator columns separator (default NA)
 #' @slot date_column index of date column (default NA)
 #' @slot date_format format of date (default NA)
 #' @slot na_strings strings for NA values (default NA)
@@ -332,7 +332,7 @@ setMethod(
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
-                          slots = c(has_header = "logical",
+                          slots = c(skip_rows = "numeric",
                                     separator = "character",
                                     date_column = "numeric",
                                     date_format = "character",
@@ -345,7 +345,7 @@ mc_DataFormat <- setClass("mc_DataFormat",
 setMethod("initialize",
           "mc_DataFormat",
           function(.Object) {
-              .Object@has_header <- TRUE
+              .Object@skip_rows <- 1
               .Object@separator <- NA_character_
               .Object@date_column <- NA_integer_
               .Object@date_format <- NA_character_
@@ -529,15 +529,15 @@ setMethod(
     signature("mc_DataFormat"),
     function(object, filename) {
         con <- file(filename, "r")
-        skip <- object@has_header
+        skip <- object@skip_rows
         while (TRUE) {
             line <- readLines(con, n = 1)
             if ( length(line) == 0 ) {
                 close(con)
                 return(FALSE)
             }
-            if(skip) {
-              skip <- FALSE
+            if(skip > 0) {
+              skip <- skip - 1
               next
             }
             close(con)
