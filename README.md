@@ -16,9 +16,9 @@ setwd("C:/path/to/directory") # !!!! EDIT HERE !!!!
 zip_file <- "myClim.zip"
 dir_name <- "myClim"
 # stable version
-download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=stable&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
+# download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=stable&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
 # development version
-# download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=main&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
+download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=main&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
 subdir <- unzip(zip_file, list=TRUE)$Name[1]
 unzip(zip_file)
 file.remove(zip_file)
