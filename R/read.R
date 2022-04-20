@@ -19,13 +19,18 @@
 #' @param paths vector of paths to files or directories
 #' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join) see `names(mc_data_formats)`
 #' @param recursive logical - recursive search in sub-directories (default TRUE)
+#' @param date_format - format of date used in strptime function (default NA)
+#'
+#' This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
+#' see [mc_data_formats]
+#' @param tz_offset - timezone offset in minutes; It is required fill in only for non-UTC source data. (default NA)
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
 #' \dontrun{
 #' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 #' }
-mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
+mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA_character_, tz_offset=NA_integer_) {
     if(all(dir.exists(paths))) {
         files <- .read_get_csv_files_from_directory(paths, recursive)
     } else if(any(dir.exists(paths))) {
@@ -33,34 +38,43 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE) {
     } else {
         files <- paths
     }
-    files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name, serial_number=NA_character_)
+    files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name,
+                              serial_number=NA_character_, date_format=date_format, tz_offset=tz_offset)
     mc_read_data(files_table)
 }
 
 .read_get_csv_files_from_directory <- function(paths, recursive) {
     files_function <- function (directory) {
-        list.files(directory, pattern=".+\\.[cC][sS][vV]$", recursive=recursive, full.names=TRUE)
+        list.files(directory, pattern=".+\\.(csv|CSV|txt|TXT)$", recursive=recursive, full.names=TRUE)
     }
     purrr::flatten_chr(purrr::map(paths, files_function))
 }
 
 #' Reading files with locality metadata
 #'
-#' This function requires two tables. i.) `files_table` with paths pointing to raw
-#' csv logger files, specification of data format (logger type) and locality name. 
+#' This function has two tables parameters. i.) `files_table` with paths pointing to raw
+#' csv logger files, specification of data format (logger type) and locality name. This table is required.
 #' ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
 #' must have header, column separator must be comma "," 
 #'
-#' @param files_table path to csv file or data.frame object containing 4 columns: 
+#' @param files_table path to csv file or data.frame object contains 3 required columns and another optional:
+#' required columns:
 #' * path - path to file
 #' * locality_id
-#' * data_format see `names(mc_data_formats)`
+#' * data_format see [mc_data_formats], `names(mc_data_formats)`
+#'
+#' optional columns:
 #' * serial_number - can be NA, than try detect
-#' 
-#' @param localities_table path to csv file or data.frame object containing 5 columns:
+#' * date_format - format of date in strptime function; can be NA for TOMST data format
+#' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
+#' Value in this column highest priority. NA mean auto detection of timezone. If timezone can'ẗ be detected, then UTC is supposed.
+#' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
+#'
+#' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
+#' object contains 5 columns:
 #' * locality_id
 #' * altitude
 #' * lon_wgs84
@@ -116,21 +130,38 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 }
 
 .read_get_data_formats <- function(files_table) {
-    file_function <- function (path, data_format) {
+    file_function <- function (path, data_format, date_format, tz_offset) {
         if(!(data_format %in% names(mc_data_formats))){
             warning(stringr::str_glue("It is unknown format {data_format} for {path}. File is skipped."))
             return(NULL)
         }
         data_format_object <- mc_data_formats[[data_format]]
+        if(is.na(data_format_object@date_format) && !is.na(date_format)) {
+            data_format_object@date_format <- date_format
+        }
+        if(!is.na(tz_offset)) {
+            data_format_object@tz_offset <- tz_offset
+        }
         data_format_object <- myClim:::.model_load_data_format_params_from_file(data_format_object, path)
-        if(!myClim:::.model_is_file_in_right_format(data_format_object, path)) {
+        if(is.null(data_format_object)) {
             warning(stringr::str_glue("File {path} dosn't have right format. File is skipped."))
             return(NULL)
         }
         return(data_format_object)
     }
 
-    purrr::map2(files_table$path, files_table$data_format, file_function)
+    date_format <- NA_character_
+    if("date_format" %in% colnames(files_table)) {
+        date_format <- files_table$date_format
+    }
+    tz_offset <- NA_integer_
+    if("tz_offset" %in% colnames(files_table)) {
+        tz_offset <- files_table$tz_offset
+    }
+    purrr::pmap(list(path=files_table$path,
+                     data_format=files_table$data_format,
+                     date_format=date_format,
+                     tz_offset=tz_offset), file_function)
 }
 
 .read_get_edited_serial_numbers <- function(files_table, data_formats) {
@@ -138,7 +169,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         if(!is.na(serial_number)) {
             return(serial_number)
         }
-        serial_number <- myClim:::.model_get_serial_number_from_filename(data_format, path)
+        serial_number <- myClim:::.model_get_serial_number_from_file(data_format, path)
         if(is.na(serial_number))
         {
             stop(stringr::str_glue("It isn't possible detect serial_number for {path}."))
@@ -146,10 +177,15 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         serial_number
     }
 
+    serial_numbers <- NA_character_
+    if("serial_number" %in% colnames(files_table)) {
+        serial_numbers <- files_table$serial_number
+    }
+
     parameters <- list(path = files_table$path,
                        locality_id = files_table$locality_id,
                        data_format = data_formats,
-                       serial_number = files_table$serial_number)
+                       serial_number = serial_numbers)
 
     purrr::pmap_chr(parameters, row_function)
 }
@@ -201,20 +237,28 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 }
 
 .read_logger <- function(filename, data_format, serial_number) {
-    skip <- data_format@skip_rows
-    data_table <- read.table(filename,
-                             sep = data_format@separator,
-                             skip = skip,
-                             stringsAsFactors = FALSE,
-                             na.strings = data_format@na_strings)
-    data_format <- myClim:::.model_load_data_format_params_from_data(data_format, data_table)
+    data_table <- .read_get_data_from_file(filename, data_format)
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
     if(any(is.na(datetime))) {
         stop(stringr::str_glue("It isn't possible read datetimes from {filename}."))
     }
+    if(data_format@tz_offset != 0) {
+        datetime <- datetime - data_format@tz_offset * 60
+    }
     sensors <- .read_get_sensors_from_data_format(data_table, data_format)
     .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type)
+}
+
+.read_get_data_from_file <- function(filename, data_format, nrows=-1) {
+    read.table(filename,
+               sep = data_format@separator,
+               skip = data_format@skip,
+               stringsAsFactors = FALSE,
+               na.strings = data_format@na_strings,
+               fill = TRUE,
+               nrows = nrows,
+               comment.char = "")
 }
 
 .read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {

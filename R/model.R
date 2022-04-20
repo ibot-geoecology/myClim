@@ -11,6 +11,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("altitude", "lat_wgs84", "lon_wgs84", "tz_offset")
 
 .model_const_PHYSICAL_T_C <- "T_C"
+.model_const_PHYSICAL_T_F <- "T_F"
 .model_const_PHYSICAL_moisture <- "moisture"
 .model_const_PHYSICAL_TMSmoisture <- "TMSmoisture"
 .model_const_PHYSICAL_RH_perc <- "RH_perc"
@@ -29,6 +30,10 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_TMS_T3 <- "TMS_T3"
 .model_const_SENSOR_TMS_TMSmoisture <- "TMS_TMSmoisture"
 .model_const_SENSOR_TM_T <- "TM_T"
+.model_const_SENSOR_HOBO_T_C <- "HOBO_T_C"
+.model_const_SENSOR_HOBO_T_F <- "HOBO_T_F"
+.model_const_SENSOR_HOBO_RH <- "HOBO_RH"
+
 # universal sensors
 .model_const_SENSOR_count <- "count"
 .model_const_SENSOR_coverage <- "coverage"
@@ -49,10 +54,17 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
 .model_const_LOGGER_TOMST_THERMODATALOGGER <- "ThermoDatalogger"
+.model_const_LOGGER_HOBO_U23 <- "HOBO_U23"
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
 .model_const_DATA_FORMAT_HOBO <- "HOBO"
+
+.model_const_MESSAGE_NO_DATA <- "There aren't data in source file."
+.model_const_MESSAGE_SEPARATED_TIME <- "Separated time in source data isn't supported."
+.model_const_MESSAGE_DATE_TIME_HEADER <- "It is not possible detect timezone offset from header."
+.model_const_MESSAGE_COLUMNS_PROBLEM <- "It is not possible detect columns from header."
+.model_const_MESSAGE_HOBO_DATE_FORMAT_PROBLEM <- "HOBO data format required filled in parameter date_format."
 
 # classes ================================================================================
 
@@ -308,7 +320,7 @@ setMethod(
 #'  
 #' \preformatted{
 #' An object of class "mc_TOMSTDataFormat"
-#' attr(,"skip_rows"): 0
+#' attr(,"skip"): 0
 #' attr(,"separator"): ";"
 #' attr(,"date_column"): 2
 #' attr(,"date_format"): NA
@@ -319,20 +331,23 @@ setMethod(
 #' attr(,"logger_type"): character(0)
 #' }
 #' 
-#' @slot skip_rows number of rows before data - header etc. (default 1)
+#' @slot skip number of lines before data - header etc. (default 0)
 #' @slot separator columns separator (default NA)
 #' @slot date_column index of date column (default NA)
 #' @slot date_format format of date (default NA)
 #' @slot na_strings strings for NA values (default NA)
 #' @slot columns list with names and indexes of value columns (default list())
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from filename (default NA)
-#' @slot data_row_pattern character pattern for detecting right file format
+#' @slot data_row_pattern character pattern for detecting right file format (default NA)
+#'
+#' If data_row_pattern is NA, then file format is not validated.
 #' @slot logger_type type of logger: TMS, ThermoDatalogger (default NA)
+#' @slot tz_offset timezone offset in minutes from UTC in source data (default 0)
 #' @export mc_DataFormat
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
-                          slots = c(skip_rows = "numeric",
+                          slots = c(skip = "numeric",
                                     separator = "character",
                                     date_column = "numeric",
                                     date_format = "character",
@@ -340,12 +355,13 @@ mc_DataFormat <- setClass("mc_DataFormat",
                                     columns = "list",
                                     filename_serial_number_pattern = "character",
                                     data_row_pattern = "character",
-                                    logger_type = "character"))
+                                    logger_type = "character",
+                                    tz_offset = "numeric"))
 
 setMethod("initialize",
           "mc_DataFormat",
           function(.Object) {
-              .Object@skip_rows <- 1
+              .Object@skip <- 0
               .Object@separator <- NA_character_
               .Object@date_column <- NA_integer_
               .Object@date_format <- NA_character_
@@ -354,6 +370,7 @@ setMethod("initialize",
               .Object@filename_serial_number_pattern <- NA_character_
               .Object@data_row_pattern <- NA_character_
               .Object@logger_type <- NA_character_
+              .Object@tz_offset <- NA_integer_
               return(.Object)
           })
 
@@ -401,23 +418,9 @@ setGeneric(
 )
 
 setGeneric(
-  ".model_load_data_format_params_from_data",
-  function(object, data){
-    standardGeneric(".model_load_data_format_params_from_data")
-  }
-)
-
-setGeneric(
-  ".model_get_serial_number_from_filename",
-  function(object, filename){
-    standardGeneric(".model_get_serial_number_from_filename")
-  }
-)
-
-setGeneric(
-  ".model_is_file_in_right_format",
-  function(object, filename){
-    standardGeneric(".model_is_file_in_right_format")
+  ".model_get_serial_number_from_file",
+  function(object, path){
+    standardGeneric(".model_get_serial_number_from_file")
   }
 )
 
@@ -427,22 +430,42 @@ setMethod(
     ".model_load_data_format_params_from_file",
     "mc_DataFormat",
     function(object, path) {
+        if(!.model_is_file_in_right_format(object, path)) {
+            return(NULL)
+        }
         object
     }
 )
 
-setMethod(
-    ".model_load_data_format_params_from_data",
-    "mc_DataFormat",
-    function(object, data) {
-        object
+.model_is_file_in_right_format <- function(object, path) {
+    if(is.na(object@data_row_pattern)) {
+        return(TRUE)
     }
-)
+    con <- file(path, "r")
+    skip <- object@skip
+    while (TRUE) {
+        line <- readLines(con, n = 1)
+        if ( length(line) == 0 ) {
+            close(con)
+            return(FALSE)
+        }
+        if(skip > 0) {
+            skip <- skip - 1
+            next
+        }
+        close(con)
+        return(stringr::str_detect(line, object@data_row_pattern))
+    }
+}
 
 setMethod(
-    ".model_load_data_format_params_from_data",
+    ".model_load_data_format_params_from_file",
     "mc_TOMSTDataFormat",
-    function(object, data) {
+    function(object, path) {
+        if(!.model_is_file_in_right_format(object, path)) {
+            return(NULL)
+        }
+        data <- myClim:::.read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
         object@date_format <- .get_tomst_datetime_format(data, object@date_column)
         .change_tomst_columns_and_logger_type(object, data)
     }
@@ -466,7 +489,6 @@ setMethod(
     tms_columns <- list(4, 5, 6, 7)
     names(tms_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2,.model_const_SENSOR_TMS_T3,
                             .model_const_SENSOR_TMS_TMSmoisture)
-    data <- head(data, .model_const_COUNT_TEST_VALUES)
     if(all(is.na(data[[tms_columns[[.model_const_SENSOR_TMS_T2]]]]))) {
         object@columns <- tm_columns
         object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
@@ -479,9 +501,13 @@ setMethod(
 }
 
 setMethod(
-    ".model_load_data_format_params_from_data",
+    ".model_load_data_format_params_from_file",
     "mc_TOMSTJoinDataFormat",
-    function(object, data) {
+    function(object, path) {
+        if(!.model_is_file_in_right_format(object, path)) {
+            return(NULL)
+        }
+        data <- myClim:::.read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
         .change_tomst_join_columns_and_logger_type(object, data)
     }
 )
@@ -492,12 +518,11 @@ setMethod(
     tmsj_columns <- list(5, 6, 7, 8, 9)
     names(tmsj_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2,.model_const_SENSOR_TMS_T3,
                              .model_const_SENSOR_TMS_TMSmoisture, .model_const_SENSOR_moisture)
-    data <- head(data, .model_const_COUNT_TEST_VALUES)
     is_T1_NA <- all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]]))
     is_NA_T2_T3 <- all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T2]]]])) &&
         all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
     is_T1_T2_T3_equals <- (all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T2]]]]) &&
-                           all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
+        all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
     if(!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals)) {
         object@columns <- tmj_columns
         object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
@@ -514,34 +539,154 @@ setMethod(
 }
 
 setMethod(
-    ".model_get_serial_number_from_filename",
+    ".model_load_data_format_params_from_file",
+    "mc_HOBODataFormat",
+    function(object, path) {
+        count_lines <- 5
+        lines <- .model_read_n_lines(path, count_lines)
+        object@separator <- .model_hobo_get_separator(lines)
+        if(is.na(object@separator)) {
+            return(NULL)
+        }
+        data <- myClim:::.read_get_data_from_file(path, object, nrows = count_lines)
+        object <- .model_hobo_set_skip(object, data)
+        has_numbers_column <- data[[1]][[object@skip]] == "#"
+        object <- .model_hobo_set_date_column(object, data, has_numbers_column)
+        if(is.na(object@date_column)) {
+            return(NULL)
+        }
+        object <- .model_hobo_set_tz_offset(object, data)
+        object <- .model_hobo_set_columns(object, data, has_numbers_column)
+        if(!.model_is_hobo_format_ok(object)) {
+            return(NULL)
+        }
+        object
+    }
+)
+
+.model_read_n_lines <- function(filename, count_lines) {
+    con <- file(filename, "r")
+    lines <- readLines(con, n = count_lines)
+    close(con)
+    lines
+}
+
+.model_hobo_get_separator <- function(lines) {
+    if(length(lines) >= 3) {
+        line <- lines[[3]]
+    } else if(length(lines) == 2) {
+        line <- lines[[2]]
+    } else {
+        return(NA_character_)
+    }
+    for(sep in c(";", "\t", ",")) {
+        parts <- stringr::str_split(line, sep)[[1]]
+        if(length(parts) >= 3) {
+            return(sep)
+        }
+    }
+    return(NA_character_)
+}
+
+.model_hobo_set_skip <- function(object, data) {
+    if(stringr::str_starts(data[[1]][[1]], "Plot Title:")) {
+        object@skip <- 2
+    } else {
+        object@skip <- 1
+    }
+    object
+}
+
+.model_hobo_set_date_column <- function (object, data, has_numbers_column) {
+    date_column <- if(has_numbers_column) 2 else 1
+    if(data[[date_column]][[object@skip]] == "Date") {
+        warning(.model_const_MESSAGE_SEPARATED_TIME)
+        return(object)
+    }
+    object@date_column <- date_column
+    object
+}
+
+.model_hobo_set_tz_offset <- function (object, data) {
+    if(!is.na(object@tz_offset)) {
+        return(object)
+    }
+    if(data[[object@date_column]][[object@skip]] == "Date Time") {
+        object@tz_offset <- 0
+        return(object)
+    }
+    parts <- stringr::str_match(data[[object@date_column]][[object@skip]], "Date Time, GMT([+-])(\\d{2}):(\\d{2})")
+    if(is.na(parts[[1, 1]])) {
+        warning(.model_const_MESSAGE_DATE_TIME_HEADER)
+        object@tz_offset <- NA_integer_
+    }
+    tz_sign <- if(parts[[1, 2]] == "+") 1 else -1
+    object@tz_offset <- tz_sign * (strtoi(parts[[3]]) * 60 + strtoi(parts[[4]]))
+    object
+}
+
+.model_hobo_set_columns <- function(object, data, has_numbers_column) {
+    add_count_columns <- if(has_numbers_column) 1 else 0
+    temp_column <- 2 + add_count_columns
+    rh_column <- 3 + add_count_columns
+    parts <- stringr::str_match(data[[temp_column]][[object@skip]], "Temp,? \\(?(°[CF])\\)?")
+    if(is.na(parts[[1, 2]])) {
+        warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
+        return(object)
+    }
+    temp_sensor_id <- .model_const_SENSOR_HOBO_T_C
+    if(parts[[1, 2]] == "°F") {
+        temp_sensor_id <- .model_const_SENSOR_HOBO_T_F
+    }
+    parts <- stringr::str_match(data[[rh_column]][[object@skip]], "RH,? \\(?%\\)?")
+    if(is.na(parts[[1, 1]])) {
+        warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
+        return(object)
+    }
+    columns <- list(temp_column, rh_column)
+    names(columns) <- c(temp_sensor_id, .model_const_SENSOR_HOBO_RH)
+    object@columns <- columns
+    object
+}
+
+.model_is_hobo_format_ok <- function(object) {
+    if(is.na(object@tz_offset)) {
+        return(FALSE)
+    }
+    if(length(object@columns) == 0) {
+        return(FALSE)
+    }
+    if(is.na(object@date_format)) {
+        warning(.model_const_MESSAGE_HOBO_DATE_FORMAT_PROBLEM)
+        return(FALSE)
+    }
+    return(TRUE)
+}
+
+setMethod(
+    ".model_get_serial_number_from_file",
     signature("mc_DataFormat"),
-    function(object, filename) {
+    function(object, path) {
         if(is.null(object@filename_serial_number_pattern)) {
           stop(stringr::str_glue("It is not possible identify serial_number from file {filename}."))
         }
-        stringr::str_match(basename(filename), object@filename_serial_number_pattern)[1, 2]
+        stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
     }
 )
 
 setMethod(
-    ".model_is_file_in_right_format",
-    signature("mc_DataFormat"),
-    function(object, filename) {
-        con <- file(filename, "r")
-        skip <- object@skip_rows
-        while (TRUE) {
-            line <- readLines(con, n = 1)
-            if ( length(line) == 0 ) {
-                close(con)
-                return(FALSE)
-            }
-            if(skip > 0) {
-              skip <- skip - 1
-              next
-            }
-            close(con)
-            return(stringr::str_detect(line, object@data_row_pattern))
+    ".model_get_serial_number_from_file",
+    signature("mc_HOBODataFormat"),
+    function(object, path) {
+        changed_object <- object
+        changed_object@skip <- object@skip - 1
+        data <- myClim:::.read_get_data_from_file(path, changed_object, nrows = 1)
+        temp_column <- changed_object@columns[[1]]
+        parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?°[CF]\\)? \\(?LGR S\\/N: (\\d+),")
+        if(is.na(parts[[1, 2]])) {
+            return(callNextMethod())
         }
+        return(parts[[1, 2]])
     }
 )
+

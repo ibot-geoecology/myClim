@@ -7,15 +7,25 @@
 mc_read_data(files_table, localities_table = NULL)
 }
 \arguments{
-\item{files_table}{path to csv file or data.frame object containing 4 columns:
+\item{files_table}{path to csv file or data.frame object contains 3 required columns and another optional:
+required columns:
 \itemize{
 \item path - path to file
 \item locality_id
-\item data_format see \code{names(mc_data_formats)}
+\item data_format see \link{mc_data_formats}, \code{names(mc_data_formats)}
+}
+
+optional columns:
+\itemize{
 \item serial_number - can be NA, than try detect
+\item date_format - format of date in strptime function; can be NA for TOMST data format
+\item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
+Value in this column highest priority. NA mean auto detection of timezone. If timezone can'ẗ be detected, then UTC is supposed.
+Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
 }}
 
-\item{localities_table}{path to csv file or data.frame object containing 5 columns:
+\item{localities_table}{path to csv file or data.frame. Localities table is optional (default NULL).
+object contains 5 columns:
 \itemize{
 \item locality_id
 \item altitude
@@ -28,8 +38,8 @@ mc_read_data(files_table, localities_table = NULL)
 myClim object in Prep-format see \link{myClim-package}
 }
 \description{
-This function requires two tables. i.) \code{files_table} with paths pointing to raw
-csv logger files, specification of data format (logger type) and locality name.
+This function has two tables parameters. i.) \code{files_table} with paths pointing to raw
+csv logger files, specification of data format (logger type) and locality name. This table is required.
 ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
 }
 \details{

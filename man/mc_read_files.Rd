@@ -4,7 +4,13 @@
 \alias{mc_read_files}
 \title{Reading files or directories}
 \usage{
-mc_read_files(paths, dataformat_name, recursive = TRUE)
+mc_read_files(
+  paths,
+  dataformat_name,
+  recursive = TRUE,
+  date_format = NA_character_,
+  tz_offset = NA_integer_
+)
 }
 \arguments{
 \item{paths}{vector of paths to files or directories}
@@ -12,6 +18,17 @@ mc_read_files(paths, dataformat_name, recursive = TRUE)
 \item{dataformat_name}{character - data format of logger one of (TOMST, TOMST_join) see \code{names(mc_data_formats)}}
 
 \item{recursive}{logical - recursive search in sub-directories (default TRUE)}
+
+\item{date_format}{\itemize{
+\item format of date used in strptime function (default NA)
+}
+
+This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
+see \link{mc_data_formats}}
+
+\item{tz_offset}{\itemize{
+\item timezone offset in minutes; It is required fill in only for non-UTC source data. (default NA)
+}}
 }
 \value{
 myClim object in Prep-format see \link{myClim-package}

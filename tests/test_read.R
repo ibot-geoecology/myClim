@@ -1,5 +1,4 @@
 library(testthat)
-library(myClim)
 source("test.R")
 
 test_that("mc_read_data csv without localities", {
@@ -39,6 +38,37 @@ test_that("mc_read_files TOMST directory", {
     expect_equal(data[[1]]$metadata@tz_type, mc_const_TZ_UTC)
     expect_equal(length(data), 4)
     expect_equal(length(data[[1]]$loggers), 1)
+})
+
+test_that("mc_read_files HOBO", {
+    data <- mc_read_files(c("data/HOBO/20024354_comma.csv", "data/HOBO/20024354_semicolon.txt", "data/HOBO/20024354_tab.txt"),
+                          "HOBO",  date_format = "%y.%m.%d %H:%M:%S", tz_offset = 120)
+    test_prep_data_format(data)
+})
+
+test_that("mc_read_data HOBO", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path,                                   ~locality_id, ~data_format, ~serial_number, ~date_format,        ~tz_offset,
+        "data/HOBO/20024354.txt",                "A",          "HOBO",       NA_character_,  "%d.%m.%Y %H:%M:%S", NA_integer_,
+        "data/HOBO/20024354_comma.csv",          "B",          "HOBO",       NA_character_,  "%y.%m.%d %H:%M:%S", NA_integer_,
+        "data/HOBO/20024354_fahrenheit.csv",     "C",          "HOBO",       NA_character_,  "%m.%d.%y %H:%M:%S", NA_integer_,
+        "data/HOBO/20024354_minimal.csv",        "D",          "HOBO",       "20024356",     "%y.%m.%d %H:%M:%S", 120,
+        "data/HOBO/20024354_minimal_title.csv",  "E",          "HOBO",       "20024356",     "%y.%m.%d %H:%M:%S", 120,
+        "data/HOBO/20024354_semicolon.txt",      "F",          "HOBO",       NA_character_,  "%y.%m.%d %H:%M:%S", NA_integer_,
+        "data/HOBO/20024354_separated_CEST.csv", "G",          "HOBO",       NA_character_,  "%y.%m.%d",          NA_integer_,
+        "data/HOBO/20024354_separeted.csv",      "H",          "HOBO",       "20024356",     "%y.%m.%d",          NA_integer_,
+        "data/HOBO/20024354_tab.txt",            "CH",         "HOBO",       NA_character_,  "%y.%m.%d %H:%M:%S", NA_integer_,
+    ))
+    expect_warning(data <- mc_read_data(files_table))
+    test_prep_data_format(data)
+    expect_equal(names(data), c("A", "B", "C", "D", "E", "F", "CH"))
+    expect_true(var(c(data$A$loggers[[1]]$datetime[[1]],
+                      data$B$loggers[[1]]$datetime[[1]],
+                      data$C$loggers[[1]]$datetime[[1]],
+                      data$D$loggers[[1]]$datetime[[1]],
+                      data$E$loggers[[1]]$datetime[[1]],
+                      data$F$loggers[[1]]$datetime[[1]],
+                      data$CH$loggers[[1]]$datetime[[1]])) == 0)
 })
 
 test_that("mc_read_files error", {

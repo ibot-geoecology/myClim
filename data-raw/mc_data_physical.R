@@ -9,6 +9,13 @@ mc_data_physical[[.model_const_PHYSICAL_T_C]]@units <- "°C"
 mc_data_physical[[.model_const_PHYSICAL_T_C]]@viridis_color_map <- "C"
 mc_data_physical[[.model_const_PHYSICAL_T_C]]@scale_coeff <- 1/30
 
+mc_data_physical[[.model_const_PHYSICAL_T_F]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_T_F]]@name <- .model_const_PHYSICAL_T_F
+mc_data_physical[[.model_const_PHYSICAL_T_F]]@description <- "Temperature °F"
+mc_data_physical[[.model_const_PHYSICAL_T_F]]@units <- "°F"
+mc_data_physical[[.model_const_PHYSICAL_T_F]]@viridis_color_map <- "C"
+mc_data_physical[[.model_const_PHYSICAL_T_F]]@scale_coeff <- 1/54
+
 mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@name <- .model_const_PHYSICAL_TMSmoisture
 mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@description <- "Soil moisture (TDT signal)"

@@ -55,6 +55,27 @@ mc_data_sensors[[.model_const_SENSOR_TM_T]]@max_value <- 60
 mc_data_sensors[[.model_const_SENSOR_TM_T]]@plot_color <- "#2000EEB0"
 mc_data_sensors[[.model_const_SENSOR_TM_T]]@plot_line_width <- 2
 
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@sensor_id <- .model_const_SENSOR_HOBO_T_C
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@logger <- .model_const_LOGGER_HOBO_U23
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@physical <- .model_const_PHYSICAL_T_C
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@min_value <- -40
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@max_value <- 70
+
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@sensor_id <- .model_const_SENSOR_HOBO_T_F
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@logger <- .model_const_LOGGER_HOBO_U23
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@physical <- .model_const_PHYSICAL_T_F
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@min_value <- -40
+mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@max_value <- 158
+
+mc_data_sensors[[.model_const_SENSOR_HOBO_RH]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@sensor_id <- .model_const_SENSOR_HOBO_RH
+mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@logger <- .model_const_LOGGER_HOBO_U23
+mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@physical <- .model_const_PHYSICAL_RH_perc
+mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@min_value <- 0
+mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@max_value <- 100
+
 # universal sensors ================================================================================
 
 mc_data_sensors[[.model_const_SENSOR_count]] <- new("mc_Sensor")

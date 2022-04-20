@@ -15,7 +15,27 @@ R object of class environment with the definitions how to
 parse specific microclimatic logger files. In case you would like to add
 new, unsupported logger, this is the place where the reading key is stored.
 }
+\details{
+Package myClim support formats TOMST, TOMST_join and HOBO
+
+TOMST
+
+TOMST data format has stable structure. Datetime is in UTC. Name of data file is in format data_<serial_number>_<x>.csv.
+Value serial_number can be automatically detected from file name. Supported loggers are TMS and ThermoDataLogger.
+
+TOMST_join
+
+TOMST_join data format is custome format for internal using of Institute of Botany of the Czech Academy of Sciences.
+
+HOBO
+
+HOBO data format is export format from software HOBOware of Onset company. Format is very variable
+and can be changed in preferences form. Strucuture of format can be partly detected automatically from header of data.
+It is required manually define format of date-time (\code{date_format}) in reading functions (\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}).
+Separated date and time is not supported. If time zone is not defined in header and is other than UTC, then \code{tz_offset}
+must be filled in.
+}
 \seealso{
-\link{mc_DataFormat},\linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}
+\link{mc_DataFormat}, \linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}, \linkS4class{mc_HOBODataFormat}
 }
 \keyword{datasets}
