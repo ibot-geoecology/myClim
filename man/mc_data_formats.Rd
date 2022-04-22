@@ -18,16 +18,16 @@ new, unsupported logger, this is the place where the reading key is stored.
 \details{
 Package myClim support formats TOMST, TOMST_join and HOBO
 
-TOMST
+\strong{TOMST}
 
 TOMST data format has stable structure. Datetime is in UTC. Name of data file is in format data_<serial_number>_<x>.csv.
 Value serial_number can be automatically detected from file name. Supported loggers are TMS and ThermoDataLogger.
 
-TOMST_join
+\strong{TOMST_join}
 
-TOMST_join data format is custome format for internal using of Institute of Botany of the Czech Academy of Sciences.
+TOMST_join data format is custom format for internal using of Institute of Botany of the Czech Academy of Sciences.
 
-HOBO
+\strong{HOBO}
 
 HOBO data format is export format from software HOBOware of Onset company. Format is very variable
 and can be changed in preferences form. Strucuture of format can be partly detected automatically from header of data.
