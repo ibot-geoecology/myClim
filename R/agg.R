@@ -1,4 +1,7 @@
 .agg_const_MESSAGE_LOCALITY_WITHOUT_DATA <- "Locality {locality$metadata@locality_id} is without valid data. It is removed."
+.agg_const_MESSAGE_CUSTOM_START_NULL <- "Parameter custom_start must be set."
+.agg_const_MESSAGE_CUSTOM_WRONG_FORMAT <- "Prameter {parameter_name} is in wrong format. Required format is 'mm-dd' or 'mm-dd H:MM'."
+.agg_const_MESSAGE_EMPTY_DATA <- "Data are empty."
 
 #' Aggregate data by function
 #'
@@ -31,9 +34,13 @@
 #' Named list of functions allows apply specific functions for different sensors e.g. `list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")`
 #' if NULL records are not aggregated, but converted to Calc-format. See details.
 #'
-#' @param period Time period for aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
+#' @param period Time period for aggregation - same as breaks in cut.POSIXt, e.g. (`"hour"`, `"day"`, `"month"`); if NULL then no aggregation
 #'
-#' There is special period "all" returning single value for each sensor based on function applied across all records within the sensor.
+#' There is special period `"all"` returning single value for each sensor based on function applied across all records within the sensor.
+#'
+#' Another special period is `"custom"`. It aggregates data to year, but year can start in other date then first of janury
+#' (for example hydrological year). It is possible select only part of year and another values skip (for example growing season).
+#' See `custom_start` and `custom_end` parameters.
 #'
 #' Start day of week is Monday.
 #' @param use_utc default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
@@ -41,19 +48,21 @@
 #' Non-UTC time can by used only for period `day` and longer. 
 #' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
 #' @param na.rm parameter for aggregation function; Not used for count and coverage.
+#' @param custom_start date of start `custom` period (defaul NULL); Parameter is required for custom period. It is character in format `"mm-dd"` or `"mm-dd H:MM"`.
+#' @param custom_end date of end `custom` period (defaul NULL); If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped.
+#' It is character in same format as `custom_start`. Value with same datetime as `custom_end` is not included.
 #' @return Returns new myClim object in Calc-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
 #' records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
 #' @export
 #' @examples
 #' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
 #' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", na.rm=FALSE)
-mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE) {
+mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE,
+                   custom_start=NULL, custom_end=NULL) {
+    old_lubridate_week_start <- getOption("lubridate.week.start")
     options(lubridate.week.start = 1)
-    use_interval <- NULL
-    if(!is.null(period) && period == "all") {
-        use_interval <- myClim:::.common_get_cleaned_data_range(data)
-    }
-    period_object <- .agg_get_period_object(use_interval, period)
+    use_intervals <- .agg_get_use_intervals(data, period, custom_start, custom_end)
+    period_object <- .agg_get_period_object(use_intervals, period)
     .agg_check_fun_period(fun, period_object, use_utc)
     if(!use_utc) {
         myClim:::.prep_warn_if_unset_tz_offset(data)
@@ -63,9 +72,9 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_prep) {
-            return(.agg_aggregate_prep_locality(locality, fun, period, use_interval, percentiles, na.rm, tz_offset))
+            return(.agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset))
         } else {
-            return(.agg_aggregate_item(locality, fun, period, use_interval, percentiles, na.rm, tz_offset, original_step_text))
+            return(.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_step_text))
         }
     }
     if(is_prep) {
@@ -76,7 +85,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     new_localities <- purrr::map(localities, locality_function)
     new_localities <- purrr::keep(new_localities, function (x) !is.null(x))
     if(length(new_localities) == 0) {
-        stop("Data are empty.")
+        stop(.agg_const_MESSAGE_EMPTY_DATA)
     }
 
     if(is.null(period)) {
@@ -84,7 +93,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         step <- as.integer(number_of_seconds / 60)
         step_text <- stringr::str_glue("{step} min")
     } else if(period == "all") {
-        number_of_seconds <- as.numeric(use_interval)
+        number_of_seconds <- as.numeric(use_intervals)
         step <- as.integer(number_of_seconds / 60)
         step_text <- stringr::str_glue("{step} min")
     } else {
@@ -94,15 +103,121 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     metadata <- new("mc_MainMetadata")
     metadata@step_text <- step_text
     metadata@step <- step
+    options(lubridate.week.start = old_lubridate_week_start)
     list(metadata=metadata, localities=new_localities)
 }
 
-.agg_get_period_object <- function(use_interval, period) {
+.agg_get_use_intervals <- function(data, period, custom_start, custom_end) {
+    result <- NULL
+    if(!is.null(period) && period %in% c("all", "custom")) {
+        result <- myClim:::.common_get_cleaned_data_range(data)
+    }
+    if(!is.null(period) && period == "custom") {
+        custom_dates <- .agg_parse_custom_dates(custom_start, custom_end)
+        result <- .agg_get_custom_intervals(result, custom_dates)
+    }
+    result
+}
+
+.agg_parse_custom_dates <- function(custom_start, custom_end) {
+    if(is.null(custom_start)) {
+        stop(.agg_const_MESSAGE_CUSTOM_START_NULL)
+    }
+    date_format <- "^(\\d{2})-(\\d{2})(?: (\\d{1,2}):(\\d{2}))?$"
+    parts <- stringr::str_match(custom_start, date_format)
+    if(is.na(parts[1,1])) {
+        parameter_name <- "custom_start"
+        stop(stringr::str_glue(.agg_const_MESSAGE_CUSTOM_WRONG_FORMAT))
+    }
+    result <- list(end_month=NA_integer_, end_day=NA_integer_,
+                   end_hour=NA_integer_, end_minute=NA_integer_)
+    result$start_month <- as.integer(parts[1, 2])
+    result$start_day <- as.integer(parts[1, 3])
+    result$start_hour <- if(is.na(parts[1, 4])) 0 else as.integer(parts[1, 4])
+    result$start_minute <- if(is.na(parts[1, 5])) 0 else as.integer(parts[1, 5])
+    if(is.null(custom_end)) {
+        return(result)
+    }
+    parts <- stringr::str_match(custom_end, date_format)
+    if(is.na(parts[1,1])) {
+        parameter_name <- "custom_end"
+        stop(stringr::str_glue(.agg_const_MESSAGE_CUSTOM_WRONG_FORMAT))
+    }
+    result$end_month <- as.integer(parts[1, 2])
+    result$end_day <- as.integer(parts[1, 3])
+    result$end_hour <- if(is.na(parts[1, 4])) 0 else as.integer(parts[1, 4])
+    result$end_minute <- if(is.na(parts[1, 5])) 0 else as.integer(parts[1, 5])
+    result
+}
+
+.agg_get_custom_intervals <- function(whole_interval, custom_dates) {
+    first_interval <- .agg_get_first_custom_interval(whole_interval, custom_dates)
+    last_interval <- .agg_get_last_custom_interval(whole_interval, first_interval)
+    count_years <- lubridate::year(lubridate::int_start(last_interval)) - lubridate::year(lubridate::int_start(first_interval))
+    intervals <- lubridate::int_shift(first_interval, years(seq(0, count_years)))
+    interval_function <- function(item) {
+        lubridate::int_end(item) <- lubridate::int_end(item) - seconds(1)
+        item
+    }
+    map(intervals, interval_function)
+}
+
+.agg_get_first_custom_interval <- function(whole_interval, custom_dates) {
+    start <- lubridate::int_start(whole_interval)
+    end <- lubridate::int_end(whole_interval)
+    start_interval <- lubridate::make_datetime(lubridate::year(start),
+                                               custom_dates$start_month,
+                                               custom_dates$start_day,
+                                               custom_dates$start_hour,
+                                               custom_dates$start_minute)
+    if(is.na(custom_dates$end_month)) {
+        end_interval <- start_interval + lubridate::years(1)
+    } else {
+        end_interval <- lubridate::make_datetime(lubridate::year(start),
+                                                 custom_dates$end_month,
+                                                 custom_dates$end_day,
+                                                 custom_dates$end_hour,
+                                                 custom_dates$end_minute)
+    }
+    if(end_interval < start_interval) {
+        end_interval <- end_interval + lubridate::years(1)
+    }
+    result <- lubridate::interval(start_interval, end_interval)
+    if(lubridate::`%within%`(start, result) && start != end_interval) {
+        return(result)
+    }
+    if(end_interval <= start) {
+        result <- lubridate::int_shift(result, lubridate::years(1))
+    }
+    else if(start_interval > start) {
+        previous_interval <- lubridate::int_shift(result, lubridate::years(-1))
+        if(lubridate::int_end(previous_interval) > start) {
+            result <- previous_interval
+        }
+    }
+    if(lubridate::int_start(result) > end) {
+        stop(.agg_const_MESSAGE_EMPTY_DATA)
+    }
+    result
+}
+
+.agg_get_last_custom_interval <- function(whole_interval, first_interval) {
+    end <- lubridate::int_end(whole_interval)
+    start_first_interval <- lubridate::int_start(first_interval)
+    count_years <- lubridate::year(end) - lubridate::year(start_first_interval)
+    result <- lubridate::int_shift(first_interval, lubridate::years(count_years))
+    if(lubridate::int_start(result) > end) {
+        result <- lubridate::int_shift(result, lubridate::years(-1))
+    }
+    result
+}
+
+.agg_get_period_object <- function(use_intervals, period) {
     if(is.null(period)) {
         return(NULL)
     }
-    if(!is.null(use_interval)) {
-        return(lubridate::as.period(use_interval))
+    if(!is.null(use_intervals)) {
+        return(lubridate::as.period(use_intervals))
     }
     lubridate::period(period)
 }

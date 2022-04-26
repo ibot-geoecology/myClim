@@ -30,5 +30,5 @@ install.packages(pkg_file, repos = NULL)
 ```
 # Documentation & user manual
 * [Functions documentation](http://labgis.ibot.cas.cz/myclim-devel/index.html).   
-* [vignette: user manual](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html)
+* [vignette: user manual](http://labgis.ibot.cas.cz/myclim-devel/articles/myclim-demo.html)
 

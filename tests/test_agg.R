@@ -154,3 +154,21 @@ test_that("mc_agg merging loggers", {
     expect_equal(length(agg_data$localities$A6W79$sensors), 9)
 })
 
+test_that(".agg_get_custom_intervals", {
+    test_function_parse <- if(exists(".agg_parse_custom_dates")) .agg_parse_custom_dates else myClim:::.agg_parse_custom_dates
+    test_function <- if(exists(".agg_get_custom_intervals")) .agg_get_custom_intervals else myClim:::.agg_get_custom_intervals
+    custom_dates <- test_function_parse("04-01", NULL)
+    intervals <- test_function(lubridate::interval(lubridate::ymd(20220501), lubridate::ymd(20230104)), custom_dates)
+    expect_equal(intervals[[1]], lubridate::interval(lubridate::ymd(20220401), lubridate::ymd_hms("2023-03-31 23:59:59")))
+    intervals <- test_function(lubridate::interval(lubridate::ymd(20210301), lubridate::ymd(20230104)), custom_dates)
+    expect_equal(intervals, list(lubridate::interval(lubridate::ymd(20200401), lubridate::ymd_hms("2021-03-31 23:59:59")),
+                                 lubridate::interval(lubridate::ymd(20210401), lubridate::ymd_hms("2022-03-31 23:59:59")),
+                                 lubridate::interval(lubridate::ymd(20220401), lubridate::ymd_hms("2023-03-31 23:59:59"))))
+    custom_dates <- test_function_parse("03-01", NULL)
+    intervals <- test_function(lubridate::interval(lubridate::ymd(20190501), lubridate::ymd(20200404)), custom_dates)
+    expect_equal(intervals, list(lubridate::interval(lubridate::ymd(20190301), lubridate::ymd_hms("2020-02-29 23:59:59")),
+                                 lubridate::interval(lubridate::ymd(20200301), lubridate::ymd_hms("2021-02-28 23:59:59"))))
+    custom_dates <- test_function_parse("03-10 12:00", "09-06 8:00")
+    intervals <- test_function(lubridate::interval(lubridate::ymd(20200101), lubridate::ymd(20230101)), custom_dates)
+})
+
