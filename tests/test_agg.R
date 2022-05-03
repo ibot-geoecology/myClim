@@ -172,3 +172,11 @@ test_that(".agg_get_custom_intervals", {
     intervals <- test_function(lubridate::interval(lubridate::ymd(20200101), lubridate::ymd(20230101)), custom_dates)
 })
 
+test_that("mc_agg reaggregate", {
+    expect_warning(data <- mc_read_files("data/TOMST/", "TOMST"))
+    data <- mc_prep_clean(data, silent=T)
+    agg_data <- mc_agg(data)
+    agg_all <- mc_agg(agg_data, period = "all", fun = "mean")
+    test_calc_data_format(agg_all)
+})
+
