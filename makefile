@@ -7,7 +7,7 @@ install-no-vignette:
 	R -e 'install.packages(".", repos = NULL)'
 
 install:
-	R -e 'pkg_file <- pkgbuild::build(".", dest_path="../myClim_latest.tar.gz"); install.packages("../myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)'
+	R -e 'pkg_file <- devtools::build(".", dest_path="../myClim_latest.tar.gz"); install.packages("../myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)'
 
 remove:
 	R -e 'remove.packages("myClim")'
