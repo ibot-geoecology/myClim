@@ -61,7 +61,7 @@ test_that("mc_read_data HOBO", {
     ))
     expect_warning(data <- mc_read_data(files_table))
     test_prep_data_format(data)
-    expect_equal(names(data), c("A", "B", "C", "D", "E", "F", "CH"))
+    expect_equal(sort(names(data)), sort(c("A", "B", "C", "D", "E", "F", "CH")))
     expect_true(var(c(data$A$loggers[[1]]$datetime[[1]],
                       data$B$loggers[[1]]$datetime[[1]],
                       data$C$loggers[[1]]$datetime[[1]],

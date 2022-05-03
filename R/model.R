@@ -549,6 +549,7 @@ setMethod(
             return(NULL)
         }
         data <- myClim:::.read_get_data_from_file(path, object, nrows = count_lines)
+        data[1, 1] <- stringr::str_trim(data[1, 1])
         object <- .model_hobo_set_skip(object, data)
         has_numbers_column <- data[[1]][[object@skip]] == "#"
         object <- .model_hobo_set_date_column(object, data, has_numbers_column)
@@ -568,7 +569,7 @@ setMethod(
     con <- file(filename, "r")
     lines <- readLines(con, n = count_lines)
     close(con)
-    lines
+    purrr::map_chr(lines, ~ stringr::str_trim(.x))
 }
 
 .model_hobo_get_separator <- function(lines) {
