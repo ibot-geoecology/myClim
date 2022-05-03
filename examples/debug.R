@@ -13,3 +13,5 @@ debug_loading_function("./")
 # debug tests
 setwd("tests")
 debug_loading_function("../")
+
+# debug code
