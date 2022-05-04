@@ -21,7 +21,7 @@
 #' @param paths vector of paths to files or directories
 #' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join) see `names(mc_data_formats)`
 #' @param recursive logical - recursive search in sub-directories (default TRUE)
-#' @param date_format - format of date used in strptime function (default NA)
+#' @param date_format - format of date used in strptime function e.g. "%d.%m.%y %H:%M:%S" (default NA) necessary to provide for HOBO. 
 #'
 #' This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
 #' see [mc_data_formats]
@@ -70,7 +70,7 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #'
 #' optional columns:
 #' * serial_number - can be NA, than try detect
-#' * date_format - format of date in strptime function; can be NA for TOMST data format
+#' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S"); can be NA for TOMST data format
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column highest priority. NA mean auto detection of timezone. If timezone can'ẗ be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.

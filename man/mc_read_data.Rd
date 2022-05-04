@@ -18,7 +18,7 @@ required columns:
 optional columns:
 \itemize{
 \item serial_number - can be NA, than try detect
-\item date_format - format of date in strptime function; can be NA for TOMST data format
+\item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S"); can be NA for TOMST data format
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column highest priority. NA mean auto detection of timezone. If timezone can'ẗ be detected, then UTC is supposed.
 Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
