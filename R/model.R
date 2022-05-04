@@ -630,7 +630,7 @@ setMethod(
     add_count_columns <- if(has_numbers_column) 1 else 0
     temp_column <- 2 + add_count_columns
     rh_column <- 3 + add_count_columns
-    parts <- stringr::str_match(data[[temp_column]][[object@skip]], "Temp,? \\(?(°[CF])\\)?")
+    parts <- stringr::str_match(data[[temp_column]][[object@skip]], "Temp,? \\(?(.[CF])\\)?")
     if(is.na(parts[[1, 2]])) {
         warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
         return(object)

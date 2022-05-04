@@ -69,6 +69,7 @@ test_that("mc_read_data HOBO", {
                       data$E$loggers[[1]]$datetime[[1]],
                       data$F$loggers[[1]]$datetime[[1]],
                       data$CH$loggers[[1]]$datetime[[1]])) == 0)
+    expect_true(myClim:::.model_const_SENSOR_HOBO_T_F %in% names(data$C$loggers[[1]]$sensors))
 })
 
 test_that("mc_read_files error", {
