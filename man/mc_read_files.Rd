@@ -50,3 +50,6 @@ Localities are named after serial_number of logger.
 tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 }
 }
+\seealso{
+\link{mc_DataFormat}
+}

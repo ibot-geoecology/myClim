@@ -44,10 +44,13 @@ ii) \code{localities_table} with locality id and metadata e.g. longitude, latitu
 }
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table} and \code{localities_table} from external CSV it
-must have header, column separator must be comma ","
+must have header, column separator must be comma ",".
 }
 \examples{
 \dontrun{
 tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")
 }
+}
+\seealso{
+\link{mc_DataFormat}
 }

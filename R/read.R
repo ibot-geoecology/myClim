@@ -16,6 +16,8 @@
 #' CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.    
 #' Localities are named after serial_number of logger.
 #'
+#' @seealso [myClim::mc_DataFormat]
+#'
 #' @param paths vector of paths to files or directories
 #' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join) see `names(mc_data_formats)`
 #' @param recursive logical - recursive search in sub-directories (default TRUE)
@@ -58,8 +60,8 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
-#' must have header, column separator must be comma "," 
-#'
+#' must have header, column separator must be comma ",".
+#' @seealso [myClim::mc_DataFormat]
 #' @param files_table path to csv file or data.frame object contains 3 required columns and another optional:
 #' required columns:
 #' * path - path to file
@@ -258,7 +260,8 @@ mc_read_data <- function(files_table, localities_table=NULL) {
                na.strings = data_format@na_strings,
                fill = TRUE,
                nrows = nrows,
-               comment.char = "")
+               comment.char = "",
+               encoding = "UTF-8")
 }
 
 .read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {
