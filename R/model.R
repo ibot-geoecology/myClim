@@ -54,7 +54,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
 .model_const_LOGGER_TOMST_THERMODATALOGGER <- "ThermoDatalogger"
-.model_const_LOGGER_HOBO_U23 <- "HOBO_U23"
+.model_const_LOGGER_HOBO <- "HOBO"
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"

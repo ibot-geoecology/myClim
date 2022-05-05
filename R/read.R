@@ -2,6 +2,8 @@
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
 .read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
 .read_const_MESSAGE_ANY_FILE <- "There isn't any source file."
+.read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible read datetimes from {filename}. File is skipped."
+.read_const_MESSAGE_ANY_LOCALITY <- "There isn't any valid locality."
 
 #' Reading files or directories
 #'
@@ -215,13 +217,18 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         } else {
             locality <- .read_get_new_locality(.y$locality_id)
         }
-        parameters = list(path = .x$path,
-                          data_format = data_formats[.x$index],
-                          serial_number = .x$serial_number)
+        parameters <- list(path = .x$path,
+                           data_format = data_formats[.x$index],
+                           serial_number = .x$serial_number)
         locality$loggers <- purrr::pmap(parameters, row_function)
+        locality$loggers <- purrr::discard(locality$loggers, ~ is.null(.x))
         locality
     }
     result <- dplyr::group_map(groupped_files, locality_function)
+    result <- purrr::discard(result, ~ length(.x$loggers) == 0)
+    if(length(result) == 0) {
+        stop(.read_const_MESSAGE_ANY_LOCALITY)
+    }
     names(result) <- purrr::map_chr(result, function(.x) .x$metadata@locality_id)
     result
 }
@@ -243,7 +250,8 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
     if(any(is.na(datetime))) {
-        stop(stringr::str_glue("It isn't possible read datetimes from {filename}."))
+        warning(stringr::str_glue(.read_const_MESSAGE_WRONG_DATETIME))
+        return(NULL)
     }
     if(data_format@tz_offset != 0) {
         datetime <- datetime - data_format@tz_offset * 60

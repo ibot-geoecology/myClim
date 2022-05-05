@@ -72,6 +72,17 @@ test_that("mc_read_data HOBO", {
     expect_true(myClim:::.model_const_SENSOR_HOBO_T_F %in% names(data$C$loggers[[1]]$sensors))
 })
 
+test_that("mc_read_data HOBO skip wrong datetime", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path,                                   ~locality_id, ~data_format, ~serial_number, ~date_format,        ~tz_offset,
+        "data/HOBO/20024354.txt",                "A",          "HOBO",       NA_character_,  "%d.%m.%Y %H:%M:%S", NA_integer_,
+        "data/HOBO/20024354_comma.csv",          "B",          "HOBO",       NA_character_,  "%m.%d.%Y %H:%M:%S", NA_integer_
+    ))
+    expect_warning(data <- mc_read_data(files_table))
+    test_prep_data_format(data)
+    expect_equal(length(data), 1)
+})
+
 test_that("mc_read_files error", {
     expect_error(data <- mc_read_files(c("data/TOMST", "data/eco-snow/data_94184102_0.csv"), "TOMST"))
 })
