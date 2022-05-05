@@ -639,13 +639,18 @@ setMethod(
     if(parts[[1, 2]] == "°F") {
         temp_sensor_id <- .model_const_SENSOR_HOBO_T_F
     }
-    parts <- stringr::str_match(data[[rh_column]][[object@skip]], "RH,? \\(?%\\)?")
-    if(is.na(parts[[1, 1]])) {
-        warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
+    columns <- list()
+    columns[[temp_sensor_id]] <- temp_column
+    if(ncol(data) < rh_column){
+        object@columns <- columns
         return(object)
     }
-    columns <- list(temp_column, rh_column)
-    names(columns) <- c(temp_sensor_id, .model_const_SENSOR_HOBO_RH)
+    parts <- stringr::str_match(data[[rh_column]][[object@skip]], "RH,? \\(?%\\)?")
+    if(is.na(parts[[1, 1]])) {
+        object@columns <- columns
+        return(object)
+    }
+    columns[[.model_const_SENSOR_HOBO_RH]] <- rh_column
     object@columns <- columns
     object
 }

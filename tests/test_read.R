@@ -58,10 +58,11 @@ test_that("mc_read_data HOBO", {
         "data/HOBO/20024354_separated_CEST.csv", "G",          "HOBO",       NA_character_,  "%y.%m.%d",          NA_integer_,
         "data/HOBO/20024354_separeted.csv",      "H",          "HOBO",       "20024356",     "%y.%m.%d",          NA_integer_,
         "data/HOBO/20024354_tab.txt",            "CH",         "HOBO",       NA_character_,  "%y.%m.%d %H:%M:%S", NA_integer_,
+        "data/HOBO/6265.csv",                    "I",          "HOBO",       NA_character_,  "%m/%d/%y %I:%M:%S %p", NA_integer_,
     ))
     expect_warning(data <- mc_read_data(files_table))
     test_prep_data_format(data)
-    expect_equal(sort(names(data)), sort(c("A", "B", "C", "D", "E", "F", "CH")))
+    expect_equal(sort(names(data)), sort(c("A", "B", "C", "D", "E", "F", "CH", "I")))
     expect_true(var(c(data$A$loggers[[1]]$datetime[[1]],
                       data$B$loggers[[1]]$datetime[[1]],
                       data$C$loggers[[1]]$datetime[[1]],
@@ -70,6 +71,8 @@ test_that("mc_read_data HOBO", {
                       data$F$loggers[[1]]$datetime[[1]],
                       data$CH$loggers[[1]]$datetime[[1]])) == 0)
     expect_true(myClim:::.model_const_SENSOR_HOBO_T_F %in% names(data$C$loggers[[1]]$sensors))
+    expect_equal(length(data$A$loggers[[1]]$sensors), 2)
+    expect_equal(length(data$I$loggers[[1]]$sensors), 1)
 })
 
 test_that("mc_read_data HOBO skip wrong datetime", {
