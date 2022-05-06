@@ -25,7 +25,7 @@ mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@tz_offset <- 0
 
 mc_data_formats[[.model_const_DATA_FORMAT_HOBO]] <- new("mc_HOBODataFormat")
 mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@skip <- 0
-mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@logger_type <- .model_const_LOGGER_HOBO_U23
+mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@logger_type <- .model_const_LOGGER_HOBO
 mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@filename_serial_number_pattern <- "(.+)\\.(?:csv|txt)$"
 
 usethis::use_data(mc_data_formats, overwrite = TRUE)

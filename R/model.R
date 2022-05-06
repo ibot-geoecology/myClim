@@ -54,7 +54,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
 .model_const_LOGGER_TOMST_THERMODATALOGGER <- "ThermoDatalogger"
-.model_const_LOGGER_HOBO_U23 <- "HOBO_U23"
+.model_const_LOGGER_HOBO <- "HOBO"
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
@@ -549,6 +549,7 @@ setMethod(
             return(NULL)
         }
         data <- myClim:::.read_get_data_from_file(path, object, nrows = count_lines)
+        data[1, 1] <- stringr::str_trim(data[1, 1])
         object <- .model_hobo_set_skip(object, data)
         has_numbers_column <- data[[1]][[object@skip]] == "#"
         object <- .model_hobo_set_date_column(object, data, has_numbers_column)
@@ -568,7 +569,7 @@ setMethod(
     con <- file(filename, "r")
     lines <- readLines(con, n = count_lines)
     close(con)
-    lines
+    purrr::map_chr(lines, ~ stringr::str_trim(.x))
 }
 
 .model_hobo_get_separator <- function(lines) {
@@ -629,7 +630,7 @@ setMethod(
     add_count_columns <- if(has_numbers_column) 1 else 0
     temp_column <- 2 + add_count_columns
     rh_column <- 3 + add_count_columns
-    parts <- stringr::str_match(data[[temp_column]][[object@skip]], "Temp,? \\(?(°[CF])\\)?")
+    parts <- stringr::str_match(data[[temp_column]][[object@skip]], "Temp,? \\(?(.[CF])\\)?")
     if(is.na(parts[[1, 2]])) {
         warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
         return(object)
@@ -638,13 +639,18 @@ setMethod(
     if(parts[[1, 2]] == "°F") {
         temp_sensor_id <- .model_const_SENSOR_HOBO_T_F
     }
-    parts <- stringr::str_match(data[[rh_column]][[object@skip]], "RH,? \\(?%\\)?")
-    if(is.na(parts[[1, 1]])) {
-        warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
+    columns <- list()
+    columns[[temp_sensor_id]] <- temp_column
+    if(ncol(data) < rh_column){
+        object@columns <- columns
         return(object)
     }
-    columns <- list(temp_column, rh_column)
-    names(columns) <- c(temp_sensor_id, .model_const_SENSOR_HOBO_RH)
+    parts <- stringr::str_match(data[[rh_column]][[object@skip]], "RH,? \\(?%\\)?")
+    if(is.na(parts[[1, 1]])) {
+        object@columns <- columns
+        return(object)
+    }
+    columns[[.model_const_SENSOR_HOBO_RH]] <- rh_column
     object@columns <- columns
     object
 }

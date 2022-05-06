@@ -13,6 +13,14 @@ It is necessary to **set the directory where to unzip installation files**. Is i
 ```R
 # directory to unzip source files
 setwd("C:/path/to/directory") # !!!! EDIT HERE !!!!
+
+# === Install package ===
+# stable version
+# install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
+# development version
+install.packages("http://labgis.ibot.cas.cz/myclim-devel/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
+
+# === Download source and examples ===
 zip_file <- "myClim.zip"
 dir_name <- "myClim"
 # stable version
@@ -25,8 +33,6 @@ file.remove(zip_file)
 unlink(dir_name, recursive=TRUE)
 file.rename(subdir, dir_name)
 setwd(dir_name)
-pkg_file <- devtools::build(".")
-install.packages(pkg_file, repos = NULL)
 ```
 # Documentation & user manual
 * [Functions documentation](http://labgis.ibot.cas.cz/myclim-devel/index.html).   

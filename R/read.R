@@ -2,6 +2,8 @@
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
 .read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
 .read_const_MESSAGE_ANY_FILE <- "There isn't any source file."
+.read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible read datetimes from {filename}. File is skipped."
+.read_const_MESSAGE_ANY_LOCALITY <- "There isn't any valid locality."
 
 #' Reading files or directories
 #'
@@ -16,10 +18,12 @@
 #' CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.    
 #' Localities are named after serial_number of logger.
 #'
+#' @seealso [myClim::mc_DataFormat]
+#'
 #' @param paths vector of paths to files or directories
 #' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join) see `names(mc_data_formats)`
 #' @param recursive logical - recursive search in sub-directories (default TRUE)
-#' @param date_format - format of date used in strptime function (default NA)
+#' @param date_format - format of date used in strptime function e.g. "%d.%m.%y %H:%M:%S" (default NA) necessary to provide for HOBO. 
 #'
 #' This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
 #' see [mc_data_formats]
@@ -58,8 +62,8 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
-#' must have header, column separator must be comma "," 
-#'
+#' must have header, column separator must be comma ",".
+#' @seealso [myClim::mc_DataFormat]
 #' @param files_table path to csv file or data.frame object contains 3 required columns and another optional:
 #' required columns:
 #' * path - path to file
@@ -68,7 +72,7 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #'
 #' optional columns:
 #' * serial_number - can be NA, than try detect
-#' * date_format - format of date in strptime function; can be NA for TOMST data format
+#' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S"); can be NA for TOMST data format
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column highest priority. NA mean auto detection of timezone. If timezone can'ẗ be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
@@ -213,13 +217,18 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         } else {
             locality <- .read_get_new_locality(.y$locality_id)
         }
-        parameters = list(path = .x$path,
-                          data_format = data_formats[.x$index],
-                          serial_number = .x$serial_number)
+        parameters <- list(path = .x$path,
+                           data_format = data_formats[.x$index],
+                           serial_number = .x$serial_number)
         locality$loggers <- purrr::pmap(parameters, row_function)
+        locality$loggers <- purrr::discard(locality$loggers, ~ is.null(.x))
         locality
     }
     result <- dplyr::group_map(groupped_files, locality_function)
+    result <- purrr::discard(result, ~ length(.x$loggers) == 0)
+    if(length(result) == 0) {
+        stop(.read_const_MESSAGE_ANY_LOCALITY)
+    }
     names(result) <- purrr::map_chr(result, function(.x) .x$metadata@locality_id)
     result
 }
@@ -241,7 +250,8 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
     if(any(is.na(datetime))) {
-        stop(stringr::str_glue("It isn't possible read datetimes from {filename}."))
+        warning(stringr::str_glue(.read_const_MESSAGE_WRONG_DATETIME))
+        return(NULL)
     }
     if(data_format@tz_offset != 0) {
         datetime <- datetime - data_format@tz_offset * 60
@@ -258,7 +268,8 @@ mc_read_data <- function(files_table, localities_table=NULL) {
                na.strings = data_format@na_strings,
                fill = TRUE,
                nrows = nrows,
-               comment.char = "")
+               comment.char = "",
+               encoding = "UTF-8")
 }
 
 .read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {

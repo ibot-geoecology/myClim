@@ -32,7 +32,7 @@
 #' and can be changed in preferences form. Strucuture of format can be partly detected automatically from header of data.
 #' It is required manually define format of date-time (`date_format`) in reading functions ([mc_read_files()], [mc_read_data()]).
 #' Separated date and time is not supported. If time zone is not defined in header and is other than UTC, then `tz_offset`
-#' must be filled in.
+#' must be filled in. UTF-8 encoding of file is required.
 #'
 #' @seealso [myClim::mc_DataFormat], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 "mc_data_formats"

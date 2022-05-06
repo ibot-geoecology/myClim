@@ -20,7 +20,7 @@ mc_read_files(
 \item{recursive}{logical - recursive search in sub-directories (default TRUE)}
 
 \item{date_format}{\itemize{
-\item format of date used in strptime function (default NA)
+\item format of date used in strptime function e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA) necessary to provide for HOBO.
 }
 
 This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
@@ -49,4 +49,7 @@ Localities are named after serial_number of logger.
 \dontrun{
 tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 }
+}
+\seealso{
+\link{mc_DataFormat}
 }
