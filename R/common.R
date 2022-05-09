@@ -84,17 +84,33 @@
     localities
 }
 
-.common_get_cleaned_data_range <- function(data) {
-    datetime_items_function <- function(item) {
-        list(start=dplyr::first(item$datetime),
-             end=dplyr::last(item$datetime))
-    }
-    if(.common_is_calc_format(data)) {
+.common_get_cleaned_data_range <- function(data, add_step_to_end=FALSE) {
+    is_calc <- .common_is_calc_format(data)
+
+    if(is_calc) {
         items <- data$localities
+        steps <- NA_real_
     } else {
         items <- purrr::flatten(purrr::map(data, ~ .x$loggers))
+        steps <- purrr::map_dbl(items, ~ .x$clean_info@step)
     }
-    table <- purrr::map_dfr(items, datetime_items_function)
+
+    datetime_items_function <- function(item, step) {
+        start <- dplyr::first(item$datetime)
+        end <- dplyr::last(item$datetime)
+        if(!add_step_to_end) {
+            return(list(start=start, end=end))
+        }
+        if(!is_calc) {
+            end <- end + lubridate::minutes(step)
+        } else if(!is.na(data$metadata@step)) {
+            end <- end + lubridate::minutes(data$metadata@step)
+        } else {
+            end <- end + lubridate::period(data$metadata@step_text)
+        }
+        return(list(start=start, end=end))
+    }
+    table <- purrr::map2_dfr(items, steps, datetime_items_function)
     lubridate::interval(min(table$start, na.rm=TRUE), max(table$end, na.rm=TRUE))
 }
 

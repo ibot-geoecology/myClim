@@ -87,7 +87,7 @@ test_that("mc_agg all period", {
     data <- mc_prep_clean(data, silent=T)
     all_data <- mc_agg(data, "mean", "all", na.rm = FALSE)
     test_calc_data_format(all_data)
-    expect_equal(all_data$metadata@step_text, "44625 min")
+    expect_equal(all_data$metadata@step_text, "all:1m 0d 0H 0M 0S")
     expect_equal(length(all_data$localities$`94184102`$datetime), 1)
     expect_equal(length(all_data$localities$`94184103`$datetime), 1)
     expect_false(is.na(all_data$localities$`94184102`$sensors$TMS_T1_mean$values[[1]]))
@@ -170,13 +170,5 @@ test_that(".agg_get_custom_intervals", {
                                  lubridate::interval(lubridate::ymd(20200301), lubridate::ymd_hms("2021-02-28 23:59:59"))))
     custom_dates <- test_function_parse("03-10 12:00", "09-06 8:00")
     intervals <- test_function(lubridate::interval(lubridate::ymd(20200101), lubridate::ymd(20230101)), custom_dates)
-})
-
-test_that("mc_agg reaggregate", {
-    expect_warning(data <- mc_read_files("data/TOMST/", "TOMST"))
-    data <- mc_prep_clean(data, silent=T)
-    agg_data <- mc_agg(data)
-    agg_all <- mc_agg(agg_data, period = "all", fun = "mean")
-    test_calc_data_format(agg_all)
 })
 

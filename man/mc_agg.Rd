@@ -10,7 +10,9 @@ mc_agg(
   period = NULL,
   use_utc = TRUE,
   percentiles = NULL,
-  na.rm = TRUE
+  na.rm = TRUE,
+  custom_start = NULL,
+  custom_end = NULL
 )
 }
 \arguments{
@@ -21,9 +23,12 @@ Can be single function name, character vector of function names or named list of
 Named list of functions allows apply specific functions for different sensors e.g. \code{list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")}
 if NULL records are not aggregated, but converted to Calc-format. See details.}
 
-\item{period}{Time period for aggregation - same as breaks in cut.POSIXt, e.g. ("hour", "day", "month"); if NULL then no aggregation
+\item{period}{Time period for aggregation - same as breaks in cut.POSIXt, e.g. (\code{"hour"}, \code{"day"}, \code{"month"}); if NULL then no aggregation
 
-There is special period "all" returning single value for each sensor based on function applied across all records within the sensor.
+There are special periods \code{"all"} and \code{"custom"}. Period \code{"all"} returning single value for each sensor based
+on function applied across all records within the sensor. Period \code{"custom"} aggregates data to year, but year can start in other date then first of janury
+(for example hydrological year). It is possible select only part of year and another values skip (for example growing season).
+See \code{custom_start} and \code{custom_end} parameters. Data aggregated by special periods is not possible use again in \code{\link[=mc_agg]{mc_agg()}} function.
 
 Start day of week is Monday.}
 
@@ -34,6 +39,11 @@ Non-UTC time can by used only for period \code{day} and longer.}
 \item{percentiles}{vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details}
 
 \item{na.rm}{parameter for aggregation function; Not used for count and coverage.}
+
+\item{custom_start}{date of start \code{custom} period (defaul NULL); Parameter is required for custom period. It is character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}.}
+
+\item{custom_end}{date of end \code{custom} period (defaul NULL); If parameter is filled in then data out of range \code{custom_start}-\code{custom_end} are skipped.
+It is character in same format as \code{custom_start}. Value with same datetime as \code{custom_end} is not included.}
 }
 \value{
 Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL
@@ -47,15 +57,27 @@ Function has two basic uses:
 }
 }
 \details{
-Any output of mc_agg is in Calc-format. That means the structure of myClim object is flattened. Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within the sensors are joined directly to the level of locality (Locality<-Sensor<-Record). This is called Calc-format and is only acceptable format for \code{mc_calc} functions family. See \link{myClim-package}.
+Any output of mc_agg is in Calc-format. That means the structure of myClim object is flattened.
+Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within
+the sensors are joined directly to the level of locality (Locality<-Sensor<-Record).
+This is called Calc-format and is only acceptable format for \code{mc_calc} functions family. See \link{myClim-package}.
 
-In case \code{mc_agg()} is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic records are not modified.
+In case \code{mc_agg()} is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic
+records are not modified. Identical step in all sensors is required for conversion.
 
-When fun and period is specified, microclimatic records are aggregated based on function into new period. Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...); week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...); year = c(2021-01-01 00:00, 2022-01-01 00:00...).
-When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted and aggregation starts in December).
+When fun and period is specified, microclimatic records are aggregated based on function into new period.
+Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
+week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...);
+year = c(2021-01-01 00:00, 2022-01-01 00:00...).
+When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown
+(e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted
+and aggregation starts in December). ||The behaviour for \code{"all"} period is different. Incomplete date series aren't
+deleted, but result of aggregation depends on \code{na.rm} parameter.||
 
 Empty sensors with no records are excluded. \code{mc_agg()} return NA for empty vector except from count which returns 0.
-When aggregation functions are provided as vector or list e.g. c(mean,min,maxx), than they are applied to all sensors of input myClim object. When named list (names are the sensor ids) of functions is provided then \code{mc_agg()} apply specific functions to the specific sensors based on the named list.
+When aggregation functions are provided as vector or list e.g. c(mean,min,maxx), than they are applied to all sensors
+of input myClim object. When named list (names are the sensor ids) of functions is provided then \code{mc_agg()}
+apply specific functions to the specific sensors based on the named list.
 Aggregation function creates new sensors on localities putting aggregation
 function in its name (TMS_T1 -> TMS_T1_max), despite sensor names contains aggregation
 function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1).
