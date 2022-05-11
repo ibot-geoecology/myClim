@@ -7,7 +7,7 @@
 mc_read_data(files_table, localities_table = NULL)
 }
 \arguments{
-\item{files_table}{path to csv file or data.frame object contains 3 required columns and another optional:
+\item{files_table}{path to csv file or data.frame object ||contains 3 required columns and another optional:
 required columns:
 \itemize{
 \item path - path to file
@@ -21,11 +21,11 @@ optional columns:
 \item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S"); can be NA for TOMST data format
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column highest priority. NA mean auto detection of timezone. If timezone can'ẗ be detected, then UTC is supposed.
-Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
+Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.||
 }}
 
-\item{localities_table}{path to csv file or data.frame. Localities table is optional (default NULL).
-object contains 5 columns:
+\item{localities_table}{||path to csv file or data.frame. Localities table is optional (default NULL).
+object contains 5 columns:||
 \itemize{
 \item locality_id
 \item altitude

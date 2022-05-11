@@ -23,11 +23,11 @@
 #' @param paths vector of paths to files or directories
 #' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join) see `names(mc_data_formats)`
 #' @param recursive logical - recursive search in sub-directories (default TRUE)
-#' @param date_format - format of date used in strptime function e.g. "%d.%m.%y %H:%M:%S" (default NA) necessary to provide for HOBO. 
+#' @param date_format - ||format of date used in strptime function e.g. "%d.%m.%y %H:%M:%S" (default NA) necessary to provide for HOBO.
 #'
 #' This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
-#' see [mc_data_formats]
-#' @param tz_offset - timezone offset in minutes; It is required fill in only for non-UTC source data. (default NA)
+#' see [mc_data_formats]||
+#' @param tz_offset - ||timezone offset in minutes; It is required fill in only for non-UTC source data. (default NA)||
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
@@ -64,7 +64,7 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
 #' must have header, column separator must be comma ",".
 #' @seealso [myClim::mc_DataFormat]
-#' @param files_table path to csv file or data.frame object contains 3 required columns and another optional:
+#' @param files_table path to csv file or data.frame object ||contains 3 required columns and another optional:
 #' required columns:
 #' * path - path to file
 #' * locality_id
@@ -75,10 +75,10 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S"); can be NA for TOMST data format
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column highest priority. NA mean auto detection of timezone. If timezone can'ẗ be detected, then UTC is supposed.
-#' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
+#' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.||
 #'
-#' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
-#' object contains 5 columns:
+#' @param localities_table ||path to csv file or data.frame. Localities table is optional (default NULL).
+#' object contains 5 columns:||
 #' * locality_id
 #' * altitude
 #' * lon_wgs84

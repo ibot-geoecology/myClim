@@ -16,10 +16,10 @@ mc_calc_cumsum(data, sensors, output_suffix = "_cumsum", localities = NULL)
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 }
 \value{
-The same myClim object as input but with added cumsum sensors.
+The same myClim object as input but with added cumsum sensors.||
 }
 \description{
-Function calculate cumulative sum for sensors and add output as new sensors.
+||Function calculate cumulative sum for sensors and add output as new sensors.
 Names of new sensors are original sensor name + \code{outpus_suffix}.
 }
 \details{
