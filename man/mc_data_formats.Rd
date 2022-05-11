@@ -16,7 +16,7 @@ parse specific microclimatic logger files. In case you would like to add
 new, unsupported logger, this is the place where the reading key is stored.
 }
 \details{
-Package myClim support formats TOMST, TOMST_join and HOBO
+||Package myClim support formats TOMST, TOMST_join and HOBO
 
 \strong{TOMST}
 
@@ -33,7 +33,7 @@ HOBO data format is export format from software HOBOware of Onset company. Forma
 and can be changed in preferences form. Strucuture of format can be partly detected automatically from header of data.
 It is required manually define format of date-time (\code{date_format}) in reading functions (\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}).
 Separated date and time is not supported. If time zone is not defined in header and is other than UTC, then \code{tz_offset}
-must be filled in. UTF-8 encoding of file is required.
+must be filled in. UTF-8 encoding of file is required.||
 }
 \seealso{
 \link{mc_DataFormat}, \linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}, \linkS4class{mc_HOBODataFormat}

@@ -20,14 +20,14 @@ mc_read_files(
 \item{recursive}{logical - recursive search in sub-directories (default TRUE)}
 
 \item{date_format}{\itemize{
-\item format of date used in strptime function e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA) necessary to provide for HOBO.
+\item ||format of date used in strptime function e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA) necessary to provide for HOBO.
 }
 
 This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
-see \link{mc_data_formats}}
+see \link{mc_data_formats}||}
 
 \item{tz_offset}{\itemize{
-\item timezone offset in minutes; It is required fill in only for non-UTC source data. (default NA)
+\item ||timezone offset in minutes; It is required fill in only for non-UTC source data. (default NA)||
 }}
 }
 \value{
