@@ -37,8 +37,8 @@ For detailed description and schema of myClim Prep-format or Calc-format see `he
 
 
 ## Read microclimatic data
-myClim read multiple formats of data downloaded from various loggers (for testing only Tomst format is supported, but we are preparing also HOBO, ibutton, lascar etc) read functions require downloaded data in defined format as is specific column order, separator, date format, number format atc. Logger output files are specified in R class with several slots. User can principially extend supported file formats defining custom class. See `mc_DataFormat-class` While reading data, user must specify `dataformat_name=` one of `r names(myClim::mc_data_formats)`. For testing supported only Tomst files. 
- 
+myClim read multiple formats of data downloaded from various loggers (for testing only Tomst and HOBO formats are supported, but we are preparing also ibutton, lascar etc) read functions require downloaded data in defined format as is specific column order, separator, date format, number format atc. Logger output files are specified in R class with several slots. User can principially extend supported file formats defining custom class. See `mc_DataFormat-class` While reading data, user must specify `dataformat_name=` one of `r names(myClim::mc_data_formats)`.
+
 When user not provide metadata and localities, using functions `mc_read_files()`, `mc_read_wide()`, `mc_read_long()` myClim automatically generates localities from each data file. Such localities are named after loaded data files (loggers) or locality from wide, long format and have no metadata.
 When user provides metadata using function `mc_read_data()` than two specific tables are required. 1. table with logger files paths, logger type and locality, 2. table with locality metadata like e.g. coordinates, altitude, time zone information. See help for `mc_read_data()`
 
@@ -49,13 +49,25 @@ Output of reading functions is myClim object in Prep-format designed for data cl
 
 library(myClim)
 ## Read without metadata
-## read from files
+
+## read from TOMST files
 tms.f <- mc_read_files(c("data_91184101_0.csv","data_94184102_0.csv"),
                        dataformat_name="TOMST")
+## read from HOBO files
+hob.f <- mc_read_files(c("20024354.txt","20024354_comma.csv","20024354_semicolon.txt",
+                         "20024354_tab.txt"), 
+                       dataformat_name="HOBO",
+                       date_format = "%d.%m.%y %H:%M:%S")
+# 20024354.txt file is skipped, because of different date format. 
+
+hob.f1 <- mc_read_files(c("20024354.txt"), 
+                       dataformat_name="HOBO",
+                       date_format = "%d.%m.%Y %H:%M:%S")
+# 20024354.txt file correct date format definition "y=09" vs "Y=2009" 
 
 ## read from directory
 tms.d <- mc_read_files(".", dataformat_name="TOMST")
-## warning about file format control, files not matching format are skipped. 
+ 
 
 # read from data.frame
 load("airTmax_merged.RData") #airTmax
@@ -284,7 +296,7 @@ tms.long<-mc_reshape_long(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
 ## To do (work in progress)
 
 * function for joining data from multiple downloads in time
-* reading iButton, HOBO, Lascar... files
+* reading iButton, Lascar... files
 * more calculation functions (VPD...)
 
 

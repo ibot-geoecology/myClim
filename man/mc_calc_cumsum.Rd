@@ -9,17 +9,17 @@ mc_calc_cumsum(data, sensors, output_suffix = "_cumsum", localities = NULL)
 \arguments{
 \item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
-\item{sensors}{names of sensors for which is calculated cumulative sum}
+\item{sensors}{names of sensors where to calculate cumulative sum}
 
-\item{output_suffix}{name suffix for new names (default "_cumsum")}
+\item{output_suffix}{name suffix for new names (default "_cumsum") e.g. TMS_T3_cumsum}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 }
 \value{
-The same myClim object as input but with added cumsum sensors.||
+The same myClim object as input but with added cumsum sensors.
 }
 \description{
-||Function calculate cumulative sum for sensors and add output as new sensors.
+Function calculate cumulative sum for the values on the sensor and add output as new sensors.
 Names of new sensors are original sensor name + \code{outpus_suffix}.
 }
 \details{

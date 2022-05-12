@@ -15,7 +15,7 @@
 #' new, unsupported logger, this is the place where the reading key is stored.
 #'
 #' @details
-#' ||Package myClim support formats TOMST, TOMST_join and HOBO
+#' Package myClim support formats TOMST, TOMST_join and HOBO
 #'
 #' **TOMST**
 #'
@@ -24,16 +24,17 @@
 #'
 #' **TOMST_join**
 #'
-#' TOMST_join data format is custom format for internal using of Institute of Botany of the Czech Academy of Sciences.
+#' TOMST_join data format is custom format for internal using of Institute of Botany of the Czech Academy of Sciences. 
+#' It is the output of joinTMS.exe modified, checked, curated and validated by Lucia.  
 #'
 #' **HOBO**
 #'
 #' HOBO data format is export format from software HOBOware of Onset company. Format is very variable
-#' and can be changed in preferences form. Strucuture of format can be partly detected automatically from header of data.
-#' It is required manually define format of date-time (`date_format`) in reading functions ([mc_read_files()], [mc_read_data()]).
-#' Separated date and time is not supported. If time zone is not defined in header and is other than UTC, then `tz_offset`
-#' must be filled in. UTF-8 encoding of file is required.||
-#'
+#' and can be adjusted by user in preferences of HOBOware. Strucuture of HOBO files format can be partly detected automatically from header of data.
+#' Except of  format of date-time (`date_format`) which must be set manually in myClim reading functions ([mc_read_files()], [mc_read_data()]).
+#' Date and time separated in more columns is not supported in myClim reading. If time zone is not defined in header of HOBO txt or csv file
+#' and is not UTC, then `tz_offset` must be filled in ehile reding. UTF-8 encoding of HOBO file is required for reding to myClim.
+#' #'
 #' @seealso [myClim::mc_DataFormat], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 "mc_data_formats"
 

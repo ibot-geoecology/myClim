@@ -25,10 +25,11 @@ if NULL records are not aggregated, but converted to Calc-format. See details.}
 
 \item{period}{Time period for aggregation - same as breaks in cut.POSIXt, e.g. (\code{"hour"}, \code{"day"}, \code{"month"}); if NULL then no aggregation
 
-||There are special periods \code{"all"} and \code{"custom"}. Period \code{"all"} returning single value for each sensor based
-on function applied across all records within the sensor. Period \code{"custom"} aggregates data to year, but year can start in other date then first of janury
-(for example hydrological year). It is possible select only part of year and another values skip (for example growing season).
-See \code{custom_start} and \code{custom_end} parameters. Data aggregated by special periods is not possible use again in \code{\link[=mc_agg]{mc_agg()}} function.||
+There are special periods \code{"all"} and \code{"custom"}. Period \code{"all"} returning single value for each sensor based
+on function applied across all records within the sensor. E.g. mean and max air temperature from all data from the logger.
+Period \code{"custom"} aggregates data in year time window. You can aggregate e.g. water year, vegetation season etc by providing start, end datetime.
+See \code{custom_start} and \code{custom_end} parameters. The output of special periods \code{"all"} and \code{"custom"}is not allowed to be aggregated
+again in \code{\link[=mc_agg]{mc_agg()}} function.
 
 Start day of week is Monday.}
 
@@ -38,12 +39,13 @@ Non-UTC time can by used only for period \code{day} and longer.}
 
 \item{percentiles}{vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details}
 
-\item{na.rm}{parameter for aggregation function; Not used for count and coverage.}
+\item{na.rm}{parameter for aggregation function; Not used for count and coverage. special importance for period \code{"all"} and \code{"custom"} see details}
 
-\item{custom_start}{||date of start \code{custom} period (defaul NULL); Parameter is required for custom period. It is character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}.||}
+\item{custom_start}{date of start only use for \code{custom} period (defaul NULL); Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}.}
 
-\item{custom_end}{||date of end \code{custom} period (defaul NULL); If parameter is filled in then data out of range \code{custom_start}-\code{custom_end} are skipped.
-It is character in same format as \code{custom_start}. Value with same datetime as \code{custom_end} is not included.||}
+\item{custom_end}{date of end only use for \code{custom} period (defaul NULL); If NULL then calculates in year cycle ending on \code{custom_start} next year.
+If parameter is filled in then data out of range \code{custom_start}-\code{custom_end} are skipped. E.g. vegetation season, winter season...
+Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}. \code{custom_end} row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 \code{custom_end=01-01}.}
 }
 \value{
 Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL
@@ -63,7 +65,7 @@ the sensors are joined directly to the level of locality (Locality<-Sensor<-Reco
 This is called Calc-format and is only acceptable format for \code{mc_calc} functions family. See \link{myClim-package}.
 
 In case \code{mc_agg()} is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic
-records are not modified. ||Identical step in all sensors is required for conversion.||
+records are not modified. Equal step in all sensors is required for conversion from Prep-format to Calc-format.
 
 When fun and period is specified, microclimatic records are aggregated based on function into new period.
 Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
@@ -71,8 +73,11 @@ week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 202
 year = c(2021-01-01 00:00, 2022-01-01 00:00...).
 When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown
 (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted
-and aggregation starts in December). ||The behaviour for \code{"all"} period is different. Incomplete date series aren't
-deleted, but result of aggregation depends on \code{na.rm} parameter.||
+and aggregation starts in December).
+
+The behavior is a bit diferent for special periods  \code{"all"} and \code{"custom"}. Incomplete datetime series aren't
+deleted, but result of aggregation depends on \code{na.rm} parameter. If \code{na.rm=T} then returns value even in case you have only few records out of 365 days.
+CAUTION! \code{na.rm=T} is default. If \code{na.rm=F} returns NA when missing data occures.
 
 Empty sensors with no records are excluded. \code{mc_agg()} return NA for empty vector except from count which returns 0.
 When aggregation functions are provided as vector or list e.g. c(mean,min,maxx), than they are applied to all sensors

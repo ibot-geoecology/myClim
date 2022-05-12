@@ -19,15 +19,11 @@ mc_read_files(
 
 \item{recursive}{logical - recursive search in sub-directories (default TRUE)}
 
-\item{date_format}{\itemize{
-\item ||format of date used in strptime function e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA) necessary to provide for HOBO.
-}
-
-This parameter is required only for variable data formats as HOBO. Date format in TOMST data is stable.
-see \link{mc_data_formats}||}
+\item{date_format}{format of date in your hobo files e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA). Required for HOBO files.
+For TMS files ignored, there is fix date format. see \link{mc_data_formats}}
 
 \item{tz_offset}{\itemize{
-\item ||timezone offset in minutes; It is required fill in only for non-UTC source data. (default NA)||
+\item timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
 }}
 }
 \value{

@@ -331,18 +331,18 @@ setMethod(
 #' attr(,"logger_type"): character(0)
 #' }
 #' 
-#' @slot skip ||number of lines before data - header etc. (default 0)||
+#' @slot skip number of lines before data - header etc. (default 0)
 #' @slot separator columns separator (default NA)
 #' @slot date_column index of date column (default NA)
 #' @slot date_format format of date (default NA)
 #' @slot na_strings strings for NA values (default NA)
 #' @slot columns list with names and indexes of value columns (default list())
-#' @slot filename_serial_number_pattern character pattern for detecting serial_number from filename (default NA)
+#' @slot filename_serial_number_pattern character pattern for detecting serial_number from file name (default NA)
 #' @slot data_row_pattern character pattern for detecting right file format (default NA)
 #'
-#' ||If data_row_pattern is NA, then file format is not validated.||
+#' If data_row_pattern is NA, then file format is not validated.
 #' @slot logger_type type of logger: TMS, ThermoDatalogger (default NA)
-#' @slot tz_offset ||timezone offset in minutes from UTC in source data (default 0)||
+#' @slot tz_offset timezone offset in minutes from UTC in source data (default 0)
 #' @export mc_DataFormat
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
@@ -397,11 +397,11 @@ mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 #' @exportClass mc_TOMSTJoinDataFormat
 mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_DataFormat")
 
-#' ||Class for reading HOBO logger files
+#' Class for reading HOBO logger files
 #'
 #' Provides the key for the column in source files. Where is the date,
 #' in what format is the date, in which columns are records of which sensors.
-#' The code defining the class is in section methods ./R/model.R||
+#' The code defining the class is in section methods ./R/model.R
 #'
 #' @seealso [myClim::mc_DataFormat],[mc_data_formats]
 #' @export mc_HOBODataFormat
