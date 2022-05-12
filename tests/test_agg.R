@@ -161,14 +161,36 @@ test_that(".agg_get_custom_intervals", {
     intervals <- test_function(lubridate::interval(lubridate::ymd(20220501), lubridate::ymd(20230104)), custom_dates)
     expect_equal(intervals[[1]], lubridate::interval(lubridate::ymd(20220401), lubridate::ymd_hms("2023-03-31 23:59:59")))
     intervals <- test_function(lubridate::interval(lubridate::ymd(20210301), lubridate::ymd(20230104)), custom_dates)
-    expect_equal(intervals, list(lubridate::interval(lubridate::ymd(20200401), lubridate::ymd_hms("2021-03-31 23:59:59")),
-                                 lubridate::interval(lubridate::ymd(20210401), lubridate::ymd_hms("2022-03-31 23:59:59")),
-                                 lubridate::interval(lubridate::ymd(20220401), lubridate::ymd_hms("2023-03-31 23:59:59"))))
+    expect_equal(intervals, c(lubridate::interval(lubridate::ymd(20200401), lubridate::ymd_hms("2021-03-31 23:59:59")),
+                              lubridate::interval(lubridate::ymd(20210401), lubridate::ymd_hms("2022-03-31 23:59:59")),
+                              lubridate::interval(lubridate::ymd(20220401), lubridate::ymd_hms("2023-03-31 23:59:59"))))
     custom_dates <- test_function_parse("03-01", NULL)
     intervals <- test_function(lubridate::interval(lubridate::ymd(20190501), lubridate::ymd(20200404)), custom_dates)
-    expect_equal(intervals, list(lubridate::interval(lubridate::ymd(20190301), lubridate::ymd_hms("2020-02-29 23:59:59")),
-                                 lubridate::interval(lubridate::ymd(20200301), lubridate::ymd_hms("2021-02-28 23:59:59"))))
+    expect_equal(intervals, c(lubridate::interval(lubridate::ymd(20190301), lubridate::ymd_hms("2020-02-29 23:59:59")),
+                              lubridate::interval(lubridate::ymd(20200301), lubridate::ymd_hms("2021-02-28 23:59:59"))))
     custom_dates <- test_function_parse("03-10 12:00", "09-06 8:00")
     intervals <- test_function(lubridate::interval(lubridate::ymd(20200101), lubridate::ymd(20230101)), custom_dates)
+})
+
+test_that("mc_agg custom", {
+    table <- readRDS("data/agg-custom/air_humidity.rds")
+    data <- mc_read_wide(table, sensor_id = "RH_perc", "humidity")
+    data <- mc_prep_clean(data, silent = TRUE)
+    expect_error(agg_data <- mc_agg(data, "mean", period = "custom"))
+    expect_warning(agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "11-01"))
+    test_calc_data_format(agg_data)
+    expect_equal(agg_data$localities$B1BYSH01$datetime, c(lubridate::ymd_h("2018-11-01 00"), lubridate::ymd_h("2019-11-01 00")))
+    expect_equal(agg_data$metadata@step_text, "custom:1y 0m 0d 0H 0M 0S")
+    expect_true(is.na(agg_data$metadata@step))
+    agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "05-01", custom_end = "10-01")
+    test_calc_data_format(agg_data)
+    expect_equal(agg_data$localities$B1BYSH01$datetime, c(lubridate::ymd_h("2018-05-01 00"), lubridate::ymd_h("2019-05-01 00"), lubridate::ymd_h("2020-05-01 00")))
+    expect_equal(agg_data$metadata@step_text, "custom:5m 0d 0H 0M 0S")
+    expect_false(is.na(agg_data$metadata@step))
+    expect_warning(agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "12-01", custom_end = "03-01"))
+    test_calc_data_format(agg_data)
+    expect_equal(agg_data$localities$B1BYSH01$datetime, c(lubridate::ymd_h("2018-12-01 00"), lubridate::ymd_h("2019-12-01 00")))
+    expect_equal(agg_data$metadata@step_text, "custom:3m 0d 0H 0M 0S")
+    expect_true(is.na(agg_data$metadata@step))
 })
 

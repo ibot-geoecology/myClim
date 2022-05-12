@@ -20,7 +20,7 @@
 #' This is called Calc-format and is only acceptable format for `mc_calc` functions family. See [myClim-package].
 #' 
 #' In case `mc_agg()` is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic
-#' records are not modified. Identical step in all sensors is required for conversion.
+#' records are not modified. ||Identical step in all sensors is required for conversion.||
 #' 
 #' When fun and period is specified, microclimatic records are aggregated based on function into new period.
 #' Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
@@ -52,10 +52,10 @@
 #'
 #' @param period Time period for aggregation - same as breaks in cut.POSIXt, e.g. (`"hour"`, `"day"`, `"month"`); if NULL then no aggregation
 #'
-#' There are special periods `"all"` and `"custom"`. Period `"all"` returning single value for each sensor based
+#' ||There are special periods `"all"` and `"custom"`. Period `"all"` returning single value for each sensor based
 #' on function applied across all records within the sensor. Period `"custom"` aggregates data to year, but year can start in other date then first of janury
 #' (for example hydrological year). It is possible select only part of year and another values skip (for example growing season).
-#' See `custom_start` and `custom_end` parameters. Data aggregated by special periods is not possible use again in [myClim::mc_agg()] function.
+#' See `custom_start` and `custom_end` parameters. Data aggregated by special periods is not possible use again in [myClim::mc_agg()] function.||
 #'
 #' Start day of week is Monday.
 #' @param use_utc default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
@@ -63,9 +63,9 @@
 #' Non-UTC time can by used only for period `day` and longer. 
 #' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
 #' @param na.rm parameter for aggregation function; Not used for count and coverage.
-#' @param custom_start date of start `custom` period (defaul NULL); Parameter is required for custom period. It is character in format `"mm-dd"` or `"mm-dd H:MM"`.
-#' @param custom_end date of end `custom` period (defaul NULL); If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped.
-#' It is character in same format as `custom_start`. Value with same datetime as `custom_end` is not included.
+#' @param custom_start ||date of start `custom` period (defaul NULL); Parameter is required for custom period. It is character in format `"mm-dd"` or `"mm-dd H:MM"`.||
+#' @param custom_end ||date of end `custom` period (defaul NULL); If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped.
+#' It is character in same format as `custom_start`. Value with same datetime as `custom_end` is not included.||
 #' @return Returns new myClim object in Calc-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
 #' records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
 #' @export
@@ -108,10 +108,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         step <- as.integer(number_of_seconds / 60)
         step_text <- stringr::str_glue("{step} min")
     } else if(!is.null(use_intervals)) {
-        if(length(use_intervals) == 1 || var(as.integer(use_intervals)) == 0) {
-            step <- (as.integer(dplyr::first(use_intervals)) + 1) / 60
-        }
         step_text <- .agg_get_step_text_by_special_periods(period, use_intervals)
+        step <- .agg_get_step_from_use_intervals(use_intervals)
     } else {
         step_text <- period
         step <- .agg_get_step_from_period_object(period_object)
@@ -172,11 +170,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     last_interval <- .agg_get_last_custom_interval(whole_interval, first_interval)
     count_years <- lubridate::year(lubridate::int_start(last_interval)) - lubridate::year(lubridate::int_start(first_interval))
     intervals <- lubridate::int_shift(first_interval, lubridate::years(seq(0, count_years)))
-    interval_function <- function(item) {
-        lubridate::int_end(item) <- lubridate::int_end(item) - lubridate::seconds(1)
-        item
-    }
-    purrr::map(intervals, interval_function)
+    lubridate::int_end(intervals) <- lubridate::int_end(intervals) - lubridate::seconds(1)
+    intervals
 }
 
 .agg_get_first_custom_interval <- function(whole_interval, custom_dates) {
@@ -303,16 +298,19 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_get_step_text_by_special_periods <- function(period, use_intervals) {
-    interval_objects <- purrr::reduce(use_intervals, ~ if(.x == .y) .x else NULL)
-    if(is.null(interval_objects)) {
-        interval_objects <- use_intervals
+    lubridate::int_end(use_intervals) <- lubridate::int_end(use_intervals) + lubridate::seconds(1)
+    periods <- lubridate::as.period(use_intervals)
+    if(all(periods[[1]] == periods)) {
+        periods <- periods[[1]]
     }
-    interval_function <- function(interval) {
-        lubridate::int_end(interval) <- lubridate::int_end(interval) + lubridate::seconds(1)
-        as.character(lubridate::as.period(interval))
+    stringr::str_glue("{period}:{stringr::str_c(as.character(periods), collapse = ',')}")
+}
+
+.agg_get_step_from_use_intervals <- function(use_intervals) {
+    if(length(use_intervals) == 1 || var(as.integer(use_intervals)) == 0) {
+        return((as.integer(dplyr::first(use_intervals)) + 1) / 60)
     }
-    period_texts <- purrr::map_chr(interval_objects, interval_function)
-    stringr::str_glue("{period}:{stringr::str_c(period_texts, collapse = ',')}")
+    NA_integer_
 }
 
 .agg_get_step_from_period_object <- function(period_object) {
@@ -342,7 +340,9 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         groupped_table <- dplyr::group_by(agg_table, step)
         item$datetime <- dplyr::summarise(groupped_table, x=min(datetime))$x
     } else {
-        item <- .agg_extend_item_to_intervals(item, use_intervals, original_step_text)
+        if (period == .agg_const_PERIOD_ALL) {
+            item <- .agg_extend_item_to_all_interval(item, use_intervals, original_step_text)
+        }
         interval_function <- function(interval) {
             count <- sum(lubridate::`%within%`(item$datetime, interval))
             rep(lubridate::int_start(interval), count)
@@ -480,7 +480,10 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_remove_values_outside_intervals <- function(item, use_intervals) {
-    mask <- lubridate::`%within%`(item$datetime, use_intervals)
+    interval_function <- function(interval) {
+        lubridate::`%within%`(item$datetime, interval)
+    }
+    mask <- purrr::reduce(purrr::map(use_intervals, interval_function), `|`)
     item$datetime <- item$datetime[mask]
     sensor_function <- function(sensor) {
         sensor$values <- sensor$values[mask]
@@ -516,14 +519,14 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     }
     cropping <- FALSE
     mask_interval_start <- lubridate::`%within%`(start, use_intervals)
-    start_index <- 1:length(use_intervals)[mask_interval_start]
+    start_index <- (1:length(use_intervals))[mask_interval_start]
     mask_interval_end <- lubridate::`%within%`(end, use_intervals)
-    end_index <- 1:length(use_intervals)[mask_interval_end]
+    end_index <- (seq_along(use_intervals))[mask_interval_end]
     original_step_period <- lubridate::as.period(original_step_text)
     if(lubridate::`%within%`(start - original_step_period, use_intervals[start_index])) {
         cropping <- TRUE
         if(start_index < length(use_intervals)) {
-            start <- lubridate::int_end(use_intervals[[start_index + 1]])
+            start <- lubridate::int_start(use_intervals[[start_index + 1]])
         } else {
             start <- lubridate::int_end(use_intervals[[start_index]]) + lubridate::seconds(1)
         }
@@ -540,9 +543,9 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     list(start=start, end=end, cropping=cropping)
 }
 
-.agg_extend_item_to_intervals <- function(item, use_intervals, original_step_text) {
-    start <- lubridate::ceiling_date(lubridate::int_start(dplyr::first(use_intervals)), original_step_text)
-    end <- lubridate::floor_date(lubridate::int_end(dplyr::last(use_intervals)), original_step_text)
+.agg_extend_item_to_all_interval <- function(item, use_intervals, original_step_text) {
+    start <- lubridate::ceiling_date(lubridate::int_start(use_intervals), original_step_text)
+    end <- lubridate::floor_date(lubridate::int_end(use_intervals), original_step_text)
     if(start == dplyr::first(item$datetime) && end == dplyr::last(item$datetime)) {
         return(item)
     }
@@ -557,7 +560,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         sensor
     }
     item$sensors <- purrr::map(item$sensors, sensor_function)
-    .agg_remove_values_outside_intervals(item, use_intervals)
+    item
 }
 
 .agg_get_functions <- function(sensor, fun, percentiles, na.rm) {
