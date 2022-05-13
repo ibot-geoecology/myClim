@@ -87,11 +87,14 @@ Aggregation function creates new sensors on localities putting aggregation
 function in its name (TMS_T1 -> TMS_T1_max), despite sensor names contains aggregation
 function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1).
 Sensors created with functions \code{min}, \code{max}, \code{mean}, \code{percentile}, \code{sum}, \code{range}
-keeps identical sensor_id and value_type as original input sensors. Result type of function \code{sum} with \code{logical} sensor is \code{integer}.
-It means number of \code{TRUE} values.§
+keeps identical sensor_id and value_type as original input sensors.
+When function \code{sum} is applied on \code{logical} sensor (e.g. snow as TRUE, FALSE) the
+output is  \code{integer} i.e. number of \code{TRUE} values.
 
 Sensors created with functions \code{count} has sensor_id \code{count} and value_type \code{integer},
 function  \code{coverage} has sensor_id \code{coverage} and value_type \code{real}
+
+Read carefully details about \code{sum} and \code{count} these two may not be intuitive.
 }
 \examples{
 hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)

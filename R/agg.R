@@ -52,11 +52,14 @@
 #' function in its name (TMS_T1 -> TMS_T1_max), despite sensor names contains aggregation 
 #' function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1).
 #' Sensors created with functions `min`, `max`, `mean`, `percentile`, `sum`, `range` 
-#' keeps identical sensor_id and value_type as original input sensors. Result type of function `sum` with `logical` sensor is `integer`.
-#' It means number of `TRUE` values.§
+#' keeps identical sensor_id and value_type as original input sensors. 
+#' When function `sum` is applied on `logical` sensor (e.g. snow as TRUE, FALSE) the 
+#' output is  `integer` i.e. number of `TRUE` values.
 #'
 #' Sensors created with functions `count` has sensor_id `count` and value_type `integer`,
 #' function  `coverage` has sensor_id `coverage` and value_type `real`
+#' 
+#' Read carefully details about `sum` and `count` these two may not be intuitive.  
 #'
 #' @param data cleaned myClim object in Prep-format: output of [myClim::mc_prep_clean()] or Calc-format as it is allowed to aggregate data multiple times.
 #' @param fun aggregation function; one of ("min", "max", "mean", "percentile", "sum", "range", "count", "coverage") See details.
