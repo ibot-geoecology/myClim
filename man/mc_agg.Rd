@@ -45,7 +45,7 @@ Non-UTC time can by used only for period \code{day} and longer.}
 
 \item{custom_end}{date of end only use for \code{custom} period (defaul NULL); If NULL then calculates in year cycle ending on \code{custom_start} next year.
 If parameter is filled in then data out of range \code{custom_start}-\code{custom_end} are skipped. E.g. vegetation season, winter season...
-Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}. \code{custom_end} row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 \code{custom_end=01-01}.}
+Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}. \code{custom_end} row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 \code{custom_end="01-01"}.}
 }
 \value{
 Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL
@@ -75,7 +75,7 @@ When first or last period is incomplete in original data, the incomplete part is
 (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted
 and aggregation starts in December).
 
-The behavior is a bit diferent for special periods  \code{"all"} and \code{"custom"}. Incomplete datetime series aren't
+The behavior is a bit diferent for special period \code{"all"}. Incomplete datetime series aren't
 deleted, but result of aggregation depends on \code{na.rm} parameter. If \code{na.rm=T} then returns value even in case you have only few records out of 365 days.
 CAUTION! \code{na.rm=T} is default. If \code{na.rm=F} returns NA when missing data occures.
 
@@ -87,8 +87,10 @@ Aggregation function creates new sensors on localities putting aggregation
 function in its name (TMS_T1 -> TMS_T1_max), despite sensor names contains aggregation
 function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1).
 Sensors created with functions \code{min}, \code{max}, \code{mean}, \code{percentile}, \code{sum}, \code{range}
-keeps identical sensor_id and value_type as original input sensors. Sensors created
-with functions \code{count} has sensor_id \code{count} and value_type \code{integer},
+keeps identical sensor_id and value_type as original input sensors. Result type of function \code{sum} with \code{logical} sensor is \code{integer}.
+It means number of \code{TRUE} values.§
+
+Sensors created with functions \code{count} has sensor_id \code{count} and value_type \code{integer},
 function  \code{coverage} has sensor_id \code{coverage} and value_type \code{real}
 }
 \examples{

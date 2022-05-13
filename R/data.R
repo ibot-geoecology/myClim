@@ -33,8 +33,8 @@
 #' and can be adjusted by user in preferences of HOBOware. Strucuture of HOBO files format can be partly detected automatically from header of data.
 #' Except of  format of date-time (`date_format`) which must be set manually in myClim reading functions ([mc_read_files()], [mc_read_data()]).
 #' Date and time separated in more columns is not supported in myClim reading. If time zone is not defined in header of HOBO txt or csv file
-#' and is not UTC, then `tz_offset` must be filled in ehile reding. UTF-8 encoding of HOBO file is required for reding to myClim.
-#' #'
+#' and is not UTC, then `tz_offset` must be filled in while reading. UTF-8 encoding of HOBO file is required for reding to myClim.
+#'
 #' @seealso [myClim::mc_DataFormat], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 "mc_data_formats"
 
