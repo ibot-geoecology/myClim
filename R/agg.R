@@ -1,6 +1,15 @@
 .agg_const_PERIOD_ALL <- "all"
 .agg_const_PERIOD_CUSTOM <- "custom"
 
+.agg_const_FUNCTION_MIN <- "min"
+.agg_const_FUNCTION_MAX <- "max"
+.agg_const_FUNCTION_MEAN <- "mean"
+.agg_const_FUNCTION_PERCENTILE <- "percentile"
+.agg_const_FUNCTION_SUM <- "sum"
+.agg_const_FUNCTION_RANGE <- "range"
+.agg_const_FUNCTION_COUNT <- "count"
+.agg_const_FUNCTION_COVERAGE <- "coverage"
+
 .agg_const_MESSAGE_LOCALITY_WITHOUT_DATA <- "Locality {locality$metadata@locality_id} is without valid data. It is removed."
 .agg_const_MESSAGE_CUSTOM_START_NULL <- "Parameter custom_start must be set."
 .agg_const_MESSAGE_CUSTOM_WRONG_FORMAT <- "Prameter {parameter_name} is in wrong format. Required format is 'mm-dd' or 'mm-dd H:MM'."
@@ -20,7 +29,7 @@
 #' This is called Calc-format and is only acceptable format for `mc_calc` functions family. See [myClim-package].
 #' 
 #' In case `mc_agg()` is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic
-#' records are not modified. ||Identical step in all sensors is required for conversion.||
+#' records are not modified. Equal step in all sensors is required for conversion from Prep-format to Calc-format.
 #' 
 #' When fun and period is specified, microclimatic records are aggregated based on function into new period.
 #' Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
@@ -28,8 +37,11 @@
 #' year = c(2021-01-01 00:00, 2022-01-01 00:00...).
 #' When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown
 #' (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted
-#' and aggregation starts in December). ||The behaviour for `"all"` period is different. Incomplete date series aren't
-#' deleted, but result of aggregation depends on `na.rm` parameter.||
+#' and aggregation starts in December). 
+#' 
+#' The behavior is a bit diferent for special period `"all"`. Incomplete datetime series aren't
+#' deleted, but result of aggregation depends on `na.rm` parameter. If `na.rm=T` then returns value even in case you have only few records out of 365 days. 
+#' CAUTION! `na.rm=T` is default. If `na.rm=F` returns NA when missing data occures.      
 #' 
 #' Empty sensors with no records are excluded. `mc_agg()` return NA for empty vector except from count which returns 0. 
 #' When aggregation functions are provided as vector or list e.g. c(mean,min,maxx), than they are applied to all sensors
@@ -40,9 +52,14 @@
 #' function in its name (TMS_T1 -> TMS_T1_max), despite sensor names contains aggregation 
 #' function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1).
 #' Sensors created with functions `min`, `max`, `mean`, `percentile`, `sum`, `range` 
-#' keeps identical sensor_id and value_type as original input sensors. Sensors created 
-#' with functions `count` has sensor_id `count` and value_type `integer`, 
+#' keeps identical sensor_id and value_type as original input sensors. 
+#' When function `sum` is applied on `logical` sensor (e.g. snow as TRUE, FALSE) the 
+#' output is  `integer` i.e. number of `TRUE` values.
+#'
+#' Sensors created with functions `count` has sensor_id `count` and value_type `integer`,
 #' function  `coverage` has sensor_id `coverage` and value_type `real`
+#' 
+#' Read carefully details about `sum` and `count` these two may not be intuitive.  
 #'
 #' @param data cleaned myClim object in Prep-format: output of [myClim::mc_prep_clean()] or Calc-format as it is allowed to aggregate data multiple times.
 #' @param fun aggregation function; one of ("min", "max", "mean", "percentile", "sum", "range", "count", "coverage") See details.
@@ -52,20 +69,22 @@
 #'
 #' @param period Time period for aggregation - same as breaks in cut.POSIXt, e.g. (`"hour"`, `"day"`, `"month"`); if NULL then no aggregation
 #'
-#' ||There are special periods `"all"` and `"custom"`. Period `"all"` returning single value for each sensor based
-#' on function applied across all records within the sensor. Period `"custom"` aggregates data to year, but year can start in other date then first of janury
-#' (for example hydrological year). It is possible select only part of year and another values skip (for example growing season).
-#' See `custom_start` and `custom_end` parameters. Data aggregated by special periods is not possible use again in [myClim::mc_agg()] function.||
+#' There are special periods `"all"` and `"custom"`. Period `"all"` returning single value for each sensor based
+#' on function applied across all records within the sensor. E.g. mean and max air temperature from all data from the logger.
+#' Period `"custom"` aggregates data in year time window. You can aggregate e.g. water year, vegetation season etc by providing start, end datetime.  
+#' See `custom_start` and `custom_end` parameters. The output of special periods `"all"` and `"custom"`is not allowed to be aggregated 
+#' again in [myClim::mc_agg()] function. 
 #'
 #' Start day of week is Monday.
 #' @param use_utc default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
 #' (in locality metadata: tz_offset) local or solar time see (e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta()]);
 #' Non-UTC time can by used only for period `day` and longer. 
 #' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
-#' @param na.rm parameter for aggregation function; Not used for count and coverage.
-#' @param custom_start ||date of start `custom` period (defaul NULL); Parameter is required for custom period. It is character in format `"mm-dd"` or `"mm-dd H:MM"`.||
-#' @param custom_end ||date of end `custom` period (defaul NULL); If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped.
-#' It is character in same format as `custom_start`. Value with same datetime as `custom_end` is not included.||
+#' @param na.rm parameter for aggregation function; Not used for count and coverage. special importance for period `"all"` and `"custom"` see details
+#' @param custom_start date of start only use for `custom` period (defaul NULL); Character in format `"mm-dd"` or `"mm-dd H:MM"`.
+#' @param custom_end date of end only use for `custom` period (defaul NULL); If NULL then calculates in year cycle ending on `custom_start` next year. 
+#' If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped. E.g. vegetation season, winter season... 
+#' Character in format `"mm-dd"` or `"mm-dd H:MM"`. `custom_end` row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 `custom_end="01-01"`.
 #' @return Returns new myClim object in Calc-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
 #' records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
 #' @export
@@ -576,41 +595,44 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_convert_function <- function(function_text, percentiles, na.rm, value_type) {
-    if(function_text == "min") {
+    if(function_text == .agg_const_FUNCTION_MIN) {
         return(list(min=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(min(x), value_type)
         }))
-    } else if(function_text == "max") {
+    } else if(function_text == .agg_const_FUNCTION_MAX) {
         return(list(max=function(x){
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(max(x), value_type)
         }))
-    } else if(function_text == "mean") {
+    } else if(function_text == .agg_const_FUNCTION_MEAN) {
         return(list(mean=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(mean(x), value_type)
         }))
-    } else if(function_text == "percentile") {
+    } else if(function_text == .agg_const_FUNCTION_PERCENTILE) {
         return(.agg_convert_percentile_functions(percentiles, na.rm, value_type))
-    } else if(function_text == "sum") {
+    } else if(function_text == .agg_const_FUNCTION_SUM) {
         return(list(sum=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
+            if(value_type == myClim:::.model_const_VALUE_TYPE_LOGICAL) {
+                value_type <- myClim:::.model_const_VALUE_TYPE_INTEGER
+            }
             .agg_function_convert_result(sum(x), value_type)
         }))
-    } else if(function_text == "range") {
+    } else if(function_text == .agg_const_FUNCTION_RANGE) {
         return(list(range=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(max(x) - min(x), value_type)
         }))
-    } else if(function_text == "count") {
+    } else if(function_text == .agg_const_FUNCTION_COUNT) {
         return(list(count=function(x) length(x[!is.na(x)])))
-    } else if(function_text == "coverage") {
+    } else if(function_text == .agg_const_FUNCTION_COVERAGE) {
         return(list(coverage=function(x) {
             if(length(x) == 0) return(NA)
             length(x[!is.na(x)]) / length(x)
@@ -653,9 +675,14 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 
 .agg_agregate_sensor <- function(sensor, functions, by_aggregate) {
     sensor_function <- function(.x, .y) {
+        sensor_info <- mc_data_sensors[[sensor$metadata@sensor_id]]
         new_sensor <- sensor
-        if(.y %in% c("count", "coverage")) {
+        if(.y %in% c(.agg_const_FUNCTION_COUNT, .agg_const_FUNCTION_COVERAGE)) {
             new_sensor$metadata@sensor_id <- .y
+        }
+        if(sensor_info@value_type == myClim:::.model_const_VALUE_TYPE_LOGICAL &&
+            .y == .agg_const_FUNCTION_SUM) {
+            new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
         }
         new_sensor$metadata@name <- stringr::str_glue("{new_sensor$metadata@name}_{.y}")
         new_sensor$values <- aggregate(new_sensor$values, by_aggregate, .x)$x

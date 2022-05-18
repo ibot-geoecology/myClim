@@ -386,17 +386,17 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' Cumulative sum
 #'
 #' @description
-#' ||Function calculate cumulative sum for sensors and add output as new sensors.
+#' Function calculate cumulative sum for the values on the sensor and add output as new sensors.
 #' Names of new sensors are original sensor name + `outpus_suffix`.
 #'
 #' @details
 #' If value type of sensor is logical, then output type is integer.
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
-#' @param sensors names of sensors for which is calculated cumulative sum
-#' @param output_suffix name suffix for new names (default "_cumsum")
+#' @param sensors names of sensors where to calculate cumulative sum
+#' @param output_suffix name suffix for new names (default "_cumsum") e.g. TMS_T3_cumsum
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @return The same myClim object as input but with added cumsum sensors.||
+#' @return The same myClim object as input but with added cumsum sensors.
 #' @export
 #' @examples
 #' cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))

@@ -31,7 +31,7 @@ attr(,"logger_type"): character(0)
 \section{Slots}{
 
 \describe{
-\item{\code{skip}}{||number of lines before data - header etc. (default 0)||}
+\item{\code{skip}}{number of lines before data - header etc. (default 0)}
 
 \item{\code{separator}}{columns separator (default NA)}
 
@@ -43,15 +43,15 @@ attr(,"logger_type"): character(0)
 
 \item{\code{columns}}{list with names and indexes of value columns (default list())}
 
-\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from filename (default NA)}
+\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from file name (default NA)}
 
 \item{\code{data_row_pattern}}{character pattern for detecting right file format (default NA)
 
-||If data_row_pattern is NA, then file format is not validated.||}
+If data_row_pattern is NA, then file format is not validated.}
 
 \item{\code{logger_type}}{type of logger: TMS, ThermoDatalogger (default NA)}
 
-\item{\code{tz_offset}}{||timezone offset in minutes from UTC in source data (default 0)||}
+\item{\code{tz_offset}}{timezone offset in minutes from UTC in source data (default 0)}
 }}
 
 \seealso{

@@ -4,11 +4,11 @@
 \name{mc_HOBODataFormat-class}
 \alias{mc_HOBODataFormat-class}
 \alias{mc_HOBODataFormat}
-\title{||Class for reading HOBO logger files}
+\title{Class for reading HOBO logger files}
 \description{
 Provides the key for the column in source files. Where is the date,
 in what format is the date, in which columns are records of which sensors.
-The code defining the class is in section methods ./R/model.R||
+The code defining the class is in section methods ./R/model.R
 }
 \seealso{
 \link{mc_DataFormat},\link{mc_data_formats}
