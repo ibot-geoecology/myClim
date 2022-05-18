@@ -55,6 +55,23 @@ mc_data_sensors[[.model_const_SENSOR_TM_T]]@max_value <- 60
 mc_data_sensors[[.model_const_SENSOR_TM_T]]@plot_color <- "#2000EEB0"
 mc_data_sensors[[.model_const_SENSOR_TM_T]]@plot_line_width <- 2
 
+mc_data_sensors[[.model_const_SENSOR_DEND_T]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_DEND_T]]@sensor_id <- .model_const_SENSOR_DEND_T
+mc_data_sensors[[.model_const_SENSOR_DEND_T]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
+mc_data_sensors[[.model_const_SENSOR_DEND_T]]@physical <- .model_const_PHYSICAL_T_C
+mc_data_sensors[[.model_const_SENSOR_DEND_T]]@min_value <- -40
+mc_data_sensors[[.model_const_SENSOR_DEND_T]]@max_value <- 60
+mc_data_sensors[[.model_const_SENSOR_DEND_T]]@plot_color <- "#2000EEB0"
+mc_data_sensors[[.model_const_SENSOR_DEND_T]]@plot_line_width <- 2
+
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@sensor_id <- .model_const_SENSOR_DEND_TOMSTdendro
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@physical <- .model_const_PHYSICAL_TOMSTdendro
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@min_value <- 1279
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@max_value <- 34000
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@value_type <- .model_const_VALUE_TYPE_INTEGER
+
 mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@sensor_id <- .model_const_SENSOR_HOBO_T_C
 mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@logger <- .model_const_LOGGER_HOBO
@@ -91,7 +108,7 @@ mc_data_sensors[[.model_const_SENSOR_coverage]]@max_value <- 1
 mc_data_sensors[[.model_const_SENSOR_snow_bool]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_snow_bool]]@sensor_id <- .model_const_SENSOR_snow_bool
 mc_data_sensors[[.model_const_SENSOR_snow_bool]]@value_type <- .model_const_VALUE_TYPE_LOGICAL
-mc_data_sensors[[.model_const_SENSOR_snow_bool]]@description <- "Sensor detects snow."
+mc_data_sensors[[.model_const_SENSOR_snow_bool]]@description <- "Sensor detects snow"
 
 mc_data_sensors[[.model_const_SENSOR_snow_fresh]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_snow_fresh]]@sensor_id <- .model_const_SENSOR_snow_fresh
@@ -129,7 +146,7 @@ mc_data_sensors[[.model_const_SENSOR_GDD]]@description <- "Growing degree days"
 
 mc_data_sensors[[.model_const_SENSOR_FDD]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_FDD]]@sensor_id <- .model_const_SENSOR_FDD
-mc_data_sensors[[.model_const_SENSOR_GDD]]@description <- "Freezing degree days"
+mc_data_sensors[[.model_const_SENSOR_FDD]]@description <- "Freezing degree days"
 
 mc_data_sensors[[.model_const_SENSOR_moisture]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_moisture]]@sensor_id <- .model_const_SENSOR_moisture
@@ -149,6 +166,11 @@ mc_data_sensors[[.model_const_SENSOR_RH_perc]]@sensor_id <- .model_const_SENSOR_
 mc_data_sensors[[.model_const_SENSOR_RH_perc]]@physical <- .model_const_PHYSICAL_RH_perc
 mc_data_sensors[[.model_const_SENSOR_RH_perc]]@min_value <- 0
 mc_data_sensors[[.model_const_SENSOR_RH_perc]]@max_value <- 100
+
+mc_data_sensors[[.model_const_SENSOR_r_delta]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_r_delta]]@sensor_id <- .model_const_SENSOR_r_delta
+mc_data_sensors[[.model_const_SENSOR_r_delta]]@physical <- .model_const_PHYSICAL_l_um
+mc_data_sensors[[.model_const_SENSOR_r_delta]]@description <- "Radius difference"
 
 mc_data_sensors[[.model_const_SENSOR_real]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_real]]@sensor_id <- .model_const_SENSOR_real

@@ -9,6 +9,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_COUNT_TEST_VALUES <- 100
 .model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("altitude", "lat_wgs84", "lon_wgs84", "tz_offset")
+.model_const_TOMST_THERMODATALOGGER_VALUE <- 65336
 
 .model_const_PHYSICAL_T_C <- "T_C"
 .model_const_PHYSICAL_T_F <- "T_F"
@@ -17,8 +18,10 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_PHYSICAL_RH_perc <- "RH_perc"
 .model_const_PHYSICAL_l_cm <- "l_cm"
 .model_const_PHYSICAL_l_mm <- "l_mm"
+.model_const_PHYSICAL_l_um <- "l_um"
 .model_const_PHYSICAL_v <- "v"
 .model_const_PHYSICAL_t_h <- "t_h"
+.model_const_PHYSICAL_TOMSTdendro <- "TOMSTdendro"
 
 .model_const_VALUE_TYPE_REAL <- "real"
 .model_const_VALUE_TYPE_INTEGER <- "integer"
@@ -30,6 +33,8 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_TMS_T3 <- "TMS_T3"
 .model_const_SENSOR_TMS_TMSmoisture <- "TMS_TMSmoisture"
 .model_const_SENSOR_TM_T <- "TM_T"
+.model_const_SENSOR_DEND_T <- "DEND_T"
+.model_const_SENSOR_DEND_TOMSTdendro <- "DEND_TOMSTdendro"
 .model_const_SENSOR_HOBO_T_C <- "HOBO_T_C"
 .model_const_SENSOR_HOBO_T_F <- "HOBO_T_F"
 .model_const_SENSOR_HOBO_RH <- "HOBO_RH"
@@ -45,6 +50,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_wind <- "wind"
 .model_const_SENSOR_GDD <- "GDD"
 .model_const_SENSOR_FDD <- "FDD"
+.model_const_SENSOR_r_delta <- "r_delta"
 .model_const_SENSOR_moisture <- .model_const_PHYSICAL_moisture
 .model_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
 .model_const_SENSOR_RH_perc <- .model_const_PHYSICAL_RH_perc
@@ -54,6 +60,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
 .model_const_LOGGER_TOMST_THERMODATALOGGER <- "ThermoDatalogger"
+.model_const_LOGGER_TOMST_DENDROMETER <- "Dendrometer"
 .model_const_LOGGER_HOBO <- "HOBO"
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
@@ -486,14 +493,20 @@ setMethod(
 .change_tomst_columns_and_logger_type <- function(object, data){
     tm_columns <- list(4)
     names(tm_columns) <- .model_const_SENSOR_TM_T
+    dendro_columns <- list(4, 7)
+    names(dendro_columns) <- c(.model_const_SENSOR_DEND_T, .model_const_SENSOR_DEND_TOMSTdendro)
     tms_columns <- list(4, 5, 6, 7)
-    names(tms_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2,.model_const_SENSOR_TMS_T3,
+    names(tms_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2, .model_const_SENSOR_TMS_T3,
                             .model_const_SENSOR_TMS_TMSmoisture)
     if(all(is.na(data[[tms_columns[[.model_const_SENSOR_TMS_T2]]]]))) {
-        object@columns <- tm_columns
-        object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
-    }
-    else {
+        if(all(data[[dendro_columns[[.model_const_SENSOR_DEND_TOMSTdendro]]]] == .model_const_TOMST_THERMODATALOGGER_VALUE)) {
+            object@columns <- tm_columns
+            object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
+        } else {
+            object@columns <- dendro_columns
+            object@logger_type <- .model_const_LOGGER_TOMST_DENDROMETER
+        }
+    } else {
         object@columns <- tms_columns
         object@logger_type <- .model_const_LOGGER_TOMST_TMS
     }

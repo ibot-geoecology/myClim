@@ -51,6 +51,13 @@ mc_data_physical[[.model_const_PHYSICAL_l_mm]]@units <- "mm"
 mc_data_physical[[.model_const_PHYSICAL_l_mm]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_l_mm]]@scale_coeff <- 1/10
 
+mc_data_physical[[.model_const_PHYSICAL_l_um]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_l_um]]@name <- .model_const_PHYSICAL_l_um
+mc_data_physical[[.model_const_PHYSICAL_l_um]]@description <- "Length μm"
+mc_data_physical[[.model_const_PHYSICAL_l_um]]@units <- "μm"
+mc_data_physical[[.model_const_PHYSICAL_l_um]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_l_um]]@scale_coeff <- 1/1000
+
 mc_data_physical[[.model_const_PHYSICAL_v]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_v]]@name <- .model_const_PHYSICAL_v
 mc_data_physical[[.model_const_PHYSICAL_v]]@description <- "Speed m/s"
@@ -64,5 +71,12 @@ mc_data_physical[[.model_const_PHYSICAL_t_h]]@description <- "Time hour"
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@units <- "hour"
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@scale_coeff <- 1/24
+
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@name <- .model_const_PHYSICAL_TOMSTdendro
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@description <- "Radius difference raw units"
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@units <- "raw units"
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@scale_coeff <- 1/10000
 
 usethis::use_data(mc_data_physical, overwrite = TRUE)
