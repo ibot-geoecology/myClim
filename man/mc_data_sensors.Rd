@@ -20,17 +20,23 @@ Names of items are sensor_ids.
 Currently supported sensors:
 \itemize{
 \item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}
-\item coverage - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}
+\item coverage - result of \code{coverage} function \code{\link[=mc_agg]{mc_agg()}}
+\item DEND_T - temperature in TOMST dendrometer (°C)
+\item DEND_TOMST_r_delta - trunk radius difference in TOMST dendrometer (raw units) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item FDD - result of function \code{\link[=mc_calc_fdd]{mc_calc_fdd()}}
 \item GDD - result of function \code{\link[=mc_calc_gdd]{mc_calc_gdd()}}
+\item HOBO_RH - relative humidity in HOBO logger (\%)
+\item HOBO_T_C - temperature in HOBO logger (°C)
+\item HOBO_T_F - temperature in HOBO logger (°F)
 \item integer - universal sensor with integer values
 \item logical - universal sensor with logical values
 \item moisture - volumetric soil moisture (ratio)
-\item precipitation in (mm)
+\item precipitation (mm)
+\item r_delta - radius difference (μm) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item real - universal sensor with real values
 \item RH_perc - Relative humidity sensor (\%)
 \item snow_bool - result of function \code{\link[=mc_calc_snow]{mc_calc_snow()}}
-\item snow_fresh - new snow in (cm)
+\item snow_fresh - new snow (cm)
 \item snow_total - total hight snow (cm)
 \item sun_shine - time of sun shine (hours)
 \item T_C - universal temperature sensor (°C)

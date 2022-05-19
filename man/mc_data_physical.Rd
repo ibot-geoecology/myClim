@@ -21,14 +21,17 @@ to add new, unsupported physical here.
 
 Currently supported physical quantities:
 \itemize{
-\item T_C - Temperature in °C
-\item moisture - moisture in ratio 0-1
-\item TMSmoisture - TDT signal from TMS moisture sensor
-\item RH_perc - Relative humidity in \%
 \item l_cm - length in cm
 \item l_mm - lenght in mm
-\item v - speed in m/s
+\item l_um - lenght in μm
+\item moisture - moisture in ratio 0-1
+\item RH_perc - Relative humidity in \%
+\item T_C - Temperature in °C
+\item T_F - Temperature in °F
 \item t_h - time in hours
+\item TMSmoisture - TDT signal from TMS moisture sensor
+\item TOMST_r_delta - radius difference in raw units
+\item v - speed in m/s
 }
 }
 \keyword{datasets}

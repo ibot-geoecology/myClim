@@ -47,17 +47,23 @@
 #' Names of items are sensor_ids.
 #' Currently supported sensors:
 #' * count - result of `count` function [myClim::mc_agg()]
-#' * coverage - result of `count` function [myClim::mc_agg()]
+#' * coverage - result of `coverage` function [myClim::mc_agg()]
+#' * DEND_T - temperature in TOMST dendrometer (°C)
+#' * DEND_TOMST_r_delta - trunk radius difference in TOMST dendrometer (raw units) [myClim::mc_calc_tomst_dendro()]
 #' * FDD - result of function [myClim::mc_calc_fdd()]
 #' * GDD - result of function [myClim::mc_calc_gdd()]
+#' * HOBO_RH - relative humidity in HOBO logger (%)
+#' * HOBO_T_C - temperature in HOBO logger (°C)
+#' * HOBO_T_F - temperature in HOBO logger (°F)
 #' * integer - universal sensor with integer values
 #' * logical - universal sensor with logical values
 #' * moisture - volumetric soil moisture (ratio)
-#' * precipitation in (mm)
+#' * precipitation (mm)
+#' * r_delta - radius difference (μm) [myClim::mc_calc_tomst_dendro()]
 #' * real - universal sensor with real values
 #' * RH_perc - Relative humidity sensor (%)
 #' * snow_bool - result of function [myClim::mc_calc_snow()]
-#' * snow_fresh - new snow in (cm)
+#' * snow_fresh - new snow (cm)
 #' * snow_total - total hight snow (cm)
 #' * sun_shine - time of sun shine (hours)
 #' * T_C - universal temperature sensor (°C)
@@ -78,14 +84,17 @@
 #' @seealso [mc_Physical-class]
 #'
 #' Currently supported physical quantities:
-#' * T_C - Temperature in °C
-#' * moisture - moisture in ratio 0-1
-#' * TMSmoisture - TDT signal from TMS moisture sensor
-#' * RH_perc - Relative humidity in %
 #' * l_cm - length in cm
 #' * l_mm - lenght in mm
-#' * v - speed in m/s
+#' * l_um - lenght in μm
+#' * moisture - moisture in ratio 0-1
+#' * RH_perc - Relative humidity in %
+#' * T_C - Temperature in °C
+#' * T_F - Temperature in °F
 #' * t_h - time in hours
+#' * TMSmoisture - TDT signal from TMS moisture sensor
+#' * TOMST_r_delta - radius difference in raw units
+#' * v - speed in m/s
 "mc_data_physical"
 
 #' Volumetric water content parameters
