@@ -112,3 +112,13 @@ test_that("mc_calc_cumsum", {
     expect_equal(cumsum(cumsum_data$localities$A2E32$sensors$TMS_T1$values), cumsum_data$localities$A2E32$sensors$TMS_T1_cumsum$values)
     expect_equal(cumsum_data$localities$A2E32$sensors$snow_cumsum$metadata@sensor_id, myClim:::.model_const_SENSOR_integer)
 })
+
+test_that("mc_calc_tomst_dendro", {
+    expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
+    test_calc_data_format(calc_data)
+    expect_equal(calc_data$localities$`92192250`$sensors$r_delta$values[[1]],
+                 (calc_data$localities$`92192250`$sensors$DEND_TOMST_r_delta$values[[1]] - 1279) * (8890 / (34000 - 1279)))
+})

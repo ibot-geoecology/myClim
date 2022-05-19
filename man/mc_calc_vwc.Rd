@@ -6,8 +6,8 @@
 \usage{
 mc_calc_vwc(
   data,
-  moist_sensor = "TMS_TMSmoisture",
-  temp_sensor = "TMS_T1",
+  moist_sensor = myClim:::.model_const_SENSOR_TMS_TMSmoisture,
+  temp_sensor = myClim:::.model_const_SENSOR_TMS_T1,
   output_sensor = "vwc_moisture",
   soiltype = "universal",
   localities = NULL,

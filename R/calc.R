@@ -223,7 +223,8 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' 
 #' @examples
 #' calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
-mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T1",
+mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSmoisture,
+                        temp_sensor=myClim:::.model_const_SENSOR_TMS_T1,
                         output_sensor="vwc_moisture",
                         soiltype="universal", localities=NULL,
                         ref_t=myClim:::.calib_MOIST_REF_T,
@@ -268,7 +269,7 @@ mc_calc_vwc <- function(data, moist_sensor="TMS_TMSmoisture", temp_sensor="TMS_T
     }
     values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
-    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor("moisture", output_sensor,
+    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_moisture, output_sensor,
                                                                          values=purrr::flatten_dbl(values), calibrated = is_calibrated,
                                                                          calibration=locality$sensors[[moist_sensor]]$calibration)
     return(locality)
@@ -438,3 +439,43 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
     data
 }
 
+#' Converting raw values of TOMST dendrometer to micrometers
+#'
+#' @description
+#' This function convert differences of trunk radius fram raw TOMST units to micrometers.
+#'
+#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param dendro_sensor name of radius difference sensor to be converted from raw to micrometers (default "DEND_TOMST_r_delta") see `names(mc_data_sensors)`
+#' @param output_sensor name of new snow sensor (default "r_delta")
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return myClim object same as input but with added r_delta sensor
+#' @export
+#' @examples
+#' calc_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
+mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSOR_DEND_TOMST_r_delta,
+                        output_sensor=myClim:::.model_const_SENSOR_r_delta,
+                        localities=NULL) {
+    myClim:::.common_stop_if_not_calc_format(data)
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        .calc_add_r_delta_to_locality(locality, dendro_sensor, output_sensor)
+    }
+    data$localities <- purrr::map(data$localities, locality_function)
+    data
+}
+
+.calc_add_r_delta_to_locality <- function(locality, dendro_sensor, output_sensor) {
+    if(!.calc_check_sensor_in_locality(locality, dendro_sensor)){
+        return(locality)
+    }
+    min_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMST_r_delta]]@min_value
+    max_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMST_r_delta]]@max_value
+    um_range <- myClim:::.model_const_TOMST_DENDROMETER_UM_RANGE
+    values <- (locality$sensors[[dendro_sensor]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
+    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_r_delta, output_sensor,
+                                                                         values)
+    return(locality)
+}

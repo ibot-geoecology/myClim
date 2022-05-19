@@ -36,8 +36,10 @@ test_that("mc_read_files TOMST directory", {
     expect_warning(data <- mc_read_files(c("data/TOMST", "data/eco-snow"), "TOMST"))
     test_prep_data_format(data)
     expect_equal(data[[1]]$metadata@tz_type, mc_const_TZ_UTC)
-    expect_equal(length(data), 4)
+    expect_equal(length(data), 5)
     expect_equal(length(data[[1]]$loggers), 1)
+    expect_equal(data$`92192250`$loggers[[1]]$metadata@type, myClim:::.model_const_LOGGER_TOMST_DENDROMETER)
+    expect_equal(length(data$`92192250`$loggers[[1]]$sensors), 2)
 })
 
 test_that("mc_read_files HOBO", {
