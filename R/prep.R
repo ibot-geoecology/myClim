@@ -9,9 +9,9 @@
 #' Cleaning datetime series
 #'
 #' @description
-#' This function guess time step from regular time series. After that produce perfectly regular time series based on time range of provided data and guessed step. 
-#' Using clean time series, function check weather the original time series is continual without missing values, check duplicated and disordered records. 
-#' Resulting myClim object time series has constant step without duplicated and disordered records. Disordered records are reordered chronologically, missing values are filled with NAs. Resulting time series is nicely rounded. See details.
+#' Function 'mc_prep_clean' guess time step from regular time series. After that produce perfectly regular time series based on time range of provided data and guessed step. 
+#' Using clean time series, function check provided time-series for missing, duplicated, and disordered records. 
+#' Resulting myClim object has constant step in time-series in incremental order, missing values in expected time of measuring are filled with NAs. Resulting time series is nicely rounded. See details.
 #' 
 #' 
 #' @details
