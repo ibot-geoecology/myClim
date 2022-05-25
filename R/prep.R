@@ -9,16 +9,16 @@
 #' Cleaning datetime series
 #'
 #' @description
-#' Function 'mc_prep_clean' guess time step from regular time series. After that produce perfectly regular time series based on time range of provided data and guessed step. 
-#' Using clean time series, function check provided time-series for missing, duplicated, and disordered records. 
-#' Resulting myClim object has constant step in time-series in incremental order, missing values in expected time of measuring are filled with NAs. Resulting time series is nicely rounded. See details.
+#' Function 'mc_prep_clean' check time-series in myClim object in prep-format for missing, duplicated, and disordered records and regularize microclimatic time-series to constant time-step rounded to the nearest interval. Duplicit records are removed and missing values are filled with NA's.
+
+#' See details.
 #' 
 #' 
 #' @details
-#' `mc_prep_clean` is initial, mandatory step before further work with data in `myClim` library. 
+#' Processing the data with `mc_prep_clean` is a mandatory step required for further data handling in `myClim` library.
 #' 
-#' This function guarantee time series with constant time step, without duplicated and disordered records which is crucial for next steps in data analysis. 
-#' `mc_prep_clean` assume constant time step in microclimatic records. The time step is guessed from input time series based on last 100 records. In case of irregular time series, function returns warning and skip series. 
+#' This function guarantee that all time series are in chronological order and have regular time-step, without duplicated records.
+#' `mc_prep_clean` identify time-step from input time series based on last 100 records. In case of irregular time series, function returns warning and skip series. 
 #' 
 #' In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).   
 #' 
