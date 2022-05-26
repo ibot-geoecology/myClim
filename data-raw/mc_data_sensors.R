@@ -172,6 +172,12 @@ mc_data_sensors[[.model_const_SENSOR_r_delta]]@sensor_id <- .model_const_SENSOR_
 mc_data_sensors[[.model_const_SENSOR_r_delta]]@physical <- .model_const_PHYSICAL_l_um
 mc_data_sensors[[.model_const_SENSOR_r_delta]]@description <- "Radius difference"
 
+mc_data_sensors[[.model_const_SENSOR_VPD]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_VPD]]@sensor_id <- .model_const_SENSOR_VPD
+mc_data_sensors[[.model_const_SENSOR_VPD]]@value_type <- .model_const_VALUE_TYPE_REAL
+mc_data_sensors[[.model_const_SENSOR_VPD]]@physical <- .model_const_PHYSICAL_p_kPa
+mc_data_sensors[[.model_const_SENSOR_VPD]]@description <- "Vapor Pressure Deficit"
+
 mc_data_sensors[[.model_const_SENSOR_real]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_real]]@sensor_id <- .model_const_SENSOR_real
 mc_data_sensors[[.model_const_SENSOR_real]]@value_type <- .model_const_VALUE_TYPE_REAL

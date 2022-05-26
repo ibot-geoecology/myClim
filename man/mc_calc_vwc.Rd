@@ -8,7 +8,7 @@ mc_calc_vwc(
   data,
   moist_sensor = myClim:::.model_const_SENSOR_TMS_TMSmoisture,
   temp_sensor = myClim:::.model_const_SENSOR_TMS_T1,
-  output_sensor = "vwc_moisture",
+  output_sensor = "VWC_moisture",
   soiltype = "universal",
   localities = NULL,
   ref_t = myClim:::.calib_MOIST_REF_T,
@@ -19,13 +19,15 @@ mc_calc_vwc(
 \arguments{
 \item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
-\item{moist_sensor}{name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see \code{names(mc_data_sensors)}}
+\item{moist_sensor}{name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see \code{names(mc_data_sensors)}
+
+Soil moisture sensor must be in TMSmoisture physical.}
 
 \item{temp_sensor}{name of soil temperature sensor (default "TMS_T1") see \code{names(mc_data_sensors)}
 
-Temperature sensor must be in T physical.}
+Temperature sensor must be in T_C physical.}
 
-\item{output_sensor}{name of new snow sensor (default "vwc_moisture")}
+\item{output_sensor}{name of new snow sensor (default "VWC_moisture")}
 
 \item{soiltype}{value from mc_data_vwc_parameters in column soiltype (default "universal")
 

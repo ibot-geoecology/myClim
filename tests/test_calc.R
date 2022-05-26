@@ -69,9 +69,9 @@ test_that("mc_calc_vwc", {
     expect_warning(calc_data <- mc_calc_vwc(calc_data, localities=c("A1E05", "A2E32")))
     test_calc_data_format(calc_data)
     expect_false(calc_data$localities$A2E32$sensors$TMS_TMSmoisture$metadata@calibrated)
-    expect_true(calc_data$localities$A2E32$sensors$vwc_moisture$metadata@calibrated)
+    expect_true(calc_data$localities$A2E32$sensors$VWC_moisture$metadata@calibrated)
     expect_equal(calc_data$localities$A2E32$sensors$TMS_TMSmoisture$calibration,
-                 calc_data$localities$A2E32$sensors$vwc_moisture$calibration)
+                 calc_data$localities$A2E32$sensors$VWC_moisture$calibration)
 })
 
 test_that("mc_calc_vwc wrong", {

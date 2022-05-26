@@ -1,9 +1,10 @@
-.calc_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {locality$metadata@locality_id} doesn't contains sensor {sensor}. It is skipped."
-.calc_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@step_text} in data is too long. Maximal step is day."
-.calc_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
-.calc_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
-.calc_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
-.calc_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
+.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {locality$metadata@locality_id} doesn't contains sensor {sensor}. It is skipped."
+.calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@step_text} in data is too long. Maximal step is day."
+.calc_const_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
+.calc_const_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
+.calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
+.calc_const_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
+.calc_const_MESSAGE_VPD_AGGREGATED <- "You are attempting to calculate VPD from aggregated temperature / RH values. Due to non-linear relationship between VPD and T/RH, this may produce biased VPD estimates."
 
 #' Snow detection from temperature
 #'
@@ -42,7 +43,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 
 .calc_check_maximal_day_step <- function(data) {
     if(.calc_is_step_bigger_then(data, lubridate::days(1))) {
-        stop(stringr::str_glue(.calc_MESSAGE_STEP_LONGER_DAY))
+        stop(stringr::str_glue(.calc_const_MESSAGE_STEP_LONGER_DAY))
     }
 }
 
@@ -73,18 +74,18 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
 .calc_check_sensor_in_locality <- function(locality, sensor) {
     result <- sensor %in% names(locality$sensors)
     if(!result){
-        warning(stringr::str_glue(.calc_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR))
+        warning(stringr::str_glue(.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR))
     }
     result
 }
 
 .calc_wrong_physical_error_function <- function(sensor_name, unit_name) {
-    stop(stringr::str_glue(.calc_MESSAGE_WRONG_PHYSICAL_UNIT))
+    stop(stringr::str_glue(.calc_const_MESSAGE_WRONG_PHYSICAL_UNIT))
 }
 
 .calc_warn_if_overwriting <- function(locality, output_sensor) {
     if(output_sensor %in% names(locality$sensors)) {
-        warning(stringr::str_glue(.calc_MESSAGE_OVERWRITE_SENSOR))
+        warning(stringr::str_glue(.calc_const_MESSAGE_OVERWRITE_SENSOR))
     }
 }
 
@@ -124,7 +125,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
     myClim:::.common_stop_if_not_calc_format(data)
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
     if(length(data$localities) == 0) {
-        stop(.calc_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES)
+        stop(.calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES)
     }
     if(!use_utc) {
         myClim:::.prep_warn_if_unset_tz_offset(data)
@@ -199,10 +200,12 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`
+#'
+#' Soil moisture sensor must be in TMSmoisture physical.
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1") see `names(mc_data_sensors)`
 #'
-#' Temperature sensor must be in T physical.
-#' @param output_sensor name of new snow sensor (default "vwc_moisture")
+#' Temperature sensor must be in T_C physical.
+#' @param output_sensor name of new snow sensor (default "VWC_moisture")
 #' @param soiltype value from mc_data_vwc_parameters in column soiltype (default "universal")
 #'
 #' Parameters a, b and c are used in calculation.
@@ -225,7 +228,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
 mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSmoisture,
                         temp_sensor=myClim:::.model_const_SENSOR_TMS_T1,
-                        output_sensor="vwc_moisture",
+                        output_sensor="VWC_moisture",
                         soiltype="universal", localities=NULL,
                         ref_t=myClim:::.calib_MOIST_REF_T,
                         acor_t=myClim:::.calib_MOIST_ACOR_T,
@@ -243,7 +246,7 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
     data
 }
 
-.calc_add_vwc_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
+.calc_add_vpd_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
                                       soiltype_value, ref_t, acor_t, wcor_t) {
     skip <- .calc_vwc_check_sensors_get_skip(locality, moist_sensor, temp_sensor, output_sensor)
     if(skip) {
@@ -251,7 +254,7 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
     }
     soil_row <- dplyr::filter(mc_data_vwc_parameters, soiltype == soiltype_value)
     if(nrow(soil_row) != 1) {
-        stop(stringr::str_glue(.calc_MESSAGE_UNKNONW_SIOLTYPE))
+        stop(stringr::str_glue(.calc_const_MESSAGE_UNKNONW_SIOLTYPE))
     }
     values_table <- tibble::tibble(datetime = locality$datetime,
                                    raw = locality$sensors[[moist_sensor]]$values,
@@ -280,13 +283,13 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
         return(TRUE)
     }
     if(!myClim:::.model_is_physical_TMSmoisture(locality$sensors[[moist_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(moist_sensor, "TMSmoisture")
+        .calc_wrong_physical_error_function(moist_sensor, myClim:::.model_const_PHYSICAL_TMSmoisture)
     }
     if(!.calc_check_sensor_in_locality(locality, temp_sensor)){
         return(TRUE)
     }
     if(!myClim:::.model_is_physical_T_C(locality$sensors[[temp_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(temp_sensor, "T")
+        .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_T_C)
     }
     .calc_warn_if_overwriting(locality, output_sensor)
     return(FALSE)
@@ -461,21 +464,103 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_r_delta_to_locality(locality, dendro_sensor, output_sensor)
+        .calc_add_sensor_to_locality(locality, dendro_sensor, myClim:::.model_const_SENSOR_r_delta, output_sensor,
+                                     myClim:::.model_const_PHYSICAL_TOMST_r_delta,
+                                     .calc_get_r_delta)
     }
     data$localities <- purrr::map(data$localities, locality_function)
     data
 }
 
-.calc_add_r_delta_to_locality <- function(locality, dendro_sensor, output_sensor) {
-    if(!.calc_check_sensor_in_locality(locality, dendro_sensor)){
-        return(locality)
-    }
+.calc_get_r_delta <- function(locality, sensor_name) {
     min_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMST_r_delta]]@min_value
     max_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMST_r_delta]]@max_value
     um_range <- myClim:::.model_const_TOMST_DENDROMETER_UM_RANGE
-    values <- (locality$sensors[[dendro_sensor]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
-    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_r_delta, output_sensor,
-                                                                         values)
+    (locality$sensors[[sensor_name]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
+}
+
+#' Calculate vapor pressure deficit (in kPa)
+#'
+#' @description
+#' Function calculate vapor pressure deficit (in kPa) from temperature and relative humidity readings using equation
+#' from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981) and adapted by Jones, 2013 (eq. 5.15)
+#' Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
+#'
+#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param temp_sensor name of temperature sensor
+#'
+#' Temperature sensor must be in T_C physical.
+#' @param rh_sensor name relative humidity sensor
+#'
+#' Temperature sensor must be in RH_perc physical.
+#' @param output_sensor name of new snow sensor (default "VPD")
+#' @param altitude value in meters (default 0)
+#' @param metadata_altitude if TRUE then altitude from metadata of locality is used (default TRUE)
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return myClim object same as input but with added VPD sensor
+#' @export
+#' @references
+#' Jones H.G. (2014) Plants and Microclimate, Third Edit. Cambridge University Press, Cambridge Buck A.L. (1981)
+#' New equations for computing vapor pressure and enhancment factor. Journal of Applied Meteorology 20: 1527–1532.
+#' Campbell G.S. & Norman J.M. (1998). An Introduction to Environmental Biophysics, Springer New York, New York, NY
+#'
+#' @examples
+mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
+                        output_sensor="VPD", altitude=0,
+                        metadata_altitude=TRUE, localities=NULL) {
+    myClim:::.common_stop_if_not_calc_format(data)
+
+    if(lubridate::period(data$metadata@step_text) >= lubridate::days(1)) {
+        warning(.calc_const_MESSAGE_VPD_AGGREGATED)
+    }
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        .calc_add_vpd_to_locality(locality, temp_sensor, rh_sensor, output_sensor,
+                                  altitude, metadata_altitude)
+    }
+    data$localities <- purrr::map(data$localities, locality_function)
+    data
+}
+
+.calc_add_vpd_to_locality <- function(locality, temp_sensor, rh_sensor, output_sensor,
+                                      altitude, metadata_altitude) {
+    skip <- .calc_vpd_check_sensors_get_skip(locality, temp_sensor, rh_sensor, output_sensor)
+    if(skip) {
+        return(locality)
+    }
+
+    if(metadata_altitude && ! is.na(locality$metadata@altitude)) {
+        altitude <- locality$metadata@altitude
+    }
+
+    a <- 0.61121
+    b <- 18.678 - (locality$sensors[[temp_sensor]]$values / 234.5)
+    c <- 257.14
+    P <- 101300 * exp(- altitude / 8200)
+    f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * t^2)) #enhancement factor
+    values <- f * a * exp(b * t / (c + t)) * (1 - locality$sensors[[rh_sensor]]$values / 100)
+
+    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_VPD, output_sensor,
+                                                                         values=values)
     return(locality)
+}
+
+.calc_vpd_check_sensors_get_skip <- function(locality, temp_sensor, rh_sensor, output_sensor){
+    if(!.calc_check_sensor_in_locality(locality, temp_sensor)){
+        return(TRUE)
+    }
+    if(!myClim:::.model_is_physical_T_C(locality$sensors[[temp_sensor]]$metadata)){
+        .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_T_C)
+    }
+    if(!.calc_check_sensor_in_locality(locality, rh_sensor)){
+        return(TRUE)
+    }
+    if(!myClim:::.model_is_physical(locality$sensors[[rh_sensor]]$metadata, myClim:::.model_const_PHYSICAL_RH_perc)){
+        .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_RH_perc)
+    }
+    .calc_warn_if_overwriting(locality, output_sensor)
+    return(FALSE)
 }
