@@ -8,12 +8,11 @@
 #' Snow detection from temperature
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.  
+#' Function detects snow cover from temperature time-series. 
 #'
 #' @details
-#' Function detects snow cover from temperature time-series. Temperature sensor is considered as covered by snow when the maximal temperature in the preceding or subsequent time-window (specified by 'days' param) does not exceed specific 'tmax' threshold value (default 0.5°C) and the temperature range remain below specified 'range' threshold (default 2°C). This function rely on insulating effect of snow, but for detection of shallow snow cover may be the default temperature range limit too low. Typically, for snow detection is used temperature sensor near the ground (e.g. 'TMS_T2').
-#' 
-#' TRUE/FALSE = Snow/non-snow information is returned in original time step (e.g. 15 min, 1 h...) despite function operate with daily temperature range and maximum. Because of dependency on daily temperatures, the longest time step for snow detection allowed is day. 
+#' Function detects snow cover from temperature time-series. Temperature sensor is considered as covered by snow when the maximal temperature in the preceding or subsequent time-window (specified by 'days' param) does not exceed specific 'tmax' threshold value (default 0.5°C) and the temperature range remain below specified 'range' threshold (default 2°C). This function rely on insulating effect of snow, significantly reducing diurnal temperature variation. Typically, for snow detection is used temperature sensor near the ground (e.g. 'TMS_T2').
+#' The function returns vector of snow cover with same time-step as input data. To get number of days with snow cover and more info, apply [mc_calc_snow_agg].
 #'
 #' @param data myClim object in Calc-format. See [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used for snow estimation. (e.g. TMS_T2)
@@ -22,7 +21,7 @@
 #' @param range maximal temperature range threshold for snow-covered sensor
 #' @param tmax maximal temperature threshold for snow-covered sensor
 #' @param days number of days to be used for moving-window for snow detection algorithm
-#' @return The new myClim data object, identical as input but with added snow sensor. Time step is not modified.
+#' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
 #' @export
 #' @examples
 #' snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
