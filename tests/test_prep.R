@@ -22,6 +22,12 @@ test_that("mc_prep_clean", {
     expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$clean_info@step, 15)
 })
 
+test_that("mc_prep_clean 1.5 hour step", {
+    data <- mc_read_files("data/HOBO/6265.csv", "HOBO", date_format = "%m/%d/%y %I:%M:%S %p")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    test_prep_data_format(cleaned_data)
+})
+
 test_that("mc_prep_clean one record", {
     data <- mc_read_files("data/clean-one-record", "TOMST")
     expect_warning(cleaned_data <- mc_prep_clean(data, silent=T))

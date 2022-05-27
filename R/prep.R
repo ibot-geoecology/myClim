@@ -60,7 +60,8 @@ mc_prep_clean <- function(data, silent=FALSE) {
         warning(stringr::str_glue("step cannot be detected for logger {logger$metadata@serial_number} - skip"))
         return(logger)
     }
-    logger$datetime <- lubridate::round_date(logger$datetime, lubridate::seconds_to_period(logger$clean_info@step * 60))
+    step_seconds <- logger$clean_info@step * 60
+    logger$datetime <- myClim:::.common_as_utc_posixct((as.numeric(logger$datetime) + logger$clean_info@step * 30) %/% step_seconds * step_seconds)
     logger <- .prep_clean_write_info(logger)
     logger <- .prep_clean_edit_series(logger)
     logger

@@ -9,10 +9,14 @@
 #' Snow detection from temperature
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.  
+#' This function creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector
+#' in original time step for Snow/non-snow  events.
 #'
 #' @details
-#' Function was designed to estimate snow presence from temperature in situation when temperature sensor is covered by snow. Snow detection algorithm combines daily range `dr`of temperature with the maximal daily temperature `tmax`. I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C and daily maximal temperature is lower than 0.5 °C.
+#' Function was designed to estimate snow presence from temperature in situation when temperature sensor is covered by snow.
+#' Snow detection algorithm combines daily range `dr`of temperature with the maximal daily temperature `tmax`.
+#' I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C
+#' and daily maximal temperature is lower than 0.5 °C.
 #' 
 #' TRUE/FALSE = Snow/non-snow information is returned in original time step (e.g. 15 min, 1 h...) despite function operate with daily temperature range and maximum. Because of dependency on daily temperatures, the longest time step for snow detection allowed is day. 
 #'
@@ -246,7 +250,7 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
     data
 }
 
-.calc_add_vpd_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
+.calc_add_vwc_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
                                       soiltype_value, ref_t, acor_t, wcor_t) {
     skip <- .calc_vwc_check_sensors_get_skip(locality, moist_sensor, temp_sensor, output_sensor)
     if(skip) {
@@ -505,6 +509,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 #' Campbell G.S. & Norman J.M. (1998). An Introduction to Environmental Biophysics, Springer New York, New York, NY
 #'
 #' @examples
+#' calc_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
 mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
                         output_sensor="VPD", altitude=0,
                         metadata_altitude=TRUE, localities=NULL) {
@@ -536,12 +541,14 @@ mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
         altitude <- locality$metadata@altitude
     }
 
+    T <- locality$sensors[[temp_sensor]]$values
+    RH <- locality$sensors[[rh_sensor]]$values
     a <- 0.61121
-    b <- 18.678 - (locality$sensors[[temp_sensor]]$values / 234.5)
+    b <- 18.678 - (T / 234.5)
     c <- 257.14
     P <- 101300 * exp(- altitude / 8200)
-    f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * t^2)) #enhancement factor
-    values <- f * a * exp(b * t / (c + t)) * (1 - locality$sensors[[rh_sensor]]$values / 100)
+    f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * T^2)) #enhancement factor
+    values <- f * a * exp(b * T / (c + T)) * (1 - RH / 100)
 
     locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_VPD, output_sensor,
                                                                          values=values)
