@@ -11,7 +11,7 @@
 #' This function creates new virtual sensor on locality within myClim data object. Function return TRUE/FALSE vector in original time step for Snow/non-snow  events.  
 #'
 #' @details
-#' Function was designed to estimate snow presence from temperature in situation when temperature sensor is covered by snow. Snow detection algorithm combines daily range `dr`of temperature with the maximal daily temperature `tmax`. I.e in default settings TRUE (snow presence) is returned when daily temperature range is lower than 2°C and daily maximal temperature is lower than 0.5 °C.
+#' Function detects snow cover from temperature time-series. Temperature sensor is considered as covered by snow when the maximal temperature in the preceding or subsequent time-window (specified by 'days' param) does not exceed specific 'tmax' threshold value (default 0.5°C) and the temperature range remain below specified 'range' threshold (default 2°C). This function rely on insulating effect of snow, but for detection of shallow snow cover may be the default temperature range limit too low. Typically, for snow detection is used temperature sensor near the ground (e.g. 'TMS_T2').
 #' 
 #' TRUE/FALSE = Snow/non-snow information is returned in original time step (e.g. 15 min, 1 h...) despite function operate with daily temperature range and maximum. Because of dependency on daily temperatures, the longest time step for snow detection allowed is day. 
 #'
