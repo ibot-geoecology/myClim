@@ -12,17 +12,18 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_TOMST_THERMODATALOGGER_VALUE <- 65336
 .model_const_TOMST_DENDROMETER_UM_RANGE <- 8890
 
-.model_const_PHYSICAL_T_C <- "T_C"
-.model_const_PHYSICAL_T_F <- "T_F"
-.model_const_PHYSICAL_moisture <- "moisture"
-.model_const_PHYSICAL_TMSmoisture <- "TMSmoisture"
-.model_const_PHYSICAL_RH_perc <- "RH_perc"
 .model_const_PHYSICAL_l_cm <- "l_cm"
 .model_const_PHYSICAL_l_mm <- "l_mm"
 .model_const_PHYSICAL_l_um <- "l_um"
-.model_const_PHYSICAL_v <- "v"
+.model_const_PHYSICAL_moisture <- "moisture"
+.model_const_PHYSICAL_p_kPa <- "p_kPa"
+.model_const_PHYSICAL_RH_perc <- "RH_perc"
+.model_const_PHYSICAL_T_C <- "T_C"
+.model_const_PHYSICAL_T_F <- "T_F"
 .model_const_PHYSICAL_t_h <- "t_h"
+.model_const_PHYSICAL_TMSmoisture <- "TMSmoisture"
 .model_const_PHYSICAL_TOMST_r_delta <- "TOMST_r_delta"
+.model_const_PHYSICAL_v <- "v"
 
 .model_const_VALUE_TYPE_REAL <- "real"
 .model_const_VALUE_TYPE_INTEGER <- "integer"
@@ -43,18 +44,21 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 # universal sensors
 .model_const_SENSOR_count <- "count"
 .model_const_SENSOR_coverage <- "coverage"
+.model_const_SENSOR_FDD <- "FDD"
+.model_const_SENSOR_GDD <- "GDD"
+.model_const_SENSOR_precipitation <- "precipitation"
+.model_const_SENSOR_r_delta <- "r_delta"
 .model_const_SENSOR_snow_bool <- "snow_bool"
 .model_const_SENSOR_snow_fresh <- "snow_fresh"
 .model_const_SENSOR_snow_total <- "snow_total"
-.model_const_SENSOR_precipitation <- "precipitation"
 .model_const_SENSOR_sun_shine <- "sun_shine"
+.model_const_SENSOR_VPD <- "VPD"
 .model_const_SENSOR_wind <- "wind"
-.model_const_SENSOR_GDD <- "GDD"
-.model_const_SENSOR_FDD <- "FDD"
-.model_const_SENSOR_r_delta <- "r_delta"
+
 .model_const_SENSOR_moisture <- .model_const_PHYSICAL_moisture
-.model_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
 .model_const_SENSOR_RH_perc <- .model_const_PHYSICAL_RH_perc
+.model_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
+
 .model_const_SENSOR_real <- .model_const_VALUE_TYPE_REAL
 .model_const_SENSOR_integer <- .model_const_VALUE_TYPE_INTEGER
 .model_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
@@ -688,9 +692,17 @@ setMethod(
     signature("mc_DataFormat"),
     function(object, path) {
         if(is.null(object@filename_serial_number_pattern)) {
-          stop(stringr::str_glue("It is not possible identify serial_number from file {filename}."))
+          stop(stringr::str_glue("It is not possible identify serial_number from file. Pattern is missed in data_format."))
         }
-        stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
+        result <- stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
+        if(is.na(result)) {
+            result <- stringr::str_match(basename(path), "(.+)\\.[^.]+")[1, 2]
+            if(is.na(result)) {
+                result <- basename(path)
+            }
+            warning(stringr::str_glue("It is not possible identify serial_number from file. Name {result} is used."))
+        }
+        result
     }
 )
 

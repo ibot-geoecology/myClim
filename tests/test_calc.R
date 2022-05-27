@@ -69,9 +69,9 @@ test_that("mc_calc_vwc", {
     expect_warning(calc_data <- mc_calc_vwc(calc_data, localities=c("A1E05", "A2E32")))
     test_calc_data_format(calc_data)
     expect_false(calc_data$localities$A2E32$sensors$TMS_TMSmoisture$metadata@calibrated)
-    expect_true(calc_data$localities$A2E32$sensors$vwc_moisture$metadata@calibrated)
+    expect_true(calc_data$localities$A2E32$sensors$VWC_moisture$metadata@calibrated)
     expect_equal(calc_data$localities$A2E32$sensors$TMS_TMSmoisture$calibration,
-                 calc_data$localities$A2E32$sensors$vwc_moisture$calibration)
+                 calc_data$localities$A2E32$sensors$VWC_moisture$calibration)
 })
 
 test_that("mc_calc_vwc wrong", {
@@ -121,4 +121,41 @@ test_that("mc_calc_tomst_dendro", {
     test_calc_data_format(calc_data)
     expect_equal(calc_data$localities$`92192250`$sensors$r_delta$values[[1]],
                  (calc_data$localities$`92192250`$sensors$DEND_TOMST_r_delta$values[[1]] - 1279) * (8890 / (34000 - 1279)))
+})
+
+test_that("mc_calc_tomst_dendro", {
+    expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
+    test_calc_data_format(calc_data)
+    expect_equal(calc_data$localities$`92192250`$sensors$r_delta$values[[1]],
+                 (calc_data$localities$`92192250`$sensors$DEND_TOMST_r_delta$values[[1]] - 1279) * (8890 / (34000 - 1279)))
+})
+
+test_that("mc_calc_vpd", {
+    data <- mc_read_files("data/HOBO/20024354.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S")
+    data <- mc_prep_rename_locality(data, list(`20024354`="LOC"))
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    calc_data <- mc_calc_vpd(calc_data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH)
+    test_calc_data_format(calc_data)
+    vpd_martin <- function(t,rh,elev = 0) {
+        a <- 0.61121
+        b <- 18.678 - (t/234.5)
+        c <- 257.14
+        P <- 101300*exp(-elev/8200)
+        f <- 1.00072 + (10e-7*P*(0.032+5.9*10e-6*t^2)) #enhancement factor
+        vpd <- f*a*exp(b*t/(c+t))*(1-rh/100)
+        return(vpd)
+    }
+    expect_equal(vpd_martin(calc_data$localities$LOC$sensors$HOBO_T_C$values[[1]],
+                            calc_data$localities$LOC$sensors$HOBO_RH$values[[1]]),
+                 calc_data$localities$LOC$sensors$VPD$values[[1]])
+    calc_data <- mc_prep_meta(calc_data, list(LOC = 500), "altitude")
+    calc_data <- mc_calc_vpd(calc_data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH,
+                             output_sensor = "VPD500")
+    expect_equal(vpd_martin(calc_data$localities$LOC$sensors$HOBO_T_C$values[[1]],
+                            calc_data$localities$LOC$sensors$HOBO_RH$values[[1]], elev = 500),
+                 calc_data$localities$LOC$sensors$VPD500$values[[1]])
 })

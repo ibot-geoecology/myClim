@@ -18,7 +18,7 @@
 #' Processing the data with `mc_prep_clean` is a mandatory step required for further data handling in `myClim` library.
 #' 
 #' This function guarantee that all time series are in chronological order and have regular time-step, without duplicated records.
-#' `mc_prep_clean` identify time-step from input time series based on last 100 records. In case of irregular time series, function returns warning and skip series. 
+#' `mc_prep_clean` identify time-step from input time series based on last 100 records. In case of irregular time series, function returns warning and skip series.
 #' 
 #' In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).   
 #' 
@@ -60,7 +60,8 @@ mc_prep_clean <- function(data, silent=FALSE) {
         warning(stringr::str_glue("step cannot be detected for logger {logger$metadata@serial_number} - skip"))
         return(logger)
     }
-    logger$datetime <- lubridate::round_date(logger$datetime, lubridate::seconds_to_period(min(60,logger$clean_info@step) * 60))
+    step_seconds <- logger$clean_info@step * 60
+    logger$datetime <- myClim:::.common_as_utc_posixct((as.numeric(logger$datetime) + logger$clean_info@step * 30) %/% step_seconds * step_seconds)
     logger <- .prep_clean_write_info(logger)
     logger <- .prep_clean_edit_series(logger)
     logger
