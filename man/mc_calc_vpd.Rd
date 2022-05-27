@@ -41,6 +41,9 @@ Function calculate vapor pressure deficit (in kPa) from temperature and relative
 from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981) and adapted by Jones, 2013 (eq. 5.15)
 Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
 }
+\examples{
+calc_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
+}
 \references{
 Jones H.G. (2014) Plants and Microclimate, Third Edit. Cambridge University Press, Cambridge Buck A.L. (1981)
 New equations for computing vapor pressure and enhancment factor. Journal of Applied Meteorology 20: 1527–1532.

@@ -135,3 +135,9 @@ test_that("mc_read_long", {
     test_prep_data_format(data)
     expect_equal(length(data), 9)
 })
+
+test_that("mc_read_files TOMST serial_number", {
+    expect_warning(data <- mc_read_files("data/format/201911_93164272.csv", "TOMST"))
+    expect_equal(names(data), "201911_93164272")
+})
+

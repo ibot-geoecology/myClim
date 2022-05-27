@@ -692,9 +692,17 @@ setMethod(
     signature("mc_DataFormat"),
     function(object, path) {
         if(is.null(object@filename_serial_number_pattern)) {
-          stop(stringr::str_glue("It is not possible identify serial_number from file {filename}."))
+          stop(stringr::str_glue("It is not possible identify serial_number from file. Pattern is missed in data_format."))
         }
-        stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
+        result <- stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
+        if(is.na(result)) {
+            result <- stringr::str_match(basename(path), "(.+)\\.[^.]+")[1, 2]
+            if(is.na(result)) {
+                result <- basename(path)
+            }
+            warning(stringr::str_glue("It is not possible identify serial_number from file. Name {result} is used."))
+        }
+        result
     }
 )
 
