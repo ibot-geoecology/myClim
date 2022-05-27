@@ -19,13 +19,14 @@
 #' @param sensor name of temperature sensor used for snow estimation. (e.g. TMS_T2)
 #' @param output_sensor name of output snow sensor (default "snow")
 #' @param localities list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
-#' @param dr delta range (maximal daily temperature range on sensor covered by snow)
-#' @param tmax maximal daily temperature on sensor covered by snow
+#' @param range maximal temperature range threshold for snow-covered sensor
+#' @param tmax maximal temperature threshold for snow-covered sensor
+#' @param days number of days to be used for moving-window for snow detection algorithm
 #' @return The new myClim data object, identical as input but with added snow sensor. Time step is not modified.
 #' @export
 #' @examples
 #' snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
-mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr=2, tmax=0.5) {
+mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=2, tmax=0.5,days = 1) {
     myClim:::.common_stop_if_not_calc_format(data)
     .calc_check_maximal_day_step(data)
     locality_function <- function(locality) {
@@ -34,7 +35,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
         }
         .calc_add_sensor_to_locality(locality, sensor, myClim:::.model_const_SENSOR_snow_bool, output_sensor,
                                      myClim:::.model_const_PHYSICAL_T_C,
-                                     .calc_snow_values_function, dr=dr, tmax=tmax)
+                                     .calc_snow_values_function, range=range, tmax=tmax,days=days)
     }
     data$localities <- purrr::map(data$localities, locality_function)
     data
@@ -51,10 +52,16 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, dr
     return(data_period > max_period)
 }
 
-.calc_snow_values_function <- function(locality, sensor_name, dr, tmax) {
-    day_max_temp <- runner::runner(locality$sensors[[sensor_name]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
-    day_range_temp <- runner::runner(locality$sensors[[sensor_name]]$values, k=3600*24, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-    (day_range_temp < dr) & (day_max_temp < tmax)
+.calc_snow_values_function <- function(locality, sensor_name, range, tmax, days) {
+    per <- 3600*24*days
+    day_max_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    day_range_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
+
+    day_max_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
+,lag = -, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    day_range_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per,lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
+
+    (day_range_temp_prev < range) & (day_max_temp_prev < tmax) | (day_range_temp_next < range) & (day_max_temp_next < tmax)
 }
 
 .calc_add_sensor_to_locality <- function(locality, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
