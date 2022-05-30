@@ -19,9 +19,9 @@
 #' @param sensor name of temperature sensor used for snow estimation. (e.g. TMS_T2)
 #' @param output_sensor name of output snow sensor (default "snow")
 #' @param localities list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
-#' @param range maximal temperature range threshold for snow-covered sensor
-#' @param tmax maximal temperature threshold for snow-covered sensor
-#' @param days number of days to be used for moving-window for snow detection algorithm
+#' @param range maximal temperature range threshold for snow-covered sensor (default 2°C)
+#' @param tmax maximal temperature threshold for snow-covered sensor  (default 0.5°C)
+#' @param days number of days to be used for moving-window for snow detection algorithm (default 1)
 #' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
 #' @export
 #' @examples
@@ -57,7 +57,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     day_max_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
 
-    day_max_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
+    day_max_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per,lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
 
     (day_range_temp_prev < range) & (day_max_temp_prev < tmax) | (day_range_temp_next < range) & (day_max_temp_next < tmax)
