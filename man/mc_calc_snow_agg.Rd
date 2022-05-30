@@ -48,5 +48,6 @@ but accepts any sensor with TRUE/FLAST snow event detection. If \code{snow_senso
 on the locality missing, then locality is skipped.
 }
 \examples{
-snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")
+data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+mc_calc_snow_agg(data, "TMS_T2_snow")
 }

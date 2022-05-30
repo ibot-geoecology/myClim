@@ -23,11 +23,11 @@ mc_calc_snow(
 
 \item{localities}{list of locality_ids where snow sill be calculated; if NULL then all (default NULL)}
 
-\item{range}{maximal temperature range threshold for snow-covered sensor}
+\item{range}{maximal temperature range threshold for snow-covered sensor (default 2°C)}
 
-\item{tmax}{maximal temperature threshold for snow-covered sensor}
+\item{tmax}{maximal temperature threshold for snow-covered sensor  (default 0.5°C)}
 
-\item{days}{number of days to be used for moving-window for snow detection algorithm}
+\item{days}{number of days to be used for moving-window for snow detection algorithm (default 1)}
 }
 \value{
 myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
@@ -40,5 +40,5 @@ Function detects snow cover from temperature time-series. Temperature sensor is 
 The function returns vector of snow cover with same time-step as input data. To get number of days with snow cover and more info, apply \link{mc_calc_snow_agg}.
 }
 \examples{
-snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
+data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 }

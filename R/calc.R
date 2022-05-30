@@ -25,7 +25,7 @@
 #' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
 #' @export
 #' @examples
-#' snow <- mc_calc_snow(example_tomst_data1, "TMS_T2", output_sensor="TMS_T2_snow")
+#' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=2, tmax=0.5,days = 1) {
     myClim:::.common_stop_if_not_calc_format(data)
     .calc_check_maximal_day_step(data)
@@ -125,7 +125,8 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' 
 #' @export
 #' @examples
-#' snow_agg <- mc_calc_snow_agg(example_tomst_data1, "TMS_T2_snow")
+#' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+#' mc_calc_snow_agg(data, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=F) {
     myClim:::.common_stop_if_not_calc_format(data)
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
