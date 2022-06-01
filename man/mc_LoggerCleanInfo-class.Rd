@@ -19,6 +19,6 @@ Class for logger clean info
 
 \item{\code{count_disordered}}{count of records incorrectly ordered in time. In table, newer record is followed by the older.}
 
-\item{\code{rounded}}{§TRUE value if data rounded to nice time§}
+\item{\code{rounded}}{T/F indication whether myClim automatically rounded time series to the closes half (06, 12) e.g. 13:07 -> 13:00}
 }}
 

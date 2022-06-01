@@ -64,13 +64,13 @@ mc_data_sensors[[.model_const_SENSOR_DEND_T]]@max_value <- 60
 mc_data_sensors[[.model_const_SENSOR_DEND_T]]@plot_color <- "#2000EEB0"
 mc_data_sensors[[.model_const_SENSOR_DEND_T]]@plot_line_width <- 2
 
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMST_r_delta]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMST_r_delta]]@sensor_id <- .model_const_SENSOR_DEND_TOMST_r_delta
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMST_r_delta]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMST_r_delta]]@physical <- .model_const_PHYSICAL_TOMST_r_delta
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMST_r_delta]]@min_value <- 1279
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMST_r_delta]]@max_value <- 34000
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMST_r_delta]]@value_type <- .model_const_VALUE_TYPE_INTEGER
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@sensor_id <- .model_const_SENSOR_DEND_TOMSTdendro
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@physical <- .model_const_PHYSICAL_TOMSTdendro
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@min_value <- 1279
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@max_value <- 34000
+mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@value_type <- .model_const_VALUE_TYPE_INTEGER
 
 mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@sensor_id <- .model_const_SENSOR_HOBO_T_C
@@ -167,10 +167,10 @@ mc_data_sensors[[.model_const_SENSOR_RH_perc]]@physical <- .model_const_PHYSICAL
 mc_data_sensors[[.model_const_SENSOR_RH_perc]]@min_value <- 0
 mc_data_sensors[[.model_const_SENSOR_RH_perc]]@max_value <- 100
 
-mc_data_sensors[[.model_const_SENSOR_r_delta]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_r_delta]]@sensor_id <- .model_const_SENSOR_r_delta
-mc_data_sensors[[.model_const_SENSOR_r_delta]]@physical <- .model_const_PHYSICAL_l_um
-mc_data_sensors[[.model_const_SENSOR_r_delta]]@description <- "Radius difference"
+mc_data_sensors[[.model_const_SENSOR_dendro_l_um]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_dendro_l_um]]@sensor_id <- .model_const_SENSOR_dendro_l_um
+mc_data_sensors[[.model_const_SENSOR_dendro_l_um]]@physical <- .model_const_PHYSICAL_l_um
+mc_data_sensors[[.model_const_SENSOR_dendro_l_um]]@description <- "Radius difference"
 
 mc_data_sensors[[.model_const_SENSOR_VPD]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_VPD]]@sensor_id <- .model_const_SENSOR_VPD

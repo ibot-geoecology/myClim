@@ -96,6 +96,7 @@ Schema of myClim \strong{Prep-format}
 |           |             | @count_duplicits           |                       ||
 |           |             | @count_missed              |                       ||
 |           |             | @count_disordered          |                       ||
+|           |             | @rounded                   |                       ||
 |           |             +----------------------------+                       ||
 |           | $datetime   POSIXct vector                                       ||
 |           |             +---------------------------------------------------+||

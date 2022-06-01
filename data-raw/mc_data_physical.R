@@ -72,12 +72,12 @@ mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@units <- "TDT signal"
 mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@scale_coeff <- 1/3000
 
-mc_data_physical[[.model_const_PHYSICAL_TOMST_r_delta]] <- new("mc_Physical")
-mc_data_physical[[.model_const_PHYSICAL_TOMST_r_delta]]@name <- .model_const_PHYSICAL_TOMST_r_delta
-mc_data_physical[[.model_const_PHYSICAL_TOMST_r_delta]]@description <- "Radius difference raw units"
-mc_data_physical[[.model_const_PHYSICAL_TOMST_r_delta]]@units <- "raw units"
-mc_data_physical[[.model_const_PHYSICAL_TOMST_r_delta]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_TOMST_r_delta]]@scale_coeff <- 1/10000
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@name <- .model_const_PHYSICAL_TOMSTdendro
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@description <- "Radius difference raw units"
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@units <- "raw units"
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@scale_coeff <- 1/10000
 
 mc_data_physical[[.model_const_PHYSICAL_v]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_v]]@name <- .model_const_PHYSICAL_v

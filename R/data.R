@@ -49,7 +49,8 @@
 #' * count - result of `count` function [myClim::mc_agg()]
 #' * coverage - result of `coverage` function [myClim::mc_agg()]
 #' * DEND_T - temperature in TOMST dendrometer (°C)
-#' * DEND_TOMST_r_delta - trunk radius difference in TOMST dendrometer (raw units) [myClim::mc_calc_tomst_dendro()]
+#' * DEND_TOMSTdendro - change in stem size in TOMST dendrometer (raw units) [myClim::mc_calc_tomst_dendro()]
+#' * dendro_l_um - change in stem size (μm) [myClim::mc_calc_tomst_dendro()]
 #' * FDD - result of function [myClim::mc_calc_fdd()]
 #' * GDD - result of function [myClim::mc_calc_gdd()]
 #' * HOBO_RH - relative humidity in HOBO logger (%)
@@ -59,7 +60,6 @@
 #' * logical - universal sensor with logical values
 #' * moisture - volumetric soil moisture (ratio)
 #' * precipitation (mm)
-#' * r_delta - radius difference (μm) [myClim::mc_calc_tomst_dendro()]
 #' * real - universal sensor with real values
 #' * RH_perc - Relative humidity sensor (%)
 #' * snow_bool - result of function [myClim::mc_calc_snow()]
@@ -93,7 +93,7 @@
 #' * T_F - Temperature in °F
 #' * t_h - time in hours
 #' * TMSmoisture - TDT signal from TMS moisture sensor
-#' * TOMST_r_delta - radius difference in raw units
+#' * TOMSTdendro - radius difference in raw units
 #' * v - speed in m/s
 "mc_data_physical"
 

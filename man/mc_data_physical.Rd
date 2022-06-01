@@ -30,7 +30,7 @@ Currently supported physical quantities:
 \item T_F - Temperature in °F
 \item t_h - time in hours
 \item TMSmoisture - TDT signal from TMS moisture sensor
-\item TOMST_r_delta - radius difference in raw units
+\item TOMSTdendro - radius difference in raw units
 \item v - speed in m/s
 }
 }

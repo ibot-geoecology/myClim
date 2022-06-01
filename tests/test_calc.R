@@ -120,8 +120,8 @@ test_that("mc_calc_tomst_dendro", {
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
     test_calc_data_format(calc_data)
-    expect_equal(calc_data$localities$`92192250`$sensors$r_delta$values[[1]],
-                 (calc_data$localities$`92192250`$sensors$DEND_TOMST_r_delta$values[[1]] - 1279) * (8890 / (34000 - 1279)))
+    expect_equal(calc_data$localities$`92192250`$sensors$dendro_l_um$values[[1]],
+                 (calc_data$localities$`92192250`$sensors$DEND_TOMSTdendro$values[[1]] - 1279) * (8890 / (34000 - 1279)))
 })
 
 test_that("mc_calc_tomst_dendro", {
@@ -130,8 +130,8 @@ test_that("mc_calc_tomst_dendro", {
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
     test_calc_data_format(calc_data)
-    expect_equal(calc_data$localities$`92192250`$sensors$r_delta$values[[1]],
-                 (calc_data$localities$`92192250`$sensors$DEND_TOMST_r_delta$values[[1]] - 1279) * (8890 / (34000 - 1279)))
+    expect_equal(calc_data$localities$`92192250`$sensors$dendro_l_um$values[[1]],
+                 (calc_data$localities$`92192250`$sensors$DEND_TOMSTdendro$values[[1]] - 1279) * (8890 / (34000 - 1279)))
 })
 
 test_that("mc_calc_vpd", {

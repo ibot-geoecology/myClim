@@ -6,25 +6,25 @@
 \usage{
 mc_calc_tomst_dendro(
   data,
-  dendro_sensor = myClim:::.model_const_SENSOR_DEND_TOMST_r_delta,
-  output_sensor = myClim:::.model_const_SENSOR_r_delta,
+  dendro_sensor = myClim:::.model_const_SENSOR_DEND_TOMSTdendro,
+  output_sensor = myClim:::.model_const_SENSOR_dendro_l_um,
   localities = NULL
 )
 }
 \arguments{
 \item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
-\item{dendro_sensor}{name of radius difference sensor to be converted from raw to micrometers (default "DEND_TOMST_r_delta") see \code{names(mc_data_sensors)}}
+\item{dendro_sensor}{name of change in stem size sensor to be converted from raw to micrometers (default "DEND_TOMSTdendro") see \code{names(mc_data_sensors)}}
 
-\item{output_sensor}{name of new snow sensor (default "r_delta")}
+\item{output_sensor}{name of new change in stem size sensor (default "dendro_l_um")}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 }
 \value{
-myClim object same as input but with added r_delta sensor
+myClim object same as input but with added dendro_l_um sensor
 }
 \description{
-This function convert differences of trunk radius fram raw TOMST units to micrometers.
+This function convert change in stem size fram raw TOMST units to micrometers.
 }
 \examples{
 calc_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
