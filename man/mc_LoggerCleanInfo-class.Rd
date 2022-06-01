@@ -18,5 +18,7 @@ Class for logger clean info
 \item{\code{count_missed}}{count of missing records; Period between the records should be the same length. If not, than missing.}
 
 \item{\code{count_disordered}}{count of records incorrectly ordered in time. In table, newer record is followed by the older.}
+
+\item{\code{rounded}}{§TRUE value if data rounded to nice time§}
 }}
 

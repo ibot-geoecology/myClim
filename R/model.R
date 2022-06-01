@@ -203,26 +203,38 @@ setMethod("initialize",
           })
 
 #' Class for logger metadata
-#' @slot type of logger (TMS, ThermoDatalogger, HOBO, ibutton)
+#' @slot type of logger (TMS, ThermoDatalogger, Dendrometer, HOBO)
 #' @slot serial_number serial number of the logger 
+#' @slot step §Time step of microclimatic data series in minutes defined by user.
+#' In [mc_prep_clean()] function is used instead of auto-detected value.§
 #' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               slots = c(type = "character",
-                                        serial_number = "character"),)
+                                        serial_number = "character",
+                                        step = "numeric"))
+
+setMethod("initialize",
+          "mc_LoggerMetadata",
+          function(.Object) {
+              .Object@step <- NA_integer_
+              return(.Object)
+          })
 
 #' Class for logger clean info
 #' @slot step Time step of microclimatic data series in minutes
 #' @slot count_duplicits count of duplicated records - values with same date
 #' @slot count_missed count of missing records; Period between the records should be the same length. If not, than missing. 
 #' @slot count_disordered count of records incorrectly ordered in time. In table, newer record is followed by the older. 
+#' @slot rounded §TRUE value if data rounded to nice time§
 #' @export mc_LoggerCleanInfo
 #' @exportClass mc_LoggerCleanInfo
 mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
                                slots = c(step = "numeric",
                                          count_duplicits = "numeric",
                                          count_missed = "numeric",
-                                         count_disordered = "numeric"))
+                                         count_disordered = "numeric",
+                                         rounded = "logical"))
 
 setMethod("initialize",
           "mc_LoggerCleanInfo",
@@ -231,6 +243,7 @@ setMethod("initialize",
               .Object@count_duplicits <- NA_integer_
               .Object@count_missed <- NA_integer_
               .Object@count_disordered <- NA_integer_
+              .Object@rounded <- FALSE
               return(.Object)
           })
 
@@ -434,6 +447,13 @@ setGeneric(
   function(object, path){
     standardGeneric(".model_get_serial_number_from_file")
   }
+)
+
+setGeneric(
+    ".model_edit_data",
+    function(object, data_table){
+        standardGeneric(".model_edit_data")
+    }
 )
 
 # methods ================================================================================
@@ -719,6 +739,30 @@ setMethod(
             return(callNextMethod())
         }
         return(parts[[1, 2]])
+    }
+)
+
+setMethod(
+    ".model_edit_data",
+    "mc_DataFormat",
+    function(object, data_table) {
+        data_table
+    }
+)
+
+setMethod(
+    ".model_edit_data",
+    "mc_HOBODataFormat",
+    function(object, data_table) {
+        last_value_column <- max(unlist(object@columns))
+        if(ncol(data_table) == last_value_column) {
+            return(data_table)
+        }
+        na_values <- purrr::map(object@columns, ~ is.na(data_table[[.x]]))
+        na_values <- purrr::reduce(na_values, `&`)
+        logged_values <- purrr::map((last_value_column+1):ncol(data_table), ~ data_table[[.x]] == "Logged")
+        logged_values <- purrr::reduce(logged_values, `|`)
+        data_table[!(na_values & logged_values),]
     }
 )
 

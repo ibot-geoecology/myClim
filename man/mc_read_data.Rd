@@ -22,6 +22,8 @@ optional columns:
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
 Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. Ignored for TOMST data format
+\item step - §Time step of microclimatic data series in minutes defined by user.
+In \code{\link[=mc_prep_clean]{mc_prep_clean()}} function is used instead of auto-detected value.§ (default NA)
 }}
 
 \item{localities_table}{path to csv file or data.frame. Localities table is optional (default NULL).

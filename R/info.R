@@ -55,6 +55,7 @@ mc_info_count <- function(data) {
 #' * count_duplicits - number of duplicated records (identical time and value)
 #' * count_missed - number of missing records (logger outage in time it should record)
 #' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
+#' * rounded - §detect if time was rounded to nice one§
 #' @seealso [myClim::mc_prep_clean()]
 #' @export
 mc_info_clean <- function(data) {
@@ -67,7 +68,8 @@ mc_info_clean <- function(data) {
              logger$clean_info@step,
              logger$clean_info@count_duplicits,
              logger$clean_info@count_missed,
-             logger$clean_info@count_disordered)
+             logger$clean_info@count_disordered,
+             logger$clean_info@rounded)
     }
 
     locality_function <- function(locality) {
@@ -81,7 +83,8 @@ mc_info_clean <- function(data) {
                start_date=myClim:::.common_as_utc_posixct(unlist(columns[[3]])),
                end_date=myClim:::.common_as_utc_posixct(unlist(columns[[4]])),
                step=unlist(columns[[5]]), count_duplicits=unlist(columns[[6]]),
-               count_missed=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]))
+               count_missed=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]),
+               rounded=unlist(columns[[9]]))
 }
 
 

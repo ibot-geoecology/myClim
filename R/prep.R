@@ -9,18 +9,23 @@
 #' Cleaning datetime series
 #'
 #' @description
-#' Function 'mc_prep_clean' check time-series in myClim object in prep-format for missing, duplicated, and disordered records and regularize microclimatic time-series to constant time-step rounded to the nearest interval. Duplicit records are removed and missing values are filled with NA's.
-
+#' Function 'mc_prep_clean' check time-series in myClim object in prep-format for missing, duplicated,
+#' and disordered records and regularize microclimatic time-series to constant time-step rounded to the nearest interval.
+#' Duplicit records are removed and missing values are filled with NA's.
+#'
 #' See details.
-#' 
 #' 
 #' @details
 #' Processing the data with `mc_prep_clean` is a mandatory step required for further data handling in `myClim` library.
 #' 
 #' This function guarantee that all time series are in chronological order and have regular time-step, without duplicated records.
-#' `mc_prep_clean` identify time-step from input time series based on last 100 records. In case of irregular time series, function returns warning and skip series.
+#' §Function `mc_prep_clean` use time-step from metadata of logger[myClim::mc_LoggerMetadata]. If time-step is NA,
+#' than identify it from input time series based on last 100 records.§ In case of irregular time series, function returns warning and skip series.
 #' 
-#' In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30) microclimatic records are not modified but only shifted).   
+#' In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time
+#' and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step
+#' c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30)
+#' microclimatic records are not modified but only shifted). §Maximal rounding of time series is 30 minutes.§
 #' 
 #' @param data myClim object in Prep-format (output of `mc_read` functions family) see e.g. [myClim::mc_read_files()]
 #' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
@@ -31,11 +36,8 @@
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_source)
 mc_prep_clean <- function(data, silent=FALSE) {
-    logger_function <- function(logger) {
-        .prep_clean_logger(logger)
-    }
     locality_function <- function(locality) {
-        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        locality$loggers <- purrr::map(locality$loggers, .prep_clean_logger)
         locality
     }
     result <- purrr::map(data, locality_function)
@@ -55,14 +57,19 @@ mc_prep_clean <- function(data, silent=FALSE) {
 }
 
 .prep_clean_logger <- function(logger) {
-    logger$clean_info@step <- .prep_detect_step_minutes(logger$datetime)
+    if(is.na(logger$metadata@step)) {
+        logger$clean_info@step <- .prep_detect_step_minutes(logger$datetime)
+    } else {
+        logger$clean_info@step <- logger$metadata@step
+    }
     if(is.na(logger$clean_info@step)) {
         warning(stringr::str_glue("step cannot be detected for logger {logger$metadata@serial_number} - skip"))
         return(logger)
     }
-    step_seconds <- logger$clean_info@step * 60
-    logger$datetime <- myClim:::.common_as_utc_posixct((as.numeric(logger$datetime) + logger$clean_info@step * 30) %/% step_seconds * step_seconds)
-    logger <- .prep_clean_write_info(logger)
+    new_datetime <- .prep_get_rounded_datetime(logger)
+    rounded <- !all(new_datetime == logger$datetime)
+    logger$datetime <- new_datetime
+    logger <- .prep_clean_write_info(logger, rounded)
     logger <- .prep_clean_edit_series(logger)
     logger
 }
@@ -74,7 +81,23 @@ mc_prep_clean <- function(data, silent=FALSE) {
     round(unname(quantile(diff_datetime, p=0.5, type=1)/60))
 }
 
-.prep_clean_write_info <- function(logger) {
+.prep_get_rounded_datetime <- function(logger) {
+    step_seconds <- logger$clean_info@step * 60
+    datetime_seconds <- as.numeric(logger$datetime)
+    shift <- 0
+    if(logger$clean_info@step > 30) {
+        last_datetime <- dplyr::last(datetime_seconds)
+        new_last_datetime <- (last_datetime + logger$clean_info@step * 30) %/% step_seconds * step_seconds
+        diff <- new_last_datetime - last_datetime
+        diff_rounding <- 30 * 60
+        if(abs(diff) > diff_rounding %/% 2) {
+            shift <- (diff + diff_rounding %/% 2) %/% diff_rounding * diff_rounding
+        }
+    }
+    myClim:::.common_as_utc_posixct((datetime_seconds + logger$clean_info@step * 30) %/% step_seconds * step_seconds) - shift
+}
+
+.prep_clean_write_info <- function(logger, rounded) {
     diff_datetime <- diff(as.numeric(logger$datetime))
     logger$clean_info@count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
     sorted_datetime <- sort(as.numeric(logger$datetime))
@@ -82,6 +105,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger$clean_info@count_duplicits <- length(purrr::keep(diff_datetime, function(x) x == 0))
     right_count_datetime <- diff(c(sorted_datetime[[1]], tail(sorted_datetime, n=1))) %/% 60 %/% logger$clean_info@step + 1
     logger$clean_info@count_missed <- right_count_datetime - (length(logger$datetime) - logger$clean_info@count_duplicits)
+    logger$clean_info@rounded <- rounded
     logger
 }
 

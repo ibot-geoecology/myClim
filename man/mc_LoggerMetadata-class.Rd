@@ -11,8 +11,11 @@ Class for logger metadata
 \section{Slots}{
 
 \describe{
-\item{\code{type}}{of logger (TMS, ThermoDatalogger, HOBO, ibutton)}
+\item{\code{type}}{of logger (TMS, ThermoDatalogger, Dendrometer, HOBO)}
 
 \item{\code{serial_number}}{serial number of the logger}
+
+\item{\code{step}}{§Time step of microclimatic data series in minutes defined by user.
+In \code{\link[=mc_prep_clean]{mc_prep_clean()}} function is used instead of auto-detected value.§}
 }}
 

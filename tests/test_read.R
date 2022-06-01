@@ -10,11 +10,13 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$A6W79$loggers[[1]]$sensors), 4)
     expect_equal(data$A6W79$loggers[[1]]$metadata@type, "TMS")
     expect_equal(data$A6W79$loggers[[1]]$metadata@serial_number, "94184102")
+    expect_equal(data$A6W79$loggers[[1]]$metadata@step, 15)
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 75)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors), 4)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1), 4)
     expect_equal(length(data$A1E05$loggers[[1]]$datetime), 11)
     expect_equal(length(data$A1E05$loggers[[1]]$sensors), 1)
+    expect_true(is.na(data$A1E05$loggers[[1]]$metadata@step))
     expect_true(is.na(data$A1E05$metadata@altitude))
 })
 
@@ -75,6 +77,10 @@ test_that("mc_read_data HOBO", {
     expect_true(myClim:::.model_const_SENSOR_HOBO_T_F %in% names(data$C$loggers[[1]]$sensors))
     expect_equal(length(data$A$loggers[[1]]$sensors), 2)
     expect_equal(length(data$I$loggers[[1]]$sensors), 1)
+    cleaned_data <- mc_prep_clean(data, silent = T)
+    clean_info <- mc_info_clean(cleaned_data)
+    expect_true(all(clean_info$count_duplicits == 0))
+    expect_true(all(clean_info$count_missed == 0))
 })
 
 test_that("mc_read_data HOBO skip wrong datetime", {

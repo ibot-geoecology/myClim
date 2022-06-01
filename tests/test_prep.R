@@ -22,10 +22,30 @@ test_that("mc_prep_clean", {
     expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$clean_info@step, 15)
 })
 
+test_that("mc_prep_clean defined step", {
+    data <- mc_read_files("data/clean-datetime_step", "TOMST", step=30)
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@step, 30)
+    expect_equal(length(cleaned_data[["94184102"]]$loggers[[1]]$datetime), 25)
+})
+
+test_that("mc_prep_clean rounding", {
+    data <- mc_read_files("data/clean-rounding", "TOMST_join")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    test_prep_data_format(cleaned_data)
+    expect_equal(cleaned_data$A1E01_TS$loggers[[1]]$datetime, c(lubridate::ymd_hm("2018-10-18 09:00"),
+                                                                lubridate::ymd_hm("2018-10-18 11:00"),
+                                                                lubridate::ymd_hm("2018-10-18 13:00"),
+                                                                lubridate::ymd_hm("2018-10-18 15:00"),
+                                                                lubridate::ymd_hm("2018-10-18 17:00"),
+                                                                lubridate::ymd_hm("2018-10-18 19:00")))
+})
+
 test_that("mc_prep_clean 1.5 hour step", {
     data <- mc_read_files("data/HOBO/6265.csv", "HOBO", date_format = "%m/%d/%y %I:%M:%S %p")
     cleaned_data <- mc_prep_clean(data, silent=T)
     test_prep_data_format(cleaned_data)
+    expect_equal(data$`20396265`$loggers[[1]]$datetime, cleaned_data$`20396265`$loggers[[1]]$datetime)
 })
 
 test_that("mc_prep_clean one record", {

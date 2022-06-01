@@ -9,22 +9,24 @@ mc_read_files(
   dataformat_name,
   recursive = TRUE,
   date_format = NA_character_,
-  tz_offset = NA_integer_
+  tz_offset = NA_integer_,
+  step = NA_integer_
 )
 }
 \arguments{
 \item{paths}{vector of paths to files or directories}
 
-\item{dataformat_name}{character - data format of logger one of (TOMST, TOMST_join) see \code{names(mc_data_formats)}}
+\item{dataformat_name}{data format of logger one of \code{names(mc_data_formats)} see \code{names(mc_data_formats)}}
 
-\item{recursive}{logical - recursive search in sub-directories (default TRUE)}
+\item{recursive}{recursive search in sub-directories (default TRUE)}
 
 \item{date_format}{format of date in your hobo files e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA). Required for HOBO files.
 For TMS files ignored, there is fix date format. see \link{mc_data_formats}}
 
-\item{tz_offset}{\itemize{
-\item timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
-}}
+\item{tz_offset}{timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)}
+
+\item{step}{§Time step of microclimatic data series in minutes defined by user.
+In \code{\link[=mc_prep_clean]{mc_prep_clean()}} function is used instead of auto-detected value.§ (default NA)}
 }
 \value{
 myClim object in Prep-format see \link{myClim-package}

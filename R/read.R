@@ -21,18 +21,20 @@
 #' @seealso [myClim::mc_DataFormat]
 #'
 #' @param paths vector of paths to files or directories
-#' @param dataformat_name character - data format of logger one of (TOMST, TOMST_join) see `names(mc_data_formats)`
-#' @param recursive logical - recursive search in sub-directories (default TRUE)
+#' @param dataformat_name data format of logger one of `names(mc_data_formats)` see `names(mc_data_formats)`
+#' @param recursive recursive search in sub-directories (default TRUE)
 #' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA). Required for HOBO files. 
 #' For TMS files ignored, there is fix date format. see [mc_data_formats]
-#' @param tz_offset - timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
+#' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
+#' @param step §Time step of microclimatic data series in minutes defined by user.
+#' In [mc_prep_clean()] function is used instead of auto-detected value.§ (default NA)
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
 #' \dontrun{
 #' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 #' }
-mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA_character_, tz_offset=NA_integer_) {
+mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA_character_, tz_offset=NA_integer_, step=NA_integer_) {
     if(all(dir.exists(paths))) {
         files <- .read_get_csv_files_from_directory(paths, recursive)
     } else if(any(dir.exists(paths))) {
@@ -41,7 +43,8 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
         files <- paths
     }
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name,
-                              serial_number=NA_character_, date_format=date_format, tz_offset=tz_offset)
+                              serial_number=NA_character_, date_format=date_format, tz_offset=tz_offset,
+                              step=step)
     mc_read_data(files_table)
 }
 
@@ -74,6 +77,8 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. Ignored for TOMST data format
+#' * step - §Time step of microclimatic data series in minutes defined by user.
+#' In [mc_prep_clean()] function is used instead of auto-detected value.§ (default NA)
 #'
 #' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
 #' object contains 5 columns:
@@ -206,19 +211,18 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 .read_get_output_data <- function(files_table, localities, data_formats) {
     files_table$index <- 1:nrow(files_table)
     groupped_files <- dplyr::group_by(files_table, locality_id)
-    row_function <- function(path, data_format, serial_number) {
-        .read_logger(path, data_format, serial_number)
-    }
     locality_function <- function(.x, .y) {
         if(.y$locality_id %in% names(localities)) {
             locality <- localities[[.y$locality_id]]
         } else {
             locality <- .read_get_new_locality(.y$locality_id)
         }
-        parameters <- list(path = .x$path,
+        step <- if("step" %in% colnames(.x)) .x$step else NA_integer_
+        parameters <- list(filename = .x$path,
                            data_format = data_formats[.x$index],
-                           serial_number = .x$serial_number)
-        locality$loggers <- purrr::pmap(parameters, row_function)
+                           serial_number = .x$serial_number,
+                           step = step)
+        locality$loggers <- purrr::pmap(parameters, .read_logger)
         locality$loggers <- purrr::discard(locality$loggers, ~ is.null(.x))
         locality
     }
@@ -243,8 +247,9 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     list(metadata = metadata, loggers=list())
 }
 
-.read_logger <- function(filename, data_format, serial_number) {
+.read_logger <- function(filename, data_format, serial_number, step) {
     data_table <- .read_get_data_from_file(filename, data_format)
+    data_table <- myClim:::.model_edit_data(data_format, data_table)
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
     if(any(is.na(datetime))) {
@@ -255,7 +260,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         datetime <- datetime - data_format@tz_offset * 60
     }
     sensors <- .read_get_sensors_from_data_format(data_table, data_format)
-    .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type)
+    .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step)
 }
 
 .read_get_data_from_file <- function(filename, data_format, nrows=-1) {
@@ -285,10 +290,11 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     as.data.frame(purrr::map(seq(ncol(data_table)), values_function))
 }
 
-.read_get_new_logger <- function(datetime, sensors, serial_number=NA_character_, logger_type=NA_character_) {
+.read_get_new_logger <- function(datetime, sensors, serial_number=NA_character_, logger_type=NA_character_, step=NA_integer_) {
     metadata <- new("mc_LoggerMetadata")
     metadata@serial_number <- serial_number
     metadata@type <- logger_type
+    metadata@step <- step
     list(metadata = metadata,
          clean_info = new("mc_LoggerCleanInfo"),
          datetime = datetime,

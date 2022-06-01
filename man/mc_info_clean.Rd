@@ -20,6 +20,7 @@ data.frame with columns:
 \item count_duplicits - number of duplicated records (identical time and value)
 \item count_missed - number of missing records (logger outage in time it should record)
 \item count_disordered - number of records incorrectly ordered in time (newer followed by older)
+\item rounded - §detect if time was rounded to nice one§
 }
 }
 \description{

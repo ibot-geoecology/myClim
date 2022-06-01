@@ -40,3 +40,15 @@ test_that(".model_load_data_format_params_from_data HOBO", {
     expect_equal(hobo_format@tz_offset, 120)
     expect_equal(hobo_format@columns, list(HOBO_T_C=3, HOBO_RH=4))
 })
+
+test_that(".model_edit_data HOBO", {
+    hobo_format <- mc_data_formats$HOBO
+    hobo_format@columns <- list(HOBO_T_C=3, HOBO_RH=4)
+    hobo_format@skip <- 2
+    hobo_format@separator <- ","
+    path <- "data/HOBO/20024354_comma.csv"
+    data_table <- myClim:::.read_get_data_from_file(path, hobo_format)
+    test_function <- if(exists(".model_edit_data")) .model_edit_data else myClim:::.model_edit_data
+    new_data_table <- test_function(hobo_format, data_table)
+    expect_equal(nrow(data_table) - nrow(new_data_table), 3)
+})
