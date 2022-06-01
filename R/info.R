@@ -55,7 +55,7 @@ mc_info_count <- function(data) {
 #' * count_duplicits - number of duplicated records (identical time and value)
 #' * count_missed - number of missing records (logger outage in time it should record)
 #' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
-#' * rounded - §detect if time was rounded to nice one§
+#' * rounded - T/F indication whether myClim automatically rounded time series to the closes half (06, 12) e.g. 13:07 -> 13:00 
 #' @seealso [myClim::mc_prep_clean()]
 #' @export
 mc_info_clean <- function(data) {

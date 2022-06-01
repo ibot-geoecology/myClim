@@ -92,6 +92,7 @@
 #' |           |             | @count_duplicits           |                       ||
 #' |           |             | @count_missed              |                       ||
 #' |           |             | @count_disordered          |                       ||
+#' |           |             | @rounded                   |                       ||
 #' |           |             +----------------------------+                       ||
 #' |           | $datetime   POSIXct vector                                       ||
 #' |           |             +---------------------------------------------------+||

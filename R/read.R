@@ -26,8 +26,8 @@
 #' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA). Required for HOBO files. 
 #' For TMS files ignored, there is fix date format. see [mc_data_formats]
 #' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
-#' @param step §Time step of microclimatic data series in minutes defined by user.
-#' In [mc_prep_clean()] function is used instead of auto-detected value.§ (default NA)
+#' @param step Time step of microclimatic time-series in minutes. When provided, then is used in [mc_prep_clean] instead of automatic stepd detection. 
+#' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
@@ -77,8 +77,8 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. Ignored for TOMST data format
-#' * step - §Time step of microclimatic data series in minutes defined by user.
-#' In [mc_prep_clean()] function is used instead of auto-detected value.§ (default NA)
+#' * step - Time step of microclimatic time-series in minutes. When provided, then used in [mc_prep_clean] 
+#' instead of automatic step detection.
 #'
 #' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
 #' object contains 5 columns:
