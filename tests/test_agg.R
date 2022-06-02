@@ -195,3 +195,16 @@ test_that("mc_agg custom", {
     expect_true(is.na(agg_data$metadata@step))
 })
 
+test_that("mc_agg shifted series", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path,                                    ~locality_id, ~data_format, ~serial_number,
+        "data/clean-rounding/CZ2_HRADEC_TS.csv",  "CZ2_HRADEC", "TOMST_join",  NA_character_,
+        "data/clean-rounding/CZ2_HRADEC_TMS.csv", "CZ2_HRADEC", "TOMST_join",  NA_character_,
+    ))
+    data <- mc_read_data(files_table)
+    cleaned_data <- mc_prep_clean(data, silent = TRUE)
+    expect_equal(cleaned_data$CZ2_HRADEC$loggers[[1]]$clean_info@step, cleaned_data$CZ2_HRADEC$loggers[[2]]$clean_info@step)
+    expect_error(agg_data <- mc_agg(cleaned_data))
+    agg_data <- mc_agg(cleaned_data, "mean", "2 hours")
+    expect_false(all(is.na(agg_data$localities$CZ2_HRADEC$sensors$TM_T_mean$values)))
+})

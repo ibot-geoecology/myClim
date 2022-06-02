@@ -171,7 +171,7 @@ mc_MainMetadata <- setClass("mc_MainMetadata",
 #' Class for locality metadata
 #' @details When reading without metadata, then locality is named after file
 #' where the data come from, or after the sensor id where the data come form.  
-#' @slot id name of locality
+#' @slot locality_id name of locality
 #' @slot altitude of locality
 #' @slot lat_wgs84 latitude of locality in WGS-84
 #' @slot lon_wgs84 longitude of locality in WGS-84

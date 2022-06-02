@@ -15,6 +15,7 @@
 .agg_const_MESSAGE_CUSTOM_WRONG_FORMAT <- "Prameter {parameter_name} is in wrong format. Required format is 'mm-dd' or 'mm-dd H:MM'."
 .agg_const_MESSAGE_EMPTY_DATA <- "Data are empty."
 .agg_const_MESSAGE_WRONG_PREVIOUS_PERIOD <- "It is not possible aggregate all or custom data."
+.agg_const_MESSAGE_WRONG_SHIFT <- "Shift of time-series in {locality$metadata@locality_id} locality is different."
 
 #' Aggregate data by function
 #'
@@ -275,10 +276,10 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         }
         return(data$metadata@step_text)
     }
-    locality_function <- function(locality) {
+    step_locality_function <- function(locality) {
         purrr::map_int(locality$loggers, function(.x) as.integer(.x$clean_info@step))
     }
-    steps <- as.numeric(purrr::flatten(purrr::map(data, locality_function)))
+    steps <- as.numeric(purrr::flatten(purrr::map(data, step_locality_function)))
     if(any(is.na(steps))) {
         stop("All steps must be set. Cleaning is required.")
     }
@@ -288,6 +289,13 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(length(steps) > 1 && var(steps) != 0) {
         stop("All steps in loggers must be same.")
     }
+    shift_locality_function <- function(locality) {
+        shifts <- purrr::map_int(locality$loggers, function(.x) as.integer(.x$datetime[[1]]) %% as.integer(.x$clean_info@step * 60))
+        if(length(shifts) > 1 && var(shifts) != 0) {
+            stop(stringr::str_glue(.agg_const_MESSAGE_WRONG_SHIFT))
+        }
+    }
+    purrr::walk(data, shift_locality_function)
     stringr::str_glue("{dplyr::first(steps)} min")
 }
 
@@ -354,10 +362,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         return(item)
     }
     if(is.null(use_intervals)) {
-        by_aggregate <- list(step=cut(item$datetime, breaks=period, start.on.monday = TRUE))
-        agg_table <- data.frame(datetime=item$datetime, by_aggregate)
-        groupped_table <- dplyr::group_by(agg_table, step)
-        item$datetime <- dplyr::summarise(groupped_table, x=min(datetime))$x
+        start_datetimes <- lubridate::floor_date(item$datetime, period)
     } else {
         if (period == .agg_const_PERIOD_ALL) {
             item <- .agg_extend_item_to_all_interval(item, use_intervals, original_step_text)
@@ -366,10 +371,10 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
             count <- sum(lubridate::`%within%`(item$datetime, interval))
             rep(lubridate::int_start(interval), count)
         }
-        interval_from_datetime <- myClim:::.common_as_utc_posixct(unlist(purrr::map(use_intervals, interval_function)))
-        by_aggregate <- list(step=as.factor(interval_from_datetime))
-        item$datetime <- unique(interval_from_datetime)
+        start_datetimes <- myClim:::.common_as_utc_posixct(unlist(purrr::map(use_intervals, interval_function)))
     }
+    item$datetime <- unique(start_datetimes)
+    by_aggregate <- list(step=as.factor(start_datetimes))
     sensor_function <- function(sensor) {
         functions <- .agg_get_functions(sensor, fun, percentiles, na.rm)
         .agg_agregate_sensor(sensor, functions, by_aggregate)

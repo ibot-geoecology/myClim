@@ -15,7 +15,7 @@ where the data come from, or after the sensor id where the data come form.
 \section{Slots}{
 
 \describe{
-\item{\code{id}}{name of locality}
+\item{\code{locality_id}}{name of locality}
 
 \item{\code{altitude}}{of locality}
 
