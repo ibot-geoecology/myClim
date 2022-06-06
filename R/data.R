@@ -38,6 +38,19 @@
 #' @seealso [myClim::mc_DataFormat], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 "mc_data_formats"
 
+#' §Default heights of sensors
+#'
+#' This table is used for set height in metadata of sensor during reading source data.
+#'
+#' data.frame with columns:
+#' - logger_type
+#' - sensor_name
+#' - height - character representation of height
+#' - suffix - suffix for sensor_name. If suffix is NA, then sensor_name is original.
+#'
+#' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]§
+"mc_data_heights"
+
 #' Sensors definition.
 #' 
 #' R object of class environment with the definitions of (micro)climatic sensors.

@@ -19,8 +19,6 @@ Sensor definitions intslevesl are stored in \link{mc_data_sensors}.
 
 \item{\code{description}}{character info}
 
-\item{\code{default_height}}{default height of sensor in m (default NA)}
-
 \item{\code{value_type}}{type of values (real, integer, logical) (default real)}
 
 \item{\code{min_value}}{minimal value (default NA)}

@@ -20,7 +20,7 @@ Through \code{sensor_id} myClim assign pre-deined physicyl units or plotting col
 
 \item{\code{name}}{character, could be same as \code{sensor_id} but also defined by function or user.}
 
-\item{\code{height}}{in meters}
+\item{\code{height}}{character}
 
 \item{\code{calibrated}}{logical - detect if sensor is calibrated}
 }}

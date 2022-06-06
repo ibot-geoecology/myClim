@@ -64,6 +64,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
+.model_const_LOGGER_TOMST_TMS_L45 <- "TMS_L45"
 .model_const_LOGGER_TOMST_THERMODATALOGGER <- "ThermoDatalogger"
 .model_const_LOGGER_TOMST_DENDROMETER <- "Dendrometer"
 .model_const_LOGGER_HOBO <- "HOBO"
@@ -87,7 +88,6 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 #' @slot logger name of logger (TMS, ThermoDatalogger, ...)
 #' @slot physical unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)
 #' @slot description character info
-#' @slot default_height default height of sensor in m (default NA)
 #' @slot value_type type of values (real, integer, logical) (default real)
 #' @slot min_value minimal value (default NA)
 #' @slot max_value maximal value (default NA)
@@ -101,7 +101,6 @@ mc_Sensor <- setClass("mc_Sensor",
                                 logger = "character",
                                 physical = "character",
                                 description = "character",
-                                default_height = "numeric",
                                 value_type = "character",
                                 min_value = "numeric",
                                 max_value = "numeric",
@@ -113,7 +112,6 @@ setMethod(f="initialize",
           definition=function(.Object) {
               .Object@logger <- NA_character_
               .Object@physical <- NA_character_
-              .Object@default_height <- NA_real_
               .Object@value_type <- .model_const_VALUE_TYPE_REAL
               .Object@min_value <- NA_real_
               .Object@max_value <- NA_real_
@@ -254,7 +252,7 @@ setMethod("initialize",
 #' Through `sensor_id` myClim assign pre-deined physicyl units or plotting colors see [mc_Sensor].  
 #' @slot sensor_id unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...) [mc_data_sensors] e.g. TMS_T1, TMS_TMSmoisture, snow_fresh...
 #' @slot name character, could be same as `sensor_id` but also defined by function or user.  
-#' @slot height in meters
+#' @slot height character
 #' @slot calibrated logical - detect if sensor is calibrated
 #' @export mc_SensorMetadata
 #' @exportClass mc_SensorMetadata
@@ -262,13 +260,13 @@ setMethod("initialize",
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
                               slots = c(sensor_id = "character",
                                         name = "character",
-                                        height = "numeric",
+                                        height = "character",
                                         calibrated = "logical"))
 
 setMethod("initialize",
           "mc_SensorMetadata",
           function(.Object) {
-              .Object@height <- NA_integer_
+              .Object@height <- NA_character_
               .Object@calibrated <- FALSE
               return(.Object)
           })
@@ -367,7 +365,7 @@ setMethod(
 #' @slot data_row_pattern character pattern for detecting right file format (default NA)
 #'
 #' If data_row_pattern is NA, then file format is not validated.
-#' @slot logger_type type of logger: TMS, ThermoDatalogger (default NA)
+#' @slot logger_type type of logger: TMS, TMS_L45, ThermoDatalogger, Dendrometer, HOBO, ... (default NA)
 #' @slot tz_offset timezone offset in minutes from UTC in source data (default 0)
 #' @export mc_DataFormat
 #' @exportClass mc_DataFormat
@@ -527,14 +525,17 @@ setMethod(
     if(all(is.na(data[[tms_columns[[.model_const_SENSOR_TMS_T2]]]]))) {
         if(all(data[[dendro_columns[[.model_const_SENSOR_DEND_TOMSTdendro]]]] == .model_const_TOMST_THERMODATALOGGER_VALUE)) {
             object@columns <- tm_columns
-            object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
+            logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
         } else {
             object@columns <- dendro_columns
-            object@logger_type <- .model_const_LOGGER_TOMST_DENDROMETER
+            logger_type <- .model_const_LOGGER_TOMST_DENDROMETER
         }
     } else {
         object@columns <- tms_columns
-        object@logger_type <- .model_const_LOGGER_TOMST_TMS
+        logger_type <- .model_const_LOGGER_TOMST_TMS
+    }
+    if(is.na(object@logger_type)) {
+        object@logger_type <- logger_type
     }
     object
 }
@@ -564,10 +565,14 @@ setMethod(
         all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
     if(!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals)) {
         object@columns <- tmj_columns
-        object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
+        if(is.na(object@logger_type)) {
+            object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
+        }
         return(object)
     }
-    object@logger_type <- .model_const_LOGGER_TOMST_TMS
+    if(is.na(object@logger_type)) {
+        object@logger_type <- .model_const_LOGGER_TOMST_TMS
+    }
     moisture <- data[[tmsj_columns[[.model_const_SENSOR_moisture]]]]
     if(!any(is.na(moisture)) && all(moisture == 0)) {
         object@columns <- within(tmsj_columns, rm(moisture))

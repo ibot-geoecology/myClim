@@ -71,8 +71,9 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
         .calc_wrong_physical_error_function(sensor_name, sensor_physical)
     }
     .calc_warn_if_overwriting(locality, output_sensor_name)
+    height <- locality$sensors[[sensor_name]]$metadata@height
     values <- values_function(locality, sensor_name, ...)
-    locality$sensors[[output_sensor_name]] <- myClim:::.common_get_new_sensor(output_sensor_id, output_sensor_name, values=values)
+    locality$sensors[[output_sensor_name]] <- myClim:::.common_get_new_sensor(output_sensor_id, output_sensor_name, values=values, height=height)
     return(locality)
 }
 
@@ -278,8 +279,10 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
     }
     values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
+    height <- locality$sensors[[moist_sensor]]$metadata@height
     locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_moisture, output_sensor,
-                                                                         values=purrr::flatten_dbl(values), calibrated = is_calibrated,
+                                                                         values=purrr::flatten_dbl(values), height=height,
+                                                                         calibrated = is_calibrated,
                                                                          calibration=locality$sensors[[moist_sensor]]$calibration)
     return(locality)
 }
@@ -552,8 +555,9 @@ mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
     f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * T^2)) #enhancement factor
     values <- f * a * exp(b * T / (c + T)) * (1 - RH / 100)
 
+    height <- locality$sensors[[rh_sensor]]$metadata@height
     locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_VPD, output_sensor,
-                                                                         values=values)
+                                                                         height=height, values=values)
     return(locality)
 }
 

@@ -18,6 +18,8 @@ required columns:
 optional columns:
 \itemize{
 \item serial_number - can be NA, than try detect
+\item logger_type - §type of logger. In some cases is detected from source data file. User can define custome type.
+Default height of sensor is used from table \link{mc_data_heights} by logger_type.§
 \item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S"); Ignored for TOMST data format
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.

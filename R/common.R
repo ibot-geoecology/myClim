@@ -46,7 +46,7 @@
     }
 }
 
-.common_get_new_sensor <- function(sensor_id, sensor_name, values=NULL,
+.common_get_new_sensor <- function(sensor_id, sensor_name, values=NULL, height=NA_character_,
                                    calibrated=FALSE, calibration=data.frame()){
     if(!(sensor_id %in% names(mc_data_sensors))) {
         warning(stringr::str_glue(.common_const_MESSAGE_UNKNOWN_SENSOR_ID))
@@ -54,6 +54,7 @@
     metadata <- new("mc_SensorMetadata")
     metadata@sensor_id <- sensor_id
     metadata@name <- sensor_name
+    metadata@height <- height
     metadata@calibrated <- calibrated
     item <- list(metadata = metadata,
                  values = values,

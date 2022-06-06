@@ -25,6 +25,7 @@
 #' @param recursive recursive search in sub-directories (default TRUE)
 #' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA). Required for HOBO files. 
 #' For TMS files ignored, there is fix date format. see [mc_data_formats]
+#' @param logger_type §type of logger (default NA). see [myClim::mc_read_data()] §
 #' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
 #' @param step Time step of microclimatic time-series in minutes. When provided, then is used in [mc_prep_clean] instead of automatic stepd detection. 
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
@@ -34,7 +35,8 @@
 #' \dontrun{
 #' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 #' }
-mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA_character_, tz_offset=NA_integer_, step=NA_integer_) {
+mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, recursive=TRUE, date_format=NA_character_,
+                          tz_offset=NA_integer_, step=NA_integer_) {
     if(all(dir.exists(paths))) {
         files <- .read_get_csv_files_from_directory(paths, recursive)
     } else if(any(dir.exists(paths))) {
@@ -43,7 +45,7 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
         files <- paths
     }
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name,
-                              serial_number=NA_character_, date_format=date_format, tz_offset=tz_offset,
+                              serial_number=NA_character_, logger_type=logger_type, date_format=date_format, tz_offset=tz_offset,
                               step=step)
     mc_read_data(files_table)
 }
@@ -73,6 +75,8 @@ mc_read_files <- function(paths, dataformat_name, recursive=TRUE, date_format=NA
 #'
 #' optional columns:
 #' * serial_number - can be NA, than try detect
+#' * logger_type - §type of logger. In some cases is detected from source data file. User can define custome type.
+#' Default height of sensor is used from table [mc_data_heights] by logger_type.§
 #' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S"); Ignored for TOMST data format
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
@@ -137,7 +141,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 }
 
 .read_get_data_formats <- function(files_table) {
-    file_function <- function (path, data_format, date_format, tz_offset) {
+    file_function <- function (path, data_format, logger_type, date_format, tz_offset) {
         if(!(data_format %in% names(mc_data_formats))){
             warning(stringr::str_glue("It is unknown format {data_format} for {path}. File is skipped."))
             return(NULL)
@@ -149,6 +153,9 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         if(!is.na(tz_offset)) {
             data_format_object@tz_offset <- tz_offset
         }
+        if(!is.na(logger_type)) {
+            data_format_object@logger_type <- logger_type
+        }
         data_format_object <- myClim:::.model_load_data_format_params_from_file(data_format_object, path)
         if(is.null(data_format_object)) {
             warning(stringr::str_glue("File {path} dosn't have right format. File is skipped."))
@@ -157,6 +164,10 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         return(data_format_object)
     }
 
+    logger_type <- NA_character_
+    if("logger_type" %in% colnames(files_table)) {
+        logger_type <- files_table$logger_type
+    }
     date_format <- NA_character_
     if("date_format" %in% colnames(files_table)) {
         date_format <- files_table$date_format
@@ -167,6 +178,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     }
     purrr::pmap(list(path=files_table$path,
                      data_format=files_table$data_format,
+                     logger_type=logger_type,
                      date_format=date_format,
                      tz_offset=tz_offset), file_function)
 }
@@ -302,17 +314,22 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 }
 
 .read_get_sensors_from_data_format <- function(data_table, data_format){
-    result <- list()
-    for(sensor_name in names(data_format@columns))
-    {
-        result[[sensor_name]] <- .read_get_sensor_from_data_format(data_table, data_format, sensor_name)
+    heights_dataframe <- dplyr::filter(mc_data_heights, logger_type == data_format@logger_type)
+    sensor_function <- function(column, sensor_id) {
+        height <- NA_character_
+        suffix <- NA_character_
+        sensor_filter <- heights_dataframe$sensor_name == sensor_id
+        if(any(sensor_filter)) {
+            height <- heights_dataframe$height[sensor_filter]
+            suffix <- heights_dataframe$suffix[sensor_filter]
+        }
+        sensor_name <- if(is.na(suffix)) sensor_id else paste0(sensor_id, suffix)
+        values <- data_table[[column]]
+        myClim:::.common_get_new_sensor(sensor_id, sensor_name, values = values, height = height)
     }
+    result <- purrr::imap(data_format@columns, sensor_function)
+    names(result) <- purrr::map_chr(result, ~ .x$metadata@name)
     result
-}
-
-.read_get_sensor_from_data_format <- function(data_table, data_format, sensor_name){
-    values <- data_table[[data_format@columns[[sensor_name]]]]
-    myClim:::.common_get_new_sensor(sensor_name, sensor_name, values)
 }
 
 #' Reading data from wide data.frame

@@ -2,13 +2,16 @@ library(testthat)
 source("test.R")
 
 test_that("mc_read_data csv without localities", {
-    data <- mc_read_data("data/TOMST/files_table.csv")
+    data <- mc_read_data("data/TOMST/files_table2.csv")
     test_prep_data_format(data)
     expect_equal(length(data), 3)
     expect_equal(length(data$A6W79$loggers[[1]]$datetime), 49)
     expect_equal(data$A6W79$metadata@tz_type, mc_const_TZ_UTC)
     expect_equal(length(data$A6W79$loggers[[1]]$sensors), 4)
-    expect_equal(data$A6W79$loggers[[1]]$metadata@type, "TMS")
+    expect_equal(data$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,
+                 mc_data_heights$height[mc_data_heights$logger_type == myClim:::.model_const_LOGGER_TOMST_TMS_L45 &
+                                        mc_data_heights$sensor_name == myClim:::.model_const_SENSOR_TMS_T1])
+    expect_equal(data$A6W79$loggers[[1]]$metadata@type, myClim:::.model_const_LOGGER_TOMST_TMS_L45)
     expect_equal(data$A6W79$loggers[[1]]$metadata@serial_number, "94184102")
     expect_equal(data$A6W79$loggers[[1]]$metadata@step, 15)
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 75)
@@ -28,10 +31,14 @@ test_that("mc_read_data TOMST format datetime", {
 })
 
 test_that("mc_read_data csv with localities", {
-    data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_data("data/TOMST/files_table2.csv", "data/TOMST/localities_table.csv")
     test_prep_data_format(data)
     expect_equal(data$A1E05$metadata@altitude, 255)
     expect_equal(data$A6W79$metadata@tz_type, mc_const_TZ_USER_DEFINED)
+    expect_equal(data$A6W79$loggers[[1]]$metadata@type, myClim:::.model_const_LOGGER_TOMST_TMS_L45)
+    expect_equal(data$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,
+                 mc_data_heights$height[mc_data_heights$logger_type == myClim:::.model_const_LOGGER_TOMST_TMS_L45 &
+                                            mc_data_heights$sensor_name == myClim:::.model_const_SENSOR_TMS_T1])
 })
 
 test_that("mc_read_files TOMST directory", {

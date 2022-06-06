@@ -7,6 +7,7 @@
 mc_read_files(
   paths,
   dataformat_name,
+  logger_type = NA_character_,
   recursive = TRUE,
   date_format = NA_character_,
   tz_offset = NA_integer_,
@@ -17,6 +18,8 @@ mc_read_files(
 \item{paths}{vector of paths to files or directories}
 
 \item{dataformat_name}{data format of logger one of \code{names(mc_data_formats)} see \code{names(mc_data_formats)}}
+
+\item{logger_type}{§type of logger (default NA). see \code{\link[=mc_read_data]{mc_read_data()}} §}
 
 \item{recursive}{recursive search in sub-directories (default TRUE)}
 
