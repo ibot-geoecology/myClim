@@ -5,6 +5,9 @@
 .prep_const_MESSAGE_PARAM_NAME_NOT_NULL <- "param_name can not be NULL"
 .prep_const_MESSAGE_PARAM_NAME_NULL <- "param_name must be NULL"
 .prep_const_MESSAGE_UNEXISTED_LOCALITY <- "There isn't locality {locality_id}."
+.prep_const_MESSAGE_SENSOR_METADATA_WRONG_SLOT <- "Sensor metadata doesn't cointain slot {param_name}."
+.prep_const_MESSAGE_UNIQUE_SENSOR_NAMES <- "Sensor names must be unique."
+.prep_const_MESSAGE_UNIQUE_LOCALITY_IDS <- "Locality_ids must be unique."
 
 #' Cleaning datetime series
 #'
@@ -164,7 +167,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' Set metadata of localities
 #' 
 #' @description
-#' This function allows you to add or modify locality metadata. See [mc_LocalityMetadata] 
+#' This function allows you to add or modify locality metadata. See [mc_LocalityMetadata]. §Function can rename localities too.§
 #' You can import metadata from named list or from data frame. See details. 
 #'  
 #' @details
@@ -183,29 +186,33 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' offset value `list(A1E05=60)`. Simillarly for other metadata slots [mc_LocalityMetadata].
 #' 
 #' For batch or generally more complex metadata modification you can provide data.frame
-#' with columns specifying `locality_id` and one of `altitude, lat_wgs84, lon_wgs84, tz_offset`. 
+#' with columns specifying `locality_id` and one of `new_locality_id, altitude, lat_wgs84, lon_wgs84, tz_offset`.
 #' Provide locality_id (name) and the value in column of metadata you wish to update. 
 #' In case of using data.frame use `param_name = NULL`  
 #' 
 #' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
-#' @param metadata for localities can be named list or table
+#' @param values for localities can be named list or table
 #'
 #' * named list: `metadata <- list(locality_id=value)`; `param_name` must be set
-#' * table with column `locality_id` and another columns named by metadata parameter name; `param_name` must be NULL
-#' @param param_name name of locality metadata parameter; Default names are `altitude`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
+#' * table with column `locality_id` and another columns named by metadata parameter name;
+#' §Name of column for rename locality is `new_locality_id`.§ Parameter `param_name` must be NULL.
+#' @param param_name name of locality metadata parameter; Default names are `locality_id`, `altitude`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
 #' Another names are inserted to `user_data` list. see [myClim::mc_LocalityMetadata]
 #' @return myClim object in the same format as input, with locality metadata filled in
 #' @export
 #' @examples
-#' data <- mc_prep_meta(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
-mc_prep_meta <- function(data, metadata, param_name=NULL) {
-    if(!is.data.frame(metadata)) {
-        metadata <- tibble::tibble(locality_id=names(metadata),
-                                   value=metadata)
+#' data <- mc_prep_meta_locality(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
+mc_prep_meta_locality <- function(data, values, param_name=NULL) {
+    if(!is.data.frame(values)) {
+        values <- tibble::tibble(locality_id=names(values),
+                                 value=values)
         if(is.null(param_name)) {
             stop(.prep_const_MESSAGE_PARAM_NAME_NOT_NULL)
         }
-        names(metadata)[2] <- param_name
+        if(param_name == "locality_id") {
+            param_name <- "new_locality_id"
+        }
+        names(values)[2] <- param_name
     } else if(!is.null(param_name)) {
         stop(.prep_const_MESSAGE_PARAM_NAME_NULL)
     }
@@ -217,6 +224,11 @@ mc_prep_meta <- function(data, metadata, param_name=NULL) {
             warning(stringr::str_glue(.prep_const_MESSAGE_UNEXISTED_LOCALITY))
             return()
         }
+
+        if(slot_name == "new_locality_id") {
+            slot_name <- "locality_id"
+        }
+
         if(!(slot_name %in% myClim:::.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS)) {
             localities[[locality_id]]$metadata@user_data[[slot_name]] <- value
             return()
@@ -227,17 +239,100 @@ mc_prep_meta <- function(data, metadata, param_name=NULL) {
         }
     }
 
-    for(slot_name in colnames(metadata)[-1]) {
-        purrr::pwalk(list(locality_id=metadata$locality_id,
+    slot_names <- colnames(values)[-1]
+
+    for(slot_name in slot_names) {
+        purrr::pwalk(list(locality_id=values$locality_id,
                           slot_name=slot_name,
-                          value=metadata[[slot_name]]),
+                          value=values[[slot_name]]),
                      change_param_function)
     }
 
-    myClim:::.common_set_localities(data, as.list(localities))
+    localities <- as.list(localities)
+    if("new_locality_id" %in% slot_names) {
+        names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
+        unique_names <- unique(names(localities))
+        if(length(unique_names) != length(names(localities))) {
+            stop(.prep_const_MESSAGE_UNIQUE_LOCALITY_IDS)
+        }
+    }
+
+    myClim:::.common_set_localities(data, localities)
 }
 
-#' Set solar time offset against original time 
+#' §Set metadata of sensors
+#'
+#' @description
+#' This function allows you to modify sensor metadata. Function can rename sensors too. See [mc_SensorMetadata]
+#'
+#' @param data myClim onject in Prep-format or Calc-format see [myClim-package]
+#' @param values named list with metadata values; names of items are sensor_names e.g. change height `list(TMS_T1="soil 8 cm")`
+#' @param param_name name of locality metadata parameter; Possible names are `name` and `height`.
+#' @param localities vector of `locality_id` values where to change metadata; if NULL than all localities (default NULL)
+#' @param logger_types vector of `logger_type` values where to change metadata; if NULL than all loggers (default NULL);
+#' parameter is useful only for Prep-format of myClim having the level of logger see [myClim-package]
+#' @return myClim object in the same format as input, with sensor metadata filled in§
+#' @export
+#' @examples
+#' data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")
+mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logger_types=NULL) {
+    is_calc_format <- myClim:::.common_is_calc_format(data)
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+
+        if(!(param_name %in% myClim:::.model_const_EDITABLE_SENSOR_METADATA_PARAMETERS)) {
+            stop(stringr::str_glue(.prep_const_MESSAGE_SENSOR_METADATA_WRONG_SLOT))
+        }
+
+        .prep_edit_sensors_metadata_in_locality(locality, param_name, values, logger_types, is_calc_format)
+    }
+
+    locality_items <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, locality_items)
+}
+
+.prep_edit_sensors_metadata_in_locality <- function(locality, param_name, values, logger_types, is_calc_format) {
+    logger_function <- function(logger) {
+        if(!(is.null(logger_types) || logger$metadata@type %in% logger_types)) {
+            return(logger)
+        }
+        .prep_edit_sensors_metadata(logger, param_name, values)
+    }
+
+    if(is_calc_format) {
+        return(.prep_edit_sensors_metadata(locality, param_name, values))
+    }
+
+    locality$loggers <- purrr::map(locality$loggers, logger_function)
+    locality
+}
+
+.prep_edit_sensors_metadata <- function(item, param_name, values) {
+    if(length(dplyr::intersect(names(item$sensors), names(values))) == 0) {
+        return(item)
+    }
+    sensor_function <- function(sensor) {
+        if(!sensor$metadata@name %in% names(values)) {
+            return(sensor)
+        }
+        slot(sensor$metadata, param_name) <- values[[sensor$metadata@name]]
+        sensor
+    }
+    item$sensors <- purrr::map(item$sensors, sensor_function)
+    if(param_name == "name") {
+        names(item$sensors) <- purrr::map_chr(item$sensors, function(x) x$metadata@name)
+        unique_names <- unique(names(item$sensors))
+        if(length(unique_names) != length(names(item$sensors))) {
+            stop(.prep_const_MESSAGE_UNIQUE_SENSOR_NAMES)
+        }
+    }
+    item
+}
+
+#' Set solar time offset against original time
 #' 
 #' @description
 #' This function calculates the offset against UTC on the locality to get the solar time.
@@ -338,66 +433,6 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     item
 }
 
-#' Rename sensor
-#'
-#' This function rename sensors.
-#'
-#' @param data myClim onject in Prep-format or Calc-format see [myClim-package] 
-#' @param sensor_names named list with new names of sensors; names of items are old ones e.g. `list(TMS_T1="TMS_Tsoil")`== `list("Old"="New")`
-#' @param localities vector of locality_ids where to rename sensors; if NULL than all localities (default NULL) 
-#' @param serial_numbers vector of serial_numbers of loggers; if NULL than all loggers (default NULL); parameter is useful only for
-#' Prep-format of myClim having the level of logger see [myClim-package]
-#' @return the same myClim object as input with changed sensor names
-#' @examples
-#' load("data/mc_data_example_calc.rda")
-#' data <- mc_prep_rename_sensor(c_data_example_calc, list(TMS_T1="TMS_Tsoil"))
-#' @export
-mc_prep_rename_sensor <- function(data, sensor_names, localities=NULL, serial_numbers=NULL) {
-    is_calc_format <- myClim:::.common_is_calc_format(data)
-
-    locality_function <- function(locality) {
-        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
-            return(locality)
-        }
-        if(is_calc_format) {
-            return(.prepare_process_sensor_renaming(locality, sensor_names))
-        }
-        .prepare_process_sensor_renaming_in_loggers(locality, serial_numbers, sensor_names)
-    }
-
-    locality_items <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, locality_items)
-}
-
-.prepare_process_sensor_renaming <- function(item, sensor_names) {
-    is_changed <- FALSE
-    for(old_name in names(sensor_names)) {
-        if(old_name %in% names(item$sensors)) {
-            item$sensors[[old_name]]$metadata@name <- sensor_names[[old_name]]
-            is_changed <- TRUE
-        }
-    }
-    if(is_changed) {
-        names(item$sensors) <- purrr::map_chr(item$sensors, function(x) x$metadata@name)
-        unique_names <- unique(names(item$sensors))
-        if(length(unique_names) != length(names(item$sensors))) {
-            stop("Sensor names must be unique.")
-        }
-    }
-    item
-}
-
-.prepare_process_sensor_renaming_in_loggers <- function(locality, serial_numbers, sensor_names) {
-    logger_function <- function(logger) {
-        if(!(is.null(serial_numbers) || logger$metadata@serial_number %in% serial_numbers)) {
-            return(logger)
-        }
-        .prepare_process_sensor_renaming(logger, sensor_names)
-    }
-    locality$loggers <- purrr::map(locality$loggers, logger_function)
-    locality
-}
-
 #' Merge myClim objects
 #'
 #' @description
@@ -474,35 +509,6 @@ mc_prep_merge <- function(data_items) {
     locality1$datetime <- datetime
     locality1$sensors <- sensors
     locality1
-}
-
-#' rename locality_id
-#'
-#' @description
-#' This function change locality_ids.
-#'
-#' @param data myClim object in Prep-format or Calc-format see [myClim-package]
-#' @param locality_ids list with new locality_ids; names of items are old ones e.g. `list(A1E05="ABC05", A2E32="CDE32")`; `list("Old"="New")`
-#' @return The same myClim object as input but with changed locality_ids
-#' @examples
-#' data <- mc_prep_rename_locality(example_tomst_data1, list(A1E05="ABC05", A2E32="CDE32"))
-#' @export
-mc_prep_rename_locality <- function(data, locality_ids) {
-    locality_function <- function(locality) {
-        if(!(locality$metadata@locality_id %in% names(locality_ids))) {
-            return(locality)
-        }
-        locality$metadata@locality_id <- locality_ids[[locality$metadata@locality_id]]
-        locality
-    }
-
-    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
-    unique_names <- unique(names(localities))
-    if(length(unique_names) != length(names(localities))) {
-        stop("Locality_ids must be unique.")
-    }
-    myClim:::.common_set_localities(data, localities)
 }
 
 #' load calibration parameters to correct microclimatic records

@@ -153,7 +153,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         if(!is.na(tz_offset)) {
             data_format_object@tz_offset <- tz_offset
         }
-        if(!is.na(logger_type)) {
+        if(!(is.na(logger_type) || logger_type == "")) {
             data_format_object@logger_type <- logger_type
         }
         data_format_object <- myClim:::.model_load_data_format_params_from_file(data_format_object, path)
@@ -185,7 +185,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 
 .read_get_edited_serial_numbers <- function(files_table, data_formats) {
     row_function <- function(path, locality_id, data_format, serial_number) {
-        if(!is.na(serial_number)) {
+        if(!(is.na(serial_number) || serial_number == "")) {
             return(serial_number)
         }
         serial_number <- myClim:::.model_get_serial_number_from_file(data_format, path)

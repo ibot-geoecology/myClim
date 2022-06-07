@@ -20,7 +20,7 @@ test_that("mc_agg UTC", {
 test_that("mc_agg day functions", {
     data <- mc_read_files("data/agg", "TOMST")
     data <- mc_prep_clean(data, silent=T)
-    data <- mc_prep_meta(data, list(`91184101`=60), "tz_offset")
+    data <- mc_prep_meta_locality(data, list(`91184101`=60), "tz_offset")
     agg_data <- mc_agg(data, c("min", "max", "mean", "percentile", "sum", "range", "count", "coverage"), "day", percentiles=50, use_utc=FALSE, na.rm=FALSE)
     test_calc_data_format(agg_data)
     expect_equal(agg_data$localities$`91184101`$sensors$TM_T_min$values, c(NA, 4.125), tolerance = 1e-3)
@@ -69,7 +69,7 @@ test_that("mc_agg UTC many NA", {
 test_that("mc_agg long period", {
     data <- mc_read_files("data/agg-month", "TOMST")
     data <- mc_prep_clean(data, silent=T)
-    data <- mc_prep_meta(data, list(`91184101`=60), "tz_offset")
+    data <- mc_prep_meta_locality(data, list(`91184101`=60), "tz_offset")
     expect_warning(agg_data <- mc_agg(data, "mean", "week", use_utc=FALSE, na.rm=FALSE))
     test_calc_data_format(agg_data)
     expect_equal(agg_data$metadata@step_text, "week")

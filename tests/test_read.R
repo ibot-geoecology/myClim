@@ -14,6 +14,7 @@ test_that("mc_read_data csv without localities", {
     expect_equal(data$A6W79$loggers[[1]]$metadata@type, myClim:::.model_const_LOGGER_TOMST_TMS_L45)
     expect_equal(data$A6W79$loggers[[1]]$metadata@serial_number, "94184102")
     expect_equal(data$A6W79$loggers[[1]]$metadata@step, 15)
+    expect_equal(data$A2E32$loggers[[1]]$metadata@type, myClim:::.model_const_LOGGER_TOMST_TMS)
     expect_equal(length(data$A2E32$loggers[[1]]$datetime), 75)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors), 4)
     expect_equal(length(data$A2E32$loggers[[1]]$sensors$TMS_T1), 4)

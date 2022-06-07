@@ -1,4 +1,4 @@
-path,locality_id,data_format,serial_number
+path,locality_id,data_format,logger_type
 data/TOMST/data_94184102_0.csv,main,TOMST,
-data/TOMST/data_94184103_0.csv,main,TOMST,
+data/TOMST/data_94184103_0.csv,main,TOMST,TMS_backup
 data/TOMST/data_91184101_0.csv,main,TOMST,

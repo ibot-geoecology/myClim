@@ -96,9 +96,9 @@ After reading logger files or data.frame into myClim object, such object is in P
 
 * **Sensor calibration:** It is a good idea to be critical to the sensors and calibrate them. Either laboratory or DIY. In case you have calibration data (offsets) you can correct field records. Use `mc_prep_calib_load()` to upload calibration data (offsets) into myClim object. Then use `mc_prep_calib()` to apply the offset correction. See instructive help of the calibration functions. 
 
-* **Cropping, filtering, renaming and merging:** For data wrangling it useful to call `mc_info_count()` which returns the number of localities, loggers and sensors in myClim object  and `mc_info()` returning data.frame with handy summary per sensor. For filtering and sub-setting of  myClim sensors and localities use `mc_filter()`. To merge localities or add sensors to localities use `mc_prep_merge()`. Sometimes before merging it is useful to rename  locality `mc_prep_rename_locality()` or sensor `mc_prep_rename_sensor()` especially in cases when loading logger files without metadata. 
+* **Cropping, filtering, renaming and merging:** For data wrangling it useful to call `mc_info_count()` which returns the number of localities, loggers and sensors in myClim object  and `mc_info()` returning data.frame with handy summary per sensor. For filtering and sub-setting of  myClim sensors and localities use `mc_filter()`. To merge localities or add sensors to localities use `mc_prep_merge()`. Sometimes before merging it is useful to rename  locality `mc_prep_meta_locality()` or sensor `mc_prep_meta_sensor()` especially in cases when loading logger files without metadata.
 
-* **Updating metadata** Besides providing custom time zone offset as shown above, it is also  possible to import or update metadata of myClim locality `mc_prep_meta()`. Via `mc_prep_meta(param_name="user_data")` it is possible to appedn almost whatever to myClim locality e.g. topographic, geological or vegetation data, notes etc.   Importing and modifying metadata of sensors (depth, error flag) is not implemented yet. 
+* **Updating metadata** Besides providing custom time zone offset as shown above, it is also  possible to import or update metadata of myClim locality `mc_prep_meta_locality()`. Via `mc_prep_meta_locality(param_name="user_data")` it is possible to appedn almost whatever to myClim locality e.g. topographic, geological or vegetation data, notes etc.   Importing and modifying metadata of sensors (depth, error flag) is not implemented yet.
 
  
 * **Joining in time**  Not implemented yet in myClim. We are working on it. This function will join the data in complete, clean time series in case you have your loggers data in multiple files. I.e. you have one sensor measuring 10 years and you dowloded the data onece a year. Here is many problems we are coding the sloutions righn now e.g. overlapping data, logger replacement with problems of overlapping data from in-situ mission and from storage... 
@@ -146,10 +146,9 @@ tms.ic<-mc_info(tms) ## call info
 ## simulate another myClim object and rename some localities and sensors
 tms1<-tms
 names(tms1)
-tms1<-mc_prep_rename_locality(tms1,list(A1E05="ABC05", A2E32="CDE32"))
-tms1<-mc_prep_rename_sensor(tms1,sensor_names = list(TMS_T1="TMS_Tsoil",
-                                                     TMS_T2="TMS_Tair"),
-                            localities = "A6W79" )
+tms1<-mc_prep_meta_locality(tms1, list(A1E05="ABC05", A2E32="CDE32"), param_name="locality_id")
+tms1<-mc_prep_meta_sensor(tms1, values=list(TMS_T1="TMS_Tsoil", TMS_T2="TMS_Tair"),
+                          localities = "A6W79", param_name="name")
 
 ## merge two myClim objects Prep-format
 tms.m<-mc_prep_merge(list(tms,tms1))
@@ -180,12 +179,12 @@ metadata<-data.frame(locality_id=mer$id_auto,
                      lon_wgs84=mer$lon_wgs84)
 
 ## upload metadata from data.frame
-tms.f<-mc_prep_meta(tms.f,metadata = metadata)
+tms.f<-mc_prep_meta_locality(tms.f, values=metadata)
 
 ## upload metadata from list
 lst<-as.list(mer$tz_offset)
 names(lst)<-mer$id_auto
-tms.f<-mc_prep_meta(tms.f,lst, param_name = "tz_offset")
+tms.f<-mc_prep_meta_locality(tms.f, lst, param_name = "tz_offset")
 
 ```
 

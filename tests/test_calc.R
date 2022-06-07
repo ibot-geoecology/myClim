@@ -32,7 +32,7 @@ test_that("mc_calc_snow_logger_without_sensor", {
 test_that("mc_calc_snow_agg", {
     data <- mc_read_files("data/eco-snow", "TOMST")
     cleaned_data <- mc_prep_clean(data, silent=T)
-    cleaned_data <- mc_prep_meta(cleaned_data, list(`94184102`=60, `94184103`=60), "tz_offset")
+    cleaned_data <- mc_prep_meta_locality(cleaned_data, list(`94184102`=60, `94184103`=60), "tz_offset")
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_snow(calc_data, "TMS_T3", range=1.5, tmax=0.5)
     snow_agg <- mc_calc_snow_agg(calc_data, "snow")
@@ -136,7 +136,7 @@ test_that("mc_calc_tomst_dendro", {
 
 test_that("mc_calc_vpd", {
     data <- mc_read_files("data/HOBO/20024354.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S")
-    data <- mc_prep_rename_locality(data, list(`20024354`="LOC"))
+    data <- mc_prep_meta_locality(data, list(`20024354`="LOC"), param_name = "locality_id")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_vpd(calc_data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH)
@@ -153,7 +153,7 @@ test_that("mc_calc_vpd", {
     expect_equal(vpd_martin(calc_data$localities$LOC$sensors$HOBO_T_C$values[[1]],
                             calc_data$localities$LOC$sensors$HOBO_RH$values[[1]]),
                  calc_data$localities$LOC$sensors$VPD$values[[1]])
-    calc_data <- mc_prep_meta(calc_data, list(LOC = 500), "altitude")
+    calc_data <- mc_prep_meta_locality(calc_data, list(LOC = 500), "altitude")
     calc_data <- mc_calc_vpd(calc_data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH,
                              output_sensor = "VPD500")
     expect_equal(vpd_martin(calc_data$localities$LOC$sensors$HOBO_T_C$values[[1]],

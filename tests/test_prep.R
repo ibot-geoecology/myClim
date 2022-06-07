@@ -71,14 +71,14 @@ test_that("mc_prep_solar_tz", {
     expect_equal(data$A1E05$metadata@tz_offset, 57)
 })
 
-test_that("mc_prep_meta", {
+test_that("mc_prep_meta_locality", {
     data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
-    expect_error(changed_data <- mc_prep_meta(data, list(A1E05=50)))
-    changed_data <- mc_prep_meta(data, list(A1E05=50), param_name="tz_offset")
+    expect_error(changed_data <- mc_prep_meta_locality(data, list(A1E05=50)))
+    changed_data <- mc_prep_meta_locality(data, list(A1E05=50), param_name="tz_offset")
     test_prep_data_format(changed_data)
     expect_equal(changed_data$A1E05$metadata@tz_offset, 50)
     expect_equal(changed_data$A1E05$metadata@tz_type, mc_const_TZ_USER_DEFINED)
-    changed_data <- mc_prep_meta(data, list(A1E05="abc", A2E32="def"), param_name="my_super_param")
+    changed_data <- mc_prep_meta_locality(data, list(A1E05="abc", A2E32="def"), param_name="my_super_param")
     test_prep_data_format(changed_data)
     expect_equal(changed_data$A1E05$metadata@user_data[["my_super_param"]], "abc")
     metadata <- as.data.frame(tibble::tribble(
@@ -87,17 +87,34 @@ test_that("mc_prep_meta", {
         "A2E32"     ,          3,          4,  0,
         "TEST"      ,          1,          1, 10
     ))
-    expect_error(changed_data <- mc_prep_meta(data, metadata, param_name="tz_offset"))
-    expect_warning(changed_data <- mc_prep_meta(data, metadata))
+    expect_error(changed_data <- mc_prep_meta_locality(data, metadata, param_name="tz_offset"))
+    expect_warning(changed_data <- mc_prep_meta_locality(data, metadata))
     test_prep_data_format(changed_data)
     expect_equal(changed_data$A1E05$metadata@lat_wgs84, 1)
     expect_equal(changed_data$A1E05$metadata@lon_wgs84, 2)
     expect_true(is.na(changed_data$A1E05$metadata@user_data[["my"]]))
     data_clean <- mc_prep_clean(data, silent=T)
     data_calc <- mc_agg(data_clean)
-    expect_warning(changed_data <- mc_prep_meta(data_calc, metadata))
+    expect_warning(changed_data <- mc_prep_meta_locality(data_calc, metadata))
     test_calc_data_format(changed_data)
     expect_equal(changed_data$localities$A1E05$metadata@lat_wgs84, 1)
+})
+
+test_that("mc_prep_meta_locality rename", {
+    data <- mc_read_data("data/TOMST/files_table.csv")
+    renamed_data <- mc_prep_meta_locality(data, list(A1E05="ABC05", A2E32="CDE32"), "locality_id")
+    expect_equal(sort(names(renamed_data)), sort(c("ABC05", "CDE32", "A6W79")))
+    values <- as.data.frame(tibble::tribble(
+        ~locality_id, ~new_locality_id,
+        "A1E05"     ,          "ABC05",
+        "A2E32"     ,          "CDE32",
+    ))
+    renamed_data <- mc_prep_meta_locality(data, values)
+    expect_equal(sort(names(renamed_data)), sort(c("ABC05", "CDE32", "A6W79")))
+    renamed_data <- mc_prep_clean(renamed_data, silent=T)
+    expect_warning(renamed_data <- mc_agg(renamed_data, c("min", "max"), "hour"))
+    renamed_data <- mc_prep_meta_locality(renamed_data, list(ABC05="AAA05"), "locality_id")
+    expect_equal(names(renamed_data$localities), c("AAA05", "CDE32", "A6W79"))
 })
 
 test_that("mc_prep_crop", {
@@ -132,26 +149,28 @@ test_that(".prep_get_utc_localities", {
     expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
     test_function <- if(exists(".prep_get_utc_localities")) .prep_get_utc_localities else myClim:::.prep_get_utc_localities
     expect_equal(test_function(data), c("91184101", "92192250", "94184102", "94184103", "94184104"))
-    data_clean <- mc_prep_meta(data, list(`91184101`=60, `92192250`=60, `94184102`=60, `94184103`=60, `94184104`=60), "tz_offset")
+    data_clean <- mc_prep_meta_locality(data, list(`91184101`=60, `92192250`=60, `94184102`=60, `94184103`=60, `94184104`=60), "tz_offset")
     expect_equal(length(test_function(data_clean)), 0)
 })
 
-test_that("mc_prep_rename_sensor", {
+test_that("mc_prep_meta_sensor", {
     data <- mc_read_data("data/flat/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
-    cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T1="TMS_Tsoil"))
+    cleaned_data <- mc_prep_meta_sensor(cleaned_data, list(TMS_T1="TMS_Tsoil"), "name")
     expect_true("TMS_Tsoil" %in% names(cleaned_data$main$loggers[[1]]$sensors))
-    cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T2="T2"), serial_numbers="94184102")
+    cleaned_data <- mc_prep_meta_sensor(cleaned_data, list(TMS_T2="T2"), param_name = "name", logger_types="TMS")
     expect_true("T2" %in% names(cleaned_data$main$loggers[[1]]$sensors))
     expect_false("T2" %in% names(cleaned_data$main$loggers[[2]]$sensors))
     expect_warning(calc_data <- mc_agg(cleaned_data))
-    calc_data <- mc_prep_rename_sensor(calc_data, list(TMS_T3_1="TMS_T3_secondary"), localities="main")
+    calc_data <- mc_prep_meta_sensor(calc_data, list(TMS_T3_1="TMS_T3_secondary"), localities="main", param_name="name")
     expect_true("TMS_T3_secondary" %in% names(calc_data$localities$main$sensors))
+    calc_data <- mc_prep_meta_sensor(calc_data, list(TMS_T3_secondary="air"), param_name="height")
+    expect_equal(calc_data$localities$main$sensors$TMS_T3_secondary$metadata@height, "air")
 })
 
-test_that("mc_prep_rename_sensor wrong", {
+test_that("mc_prep_meta_sensor wrong", {
     data <- mc_read_data("data/flat/files_table.csv")
-    expect_error(data <- mc_prep_rename_sensor(data, list(TMS_T1="TMS_T2")))
+    expect_error(data <- mc_prep_meta_sensor(data, list(TMS_T1="TMS_T2"), param_name = "name"))
 })
 
 test_that("mc_prep_merge wrong", {
@@ -198,16 +217,6 @@ test_that("mc_prep_merge calc-format same name", {
     test_calc_data_format(merged_data)
     expect_equal(names(merged_data$localities), c("A1E05", "A2E32", "A6W79"))
     expect_equal(length(merged_data$localities$A2E32$sensors), 12)
-})
-
-test_that("mc_prep_rename_locality", {
-    data <- mc_read_data("data/TOMST/files_table.csv")
-    data <- mc_prep_rename_locality(data, list(A1E05="ABC05", A2E32="CDE32"))
-    expect_equal(names(data), c("ABC05", "CDE32", "A6W79"))
-    data <- mc_prep_clean(data, silent=T)
-    expect_warning(data <- mc_agg(data, c("min", "max"), "hour"))
-    data <- mc_prep_rename_locality(data, list(ABC05="AAA05"))
-    expect_equal(names(data$localities), c("AAA05", "CDE32", "A6W79"))
 })
 
 test_that("mc_prep_rename_locality wrong", {
