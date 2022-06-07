@@ -18,8 +18,10 @@ required columns:
 optional columns:
 \itemize{
 \item serial_number - can be NA, than try detect
-\item logger_type - §type of logger. In some cases is detected from source data file. User can define custome type.
-Default height of sensor is used from table \link{mc_data_heights} by logger_type.§
+\item logger_type - type of logger. This is used to set default sensor heights and hlps a lot wen joining the data.
+In some cases myClim detects loger_type from source data file, but sometimes it is not possible.
+Pre-defined loger types are:("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+Default heights of sensor based on logger types are defined in table \link{mc_data_heights}
 \item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S"); Ignored for TOMST data format
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
@@ -42,9 +44,9 @@ object contains 5 columns:
 myClim object in Prep-format see \link{myClim-package}
 }
 \description{
-This function has two tables parameters. i.) \code{files_table} with paths pointing to raw
+This function has two tables parameters. (i) \code{files_table} with paths pointing to raw
 csv logger files, specification of data format (logger type) and locality name. This table is required.
-ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
+(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
 }
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table} and \code{localities_table} from external CSV it

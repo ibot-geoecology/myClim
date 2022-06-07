@@ -19,7 +19,7 @@ mc_read_files(
 
 \item{dataformat_name}{data format of logger one of \code{names(mc_data_formats)} see \code{names(mc_data_formats)}}
 
-\item{logger_type}{§type of logger (default NA). see \code{\link[=mc_read_data]{mc_read_data()}} §}
+\item{logger_type}{type of logger (default NA), can be one of pre-defined see \code{\link[=mc_read_data]{mc_read_data()}} or any custom string}
 
 \item{recursive}{recursive search in sub-directories (default TRUE)}
 
@@ -45,6 +45,7 @@ can be provided later with function \code{\link[=mc_prep_meta]{mc_prep_meta()}}
 If file is not in expected format, then file is skipped and warning printed in console.
 CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.
 Localities are named after serial_number of logger.
+Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
 }
 \examples{
 \dontrun{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{mc_prep_meta_sensor}
 \alias{mc_prep_meta_sensor}
-\title{§Set metadata of sensors}
+\title{Set metadata of sensors}
 \usage{
 mc_prep_meta_sensor(
   data,
@@ -13,22 +13,22 @@ mc_prep_meta_sensor(
 )
 }
 \arguments{
-\item{data}{myClim onject in Prep-format or Calc-format see \link{myClim-package}}
+\item{data}{myClim object in Prep-format or Calc-format see \link{myClim-package}}
 
-\item{values}{named list with metadata values; names of items are sensor_names e.g. change height \code{list(TMS_T1="soil 8 cm")}}
+\item{values}{named list with metadata values; names of items are sensor_names e.g. for changing sensor height use \code{list(TMS_T1="soil 8 cm")}}
 
-\item{param_name}{name of locality metadata parameter; Possible names are \code{name} and \code{height}.}
+\item{param_name}{name of the sensor metadata parameter you want to change; You can change \code{name} and \code{height} of sensor.}
 
-\item{localities}{vector of \code{locality_id} values where to change metadata; if NULL than all localities (default NULL)}
+\item{localities}{optional filter; vector of \code{locality_id} where to change sensor metadata; if NULL than all localities (default NULL)}
 
-\item{logger_types}{vector of \code{logger_type} values where to change metadata; if NULL than all loggers (default NULL);
-parameter is useful only for Prep-format of myClim having the level of logger see \link{myClim-package}}
+\item{logger_types}{optional filter; vector of \code{logger_type} where to change metadata; if NULL than all logger types (default NULL);
+\code{logger_type}is useful only for Prep-format of myClim having the level of logger see \link{myClim-package}}
 }
 \value{
-myClim object in the same format as input, with sensor metadata filled in§
+myClim object in the same format as input, with updated metadata
 }
 \description{
-This function allows you to modify sensor metadata. Function can rename sensors too. See \link{mc_SensorMetadata}
+This function allows you to modify sensor metadata including sensor name. See \link{mc_SensorMetadata}
 }
 \examples{
 data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")

@@ -13,7 +13,7 @@ mc_prep_meta_locality(data, values, param_name = NULL)
 \itemize{
 \item named list: \code{metadata <- list(locality_id=value)}; \code{param_name} must be set
 \item table with column \code{locality_id} and another columns named by metadata parameter name;
-§Name of column for rename locality is \code{new_locality_id}.§ Parameter \code{param_name} must be NULL.
+to rename locality use \code{new_locality_id}. Parameter \code{param_name} must be NULL.
 }}
 
 \item{param_name}{name of locality metadata parameter; Default names are \code{locality_id}, \code{altitude}, \code{lat_wgs84}, \code{lon_wgs84}, \code{tz_offset}.
@@ -23,7 +23,7 @@ Another names are inserted to \code{user_data} list. see \link{mc_LocalityMetada
 myClim object in the same format as input, with locality metadata filled in
 }
 \description{
-This function allows you to add or modify locality metadata. See \link{mc_LocalityMetadata}. §Function can rename localities too.§
+This function allows you to add or modify locality metadata including locality names. See \link{mc_LocalityMetadata}.
 You can import metadata from named list or from data frame. See details.
 }
 \details{

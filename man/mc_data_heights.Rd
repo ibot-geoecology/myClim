@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_data_heights}
 \alias{mc_data_heights}
-\title{§Default heights of sensors}
+\title{Default heights of sensors}
 \format{
 An object of class \code{data.frame} with 13 rows and 4 columns.
 }
@@ -11,7 +11,9 @@ An object of class \code{data.frame} with 13 rows and 4 columns.
 mc_data_heights
 }
 \description{
-This table is used for set height in metadata of sensor during reading source data.
+This table is used to set the default heights in metadata of sensors based on logger type.
+The defaults were set based on the most common uses in community,
+defaults can overwrite be user. see \link{mc_prep_meta_sensor}
 }
 \details{
 data.frame with columns:
@@ -19,10 +21,10 @@ data.frame with columns:
 \item logger_type
 \item sensor_name
 \item height - character representation of height
-\item suffix - suffix for sensor_name. If suffix is NA, then sensor_name is original.
+\item suffix - suffix for sensor_name. If suffix is NA, then sensor_name is not modified.
 }
 }
 \seealso{
-\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}§
+\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}
 }
 \keyword{datasets}
