@@ -38,17 +38,19 @@
 #' @seealso [myClim::mc_DataFormat], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 "mc_data_formats"
 
-#' §Default heights of sensors
+#' Default heights of sensors
 #'
-#' This table is used for set height in metadata of sensor during reading source data.
+#' This table is used to set the default heights in metadata of sensors based on logger type.
+#' The defaults were set based on the most common uses in community,
+#' defaults can overwrite be user. see [mc_prep_meta_sensor] 
 #'
 #' data.frame with columns:
 #' - logger_type
 #' - sensor_name
 #' - height - character representation of height
-#' - suffix - suffix for sensor_name. If suffix is NA, then sensor_name is original.
+#' - suffix - suffix for sensor_name. If suffix is NA, then sensor_name is not modified.
 #'
-#' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]§
+#' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]
 "mc_data_heights"
 
 #' Sensors definition.

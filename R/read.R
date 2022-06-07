@@ -17,6 +17,7 @@
 #' If file is not in expected format, then file is skipped and warning printed in console. 
 #' CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.    
 #' Localities are named after serial_number of logger.
+#' Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")    
 #'
 #' @seealso [myClim::mc_DataFormat]
 #'
@@ -25,7 +26,7 @@
 #' @param recursive recursive search in sub-directories (default TRUE)
 #' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA). Required for HOBO files. 
 #' For TMS files ignored, there is fix date format. see [mc_data_formats]
-#' @param logger_type §type of logger (default NA). see [myClim::mc_read_data()] §
+#' @param logger_type type of logger (default NA), can be one of pre-defined see [myClim::mc_read_data()] or any custom string
 #' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
 #' @param step Time step of microclimatic time-series in minutes. When provided, then is used in [mc_prep_clean] instead of automatic stepd detection. 
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
@@ -59,9 +60,9 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 
 #' Reading files with locality metadata
 #'
-#' This function has two tables parameters. i.) `files_table` with paths pointing to raw
+#' This function has two tables parameters. (i) `files_table` with paths pointing to raw
 #' csv logger files, specification of data format (logger type) and locality name. This table is required.
-#' ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
+#' (ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
@@ -75,8 +76,10 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #'
 #' optional columns:
 #' * serial_number - can be NA, than try detect
-#' * logger_type - §type of logger. In some cases is detected from source data file. User can define custome type.
-#' Default height of sensor is used from table [mc_data_heights] by logger_type.§
+#' * logger_type - type of logger. This is used to set default sensor heights and hlps a lot wen joining the data. 
+#' In some cases myClim detects loger_type from source data file, but sometimes it is not possible. 
+#' Pre-defined loger types are:("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+#' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S"); Ignored for TOMST data format
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.

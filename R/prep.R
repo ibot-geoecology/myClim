@@ -167,7 +167,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' Set metadata of localities
 #' 
 #' @description
-#' This function allows you to add or modify locality metadata. See [mc_LocalityMetadata]. §Function can rename localities too.§
+#' This function allows you to add or modify locality metadata including locality names. See [mc_LocalityMetadata].
 #' You can import metadata from named list or from data frame. See details. 
 #'  
 #' @details
@@ -195,7 +195,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #'
 #' * named list: `metadata <- list(locality_id=value)`; `param_name` must be set
 #' * table with column `locality_id` and another columns named by metadata parameter name;
-#' §Name of column for rename locality is `new_locality_id`.§ Parameter `param_name` must be NULL.
+#' to rename locality use `new_locality_id`. Parameter `param_name` must be NULL.
 #' @param param_name name of locality metadata parameter; Default names are `locality_id`, `altitude`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
 #' Another names are inserted to `user_data` list. see [myClim::mc_LocalityMetadata]
 #' @return myClim object in the same format as input, with locality metadata filled in
@@ -260,18 +260,18 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
     myClim:::.common_set_localities(data, localities)
 }
 
-#' §Set metadata of sensors
+#' Set metadata of sensors
 #'
 #' @description
-#' This function allows you to modify sensor metadata. Function can rename sensors too. See [mc_SensorMetadata]
+#' This function allows you to modify sensor metadata including sensor name. See [mc_SensorMetadata]
 #'
-#' @param data myClim onject in Prep-format or Calc-format see [myClim-package]
-#' @param values named list with metadata values; names of items are sensor_names e.g. change height `list(TMS_T1="soil 8 cm")`
-#' @param param_name name of locality metadata parameter; Possible names are `name` and `height`.
-#' @param localities vector of `locality_id` values where to change metadata; if NULL than all localities (default NULL)
-#' @param logger_types vector of `logger_type` values where to change metadata; if NULL than all loggers (default NULL);
-#' parameter is useful only for Prep-format of myClim having the level of logger see [myClim-package]
-#' @return myClim object in the same format as input, with sensor metadata filled in§
+#' @param data myClim object in Prep-format or Calc-format see [myClim-package]
+#' @param values named list with metadata values; names of items are sensor_names e.g. for changing sensor height use `list(TMS_T1="soil 8 cm")`
+#' @param param_name name of the sensor metadata parameter you want to change; You can change `name` and `height` of sensor.
+#' @param localities optional filter; vector of `locality_id` where to change sensor metadata; if NULL than all localities (default NULL)
+#' @param logger_types optional filter; vector of `logger_type` where to change metadata; if NULL than all logger types (default NULL);
+#' `logger_type`is useful only for Prep-format of myClim having the level of logger see [myClim-package]
+#' @return myClim object in the same format as input, with updated metadata
 #' @export
 #' @examples
 #' data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")
