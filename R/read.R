@@ -274,7 +274,8 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     if(data_format@tz_offset != 0) {
         datetime <- datetime - data_format@tz_offset * 60
     }
-    sensors <- .read_get_sensors_from_data_format(data_table, data_format)
+    states <- .read_create_source_states(filename, datetime)
+    sensors <- .read_get_sensors_from_data_format(data_table, data_format, states)
     .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step)
 }
 
@@ -316,7 +317,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
          sensors = sensors)
 }
 
-.read_get_sensors_from_data_format <- function(data_table, data_format){
+.read_get_sensors_from_data_format <- function(data_table, data_format, states){
     heights_dataframe <- dplyr::filter(mc_data_heights, logger_type == data_format@logger_type)
     sensor_function <- function(column, sensor_id) {
         height <- NA_character_
@@ -328,11 +329,20 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         }
         sensor_name <- if(is.na(suffix)) sensor_id else paste0(sensor_id, suffix)
         values <- data_table[[column]]
-        myClim:::.common_get_new_sensor(sensor_id, sensor_name, values = values, height = height)
+        myClim:::.common_get_new_sensor(sensor_id, sensor_name, values=values, height=height, states=states)
     }
     result <- purrr::imap(data_format@columns, sensor_function)
     names(result) <- purrr::map_chr(result, ~ .x$metadata@name)
     result
+}
+
+.read_create_source_states <- function(path, datetime) {
+    abspath <- normalizePath(path)
+    start <- dplyr::first(datetime)
+    end <- dplyr::last(datetime)
+    data.frame(tag=myClim:::.model_const_SENSOR_STATE_SOURCE,
+               start=start, end=end,
+               value=abspath)
 }
 
 #' Reading data from wide data.frame

@@ -77,6 +77,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger$datetime <- new_datetime
     logger <- .prep_clean_write_info(logger, rounded)
     logger <- .prep_clean_edit_series(logger)
+    logger <- .prep_clean_edit_source_state(logger)
     logger
 }
 
@@ -143,8 +144,28 @@ mc_prep_clean <- function(data, silent=FALSE) {
 .prep_clean_was_error_in_logger <- function(logger) {
     is_ok <- c(logger$clean_info@count_disordered == 0,
                logger$clean_info@count_duplicits == 0,
-               logger$clean_info@count_missed == 0)
+               logger$clean_info@count_missed == 0,
+               !logger$clean_info@rounded)
     !all(is_ok)
+}
+
+.prep_clean_edit_source_state <- function(logger) {
+    if(!.prep_clean_was_error_in_logger(logger)){
+        return(logger)
+    }
+
+    sensor_function <- function(sensor) {
+        states_index <- which(sensor$states$tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
+        if(length(states_index) != 1) {
+            return(sensor)
+        }
+        sensor$states[[states_index, "start"]] <- dplyr::first(logger$datetime)
+        sensor$states[[states_index, "end"]] <- dplyr::last(logger$datetime)
+        sensor
+    }
+
+    logger$sensors <- purrr::map(logger$sensors, sensor_function)
+    logger
 }
 
 .prep_get_uncleaned_loggers <- function(data) {
@@ -423,13 +444,48 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     if(!is.null(start)) {
         table <- dplyr::filter(table, datetime >= start)
     }
+    last_datetime <- NULL
     if(!is.null(end)) {
         table <- dplyr::filter(table, datetime < end | (end_included & datetime == end))
+        last_datetime <- end
+        if(length(table$datetime) > 0) {
+            last_datetime <- dplyr::last(table$datetime)
+        }
     }
     item$datetime <- table$datetime
     item$sensors <- purrr::map(item$sensors, function(sensor) {
         sensor$values <- table[[sensor$metadata@name]]
         sensor})
+    item <- .prep_crop_edit_source_state(item, start, last_datetime)
+    item
+}
+
+.prep_crop_edit_source_state <- function(item, start, end) {
+    sensor_function <- function(sensor) {
+        states_index <- which(sensor$states$tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
+        if(length(states_index) == 0) {
+            return(sensor)
+        }
+        to_delete_start <- rep(FALSE, length(states_index))
+        to_delete_end <- rep(FALSE, length(states_index))
+        if(!is.null(start)) {
+            to_delete_start <- sensor$states[states_index,]$end < start
+            sensor$states[[states_index, "start"]] <- max(sensor$states[[states_index, "start"]], start)
+        }
+        if(!is.null(end)) {
+            to_delete_end <- sensor$states[states_index,]$start > end
+            sensor$states[[states_index, "end"]] <- min(sensor$states[[states_index, "end"]], end)
+        }
+        index_to_delete <- states_index[to_delete_start | to_delete_end]
+        if(length(index_to_delete) > 0) {
+            selector <- rep(TRUE, nrow(sensor$states))
+            selector[index_to_delete] <- FALSE
+            sensor$states <- sensor$states[selector,]
+        }
+        sensor
+    }
+
+    item$sensors <- purrr::map(item$sensors, sensor_function)
     item
 }
 

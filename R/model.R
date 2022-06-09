@@ -74,6 +74,8 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
 .model_const_DATA_FORMAT_HOBO <- "HOBO"
 
+.model_const_SENSOR_STATE_SOURCE <- "source"
+
 .model_const_MESSAGE_NO_DATA <- "There aren't data in source file."
 .model_const_MESSAGE_SEPARATED_TIME <- "Separated time in source data isn't supported."
 .model_const_MESSAGE_DATE_TIME_HEADER <- "It is not possible detect timezone offset from header."

@@ -22,6 +22,10 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$A1E05$loggers[[1]]$sensors), 1)
     expect_true(is.na(data$A1E05$loggers[[1]]$metadata@step))
     expect_true(is.na(data$A1E05$metadata@altitude))
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$start, dplyr::first(data$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$end, dplyr::last(data$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$value, normalizePath("./data/TOMST/data_91184101_0.csv"))
 })
 
 test_that("mc_read_data TOMST format datetime", {

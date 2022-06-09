@@ -29,7 +29,7 @@ test_calc_locality <- function(locality) {
     test_datetime(locality$datetime)
     expect_equal(class(locality$sensors), "list")
     test_data_length(locality)
-    test_sensors(locality$sensors)
+    test_sensors(locality)
 }
 
 test_logger <- function(logger) {
@@ -42,7 +42,7 @@ test_logger <- function(logger) {
     expect_true(length(logger$sensors) > 0)
     test_data_length(logger)
     test_cleaning(logger)
-    test_sensors(logger$sensors)
+    test_sensors(logger)
 }
 
 test_datetime <- function(datetime) {
@@ -63,10 +63,10 @@ test_cleaning <- function(logger) {
     expect_equal(logger$clean_info@count_missed, length(purrr::keep(logger$sensors[[1]]$values, ~ is.na(.x))))
 }
 
-test_sensors <- function(sensors) {
-    sensor_names <- unname(purrr::map_chr(sensors, ~ .x$metadata@name))
-    expect_equal(names(sensors), sensor_names)
-    purrr::walk(sensors, test_sensor)
+test_sensors <- function(item) {
+    sensor_names <- unname(purrr::map_chr(item$sensors, ~ .x$metadata@name))
+    expect_equal(names(item$sensors), sensor_names)
+    purrr::pwalk(list(sensor=item$sensors), test_sensor)
 }
 
 test_sensor <- function(sensor) {
@@ -75,9 +75,21 @@ test_sensor <- function(sensor) {
     expect_equal(class(sensor$metadata)[[1]], "mc_SensorMetadata")
     expect_equal(class(sensor$calibration), "data.frame")
     expect_true(nrow(sensor$calibration) == 0 || all(colnames(sensor$calibration) == c("datetime", "cor_factor", "cor_slope")))
-    expect_equal(class(sensor$states), "data.frame")
-    expect_true(nrow(sensor$states) == 0 || all(colnames(sensor$states) == c("tag", "start", "end")))
     expect_true(is.numeric(sensor$values) || all(is.na(sensor$values)))
+    test_states(sensor)
+}
+
+test_states <- function (sensor) {
+    expect_equal(class(sensor$states), "data.frame")
+    if(nrow(sensor$states) == 0) {
+        return()
+    }
+    expect_true(all(colnames(sensor$states) == c("tag", "start", "end", "value")))
+    states <- dplyr::filter(sensor$states, tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
+    if(length(sensor$values) == 0) {
+        expect_equal(nrow(states), 0)
+        return()
+    }
 }
 
 get_empty_prep_data <- function() {
