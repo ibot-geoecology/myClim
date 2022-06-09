@@ -26,7 +26,7 @@
 #' @export
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
-mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=2, tmax=0.5,days = 1) {
+mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=2, tmax=1,days = 1) {
     myClim:::.common_stop_if_not_calc_format(data)
     .calc_check_maximal_day_step(data)
     locality_function <- function(locality) {
@@ -56,11 +56,15 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     per <- 3600*24*days
     day_max_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
+   snow_prev <- (day_range_temp_prev < range) & (day_max_temp_prev < tmax)
+   snow_prev_fullper <- runner::runner(snow_prev, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
 
     day_max_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per,lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-
-    (day_range_temp_prev < range) & (day_max_temp_prev < tmax) | (day_range_temp_next < range) & (day_max_temp_next < tmax)
+    snow_next <- (day_range_temp_next < range) & (day_max_temp_next < tmax)
+    snow_next_fullper <- runner::runner(snow_prev, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+snow <- snow_prev_fullper | snow_next_fullper
+return(snow)
 }
 
 .calc_add_sensor_to_locality <- function(locality, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
