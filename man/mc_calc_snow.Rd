@@ -10,7 +10,7 @@ mc_calc_snow(
   output_sensor = "snow",
   localities = NULL,
   range = 2,
-  tmax = 0.5,
+  tmax = 1,
   days = 1
 )
 }
@@ -25,7 +25,7 @@ mc_calc_snow(
 
 \item{range}{maximal temperature range threshold for snow-covered sensor (default 2°C)}
 
-\item{tmax}{maximal temperature threshold for snow-covered sensor  (default 0.5°C)}
+\item{tmax}{maximal temperature threshold for snow-covered sensor  (default 1°C)}
 
 \item{days}{number of days to be used for moving-window for snow detection algorithm (default 1)}
 }

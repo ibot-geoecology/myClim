@@ -108,7 +108,7 @@ test_that("mc_agg logical sensor", {
     data <- mc_read_files("data/eco-snow/data_94184102_0.csv", "TOMST")
     data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(data)
-    calc_data <- mc_calc_snow(calc_data, "TMS_T3")
+    calc_data <- mc_calc_snow(calc_data, "TMS_T3", tmax=0.5)
     expect_warning(week_calc_data <- mc_agg(calc_data, list(snow=c("min", "max", "mean", "percentile", "sum", "count", "coverage")), "week", percentiles = 20))
     expect_equal(week_calc_data$localities$`94184102`$sensors$snow_min$values, c(F, F, F, F))
     expect_equal(week_calc_data$localities$`94184102`$sensors$snow_max$values, c(T, T, T, T))

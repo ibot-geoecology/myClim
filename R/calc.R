@@ -20,13 +20,13 @@
 #' @param output_sensor name of output snow sensor (default "snow")
 #' @param localities list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
 #' @param range maximal temperature range threshold for snow-covered sensor (default 2°C)
-#' @param tmax maximal temperature threshold for snow-covered sensor  (default 0.5°C)
+#' @param tmax maximal temperature threshold for snow-covered sensor  (default 1°C)
 #' @param days number of days to be used for moving-window for snow detection algorithm (default 1)
 #' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
 #' @export
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
-mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=2, tmax=1,days = 1) {
+mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=2, tmax=1, days=1) {
     myClim:::.common_stop_if_not_calc_format(data)
     .calc_check_maximal_day_step(data)
     locality_function <- function(locality) {
