@@ -220,6 +220,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param ref_t (default 24)
 #' @param acor_t (default 1.91132689118083) correction temperature while sensor on the air see [myClim::mc_calib_moisture()]
 #' @param wcor_t (default 0.64108) correction temperature while sensor in the water [myClim::mc_calib_moisture()]
+#' @param frozen2NA §if TRUE then result is NA for temperatures below 0 (default TRUE)§
 #' @return myClim object same as input but with added VWC moisture sensor
 #' @export
 #' @seealso [mc_data_vwc_parameters]
@@ -239,7 +240,8 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
                         soiltype="universal", localities=NULL,
                         ref_t=myClim:::.calib_MOIST_REF_T,
                         acor_t=myClim:::.calib_MOIST_ACOR_T,
-                        wcor_t=myClim:::.calib_MOIST_WCOR_T) {
+                        wcor_t=myClim:::.calib_MOIST_WCOR_T,
+                        frozen2NA=TRUE) {
     myClim:::.common_stop_if_not_calc_format(data)
 
     locality_function <- function(locality) {
@@ -247,14 +249,14 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
             return(locality)
         }
         .calc_add_vwc_to_locality(locality, moist_sensor, temp_sensor, output_sensor,
-                                  soiltype, ref_t, acor_t, wcor_t)
+                                  soiltype, ref_t, acor_t, wcor_t, frozen2NA)
     }
     data$localities <- purrr::map(data$localities, locality_function)
     data
 }
 
 .calc_add_vwc_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
-                                      soiltype_value, ref_t, acor_t, wcor_t) {
+                                      soiltype_value, ref_t, acor_t, wcor_t, frozen2NA) {
     skip <- .calc_vwc_check_sensors_get_skip(locality, moist_sensor, temp_sensor, output_sensor)
     if(skip) {
         return(locality)
@@ -275,7 +277,8 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
                              cal_cor_factor = if(is_calibrated) cor_factor else 0,
                              cal_cor_slope = if(is_calibrated) cor_slope else 0,
                              a = soil_row$a, b = soil_row$b, c = soil_row$c,
-                             ref_t = ref_t, acor_t = acor_t, wcor_t = wcor_t)
+                             ref_t = ref_t, acor_t = acor_t, wcor_t = wcor_t,
+                             frozen2NA = frozen2NA)
     }
     values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
@@ -305,12 +308,16 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
 }
 
 .calc_get_vwc_values <- function(raw_values, temp_values, cal_cor_factor, cal_cor_slope,
-                                 a, b, c, ref_t, acor_t, wcor_t) {
+                                 a, b, c, ref_t, acor_t, wcor_t, frozen2NA) {
     vwc <- a * raw_values^2 + b * raw_values + c
     dcor_t <- wcor_t - acor_t
     tcor <- raw_values + (temp_values - ref_t) * (acor_t + dcor_t * vwc)
     vwc_cor <- a * (tcor + cal_cor_factor + cal_cor_slope * vwc)^2 + b * (tcor + cal_cor_factor + cal_cor_slope * vwc) + c
-    pmin(pmax(vwc_cor, 0), 1)
+    result <- pmin(pmax(vwc_cor, 0), 1)
+    if(frozen2NA) {
+        result[temp_values < 0] <- NA_real_
+    }
+    result
 }
 
 #' Growing Degree Days

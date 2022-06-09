@@ -13,7 +13,8 @@ mc_calc_vwc(
   localities = NULL,
   ref_t = myClim:::.calib_MOIST_REF_T,
   acor_t = myClim:::.calib_MOIST_ACOR_T,
-  wcor_t = myClim:::.calib_MOIST_WCOR_T
+  wcor_t = myClim:::.calib_MOIST_WCOR_T,
+  frozen2NA = TRUE
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ Parameters a, b and c are used in calculation.}
 \item{acor_t}{(default 1.91132689118083) correction temperature while sensor on the air see \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
 
 \item{wcor_t}{(default 0.64108) correction temperature while sensor in the water \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
+
+\item{frozen2NA}{§if TRUE then result is NA for temperatures below 0 (default TRUE)§}
 }
 \value{
 myClim object same as input but with added VWC moisture sensor

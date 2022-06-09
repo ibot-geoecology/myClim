@@ -75,6 +75,16 @@ test_that("mc_calc_vwc", {
                  calc_data$localities$A2E32$sensors$VWC_moisture$calibration)
 })
 
+test_that("mc_calc_vwc frozen2NA", {
+    data <- mc_read_files("data/eco-snow/data_94184103_0.csv", "TOMST")
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    calc_data <- mc_agg(cleaned_data)
+    vwc_data <- mc_calc_vwc(calc_data, temp_sensor = "TMS_T3")
+    expect_true(is.na(vwc_data$localities$`94184103`$sensors$VWC_moisture$values[[8]]))
+    vwc_data <- mc_calc_vwc(calc_data, temp_sensor = "TMS_T3", frozen2NA = FALSE)
+    expect_false(is.na(vwc_data$localities$`94184103`$sensors$VWC_moisture$values[[8]]))
+})
+
 test_that("mc_calc_vwc wrong", {
     data <- mc_read_data("data/TOMST/files_table.csv")
     cleaned_data <- mc_prep_clean(data, silent=T)
