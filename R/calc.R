@@ -56,15 +56,15 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     per <- 3600*24*days
     day_max_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-   snow_prev <- (day_range_temp_prev < range) & (day_max_temp_prev < tmax)
-   snow_prev_fullper <- runner::runner(snow_prev, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    snow_prev <- (day_range_temp_prev < range) & (day_max_temp_prev < tmax)
+    snow_prev_fullper <- runner::runner(snow_prev, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
 
     day_max_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per,lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
     snow_next <- (day_range_temp_next < range) & (day_max_temp_next < tmax)
     snow_next_fullper <- runner::runner(snow_next, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
-snow <- snow_prev_fullper | snow_next_fullper
-return(snow)
+    snow <- snow_prev_fullper | snow_next_fullper
+    return(snow)
 }
 
 .calc_add_sensor_to_locality <- function(locality, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
@@ -224,7 +224,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param ref_t (default 24)
 #' @param acor_t (default 1.91132689118083) correction temperature while sensor on the air see [myClim::mc_calib_moisture()]
 #' @param wcor_t (default 0.64108) correction temperature while sensor in the water [myClim::mc_calib_moisture()]
-#' @param frozen2NA §if TRUE then result is NA for temperatures below 0 (default TRUE)§
+#' @param frozen2NA if TRUE then result is NA for temperatures below 0 (default TRUE)
 #' @return myClim object same as input but with added VWC moisture sensor
 #' @export
 #' @seealso [mc_data_vwc_parameters]

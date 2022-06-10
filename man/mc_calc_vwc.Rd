@@ -42,7 +42,7 @@ Parameters a, b and c are used in calculation.}
 
 \item{wcor_t}{(default 0.64108) correction temperature while sensor in the water \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
 
-\item{frozen2NA}{§if TRUE then result is NA for temperatures below 0 (default TRUE)§}
+\item{frozen2NA}{if TRUE then result is NA for temperatures below 0 (default TRUE)}
 }
 \value{
 myClim object same as input but with added VWC moisture sensor
