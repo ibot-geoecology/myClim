@@ -275,7 +275,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         datetime <- datetime - data_format@tz_offset * 60
     }
     states <- .read_create_source_states(filename, datetime)
-    sensors <- .read_get_sensors_from_data_format(data_table, data_format, states)
+    sensors <- .read_get_sensors_from_data_format(data_table, data_format, datetime, states)
     .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step)
 }
 
@@ -317,7 +317,7 @@ mc_read_data <- function(files_table, localities_table=NULL) {
          sensors = sensors)
 }
 
-.read_get_sensors_from_data_format <- function(data_table, data_format, states){
+.read_get_sensors_from_data_format <- function(data_table, data_format, datetime, states){
     heights_dataframe <- dplyr::filter(mc_data_heights, logger_type == data_format@logger_type)
     sensor_function <- function(column, sensor_id) {
         height <- NA_character_
@@ -329,11 +329,38 @@ mc_read_data <- function(files_table, localities_table=NULL) {
         }
         sensor_name <- if(is.na(suffix)) sensor_id else paste0(sensor_id, suffix)
         values <- data_table[[column]]
-        myClim:::.common_get_new_sensor(sensor_id, sensor_name, values=values, height=height, states=states)
+        sensor <- myClim:::.common_get_new_sensor(sensor_id, sensor_name, values=values, height=height, states=states)
+        sensor <- .read_set_errors_in_sensor(sensor, data_format@error_value, datetime)
+        return(sensor)
     }
     result <- purrr::imap(data_format@columns, sensor_function)
     names(result) <- purrr::map_chr(result, ~ .x$metadata@name)
     result
+}
+
+.read_set_errors_in_sensor <- function(sensor, error_value, datetime) {
+    if(is.na(error_value)) {
+        return(sensor)
+    }
+    error_filter <- !is.na(sensor$values) & sensor$values == error_value
+    if(!any(error_filter)) {
+        return(sensor)
+    }
+    rle_output <- rle(error_filter)
+    cumsum_lengths <- cumsum(rle_output$lengths)
+    start_indexes <- (c(0, cumsum_lengths[-length(cumsum_lengths)]) + 1)[rle_output$values]
+    end_indexes <- cumsum_lengths[rle_output$values]
+    error_states <- data.frame(tag = myClim:::.model_const_SENSOR_STATE_ERROR,
+                               start = datetime[start_indexes],
+                               end = datetime[end_indexes],
+                               value = as.character(error_value))
+    sensor$values[error_filter] <- NA
+    if(nrow(sensor$states) == 0) {
+        sensor$states <- error_states
+    } else {
+        sensor$states <- dplyr::bind_rows(sensor$states, error_states)
+    }
+    return(sensor)
 }
 
 .read_create_source_states <- function(path, datetime) {

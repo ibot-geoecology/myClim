@@ -75,6 +75,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_DATA_FORMAT_HOBO <- "HOBO"
 
 .model_const_SENSOR_STATE_SOURCE <- "source"
+.model_const_SENSOR_STATE_ERROR <- "error"
 
 .model_const_MESSAGE_NO_DATA <- "There aren't data in source file."
 .model_const_MESSAGE_SEPARATED_TIME <- "Separated time in source data isn't supported."
@@ -363,6 +364,7 @@ setMethod(
 #' @slot date_column index of date column (default NA)
 #' @slot date_format format of date (default NA)
 #' @slot na_strings strings for NA values (default NA)
+#' @slot error_value §value means error of sensor (default NA)§
 #' @slot columns list with names and indexes of value columns (default list())
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from file name (default NA)
 #' @slot data_row_pattern character pattern for detecting right file format (default NA)
@@ -379,6 +381,7 @@ mc_DataFormat <- setClass("mc_DataFormat",
                                     date_column = "numeric",
                                     date_format = "character",
                                     na_strings = "character",
+                                    error_value = "numeric",
                                     columns = "list",
                                     filename_serial_number_pattern = "character",
                                     data_row_pattern = "character",
@@ -393,6 +396,7 @@ setMethod("initialize",
               .Object@date_column <- NA_integer_
               .Object@date_format <- NA_character_
               .Object@na_strings <- NA_character_
+              .Object@error_value <- NA_integer_
               .Object@columns <- list()
               .Object@filename_serial_number_pattern <- NA_character_
               .Object@data_row_pattern <- NA_character_

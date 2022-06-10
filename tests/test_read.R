@@ -115,6 +115,25 @@ test_that("mc_read_files TOMST comma in number", {
     test_prep_data_format(data)
 })
 
+test_that("mc_read_files TOMST with error in data", {
+    expect_warning(data <- mc_read_files("data/TOMST-error", "TOMST"))
+    expect_true(is.na(data$data_93142777$loggers[[1]]$sensors$TMS_T2$values[[7]]))
+    states <- dplyr::filter(data$data_93142777$loggers[[1]]$sensors$TMS_T2$states, tag == myClim:::.model_const_SENSOR_STATE_ERROR)
+    expect_equal(nrow(states), 6)
+    expect_equal(states$start, c(lubridate::ymd_hm("2022-02-24 06:00"),
+                                 lubridate::ymd_hm("2022-02-24 07:15"),
+                                 lubridate::ymd_hm("2022-02-24 09:00"),
+                                 lubridate::ymd_hm("2022-02-24 09:45"),
+                                 lubridate::ymd_hm("2022-02-24 10:15"),
+                                 lubridate::ymd_hm("2022-02-24 11:15")))
+    expect_equal(states$end, c(lubridate::ymd_hm("2022-02-24 06:45"),
+                               lubridate::ymd_hm("2022-02-24 08:30"),
+                               lubridate::ymd_hm("2022-02-24 09:15"),
+                               lubridate::ymd_hm("2022-02-24 09:45"),
+                               lubridate::ymd_hm("2022-02-24 10:45"),
+                               lubridate::ymd_hm("2022-02-24 16:30")))
+})
+
 test_that("mc_read_files joined TOMST direcory", {
     data <- mc_read_files("data/joined_TOMST", "TOMST_join")
     test_prep_data_format(data)
