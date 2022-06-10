@@ -208,6 +208,10 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
 #' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 #' For full table of function parameters see [mc_data_vwc_parameters]
+#' 
+#' The function by default replace the moisture records while soil is frozen with NA, because the soil
+#' moisture sensor was not designed to measure in frozen soils and the returned records are thus not comparable
+#' with values from non frozen soil.  
 #'
 #' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
 #' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`
@@ -224,7 +228,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param ref_t (default 24)
 #' @param acor_t (default 1.91132689118083) correction temperature while sensor on the air see [myClim::mc_calib_moisture()]
 #' @param wcor_t (default 0.64108) correction temperature while sensor in the water [myClim::mc_calib_moisture()]
-#' @param frozen2NA if TRUE then result is NA for temperatures below 0 (default TRUE)
+#' @param frozen2NA if TRUE then those moisture records are set to NA when soil temperature is below 0 (default TRUE)
 #' @return myClim object same as input but with added VWC moisture sensor
 #' @export
 #' @seealso [mc_data_vwc_parameters]
