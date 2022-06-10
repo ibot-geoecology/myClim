@@ -62,7 +62,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     day_max_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
     day_range_temp_next <- runner::runner(locality$sensors[[sensor_name]]$values, k=per,lag = -per+1, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
     snow_next <- (day_range_temp_next < range) & (day_max_temp_next < tmax)
-    snow_next_fullper <- runner::runner(snow_prev, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
+    snow_next_fullper <- runner::runner(snow_next, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
 snow <- snow_prev_fullper | snow_next_fullper
 return(snow)
 }
