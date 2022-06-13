@@ -42,7 +42,7 @@ Parameters a, b and c are used in calculation.}
 
 \item{wcor_t}{(default 0.64108) correction temperature while sensor in the water \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
 
-\item{frozen2NA}{if TRUE then result is NA for temperatures below 0 (default TRUE)}
+\item{frozen2NA}{if TRUE then those moisture records are set to NA when soil temperature is below 0 (default TRUE)}
 }
 \value{
 myClim object same as input but with added VWC moisture sensor
@@ -67,6 +67,10 @@ existing calibration curve for specific soil type instead of default "universal"
 Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
 universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 For full table of function parameters see \link{mc_data_vwc_parameters}
+
+The function by default replace the moisture records while soil is frozen with NA, because the soil
+moisture sensor was not designed to measure in frozen soils and the returned records are thus not comparable
+with values from non frozen soil.
 }
 \examples{
 calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")

@@ -456,25 +456,25 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     item$sensors <- purrr::map(item$sensors, function(sensor) {
         sensor$values <- table[[sensor$metadata@name]]
         sensor})
-    item <- .prep_crop_edit_source_state(item, start, last_datetime)
+    item <- .prep_crop_edit_states(item, start, last_datetime)
     item
 }
 
-.prep_crop_edit_source_state <- function(item, start, end) {
+.prep_crop_edit_states <- function(item, start, end) {
     sensor_function <- function(sensor) {
-        states_index <- which(sensor$states$tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
-        if(length(states_index) == 0) {
+        if(nrow(sensor$states) == 0) {
             return(sensor)
         }
+        states_index <- seq_len(nrow(sensor$states))
         to_delete_start <- rep(FALSE, length(states_index))
         to_delete_end <- rep(FALSE, length(states_index))
         if(!is.null(start)) {
             to_delete_start <- sensor$states[states_index,]$end < start
-            sensor$states[[states_index, "start"]] <- max(sensor$states[[states_index, "start"]], start)
+            sensor$states[states_index, "start"] <- pmax(sensor$states[states_index, "start"], start)
         }
         if(!is.null(end)) {
             to_delete_end <- sensor$states[states_index,]$start > end
-            sensor$states[[states_index, "end"]] <- min(sensor$states[[states_index, "end"]], end)
+            sensor$states[states_index, "end"] <- pmin(sensor$states[states_index, "end"], end)
         }
         index_to_delete <- states_index[to_delete_start | to_delete_end]
         if(length(index_to_delete) > 0) {

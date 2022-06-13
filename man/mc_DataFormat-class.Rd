@@ -41,7 +41,7 @@ attr(,"logger_type"): character(0)
 
 \item{\code{na_strings}}{strings for NA values (default NA)}
 
-\item{\code{error_value}}{§value means error of sensor (default NA)§}
+\item{\code{error_value}}{value means error of sensor (default NA)}
 
 \item{\code{columns}}{list with names and indexes of value columns (default list())}
 

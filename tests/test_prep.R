@@ -144,6 +144,21 @@ test_that("mc_prep_crop", {
     test_calc_data_format(cropped_calc_data)
 })
 
+test_that("mc_prep_crop errors", {
+    expect_warning(data <- mc_read_files("data/TOMST-error", "TOMST"))
+    cropped_data <- mc_prep_crop(data, start=lubridate::ymd_hm("2022-02-24 07:45"), end=lubridate::ymd_hm("2022-02-24 10:30"))
+    states <- dplyr::filter(cropped_data$data_93142777$loggers[[1]]$sensors$TMS_T2$states, tag == myClim:::.model_const_SENSOR_STATE_ERROR)
+    expect_equal(nrow(states), 4)
+    expect_equal(states$start, c(lubridate::ymd_hm("2022-02-24 07:45"),
+                                 lubridate::ymd_hm("2022-02-24 09:00"),
+                                 lubridate::ymd_hm("2022-02-24 09:45"),
+                                 lubridate::ymd_hm("2022-02-24 10:15")))
+    expect_equal(states$end, c(lubridate::ymd_hm("2022-02-24 08:30"),
+                               lubridate::ymd_hm("2022-02-24 09:15"),
+                               lubridate::ymd_hm("2022-02-24 09:45"),
+                               lubridate::ymd_hm("2022-02-24 10:30")))
+})
+
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
     data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv")
     test_function <- if(exists(".prep_get_uncleaned_loggers")) .prep_get_uncleaned_loggers else myClim:::.prep_get_uncleaned_loggers
