@@ -177,11 +177,11 @@ mc_prep_clean <- function(data, silent=FALSE) {
     purrr::reduce(loggers, c)
 }
 
-.prep_warn_if_datetime_step_unprocessed <- function(data) {
+.prep_check_datetime_step_unprocessed <- function(data, func=warning) {
     unprocessed_loggers <- .prep_get_uncleaned_loggers(data)
     if(length(unprocessed_loggers) > 0){
         loggers_text <- paste(unprocessed_loggers, collapse=", ")
-        warning(stringr::str_glue("Detected missed step in loggers {loggers_text}. Probably loggers weren't cleaned."))
+        func(stringr::str_glue("Detected missed step in loggers {loggers_text}. Probably loggers weren't cleaned."))
     }
 }
 

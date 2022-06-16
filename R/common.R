@@ -115,3 +115,6 @@
     lubridate::interval(min(table$start, na.rm=TRUE), max(table$end, na.rm=TRUE))
 }
 
+.common_get_logger_shift <- function(logger) {
+    as.integer(logger$datetime[[1]]) %% as.integer(logger$clean_info@step * 60)
+}

@@ -17,7 +17,7 @@
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
     myClim:::.common_stop_if_not_prep_format(data)
     data <- mc_filter(data, localities, sensors)
-    myClim:::.prep_warn_if_datetime_step_unprocessed(data)
+    myClim:::.prep_check_if_datetime_step_unprocessed(data)
     loggers <- myClim:::.common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {
