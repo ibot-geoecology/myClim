@@ -118,3 +118,25 @@
 .common_get_logger_shift <- function(logger) {
     as.integer(logger$datetime[[1]]) %% as.integer(logger$clean_info@step * 60)
 }
+
+.common_crop_states <- function(sensor, intervals) {
+    state_function <- function(tag, start, end, value) {
+        state_interval <- lubridate::interval(start, end)
+        new_state_intervals <- purrr::discard(lubridate::intersect(state_interval, intervals), ~ is.na(.x))
+        return(list(tag=tag,
+                    start=lubridate::int_start(new_state_intervals),
+                    end=lubridate::int_end(new_state_intervals),
+                    value=value))
+    }
+
+    sensor$states <- purrr::pmap_dfr(sensor$states, state_function)
+    sensor
+}
+
+.common_get_time_series_intervals <- function(datetime, filter) {
+    rle_output <- rle(filter)
+    cumsum_lengths <- cumsum(rle_output$lengths)
+    start_indexes <- (c(0, cumsum_lengths[-length(cumsum_lengths)]) + 1)[rle_output$values]
+    end_indexes <- cumsum_lengths[rle_output$values]
+    lubridate::interval(datetime[start_indexes], datetime[end_indexes])
+}

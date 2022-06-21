@@ -346,13 +346,10 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     if(!any(error_filter)) {
         return(sensor)
     }
-    rle_output <- rle(error_filter)
-    cumsum_lengths <- cumsum(rle_output$lengths)
-    start_indexes <- (c(0, cumsum_lengths[-length(cumsum_lengths)]) + 1)[rle_output$values]
-    end_indexes <- cumsum_lengths[rle_output$values]
+    error_intervals <- myClim:::.common_get_time_series_intervals(datetime, error_filter)
     error_states <- data.frame(tag = myClim:::.model_const_SENSOR_STATE_ERROR,
-                               start = datetime[start_indexes],
-                               end = datetime[end_indexes],
+                               start = lubridate::int_start(error_intervals),
+                               end = lubridate::int_end(error_intervals),
                                value = as.character(error_value))
     sensor$values[error_filter] <- NA
     if(nrow(sensor$states) == 0) {

@@ -26,9 +26,6 @@ data.frame with columns:
 \description{
 This function return data.frame with information from cleaning the loggers time series see \code{\link[=mc_prep_clean]{mc_prep_clean()}}
 }
-\details{
-
-}
 \seealso{
 \code{\link[=mc_prep_clean]{mc_prep_clean()}}
 }

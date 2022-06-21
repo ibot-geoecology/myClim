@@ -461,28 +461,16 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 }
 
 .prep_crop_edit_states <- function(item, start, end) {
+    if(is.null(start)) {
+        start <- min(item$datetime)
+    }
+    if(is.null(end)) {
+        end <- max(item$datetime)
+    }
+    interval <- lubridate::interval(start, end)
+
     sensor_function <- function(sensor) {
-        if(nrow(sensor$states) == 0) {
-            return(sensor)
-        }
-        states_index <- seq_len(nrow(sensor$states))
-        to_delete_start <- rep(FALSE, length(states_index))
-        to_delete_end <- rep(FALSE, length(states_index))
-        if(!is.null(start)) {
-            to_delete_start <- sensor$states[states_index,]$end < start
-            sensor$states[states_index, "start"] <- pmax(sensor$states[states_index, "start"], start)
-        }
-        if(!is.null(end)) {
-            to_delete_end <- sensor$states[states_index,]$start > end
-            sensor$states[states_index, "end"] <- pmin(sensor$states[states_index, "end"], end)
-        }
-        index_to_delete <- states_index[to_delete_start | to_delete_end]
-        if(length(index_to_delete) > 0) {
-            selector <- rep(TRUE, nrow(sensor$states))
-            selector[index_to_delete] <- FALSE
-            sensor$states <- sensor$states[selector,]
-        }
-        sensor
+        myClim:::.common_crop_states(sensor, interval)
     }
 
     item$sensors <- purrr::map(item$sensors, sensor_function)
