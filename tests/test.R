@@ -57,7 +57,7 @@ test_data_length <- function(item) {
 }
 
 test_cleaning <- function(logger) {
-    if(!myClim:::.prep_is_logger_cleaned(logger)) {
+    if(!myClim:::.prep_is_logger_cleaned(logger) || is.na(logger$clean_info@count_missed)) {
         return()
     }
     expect_equal(logger$clean_info@count_missed, length(purrr::keep(logger$sensors[[1]]$values, ~ is.na(.x))))

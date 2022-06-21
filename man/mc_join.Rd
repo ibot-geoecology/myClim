@@ -17,5 +17,7 @@ Function join sensors from different loggers. Loggers with same type \link{mc_Lo
 Every sensore from first logger must have pair sensor from second one with same height.
 }
 \details{
-Name of result sensor is used from logger with older data.
+Name of result sensor is used from logger with older data. If serial_number is not equal in joining loggers, then
+result serial_number is NA. Clean info is changed to NA except step. If uncalibrated sensor is joining with calibrated one,
+then calibration inforamtion must be empty for uncalibrated sensor.
 }

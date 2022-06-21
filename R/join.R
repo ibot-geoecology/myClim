@@ -33,7 +33,8 @@ mc_join <- function(data) {
         }
         .join_loggers_same_type(locality$loggers[indexes])
     }
-    purrr::map(unique_types, type_function)
+    locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
+    locality
 }
 
 .join_loggers_same_type <- function(loggers) {
@@ -68,10 +69,10 @@ mc_join <- function(data) {
     names_table <- .join_get_names_table(logger1, logger2)
     l1_table <- myClim:::.common_sensor_values_as_tibble(logger1)
     colnames(l1_table) <- .join_get_logger_table_column_names(colnames(l1_table), names_table, TRUE)
-    data_table <- dplyr::left_join(data_table, l1_table)
+    data_table <- dplyr::left_join(data_table, l1_table, by="datetime")
     l2_table <- myClim:::.common_sensor_values_as_tibble(logger2)
     colnames(l2_table) <- .join_get_logger_table_column_names(colnames(l2_table), names_table, FALSE)
-    data_table <- dplyr::left_join(data_table, l2_table)
+    data_table <- dplyr::left_join(data_table, l2_table, by="datetime")
     data_table <- .join_add_select_column(data_table, names_table)
     .join_get_joined_logger(logger1, logger2, data_table, names_table)
 }
@@ -83,7 +84,7 @@ mc_join <- function(data) {
     l2_heights <- purrr::map_chr(logger2$sensors, ~ .x$metadata@height)
     l1 <- tibble::tibble(height=l1_heights, l1_name=l1_names, l1_new_name=paste0("l1_", l1_names))
     l2 <- tibble::tibble(height=l2_heights, l2_name=l2_names, l2_new_name=paste0("l2_", l2_names))
-    dplyr::left_join(l1, l2)
+    dplyr::left_join(l1, l2, by="height")
 }
 
 .join_get_logger_table_column_names <- function (old_names, names_table, is_l1) {
@@ -129,33 +130,47 @@ mc_join <- function(data) {
 
     l1_intervals <- myClim:::.common_get_time_series_intervals(data_table$datetime, data_table$use_l1)
     l2_intervals <- myClim:::.common_get_time_series_intervals(data_table$datetime, !data_table$use_l1)
+    l1_origin_interval <- lubridate::interval(dplyr::first(logger1$datetime), dplyr::last(logger1$datetime))
+    l2_origin_interval <- lubridate::interval(dplyr::first(logger2$datetime), dplyr::last(logger2$datetime))
     sensor_function <- function (l1_sensor_name) {
         l1_sensor <- result_logger$sensors[[l1_sensor_name]]
         current_name <- l1_sensor_name == names_table$l1_name
-        l2_sensor_name <- names_table$l2_name[current_name]
+        l2_sensor_name <- unname(names_table$l2_name[current_name])
         l2_sensor <- logger2$sensors[[l2_sensor_name]]
         if(l1_sensor$metadata@sensor_id != l2_sensor$metadata@sensor_id) {
             stop(stringr::str_glue(.join_const_MESSAGE_DIFFERENT_SENSOR_ID))
         }
         result <- l1_sensor
         result$metadata@calibrated <- l1_sensor$metadata@calibrated || l2_sensor$metadata@calibrated
-        if(result$metadata@calibrated) {
-
-        }
+        result$calibration <- .join_get_sensors_calibration(l1_sensor, l2_sensor,
+                                                            l1_origin_interval, l2_origin_interval,
+                                                            l1_intervals, l2_intervals)
+        result$states <- .join_get_sensors_states(l1_sensor, l2_sensor, l1_intervals, l2_intervals)
+        result$values <- data_table[[names_table$l2_new_name[current_name]]]
+        result$values[data_table$use_l1] <- data_table[[names_table$l1_new_name[current_name]]][data_table$use_l1]
+        result
     }
-
-    result_logger$sensors <- purrr::map(names(result_logger$sensors), sensor_function)
+    sensor_names <- names(result_logger$sensors)
+    result_logger$sensors <- purrr::map(sensor_names, sensor_function)
+    names(result_logger$sensors) <- sensor_names
     result_logger
 }
 
 .join_get_sensors_calibration <- function(l1_sensor, l2_sensor, l1_origin_interval, l2_origin_interval, l1_intervals, l2_intervals) {
     if((l1_sensor$metadata@calibrated && !l2_sensor$metadata@calibrated && nrow(l2_sensor$calibration) > 0) ||
        (!l1_sensor$metadata@calibrated && l2_sensor$metadata@calibrated && nrow(l1_sensor$calibration) > 0)) {
-        stop(join_const_MESSAGE_INCONSISTENT_CALIBRATION)
+        stop(.join_const_MESSAGE_INCONSISTENT_CALIBRATION)
     }
 
     l1_calibration <- .join_get_sensor_calibration(l1_sensor, l1_origin_interval, l1_intervals)
     l2_calibration <- .join_get_sensor_calibration(l2_sensor, l2_origin_interval, l2_intervals)
+    calibration <- dplyr::arrange(dplyr::bind_rows(l1_calibration, l2_calibration), datetime)
+    na_calibration <- is.na(calibration$cor_factor) & is.na(calibration$cor_slope)
+    rle_na <- rle(na_calibration)
+    if(rle_na$values[[1]]) {
+        calibration <- dplyr::filter(calibration, dplyr::row_number() > rle_na$lengths[[1]])
+    }
+    as.data.frame(calibration)
 }
 
 .join_get_sensor_calibration <- function(sensor, origin_data_interval, intervals) {
@@ -165,26 +180,33 @@ mc_join <- function(data) {
         if(length(result_intervals) == 0) {
             return(tibble::tibble())
         }
-        tibble::tibble(interval=result_intervals, cor_factor=cor_factor, cor_slope=cor_slope)
+        tibble::tibble(datetime=lubridate::int_start(result_intervals), cor_factor=cor_factor, cor_slope=cor_slope)
     }
 
     if(nrow(sensor$calibration) == 0) {
-        return(tibble::tibble(interval=intervals, cor_factor=NA_real_, cor_slope=NA_real_))
+        return(tibble::tibble(datetime=lubridate::int_start(intervals), cor_factor=NA_real_, cor_slope=NA_real_))
     }
 
     starts <- sensor$calibration$datetime
-    ends <- c(sensor$calibration$datetime[-1], last_datetime)
+    ends <- c(sensor$calibration$datetime[-1], lubridate::int_end(origin_data_interval))
     cor_factor <- sensor$calibration$cor_factor
     cor_slope <- sensor$calibration$cor_slope
-    if(starts[1] != lubridate::int_start(origin_data_interval)) {
+    if(starts[[1]] > lubridate::int_start(origin_data_interval)) {
         starts <- c(lubridate::int_start(origin_data_interval), starts)
         ends <- c(starts[2], ends)
         cor_factor <- c(NA_real_, sensor$calibration$cor_factor)
         cor_slope <- c(NA_real_, sensor$calibration$cor_slope)
     }
 
-    return(purrr::pmap_dfr(list(start=sensor$calibration$datetime,
+    return(purrr::pmap_dfr(list(start=starts,
                                 end=ends,
                                 cor_factor=sensor$calibration$cor_factor,
-                                cor_slope=sensor$calibration$cor_slope)), calibration_function)
+                                cor_slope=sensor$calibration$cor_slope), calibration_function))
 }
+
+.join_get_sensors_states <- function(l1_sensor, l2_sensor, l1_intervals, l2_intervals) {
+    l1_sensor <- myClim:::.common_crop_states(l1_sensor, l1_intervals)
+    l2_sensor <- myClim:::.common_crop_states(l2_sensor, l2_intervals)
+    as.data.frame(dplyr::bind_rows(l1_sensor$states, l2_sensor$states))
+}
+
