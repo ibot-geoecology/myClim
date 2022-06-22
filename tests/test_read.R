@@ -26,6 +26,7 @@ test_that("mc_read_data csv without localities", {
     expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$start, dplyr::first(data$A1E05$loggers[[1]]$datetime))
     expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$end, dplyr::last(data$A1E05$loggers[[1]]$datetime))
     expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$value, normalizePath("./data/TOMST/data_91184101_0.csv"))
+    expect_equal(data$A1E05$loggers[[2]]$metadata@serial_number, "94230002")
 })
 
 test_that("mc_read_data TOMST format datetime", {
@@ -50,7 +51,7 @@ test_that("mc_read_files TOMST directory", {
     expect_warning(data <- mc_read_files(c("data/TOMST", "data/eco-snow"), "TOMST"))
     test_prep_data_format(data)
     expect_equal(data[[1]]$metadata@tz_type, mc_const_TZ_UTC)
-    expect_equal(length(data), 5)
+    expect_equal(length(data), 6)
     expect_equal(length(data[[1]]$loggers), 1)
     expect_equal(data$`92192250`$loggers[[1]]$metadata@type, myClim:::.model_const_LOGGER_TOMST_DENDROMETER)
     expect_equal(length(data$`92192250`$loggers[[1]]$sensors), 2)

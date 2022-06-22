@@ -170,8 +170,8 @@ test_that(".prep_get_loggers_datetime_step_unprocessed", {
 test_that(".prep_get_utc_localities", {
     expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
     test_function <- if(exists(".prep_get_utc_localities")) .prep_get_utc_localities else myClim:::.prep_get_utc_localities
-    expect_equal(test_function(data), c("91184101", "92192250", "94184102", "94184103", "94184104"))
-    data_clean <- mc_prep_meta_locality(data, list(`91184101`=60, `92192250`=60, `94184102`=60, `94184103`=60, `94184104`=60), "tz_offset")
+    expect_equal(test_function(data), c("91184101", "92192250", "94184102", "94184103", "94184104", "94230002"))
+    data_clean <- mc_prep_meta_locality(data, list(`91184101`=60, `92192250`=60, `94184102`=60, `94184103`=60, `94184104`=60, `94230002`=60), "tz_offset")
     expect_equal(length(test_function(data_clean)), 0)
 })
 
