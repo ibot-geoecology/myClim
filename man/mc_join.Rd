@@ -2,19 +2,22 @@
 % Please edit documentation in R/join.R
 \name{mc_join}
 \alias{mc_join}
-\title{Joining sensors from different loggers}
+\title{§Joining sensors from different loggers}
 \usage{
-mc_join(data)
+mc_join(data, comp_sensors = NULL)
 }
 \arguments{
 \item{data}{myClim object in Prep-format. See \link{myClim-package}}
+
+\item{comp_sensors}{senors for compare and select source logger; If NULL then first is used. (default NULL)}
 }
 \value{
-myClim object with joined sensors.
+myClim object with joined loggers.§
 }
 \description{
 Function join sensors from different loggers. Loggers with same type \link{mc_LoggerMetadata} and step are joined.
-Every sensore from first logger must have pair sensor from second one with same height.
+Every sensore from first logger must have pair sensor from second one with same height. If sensor values are different,
+then user interactively select source logger.
 }
 \details{
 Name of result sensor is used from logger with older data. If serial_number is not equal in joining loggers, then

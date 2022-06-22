@@ -129,7 +129,7 @@
                     value=value))
     }
 
-    sensor$states <- purrr::pmap_dfr(sensor$states, state_function)
+    sensor$states <- as.data.frame(purrr::pmap_dfr(sensor$states, state_function))
     sensor
 }
 

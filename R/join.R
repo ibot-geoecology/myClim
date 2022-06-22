@@ -1,12 +1,14 @@
 
 .join_const_MESSAGE_DIFFERENT_SENSOR_ID <- "Parameters sensor_id in {logger1$metadata@serial_number}-{sensor1$metadata@name} and {logger2$metadata@serial_number}-{sensor2$metadata@name} are different."
 .join_const_MESSAGE_INCONSISTENT_CALIBRATION <- "Calibration in sensors is inconsistent."
+.join_const_MESSAGE_SENSORS_NOT_FOUND <- "Selected sensors not found - {sensor_name} used."
 
-#' Joining sensors from different loggers
+#' §Joining sensors from different loggers
 #'
 #' @description
 #' Function join sensors from different loggers. Loggers with same type [mc_LoggerMetadata] and step are joined.
-#' Every sensore from first logger must have pair sensor from second one with same height.
+#' Every sensore from first logger must have pair sensor from second one with same height. If sensor values are different,
+#' then user interactively select source logger.
 #'
 #' @details
 #' Name of result sensor is used from logger with older data. If serial_number is not equal in joining loggers, then
@@ -14,37 +16,37 @@
 #' then calibration inforamtion must be empty for uncalibrated sensor.
 #'
 #' @param data myClim object in Prep-format. See [myClim-package]
-#' @return myClim object with joined sensors.
+#' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
+#' @return myClim object with joined loggers.§
 #' @export
 #' @examples
-mc_join <- function(data) {
+mc_join <- function(data, comp_sensors=NULL) {
     myClim:::.common_stop_if_not_prep_format(data)
     myClim:::.prep_check_datetime_step_unprocessed(data, stop)
-    purrr::map(data, .join_locality)
-}
-
-.join_locality <- function(locality) {
-    types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
-    unique_types <- unique(types)
-    type_function <- function(logger_type) {
-        indexes <- which(types == logger_type)
-        if(length(indexes) == 1) {
-            return(locality$loggers[[indexes]])
+    locality_function <- function(locality) {
+        types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
+        unique_types <- unique(types)
+        type_function <- function(logger_type) {
+            indexes <- which(types == logger_type)
+            if(length(indexes) == 1) {
+                return(locality$loggers[[indexes]])
+            }
+            .join_loggers_same_type(locality$loggers[indexes], comp_sensors)
         }
-        .join_loggers_same_type(locality$loggers[indexes])
+        locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
+        locality
     }
-    locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
-    locality
+    purrr::map(data, locality_function)
 }
 
-.join_loggers_same_type <- function(loggers) {
+.join_loggers_same_type <- function(loggers, comp_sensors) {
     steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
     shifts <- purrr::map_int(loggers, ~ as.integer(myClim:::.common_get_logger_shift(.x)))
     heights <- .join_get_heights(loggers)
     table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts, heights=heights)
     table <- dplyr::group_by(table, steps, shifts, heights)
     group_function <- function(group, .y) {
-        purrr::reduce(loggers[group$logger_id], .join_loggers)
+        .join_loggers(loggers[group$logger_id], comp_sensors)
     }
     dplyr::group_map(table, group_function)
 }
@@ -57,24 +59,27 @@ mc_join <- function(data) {
     purrr::map_chr(loggers, logger_function)
 }
 
-.join_loggers <- function(logger1, logger2) {
-    if(logger2$datetime[[1]] < logger1$datetime[[1]]) {
-        temp <- logger1
-        logger1 <- logger2
-        logger2 <- temp
+.join_loggers <- function(loggers, comp_sensors) {
+    reduce_function <- function(logger1, logger2) {
+        if(logger2$datetime[[1]] < logger1$datetime[[1]]) {
+            temp <- logger1
+            logger1 <- logger2
+            logger2 <- temp
+        }
+        start <- logger1$datetime[[1]]
+        end <- max(dplyr::last(logger1$datetime), dplyr::last(logger2$datetime))
+        data_table <- tibble::tibble(datetime = seq(start, end, logger1$clean_info@step * 60))
+        names_table <- .join_get_names_table(logger1, logger2)
+        l1_table <- myClim:::.common_sensor_values_as_tibble(logger1)
+        colnames(l1_table) <- .join_get_logger_table_column_names(colnames(l1_table), names_table, TRUE)
+        data_table <- dplyr::left_join(data_table, l1_table, by="datetime")
+        l2_table <- myClim:::.common_sensor_values_as_tibble(logger2)
+        colnames(l2_table) <- .join_get_logger_table_column_names(colnames(l2_table), names_table, FALSE)
+        data_table <- dplyr::left_join(data_table, l2_table, by="datetime")
+        data_table <- .join_add_select_column(data_table, names_table, comp_sensors)
+        .join_get_joined_logger(logger1, logger2, data_table, names_table)
     }
-    start <- logger1$datetime[[1]]
-    end <- max(dplyr::last(logger1$datetime), dplyr::last(logger2$datetime))
-    data_table <- tibble::tibble(datetime = seq(start, end, logger1$clean_info@step * 60))
-    names_table <- .join_get_names_table(logger1, logger2)
-    l1_table <- myClim:::.common_sensor_values_as_tibble(logger1)
-    colnames(l1_table) <- .join_get_logger_table_column_names(colnames(l1_table), names_table, TRUE)
-    data_table <- dplyr::left_join(data_table, l1_table, by="datetime")
-    l2_table <- myClim:::.common_sensor_values_as_tibble(logger2)
-    colnames(l2_table) <- .join_get_logger_table_column_names(colnames(l2_table), names_table, FALSE)
-    data_table <- dplyr::left_join(data_table, l2_table, by="datetime")
-    data_table <- .join_add_select_column(data_table, names_table)
-    .join_get_joined_logger(logger1, logger2, data_table, names_table)
+    purrr::reduce(loggers, reduce_function)
 }
 
 .join_get_names_table <- function(logger1, logger2){
@@ -102,19 +107,40 @@ mc_join <- function(data) {
     purrr::map_chr(old_names, new_name_function)
 }
 
-.join_add_select_column <- function(data_table, names_table) {
-    l1_column <- dplyr::first(names_table$l1_new_name)
-    l2_column <- dplyr::first(names_table$l2_new_name)
-    equal_data <- data_table[[l1_column]] == data_table[[l2_column]]
-    equal_data[is.na(equal_data)] <- FALSE
-    data_l1 <- is.na(data_table[[l2_column]]) | equal_data
-    data_l2 <- is.na(data_table[[l1_column]])
+.join_add_select_column <- function(data_table, names_table, comp_sensors) {
+    columns <- .join_get_compare_columns(names_table, comp_sensors)
+    equal_data <- .join_get_equal_data(data_table, columns)
+    data_l1 <- purrr::reduce(purrr::map(columns$l2, ~ is.na(data_table[[.x]])), `&`) | equal_data
+    data_l2 <- purrr::reduce(purrr::map(columns$l1, ~ is.na(data_table[[.x]])), `&`)
     problems <- !(data_l1 | data_l2)
     if(any(problems)) {
         stop("zatím to neumím řešit")
     }
     data_table$use_l1 <- data_l1
     data_table
+}
+
+.join_get_compare_columns <- function(names_table, comp_sensors) {
+    l1_columns <- dplyr::first(names_table$l1_new_name)
+    l2_columns <- dplyr::first(names_table$l2_new_name)
+    if(!is.null(comp_sensors)) {
+        sensors_select <- names_table$l1_name %in% comp_sensors | names_table$l2_name %in% comp_sensors
+        if(!any(sensors_select)) {
+            sensor_name <- dplyr::first(names_table$l1_name)
+            warning(stringr::str_glue(.join_const_MESSAGE_SENSORS_NOT_FOUND))
+        } else {
+            l1_columns <- names_table$l1_new_name[sensors_select]
+            l2_columns <- names_table$l2_new_name[sensors_select]
+        }
+    }
+    tibble::tibble(l1=l1_columns, l2=l2_columns)
+}
+
+.join_get_equal_data <- function(data_table, columns) {
+    is_equal <- purrr::map2(columns$l1, columns$l2, ~ dplyr::near(data_table[[.x]], data_table[[.y]]))
+    result <- purrr::reduce(is_equal, `&`)
+    result[is.na(result)] <- FALSE
+    result
 }
 
 .join_get_joined_logger <- function(logger1, logger2, data_table, names_table) {

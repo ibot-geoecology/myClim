@@ -461,6 +461,16 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 }
 
 .prep_crop_edit_states <- function(item, start, end) {
+    if(length(item$datetime) == 0) {
+        rm_states <- function(sensor) {
+            sensor$states <- data.frame()
+            sensor
+        }
+
+        item$sensors <- purrr::map(item$sensors, rm_states)
+        return(item)
+    }
+
     if(is.null(start)) {
         start <- min(item$datetime)
     }

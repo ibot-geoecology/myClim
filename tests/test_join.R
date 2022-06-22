@@ -13,7 +13,7 @@ test_that("mc_join", {
     cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
     cleaned_data$`91184101`$loggers[[2]]$sensors$TM_T$calibration <- data.frame()
     cleaned_data$`91184101`$loggers[[3]]$sensors$TM_T$calibration <- data.frame()
-    joined_data <- mc_join(cleaned_data)
+    expect_warning(joined_data <- mc_join(cleaned_data, comp_sensors=c("TMS_T1", "TMS_T2")))
     test_prep_data_format(joined_data)
     expect_equal(length(joined_data$`91184101`$loggers), 1)
     expect_equal(length(joined_data$`94184102`$loggers), 1)
