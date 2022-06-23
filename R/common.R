@@ -119,7 +119,7 @@
     as.integer(logger$datetime[[1]]) %% as.integer(logger$clean_info@step * 60)
 }
 
-.common_crop_states <- function(sensor, intervals) {
+.common_crop_states_table <- function(states_table, intervals) {
     state_function <- function(tag, start, end, value) {
         state_interval <- lubridate::interval(start, end)
         new_state_intervals <- purrr::discard(lubridate::intersect(state_interval, intervals), ~ is.na(.x))
@@ -129,8 +129,7 @@
                     value=value))
     }
 
-    sensor$states <- as.data.frame(purrr::pmap_dfr(sensor$states, state_function))
-    sensor
+    as.data.frame(purrr::pmap_dfr(states_table, state_function))
 }
 
 .common_get_time_series_intervals <- function(datetime, filter) {

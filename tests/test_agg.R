@@ -1,5 +1,4 @@
 library(testthat)
-library(myClim)
 source("test.R")
 
 test_that("mc_agg UTC", {

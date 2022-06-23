@@ -480,7 +480,8 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     interval <- lubridate::interval(start, end)
 
     sensor_function <- function(sensor) {
-        myClim:::.common_crop_states(sensor, interval)
+        sensor$states <- myClim:::.common_crop_states_table(sensor$states, interval)
+        sensor
     }
 
     item$sensors <- purrr::map(item$sensors, sensor_function)

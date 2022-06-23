@@ -30,10 +30,12 @@ Imports:
     tibble,
     dplyr,
     purrr,
+    tidyr,
     ggplot2,
     ggforce,
     viridis,
-    runner
+    runner,
+    utils
 Roxygen: list(markdown = TRUE)
 Suggests: 
     rmarkdown,
