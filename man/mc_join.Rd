@@ -2,7 +2,7 @@
 % Please edit documentation in R/join.R
 \name{mc_join}
 \alias{mc_join}
-\title{Joining sensors from different loggers}
+\title{§Joining sensors from different loggers}
 \usage{
 mc_join(data, comp_sensors = NULL)
 }
@@ -12,7 +12,7 @@ mc_join(data, comp_sensors = NULL)
 \item{comp_sensors}{senors for compare and select source logger; If NULL then first is used. (default NULL)}
 }
 \value{
-myClim object with joined loggers.
+myClim object with joined loggers.§
 }
 \description{
 Function join sensors from different loggers. Loggers with same type \link{mc_LoggerMetadata} and step are joined.

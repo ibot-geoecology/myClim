@@ -17,7 +17,7 @@
 
 .join_const_PLOT_NEIGHBORHOODS_DAYS <- 7
 
-#' Joining sensors from different loggers
+#' §Joining sensors from different loggers
 #'
 #' @description
 #' Function join sensors from different loggers. Loggers with same type [mc_LoggerMetadata] and step are joined.
@@ -31,7 +31,7 @@
 #'
 #' @param data myClim object in Prep-format. See [myClim-package]
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
-#' @return myClim object with joined loggers.
+#' @return myClim object with joined loggers.§
 #' @export
 #' @examples
 mc_join <- function(data, comp_sensors=NULL) {

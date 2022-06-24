@@ -42,6 +42,8 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_HOBO_T_F <- "HOBO_T_F"
 .model_const_SENSOR_HOBO_RH <- "HOBO_RH"
 
+.model_const_WRONG_CALIBRATION_SENSOR_ID <- .model_const_SENSOR_TMS_TMSmoisture
+
 # universal sensors
 .model_const_SENSOR_count <- "count"
 .model_const_SENSOR_coverage <- "coverage"

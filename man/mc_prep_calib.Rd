@@ -4,12 +4,13 @@
 \alias{mc_prep_calib}
 \title{Sensor calibration}
 \usage{
-mc_prep_calib(data, sensors, localities = NULL)
+mc_prep_calib(data, sensors = NULL, localities = NULL)
 }
 \arguments{
 \item{data}{myClim object in Prep-format or Calc-format having calibration data in metadata slot \code{sensor$calibration}}
 
-\item{sensors}{vector of sensor names where to perform calibration see \code{names(mc_data_sensors)}}
+\item{sensors}{vector of sensor names where to perform calibration see \code{names(mc_data_sensors)}§; if NULL,
+then calibrate all sensors with filled in calibration parameters§ (default NULL)}
 
 \item{localities}{vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)}
 }
@@ -21,9 +22,12 @@ This function calibrate values of sensor (microclimatic records) with the myClim
 Microclimatic records are changed and myClim object parameter sensor$metadata@calibrated is set to TRUE. It isn't possible to calibrate sensor multiple times.
 }
 \details{
-This function performs callibartion itself. It uses the calibration values (cor_factor, cor_slope) stored in myClim object sensor metadata sensor$calibration loaded with \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
+This function performs callibartion itself. It uses the calibration values (cor_factor, cor_slope) stored
+in myClim object sensor metadata sensor$calibration loaded with \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
+§Older data then first calbration \code{datetime} are calibrated by first parameters.§
 
-It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function. For TMSmoisture calibration (conversion to volumetric water content) use \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
+It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function.
+For TMSmoisture calibration (conversion to volumetric water content) use \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
 
 Only sensors with real value type can be calibrated. see \code{\link[=mc_data_sensors]{mc_data_sensors()}}
 }
