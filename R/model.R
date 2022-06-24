@@ -337,6 +337,48 @@ setMethod(
     }
 )
 
+setGeneric(
+    ".model_get_physical_description",
+    function(object){
+        standardGeneric(".model_get_physical_description")
+    }
+)
+
+setMethod(
+    ".model_get_physical_description",
+    "mc_SensorMetadata",
+    function(object) {
+        if(!(object@sensor_id %in% names(mc_data_sensors))) {
+            return(NA_character_)
+        }
+        sensor_info <- mc_data_sensors[[object@sensor_id]]
+        if(is.na(sensor_info@physical)) {
+            return(NA_character_)
+        }
+        physical <- mc_data_physical[[sensor_info@physical]]
+        physical@description
+    }
+)
+
+setGeneric(
+    ".model_get_sensor_description",
+    function(object){
+        standardGeneric(".model_get_sensor_description")
+    }
+)
+
+setMethod(
+    ".model_get_sensor_description",
+    "mc_SensorMetadata",
+    function(object) {
+        if(!(object@sensor_id %in% names(mc_data_sensors))) {
+            return(NA_character_)
+        }
+        sensor_info <- mc_data_sensors[[object@sensor_id]]
+        sensor_info@description
+    }
+)
+
 #' Class for logger file data format
 #'
 #' The Class used for parsing source data files. Typically the csv files downloaded from microclimatic loggers. 

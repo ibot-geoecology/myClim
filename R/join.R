@@ -45,7 +45,7 @@ mc_join <- function(data, comp_sensors=NULL) {
             if(length(indexes) == 1) {
                 return(locality$loggers[[indexes]])
             }
-            .join_loggers_same_type(locality$loggers[indexes], comp_sensors)
+            .join_loggers_same_type(locality$loggers[indexes], comp_sensors, locality$metadata@locality_id)
         }
         locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
         locality
@@ -53,7 +53,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     purrr::map(data, locality_function)
 }
 
-.join_loggers_same_type <- function(loggers, comp_sensors) {
+.join_loggers_same_type <- function(loggers, comp_sensors, locality_id) {
     steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
     shifts <- purrr::map_int(loggers, ~ as.integer(myClim:::.common_get_logger_shift(.x)))
     heights <- .join_get_heights(loggers)
@@ -62,7 +62,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     e_choice <- new.env()
     e_choice$choice <- NA_integer_
     group_function <- function(group, .y) {
-        .join_loggers(loggers[group$logger_id], comp_sensors, e_choice)
+        .join_loggers(loggers[group$logger_id], comp_sensors, e_choice, locality_id)
     }
     dplyr::group_map(table, group_function)
 }
@@ -75,7 +75,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     purrr::map_chr(loggers, logger_function)
 }
 
-.join_loggers <- function(loggers, comp_sensors, e_choice) {
+.join_loggers <- function(loggers, comp_sensors, e_choice, locality_id) {
     reduce_function <- function(logger1, logger2) {
         if(logger2$datetime[[1]] < logger1$datetime[[1]]) {
             temp <- logger1
@@ -92,7 +92,7 @@ mc_join <- function(data, comp_sensors=NULL) {
         l2_table <- myClim:::.common_sensor_values_as_tibble(logger2)
         colnames(l2_table) <- .join_get_logger_table_column_names(colnames(l2_table), names_table, FALSE)
         data_table <- dplyr::left_join(data_table, l2_table, by="datetime")
-        data_table <- .join_add_select_column(logger1, logger2, data_table, names_table, comp_sensors, e_choice)
+        data_table <- .join_add_select_column(logger1, logger2, data_table, names_table, comp_sensors, e_choice, locality_id)
         .join_get_joined_logger(logger1, logger2, data_table, names_table)
     }
     purrr::reduce(loggers, reduce_function)
@@ -123,7 +123,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     purrr::map_chr(old_names, new_name_function)
 }
 
-.join_add_select_column <- function(logger1, logger2, data_table, names_table, comp_sensors, e_choice) {
+.join_add_select_column <- function(logger1, logger2, data_table, names_table, comp_sensors, e_choice, locality_id) {
     columns <- .join_get_compare_columns(names_table, comp_sensors)
     equal_data <- .join_get_equal_data(data_table, columns)
     data_l1 <- purrr::reduce(purrr::map(columns$l2, ~ is.na(data_table[[.x]])), `&`) | equal_data
@@ -132,7 +132,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     problems <- !(data_l1 | data_l2)
     if(any(problems)) {
         if(is.na(e_choice$choice)) {
-            choice <- .join_ask_user_choice(logger1, logger2, data_table, problems, columns)
+            choice <- .join_ask_user_choice(logger1, logger2, data_table, problems, columns, locality_id)
             if(choice %in% c(.join_const_MENU_CHOICE_OLDER_ALWAYS, .join_const_MENU_CHOICE_NEWER_ALWAYS)) {
                 e_choice$choice <- choice
             }
@@ -172,17 +172,24 @@ mc_join <- function(data, comp_sensors=NULL) {
     result
 }
 
-.join_ask_user_choice <- function(logger1, logger2, data_table, problems, columns) {
+.join_ask_user_choice <- function(logger1, logger2, data_table, problems, columns, locality_id) {
     plot_interval <- lubridate::interval(min(data_table$datetime[problems]) - lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS),
                                          max(data_table$datetime[problems]) + lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS))
-    .join_print_info_logger(logger1, dplyr::first(columns$l1_orig), plot_interval, TRUE)
-    .join_print_info_logger(logger2, dplyr::first(columns$l2_orig), plot_interval, FALSE)
+    print(stringr::str_glue("Locality: {locality_id}"))
+    logger1_text <- .join_get_logger_text(logger1, TRUE)
+    print(logger1_text)
+    .join_print_info_logger(logger1, dplyr::first(columns$l1_orig))
+    logger2_text <- .join_get_logger_text(logger2, FALSE)
+    print(logger2_text)
+    .join_print_info_logger(logger2, dplyr::first(columns$l2_orig))
     problems_data_table <- dplyr::filter(data_table, lubridate::`%within%`(datetime, plot_interval))
     problems_data_table <- problems_data_table[c("datetime", columns$l1, columns$l2)]
     colnames(problems_data_table) <- c("datetime", paste0("Older ", columns$l1_orig), paste0("Newer ", columns$l2_orig))
     plot_data_table <- tidyr::pivot_longer(problems_data_table, !datetime)
     plot_data_table <- dplyr::filter(plot_data_table, !is.na(value))
-    myClim:::.plot_show_joining_chart(plot_data_table)
+    y_label <- .join_get_y_label(logger1, dplyr::first(columns$l1_orig))
+    #myClim:::
+    .plot_show_joining_chart(plot_data_table, stringr::str_glue("{locality_id}: {logger1_text} - {logger2_text}"), y_label)
     choice <- utils::menu(.join_const_MENU_CHOICES, title=.join_const_MENU_TITLE)
     if(choice %in% .join_const_MENU_EXIT_CHOICES) {
         stop(.join_const_MESSAGE_JOINING_EXIT)
@@ -190,14 +197,29 @@ mc_join <- function(data, comp_sensors=NULL) {
     choice
 }
 
-.join_print_info_logger <- function(logger, sensor_name, plot_interval, is_older) {
+.join_get_logger_text <- function(logger, is_older) {
     texts <- c(if(is_older) "Older logger" else "Newer logger",
                logger$metadata@type,
                logger$metadata@serial_number)
-    print(paste0(texts[!is.na(texts)], collapse = " "))
+    paste0(texts[!is.na(texts)], collapse = " ")
+}
+
+.join_print_info_logger <- function(logger, sensor_name) {
     source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
-    source_states <- myClim:::.common_crop_states_table(source_states, plot_interval)
     print(source_states)
+}
+
+.join_get_y_label <- function(logger, sensor_name) {
+    sensor <- logger$sensors[[sensor_name]]
+    sensor_description <- myClim:::.model_get_sensor_description(sensor$metadata)
+    physical_description <- myClim:::.model_get_physical_description(sensor$metadata)
+    if(!is.na(physical_description)) {
+        return(physical_description)
+    }
+    if(!is.na(sensor_description)) {
+        return(sensor_description)
+    }
+    return("Value")
 }
 
 .join_get_joined_logger <- function(logger1, logger2, data_table, names_table) {

@@ -441,8 +441,12 @@ mc_plot_line <- function(data, filename, sensors=NULL,
                    panel.border = ggplot2::element_blank())
 }
 
-.plot_show_joining_chart <- function(data_table) {
+.plot_show_joining_chart <- function(data_table, title, y_label) {
     p <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=datetime, y=value, group=name)) +
-        ggplot2::geom_line(ggplot2::aes(color=name))
+        ggplot2::geom_line(ggplot2::aes(color=name)) +
+        ggplot2::theme(legend.position="bottom") +
+        ggplot2::ggtitle(title) +
+        ggplot2::ylab(y_label) +
+        ggplot2::xlab("Date")
     print(p)
 }
