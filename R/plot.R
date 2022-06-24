@@ -450,3 +450,22 @@ mc_plot_line <- function(data, filename, sensors=NULL,
         ggplot2::xlab("Date")
     print(p)
 }
+
+.plot_prep_locality <- function(locality) {
+    logger_function <- function(logger, logger_id) {
+        sensor_function <- function(sensor) {
+            list(datetime=logger$datetime,
+                 name=stringr::str_glue("{logger_id} {sensor$metadata@name}"),
+                 value=sensor$values)
+        }
+        purrr::map_dfr(logger$sensors, sensor_function)
+    }
+
+    data_table <- imap_dfr(locality$loggers, logger_function)
+    p <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=datetime, y=value, group=name)) +
+        ggplot2::geom_line(ggplot2::aes(color=name)) +
+        ggplot2::theme(legend.position="bottom") +
+        ggplot2::ggtitle(locality$locality_id) +
+        ggplot2::xlab("Date")
+    print(p)
+}

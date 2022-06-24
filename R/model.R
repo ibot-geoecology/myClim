@@ -552,11 +552,11 @@ setMethod(
 )
 
 .get_tomst_datetime_format <- function(data, date_column){
-    if(stringr::str_detect(data[1, date_column], "\\d{4}\\.\\d{1,2}\\.\\d{1,2} \\d{2}:\\d{2}"))
+    if(stringr::str_detect(data[1, date_column], "\\d{4}\\.\\d{1,2}\\.\\d{1,2} \\d{1,2}:\\d{2}"))
     {
         return("%Y.%m.%d %H:%M")
     }
-    if(stringr::str_detect(data[1, date_column], "\\d{1,2}\\.\\d{1,2}\\.\\d{4} \\d{2}:\\d{2}"))
+    if(stringr::str_detect(data[1, date_column], "\\d{1,2}\\.\\d{1,2}\\.\\d{4} \\d{1,2}:\\d{2}"))
     {
         return("%d.%m.%Y %H:%M")
     }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/join.R
 \name{mc_join}
 \alias{mc_join}
-\title{§Joining sensors from different loggers}
+\title{Joining sensors from different loggers}
 \usage{
 mc_join(data, comp_sensors = NULL)
 }
@@ -12,7 +12,7 @@ mc_join(data, comp_sensors = NULL)
 \item{comp_sensors}{senors for compare and select source logger; If NULL then first is used. (default NULL)}
 }
 \value{
-myClim object with joined loggers.§
+myClim object with joined loggers.
 }
 \description{
 Function join sensors from different loggers. Loggers with same type \link{mc_LoggerMetadata} and step are joined.
@@ -20,7 +20,7 @@ Every sensore from first logger must have pair sensor from second one with same 
 then user interactively select source logger.
 }
 \details{
-Name of result sensor is used from logger with older data. If serial_number is not equal in joining loggers, then
-result serial_number is NA. Clean info is changed to NA except step. If uncalibrated sensor is joining with calibrated one,
+Name of result sensor is used from logger with older data. If \code{serial_number} is not equal in joining loggers, then
+result \code{serial_number} is \code{NA}. Clean info is changed to \code{NA} except step. If uncalibrated sensor is joining with calibrated one,
 then calibration inforamtion must be empty for uncalibrated sensor.
 }

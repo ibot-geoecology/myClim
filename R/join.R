@@ -17,7 +17,7 @@
 
 .join_const_PLOT_NEIGHBORHOODS_DAYS <- 7
 
-#' §Joining sensors from different loggers
+#' Joining sensors from different loggers
 #'
 #' @description
 #' Function join sensors from different loggers. Loggers with same type [mc_LoggerMetadata] and step are joined.
@@ -25,13 +25,13 @@
 #' then user interactively select source logger.
 #'
 #' @details
-#' Name of result sensor is used from logger with older data. If serial_number is not equal in joining loggers, then
-#' result serial_number is NA. Clean info is changed to NA except step. If uncalibrated sensor is joining with calibrated one,
+#' Name of result sensor is used from logger with older data. If `serial_number` is not equal in joining loggers, then
+#' result `serial_number` is `NA`. Clean info is changed to `NA` except step. If uncalibrated sensor is joining with calibrated one,
 #' then calibration inforamtion must be empty for uncalibrated sensor.
 #'
 #' @param data myClim object in Prep-format. See [myClim-package]
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
-#' @return myClim object with joined loggers.§
+#' @return myClim object with joined loggers.
 #' @export
 #' @examples
 mc_join <- function(data, comp_sensors=NULL) {
@@ -173,9 +173,11 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_ask_user_choice <- function(logger1, logger2, data_table, problems, columns, locality_id) {
-    plot_interval <- lubridate::interval(min(data_table$datetime[problems]) - lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS),
-                                         max(data_table$datetime[problems]) + lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS))
+    problem_interval <- lubridate::interval(min(data_table$datetime[problems]), max(data_table$datetime[problems]))
+    plot_interval <- lubridate::interval(lubridate::int_start(problem_interval) - lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS),
+                                         lubridate::int_start(problem_interval) + lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS))
     print(stringr::str_glue("Locality: {locality_id}"))
+    print(stringr::str_glue("Problematic interval: {problem_interval}"))
     logger1_text <- .join_get_logger_text(logger1, TRUE)
     print(logger1_text)
     .join_print_info_logger(logger1, dplyr::first(columns$l1_orig))
@@ -224,7 +226,8 @@ mc_join <- function(data, comp_sensors=NULL) {
 
 .join_get_joined_logger <- function(logger1, logger2, data_table, names_table) {
     result_logger <- logger1
-    if(logger1$metadata@serial_number != logger2$metadata@serial_number) {
+    if(is.na(logger1$metadata@serial_number) || is.na(logger2$metadata@serial_number) ||
+        logger1$metadata@serial_number != logger2$metadata@serial_number) {
         result_logger$metadata@serial_number <- NA_character_
     }
     result_logger$clean_info@count_duplicits <- NA_integer_
