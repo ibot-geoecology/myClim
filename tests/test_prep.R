@@ -250,31 +250,35 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     data <- mc_read_data("data/TOMST/files_table.csv")
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                     ~datetime, ~cor_factor,
-        "91184101",              "TM_T",          lubridate::ymd(20201028),         0.1,
+        "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 00"),         0.1,
         "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),           0,
-        "94184102",            "TMS_T1",          lubridate::ymd(20201016),        0.12,
+        "94184102",            "TMS_T1", lubridate::ymd_h("2020-10-16 00"),        0.12,
         "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,
-        "94184102",            "TMS_T3",          lubridate::ymd(20201016),         0.2,
-        "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),        0.01,
+        "94184102",            "TMS_T3", lubridate::ymd_h("2020-10-16 00"),         0.2,
+        "94184102",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 00"),        0.01,
     ))
     param_data <- mc_prep_calib_load(data, calib_table)
     test_prep_data_format(param_data)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
-            "91184101",              "TM_T",          lubridate::ymd(20201028),         0.1,          0,
+            "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 00"),         0.1,          0,
             "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),           0,      -0.05,
-            "94184102",            "TMS_T1",          lubridate::ymd(20201016),        0.12,        0.1,
+            "94184102",            "TMS_T1", lubridate::ymd_h("2020-10-16 00"),        0.12,        0.1,
             "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,       0.05,
-            "94184102",            "TMS_T3",          lubridate::ymd(20201016),         0.2,          0,
-            "94184102",   "TMS_TMSmoisture",          lubridate::ymd(20201016),        0.01,          0,
+            "94184102",            "TMS_T3", lubridate::ymd_h("2020-10-16 00"),         0.2,          0,
+            "94184102",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 00"),        0.01,          0,
     ))
     param_data <- mc_prep_calib_load(data, calib_table)
     test_prep_data_format(param_data)
-    calib_data <- mc_prep_calib(param_data, sensors = "TM_T")
+    expect_error(calib_data <- mc_prep_calib(param_data, sensors = c("TM_T", "TMS_T2")))
+    param_data <- mc_prep_clean(param_data, silent = T)
+    expect_warning(calib_data <- mc_prep_calib(param_data, sensors = c("TM_T", "TMS_T2")))
     test_prep_data_format(calib_data)
     expect_true(calib_data$A1E05$loggers[[1]]$sensors$TM_T$metadata@calibrated)
     expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TM_T$values[[1]], 9.875 + 0.1)
     expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TM_T$values[[6]], 6.875 * 0.95)
+    expect_equal(calib_data$A6W79$loggers[[1]]$sensors$TMS_T2$values[[1]], 9.5 * 1.05 + 0.15)
+    expect_equal(calib_data$A6W79$loggers[[1]]$sensors$TMS_T2$values[[5]], 9.5 * 1.05 + 0.15)
     cleaned_data <- mc_prep_clean(param_data, silent = TRUE)
     calc_data <- mc_agg(cleaned_data)
     calib_data <- mc_prep_calib(calc_data, sensors = "TM_T")

@@ -8,6 +8,7 @@
 .prep_const_MESSAGE_SENSOR_METADATA_WRONG_SLOT <- "Sensor metadata doesn't cointain slot {param_name}."
 .prep_const_MESSAGE_UNIQUE_SENSOR_NAMES <- "Sensor names must be unique."
 .prep_const_MESSAGE_UNIQUE_LOCALITY_IDS <- "Locality_ids must be unique."
+.prep_const_MESSAGE_UNCLEANED_DATA<- "Data aren't cleaned."
 
 #' Cleaning datetime series
 #'
@@ -180,8 +181,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 .prep_check_datetime_step_unprocessed <- function(data, func=warning) {
     unprocessed_loggers <- .prep_get_uncleaned_loggers(data)
     if(length(unprocessed_loggers) > 0){
-        loggers_text <- paste(unprocessed_loggers, collapse=", ")
-        func(stringr::str_glue("Detected missed step in loggers {loggers_text}. Probably loggers weren't cleaned."))
+        func(.prep_const_MESSAGE_UNCLEANED_DATA)
     }
 }
 
@@ -650,6 +650,9 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' @export
 mc_prep_calib <- function(data, sensors, localities=NULL) {
     is_prep_format <- myClim:::.common_is_prep_format(data)
+    if(is_prep_format) {
+        .prep_check_datetime_step_unprocessed(data, stop)
+    }
 
     sensor_function <- function(sensor, datetime, locality_id) {
         if(!(sensor$metadata@name %in% sensors)) {
@@ -706,16 +709,13 @@ mc_prep_calib <- function(data, sensors, localities=NULL) {
 }
 
 .prep_split_data_by_calibration <- function(values_table, calib_table) {
+    min_datetime <- dplyr::first(values_table$datetime)
     if(nrow(calib_table) == 0) {
-        calib_table <- tibble::tibble(datetime = dplyr::first(values_table$datetime),
+        calib_table <- tibble::tibble(datetime = min_datetime,
                                       cor_factor = NA_real_,
                                       cor_slope = NA_real_)
-    } else if (dplyr::first(values_table$datetime) < dplyr::first(calib_table$datetime)) {
-        calib_table <- tibble::add_row(calib_table,
-                                       datetime = dplyr::first(values_table$datetime),
-                                       cor_factor = NA_real_,
-                                       cor_slope = NA_real_,
-                                       .before = 1)
+    } else if (min_datetime < dplyr::first(calib_table$datetime)) {
+        calib_table[1, "datetime"] <- min_datetime
     }
     calib_table[["end_datetime"]] <- c(as.numeric(calib_table$datetime), Inf)[-1]
     subset_function <- function(start, end) {
