@@ -175,7 +175,7 @@ mc_join <- function(data, comp_sensors=NULL) {
 .join_ask_user_choice <- function(logger1, logger2, data_table, problems, columns, locality_id) {
     problem_interval <- lubridate::interval(min(data_table$datetime[problems]), max(data_table$datetime[problems]))
     plot_interval <- lubridate::interval(lubridate::int_start(problem_interval) - lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS),
-                                         lubridate::int_start(problem_interval) + lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS))
+                                         lubridate::int_end(problem_interval) + lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS))
     print(stringr::str_glue("Locality: {locality_id}"))
     print(stringr::str_glue("Problematic interval: {problem_interval}"))
     logger1_text <- .join_get_logger_text(logger1, TRUE)
