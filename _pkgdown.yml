@@ -34,6 +34,11 @@ reference:
     contents:
       - starts_with("mc_prep")
 
+  - title: Joining functions
+    desc: Functions are used to join loggers from one locality.
+    contents:
+      - starts_with("mc_join")
+
   - title: Aggregation function
     contents:
       - starts_with("mc_agg")
