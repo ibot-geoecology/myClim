@@ -17,10 +17,11 @@ myClim object with joined loggers.§
 \description{
 Function join sensors from different loggers. Loggers with same type \link{mc_LoggerMetadata} and step are joined.
 Every sensore from first logger must have pair sensor from second one with same height. If sensor values are different,
-then user interactively select source logger.
+then user interactively select source logger. Plot with conflict interval is viewed during joininig. User can select older,
+newer data or datetime split for use older and newer data.
 }
 \details{
 Name of result sensor is used from logger with older data. If \code{serial_number} is not equal in joining loggers, then
 result \code{serial_number} is \code{NA}. Clean info is changed to \code{NA} except step. If uncalibrated sensor is joining with calibrated one,
-then calibration inforamtion must be empty for uncalibrated sensor.
+then calibration inforamtion must be empty in uncalibrated sensor.
 }

@@ -18,6 +18,8 @@
                               "exit")
 
 .join_const_PLOT_NEIGHBORHOODS_DAYS <- 7
+.join_const_PLOT_SIZE_OLDER <- 1
+.join_const_PLOT_SIZE_NEWER <- 0.5
 
 #' §Joining sensors from different loggers
 #'
@@ -192,14 +194,11 @@ mc_join <- function(data, comp_sensors=NULL) {
     logger2_text <- .join_get_logger_text(logger2, FALSE)
     writeLines(logger2_text)
     .join_print_info_logger(logger2, dplyr::first(columns$l2_orig))
-    problems_data_table <- dplyr::filter(data_table, lubridate::`%within%`(datetime, plot_interval))
-    problems_data_table <- problems_data_table[c("datetime", columns$l1, columns$l2)]
-    colnames(problems_data_table) <- c("datetime", paste0("A. Older ", columns$l1_orig), paste0("B. Newer ", columns$l2_orig))
-    plot_data_table <- tidyr::pivot_longer(problems_data_table, !datetime)
-    plot_data_table <- dplyr::filter(plot_data_table, !is.na(value))
+    plot_data <- .join_get_plot_data(data_table, columns, plot_interval)
+    highlight_data_table <- .join_get_plot_highlight_data(data_table, problems, plot_data$table, columns$l1_orig, logger1$clean_info@step)
     y_label <- .join_get_y_label(logger1, dplyr::first(columns$l1_orig))
-    .plot_show_joining_chart(plot_data_table, stringr::str_glue("{locality_id}: {logger1_text} - {logger2_text}"),
-                             y_label, .join_get_line_sizes(colnames(problems_data_table)[-1]))
+    .plot_show_joining_chart(plot_data$table, stringr::str_glue("{locality_id}: {logger1_text} - {logger2_text}"),
+                             y_label, plot_data$sizes, highlight_data_table)
     .join_select_choice()
 }
 
@@ -215,6 +214,43 @@ mc_join <- function(data, comp_sensors=NULL) {
     print(source_states)
 }
 
+.join_get_plot_data <- function(data_table, columns, plot_interval) {
+    problems_data_table <- dplyr::filter(data_table, lubridate::`%within%`(datetime, plot_interval))
+    problems_data_table <- problems_data_table[c("datetime", columns$l1, columns$l2)]
+    plot_data_table <- tidyr::pivot_longer(problems_data_table, !datetime)
+    plot_data_table$sensor <- NA_character_
+    sizes <- list()
+    for(i in seq(nrow(columns))) {
+        select_old <- plot_data_table$name == columns[[i, "l1"]]
+        select_new <- plot_data_table$name == columns[[i, "l2"]]
+        old_name <- paste0("A. Older ", columns[[i, "l1_orig"]])
+        new_name <- paste0("B. Newer ", columns[[i, "l2_orig"]])
+        plot_data_table$name[select_old] <- old_name
+        sizes[[old_name]] <- .join_const_PLOT_SIZE_OLDER
+        sizes[[new_name]] <- .join_const_PLOT_SIZE_NEWER
+        plot_data_table$name[select_new] <- new_name
+        plot_data_table$sensor[select_old | select_new] <- columns[[i, "l1_orig"]]
+    }
+    plot_data_table <- dplyr::filter(plot_data_table, !is.na(value))
+    return(list(table=plot_data_table, sizes=sizes))
+}
+
+.join_get_plot_highlight_data <- function(data_table, problems, plot_data_table, sensors, step) {
+    problem_intervals <- myClim:::.common_get_time_series_intervals(data_table$datetime, problems)
+    result_function <- function(sensor) {
+        select_sensor <- plot_data_table$sensor == sensor
+        tibble::tibble(start = lubridate::int_start(problem_intervals),
+                       end = lubridate::int_end(problem_intervals) + lubridate::minutes(step),
+                       sensor = sensor,
+                       ymin = min(plot_data_table$value[select_sensor]),
+                       ymax = max(plot_data_table$value[select_sensor]))
+    }
+
+    result <- purrr::map_dfr(sensors, result_function)
+    result$group <- seq(nrow(result))
+    result
+}
+
 .join_get_y_label <- function(logger, sensor_name) {
     sensor <- logger$sensors[[sensor_name]]
     sensor_description <- myClim:::.model_get_sensor_description(sensor$metadata)
@@ -226,14 +262,6 @@ mc_join <- function(data, comp_sensors=NULL) {
         return(sensor_description)
     }
     return("Value")
-}
-
-.join_get_line_sizes <- function(line_names) {
-    count <- length(line_names)
-    result <- rep(0.5, count)
-    result[seq(1, (count %/% 2))] <- 1
-    names(result) <- line_names
-    result
 }
 
 .join_select_choice <- function() {

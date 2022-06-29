@@ -441,14 +441,18 @@ mc_plot_line <- function(data, filename, sensors=NULL,
                    panel.border = ggplot2::element_blank())
 }
 
-.plot_show_joining_chart <- function(data_table, title, y_label, sizes) {
+.plot_show_joining_chart <- function(data_table, title, y_label, sizes, highlight_data_table) {
     p <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=datetime, y=value, group=name)) +
         ggplot2::geom_line(ggplot2::aes(color=name, size=name)) +
-        ggplot2::scale_size_manual(values = sizes)
+        ggplot2::scale_size_manual(values = sizes) +
         ggplot2::theme(legend.position="bottom") +
         ggplot2::ggtitle(title) +
         ggplot2::ylab(y_label) +
-        ggplot2::xlab("Date")
+        ggplot2::xlab("Date") +
+        ggplot2::geom_rect(data=highlight_data_table, inherit.aes = FALSE,
+                           ggplot2::aes(xmin=start, xmax=end, ymin=ymin, ymax=ymax, group=group),
+                           color="transparent", fill="orange", alpha=0.3) +
+        ggplot2::facet_grid(rows = ggplot2::vars(sensor))
     if("plotly" %in% installed.packages()[,"Package"]) {
         p <- plotly::ggplotly(p)
     }
