@@ -34,11 +34,12 @@ Imports:
     ggplot2,
     ggforce,
     viridis,
-    runner,
-    utils
+    runner
 Roxygen: list(markdown = TRUE)
 Suggests: 
     rmarkdown,
     knitr,
-    kableExtra
+    kableExtra,
+    testthat,
+    plotly
 VignetteBuilder: knitr

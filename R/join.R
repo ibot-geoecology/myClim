@@ -4,11 +4,13 @@
 .join_const_MESSAGE_JOINING_EXIT <- "Joining exited by user."
 
 .join_const_MENU_TITLE <- "Loggers are different. They cannot be joined automatically."
+.join_const_MENU_INFO <- "Write choice number or start datetime of use newer logger in format YYYY-MM-DD hh:mm."
+.join_const_MENU_WRONG <- "Your choice is not valid!"
 .join_const_MENU_CHOICE_OLDER <- 1
 .join_const_MENU_CHOICE_NEWER <- 2
 .join_const_MENU_CHOICE_OLDER_ALWAYS <- 3
 .join_const_MENU_CHOICE_NEWER_ALWAYS <- 4
-.join_const_MENU_EXIT_CHOICES <- c(0, 5)
+.join_const_MENU_EXIT_CHOICE <- "5"
 .join_const_MENU_CHOICES <- c("use older logger",
                               "use newer logger",
                               "use always older logger",
@@ -22,12 +24,13 @@
 #' @description
 #' Function join sensors from different loggers. Loggers with same type [mc_LoggerMetadata] and step are joined.
 #' Every sensore from first logger must have pair sensor from second one with same height. If sensor values are different,
-#' then user interactively select source logger.
+#' then user interactively select source logger. Plot with conflict interval is viewed during joininig. User can select older,
+#' newer data or datetime split for use older and newer data.
 #'
 #' @details
 #' Name of result sensor is used from logger with older data. If `serial_number` is not equal in joining loggers, then
 #' result `serial_number` is `NA`. Clean info is changed to `NA` except step. If uncalibrated sensor is joining with calibrated one,
-#' then calibration inforamtion must be empty for uncalibrated sensor.
+#' then calibration inforamtion must be empty in uncalibrated sensor.
 #'
 #' @param data myClim object in Prep-format. See [myClim-package]
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
@@ -139,8 +142,13 @@ mc_join <- function(data, comp_sensors=NULL) {
         } else {
             choice <- e_choice$choice
         }
-        use_l1 <- choice %in% c(.join_const_MENU_CHOICE_OLDER, .join_const_MENU_CHOICE_OLDER_ALWAYS)
-        data_table$use_l1[problems] <- use_l1
+        if(lubridate::is.POSIXct(choice)) {
+            data_table$use_l1[problems] <- TRUE
+            data_table$use_l1[problems & data_table$datetime >= choice] <- FALSE
+        } else {
+            use_l1 <- choice %in% c(.join_const_MENU_CHOICE_OLDER, .join_const_MENU_CHOICE_OLDER_ALWAYS)
+            data_table$use_l1[problems] <- use_l1
+        }
     }
     data_table
 }
@@ -176,27 +184,23 @@ mc_join <- function(data, comp_sensors=NULL) {
     problem_interval <- lubridate::interval(min(data_table$datetime[problems]), max(data_table$datetime[problems]))
     plot_interval <- lubridate::interval(lubridate::int_start(problem_interval) - lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS),
                                          lubridate::int_end(problem_interval) + lubridate::days(.join_const_PLOT_NEIGHBORHOODS_DAYS))
-    print(stringr::str_glue("Locality: {locality_id}"))
-    print(stringr::str_glue("Problematic interval: {problem_interval}"))
+    writeLines(stringr::str_glue("Locality: {locality_id}"))
+    writeLines(stringr::str_glue("Problematic interval: {problem_interval}"))
     logger1_text <- .join_get_logger_text(logger1, TRUE)
-    print(logger1_text)
+    writeLines(logger1_text)
     .join_print_info_logger(logger1, dplyr::first(columns$l1_orig))
     logger2_text <- .join_get_logger_text(logger2, FALSE)
-    print(logger2_text)
+    writeLines(logger2_text)
     .join_print_info_logger(logger2, dplyr::first(columns$l2_orig))
     problems_data_table <- dplyr::filter(data_table, lubridate::`%within%`(datetime, plot_interval))
     problems_data_table <- problems_data_table[c("datetime", columns$l1, columns$l2)]
-    colnames(problems_data_table) <- c("datetime", paste0("Older ", columns$l1_orig), paste0("Newer ", columns$l2_orig))
+    colnames(problems_data_table) <- c("datetime", paste0("A. Older ", columns$l1_orig), paste0("B. Newer ", columns$l2_orig))
     plot_data_table <- tidyr::pivot_longer(problems_data_table, !datetime)
     plot_data_table <- dplyr::filter(plot_data_table, !is.na(value))
     y_label <- .join_get_y_label(logger1, dplyr::first(columns$l1_orig))
-    #myClim:::
-    .plot_show_joining_chart(plot_data_table, stringr::str_glue("{locality_id}: {logger1_text} - {logger2_text}"), y_label)
-    choice <- utils::menu(.join_const_MENU_CHOICES, title=.join_const_MENU_TITLE)
-    if(choice %in% .join_const_MENU_EXIT_CHOICES) {
-        stop(.join_const_MESSAGE_JOINING_EXIT)
-    }
-    choice
+    .plot_show_joining_chart(plot_data_table, stringr::str_glue("{locality_id}: {logger1_text} - {logger2_text}"),
+                             y_label, .join_get_line_sizes(colnames(problems_data_table)[-1]))
+    .join_select_choice()
 }
 
 .join_get_logger_text <- function(logger, is_older) {
@@ -222,6 +226,34 @@ mc_join <- function(data, comp_sensors=NULL) {
         return(sensor_description)
     }
     return("Value")
+}
+
+.join_get_line_sizes <- function(line_names) {
+    count <- length(line_names)
+    result <- rep(0.5, count)
+    result[seq(1, (count %/% 2))] <- 1
+    names(result) <- line_names
+    result
+}
+
+.join_select_choice <- function() {
+    writeLines(c(.join_const_MENU_TITLE, ""))
+    writeLines(purrr::imap_chr(.join_const_MENU_CHOICES, ~ stringr::str_glue("{.y}: {.x}")))
+    writeLines(c("", .join_const_MENU_INFO))
+    while(TRUE) {
+        text <- readline(stringr::str_glue("CHOICE>"))
+
+        if(stringr::str_detect(text, "^[1234]$")) {
+            return(as.integer(text))
+        }
+        if(text == .join_const_MENU_EXIT_CHOICE) {
+            stop(.join_const_MESSAGE_JOINING_EXIT)
+        }
+        if(stringr::str_detect(text, "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$")) {
+            return(lubridate::ymd_hm(text))
+        }
+        writeLines(.join_const_MENU_WRONG)
+    }
 }
 
 .join_get_joined_logger <- function(logger1, logger2, data_table, names_table) {
