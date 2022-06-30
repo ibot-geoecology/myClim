@@ -4,8 +4,7 @@ library(myClim)
 source("test.R")
 
 test_that("mc_calc_snow", {
-    data <- mc_read_files("data/eco-snow", "TOMST")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_files("data/eco-snow", "TOMST", silent=T)
     expect_error(mc_calc_snow(cleaned_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5))
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_snow(calc_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5)
@@ -15,23 +14,20 @@ test_that("mc_calc_snow", {
 })
 
 test_that("mc_calc_snow long period", {
-    data <- mc_read_files("data/eco-snow", "TOMST")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_files("data/eco-snow", "TOMST", silent=T)
     expect_warning(calc_data <- mc_agg(cleaned_data, "mean", "week"))
     expect_error(calc_data <- mc_calc_snow(calc_data, "TMS_T3_mean", output_sensor="T3_snow", range=1.5, tmax=0.5))
 })
 
 test_that("mc_calc_snow_logger_without_sensor", {
-    expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_warning(cleaned_data <- mc_read_files("data/TOMST", "TOMST", silent = T))
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_snow(calc_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5))
     expect_equal(length(calc_data$localities[["91184101"]]$sensors), 1)
 })
 
 test_that("mc_calc_snow_agg", {
-    data <- mc_read_files("data/eco-snow", "TOMST")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_files("data/eco-snow", "TOMST", silent = T)
     cleaned_data <- mc_prep_meta_locality(cleaned_data, list(`94184102`=60, `94184103`=60), "tz_offset")
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_snow(calc_data, "TMS_T3", range=1.5, tmax=0.5)
@@ -51,15 +47,13 @@ test_that("mc_calc_snow_agg", {
 })
 
 test_that("mc_calc_snow_agg no sensor", {
-    data <- mc_read_files("data/eco-snow", "TOMST")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_files("data/eco-snow", "TOMST", silent = T)
     calc_data <- mc_agg(cleaned_data)
     expect_error(snow_agg <- mc_calc_snow_agg(calc_data, "snow"))
 })
 
 test_that("mc_calc_vwc", {
-    data <- mc_read_data("data/TOMST/files_table.csv")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent = T)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
             "94184103",   "TMS_TMSmoisture",          lubridate::ymd(20201016),        0.02,        1.1,
@@ -76,8 +70,7 @@ test_that("mc_calc_vwc", {
 })
 
 test_that("mc_calc_vwc frozen2NA", {
-    data <- mc_read_files("data/eco-snow/data_94184103_0.csv", "TOMST")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_files("data/eco-snow/data_94184103_0.csv", "TOMST", silent = T)
     calc_data <- mc_agg(cleaned_data)
     vwc_data <- mc_calc_vwc(calc_data, temp_sensor = "TMS_T3")
     expect_true(is.na(vwc_data$localities$`94184103`$sensors$VWC_moisture$values[[8]]))
@@ -86,16 +79,14 @@ test_that("mc_calc_vwc frozen2NA", {
 })
 
 test_that("mc_calc_vwc wrong", {
-    data <- mc_read_data("data/TOMST/files_table.csv")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent = T)
     calc_data <- mc_agg(cleaned_data)
     expect_error(calc_data <- mc_calc_vwc(calc_data, temp_sensor="TMS_TMSmoisture", localities="A2E32"))
     expect_error(calc_data <- mc_calc_vwc(calc_data, moist_sensor="TMS_T1", localities="A2E32"))
 })
 
 test_that("mc_calc_gdd", {
-    data <- mc_read_files("data/calc-gdd", "TOMST")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_files("data/calc-gdd", "TOMST", silent = T)
     expect_error(mc_calc_gdd(cleaned_data, "TM_T"))
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_gdd(calc_data, "TM_T")
@@ -104,8 +95,7 @@ test_that("mc_calc_gdd", {
 })
 
 test_that("mc_calc_fdd", {
-    data <- mc_read_files("data/calc-gdd", "TOMST")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_files("data/calc-gdd", "TOMST", silent=T)
     expect_error(mc_calc_fdd(cleaned_data, "TM_T"))
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_fdd(calc_data, "TM_T")
@@ -114,8 +104,7 @@ test_that("mc_calc_fdd", {
 })
 
 test_that("mc_calc_cumsum", {
-    data <- mc_read_data("data/TOMST/files_table.csv")
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent=T)
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_snow(calc_data, "TMS_T3", range=1.5, tmax=0.5))
     expect_warning(cumsum_data <- mc_calc_cumsum(calc_data, c("TMS_T1", "TMS_T2", "snow")))
@@ -125,8 +114,7 @@ test_that("mc_calc_cumsum", {
 })
 
 test_that("mc_calc_tomst_dendro", {
-    expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_warning(cleaned_data <- mc_read_files("data/TOMST", "TOMST", silent=T))
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
     test_calc_data_format(calc_data)
@@ -135,8 +123,7 @@ test_that("mc_calc_tomst_dendro", {
 })
 
 test_that("mc_calc_tomst_dendro", {
-    expect_warning(data <- mc_read_files("data/TOMST", "TOMST"))
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_warning(cleaned_data <- mc_read_files("data/TOMST", "TOMST", silent=T))
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
     test_calc_data_format(calc_data)
@@ -145,7 +132,7 @@ test_that("mc_calc_tomst_dendro", {
 })
 
 test_that("mc_calc_vpd", {
-    data <- mc_read_files("data/HOBO/20024354.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S")
+    data <- mc_read_files("data/HOBO/20024354.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S", clean=FALSE, silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`20024354`="LOC"), param_name = "locality_id")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)

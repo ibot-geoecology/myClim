@@ -7,7 +7,9 @@
 mc_read_wide(
   data_table,
   sensor_id = myClim:::.model_const_SENSOR_real,
-  sensor_name = NULL
+  sensor_name = NULL,
+  clean = TRUE,
+  silent = FALSE
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ Columns:
 \item{sensor_id}{define the sensor type, one of \code{names(mc_data_sensors)} (default \code{real})}
 
 \item{sensor_name}{custom name of sensor; if NULL (default) than \code{sensor_name == sensor_id}}
+
+\item{clean}{§if TRUE, then \link{mc_prep_clean} is called automatically (default TRUE)§}
+
+\item{silent}{§if TRUE, then any information is printed in console (default FALSE)§}
 }
 \value{
 myClim object in Prep-format

@@ -2,7 +2,7 @@ library(testthat)
 source("test.R")
 
 test_that("mc_read_data csv without localities", {
-    data <- mc_read_data("data/TOMST/files_table2.csv")
+    data <- mc_read_data("data/TOMST/files_table2.csv", clean=FALSE)
     test_prep_data_format(data)
     expect_equal(length(data), 3)
     expect_equal(length(data$A6W79$loggers[[1]]$datetime), 49)
@@ -32,12 +32,12 @@ test_that("mc_read_data csv without localities", {
 test_that("mc_read_data TOMST format datetime", {
     table <- data.frame(path="data/format/201911_93164272.csv", locality_id="AAA",
                         data_format="TOMST", serial_number="93164272")
-    data <- mc_read_data(table)
+    data <- mc_read_data(table, clean=FALSE)
     test_prep_data_format(data)
 })
 
 test_that("mc_read_data csv with localities", {
-    data <- mc_read_data("data/TOMST/files_table2.csv", "data/TOMST/localities_table.csv")
+    data <- mc_read_data("data/TOMST/files_table2.csv", "data/TOMST/localities_table.csv", clean=FALSE)
     test_prep_data_format(data)
     expect_equal(data$A1E05$metadata@altitude, 255)
     expect_equal(data$A6W79$metadata@tz_type, mc_const_TZ_USER_DEFINED)
@@ -48,7 +48,7 @@ test_that("mc_read_data csv with localities", {
 })
 
 test_that("mc_read_files TOMST directory", {
-    expect_warning(data <- mc_read_files(c("data/TOMST", "data/eco-snow"), "TOMST"))
+    expect_warning(data <- mc_read_files(c("data/TOMST", "data/eco-snow"), "TOMST", clean=FALSE))
     test_prep_data_format(data)
     expect_equal(data[[1]]$metadata@tz_type, mc_const_TZ_UTC)
     expect_equal(length(data), 6)
@@ -59,7 +59,7 @@ test_that("mc_read_files TOMST directory", {
 
 test_that("mc_read_files HOBO", {
     data <- mc_read_files(c("data/HOBO/20024354_comma.csv", "data/HOBO/20024354_semicolon.txt", "data/HOBO/20024354_tab.txt"),
-                          "HOBO",  date_format = "%y.%m.%d %H:%M:%S", tz_offset = 120)
+                          "HOBO",  date_format = "%y.%m.%d %H:%M:%S", tz_offset = 120, clean=FALSE)
     test_prep_data_format(data)
 })
 
@@ -77,7 +77,7 @@ test_that("mc_read_data HOBO", {
         "data/HOBO/20024354_tab.txt",            "CH",         "HOBO",       NA_character_,  "%y.%m.%d %H:%M:%S", NA_integer_,
         "data/HOBO/6265.csv",                    "I",          "HOBO",       NA_character_,  "%m/%d/%y %I:%M:%S %p", NA_integer_,
     ))
-    expect_warning(data <- mc_read_data(files_table))
+    expect_warning(data <- mc_read_data(files_table, clean=FALSE))
     test_prep_data_format(data)
     expect_equal(sort(names(data)), sort(c("A", "B", "C", "D", "E", "F", "CH", "I")))
     expect_true(var(c(data$A$loggers[[1]]$datetime[[1]],
@@ -102,22 +102,22 @@ test_that("mc_read_data HOBO skip wrong datetime", {
         "data/HOBO/20024354.txt",                "A",          "HOBO",       NA_character_,  "%d.%m.%Y %H:%M:%S", NA_integer_,
         "data/HOBO/20024354_comma.csv",          "B",          "HOBO",       NA_character_,  "%m.%d.%Y %H:%M:%S", NA_integer_
     ))
-    expect_warning(data <- mc_read_data(files_table))
+    expect_warning(data <- mc_read_data(files_table, clean=FALSE))
     test_prep_data_format(data)
     expect_equal(length(data), 1)
 })
 
 test_that("mc_read_files error", {
-    expect_error(data <- mc_read_files(c("data/TOMST", "data/eco-snow/data_94184102_0.csv"), "TOMST"))
+    expect_error(data <- mc_read_files(c("data/TOMST", "data/eco-snow/data_94184102_0.csv"), "TOMST", clean=FALSE))
 })
 
 test_that("mc_read_files TOMST comma in number", {
-    data <- mc_read_files(c("data/comma_TOMST/data_91212414_0.csv", "data/comma_TOMST/data_94214606_0.csv"), "TOMST")
+    data <- mc_read_files(c("data/comma_TOMST/data_91212414_0.csv", "data/comma_TOMST/data_94214606_0.csv"), "TOMST", clean=FALSE)
     test_prep_data_format(data)
 })
 
 test_that("mc_read_files TOMST with error in data", {
-    expect_warning(data <- mc_read_files("data/TOMST-error", "TOMST"))
+    expect_warning(data <- mc_read_files("data/TOMST-error", "TOMST", clean=FALSE))
     expect_true(is.na(data$data_93142777$loggers[[1]]$sensors$TMS_T2$values[[7]]))
     states <- dplyr::filter(data$data_93142777$loggers[[1]]$sensors$TMS_T2$states, tag == myClim:::.model_const_SENSOR_STATE_ERROR)
     expect_equal(nrow(states), 6)
@@ -136,7 +136,7 @@ test_that("mc_read_files TOMST with error in data", {
 })
 
 test_that("mc_read_files joined TOMST direcory", {
-    data <- mc_read_files("data/joined_TOMST", "TOMST_join")
+    data <- mc_read_files("data/joined_TOMST", "TOMST_join", clean=FALSE)
     test_prep_data_format(data)
     expect_equal(names(data), c("A1E01_TS", "A1W14_TMS", "A4E53_TMS", "CKras_Loc_2_15", "CZ2_HRADEC_TMS", "CZ2_HRADEC_TS"))
     expect_equal(names(data$A1W14_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture"))
@@ -146,12 +146,12 @@ test_that("mc_read_files joined TOMST direcory", {
 
 test_that("mc_read_wide", {
     data_table <- readRDS("data/read_table/precip.Rds")
-    expect_error(data <- mc_read_wide(data_table, myClim:::.model_const_SENSOR_precipitation))
+    expect_error(data <- mc_read_wide(data_table, myClim:::.model_const_SENSOR_precipitation, clean=FALSE))
     dates <- data_table$date
     data_table$date <- as.POSIXct(lubridate::ymd(dates))
-    expect_error(data <- mc_read_wide(data_table, myClim:::.model_const_SENSOR_precipitation))
+    expect_error(data <- mc_read_wide(data_table, myClim:::.model_const_SENSOR_precipitation, clean=FALSE))
     data_table$date <- as.POSIXct(lubridate::ymd(dates, tz="UTC"))
-    data <- mc_read_wide(data_table, myClim:::.model_const_SENSOR_precipitation)
+    data <- mc_read_wide(data_table, myClim:::.model_const_SENSOR_precipitation, clean=FALSE)
     test_prep_data_format(data)
     expect_equal(length(data), 49)
     expect_equal(names(data$B1BLAT01$loggers[[1]]$sensors), myClim:::.model_const_SENSOR_precipitation)
@@ -169,13 +169,13 @@ test_that("mc_read_long", {
     data_table <- dplyr::rename(data_table, datetime=date)
     data_table <- dplyr::select(data_table, locality_id, sensor_name, datetime, value)
     data_table$datetime <- as.POSIXct(lubridate::ymd(data_table$datetime, tz="UTC"))
-    data <- mc_read_long(data_table, list(precip="precipitation"))
+    data <- mc_read_long(data_table, list(precip="precipitation"), clean=FALSE)
     test_prep_data_format(data)
     expect_equal(length(data), 9)
 })
 
 test_that("mc_read_files TOMST serial_number", {
-    expect_warning(data <- mc_read_files("data/format/201911_93164272.csv", "TOMST"))
+    expect_warning(data <- mc_read_files("data/format/201911_93164272.csv", "TOMST", clean=FALSE))
     expect_equal(names(data), "201911_93164272")
 })
 

@@ -4,7 +4,7 @@
 \alias{mc_read_long}
 \title{Reading data from long data.frame}
 \usage{
-mc_read_long(data_table, sensor_ids = list())
+mc_read_long(data_table, sensor_ids = list(), clean = TRUE, silent = FALSE)
 }
 \arguments{
 \item{data_table}{long data.frame with Columns:
@@ -20,6 +20,10 @@ sensor_id is key from \code{names(mc_data_sensors)}. If sensor_name is the same 
 it does not have to be in the list.
 
 \code{sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)}}
+
+\item{clean}{§if TRUE, then \link{mc_prep_clean} is called automatically (default TRUE)§}
+
+\item{silent}{§if TRUE, then any information is printed in console (default FALSE)§}
 }
 \value{
 myClim object in Prep-format

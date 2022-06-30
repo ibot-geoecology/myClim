@@ -28,8 +28,10 @@
 #' For TMS files ignored, there is fix date format. see [mc_data_formats]
 #' @param logger_type type of logger (default NA), can be one of pre-defined see [myClim::mc_read_data()] or any custom string
 #' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
-#' @param step Time step of microclimatic time-series in minutes. When provided, then is used in [mc_prep_clean] instead of automatic stepd detection. 
+#' @param step Time step of microclimatic time-series in minutes. When provided, then is used in [mc_prep_clean] instead of automatic step detection.
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
+#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
+#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
@@ -37,7 +39,7 @@
 #' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 #' }
 mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, recursive=TRUE, date_format=NA_character_,
-                          tz_offset=NA_integer_, step=NA_integer_) {
+                          tz_offset=NA_integer_, step=NA_integer_, clean=TRUE, silent=FALSE) {
     if(all(dir.exists(paths))) {
         files <- .read_get_csv_files_from_directory(paths, recursive)
     } else if(any(dir.exists(paths))) {
@@ -48,7 +50,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name,
                               serial_number=NA_character_, logger_type=logger_type, date_format=date_format, tz_offset=tz_offset,
                               step=step)
-    mc_read_data(files_table)
+    mc_read_data(files_table, clean=clean, silent=silent)
 }
 
 .read_get_csv_files_from_directory <- function(paths, recursive) {
@@ -94,13 +96,15 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * lon_wgs84
 #' * lat_wgs84
 #' * tz_offset
+#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
+#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
 #' \dontrun{
 #' tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")
 #' }
-mc_read_data <- function(files_table, localities_table=NULL) {
+mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=FALSE) {
     if(is.character(files_table)) {
         files_table <- .read_get_table_from_csv(files_table)
     }
@@ -127,7 +131,11 @@ mc_read_data <- function(files_table, localities_table=NULL) {
     }
     files_table$serial_number <- .read_get_edited_serial_numbers(files_table, data_formats)
     files_table$locality_id <- .read_get_edited_locality_ids(files_table)
-    .read_get_output_data(files_table, localities, data_formats)
+    result <- .read_get_output_data(files_table, localities, data_formats)
+    if(clean) {
+        result <- myClim::mc_prep_clean(result, silent=silent)
+    }
+    result
 }
 
 .read_get_table_from_csv <- function(csv_path) {
@@ -391,10 +399,12 @@ mc_read_data <- function(files_table, localities_table=NULL) {
 #' * Name of locality[n] - values
 #' @param sensor_id define the sensor type, one of `names(mc_data_sensors)` (default `real`)
 #' @param sensor_name custom name of sensor; if NULL (default) than `sensor_name == sensor_id`
+#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
+#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_long]
-mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL) {
+mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
     if(ncol(data_table) <= 1) {
        stop(.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE)
     }
@@ -410,7 +420,11 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
         locality$loggers[[1]] <- .read_get_new_logger(data_table[[1]], sensors)
         locality
     }
-    purrr::map(result, locality_function)
+    localities <- purrr::map(result, locality_function)
+    if(clean) {
+        localities <- myClim::mc_prep_clean(localities, silent=silent)
+    }
+    localities
 }
 
 .read_check_datetime <- function(datetime) {
@@ -436,15 +450,20 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' it does not have to be in the list.
 #'
 #' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
+#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
+#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_wide]
-mc_read_long <- function(data_table, sensor_ids=list()) {
+mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE) {
     .read_check_datetime(data_table$datetime)
 
     data_table <- dplyr::group_by(data_table, locality_id)
     localities <- dplyr::group_map(data_table, .read_long_locality, sensor_ids=sensor_ids)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
+    if(clean) {
+        localities <- myClim::mc_prep_clean(localities, silent=silent)
+    }
     localities
 }
 

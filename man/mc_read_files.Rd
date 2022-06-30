@@ -11,7 +11,9 @@ mc_read_files(
   recursive = TRUE,
   date_format = NA_character_,
   tz_offset = NA_integer_,
-  step = NA_integer_
+  step = NA_integer_,
+  clean = TRUE,
+  silent = FALSE
 )
 }
 \arguments{
@@ -28,8 +30,12 @@ For TMS files ignored, there is fix date format. see \link{mc_data_formats}}
 
 \item{tz_offset}{timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)}
 
-\item{step}{Time step of microclimatic time-series in minutes. When provided, then is used in \link{mc_prep_clean} instead of automatic stepd detection.
+\item{step}{Time step of microclimatic time-series in minutes. When provided, then is used in \link{mc_prep_clean} instead of automatic step detection.
 If not provided (NA), is automatically detected in \link{mc_prep_clean}. (default NA)}
+
+\item{clean}{§if TRUE, then \link{mc_prep_clean} is called automatically (default TRUE)§}
+
+\item{silent}{§if TRUE, then any information is printed in console (default FALSE)§}
 }
 \value{
 myClim object in Prep-format see \link{myClim-package}

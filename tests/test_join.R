@@ -2,7 +2,7 @@ library(testthat)
 source("test.R")
 
 test_that("mc_join", {
-    data <- mc_read_files("data/join", "TOMST")
+    data <- mc_read_files("data/join", "TOMST", clean=FALSE)
     expect_error(joined_data <- mc_join(data))
     cleaned_data <- mc_prep_clean(data, silent=T)
     calib_table <- as.data.frame(tibble::tribble(

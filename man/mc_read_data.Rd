@@ -4,7 +4,12 @@
 \alias{mc_read_data}
 \title{Reading files with locality metadata}
 \usage{
-mc_read_data(files_table, localities_table = NULL)
+mc_read_data(
+  files_table,
+  localities_table = NULL,
+  clean = TRUE,
+  silent = FALSE
+)
 }
 \arguments{
 \item{files_table}{path to csv file or data.frame object with 3 required columns and few optional:
@@ -39,6 +44,10 @@ object contains 5 columns:
 \item lat_wgs84
 \item tz_offset
 }}
+
+\item{clean}{§if TRUE, then \link{mc_prep_clean} is called automatically (default TRUE)§}
+
+\item{silent}{§if TRUE, then any information is printed in console (default FALSE)§}
 }
 \value{
 myClim object in Prep-format see \link{myClim-package}
