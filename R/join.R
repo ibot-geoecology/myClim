@@ -18,7 +18,7 @@
                               "exit")
 
 .join_const_PLOT_NEIGHBORHOODS_DAYS <- 7
-.join_const_PLOT_SIZE_OLDER <- 1
+.join_const_PLOT_SIZE_OLDER <- 1.5
 .join_const_PLOT_SIZE_NEWER <- 0.5
 
 #' Joining time-series from repeated downloads
@@ -208,7 +208,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     highlight_data_table <- .join_get_plot_highlight_data(data_table, problems, plot_data_table, columns$l1_orig, logger1$clean_info@step)
     y_label <- .join_get_y_label(logger1, dplyr::first(columns$l1_orig))
     .plot_show_joining_chart(plot_data_table, stringr::str_glue("{locality_id}: {logger1_text} - {logger2_text}"),
-                             y_label, list(OLD=.join_const_PLOT_SIZE_OLDER, NEW=.join_const_PLOT_SIZE_NEWER), highlight_data_table)
+                             y_label, c(.join_const_PLOT_SIZE_OLDER, .join_const_PLOT_SIZE_NEWER), highlight_data_table)
     .join_select_choice()
 }
 
@@ -238,8 +238,8 @@ mc_join <- function(data, comp_sensors=NULL) {
         plot_data_table$name[select_old] <- old_name
         plot_data_table$name[select_new] <- new_name
         plot_data_table$sensor[select_old | select_new] <- columns[[i, "l1_orig"]]
-        plot_data_table$size[select_old] <- "OLD"
-        plot_data_table$size[select_new] <- "NEW"
+        plot_data_table$size[select_old] <- "A"
+        plot_data_table$size[select_new] <- "B"
     }
     plot_data_table <- dplyr::filter(plot_data_table, !is.na(value))
     return(plot_data_table)
