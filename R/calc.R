@@ -1,5 +1,7 @@
-.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {locality$metadata@locality_id} doesn't contains sensor {sensor}. It is skipped."
+.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {item$metadata@locality_id} doesn't contains sensor {sensor}. It is skipped."
+.calc_const_MESSAGE_LOGGER_NOT_CONTAINS_SENSOR <- "Loger {item$metadata@serial_number} doesn't contains sensor {sensor}. It is skipped."
 .calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@step_text} in data is too long. Maximal step is day."
+.calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY <- "Step in logger {logger$metadata@serial_number} is too long. Maximal step is day. It is skipped."
 .calc_const_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
 .calc_const_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
 .calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
@@ -12,10 +14,18 @@
 #' Function detects snow cover from temperature time-series.
 #'
 #' @details
-#' Function detects snow cover from temperature time-series. Temperature sensor is considered as covered by snow when the maximal temperature in the preceding or subsequent time-window (specified by 'days' param) does not exceed specific 'tmax' threshold value (default 1.25°C) and the temperature range remain below specified 'range' threshold (default 1°C). This function rely on insulating effect of a thick layer of snow, significantly reducing diurnal temperature variation and restricting the maximal temperature near the ground close to freezing point. Temperature sensor near the ground ('TMS_T2') is default choice for snow-cover detection. Snow detection with default values accurately detects snow of depth > 15cm (unpublished data). For detection of thin snow, range parameter should be set to 3-4 °C.
-#' The function returns vector of snow cover with same time-step as input data. To get number of days with snow cover and more info, apply [mc_calc_snow_agg].
+#' Function detects snow cover from temperature time-series. Temperature sensor is considered as covered by snow
+#' when the maximal temperature in the preceding or subsequent time-window (specified by 'days' param)
+#' does not exceed specific 'tmax' threshold value (default 1.25°C) and the temperature range remain below specified
+#' 'range' threshold (default 1°C). This function rely on insulating effect of a thick layer of snow,
+#' significantly reducing diurnal temperature variation and restricting the maximal temperature near the ground
+#' close to freezing point. Temperature sensor near the ground ('TMS_T2') is default choice for snow-cover detection.
+#' Snow detection with default values accurately detects snow of depth > 15cm (unpublished data).
+#' For detection of thin snow, range parameter should be set to 3-4 °C.
+#' The function returns vector of snow cover with same time-step as input data. To get number of days with snow cover
+#' and more info, apply [mc_calc_snow_agg].
 #'
-#' @param data myClim object in Calc-format. See [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used for snow estimation. (e.g. TMS_T2)
 #' @param output_sensor name of output snow sensor (default "snow")
 #' @param localities list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
@@ -27,24 +37,55 @@
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=1, tmax=1.25, days=3) {
-    myClim:::.common_stop_if_not_calc_format(data)
-    .calc_check_maximal_day_step(data)
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if(is_calc) {
+        .calc_check_maximal_day_step(data)
+    } else {
+        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    }
+
+    call_snow <- function(item) {
+        .calc_add_sensor_to_item(item, sensor, myClim:::.model_const_SENSOR_snow_bool, output_sensor,
+                                 myClim:::.model_const_PHYSICAL_T_C,
+                                 .calc_snow_values_function, range=range, tmax=tmax, days=days)
+    }
+
+    logger_function <- function(logger) {
+        if(.calc_check_maximal_day_step_in_logger_get_skip(logger))
+        {
+            return(logger)
+        }
+        call_snow(logger)
+    }
+
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_sensor_to_locality(locality, sensor, myClim:::.model_const_SENSOR_snow_bool, output_sensor,
-                                     myClim:::.model_const_PHYSICAL_T_C,
-                                     .calc_snow_values_function, range=range, tmax=tmax,days=days)
+        if(is_calc) {
+            return(call_snow(locality))
+        }
+
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        return(locality)
     }
-    data$localities <- purrr::map(data$localities, locality_function)
-    data
+    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    .common_set_localities(data, localities)
 }
 
 .calc_check_maximal_day_step <- function(data) {
     if(.calc_is_step_bigger_then(data, lubridate::days(1))) {
         stop(stringr::str_glue(.calc_const_MESSAGE_STEP_LONGER_DAY))
     }
+}
+
+.calc_check_maximal_day_step_in_logger_get_skip <- function(logger) {
+    logger_period <- lubridate::minutes(logger$clean_info@step)
+    if(logger_period > lubridate::days(1)) {
+        warning(stringr::str_glue(.calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY))
+        return(TRUE)
+    }
+    return(FALSE)
 }
 
 .calc_is_step_bigger_then <- function(data, max_period) {
@@ -62,24 +103,28 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     return(snow)
 }
 
-.calc_add_sensor_to_locality <- function(locality, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
-    if(!.calc_check_sensor_in_locality(locality, sensor_name)){
-        return(locality)
+.calc_add_sensor_to_item <- function(item, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
+    if(!.calc_check_sensor_in_item(item, sensor_name)){
+        return(item)
     }
-    if(!is.null(sensor_physical) && !myClim:::.model_is_physical(locality$sensors[[sensor_name]]$metadata, sensor_physical)){
+    if(!is.null(sensor_physical) && !myClim:::.model_is_physical(item$sensors[[sensor_name]]$metadata, sensor_physical)){
         .calc_wrong_physical_error_function(sensor_name, sensor_physical)
     }
-    .calc_warn_if_overwriting(locality, output_sensor_name)
-    height <- locality$sensors[[sensor_name]]$metadata@height
-    values <- values_function(locality, sensor_name, ...)
-    locality$sensors[[output_sensor_name]] <- myClim:::.common_get_new_sensor(output_sensor_id, output_sensor_name, values=values, height=height)
-    return(locality)
+    .calc_warn_if_overwriting(item, output_sensor_name)
+    height <- item$sensors[[sensor_name]]$metadata@height
+    values <- values_function(item, sensor_name, ...)
+    item$sensors[[output_sensor_name]] <- myClim:::.common_get_new_sensor(output_sensor_id, output_sensor_name, values=values, height=height)
+    return(item)
 }
 
-.calc_check_sensor_in_locality <- function(locality, sensor) {
-    result <- sensor %in% names(locality$sensors)
+.calc_check_sensor_in_item <- function(item, sensor) {
+    result <- sensor %in% names(item$sensors)
     if(!result){
-        warning(stringr::str_glue(.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR))
+        if(is(item$metadata, "mc_LocalityMetadata")){
+            warning(stringr::str_glue(.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR))
+        } else {
+            warning(stringr::str_glue(.calc_const_MESSAGE_LOGGER_NOT_CONTAINS_SENSOR))
+        }
     }
     result
 }
@@ -88,8 +133,8 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     stop(stringr::str_glue(.calc_const_MESSAGE_WRONG_PHYSICAL_UNIT))
 }
 
-.calc_warn_if_overwriting <- function(locality, output_sensor) {
-    if(output_sensor %in% names(locality$sensors)) {
+.calc_warn_if_overwriting <- function(item, output_sensor) {
+    if(output_sensor %in% names(item$sensors)) {
         warning(stringr::str_glue(.calc_const_MESSAGE_OVERWRITE_SENSOR))
     }
 }
@@ -109,7 +154,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor` 
 #' on the locality missing, then locality is skipped.
 #'
-#' @param data myClim object in calculation format (see [myClim::mc_agg()]) with TRUE/FALSE snow sensor see [myClim::mc_calc_snow()]
+#' @param data myClim object in cleaned Prep-format or Calc-formt (see [myClim::mc_agg()] and [myClim-package]) with TRUE/FALSE snow sensor see [myClim::mc_calc_snow()]
 #' @param snow_sensor name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function `mc_calc_snow`; (default "snow")
 #' @param localities optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)
 #' @param period number of days defining the continuous snow cover period of interest (default 3 days)
@@ -128,31 +173,38 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 #' mc_calc_snow_agg(data, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=F) {
-    myClim:::.common_stop_if_not_calc_format(data)
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
-    if(length(data$localities) == 0) {
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if((is_calc && length(data$localities) == 0) || (!is_calc && length(data) == 0)) {
         stop(.calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES)
     }
     if(!use_utc) {
         myClim:::.prep_warn_if_unset_tz_offset(data)
     }
     locality_function <- function(locality) {
-        .calc_get_snow_agg_row(locality, snow_sensor, period, use_utc)
+        if(is_calc) {
+            return(.calc_get_snow_agg_row(locality, locality$metadata@locality_id, locality$metadata@tz_offset, snow_sensor, period, use_utc))
+        }
+
+        logger_function <- function(logger) {
+            .calc_get_snow_agg_row(logger, locality$metadata@locality_id, locality$metadata@tz_offset, snow_sensor, period, use_utc)
+        }
+        purrr::map_dfr(locality$loggers, logger_function)
     }
-    as.data.frame(purrr::map_dfr(data$localities, locality_function))
+    as.data.frame(purrr::map_dfr(myClim:::.common_get_localities(data), locality_function))
 }
 
-.calc_get_snow_agg_row <- function(locality, snow_sensor, period, use_utc) {
-    result <- list(locality_id = locality$metadata@locality_id,
+.calc_get_snow_agg_row <- function(item, locality_id, tz_offset, snow_sensor, period, use_utc) {
+    result <- list(locality_id = locality_id,
                    snow_days = NA_integer_,
                    first_day = NA,
                    last_day = NA,
                    first_day_period = NA,
                    last_day_period = NA)
-    snow_table <- tibble::tibble(datetime=locality$datetime, snow=locality$sensors[[snow_sensor]]$values)
+    snow_table <- tibble::tibble(datetime=item$datetime, snow=item$sensors[[snow_sensor]]$values)
     snow_table <- dplyr::filter(snow_table, !is.na(snow))
     if(!use_utc) {
-        snow_table$datetime <- .calc_get_datetimes_with_offset(snow_table$datetime, locality$metadata@tz_offset)
+        snow_table$datetime <- .calc_get_datetimes_with_offset(snow_table$datetime, tz_offset)
     }
 
     if(nrow(snow_table) == 0) {
@@ -208,7 +260,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' moisture sensor was not designed to measure in frozen soils and the returned records are thus not comparable
 #' with values from non frozen soil.  
 #'
-#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`
 #'
 #' Soil moisture sensor must be in TMSmoisture physical.
@@ -245,33 +297,43 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
                         acor_t=myClim:::.calib_MOIST_ACOR_T,
                         wcor_t=myClim:::.calib_MOIST_WCOR_T,
                         frozen2NA=TRUE) {
-    myClim:::.common_stop_if_not_calc_format(data)
-
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if(!is_calc) {
+        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    }
+    call_vwc <- function(item) {
+        .calc_add_vwc_to_item(item, moist_sensor, temp_sensor, output_sensor,
+                              soiltype, ref_t, acor_t, wcor_t, frozen2NA)
+    }
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_vwc_to_locality(locality, moist_sensor, temp_sensor, output_sensor,
-                                  soiltype, ref_t, acor_t, wcor_t, frozen2NA)
+        if(is_calc) {
+            return(call_vwc(locality))
+        }
+
+        locality$loggers <- purrr::map(locality$loggers, ~ call_vwc(.x))
+        return(locality)
     }
-    data$localities <- purrr::map(data$localities, locality_function)
-    data
+    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, out_localities)
 }
 
-.calc_add_vwc_to_locality <- function(locality, moist_sensor, temp_sensor, output_sensor,
-                                      soiltype_value, ref_t, acor_t, wcor_t, frozen2NA) {
-    skip <- .calc_vwc_check_sensors_get_skip(locality, moist_sensor, temp_sensor, output_sensor)
+.calc_add_vwc_to_item <- function(item, moist_sensor, temp_sensor, output_sensor,
+                                  soiltype_value, ref_t, acor_t, wcor_t, frozen2NA) {
+    skip <- .calc_vwc_check_sensors_get_skip(item, moist_sensor, temp_sensor, output_sensor)
     if(skip) {
-        return(locality)
+        return(item)
     }
     soil_row <- dplyr::filter(mc_data_vwc_parameters, soiltype == soiltype_value)
     if(nrow(soil_row) != 1) {
         stop(stringr::str_glue(.calc_const_MESSAGE_UNKNONW_SIOLTYPE))
     }
-    values_table <- tibble::tibble(datetime = locality$datetime,
-                                   raw = locality$sensors[[moist_sensor]]$values,
-                                   temp = locality$sensors[[temp_sensor]]$values)
-    calibration <- locality$sensors[[moist_sensor]]$calibration
+    values_table <- tibble::tibble(datetime = item$datetime,
+                                   raw = item$sensors[[moist_sensor]]$values,
+                                   temp = item$sensors[[temp_sensor]]$values)
+    calibration <- item$sensors[[moist_sensor]]$calibration
     input_data <- myClim:::.prep_split_data_by_calibration(values_table, calibration)
     data_function <- function(cor_factor, cor_slope, data){
         is_calibrated <- !is.na(cor_factor) && !is.na(cor_slope)
@@ -285,28 +347,28 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
     }
     values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
-    height <- locality$sensors[[moist_sensor]]$metadata@height
-    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_moisture, output_sensor,
-                                                                         values=purrr::flatten_dbl(values), height=height,
-                                                                         calibrated = is_calibrated,
-                                                                         calibration=locality$sensors[[moist_sensor]]$calibration)
-    return(locality)
+    height <- item$sensors[[moist_sensor]]$metadata@height
+    item$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_moisture, output_sensor,
+                                                                     values=purrr::flatten_dbl(values), height=height,
+                                                                     calibrated = is_calibrated,
+                                                                     calibration=item$sensors[[moist_sensor]]$calibration)
+    return(item)
 }
 
-.calc_vwc_check_sensors_get_skip <- function(locality, moist_sensor, temp_sensor, output_sensor){
-    if(!.calc_check_sensor_in_locality(locality, moist_sensor)){
+.calc_vwc_check_sensors_get_skip <- function(item, moist_sensor, temp_sensor, output_sensor){
+    if(!.calc_check_sensor_in_item(item, moist_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical_TMSmoisture(locality$sensors[[moist_sensor]]$metadata)){
+    if(!myClim:::.model_is_physical_TMSmoisture(item$sensors[[moist_sensor]]$metadata)){
         .calc_wrong_physical_error_function(moist_sensor, myClim:::.model_const_PHYSICAL_TMSmoisture)
     }
-    if(!.calc_check_sensor_in_locality(locality, temp_sensor)){
+    if(!.calc_check_sensor_in_item(item, temp_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical_T_C(locality$sensors[[temp_sensor]]$metadata)){
+    if(!myClim:::.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
         .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_T_C)
     }
-    .calc_warn_if_overwriting(locality, output_sensor)
+    .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
 }
 
@@ -338,11 +400,11 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
 #' Be careful while aggregating growing degree days to longer periods
 #' see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but myClim let you apply anything.
 #'
-#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot GDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
 #' @param output_prefix name prefix of new GDD sensor (default "GDD")
 #'
-#' name of output sensor consists of output_prefix and value t_base e.g. GDD_5
+#' name of output sensor consists of output_prefix and value t_base e.g. GDD5
 #' @param t_base base temperature for calculation of GDD (default 5)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return The same myClim object as input but with added GDD sensor
@@ -355,22 +417,44 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 }
 
 .calc_xdd <- function(data, sensor, output_sensor_id, output_prefix, t_base, localities, values_function) {
-    myClim:::.common_stop_if_not_calc_format(data)
-    .calc_check_maximal_day_step(data)
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if(is_calc) {
+        .calc_check_maximal_day_step(data)
+        data_step_part_day <- data$metadata@step / (24 * 60)
+    } else {
+        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    }
 
     output_sensor <- stringr::str_glue("{output_prefix}{t_base}")
-    step_part_day <- data$metadata@step / (24 * 60)
+
+    call_add_sensor <- function(item, step_part_day) {
+        .calc_add_sensor_to_item(item, sensor, output_sensor_id, output_sensor,
+                                 myClim:::.model_const_PHYSICAL_T_C,
+                                 values_function, t_base=t_base, step_part_day=step_part_day)
+    }
+
+    logger_function <- function(logger) {
+        if(.calc_check_maximal_day_step_in_logger_get_skip(logger))
+        {
+            return(logger)
+        }
+        step_part_day <- logger$clean_info@step / (24 * 60)
+        call_add_sensor(logger, step_part_day)
+    }
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_sensor_to_locality(locality, sensor, output_sensor_id, output_sensor,
-                                     myClim:::.model_const_PHYSICAL_T_C,
-                                     values_function, t_base=t_base, step_part_day=step_part_day)
+        if(is_calc) {
+            return(call_add_sensor(locality, data_step_part_day))
+        }
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        return(locality)
     }
-    data$localities <- purrr::map(data$localities, locality_function)
-    data
+
+    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, out_localities)
 }
 
 .calc_gdd_values_function <- function(locality, sensor_name, t_base, step_part_day) {
@@ -386,7 +470,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value is the contribution of the interval to the freezing degree day.
 #' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.
 #'
-#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
 #' @param output_prefix name prefix of new FDD sensor (default "FDD")
 #'
@@ -415,7 +499,7 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' @details
 #' If value type of sensor is logical, then output type is integer.
 #'
-#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param sensors names of sensors where to calculate cumulative sum
 #' @param output_suffix name suffix for new names (default "_cumsum") e.g. TMS_T3_cumsum
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
@@ -424,25 +508,35 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' @examples
 #' cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))
 mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NULL) {
-    myClim:::.common_stop_if_not_calc_format(data)
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if(!is_calc) {
+        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    }
 
     values_function <- function(locality, sensor_name) {
         cumsum(locality$sensors[[sensor_name]]$values)
     }
 
-    sensor_function <- function(locality, sensor_name) {
-        if(!.calc_check_sensor_in_locality(locality, sensor_name)){
-            return(locality)
+    sensor_function <- function(item, sensor_name) {
+        if(!.calc_check_sensor_in_item(item, sensor_name)){
+            return(item)
         }
-        origin_sensor <- locality$sensors[[sensor_name]]
+        origin_sensor <- item$sensors[[sensor_name]]
         output_sensor_id <- origin_sensor$metadata@sensor_id
         output_sensor_name <- stringr::str_glue("{origin_sensor$metadata@name}{output_suffix}")
-        locality <- .calc_add_sensor_to_locality(locality, sensor_name, output_sensor_id, output_sensor_name,
-                                                 values_function = values_function)
-        if(is.logical(origin_sensor$values) && !is.logical(locality$sensors[[output_sensor_name]]$values)) {
-            locality$sensors[[output_sensor_name]]$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
+        item <- .calc_add_sensor_to_item(item, sensor_name, output_sensor_id, output_sensor_name,
+                                         values_function = values_function)
+        if(is.logical(origin_sensor$values) && !is.logical(item$sensors[[output_sensor_name]]$values)) {
+            item$sensors[[output_sensor_name]]$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
         }
-        locality
+        item
+    }
+
+    all_sensors_function <- function(item) {
+        for (sensor_name in sensors) {
+            item <- sensor_function(item, sensor_name)
+        }
+        item
     }
 
     locality_function <- function(locality) {
@@ -450,15 +544,16 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
             return(locality)
         }
 
-        for (sensor_name in sensors) {
-            locality <- sensor_function(locality, sensor_name)
+        if(is_calc) {
+            return(all_sensors_function(locality))
         }
 
-        locality
+        locality$loggers <- purrr::map(locality$loggers, all_sensors_function)
+        return(locality)
     }
 
-    data$localities <- purrr::map(data$localities, locality_function)
-    data
+    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, out_localities)
 }
 
 #' Converting raw values of TOMST dendrometer to micrometers
@@ -466,7 +561,7 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' @description
 #' This function convert change in stem size fram raw TOMST units to micrometers.
 #'
-#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param dendro_sensor name of change in stem size sensor to be converted from raw to micrometers (default "DEND_TOMSTdendro") see `names(mc_data_sensors)`
 #' @param output_sensor name of new change in stem size sensor (default "dendro_l_um")
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
@@ -477,25 +572,36 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSOR_DEND_TOMSTdendro,
                         output_sensor=myClim:::.model_const_SENSOR_dendro_l_um,
                         localities=NULL) {
-    myClim:::.common_stop_if_not_calc_format(data)
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if(!is_calc) {
+        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    }
+
+    call_dendro_function <- function(item) {
+        .calc_add_sensor_to_item(item, dendro_sensor, myClim:::.model_const_SENSOR_dendro_l_um, output_sensor,
+                                 myClim:::.model_const_PHYSICAL_TOMSTdendro,
+                                 .calc_get_dendro_l_um)
+    }
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_sensor_to_locality(locality, dendro_sensor, myClim:::.model_const_SENSOR_dendro_l_um, output_sensor,
-                                     myClim:::.model_const_PHYSICAL_TOMSTdendro,
-                                     .calc_get_dendro_l_um)
+        if(is_calc) {
+            return(call_dendro_function(locality))
+        }
+        locality$loggers <- purrr::map(locality$loggers, call_dendro_function)
+        return(locality)
     }
-    data$localities <- purrr::map(data$localities, locality_function)
-    data
+    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, out_localities)
 }
 
-.calc_get_dendro_l_um <- function(locality, sensor_name) {
+.calc_get_dendro_l_um <- function(item, sensor_name) {
     min_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMSTdendro]]@min_value
     max_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMSTdendro]]@max_value
     um_range <- myClim:::.model_const_TOMST_DENDROMETER_UM_RANGE
-    (locality$sensors[[sensor_name]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
+    (item$sensors[[sensor_name]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
 }
 
 #' Calculate vapor pressure deficit (in kPa)
@@ -505,7 +611,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 #' from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981) and adapted by Jones, 2013 (eq. 5.15)
 #' Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
 #'
-#' @param data myClim object in Calc-format see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param temp_sensor name of temperature sensor
 #'
 #' Temperature sensor must be in T_C physical.
@@ -528,36 +634,45 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
                         output_sensor="VPD", altitude=0,
                         metadata_altitude=TRUE, localities=NULL) {
-    myClim:::.common_stop_if_not_calc_format(data)
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if(!is_calc) {
+        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    }
 
-    if(lubridate::period(data$metadata@step_text) >= lubridate::days(1)) {
+    if(is_calc && lubridate::period(data$metadata@step_text) >= lubridate::days(1)) {
         warning(.calc_const_MESSAGE_VPD_AGGREGATED)
+    }
+
+    call_vpd_function <- function(item, altitude) {
+        .calc_add_vpd_to_item(item, temp_sensor, rh_sensor, output_sensor, altitude)
     }
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        .calc_add_vpd_to_locality(locality, temp_sensor, rh_sensor, output_sensor,
-                                  altitude, metadata_altitude)
-    }
-    data$localities <- purrr::map(data$localities, locality_function)
-    data
-}
-
-.calc_add_vpd_to_locality <- function(locality, temp_sensor, rh_sensor, output_sensor,
-                                      altitude, metadata_altitude) {
-    skip <- .calc_vpd_check_sensors_get_skip(locality, temp_sensor, rh_sensor, output_sensor)
-    if(skip) {
+        local_altitude <- altitude
+        if(metadata_altitude && !is.na(locality$metadata@altitude)) {
+            local_altitude <- locality$metadata@altitude
+        }
+        if(is_calc) {
+            return(call_vpd_function(locality, local_altitude))
+        }
+        locality$loggers <- purrr::map2(locality$loggers, local_altitude, call_vpd_function)
         return(locality)
     }
+    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    myClim:::.common_set_localities(data, out_localities)
+}
 
-    if(metadata_altitude && ! is.na(locality$metadata@altitude)) {
-        altitude <- locality$metadata@altitude
+.calc_add_vpd_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, altitude) {
+    skip <- .calc_vpd_check_sensors_get_skip(item, temp_sensor, rh_sensor, output_sensor)
+    if(skip) {
+        return(item)
     }
 
-    T <- locality$sensors[[temp_sensor]]$values
-    RH <- locality$sensors[[rh_sensor]]$values
+    T <- item$sensors[[temp_sensor]]$values
+    RH <- item$sensors[[rh_sensor]]$values
     a <- 0.61121
     b <- 18.678 - (T / 234.5)
     c <- 257.14
@@ -565,25 +680,25 @@ mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
     f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * T^2)) #enhancement factor
     values <- f * a * exp(b * T / (c + T)) * (1 - RH / 100)
 
-    height <- locality$sensors[[rh_sensor]]$metadata@height
-    locality$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_VPD, output_sensor,
-                                                                         height=height, values=values)
-    return(locality)
+    height <- item$sensors[[rh_sensor]]$metadata@height
+    item$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_VPD, output_sensor,
+                                                                     height=height, values=values)
+    return(item)
 }
 
-.calc_vpd_check_sensors_get_skip <- function(locality, temp_sensor, rh_sensor, output_sensor){
-    if(!.calc_check_sensor_in_locality(locality, temp_sensor)){
+.calc_vpd_check_sensors_get_skip <- function(item, temp_sensor, rh_sensor, output_sensor){
+    if(!.calc_check_sensor_in_item(item, temp_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical_T_C(locality$sensors[[temp_sensor]]$metadata)){
+    if(!myClim:::.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
         .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_T_C)
     }
-    if(!.calc_check_sensor_in_locality(locality, rh_sensor)){
+    if(!.calc_check_sensor_in_item(item, rh_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical(locality$sensors[[rh_sensor]]$metadata, myClim:::.model_const_PHYSICAL_RH_perc)){
+    if(!myClim:::.model_is_physical(item$sensors[[rh_sensor]]$metadata, myClim:::.model_const_PHYSICAL_RH_perc)){
         .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_RH_perc)
     }
-    .calc_warn_if_overwriting(locality, output_sensor)
+    .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
 }

@@ -2,7 +2,7 @@ source("R/model.R")
 
 mc_data_heights <- as.data.frame(tibble::tribble(
                                   ~logger_type,                         ~sensor_name,         ~height, ~suffix,
-    .model_const_LOGGER_TOMST_THERMODATALOGGER,             .model_const_SENSOR_TM_T,    "air 200 cm",      NA,
+    .model_const_LOGGER_TOMST_THERMODATALOGGER,             .model_const_SENSOR_TS_T,    "air 200 cm",      NA,
                  .model_const_LOGGER_TOMST_TMS,           .model_const_SENSOR_TMS_T1,     "soil 8 cm",      NA,
                  .model_const_LOGGER_TOMST_TMS,           .model_const_SENSOR_TMS_T2,      "air 2 cm",      NA,
                  .model_const_LOGGER_TOMST_TMS,           .model_const_SENSOR_TMS_T3,     "air 15 cm",      NA,

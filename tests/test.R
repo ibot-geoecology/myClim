@@ -75,7 +75,7 @@ test_sensor <- function(sensor) {
     expect_equal(class(sensor$metadata)[[1]], "mc_SensorMetadata")
     expect_equal(class(sensor$calibration), "data.frame")
     expect_true(nrow(sensor$calibration) == 0 || all(colnames(sensor$calibration) == c("datetime", "cor_factor", "cor_slope")))
-    expect_true(is.numeric(sensor$values) || all(is.na(sensor$values)))
+    expect_true(is.numeric(sensor$values) || is.logical(sensor$values) || all(is.na(sensor$values)))
     test_states(sensor)
 }
 

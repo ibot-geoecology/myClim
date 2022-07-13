@@ -42,14 +42,14 @@ mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@max_value <- 4000
 mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@plot_color <- "steelblue"
 mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@plot_line_width <- 2
 
-mc_data_sensors[[.model_const_SENSOR_TM_T]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_TM_T]]@sensor_id <- .model_const_SENSOR_TM_T
-mc_data_sensors[[.model_const_SENSOR_TM_T]]@logger <- .model_const_LOGGER_TOMST_THERMODATALOGGER
-mc_data_sensors[[.model_const_SENSOR_TM_T]]@physical <- .model_const_PHYSICAL_T_C
-mc_data_sensors[[.model_const_SENSOR_TM_T]]@min_value <- -40
-mc_data_sensors[[.model_const_SENSOR_TM_T]]@max_value <- 60
-mc_data_sensors[[.model_const_SENSOR_TM_T]]@plot_color <- "#2000EEB0"
-mc_data_sensors[[.model_const_SENSOR_TM_T]]@plot_line_width <- 2
+mc_data_sensors[[.model_const_SENSOR_TS_T]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_TS_T]]@sensor_id <- .model_const_SENSOR_TS_T
+mc_data_sensors[[.model_const_SENSOR_TS_T]]@logger <- .model_const_LOGGER_TOMST_THERMODATALOGGER
+mc_data_sensors[[.model_const_SENSOR_TS_T]]@physical <- .model_const_PHYSICAL_T_C
+mc_data_sensors[[.model_const_SENSOR_TS_T]]@min_value <- -40
+mc_data_sensors[[.model_const_SENSOR_TS_T]]@max_value <- 60
+mc_data_sensors[[.model_const_SENSOR_TS_T]]@plot_color <- "#2000EEB0"
+mc_data_sensors[[.model_const_SENSOR_TS_T]]@plot_line_width <- 2
 
 mc_data_sensors[[.model_const_SENSOR_DEND_T]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_DEND_T]]@sensor_id <- .model_const_SENSOR_DEND_T

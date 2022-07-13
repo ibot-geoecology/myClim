@@ -35,7 +35,7 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_TMS_T2 <- "TMS_T2"
 .model_const_SENSOR_TMS_T3 <- "TMS_T3"
 .model_const_SENSOR_TMS_TMSmoisture <- "TMS_TMSmoisture"
-.model_const_SENSOR_TM_T <- "TM_T"
+.model_const_SENSOR_TS_T <- "TS_T"
 .model_const_SENSOR_DEND_T <- "DEND_T"
 .model_const_SENSOR_DEND_TOMSTdendro <- "DEND_TOMSTdendro"
 .model_const_SENSOR_HOBO_T_C <- "HOBO_T_C"
@@ -567,7 +567,7 @@ setMethod(
 
 .change_tomst_columns_and_logger_type <- function(object, data){
     tm_columns <- list(4)
-    names(tm_columns) <- .model_const_SENSOR_TM_T
+    names(tm_columns) <- .model_const_SENSOR_TS_T
     dendro_columns <- list(4, 7)
     names(dendro_columns) <- c(.model_const_SENSOR_DEND_T, .model_const_SENSOR_DEND_TOMSTdendro)
     tms_columns <- list(4, 5, 6, 7)
@@ -605,7 +605,7 @@ setMethod(
 
 .change_tomst_join_columns_and_logger_type <- function(object, data){
     tmj_columns <- list(5)
-    names(tmj_columns) <- .model_const_SENSOR_TM_T
+    names(tmj_columns) <- .model_const_SENSOR_TS_T
     tmsj_columns <- list(5, 6, 7, 8, 9)
     names(tmsj_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2,.model_const_SENSOR_TMS_T3,
                              .model_const_SENSOR_TMS_TMSmoisture, .model_const_SENSOR_moisture)

@@ -19,7 +19,7 @@ test_that("mc_prep_clean", {
     expect_equal(length(cleaned_data[["94184102"]]$loggers[[1]]$datetime), 49)
     expect_true(is.na(cleaned_data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[19]]))
     expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$clean_info@step, 15)
-    expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$sensors$TM_T$states$start, dplyr::first(cleaned_data[["91184133"]]$loggers[[1]]$datetime))
+    expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(cleaned_data[["91184133"]]$loggers[[1]]$datetime))
 })
 
 test_that("mc_prep_clean defined step", {
@@ -136,7 +136,7 @@ test_that("mc_prep_crop", {
     cropped_calc_data <- mc_prep_crop(data_calc, start=as.POSIXct("2020-10-16 06:00", tz="UTC"), end=as.POSIXct("2020-10-16 08:00", tz="UTC"))
     expect_equal(cropped_calc_data$localities$A6W79$sensors$TMS_T1$states$start, lubridate::ymd_h("2020-10-16 06"))
     expect_equal(cropped_calc_data$localities$A6W79$sensors$TMS_T1$states$end, lubridate::ymd_h("2020-10-16 08"))
-    expect_equal(nrow(cropped_calc_data$localities$A1E05$sensors$TM_T$states), 0)
+    expect_equal(nrow(cropped_calc_data$localities$A1E05$sensors$TS_T$states), 0)
     test_calc_data_format(cropped_calc_data)
 })
 
@@ -244,8 +244,8 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     data <- mc_read_data("data/TOMST/files_table.csv", clean=FALSE)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                     ~datetime, ~cor_factor,
-        "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 00"),         0.1,
-        "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),           0,
+        "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 00"),         0.1,
+        "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 10"),           0,
         "94184102",            "TMS_T1", lubridate::ymd_h("2020-10-16 00"),        0.12,
         "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,
         "94184102",            "TMS_T3", lubridate::ymd_h("2020-10-16 00"),         0.2,
@@ -255,8 +255,8 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     test_prep_data_format(param_data)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
-            "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 00"),         0.1,          0,
-            "91184101",              "TM_T", lubridate::ymd_h("2020-10-28 10"),           0,      -0.05,
+            "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 00"),         0.1,          0,
+            "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 10"),           0,      -0.05,
             "94184102",            "TMS_T1", lubridate::ymd_h("2020-10-16 00"),        0.12,        0.1,
             "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,       0.05,
             "94184102",            "TMS_T3", lubridate::ymd_h("2020-10-16 00"),         0.2,          0,
@@ -268,18 +268,18 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     param_data <- mc_prep_clean(param_data, silent = T)
     calib_data <- mc_prep_calib(param_data)
     test_prep_data_format(calib_data)
-    expect_true(calib_data$A1E05$loggers[[1]]$sensors$TM_T$metadata@calibrated)
-    expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TM_T$values[[1]], 9.875 + 0.1)
-    expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TM_T$values[[6]], 6.875 * 0.95)
+    expect_true(calib_data$A1E05$loggers[[1]]$sensors$TS_T$metadata@calibrated)
+    expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TS_T$values[[1]], 9.875 + 0.1)
+    expect_equal(calib_data$A1E05$loggers[[1]]$sensors$TS_T$values[[6]], 6.875 * 0.95)
     expect_equal(calib_data$A6W79$loggers[[1]]$sensors$TMS_T2$values[[1]], 9.5 * 1.05 + 0.15)
     expect_equal(calib_data$A6W79$loggers[[1]]$sensors$TMS_T2$values[[5]], 9.5 * 1.05 + 0.15)
     expect_true(calib_data$A6W79$loggers[[1]]$sensors$TMS_T3$metadata@calibrated)
     expect_false(calib_data$A6W79$loggers[[1]]$sensors$TMS_TMSmoisture$metadata@calibrated)
     cleaned_data <- mc_prep_clean(param_data, silent = TRUE)
     calc_data <- mc_agg(cleaned_data)
-    calib_data <- mc_prep_calib(calc_data, sensors = "TM_T")
+    calib_data <- mc_prep_calib(calc_data, sensors = "TS_T")
     test_calc_data_format(calib_data)
-    expect_true(calib_data$localities$A1E05$sensors$TM_T$metadata@calibrated)
-    expect_equal(calib_data$localities$A1E05$sensors$TM_T$values[[1]], 9.875 + 0.1)
-    expect_equal(calib_data$localities$A1E05$sensors$TM_T$values[[6]], 6.875 * 0.95)
+    expect_true(calib_data$localities$A1E05$sensors$TS_T$metadata@calibrated)
+    expect_equal(calib_data$localities$A1E05$sensors$TS_T$values[[1]], 9.875 + 0.1)
+    expect_equal(calib_data$localities$A1E05$sensors$TS_T$values[[6]], 6.875 * 0.95)
 })

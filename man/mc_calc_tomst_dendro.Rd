@@ -12,7 +12,7 @@ mc_calc_tomst_dendro(
 )
 }
 \arguments{
-\item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
+\item{data}{myClim object in cleaned Prep-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
 \item{dendro_sensor}{name of change in stem size sensor to be converted from raw to micrometers (default "DEND_TOMSTdendro") see \code{names(mc_data_sensors)}}
 

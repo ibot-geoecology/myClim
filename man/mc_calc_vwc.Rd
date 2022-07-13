@@ -18,7 +18,7 @@ mc_calc_vwc(
 )
 }
 \arguments{
-\item{data}{myClim object in Calc-format see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
+\item{data}{myClim object in cleaned Prep-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
 \item{moist_sensor}{name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see \code{names(mc_data_sensors)}
 

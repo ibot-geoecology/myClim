@@ -10,7 +10,7 @@ test_that(".plot_get_logger_sensors_by_physical", {
     expect_equal(physical$TMSmoisture, "TMS_TMSmoisture")
     physical <- test_function(data$A1E05$loggers[[1]])
     expect_equal(length(physical), 1)
-    expect_equal(physical$T_C, "TM_T")
+    expect_equal(physical$T_C, "TS_T")
 })
 
 test_that("all plots", {

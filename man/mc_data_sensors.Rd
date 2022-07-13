@@ -40,7 +40,7 @@ Currently supported sensors:
 \item snow_total - total hight snow (cm)
 \item sun_shine - time of sun shine (hours)
 \item T_C - universal temperature sensor (°C)
-\item TM_T - temperature sensor in TOMST ThermoDatalogger (°C)
+\item TS_T - temperature sensor in TOMST ThermoDatalogger (°C)
 \item TMS_T1 - soil temperature sensor in TOMST TMS (°C)
 \item TMS_T2 - surface temperature sensor in TOMST TMS (°C)
 \item TMS_T3 - air temperature sensor in TOMST TMS (°C)

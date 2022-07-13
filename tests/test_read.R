@@ -22,10 +22,10 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$A1E05$loggers[[1]]$sensors), 1)
     expect_true(is.na(data$A1E05$loggers[[1]]$metadata@step))
     expect_true(is.na(data$A1E05$metadata@altitude))
-    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
-    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$start, dplyr::first(data$A1E05$loggers[[1]]$datetime))
-    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$end, dplyr::last(data$A1E05$loggers[[1]]$datetime))
-    expect_equal(data$A1E05$loggers[[1]]$sensors$TM_T$states$value, normalizePath("./data/TOMST/data_91184101_0.csv"))
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TS_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(data$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TS_T$states$end, dplyr::last(data$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$A1E05$loggers[[1]]$sensors$TS_T$states$value, normalizePath("./data/TOMST/data_91184101_0.csv"))
     expect_equal(data$A1E05$loggers[[2]]$metadata@serial_number, "94230002")
 })
 
@@ -141,7 +141,7 @@ test_that("mc_read_files joined TOMST direcory", {
     expect_equal(names(data), c("A1E01_TS", "A1W14_TMS", "A4E53_TMS", "CKras_Loc_2_15", "CZ2_HRADEC_TMS", "CZ2_HRADEC_TS"))
     expect_equal(names(data$A1W14_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture"))
     expect_equal(names(data$CZ2_HRADEC_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture", "moisture"))
-    expect_equal(names(data$CZ2_HRADEC_TS$loggers[[1]]$sensors), "TM_T")
+    expect_equal(names(data$CZ2_HRADEC_TS$loggers[[1]]$sensors), "TS_T")
 })
 
 test_that("mc_read_wide", {

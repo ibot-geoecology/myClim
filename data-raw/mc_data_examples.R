@@ -10,7 +10,7 @@ files_table <- as.data.frame(tibble::tribble(
 ))
 
 
-mc_data_example_source <- mc_read_data(files_table, "examples/data/TOMST/localities_table.csv")
+mc_data_example_source <- mc_read_data(files_table, "examples/data/TOMST/localities_table.csv", clean = FALSE)
 mc_data_example_source <- mc_prep_crop(mc_data_example_source, end = lubridate::ymd("2021-02-01"))
 
 mc_data_example_clean <- mc_prep_clean(mc_data_example_source, silent = TRUE)

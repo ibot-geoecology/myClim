@@ -82,7 +82,7 @@
 #' * snow_total - total hight snow (cm)
 #' * sun_shine - time of sun shine (hours)
 #' * T_C - universal temperature sensor (°C)
-#' * TM_T - temperature sensor in TOMST ThermoDatalogger (°C)
+#' * TS_T - temperature sensor in TOMST ThermoDatalogger (°C)
 #' * TMS_T1 - soil temperature sensor in TOMST TMS (°C)
 #' * TMS_T2 - surface temperature sensor in TOMST TMS (°C)
 #' * TMS_T3 - air temperature sensor in TOMST TMS (°C)

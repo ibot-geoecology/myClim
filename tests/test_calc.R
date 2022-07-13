@@ -5,7 +5,9 @@ source("test.R")
 
 test_that("mc_calc_snow", {
     cleaned_data <- mc_read_files("data/eco-snow", "TOMST", silent=T)
-    expect_error(mc_calc_snow(cleaned_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5))
+    snow_prep_data <- mc_calc_snow(cleaned_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5)
+    test_prep_data_format(snow_prep_data)
+    expect_true("T3_snow" %in% names(snow_prep_data$`94184102`$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_snow(calc_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5)
     expect_true(is.na(calc_data$localities[["94184102"]]$sensors$T3_snow$values[[1]]))
@@ -29,6 +31,9 @@ test_that("mc_calc_snow_logger_without_sensor", {
 test_that("mc_calc_snow_agg", {
     cleaned_data <- mc_read_files("data/eco-snow", "TOMST", silent = T)
     cleaned_data <- mc_prep_meta_locality(cleaned_data, list(`94184102`=60, `94184103`=60), "tz_offset")
+    prep_data <- mc_calc_snow(cleaned_data, "TMS_T3", range=1.5, tmax=0.5)
+    snow_agg <- mc_calc_snow_agg(prep_data, "snow")
+    expect_equal(colnames(snow_agg), c("locality_id", "snow_days", "first_day", "last_day", "first_day_period", "last_day_period"))
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_snow(calc_data, "TMS_T3", range=1.5, tmax=0.5)
     snow_agg <- mc_calc_snow_agg(calc_data, "snow")
@@ -60,6 +65,9 @@ test_that("mc_calc_vwc", {
             "94184103",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 14"),      -0.015,          1,
     ))
     cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
+    expect_warning(prep_data <- mc_calc_vwc(cleaned_data, localities=c("A1E05", "A2E32")))
+    test_prep_data_format(prep_data)
+    expect_true("VWC_moisture" %in% names(prep_data$A2E32$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_vwc(calc_data, localities=c("A1E05", "A2E32")))
     test_calc_data_format(calc_data)
@@ -87,24 +95,31 @@ test_that("mc_calc_vwc wrong", {
 
 test_that("mc_calc_gdd", {
     cleaned_data <- mc_read_files("data/calc-gdd", "TOMST", silent = T)
-    expect_error(mc_calc_gdd(cleaned_data, "TM_T"))
+    prep_data <- mc_calc_gdd(cleaned_data, "TS_T")
+    test_prep_data_format(prep_data)
+    expect_true("GDD5" %in% names(prep_data$`91184101`$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
-    calc_data <- mc_calc_gdd(calc_data, "TM_T")
+    calc_data <- mc_calc_gdd(calc_data, "TS_T")
     expect_equal(calc_data$localities$`91184101`$sensors$GDD5$values[1], (12.4375 - 5) * 15/(60*24))
     expect_equal(calc_data$localities$`91184101`$sensors$GDD5$values[176], 0)
 })
 
 test_that("mc_calc_fdd", {
     cleaned_data <- mc_read_files("data/calc-gdd", "TOMST", silent=T)
-    expect_error(mc_calc_fdd(cleaned_data, "TM_T"))
+    prep_data <- mc_calc_fdd(cleaned_data, "TS_T")
+    test_prep_data_format(prep_data)
+    expect_true("FDD0" %in% names(prep_data$`91184101`$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
-    calc_data <- mc_calc_fdd(calc_data, "TM_T")
+    calc_data <- mc_calc_fdd(calc_data, "TS_T")
     expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[1], 0)
     expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[288], (0.5) * 15/(60*24))
 })
 
 test_that("mc_calc_cumsum", {
     cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent=T)
+    expect_warning(prep_data <- mc_calc_cumsum(cleaned_data, c("TMS_T1", "TMS_T2")))
+    test_prep_data_format(prep_data)
+    expect_true("TMS_T1_cumsum" %in% names(prep_data$A2E32$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_snow(calc_data, "TMS_T3", range=1.5, tmax=0.5))
     expect_warning(cumsum_data <- mc_calc_cumsum(calc_data, c("TMS_T1", "TMS_T2", "snow")))
@@ -115,15 +130,9 @@ test_that("mc_calc_cumsum", {
 
 test_that("mc_calc_tomst_dendro", {
     expect_warning(cleaned_data <- mc_read_files("data/TOMST", "TOMST", silent=T))
-    calc_data <- mc_agg(cleaned_data)
-    expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
-    test_calc_data_format(calc_data)
-    expect_equal(calc_data$localities$`92192250`$sensors$dendro_l_um$values[[1]],
-                 (calc_data$localities$`92192250`$sensors$DEND_TOMSTdendro$values[[1]] - 1279) * (8890 / (34000 - 1279)))
-})
-
-test_that("mc_calc_tomst_dendro", {
-    expect_warning(cleaned_data <- mc_read_files("data/TOMST", "TOMST", silent=T))
+    expect_warning(prep_data <- mc_calc_tomst_dendro(cleaned_data))
+    test_prep_data_format(prep_data)
+    expect_true("dendro_l_um" %in% names(prep_data$`92192250`$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
     expect_warning(calc_data <- mc_calc_tomst_dendro(calc_data))
     test_calc_data_format(calc_data)
@@ -135,6 +144,9 @@ test_that("mc_calc_vpd", {
     data <- mc_read_files("data/HOBO/20024354.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S", clean=FALSE, silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`20024354`="LOC"), param_name = "locality_id")
     cleaned_data <- mc_prep_clean(data, silent=T)
+    prep_data <- mc_calc_vpd(cleaned_data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH)
+    test_prep_data_format(prep_data)
+    expect_true("VPD" %in% names(prep_data$LOC$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
     calc_data <- mc_calc_vpd(calc_data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH)
     test_calc_data_format(calc_data)

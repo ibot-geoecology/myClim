@@ -13,7 +13,7 @@ mc_calc_snow_agg(
 )
 }
 \arguments{
-\item{data}{myClim object in calculation format (see \code{\link[=mc_agg]{mc_agg()}}) with TRUE/FALSE snow sensor see \code{\link[=mc_calc_snow]{mc_calc_snow()}}}
+\item{data}{myClim object in cleaned Prep-format or Calc-formt (see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}) with TRUE/FALSE snow sensor see \code{\link[=mc_calc_snow]{mc_calc_snow()}}}
 
 \item{snow_sensor}{name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function \code{mc_calc_snow}; (default "snow")}
 
