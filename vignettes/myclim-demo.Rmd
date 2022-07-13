@@ -187,8 +187,23 @@ kable(metadata, "html", digits=2) %>%
   kable_styling(font_size = 9)
 ```
 
-* **Joining in time**  Not implemented yet. We are working on it. This function will help to  interactively join the the time-series from multiple downloads. 
+* **Joining in time** For joining fragmented time-series stored in separate files from separate downloading visits of the localities use `mc_mc_join()`. First read separate files into myClim Prep-format and then join. myClim detcts automatically which time series to join based on locality ID, logger type and time step. myClim join automatically the time series which fits well (i) newer time-series starts at the point when older ends or (ii) older and newer time-series overlaps partly or completely with identical values. In case time_series does not fit well (conflict values in certain time step) interactive process starts and user must define which time-series to use, or provide the split date from where to use the newewr data. 
 
+
+```{r,eval=FALSE}
+load("mc_data_example_calc.rda")
+
+## lines
+# mc_plot_line(mc_data_example_calc,filename = "lines.png",
+#              sensors = c("TMS_T3","TMS_TMSmoisture"),png_width = 2500)
+mc_plot_line(mc_data_example_calc,filename = "lines.pdf",sensors = c("TMS_T3","TMS_TMSmoisture"))
+
+## raster
+# mc_plot_raster(mc_data_example_calc,filename = "raster.png",
+#                sensors = c("TMS_T3","TM_T"),png_width = 2500,png_height = 500)
+mc_plot_raster(mc_data_example_calc,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))
+
+```
 
 ## Plotting
 `myClim` is equipped with handy plotting tools mainly from ggplot. It is possible to plot raster plot with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports max. two different physical units to be plotted (primary and secondary y axis. Plotting functions save pdf or png files on your drive. 
