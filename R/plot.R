@@ -443,7 +443,7 @@ mc_plot_line <- function(data, filename, sensors=NULL,
 
 .plot_show_joining_chart <- function(data_table, title, y_label, sizes, highlight_data_table) {
     p <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=datetime, y=value, group=name)) +
-        ggplot2::geom_line(ggplot2::aes(color=name, size=name)) +
+        ggplot2::geom_line(ggplot2::aes(color=name, size=size)) +
         ggplot2::scale_size_manual(values = sizes) +
         ggplot2::theme(legend.position="bottom") +
         ggplot2::ggtitle(title) +
