@@ -638,8 +638,9 @@ mc_prep_calib_load <- function(data, calib_table) {
 #'
 #' @details
 #' This function performs callibartion itself. It uses the calibration values (cor_factor, cor_slope) stored
-#' in myClim object sensor metadata sensor$calibration loaded with [myClim::mc_prep_calib_load()].
-#' §Older data then first calbration `datetime` are calibrated by first parameters.§
+#' in myClim object sensor metadata sensor calibration loaded with [myClim::mc_prep_calib_load()].
+#' Older micrroclimatic records then first calibration `datetime` are calibrated anyway. 
+#' First calibration parameters are used for older records than calibration.
 #' 
 #' It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function.
 #' For TMSmoisture calibration (conversion to volumetric water content) use [myClim::mc_calc_vwc()]
@@ -647,8 +648,8 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' Only sensors with real value type can be calibrated. see [myClim::mc_data_sensors()]
 #' 
 #' @param data myClim object in Prep-format or Calc-format having calibration data in metadata slot `sensor$calibration`
-#' @param sensors vector of sensor names where to perform calibration see `names(mc_data_sensors)`§; if NULL,
-#' then calibrate all sensors with filled in calibration parameters§ (default NULL)
+#' @param sensors vector of sensor names where to perform calibration see `names(mc_data_sensors)`; if NULL,
+#' then calibrate all sensors hawing calibration parameters loaded (default NULL)
 #' @param localities vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)
 #' @return same myClim object as input but with calibrated sensor values.
 #' @export

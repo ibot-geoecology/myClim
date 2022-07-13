@@ -49,7 +49,6 @@
 #' wan to work with single correctly joined time series of the 10 years records. 
 #' For this type of time joining it is useful to have a level "logger" in myClim 
 #' object which allows to keep separate logger  downloads and prepare them for joining. 
-#' *Joining is not implemented yet in myClim. We are working on it.* 
 #' 
 #' Within the logger all sensors share time series. In Calc-format where level of 
 #' logger is missing, all sensors within the locality sahre time series. In Prep-format 
@@ -149,7 +148,6 @@
 #' e. g. calculate volumetric water content form TMS raw moisture records see [myClim::mc_calc_vwc]; 
 #' calculate growing degree days or freezing degree days see [myClim::mc_calc_gdd], [myClim::mc_calc_fdd]; 
 #' or estimate snow presence from near ground temperature [myClim::mc_calc_snow]. 
-#' *Only few calc functions are available do far, we are working on it.*      
 #' 
 #' In Calc-format the level of logger is missing. This is in contrast with Prep-format. 
 #' In Calc-format sensors are organized directly in the localities.

@@ -17,7 +17,9 @@
 #' If file is not in expected format, then file is skipped and warning printed in console. 
 #' CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.    
 #' Localities are named after serial_number of logger.
-#' Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")    
+#' Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+#' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
+#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
 #'
 #' @seealso [myClim::mc_DataFormat]
 #'
@@ -30,8 +32,8 @@
 #' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
 #' @param step Time step of microclimatic time-series in minutes. When provided, then is used in [mc_prep_clean] instead of automatic step detection.
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
-#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
-#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
+#' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
+#' @param silent if TRUE, then any information is printed in console (default FALSE)
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
@@ -69,6 +71,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
 #' must have header, column separator must be comma ",".
+#' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
+#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
 #' @seealso [myClim::mc_DataFormat]
 #' @param files_table path to csv file or data.frame object with 3 required columns and few optional:
 #' required columns:
@@ -96,8 +100,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * lon_wgs84
 #' * lat_wgs84
 #' * tz_offset
-#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
-#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
+#' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
+#' @param silent if TRUE, then any information is printed in console (default FALSE)
 #' @return myClim object in Prep-format see [myClim-package]
 #' @export
 #' @examples
@@ -388,6 +392,8 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 #' All values in wide data.frame represents the same sensor, e.g. air temperature. If you wish to 
 #' read multiple sensors use [myClim::mc_read_long] or use [myClim::mc_read_wide] multiple times separately
 #' for each sensor and that merge myClim objects with [myClim::mc_prep_merge]
+#' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
+#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
 #'
 #' @param data_table data.frame with first column of POSIXct time format UTC timezone, 
 #' followed by columns with microclimatic records. See details.  
@@ -399,8 +405,8 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 #' * Name of locality[n] - values
 #' @param sensor_id define the sensor type, one of `names(mc_data_sensors)` (default `real`)
 #' @param sensor_name custom name of sensor; if NULL (default) than `sensor_name == sensor_id`
-#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
-#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
+#' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
+#' @param silent if TRUE, then any information is printed in console (default FALSE)
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_long]
@@ -438,7 +444,10 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' This is universal function designed to read time series and values 
 #' from long data.frame to myClim object. 
 #'
-#' @details Similar like [myClim::mc_read_wide] but is capable to read multiple sensors. 
+#' @details 
+#' Similar like [myClim::mc_read_wide] but is capable to read multiple sensors. 
+#' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
+#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
 #'
 #' @param data_table long data.frame with Columns:
 #' * locality_id
@@ -450,8 +459,8 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' it does not have to be in the list.
 #'
 #' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
-#' @param clean §if TRUE, then [mc_prep_clean] is called automatically (default TRUE)§
-#' @param silent §if TRUE, then any information is printed in console (default FALSE)§
+#' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
+#' @param silent if TRUE, then any information is printed in console (default FALSE)
 #' @return myClim object in Prep-format
 #' @export
 #' @seealso [myClim::mc_read_wide]
