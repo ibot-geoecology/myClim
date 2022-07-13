@@ -33,9 +33,9 @@ For TMS files ignored, there is fix date format. see \link{mc_data_formats}}
 \item{step}{Time step of microclimatic time-series in minutes. When provided, then is used in \link{mc_prep_clean} instead of automatic step detection.
 If not provided (NA), is automatically detected in \link{mc_prep_clean}. (default NA)}
 
-\item{clean}{§if TRUE, then \link{mc_prep_clean} is called automatically (default TRUE)§}
+\item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
-\item{silent}{§if TRUE, then any information is printed in console (default FALSE)§}
+\item{silent}{if TRUE, then any information is printed in console (default FALSE)}
 }
 \value{
 myClim object in Prep-format see \link{myClim-package}
@@ -52,6 +52,8 @@ If file is not in expected format, then file is skipped and warning printed in c
 CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.
 Localities are named after serial_number of logger.
 Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
+holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks.
 }
 \examples{
 \dontrun{

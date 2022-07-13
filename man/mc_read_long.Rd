@@ -21,9 +21,9 @@ it does not have to be in the list.
 
 \code{sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)}}
 
-\item{clean}{§if TRUE, then \link{mc_prep_clean} is called automatically (default TRUE)§}
+\item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
-\item{silent}{§if TRUE, then any information is printed in console (default FALSE)§}
+\item{silent}{if TRUE, then any information is printed in console (default FALSE)}
 }
 \value{
 myClim object in Prep-format
@@ -34,6 +34,8 @@ from long data.frame to myClim object.
 }
 \details{
 Similar like \link{mc_read_wide} but is capable to read multiple sensors.
+By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
+holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks.
 }
 \seealso{
 \link{mc_read_wide}

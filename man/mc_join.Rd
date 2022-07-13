@@ -2,7 +2,7 @@
 % Please edit documentation in R/join.R
 \name{mc_join}
 \alias{mc_join}
-\title{§Joining sensors from different loggers}
+\title{Joining time-series from repeated downloads}
 \usage{
 mc_join(data, comp_sensors = NULL)
 }
@@ -12,16 +12,26 @@ mc_join(data, comp_sensors = NULL)
 \item{comp_sensors}{senors for compare and select source logger; If NULL then first is used. (default NULL)}
 }
 \value{
-myClim object with joined loggers.§
+myClim object with joined loggers.
 }
 \description{
-Function join sensors from different loggers. Loggers with same type \link{mc_LoggerMetadata} and step are joined.
-Every sensore from first logger must have pair sensor from second one with same height. If sensor values are different,
-then user interactively select source logger. Plot with conflict interval is viewed during joininig. User can select older,
-newer data or datetime split for use older and newer data.
+Function join time-series from repeated download on the same locality. It joins fragmentary
+time-series from the downloads of certain locality and identical loggers type \link{mc_LoggerMetadata} and time step.
+While joining, each sensor from older downloaded logger must have pair sensor on
+the newer downloaded logger with same height. If time-series overlapps and values are different,
+then user interactively select which source logger to use.
+Plot with conflict interval is shown during interactive joining. User can select older time-series,
+newer time-series or set manually the datetime split of newer and older.
 }
 \details{
-Name of result sensor is used from logger with older data. If \code{serial_number} is not equal in joining loggers, then
-result \code{serial_number} is \code{NA}. Clean info is changed to \code{NA} except step. If uncalibrated sensor is joining with calibrated one,
-then calibration inforamtion must be empty in uncalibrated sensor.
+Joining is semi-automatic pairwise process. myClim is sequentially joining the oldest logger
+file with the newer. In case the time series fits well (the newer starts at the point where the older ends),
+or in case the time series overlap and values on the overlap are identical, then myClim join automatically.
+Otherwise user interactively selects which time series to use.
+
+Loggers with multiple sensors are joined base on one or more selected sensors. See parameter \code{comp_sensors}.
+
+Name of result sensor is used from logger with older data. If \code{serial_number} is not equal while joining loggers, then
+the result \code{serial_number} is \code{NA}. Clean info is changed to \code{NA} except step. If  not calibrated sensor is beeing
+joined with calibrated one, then calibration information must be empty in not calibrated sensor.
 }

@@ -53,7 +53,6 @@ on the locality measuring 10 years. We download data twice a year and at the end
 wan to work with single correctly joined time series of the 10 years records.
 For this type of time joining it is useful to have a level "logger" in myClim
 object which allows to keep separate logger  downloads and prepare them for joining.
-\emph{Joining is not implemented yet in myClim. We are working on it.}
 
 Within the logger all sensors share time series. In Calc-format where level of
 logger is missing, all sensors within the locality sahre time series. In Prep-format
@@ -153,7 +152,6 @@ User can calculate various "virtual sensors" on the locality using existing ones
 e. g. calculate volumetric water content form TMS raw moisture records see \link{mc_calc_vwc};
 calculate growing degree days or freezing degree days see \link{mc_calc_gdd}, \link{mc_calc_fdd};
 or estimate snow presence from near ground temperature \link{mc_calc_snow}.
-\emph{Only few calc functions are available do far, we are working on it.}
 
 In Calc-format the level of logger is missing. This is in contrast with Prep-format.
 In Calc-format sensors are organized directly in the localities.

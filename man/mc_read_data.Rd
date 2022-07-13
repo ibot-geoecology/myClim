@@ -45,9 +45,9 @@ object contains 5 columns:
 \item tz_offset
 }}
 
-\item{clean}{§if TRUE, then \link{mc_prep_clean} is called automatically (default TRUE)§}
+\item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
-\item{silent}{§if TRUE, then any information is printed in console (default FALSE)§}
+\item{silent}{if TRUE, then any information is printed in console (default FALSE)}
 }
 \value{
 myClim object in Prep-format see \link{myClim-package}
@@ -60,6 +60,8 @@ csv logger files, specification of data format (logger type) and locality name. 
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table} and \code{localities_table} from external CSV it
 must have header, column separator must be comma ",".
+By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
+holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks.
 }
 \examples{
 \dontrun{
