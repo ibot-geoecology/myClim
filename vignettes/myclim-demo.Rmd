@@ -39,29 +39,33 @@ library(myClim)
 ## Read without metadata
 # read from TOMST files
 tms.f <- mc_read_files(c("data_91184101_0.csv","data_94184102_0.csv",
-                         "data_94184103_0.csv"), dataformat_name="TOMST")
+                         "data_94184103_0.csv"), dataformat_name="TOMST"
+                       ,silent = T)
 # read from HOBO files
 hob.f <- mc_read_files(c("20024354_comma.csv","20024354_semicolon.txt",
                          "20024354_tab.txt"), 
                        dataformat_name="HOBO",
-                       date_format = "%d.%m.%y %H:%M:%S")
+                       date_format = "%d.%m.%y %H:%M:%S",
+                       silent = T)
 
 # read all Tomst files from current directory
-tms.d <- mc_read_files(".", dataformat_name="TOMST",recursive = F)
+tms.d <- mc_read_files(".", dataformat_name="TOMST",recursive = F,silent = T)
 
 # read from data.frame
 meteo.table<-readRDS("airTmax_meteo.rds") # wide format data frame 
-meteo<-mc_read_wide(meteo.table,sensor_id = "T_C", sensor_name = "airTmax")
+meteo<-mc_read_wide(meteo.table,sensor_id = "T_C", 
+                    sensor_name = "airTmax",silent = T)
 
 ## Read with metadata
 # provide two tables. Can be csv files 
 tms.m <- mc_read_data(files_table = "files_table.csv",
-                      localities_table ="localities_table.csv")
+                      localities_table ="localities_table.csv",
+                      silent = T)
 
 # can be R data.frames
 files_table<-read.table("files_table.csv",sep=",",header = T)
 localities_table<-read.table("localities_table.csv",sep=",",header = T)
-tms.m <- mc_read_data(files_table, localities_table)
+tms.m <- mc_read_data(files_table, localities_table,silent = T)
 
 ```
 
@@ -191,19 +195,35 @@ kable(metadata, "html", digits=2) %>%
 
 
 ```{r,eval=FALSE}
-load("mc_data_example_calc.rda")
 
-## lines
-# mc_plot_line(mc_data_example_calc,filename = "lines.png",
-#              sensors = c("TMS_T3","TMS_TMSmoisture"),png_width = 2500)
-mc_plot_line(mc_data_example_calc,filename = "lines.pdf",sensors = c("TMS_T3","TMS_TMSmoisture"))
+# one locality with two downloads in time 
+data<-readRDS("join_example.rds") 
 
-## raster
-# mc_plot_raster(mc_data_example_calc,filename = "raster.png",
-#                sensors = c("TMS_T3","TM_T"),png_width = 2500,png_height = 500)
-mc_plot_raster(mc_data_example_calc,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))
+joined_data <- mc_join(data, comp_sensors=c("TMS_T1", "TMS_T2"))
 
+#> Locality: 94184102
+#> Problematic interval: 2020-12-01 UTC--2020-12-31 23:45:00 UTC
+#> Older logger TMS 94184102
+#>      tag               start                 end
+#> 1 source 2020-10-06 09:15:00 2020-12-31 23:45:00
+#>                                                                 value
+#> 1 D:\\Git\\microclim\\examples\\data\\join\\1deg\\data_94184102_0.csv
+#> Newer logger TMS 94184102
+#>      tag      start                 end                                                               value
+#> 1 source 2020-12-01 2021-04-07 11:45:00 D:\\Git\\microclim\\examples\\data\\join\\1deg\\data_94184102_1.csv
+#> Loggers are different. They cannot be joined automatically.
+#> 
+#> 1: use older logger
+#> 2: use newer logger
+#> 3: use always older logger
+#> 4: use always newer logger
+#> 5: exit
+#> 
+#> Write choice number or start datetime of use newer logger in format YYYY-MM-DD hh:mm.
+#> CHOICE>
 ```
+
+<img src="join_plot.png" width="700"/>
 
 ## Plotting
 `myClim` is equipped with handy plotting tools mainly from ggplot. It is possible to plot raster plot with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports max. two different physical units to be plotted (primary and secondary y axis. Plotting functions save pdf or png files on your drive. 
@@ -304,7 +324,6 @@ kable(head(tms.long,10), "html", digits=2) %>%
 
 ## To do (work in progress)
 
-* function for joining data from multiple downloads in time
 * reading iButton, Lascar... files
 * more calculation functions (VPD...)
 
