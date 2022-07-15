@@ -18,7 +18,7 @@
                               "exit")
 
 .join_const_PLOT_NEIGHBORHOODS_DAYS <- 7
-.join_const_PLOT_SIZE_OLDER <- 1.5
+.join_const_PLOT_SIZE_OLDER <- 1.0
 .join_const_PLOT_SIZE_NEWER <- 0.5
 
 #' Joining time-series from repeated downloads
