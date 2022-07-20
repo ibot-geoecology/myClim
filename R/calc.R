@@ -467,8 +467,18 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Function add new virtual sensor with values of FDD Freezing Degree Days.
 #'
 #' @details
-#' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value is the contribution of the interval to the freezing degree day.
-#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.
+#' Maximal allowed step length for FDD calculation is day and shorter. 
+#' Function creates new virtual sensor with the same time step as input data. 
+#' I. e. when the time step is shorter than a day than freezing degree day is divided 
+#' into smaller time step but still summing the day. For shorter intervals than the day 
+#' the FDD value is the contribution of the interval to the freezing degree day.
+#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] 
+#' only meaningful aggregation function is `sum`, but user is allowed to apply anything.
+#' 
+#' Note that  FDD is always positive number, despite summing freezing event. When you set 
+#' `t_base=-1` you get the sum of degree days below -1 °C but expressed in positive number
+#' the same as if you set `t_base=1` you get also positive number. Therefore pay attention to
+#' name of output variable which contains `t_base` value. FDD5_TMS_T3 vs FDDminus5_TMS_T3.  
 #'
 #' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
