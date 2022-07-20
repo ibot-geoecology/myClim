@@ -1,5 +1,4 @@
 library(testthat)
-library(myClim)
 
 source("test.R")
 
@@ -110,9 +109,11 @@ test_that("mc_calc_fdd", {
     test_prep_data_format(prep_data)
     expect_true("FDD0" %in% names(prep_data$`91184101`$loggers[[1]]$sensors))
     calc_data <- mc_agg(cleaned_data)
-    calc_data <- mc_calc_fdd(calc_data, "TS_T")
-    expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[1], 0)
-    expect_equal(calc_data$localities$`91184101`$sensors$FDD0$values[288], (0.5) * 15/(60*24))
+    fdd_data <- mc_calc_fdd(calc_data, "TS_T", t_base = 0)
+    expect_equal(fdd_data$localities$`91184101`$sensors$FDD0$values[1], 0)
+    expect_equal(fdd_data$localities$`91184101`$sensors$FDD0$values[288], (0.5) * 15/(60*24))
+    fdd_data <- mc_calc_fdd(calc_data, "TS_T", t_base = -3)
+    expect_true("FDDminus3" %in% names(fdd_data$localities$`91184101`$sensors))
 })
 
 test_that("mc_calc_cumsum", {

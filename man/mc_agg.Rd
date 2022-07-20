@@ -34,7 +34,7 @@ again in \code{\link[=mc_agg]{mc_agg()}} function.
 Start day of week is Monday.}
 
 \item{use_utc}{default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
-(in locality metadata: tz_offset) local or solar time see (e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta]{mc_prep_meta()}});
+(in locality metadata: tz_offset) local or solar time see (e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}});
 Non-UTC time can by used only for period \code{day} and longer.}
 
 \item{percentiles}{vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details}
@@ -80,7 +80,7 @@ deleted, but result of aggregation depends on \code{na.rm} parameter. If \code{n
 CAUTION! \code{na.rm=T} is default. If \code{na.rm=F} returns NA when missing data occures.
 
 Empty sensors with no records are excluded. \code{mc_agg()} return NA for empty vector except from count which returns 0.
-When aggregation functions are provided as vector or list e.g. c(mean,min,maxx), than they are applied to all sensors
+When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they are applied to all sensors
 of input myClim object. When named list (names are the sensor ids) of functions is provided then \code{mc_agg()}
 apply specific functions to the specific sensors based on the named list.
 Aggregation function creates new sensors on localities putting aggregation

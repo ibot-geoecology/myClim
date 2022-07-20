@@ -425,7 +425,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     }
 
-    output_sensor <- stringr::str_glue("{output_prefix}{t_base}")
+    output_sensor <- .calc_get_name_with_base(output_prefix, t_base)
 
     call_add_sensor <- function(item, step_part_day) {
         .calc_add_sensor_to_item(item, sensor, output_sensor_id, output_sensor,
@@ -457,6 +457,11 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
     myClim:::.common_set_localities(data, out_localities)
 }
 
+.calc_get_name_with_base <- function(prefix, base) {
+    sign_text <- if(base < 0) "minus" else ""
+    stringr::str_glue("{prefix}{sign_text}{abs(base)}")
+}
+
 .calc_gdd_values_function <- function(locality, sensor_name, t_base, step_part_day) {
     pmax(locality$sensors[[sensor_name]]$values - t_base, 0) * step_part_day
 }
@@ -467,8 +472,12 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Function add new virtual sensor with values of FDD Freezing Degree Days.
 #'
 #' @details
-#' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value is the contribution of the interval to the freezing degree day.
-#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but user is allowed to apply anything.
+#' Maximal allowed step length for FDD calculation is day and shorter. Function creates new virtual sensor with
+#' the same time step as input data. I. e. when the time step is shorter than a day than freezing degree day
+#' is divided into smaller time step but still summing the day. For shorter intervals than the day the FDD value
+#' is the contribution of the interval to the freezing degree day.
+#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()] only meaningful
+#' aggregation function is `sum`, but user is allowed to apply anything.
 #'
 #' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`

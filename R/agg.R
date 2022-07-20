@@ -16,6 +16,7 @@
 .agg_const_MESSAGE_EMPTY_DATA <- "Data are empty."
 .agg_const_MESSAGE_WRONG_PREVIOUS_PERIOD <- "It is not possible aggregate all or custom data."
 .agg_const_MESSAGE_WRONG_SHIFT <- "Shift of time-series in {locality$metadata@locality_id} locality is different."
+.agg_const_MESSAGE_MISSING_HEIGHT <- "Height is missing in sensosr {object@name}."
 
 #' Aggregate data by function
 #'
@@ -45,7 +46,7 @@
 #' CAUTION! `na.rm=T` is default. If `na.rm=F` returns NA when missing data occures.      
 #' 
 #' Empty sensors with no records are excluded. `mc_agg()` return NA for empty vector except from count which returns 0. 
-#' When aggregation functions are provided as vector or list e.g. c(mean,min,maxx), than they are applied to all sensors
+#' When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they are applied to all sensors
 #' of input myClim object. When named list (names are the sensor ids) of functions is provided then `mc_agg()`
 #' apply specific functions to the specific sensors based on the named list.
 
@@ -78,7 +79,7 @@
 #'
 #' Start day of week is Monday.
 #' @param use_utc default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
-#' (in locality metadata: tz_offset) local or solar time see (e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta()]);
+#' (in locality metadata: tz_offset) local or solar time see (e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta_locality()]);
 #' Non-UTC time can by used only for period `day` and longer. 
 #' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
 #' @param na.rm parameter for aggregation function; Not used for count and coverage. special importance for period `"all"` and `"custom"` see details
@@ -696,4 +697,13 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     result <- purrr::imap(functions, sensor_function)
     names(result) <- purrr::map_chr(result, function(x) x$metadata@name)
     result
+}
+
+.agg_get_height_name <- function(name, height) {
+    if(is.na(height)) {
+        warning(stringr::str_glue(.agg_const_MESSAGE_MISSING_HEIGHT))
+        return(name)
+    }
+    height <- stringr::str_replace_all(height, "[-]", "_")
+    make.names(height)
 }
