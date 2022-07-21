@@ -12,7 +12,8 @@ mc_agg(
   percentiles = NULL,
   na.rm = TRUE,
   custom_start = NULL,
-  custom_end = NULL
+  custom_end = NULL,
+  custom_functions = NULL
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ Non-UTC time can by used only for period \code{day} and longer.}
 \item{custom_end}{date of end only use for \code{custom} period (defaul NULL); If NULL then calculates in year cycle ending on \code{custom_start} next year.
 If parameter is filled in then data out of range \code{custom_start}-\code{custom_end} are skipped. E.g. vegetation season, winter season...
 Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}. \code{custom_end} row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 \code{custom_end="01-01"}.}
+
+\item{custom_functions}{§user defined functions in format \code{list(function_name=function(values){...})}; You can use function_name in \code{fun} parameter.§}
 }
 \value{
 Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL

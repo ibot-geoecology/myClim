@@ -17,6 +17,7 @@
 .agg_const_MESSAGE_WRONG_PREVIOUS_PERIOD <- "It is not possible aggregate all or custom data."
 .agg_const_MESSAGE_WRONG_SHIFT <- "Shift of time-series in {locality$metadata@locality_id} locality is different."
 .agg_const_MESSAGE_MISSING_HEIGHT <- "Height is missing in sensosr {object@name}."
+.agg_const_MESSAGE_WRONG_CUSTOM_FUNCTION <- "Type of values in sensor {new_sensor$metadata@name} is wrong."
 
 #' Aggregate data by function
 #'
@@ -87,6 +88,7 @@
 #' @param custom_end date of end only use for `custom` period (defaul NULL); If NULL then calculates in year cycle ending on `custom_start` next year. 
 #' If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped. E.g. vegetation season, winter season... 
 #' Character in format `"mm-dd"` or `"mm-dd H:MM"`. `custom_end` row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 `custom_end="01-01"`.
+#' @param custom_functions §user defined functions in format `list(function_name=function(values){...})`; You can use function_name in `fun` parameter.§
 #' @return Returns new myClim object in Calc-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
 #' records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
 #' @export
@@ -94,7 +96,7 @@
 #' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
 #' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", na.rm=FALSE)
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE,
-                   custom_start=NULL, custom_end=NULL) {
+                   custom_start=NULL, custom_end=NULL, custom_functions=NULL) {
     old_lubridate_week_start <- getOption("lubridate.week.start")
     options(lubridate.week.start = 1)
     use_intervals <- .agg_get_use_intervals(data, period, custom_start, custom_end)
@@ -108,9 +110,9 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_prep) {
-            return(.agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset))
+            return(.agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, custom_functions))
         } else {
-            return(.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_step_text))
+            return(.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_step_text, custom_functions))
         }
     }
     if(is_prep) {
@@ -300,11 +302,11 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     stringr::str_glue("{dplyr::first(steps)} min")
 }
 
-.agg_aggregate_prep_locality <- function(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset)
+.agg_aggregate_prep_locality <- function(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, custom_functions)
 {
     logger_function <- function (logger) {
         original_step_text <- stringr::str_glue("{logger$clean_info@step} min")
-        logger <- .agg_aggregate_item(logger, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_step_text)
+        logger <- .agg_aggregate_item(logger, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_step_text, custom_functions)
         if(is.null(logger)) {
             return(logger)
         }
@@ -348,7 +350,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     as.integer(as.numeric(period_object) / 60)
 }
 
-.agg_aggregate_item <- function(item, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_step_text)
+.agg_aggregate_item <- function(item, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_step_text,
+                                custom_functions)
 {
     if(is.null(fun) || length(item$datetime) == 0) {
         return(item)
@@ -377,8 +380,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     item$datetime <- unique(start_datetimes)
     by_aggregate <- list(step=as.factor(start_datetimes))
     sensor_function <- function(sensor) {
-        functions <- .agg_get_functions(sensor, fun, percentiles, na.rm)
-        .agg_agregate_sensor(sensor, functions, by_aggregate)
+        functions <- .agg_get_functions(sensor, fun, percentiles, na.rm, custom_functions)
+        .agg_agregate_sensor(sensor, functions, by_aggregate, custom_functions)
     }
     item$sensors <- purrr::flatten(purrr::map(item$sensors, sensor_function))
     item
@@ -588,7 +591,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     item
 }
 
-.agg_get_functions <- function(sensor, fun, percentiles, na.rm) {
+.agg_get_functions <- function(sensor, fun, percentiles, na.rm, custom_functions) {
     if(class(fun) == "character") {
         functions_to_convert <- fun
     } else if (sensor$metadata@name %in% names(fun)) {
@@ -597,10 +600,10 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         return(NULL)
     }
     value_type <- mc_data_sensors[[sensor$metadata@sensor_id]]@value_type
-    purrr::flatten(purrr::map(functions_to_convert, function(x) .agg_convert_function(x, percentiles, na.rm, value_type)))
+    purrr::flatten(purrr::map(functions_to_convert, function(x) .agg_convert_function(x, percentiles, na.rm, value_type, custom_functions)))
 }
 
-.agg_convert_function <- function(function_text, percentiles, na.rm, value_type) {
+.agg_convert_function <- function(function_text, percentiles, na.rm, value_type, custom_functions) {
     if(function_text == .agg_const_FUNCTION_MIN) {
         return(list(min=function(x) {
             x <- .agg_function_prepare_data(x, na.rm)
@@ -643,6 +646,14 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
             if(length(x) == 0) return(NA)
             length(x[!is.na(x)]) / length(x)
         }))
+    } else if(function_text %in% names(custom_functions)) {
+        result <- list()
+        result[[function_text]] <- function (x) {
+            x <- .agg_function_prepare_data(x, na.rm)
+            if(length(x) == 0) return(NA)
+            custom_functions[[function_text]] (x)
+        }
+        return(result)
     }
     NULL
 }
@@ -679,7 +690,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     result
 }
 
-.agg_agregate_sensor <- function(sensor, functions, by_aggregate) {
+.agg_agregate_sensor <- function(sensor, functions, by_aggregate, custom_functions) {
     sensor_function <- function(.x, .y) {
         sensor_info <- mc_data_sensors[[sensor$metadata@sensor_id]]
         new_sensor <- sensor
@@ -692,6 +703,17 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         }
         new_sensor$metadata@name <- stringr::str_glue("{new_sensor$metadata@name}_{.y}")
         new_sensor$values <- aggregate(new_sensor$values, by_aggregate, .x)$x
+        if(.y %in% names(custom_functions)) {
+            if(is.logical(new_sensor$values)) {
+                new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_logical
+            } else if(is.integer(new_sensor$values)) {
+                new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
+            } else if(is.numeric(new_sensor$values)) {
+                new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_real
+            } else {
+                stop(stringr::str_glue(.agg_const_MESSAGE_WRONG_CUSTOM_FUNCTION))
+            }
+        }
         new_sensor
     }
     result <- purrr::imap(functions, sensor_function)

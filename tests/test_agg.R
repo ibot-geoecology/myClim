@@ -195,3 +195,14 @@ test_that("mc_agg shifted series", {
     agg_data <- mc_agg(cleaned_data, "mean", "2 hours")
     expect_false(all(is.na(agg_data$localities$CZ2_HRADEC$sensors$TS_T_mean$values)))
 })
+
+test_that("mc_agg custom functions", {
+    data <- mc_read_files("data/agg", "TOMST", silent=T)
+    custom_functions <- list(frost_days=function(values){min(values) < 5})
+    agg_data <- mc_agg(data, c("min", "frost_days"), "hour", custom_functions=custom_functions)
+    test_calc_data_format(agg_data)
+    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_min$values < 5,
+                 agg_data$localities$`91184101`$sensors$TS_T_frost_days$values)
+    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_frost_days$metadata@sensor_id, myClim:::.model_const_SENSOR_logical)
+})
+
