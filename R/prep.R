@@ -527,7 +527,7 @@ mc_prep_merge <- function(data_items) {
         if(is_prep_format) {
             return(.prep_merge_prep_localities(locality1, locality2))
         }
-        .prep_merge_calc_localities(locality1, locality2, data1$metadata@step_text)
+        .prep_merge_calc_localities(locality1, locality2, data1$metadata@period)
     }
 
     common_localities <- purrr::map(common_locality_ids, merge_localities_function)
@@ -547,7 +547,7 @@ mc_prep_merge <- function(data_items) {
     }
 
     if(is_data1_calc_format &&
-        (lubridate::as.period(data1$metadata@step_text) != lubridate::as.period(data2$metadata@step_text))) {
+        (lubridate::as.period(data1$metadata@period) != lubridate::as.period(data2$metadata@period))) {
         stop("There is different step in data1 and data2.")
     }
 }
@@ -557,9 +557,9 @@ mc_prep_merge <- function(data_items) {
     locality1
 }
 
-.prep_merge_calc_localities <- function(locality1, locality2, step_text){
+.prep_merge_calc_localities <- function(locality1, locality2, period){
     localities <- list(locality1, locality2)
-    datetime <- myClim:::.agg_get_datetimes_from_sensor_items(localities, step_text)
+    datetime <- myClim:::.agg_get_datetimes_from_sensor_items(localities, period)
     sensors <- myClim:::.agg_get_merged_sensors(datetime, localities)
     locality1$datetime <- datetime
     locality1$sensors <- sensors

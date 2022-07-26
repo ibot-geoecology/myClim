@@ -167,7 +167,7 @@ metadata on the level of  whole object \linkS4class{mc_MainMetadata} holding inf
 on time step which has whole object. Step is stored in minutes (\code{data$metadata@step}).
 But some steps can not be represented by minutes. For example step \code{month} has variable
 number of minutes. Therefore, metadata contains also text
-representation of the step (\code{data$metadata@step_text}). Common time step
+representation of the step (\code{data$metadata@period}). Common time step
 of myClim Calc-format objects is practical when merging multiple object. See \link{mc_prep_merge}
 
 Schema of myClim \strong{Calc-format}
@@ -177,7 +177,9 @@ Schema of myClim \strong{Calc-format}
 $metadata   | mc_MainMetadata - class |
             +-------------------------+
             | @step                   |
-            | @step_text              |
+            | @period                 |
+            | @intervals_start        |
+            | @intervals_end          |
             +-------------------------+
             +-----------------------------------------------------------------+
 $localities | locality[1]                                                     |

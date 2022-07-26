@@ -6,7 +6,7 @@
 \usage{
 mc_env_temp(
   data,
-  period = NULL,
+  period,
   use_utc = TRUE,
   custom_start = NULL,
   custom_end = NULL,
@@ -16,10 +16,41 @@ mc_env_temp(
 }
 \arguments{
 \item{data}{myClim object in cleaned Prep-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
+
+\item{period}{output period see \code{\link[=mc_agg]{mc_agg()}}}
+
+\item{use_utc}{if FALSE, then local time is used for day aggregation see \code{\link[=mc_agg]{mc_agg()}}}
+
+\item{custom_start}{start date for custom period see \code{\link[=mc_agg]{mc_agg()}}}
+
+\item{custom_end}{end date for custom period see \code{\link[=mc_agg]{mc_agg()}}}
+
+\item{gdd_t_base}{base temeprature for Growing degree days \code{\link[=mc_calc_gdd]{mc_calc_gdd()}}}
+
+\item{fdd_t_base}{base temeprature for freezing degree days \code{\link[=mc_calc_fdd]{mc_calc_fdd()}}}
 }
 \value{
-long table with environment variables
+table in long format with environment variables
 }
 \description{
 Function ...
+}
+\details{
+\itemize{
+\item used all temperature sensors
+\item functions
+\itemize{
+\item min5p: fifth percentile of daily minimum
+\item mean: mean of daily mean
+\item max95p: ninety-fifth percentile of daily maximum
+\item drange: mean of daily range
+\item gdd{base}: growing degree days with base from parameter \code{gdd_t_base}
+\item fdd{base}: freezing degree days with base from parameter \code{fdd_t_base}
+\item frostdays: the number of days in which some temerature value was lower than parameter \code{fdd_t_base}
+}
+}
+}
+\examples{
+data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
+mc_env_temp(data, "month")
 }

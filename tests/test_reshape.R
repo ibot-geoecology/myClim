@@ -1,5 +1,4 @@
 library(testthat)
-library(myClim)
 
 test_that("wideformat-filter", {
     data <- mc_read_data("data/TOMST/files_table.csv", clean=FALSE)
@@ -22,15 +21,18 @@ test_that("wideformat-all", {
     expect_equal(nrow(table), 111)
 })
 
-test_that("longformat-filter", {
+test_that("reshape long", {
     data <- mc_read_data("data/TOMST/files_table.csv", clean=FALSE)
-    table <- mc_reshape_long(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
-    expect_equal(ncol(table), 5)
+    expect_warning(table <- mc_reshape_long(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")))
+    expect_equal(colnames(table), c("locality_id", "serial_number", "sensor_name", "height", "datetime", "time_to", "value"))
     expect_equal(nrow(table), 2*(49+75))
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     table <- mc_reshape_long(calc_data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
-    expect_equal(ncol(table), 5)
+    expect_equal(colnames(table), c("locality_id", "serial_number", "sensor_name", "height", "datetime", "time_to", "value"))
     expect_equal(nrow(table), 2*(49+75))
     expect_true(all(is.na(table$serial_number)))
+    all_data <- mc_agg(cleaned_data, "mean", "all")
+    table <- mc_reshape_long(all_data)
+    expect_true(all(table$time_to == lubridate::ymd_hm("2020-10-28 11:30")))
 })

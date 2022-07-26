@@ -101,7 +101,7 @@
         } else if(!is.na(data$metadata@step)) {
             end <- end + lubridate::minutes(data$metadata@step)
         } else {
-            end <- end + lubridate::period(data$metadata@step_text)
+            end <- end + lubridate::period(data$metadata@period)
         }
         return(list(start=start, end=end))
     }

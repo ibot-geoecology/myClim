@@ -19,7 +19,8 @@ mc_agg(
 \arguments{
 \item{data}{cleaned myClim object in Prep-format: output of \code{\link[=mc_prep_clean]{mc_prep_clean()}} or Calc-format as it is allowed to aggregate data multiple times.}
 
-\item{fun}{aggregation function; one of ("min", "max", "mean", "percentile", "sum", "range", "count", "coverage") See details.
+\item{fun}{aggregation function; one of (\code{"min"}, \code{"max"}, \code{"mean"}, \code{"percentile"}, \code{"sum"}, \code{"range"}, \code{"count"}, \code{"coverage"})
+§and functions defined in \code{custom_functions} parameter§ See details.
 Can be single function name, character vector of function names or named list of vector function names.
 Named list of functions allows apply specific functions for different sensors e.g. \code{list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")}
 if NULL records are not aggregated, but converted to Calc-format. See details.}

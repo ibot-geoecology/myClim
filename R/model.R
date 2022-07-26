@@ -164,14 +164,25 @@ setMethod("initialize",
 
 #' Class for myClim object metadata in Calc-format
 #' @slot step time step of data in minutes
-#' @slot step_text time step of data in text for irregular periods (e.g. month)
+#' @slot period §value from [mc_agg()]§
+#' @slot intervals_start §start datetime of data intervals for spacial periods all and custom (see [mc_agg()])§
+#' @slot intervals_end §end datetime of data intervals for spacial periods all and custom (see [mc_agg()])§
 #' @export mc_MainMetadata
 #' @exportClass mc_MainMetadata
 #' @seealso Calc-format section of [myClim-package]
 mc_MainMetadata <- setClass("mc_MainMetadata",
                             slots = c(step = "numeric",
-                                      step_text = "character"))
+                                      period = "character",
+                                      intervals_start = "POSIXct",
+                                      intervals_end = "POSIXct"))
 
+setMethod("initialize",
+          "mc_MainMetadata",
+          function(.Object) {
+              .Object@intervals_start <- lubridate::NA_POSIXct_
+              .Object@intervals_end <- lubridate::NA_POSIXct_
+              return(.Object)
+          })
 #' Class for locality metadata
 #' @details When reading without metadata, then locality is named after file
 #' where the data come from, or after the sensor id where the data come form.  

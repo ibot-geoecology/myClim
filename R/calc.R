@@ -1,6 +1,6 @@
 .calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {item$metadata@locality_id} doesn't contains sensor {sensor}. It is skipped."
 .calc_const_MESSAGE_LOGGER_NOT_CONTAINS_SENSOR <- "Loger {item$metadata@serial_number} doesn't contains sensor {sensor}. It is skipped."
-.calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@step_text} in data is too long. Maximal step is day."
+.calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@period} in data is too long. Maximal step is day."
 .calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY <- "Step in logger {logger$metadata@serial_number} is too long. Maximal step is day. It is skipped."
 .calc_const_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
 .calc_const_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
@@ -89,7 +89,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 }
 
 .calc_is_step_bigger_then <- function(data, max_period) {
-    data_period <- lubridate::period(data$metadata@step_text)
+    data_period <- lubridate::period(data$metadata@period)
     return(data_period > max_period)
 }
 
@@ -654,7 +654,7 @@ mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     }
 
-    if(is_calc && lubridate::period(data$metadata@step_text) >= lubridate::days(1)) {
+    if(is_calc && lubridate::period(data$metadata@period) >= lubridate::days(1)) {
         warning(.calc_const_MESSAGE_VPD_AGGREGATED)
     }
 

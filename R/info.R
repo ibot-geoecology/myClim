@@ -101,7 +101,7 @@ mc_info_clean <- function(data) {
 #' * start_date - the oldest record on the sensor  
 #' * end_date - the newest record on the sensor
 #' * step - time step of records series (minutes)
-#' * step_text - time step of records series (text) 
+#' * period - time step of records series (text)
 #' * min_value - minimal recorded values
 #' * max_value - maximal recorded value
 #' * count_values - number of non NA records
@@ -120,7 +120,7 @@ mc_info <- function(data) {
         f(values)
     }
 
-    sensors_item_function <- function(locality_id, item, step, step_text) {
+    sensors_item_function <- function(locality_id, item, step, period) {
         serial_number <- NA_character_
         if(is_prep_format) {
             serial_number <- item$metadata@serial_number
@@ -136,7 +136,7 @@ mc_info <- function(data) {
                        start_date=rep(min(item$datetime), count),
                        end_date=rep(max(item$datetime), count),
                        step=rep(step, count),
-                       step_text=rep(step_text, count),
+                       period=rep(period, count),
                        min_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, min)),
                        max_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, max)),
                        count_values=purrr::map_int(item$sensors, function(x) length(x$values[!is.na(x$values)])),
@@ -147,7 +147,7 @@ mc_info <- function(data) {
         purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
                              item=locality$loggers,
                              step=NA_integer_,
-                             step_text=NA_character_),
+                             period=NA_character_),
                         sensors_item_function)
     }
 
@@ -157,7 +157,7 @@ mc_info <- function(data) {
         result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
                                        item=data$localities,
                                        step=as.integer(data$metadata@step),
-                                       step_text=data$metadata@step_text),
+                                       period=data$metadata@period),
                                   sensors_item_function)
     }
     as.data.frame(result)

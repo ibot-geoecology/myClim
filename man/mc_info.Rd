@@ -19,7 +19,7 @@ data.frame with columns:
 \item start_date - the oldest record on the sensor
 \item end_date - the newest record on the sensor
 \item step - time step of records series (minutes)
-\item step_text - time step of records series (text)
+\item period - time step of records series (text)
 \item min_value - minimal recorded values
 \item max_value - maximal recorded value
 \item count_values - number of non NA records

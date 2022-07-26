@@ -1,3 +1,5 @@
+.reshape_const_MESSAGE_UNCLEANED <- "Logger {serial_number} isn't cleaned. I can't detect the last time_to."
+
 #' Wideformat of sensor values
 #'
 #' This function converts myClim object to data.frame with values of sensor in wide format.
@@ -82,13 +84,19 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     data <- mc_filter(data, localities, sensors)
     is_prep_format <- myClim:::.common_is_prep_format(data)
+    period <- NULL
+    if (!is_prep_format && !(data$metadata@period %in% myClim:::.agg_const_INTERVAL_PERIODS)) {
+        period <- lubridate::period(data$metadata@period)
+    }
 
-    sensor_function <- function(locality_id, serial_number, datetime, sensor_item) {
+    sensor_function <- function(locality_id, serial_number, sensor_item, datetime, time_to) {
         count <- length(datetime)
         tibble::tibble(locality_id=rep(locality_id, count),
                        serial_number=rep(serial_number, count),
                        sensor_name=rep(sensor_item$metadata@name, count),
+                       height=rep(sensor_item$metadata@height, count),
                        datetime=datetime,
+                       time_to=time_to,
                        value=sensor_item$values)
     }
 
@@ -96,9 +104,21 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
         serial_number <- NA_character_
         if(is_prep_format) {
             serial_number <- item$metadata@serial_number
+            if(is.na(item$clean_info@step)) {
+                warning(stringr::str_glue(.reshape_const_MESSAGE_UNCLEANED))
+            }
+            period <- lubridate::minutes(item$clean_info@step)
+        }
+        if(!is.null(period)) {
+            time_to <- c(item$datetime[-1], dplyr::last(item$datetime) + period)
+        } else {
+            first_index <- match(dplyr::first(item$datetime), data$metadata@intervals_start)
+            intervals_end <- data$metadata@intervals_end[seq(first_index, first_index + length(item$datetime) - 1)]
+            time_to <- intervals_end + lubridate::seconds(1)
         }
         tables <- purrr::pmap_dfr(list(locality_id=locality_id, serial_number=serial_number,
-                                       datetime=list(item$datetime), sensor=item$sensors),
+                                       sensor_item=item$sensors, datetime=list(item$datetime),
+                                       time_to=list(time_to)),
                                   sensor_function)
     }
 
@@ -111,7 +131,7 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     } else {
         result <- purrr::map2_dfr(names(data$localities), data$localities, sensors_item_function)
     }
-    result
+    as.data.frame(result)
 }
 
 
