@@ -52,6 +52,11 @@ reference:
     contents:
       - starts_with("mc_plot")
 
+  - title: Environment functions
+    desc: Functions returns environment variables.
+    contents:
+      - starts_with("mc_env")
+
   - title: Other functions
     contents:
       - starts_with("mc_filter")

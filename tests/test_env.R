@@ -12,3 +12,13 @@ test_that("mc_env_temp", {
                    "T.GDD5.air.200.cm", "T.max95p.air.200.cm", "T.mean.air.200.cm", "T.min5p.air.200.cm"))
     expect_equal(sort(unique(env_temp_table$height)), "air 200 cm")
 })
+
+test_that("mc_env_moist", {
+    cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent = T)
+    expect_error(env_table <- mc_env_moist(cleaned_data, "week"))
+    expect_warning(prep_data <- mc_calc_vwc(cleaned_data))
+    env_table <- mc_env_moist(prep_data, "all")
+    expect_equal(sort(unique(env_table$sensor_name)),
+                 c("VWC.5p.soil.0_14.cm", "VWC.95p.soil.0_14.cm", "VWC.mean.soil.0_14.cm",  "VWC.sd.soil.0_14.cm"))
+    expect_equal(sort(unique(env_table$height)), "soil 0-14 cm")
+})
