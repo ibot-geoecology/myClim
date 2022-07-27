@@ -104,9 +104,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     use_intervals <- .agg_get_use_intervals(data, period, custom_start, custom_end)
     period_object <- .agg_get_period_object(use_intervals, period)
     .agg_check_fun_period(fun, period_object, use_utc)
-    if(!use_utc) {
-        myClim:::.prep_warn_if_unset_tz_offset(data)
-    }
+    use_utc <- .agg_get_use_utc(data, use_utc)
     original_period <- .agg_check_steps_and_get_original_text(data, fun, period_object)
     is_prep <- myClim:::.common_is_prep_format(data)
     locality_function <- function (locality) {
@@ -276,6 +274,17 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(!use_utc && period_object[[1]]@year == 0 && period_object[[1]]@month == 0 && period_object[[1]]@day == 0) {
         stop("Non-UTC time zone can be used only for period day and bigger.")
     }
+}
+
+.agg_get_use_utc <- function(data, use_utc) {
+    is_calc <- myClim:::.common_is_calc_format(data)
+    if(!use_utc && is_calc && (is.na(data$metadata@step) || data$metadata@step >= 60*24)) {
+        use_utc <- TRUE
+    }
+    if(!use_utc) {
+        myClim:::.prep_warn_if_unset_tz_offset(data)
+    }
+    use_utc
 }
 
 .agg_check_steps_and_get_original_text <- function(data, fun, period_object) {
