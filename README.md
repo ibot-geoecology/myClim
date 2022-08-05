@@ -15,17 +15,11 @@ It is necessary to **set the directory where to unzip installation files**. Is i
 setwd("C:/path/to/directory") # !!!! EDIT HERE !!!!
 
 # === Install package ===
-# stable version
-# install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
-# development version
-install.packages("http://labgis.ibot.cas.cz/myclim-devel/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
+install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
 
 # === Download source and examples ===
 zip_file <- "myClim.zip"
 dir_name <- "myClim"
-# stable version
-# download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=stable&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
-# development version
 download.file("https://git.sorbus.ibot.cas.cz/api/v4/projects/microclimate_r%2Fmicroclim/repository/archive.zip?ref=main&private_token=2fmZB-Qg-fbiVvzz2-Lh", destfile=zip_file, mode="wb")
 subdir <- unzip(zip_file, list=TRUE)$Name[1]
 unzip(zip_file)
@@ -35,6 +29,6 @@ file.rename(subdir, dir_name)
 setwd(dir_name)
 ```
 # Documentation & user manual
-* [Functions documentation](http://labgis.ibot.cas.cz/myclim-devel/index.html).   
-* [vignette: user manual](http://labgis.ibot.cas.cz/myclim-devel/articles/myclim-demo.html)
+* [functions documentation](http://labgis.ibot.cas.cz/myclim/index.html)   
+* [vignette: user manual](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html)
 
