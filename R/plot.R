@@ -339,6 +339,7 @@ mc_plot_line <- function(data, filename, sensors=NULL,
     } else {
         stop(stringr::str_glue("Format of {filename} isn't supported."))
     }
+    return(plot)
 }
 
 .plot_get_sensors_table <- function(data) {

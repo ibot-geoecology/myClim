@@ -300,7 +300,7 @@ setMethod(
     "mc_SensorMetadata",
     function(object, physical) {
         physical_id <- mc_data_sensors[[object@sensor_id]]@physical
-        return(physical_id == physical)
+        return(!is.na(physical_id) && physical_id == physical)
     }
 )
 

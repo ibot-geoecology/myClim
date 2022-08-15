@@ -52,3 +52,11 @@ test_that(".model_edit_data HOBO", {
     new_data_table <- test_function(hobo_format, data_table)
     expect_equal(nrow(data_table) - nrow(new_data_table), 3)
 })
+
+test_that(".model_is_physical", {
+    cleaned_data <- mc_read_files("data/calc-gdd", "TOMST", silent = T)
+    prep_data <- mc_calc_gdd(cleaned_data, "TS_T")
+    test_function <- if(exists(".model_is_physical")) .model_is_physical else myClim:::.model_is_physical
+    expect_false(test_function(prep_data$`91184101`$loggers[[1]]$sensors$GDD5$metadata, "moisture"))
+})
+
