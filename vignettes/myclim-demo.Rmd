@@ -236,7 +236,16 @@ rm(list=setdiff(ls(), c("tms","hob.f"))) # environment cleaning
 ## lines
 # mc_plot_line(tms.load,filename = "lines.png",
 #              sensors = c("TMS_T3","TMS_TMSmoisture"),png_width = 2500)
-mc_plot_line(tms,filename = "lines.pdf",sensors = c("TMS_T3","TMS_TMSmoisture"))
+
+tms.plot <- mc_filter(tms,localities = "A6W79")
+
+p <- mc_plot_line(tms.plot,filename = "lines.pdf",sensors = c("TMS_T3","TMS_T1","TMS_TMSmoisture"))
+p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
+p <- p+ggplot2::xlab("week")
+p <- p+ggplot2::aes(size=sensor_name)
+p <- p+ggplot2::scale_size_manual(values = c(1,1,2))
+p <- p+ggplot2::guides(size = FALSE)
+p <- p+ggplot2::scale_color_manual(values=c("hotpink","pink", "darkblue"),name=NULL)
 
 
 ## raster
@@ -347,12 +356,11 @@ kable(head(tms.long,10), "html", digits=2) %>%
 ## General notes
 
 * `myClim` package was written using R, we did not design any function in other programming language. 
+* `myClim` functions use warnings to inform user what is going on. Those are usually not errors. 
 * `myClim` functions always return new `myClim` object instead of updating existing.
-* Some `myClim` functions works only with Prep-format, some only with Calc-formats and will complain when you mess up, but other functions can handle both. 
 
 ## To do (work in progress)
 
 * reading iButton, Lascar... files
-* more calculation functions (VPD...)
 
 
