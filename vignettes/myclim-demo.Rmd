@@ -13,7 +13,9 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-This vignette describes the handling of microclimatic data in R with myClim library. 
+This vignette describes the handling of microclimatic data in R with myClim library.  
+
+**myClim functions produce informative warnings, they are not errors**
 
 ## myClim objects
 myClim store data in lists and S3 classes. Records are  organised in localities, loggers and sensors. For detailed description and schema of myClim objects structure see `help("myClim")`  
@@ -38,7 +40,7 @@ tms.f <- mc_read_files(c("data_91184101_0.csv","data_94184102_0.csv",
 # read from HOBO files
 hob.f <- mc_read_files(c("20024354_comma.csv"), 
                        dataformat_name="HOBO",
-                       date_format = "%d.%m.%y %H:%M:%S",
+                       date_format = "%y.%m.%d %H:%M:%S",
                        silent = T)
 
 # read all Tomst files from current directory
@@ -115,7 +117,8 @@ tms<-mc_prep_calib(tms.load,sensors = c("TM_T",
 
 * **Info functions:** For data overview use:
 
-  * `mc_info_count()` which returns the number of localities, loggers and sensors in myClim object   * `mc_info()` returning data frame with handy summary per sensor
+  * `mc_info_count()` which returns the number of localities, loggers and sensors in myClim object
+  * `mc_info()` returning data frame with handy summary per sensor
   * `mc_info_meta()` returning the data frame with locality metadata
   * `mc_info_clean()` with cleaning log
 
@@ -195,7 +198,7 @@ kable(metadata, "html", digits=2) %>%
 ```{r,eval=FALSE}
 
 # one locality with two downloads in time 
-data < -readRDS("join_example.rds") 
+data <- readRDS("join_example.rds") 
 
 joined_data <- mc_join(data, comp_sensors=c("TMS_T1", "TMS_T2"))
 
@@ -284,8 +287,7 @@ tms.calc <- mc_calc_snow(tms.calc,sensor = "TMS_T2")
 tms.snow <- mc_calc_snow_agg(tms.calc)
 
 ##  virtual sensor with VPD
-hobo.vpd <- mc_calc_vpd(hob.f,temp_sensor = )
-
+hobo.vpd <- mc_calc_vpd(hob.f)
 
 ```
 
@@ -306,13 +308,9 @@ Fast track to ecological analysis.
 # calculate standard myClim envi from your data 
 temp_env <- mc_env_temp(tms,period="all")
 moist_env <- mc_env_moist(tms.calc,period="all") 
-
-
-
-vpd_env <- mc_env_vpd(hob.f,period = all)
+vpd_env <- mc_env_vpd(hobo.vpd,period = "all")
 
 ```
-
 
 
 ## Reshaping
