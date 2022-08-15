@@ -16,24 +16,18 @@ knitr::opts_chunk$set(
 This vignette describes the handling of microclimatic data in R with myClim library. 
 
 ## myClim objects
-MyClim holds data in two slightly different data formats consist of Lists and S3 classes: Prep-format and Calc-format. Microclimatic data are organised in localities, loggers and sensors. 
-Prep-format is designed for data preparations and cleaning,
-Calc-format is for calculations with pre-processed data.   
-For detailed description and schema of myClim Prep-format or Calc-format see `help("myClim")`  
+myClim store data in lists and S3 classes. Records are  organised in localities, loggers and sensors. For detailed description and schema of myClim objects structure see `help("myClim")`  
 
+## Reading microclimatic data
+myClim supports natively: `r names(myClim::mc_data_formats)`. ste parameter `dataformat_name`. myClim can also read records from wide or long data frame. 
 
-## Read microclimatic data
-myClim read multiple formats of data downloaded from various loggers. The myClim automatically detects certain structure of knwn logger output files, but user must specify the family of loggers (based on manufacturer) by providing `dataformat_name=` one of `r names(myClim::mc_data_formats)`.
+**`mc_read_files()`, `mc_read_wide()`, `mc_read_long()`** use for reading without organizing into localities. Easy, fast, exploratory. myClim automatically organize data into artificial localities per files.
 
-For the analysis it is more practical to use `mc_read_data()` where can user organise loggers to the localities and provide metadata. Inputs are two tables:  
+**`mc_read_data()`** allow to organize records into real localities and provide metadata using 2 tables:
 
-1.) table with logger files paths, dataformat name,  logger type and locality
-2.) table with locality metadata e.g., coordinates, altitude, time zone information.
-
-For fast exploration, user can read files without metadata, using functions `mc_read_files()`, `mc_read_wide()`, `mc_read_long()` myClim automatically generates localities from each data file.
-
-Output of reading functions is myClim object in Prep-format designed for data cleaning and joining. See `help("myClim")`.
-
+1.logger files paths, data format name,  logger type and locality.  
+2.locality metadata e.g., coordinates, altitude, time zone offset...  
+  
 ```{r eval=TRUE,warning=FALSE}
 library(myClim)
 ## Read without metadata
@@ -42,8 +36,7 @@ tms.f <- mc_read_files(c("data_91184101_0.csv","data_94184102_0.csv",
                          "data_94184103_0.csv"), dataformat_name="TOMST"
                        ,silent = T)
 # read from HOBO files
-hob.f <- mc_read_files(c("20024354_comma.csv","20024354_semicolon.txt",
-                         "20024354_tab.txt"), 
+hob.f <- mc_read_files(c("20024354_comma.csv"), 
                        dataformat_name="HOBO",
                        date_format = "%d.%m.%y %H:%M:%S",
                        silent = T)
@@ -53,57 +46,59 @@ tms.d <- mc_read_files(".", dataformat_name="TOMST",recursive = F,silent = T)
 
 # read from data.frame
 meteo.table<-readRDS("airTmax_meteo.rds") # wide format data frame 
-meteo<-mc_read_wide(meteo.table,sensor_id = "T_C", 
-                    sensor_name = "airTmax",silent = T)
+meteo <- mc_read_wide(meteo.table,sensor_id = "T_C", 
+                      sensor_name = "airTmax",silent = T)
 
 ## Read with metadata
-# provide two tables. Can be csv files 
-tms.m <- mc_read_data(files_table = "files_table.csv",
-                      localities_table ="localities_table.csv",
-                      silent = T)
+# provide two tables. Can be csv files or r data.frame
+ft<-read.table("files_table.csv",sep=",",header = T)
+lt<-read.table("localities_table.csv",sep=",",header = T)
 
-# can be R data.frames
-files_table<-read.table("files_table.csv",sep=",",header = T)
-localities_table<-read.table("localities_table.csv",sep=",",header = T)
-tms.m <- mc_read_data(files_table, localities_table,silent = T)
+tms.m <- mc_read_data(files_table = "files_table.csv",
+                      localities_table =lt,
+                      silent = T)
 
 ```
 
 
 ## Pre-Prprocessing
 
-* **Cleaning time series:** `mc_prep_clean()` checks the order and continuity of time-series, prints log  in console. Log is sved in myClim object and can be called ex post `mc_info_clean()`.   
+* **Cleaning time series:** `mc_prep_clean()` checks the order and continuity of time-series, prints log in console. Log is saved in myClim object and can be called ex post `mc_info_clean()`. Cleaning is called by default during reading.   
 
 ```{r eval=TRUE}
-tms<-mc_prep_clean(tms.m) # clean series
-tms.info<-mc_info_clean(tms) # call cleaning log
+# clean runs automaticaly while reading  
+tms <- mc_prep_clean(tms.m) # clean series
+tms.info <- mc_info_clean(tms) # call cleaning log
 ```
 
 
-* **Handling time zones:** `mc_prep_solar_tz()` myClim expect input data in UTC time.But sometimes, especially while handling records from large spatial scales, it is ecologically useful to use rather solar time, which respects local photo-period. Solar time is calculated from longitude of locality. When user want to set custom time zone offset e.g. UTC to local political time or also in cases the data is in local time and user wish to standardize to the UTC, than use `mc_prep_meta_locality()` 
+* **Handling time zones:** `mc_prep_solar_tz()` myClim expect input data in UTC time. It is ecologically meaningful to use rather solar time, which respects local photo-period. Solar time is calculated from longitude of locality.
 
 
 ```{r eval=TRUE}
 
-tms<-mc_prep_solar_tz(tms) # calculate solar time
+tms <- mc_prep_solar_tz(tms) # calculate solar time
 
-# provide user defined offset to UTC
-tms.usertz<-mc_prep_meta_locality(tms,values=as.list(c(A1E05=57,
-                                                       A2E32=62,
-                                                       A6W79=55)),
-                                  param_name = "tz_offset")
+# provide user defined offset to UTC in minutes 
+# for conversion to political time use offset in minutes. 
+tms.usertz <- mc_prep_meta_locality(tms,values=as.list(c(A1E05=60,
+                                                       A2E32=0,
+                                                       A6W79=120)),
+                                    param_name = "tz_offset")
 ```
 
 
-* **Sensor calibration:** In case user have calibration data (offsets) it is possible to correct measurements with them. Use `mc_prep_calib_load()` to upload calibration data (offsets) into myClim object. Then use `mc_prep_calib()` to apply the offset correction.
+* **Sensor calibration:** In case your sensor is recording warmer or colder values than 
+the true and you know it, it is possible to correct measurements by adding the offsets (+/-). Use `mc_prep_calib_load()` to upload offsets into myClim object. Then use `mc_prep_calib()` to apply the offset correction.
 
 
 ```{r eval=TRUE}
-# simulate calibration data
+
+# simulate calibration data (sensor shift/offset to add)
 i<-mc_info(tms)
 calib_table<-data.frame(serial_number=i$serial_number,
                         sensor_id=i$sensor_id,
-                        datetime=as.POSIXct("2016-11-29"),
+                        datetime=as.POSIXct("2016-11-29",tz="UTC"),
                         cor_factor=0.398,
                         cor_slope=0)
 
@@ -118,7 +113,11 @@ tms<-mc_prep_calib(tms.load,sensors = c("TM_T",
 ```
 
 
-* **Info functions:** For data overview it useful to call `mc_info_count()` which returns the number of localities, loggers and sensors in myClim object, `mc_info()` returning data frame with handy summary per sensor, `mc_info_meta()` returning the data frame with locality metadata and `mc_info_clean()` with cleaning log. 
+* **Info functions:** For data overview use:
+
+  * `mc_info_count()` which returns the number of localities, loggers and sensors in myClim object   * `mc_info()` returning data frame with handy summary per sensor
+  * `mc_info_meta()` returning the data frame with locality metadata
+  * `mc_info_clean()` with cleaning log
 
 ```{r, eval=FALSE,error=FALSE,warning=FALSE}
 mc_info_count(tms)
@@ -135,11 +134,11 @@ kable(head(mc_info(tms),10), "html", digits=2) %>%
 ```
 
 
-* **Cropping, filtering, and merging:** For filtering and sub-setting of myClim sensors and localities use `mc_filter()`. To merge localities or add sensors to localities use `mc_prep_merge()`. For cropping the time-series to start from certain date and last till certain date use `mc_prep_crop()`
+* **Cropping, filtering, and merging:** 
 
 ```{r eval=TRUE}
 
-## crop the time extent for all localities
+## crop the time-series
 start<-as.POSIXct("2021-01-01",tz="UTC")
 end<-as.POSIXct("2021-03-31",tz="UTC")
 tms<-mc_prep_crop(tms,start,end)
@@ -191,13 +190,12 @@ kable(metadata, "html", digits=2) %>%
   kable_styling(font_size = 9)
 ```
 
-* **Joining in time** For joining fragmented time-series stored in separate files from separate downloading visits of the localities use `mc_mc_join()`. First read separate files into myClim Prep-format and then join. myClim detcts automatically which time series to join based on locality ID, logger type and time step. myClim join automatically the time series which fits well (i) newer time-series starts at the point when older ends or (ii) older and newer time-series overlaps partly or completely with identical values. In case time_series does not fit well (conflict values in certain time step) interactive process starts and user must define which time-series to use, or provide the split date from where to use the newewr data. 
-
+* **Joining in time** For joining fragmented time-series stored in separate files from separate downloading visits of the localities use `mc_join()`. 
 
 ```{r,eval=FALSE}
 
 # one locality with two downloads in time 
-data<-readRDS("join_example.rds") 
+data < -readRDS("join_example.rds") 
 
 joined_data <- mc_join(data, comp_sensors=c("TMS_T1", "TMS_T2"))
 
@@ -226,20 +224,22 @@ joined_data <- mc_join(data, comp_sensors=c("TMS_T1", "TMS_T2"))
 <img src="join_plot.png" width="700"/>
 
 ## Plotting
-`myClim` is equipped with handy plotting tools mainly from ggplot. It is possible to plot raster plot with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports max. two different physical units to be plotted (primary and secondary y axis. Plotting functions save pdf or png files on your drive. 
+`myClim` It is possible to plot raster plot with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports max. two different physical units to be plotted (primary and secondary y axis. Plotting functions save pdf or png files on your drive. 
 
 ```{r,eval=FALSE}
-load("mc_data_example_calc.rda")
+
+rm(list=setdiff(ls(), c("tms","hob.f"))) # environment cleaning
 
 ## lines
-# mc_plot_line(mc_data_example_calc,filename = "lines.png",
+# mc_plot_line(tms.load,filename = "lines.png",
 #              sensors = c("TMS_T3","TMS_TMSmoisture"),png_width = 2500)
-mc_plot_line(mc_data_example_calc,filename = "lines.pdf",sensors = c("TMS_T3","TMS_TMSmoisture"))
+mc_plot_line(tms,filename = "lines.pdf",sensors = c("TMS_T3","TMS_TMSmoisture"))
+
 
 ## raster
-# mc_plot_raster(mc_data_example_calc,filename = "raster.png",
-#                sensors = c("TMS_T3","TM_T"),png_width = 2500,png_height = 500)
-mc_plot_raster(mc_data_example_calc,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))
+# mc_plot_raster(tms.load,filename = "raster.png",
+#                 sensors = c("TMS_T3","TM_T"),png_width = 2500,png_height = 500)
+mc_plot_raster(tms,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))
 
 ```
 
@@ -247,17 +247,19 @@ mc_plot_raster(mc_data_example_calc,filename = "raster.pdf",sensors = c("TMS_T3"
 <img src="lines.png" width="700"/>
 
 ## Aggregation
-With the `mc_agg()` function you can  aggregate e.g., form 15 min time-series to hours, dais, weeks months, seasons, years with several functions e.g., mean, max, percentile, sum... Aggregated myClim object is in Calc-format. The `mc_agg()` called with ***fun = NULL, period = NULL*** only converts Prep-formt to Calc-format without time step change.  
+With the `mc_agg()` function you can  aggregate e.g., form 15 min time-series to hours, dais, weeks months, seasons, years with several functions e.g., mean, max, percentile, sum... 
 ```{r,eval=TRUE,warning=F}
-#with defaults only convert Prep-format  to Calc-format
-tms.ag<-mc_agg(tms,fun = NULL, period = NULL) 
+# with defaults only convert Prep-format  to Calc-format
+tms.ag <- mc_agg(tms,fun = NULL, period = NULL) 
 
 # aggregate to daily mean, range, coverage, and 95 percentile. 
-tms.day<-mc_agg(tms, fun=c("mean","range","coverage","percentile"),
+tms.day <- mc_agg(tms, fun=c("mean","range","coverage","percentile"),
                 percentiles = 95, period = "day")
 
+# it warns you that it cropped start and end of your data. 
+
 # aggregate all time-series, return one value per sensor.
-tms.all<-mc_agg(tms, fun=c("mean","range","coverage","percentile"),
+tms.all <- mc_agg(tms, fun=c("mean","range","coverage","percentile"),
                 percentiles = 95, period = "all")
 ```
 
@@ -265,18 +267,25 @@ tms.all<-mc_agg(tms, fun=c("mean","range","coverage","percentile"),
 With myClim Calc-format objects it is possible to calculate new virtual sensors. E.g., volumetric water content, growing and freezing degree days, snow cover duration. 
 ```{r,eval=TRUE,warning=F}
 
-# calculate volumetric water content from raw Tomst moisture
-tms.calc<-mc_calc_vwc(tms.ag)
+## calculate virtual sensor VWC from raw Tomst moisture
+tms.calc <- mc_calc_vwc(tms.ag,soiltype = "loamy sand A")
+# call mc_data_vwc_parameters() for soil selection (sand, loam, peat....)
 
-# calculate growing and freezing degree days
-tms.calc<-mc_calc_gdd(tms.calc,sensor = "TMS_T3",)
-tms.calc<-mc_calc_fdd(tms.calc,sensor = "TMS_T3")
+## virtual sensor with growing and freezing degree days
+tms.calc <- mc_calc_gdd(tms.calc,sensor = "TMS_T3",)
+tms.calc <- mc_calc_fdd(tms.calc,sensor = "TMS_T3")
+# mc_plot_line(tms.calc,"gdd.pdf",sensors = c("GDD5","TMS_T3"))
 
-#estimate snow presence from 2 cm air temperature 
-tms.calc<-mc_calc_snow(tms.calc,sensor = "TMS_T2")
+## virtual sensor to estimate snow presence from 2 cm air temperature 
+tms.calc <- mc_calc_snow(tms.calc,sensor = "TMS_T2")
+# mc_plot_line(tms.calc,"snow.pdf",sensors = c("snow","TMS_T2"))
 
-#summary data.frame of snow estimation
-tms.snow<-mc_calc_snow_agg(tms.calc)
+## summary data.frame of snow estimation
+tms.snow <- mc_calc_snow_agg(tms.calc)
+
+##  virtual sensor with VPD
+hobo.vpd <- mc_calc_vpd(hob.f,temp_sensor = )
+
 
 ```
 
@@ -289,16 +298,35 @@ library(kableExtra)
 kable(tms.snow, "html", digits=2) %>%
   kable_styling(font_size = 10)
 ```
+
+
+## myClim standard envi
+Fast track to ecological analysis. 
+```{r}
+# calculate standard myClim envi from your data 
+temp_env <- mc_env_temp(tms,period="all")
+moist_env <- mc_env_moist(tms.calc,period="all") 
+
+
+
+vpd_env <- mc_env_vpd(hob.f,period = all)
+
+```
+
+
+
 ## Reshaping
 Microclimatic records from `myClim` objects can be converted to wide or long data frame `mc_reshape_wide()` and `mc_reshape_long()`
 
 ```{r, eval=TRUE}
 
 ## wide table of air temperature and soil moisture
-tms.wide<-mc_reshape_wide(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
+tms.wide <- mc_reshape_wide(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
 
 ## long table of air temperature and soil moisture
-tms.long<-mc_reshape_long(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
+tms.long <- mc_reshape_long(tms.calc,sensors = c("TMS_T3","vwc_moisture"))
+
+tms.long.all <- mc_reshape_long(tms.all)
 
 ```
 
@@ -316,6 +344,8 @@ library(kableExtra)
 kable(head(tms.long,10), "html", digits=2) %>%
   kable_styling(font_size = 9)
 ```
+
+
 ## General notes
 
 * `myClim` package was written using R, we did not design any function in other programming language. 

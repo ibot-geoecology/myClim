@@ -646,7 +646,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 #'
 #' @examples
 #' calc_data <- mc_calc_vpd(mc_data_example_calc, "HOBO_T_C", "HOBO_RH", localities="A2E32")
-mc_calc_vpd <- function(data, temp_sensor, rh_sensor,
+mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
                         output_sensor="VPD", altitude=0,
                         metadata_altitude=TRUE, localities=NULL) {
     is_calc <- myClim:::.common_is_calc_format(data)

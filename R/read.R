@@ -1,6 +1,6 @@
 .read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible combine files and directories"
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
-.read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format and UTC timezone."
+.read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format UTC timezone."
 .read_const_MESSAGE_ANY_FILE <- "There isn't any source file."
 .read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible read datetimes from {filename}. File is skipped."
 .read_const_MESSAGE_ANY_LOCALITY <- "There isn't any valid locality."
@@ -158,7 +158,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 .read_get_data_formats <- function(files_table) {
     file_function <- function (path, data_format, logger_type, date_format, tz_offset) {
         if(!(data_format %in% names(mc_data_formats))){
-            warning(stringr::str_glue("It is unknown format {data_format} for {path}. File is skipped."))
+            warning(stringr::str_glue("{data_format} is not aplicable format to {path}. File is skipped."))
             return(NULL)
         }
         data_format_object <- mc_data_formats[[data_format]]
@@ -173,7 +173,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         }
         data_format_object <- myClim:::.model_load_data_format_params_from_file(data_format_object, path)
         if(is.null(data_format_object)) {
-            warning(stringr::str_glue("File {path} dosn't have right format. File is skipped."))
+            warning(stringr::str_glue("{path} is not a supproted data format. File is skipped."))
             return(NULL)
         }
         return(data_format_object)
@@ -206,7 +206,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         serial_number <- myClim:::.model_get_serial_number_from_file(data_format, path)
         if(is.na(serial_number))
         {
-            stop(stringr::str_glue("It isn't possible detect serial_number for {path}."))
+            stop(stringr::str_glue("It isn't possible automatically detect serial_number from {path}."))
         }
         serial_number
     }

@@ -6,8 +6,8 @@
 \usage{
 mc_calc_vpd(
   data,
-  temp_sensor,
-  rh_sensor,
+  temp_sensor = "HOBO_T_C",
+  rh_sensor = "HOBO_RH",
   output_sensor = "VPD",
   altitude = 0,
   metadata_altitude = TRUE,

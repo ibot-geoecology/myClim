@@ -502,7 +502,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
             return(NULL)
         }
         item_id <- myClim:::.common_get_id_of_item_with_sensors(item)
-        warning(stringr::str_glue("{item_id} is cropped to range ({start}, {end})."))
+        warning(stringr::str_glue("{item_id} myClim cropped start, end ({start}, {end}) of your time-seires to fit period."))
         item <- myClim:::.prep_crop_data(item, start, end, end_included=FALSE)
     }
     item
