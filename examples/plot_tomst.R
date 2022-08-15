@@ -13,7 +13,7 @@ mc_plot_raster(example_tomst_data, "plots/T1T2.png", sensors = c("TMS_T1", "TMS_
 example_tomst_data <- mc_filter(example_tomst_data, sensors=c("TS_T", "TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture"))
 line_plot <- mc_plot_line(example_tomst_data, "plots/lines.pdf")
 line_plot <- line_plot + ggplot2::scale_color_manual(values=c("pink", "orange", "red", "blue", "red"))
-line_plot <- line_plot + ggplot2::scale_x_date(date_breaks = "1 week", date_labels = "%W")
+line_plot <- line_plot + ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
 print(line_plot)
 
 
