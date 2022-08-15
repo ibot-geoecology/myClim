@@ -339,6 +339,7 @@ mc_plot_line <- function(data, filename, sensors=NULL,
     } else {
         stop(stringr::str_glue("Format of {filename} isn't supported."))
     }
+    plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(locality_id))
     return(plot)
 }
 
