@@ -231,6 +231,8 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     } else {
         stop(stringr::str_glue("Format of {filename} isn't supported."))
     }
+    plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(locality_id))
+    return(plot)
 }
 
 .plot_set_ggplot_physical_colors <- function(data, plot, viridis_color_map) {
