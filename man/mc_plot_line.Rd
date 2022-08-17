@@ -6,7 +6,7 @@
 \usage{
 mc_plot_line(
   data,
-  filename,
+  filename = NULL,
   sensors = NULL,
   scale_coeff = NULL,
   png_width = 1900,
@@ -18,7 +18,9 @@ mc_plot_line(
 \arguments{
 \item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
 
-\item{filename}{output - supported formats are pdf and png}
+\item{filename}{output with the extension - supported formats are .pdf and .png (default NULL)
+
+§If NULL then the plot isn't saved to file.§}
 
 \item{sensors}{select the names of sensors to be plotted (max 2) see \code{names(mc_data_sensors)}}
 
@@ -31,6 +33,9 @@ mc_plot_line(
 \item{start_crop}{POSIXct datetime for crop data (default NULL)}
 
 \item{end_crop}{POSIXct datetime for crop data (default NULL)}
+}
+\value{
+§ggplot2 object§
 }
 \description{
 Function plot data to file with ggplot2 geom_line

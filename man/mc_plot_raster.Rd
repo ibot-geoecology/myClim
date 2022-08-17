@@ -6,7 +6,7 @@
 \usage{
 mc_plot_raster(
   data,
-  filename,
+  filename = NULL,
   sensors = NULL,
   by_hour = TRUE,
   png_width = 1900,
@@ -19,7 +19,9 @@ mc_plot_raster(
 \arguments{
 \item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
 
-\item{filename}{output with the extension - supported formats are .pdf and .png}
+\item{filename}{output with the extension - supported formats are .pdf and .png (default NULL)
+
+§If NULL then the plot isn't saved to file.§}
 
 \item{sensors}{names of sensor; should have same unit see \code{names(mc_data_sensors)}}
 

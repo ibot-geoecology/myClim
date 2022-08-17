@@ -145,6 +145,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @param sensors filter the sensors; if empty then all see `names(mc_data_sensors)`
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
+#' @return §ggplot2 object§
 #' @export
 #' @examples
 #' \dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
@@ -184,7 +185,9 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' Play with `png_height` and `png_width`. When too small, image does not fit ad is plotted broken.  
 #' 
 #' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
-#' @param filename output with the extension - supported formats are .pdf and .png
+#' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
+#'
+#' §If NULL then the plot isn't saved to file.§
 #' @param sensors names of sensor; should have same unit see `names(mc_data_sensors)`
 #' @param by_hour if TRUE, then y axis is plotted as an hour, else original time step (default TRUE) 
 #' @param png_width width for png output (default 1900)
@@ -202,7 +205,7 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' @param start_crop POSIXct datetime for crop data (default NULL)
 #' @param end_crop POSIXct datetime for crop data (default NULL)
 #' @export
-mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900,
+mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900,
                            viridis_color_map=NULL, start_crop=NULL, end_crop=NULL) {
     data <- mc_filter(data, sensors=sensors)
     if(!is.null(start_crop) || !is.null(end_crop)) {
@@ -223,13 +226,15 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
     plot <- .plot_set_ggplot_physical_colors(data, plot, viridis_color_map)
     plot <- plot + .plot_set_ggplot_raster_theme()
     plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
-    file_type <- .plot_get_file_type(filename)
-    if(file_type == "pdf"){
-        .plot_print_pdf(filename, plot, locality_id ~ sensor_name, 40)
-    } else if(file_type == "png") {
-        .plot_print_png(filename, plot, png_width, png_height, locality_id ~ sensor_name)
-    } else {
-        stop(stringr::str_glue("Format of {filename} isn't supported."))
+    if(!is.null(filename)) {
+        file_type <- .plot_get_file_type(filename)
+        if(file_type == "pdf"){
+            .plot_print_pdf(filename, plot, locality_id ~ sensor_name, 40)
+        } else if(file_type == "png") {
+            .plot_print_png(filename, plot, png_width, png_height, locality_id ~ sensor_name)
+        } else {
+            stop(stringr::str_glue("Format of {filename} isn't supported."))
+        }
     }
     plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(locality_id))
     return(plot)
@@ -300,15 +305,18 @@ mc_plot_raster <- function(data, filename, sensors=NULL, by_hour=TRUE, png_width
 #' than function try detects scale coefficient from physical unit of sensors see [mc_Physical-class].
 #' Scaling is useful when plotting together e.g. temperature and moisture.  
 #' @param data  myClim object in Prep-format or Calc-formt see [myClim-package]
-#' @param filename output - supported formats are pdf and png
+#' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
+#'
+#' §If NULL then the plot isn't saved to file.§
 #' @param sensors select the names of sensors to be plotted (max 2) see `names(mc_data_sensors)`
 #' @param scale_coeff scale coefficient for secondary axis (default NULL)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
 #' @param start_crop POSIXct datetime for crop data (default NULL)
 #' @param end_crop POSIXct datetime for crop data (default NULL)
+#' @return §ggplot2 object§
 #' @export
-mc_plot_line <- function(data, filename, sensors=NULL,
+mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          scale_coeff=NULL,
                          png_width=1900, png_height=1900,
                          start_crop=NULL, end_crop=NULL) {
@@ -333,13 +341,15 @@ mc_plot_line <- function(data, filename, sensors=NULL,
     plot <- plot + .plot_set_ggplot_line_theme()
     plot <- plot + .plot_line_set_y_axes(sensors_table)
 
-    file_type <- .plot_get_file_type(filename)
-    if(file_type == "pdf"){
-        .plot_print_pdf(filename, plot, ggplot2::vars(locality_id), 8)
-    } else if(file_type == "png") {
-        .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(locality_id))
-    } else {
-        stop(stringr::str_glue("Format of {filename} isn't supported."))
+    if(!is.null(filename)) {
+        file_type <- .plot_get_file_type(filename)
+        if(file_type == "pdf"){
+            .plot_print_pdf(filename, plot, ggplot2::vars(locality_id), 8)
+        } else if(file_type == "png") {
+            .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(locality_id))
+        } else {
+            stop(stringr::str_glue("Format of {filename} isn't supported."))
+        }
     }
     plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(locality_id))
     return(plot)
