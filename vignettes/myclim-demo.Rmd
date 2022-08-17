@@ -7,17 +7,51 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r, include = FALSE,purl=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 ```
+
+### ME&B 2022 workshop materials
+
+* [download zip](http://github.com/manmatej/2022_MEB_myClim_workshop/archive/master.zip)  
+* [clone from GitHub](https://github.com/manmatej/2022_MEB_myClim_workshop)   
+
+```{r,eval=FALSE,include=FALSE,comment='',purl=TRUE}
+# check dependencies and install if necessary
+requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr",
+                        "ggplot2", "ggforce", "viridis", "runner", "rmarkdown",
+                        "knitr", "kableExtra", "tidyr")
+missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
+if(length(missing_packages)) install.packages(missing_packages)
+
+# directory to unzip source files
+setwd("C:/path/to/directory") # !!!! EDIT HERE !!!!
+
+# === Install package ===
+install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
+
+```
+
+
+```{r,eval=FALSE,include=FALSE,comment='',purl=TRUE}
+## Set working directory to unzip downloaded or git cloned folder
+path<-paste0(Sys.getenv("userprofile"),"\\downloads\\")
+setwd(paste0(path,"2022_MEB_myClim_workshop-main"))
+
+# setwd("C:/Users/#####/downloads/2022_MEB_myClim_workshop-main/") # edit
+
+```
+
+
+
+## myClim 
 This vignette describes the handling of microclimatic data in R with myClim library.  
-
-**myClim functions produce informative warnings, they are not errors**
-
-## myClim objects
+  
+**myClim functions produce informative warnings, they are not errors**  
+  
 myClim store data in lists and S3 classes. Records are  organised in localities, loggers and sensors. For detailed description and schema of myClim objects structure see `help("myClim")`  
 
 ## Reading microclimatic data
@@ -130,7 +164,7 @@ mc_info(tms)
 
 Example output table of `mc_info()`
 
-```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE}
+```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE,purl=FALSE}
 library(kableExtra)
 kable(head(mc_info(tms),10), "html", digits=2) %>%
   kable_styling(font_size = 9)
@@ -187,7 +221,7 @@ tms.usertz<-mc_prep_meta_locality(tms,values=as.list(c(A1E05=57,
 
 Metadata table ready for `mc_prep_meta_locality()`
 
-```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE}
+```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE,purl=FALSE}
 library(kableExtra)
 kable(metadata, "html", digits=2) %>%
   kable_styling(font_size = 9)
@@ -195,7 +229,7 @@ kable(metadata, "html", digits=2) %>%
 
 * **Joining in time** For joining fragmented time-series stored in separate files from separate downloading visits of the localities use `mc_join()`. 
 
-```{r,eval=FALSE}
+```{r,eval=FALSE,comment = ''}
 
 # one locality with two downloads in time 
 data <- readRDS("join_example.rds") 
@@ -229,7 +263,7 @@ joined_data <- mc_join(data, comp_sensors=c("TMS_T1", "TMS_T2"))
 ## Plotting
 `myClim` It is possible to plot raster plot with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports max. two different physical units to be plotted (primary and secondary y axis. Plotting functions save pdf or png files on your drive. 
 
-```{r,eval=FALSE}
+```{r,eval=FALSE,comment = ''}
 
 rm(list=setdiff(ls(), c("tms","hob.f"))) # environment cleaning
 
@@ -303,7 +337,7 @@ hobo.vpd <- mc_calc_vpd(hob.f)
 
 Output table of `mc_calc_snow_agg`
 
-```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE}
+```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE,purl=FALSE}
 library(kableExtra)
 
 kable(tms.snow, "html", digits=2) %>%
@@ -338,7 +372,7 @@ tms.long.all <- mc_reshape_long(tms.all)
 ```
 
 **Reshape wide**
-```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE}
+```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE,purl=FALSE}
 library(kableExtra)
 kable(head(tms.wide,10), "html", digits=2) %>%
   kable_styling(font_size = 9)
@@ -346,7 +380,7 @@ kable(head(tms.wide,10), "html", digits=2) %>%
 
 
 **Reshape long**
-```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE}
+```{r, results = "asis",echo=FALSE,error=FALSE,warning=FALSE,purl=FALSE}
 library(kableExtra)
 kable(head(tms.long,10), "html", digits=2) %>%
   kable_styling(font_size = 9)
