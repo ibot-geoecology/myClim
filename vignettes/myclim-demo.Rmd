@@ -13,11 +13,28 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
+### ME&B 2022 workshop materials
+
+* [download zip](http://github.com/manmatej/2022_MEB_myClim_workshop/archive/master.zip)  
+* [clone from GitHub](https://github.com/manmatej/2022_MEB_myClim_workshop)   
+
+```{r eval=FALSE}
+## Set working directory to downloaded folder (unzipped)
+path<-paste0(Sys.getenv("userprofile"),"\\downloads\\")
+setwd(paste0(path,"2022_MEB_myClim_workshop-main"))
+
+# setwd("C:/Users/#####/downloads/2022_MEB_myClim_workshop-main/") # edit
+
+```
+
+
+
+## myClim 
 This vignette describes the handling of microclimatic data in R with myClim library.  
-
-**myClim functions produce informative warnings, they are not errors**
-
-## myClim objects
+  
+**myClim functions produce informative warnings, they are not errors**  
+  
 myClim store data in lists and S3 classes. Records are  organised in localities, loggers and sensors. For detailed description and schema of myClim objects structure see `help("myClim")`  
 
 ## Reading microclimatic data
