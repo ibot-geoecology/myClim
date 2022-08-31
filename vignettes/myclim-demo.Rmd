@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 # check dependencies and install if necessary
 requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr",
                         "ggplot2", "ggforce", "viridis", "runner", "rmarkdown",
-                        "knitr", "kableExtra", "tidyr")
+                        "knitr", "kableExtra", "tidyr", "plotly")
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
 

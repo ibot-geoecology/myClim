@@ -76,7 +76,9 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 #' * locality_id
 #' * serial_number
 #' * sensor_name
+#' * height
 #' * datetime
+#' * time_to
 #' * value
 #' @export
 #' @examples

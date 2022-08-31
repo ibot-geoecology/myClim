@@ -21,7 +21,9 @@ columns:
 \item locality_id
 \item serial_number
 \item sensor_name
+\item height
 \item datetime
+\item time_to
 \item value
 }
 }
