@@ -13,11 +13,11 @@ Class for myClim object metadata in Calc-format
 \describe{
 \item{\code{step}}{time step of data in minutes}
 
-\item{\code{period}}{§value from \code{\link[=mc_agg]{mc_agg()}}§}
+\item{\code{period}}{value from \code{\link[=mc_agg]{mc_agg()}} (e.g. month, day, all...)}
 
-\item{\code{intervals_start}}{§start datetime of data intervals for spacial periods all and custom (see \code{\link[=mc_agg]{mc_agg()}})§}
+\item{\code{intervals_start}}{start datetime of data intervals for spacial periods all and custom (see \code{\link[=mc_agg]{mc_agg()}})}
 
-\item{\code{intervals_end}}{§end datetime of data intervals for spacial periods all and custom (see \code{\link[=mc_agg]{mc_agg()}})§}
+\item{\code{intervals_end}}{end datetime of data intervals for spacial periods all and custom (see \code{\link[=mc_agg]{mc_agg()}})}
 }}
 
 \seealso{

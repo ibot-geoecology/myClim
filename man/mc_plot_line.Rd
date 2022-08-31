@@ -20,7 +20,7 @@ mc_plot_line(
 
 \item{filename}{output with the extension - supported formats are .pdf and .png (default NULL)
 
-§If NULL then the plot isn't saved to file.§}
+If NULL then the plot is return, but not saved to file.}
 
 \item{sensors}{select the names of sensors to be plotted (max 2) see \code{names(mc_data_sensors)}}
 
@@ -35,7 +35,7 @@ mc_plot_line(
 \item{end_crop}{POSIXct datetime for crop data (default NULL)}
 }
 \value{
-§ggplot2 object§
+ggplot2 object
 }
 \description{
 Function plot data to file with ggplot2 geom_line

@@ -20,9 +20,9 @@ mc_agg(
 \item{data}{cleaned myClim object in Prep-format: output of \code{\link[=mc_prep_clean]{mc_prep_clean()}} or Calc-format as it is allowed to aggregate data multiple times.}
 
 \item{fun}{aggregation function; one of (\code{"min"}, \code{"max"}, \code{"mean"}, \code{"percentile"}, \code{"sum"}, \code{"range"}, \code{"count"}, \code{"coverage"})
-§and functions defined in \code{custom_functions} parameter§ See details.
+and functions defined in \code{custom_functions}. See details by custom_functions argument.
 Can be single function name, character vector of function names or named list of vector function names.
-Named list of functions allows apply specific functions for different sensors e.g. \code{list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")}
+Named list of functions allows apply different function(s) for different sensors e.g. \code{list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")}
 if NULL records are not aggregated, but converted to Calc-format. See details.}
 
 \item{period}{Time period for aggregation - same as breaks in cut.POSIXt, e.g. (\code{"hour"}, \code{"day"}, \code{"month"}); if NULL then no aggregation
@@ -49,7 +49,9 @@ Non-UTC time can by used only for period \code{day} and longer.}
 If parameter is filled in then data out of range \code{custom_start}-\code{custom_end} are skipped. E.g. vegetation season, winter season...
 Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}. \code{custom_end} row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 \code{custom_end="01-01"}.}
 
-\item{custom_functions}{§user defined functions in format \code{list(function_name=function(values){...})}; You can use function_name in \code{fun} parameter.§}
+\item{custom_functions}{user define one or more functions in format \code{list(function_name=function(values){...})}; then you will feed function_name(s)
+you defined to the \code{fun} parameter. e.g. custom_functions = list(positive_count=function(x){length(x\link{x>0})}),
+fun="positive_count",}
 }
 \value{
 Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL

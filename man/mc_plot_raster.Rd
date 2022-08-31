@@ -21,7 +21,7 @@ mc_plot_raster(
 
 \item{filename}{output with the extension - supported formats are .pdf and .png (default NULL)
 
-§If NULL then the plot isn't saved to file.§}
+If NULL then the plot is return, but not saved to file.}
 
 \item{sensors}{names of sensor; should have same unit see \code{names(mc_data_sensors)}}
 
