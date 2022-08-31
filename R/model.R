@@ -164,9 +164,9 @@ setMethod("initialize",
 
 #' Class for myClim object metadata in Calc-format
 #' @slot step time step of data in minutes
-#' @slot period §value from [mc_agg()]§
-#' @slot intervals_start §start datetime of data intervals for spacial periods all and custom (see [mc_agg()])§
-#' @slot intervals_end §end datetime of data intervals for spacial periods all and custom (see [mc_agg()])§
+#' @slot period value from [mc_agg()] (e.g. month, day, all...)
+#' @slot intervals_start start datetime of data intervals for spacial periods all and custom (see [mc_agg()])
+#' @slot intervals_end end datetime of data intervals for spacial periods all and custom (see [mc_agg()])
 #' @export mc_MainMetadata
 #' @exportClass mc_MainMetadata
 #' @seealso Calc-format section of [myClim-package]

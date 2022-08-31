@@ -145,7 +145,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @param sensors filter the sensors; if empty then all see `names(mc_data_sensors)`
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
-#' @return §ggplot2 object§
+#' @return ggplot2 object
 #' @export
 #' @examples
 #' \dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
@@ -187,7 +187,7 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
 #' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
 #'
-#' §If NULL then the plot isn't saved to file.§
+#' If NULL then the plot is return, but not saved to file.
 #' @param sensors names of sensor; should have same unit see `names(mc_data_sensors)`
 #' @param by_hour if TRUE, then y axis is plotted as an hour, else original time step (default TRUE) 
 #' @param png_width width for png output (default 1900)
@@ -307,14 +307,14 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @param data  myClim object in Prep-format or Calc-formt see [myClim-package]
 #' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
 #'
-#' §If NULL then the plot isn't saved to file.§
+#' If NULL then the plot is return, but not saved to file.
 #' @param sensors select the names of sensors to be plotted (max 2) see `names(mc_data_sensors)`
 #' @param scale_coeff scale coefficient for secondary axis (default NULL)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
 #' @param start_crop POSIXct datetime for crop data (default NULL)
 #' @param end_crop POSIXct datetime for crop data (default NULL)
-#' @return §ggplot2 object§
+#' @return ggplot2 object
 #' @export
 mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          scale_coeff=NULL,
