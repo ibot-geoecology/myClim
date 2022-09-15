@@ -15,7 +15,7 @@ Class for logger metadata
 
 \item{\code{serial_number}}{serial number of the logger}
 
-\item{\code{step}}{time step of microclimatic time-seris in minutes.
+\item{\code{step}}{time step of microclimatic time-seris in seconds.
 When provided by user, is used in \code{\link[=mc_prep_clean]{mc_prep_clean()}} function instead of
 automatic step detection}
 }}

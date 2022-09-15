@@ -97,9 +97,9 @@
             return(list(start=start, end=end))
         }
         if(!is_calc) {
-            end <- end + lubridate::minutes(step)
+            end <- end + lubridate::seconds(step)
         } else if(!is.na(data$metadata@step)) {
-            end <- end + lubridate::minutes(data$metadata@step)
+            end <- end + lubridate::seconds(data$metadata@step)
         } else {
             end <- end + lubridate::period(data$metadata@period)
         }
@@ -110,7 +110,7 @@
 }
 
 .common_get_logger_shift <- function(logger) {
-    as.integer(logger$datetime[[1]]) %% as.integer(logger$clean_info@step * 60)
+    as.integer(logger$datetime[[1]]) %% as.integer(logger$clean_info@step)
 }
 
 .common_crop_states_table <- function(states_table, intervals) {

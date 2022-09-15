@@ -30,7 +30,7 @@ For TMS files ignored, there is fix date format. see \link{mc_data_formats}}
 
 \item{tz_offset}{timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)}
 
-\item{step}{Time step of microclimatic time-series in minutes. When provided, then is used in \link{mc_prep_clean} instead of automatic step detection.
+\item{step}{time step of microclimatic time-series in seconds. When provided, then is used in \link{mc_prep_clean} instead of automatic step detection.
 If not provided (NA), is automatically detected in \link{mc_prep_clean}. (default NA)}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}

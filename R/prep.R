@@ -109,7 +109,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     diff_datetime <- diff(as.numeric(logger$datetime))
     logger$clean_info@count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
     sorted_datetime <- sort(as.numeric(logger$datetime))
-    diff_datetime <- diff(sorted_datetime) %/% 60
+    diff_datetime <- diff(sorted_datetime)
     logger$clean_info@count_duplicits <- length(purrr::keep(diff_datetime, function(x) x == 0))
     right_count_datetime <- diff(c(sorted_datetime[[1]], tail(sorted_datetime, n=1))) %/% logger$clean_info@step + 1
     logger$clean_info@count_missed <- right_count_datetime - (length(logger$datetime) - logger$clean_info@count_duplicits)

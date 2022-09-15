@@ -31,7 +31,7 @@ Default heights of sensor based on logger types are defined in table \link{mc_da
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
 Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. Ignored for TOMST data format
-\item step - Time step of microclimatic time-series in minutes. When provided, then used in \link{mc_prep_clean}
+\item step - Time step of microclimatic time-series in seconds. When provided, then used in \link{mc_prep_clean}
 instead of automatic step detection.
 }}
 

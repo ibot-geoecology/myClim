@@ -133,7 +133,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(is.null(period)) {
         number_of_seconds <- as.numeric(lubridate::as.period(original_period))
         step <- as.integer(number_of_seconds)
-        period <- stringr::str_glue("{step} sec")
+        period <- .agg_get_period_text_from_step(step)
     } else if(!is.null(use_intervals)) {
         step <- .agg_get_step_from_use_intervals(use_intervals)
         intervals_start <- lubridate::int_start(use_intervals)
@@ -316,13 +316,20 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         }
     }
     purrr::walk(data, shift_locality_function)
-    stringr::str_glue("{dplyr::first(steps)} sec")
+    .agg_get_period_text_from_step(dplyr::first(steps))
+}
+
+.agg_get_period_text_from_step <- function(step) {
+    if(step %% 60 != 0) {
+        return(stringr::str_glue("{step} sec"))
+    }
+    return(stringr::str_glue("{step %/% 60} min"))
 }
 
 .agg_aggregate_prep_locality <- function(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, custom_functions)
 {
     logger_function <- function (logger) {
-        original_period <- stringr::str_glue("{logger$clean_info@step} sec")
+        original_period <- .agg_get_period_text_from_step(logger$clean_info@step)
         logger <- .agg_aggregate_item(logger, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_period, custom_functions)
         if(is.null(logger)) {
             return(logger)
@@ -334,7 +341,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         locality$loggers <- purrr::keep(locality$loggers, function (x) !is.null(x))
     } else {
-        period <- stringr::str_glue("{locality$loggers[[1]]$clean_info@step} sec")
+        period <- .agg_get_period_text_from_step(locality$loggers[[1]]$clean_info@step)
     }
     .agg_get_flat_locality(locality, period, use_intervals)
 }

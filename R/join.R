@@ -100,7 +100,7 @@ mc_join <- function(data, comp_sensors=NULL) {
         }
         start <- logger1$datetime[[1]]
         end <- max(dplyr::last(logger1$datetime), dplyr::last(logger2$datetime))
-        data_table <- tibble::tibble(datetime = seq(start, end, logger1$clean_info@step * 60))
+        data_table <- tibble::tibble(datetime = seq(start, end, logger1$clean_info@step))
         names_table <- .join_get_names_table(logger1, logger2)
         l1_table <- myClim:::.common_sensor_values_as_tibble(logger1)
         colnames(l1_table) <- .join_get_logger_table_column_names(colnames(l1_table), names_table, TRUE)
@@ -251,7 +251,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     result_function <- function(sensor) {
         select_sensor <- plot_data_table$sensor == sensor
         tibble::tibble(start = lubridate::int_start(problem_intervals),
-                       end = lubridate::int_end(problem_intervals) + lubridate::minutes(step),
+                       end = lubridate::int_end(problem_intervals) + lubridate::seconds(step),
                        sensor = sensor,
                        ymin = min(plot_data_table$value[select_sensor]),
                        ymax = max(plot_data_table$value[select_sensor]))

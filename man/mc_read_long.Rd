@@ -9,8 +9,8 @@ mc_read_long(data_table, sensor_ids = list(), clean = TRUE, silent = FALSE)
 \arguments{
 \item{data_table}{long data.frame with Columns:
 \itemize{
-\item locality_id
-\item sensor_name  - see \code{names(mc_data_sensors)}
+\item locality_id - character id of locality
+\item sensor_name - see \code{names(mc_data_sensors)}
 \item datetime - POSIXct and UTC timezone is required
 \item value
 }}

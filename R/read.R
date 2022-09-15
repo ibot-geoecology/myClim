@@ -30,7 +30,7 @@
 #' For TMS files ignored, there is fix date format. see [mc_data_formats]
 #' @param logger_type type of logger (default NA), can be one of pre-defined see [myClim::mc_read_data()] or any custom string
 #' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
-#' @param step Time step of microclimatic time-series in minutes. When provided, then is used in [mc_prep_clean] instead of automatic step detection.
+#' @param step time step of microclimatic time-series in seconds. When provided, then is used in [mc_prep_clean] instead of automatic step detection.
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is printed in console (default FALSE)
@@ -90,7 +90,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. Ignored for TOMST data format
-#' * step - Time step of microclimatic time-series in minutes. When provided, then used in [mc_prep_clean] 
+#' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection.
 #'
 #' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
@@ -137,7 +137,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     files_table$locality_id <- .read_get_edited_locality_ids(files_table)
     result <- .read_get_output_data(files_table, localities, data_formats)
     if(clean) {
-        result <- myClim::mc_prep_clean(result, silent=silent)
+        result <- mc_prep_clean(result, silent=silent)
     }
     result
 }
@@ -450,8 +450,8 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
 #'
 #' @param data_table long data.frame with Columns:
-#' * locality_id
-#' * sensor_name  - see `names(mc_data_sensors)`
+#' * locality_id - character id of locality
+#' * sensor_name - see `names(mc_data_sensors)`
 #' * datetime - POSIXct and UTC timezone is required
 #' * value
 #' @param sensor_ids list with relations between sensor_names and sensor_ids (default list());
@@ -471,7 +471,7 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
     localities <- dplyr::group_map(data_table, .read_long_locality, sensor_ids=sensor_ids)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
     if(clean) {
-        localities <- myClim::mc_prep_clean(localities, silent=silent)
+        localities <- mc_prep_clean(localities, silent=silent)
     }
     localities
 }

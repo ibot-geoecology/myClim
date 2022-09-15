@@ -80,7 +80,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 }
 
 .calc_check_maximal_day_step_in_logger_get_skip <- function(logger) {
-    logger_period <- lubridate::minutes(logger$clean_info@step)
+    logger_period <- lubridate::seconds(logger$clean_info@step)
     if(logger_period > lubridate::days(1)) {
         warning(stringr::str_glue(.calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY))
         return(TRUE)
@@ -420,7 +420,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
     is_calc <- myClim:::.common_is_calc_format(data)
     if(is_calc) {
         .calc_check_maximal_day_step(data)
-        data_step_part_day <- data$metadata@step / (24 * 60)
+        data_step_part_day <- data$metadata@step / (24 * 60 * 60)
     } else {
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     }
@@ -438,7 +438,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
         {
             return(logger)
         }
-        step_part_day <- logger$clean_info@step / (24 * 60)
+        step_part_day <- logger$clean_info@step / (24 * 60 * 60)
         call_add_sensor(logger, step_part_day)
     }
 

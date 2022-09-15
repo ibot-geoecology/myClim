@@ -163,7 +163,7 @@ setMethod("initialize",
           })
 
 #' Class for myClim object metadata in Calc-format
-#' @slot step time step of data in minutes
+#' @slot step time step of data in seconds
 #' @slot period value from [mc_agg()] (e.g. month, day, all...)
 #' @slot intervals_start start datetime of data intervals for spacial periods all and custom (see [mc_agg()])
 #' @slot intervals_end end datetime of data intervals for spacial periods all and custom (see [mc_agg()])
@@ -220,7 +220,7 @@ setMethod("initialize",
 #' Class for logger metadata
 #' @slot type of logger (TMS, ThermoDatalogger, Dendrometer, HOBO)
 #' @slot serial_number serial number of the logger 
-#' @slot step time step of microclimatic time-seris in minutes. 
+#' @slot step time step of microclimatic time-seris in seconds.
 #' When provided by user, is used in [mc_prep_clean()] function instead of
 #' automatic step detection 
 #' @export mc_LoggerMetadata
@@ -238,7 +238,7 @@ setMethod("initialize",
           })
 
 #' Class for logger clean info
-#' @slot step Time step of microclimatic data series in minutes
+#' @slot step Time step of microclimatic data series in seconds
 #' @slot count_duplicits count of duplicated records - values with same date
 #' @slot count_missed count of missing records; Period between the records should be the same length. If not, than missing. 
 #' @slot count_disordered count of records incorrectly ordered in time. In table, newer record is followed by the older. 

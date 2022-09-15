@@ -5,7 +5,7 @@ test_that("mc_agg UTC", {
     data <- mc_read_files("data/clean-datetime_step", "TOMST", clean=FALSE)
     expect_error(hour_data <- mc_agg(data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), na.rm=TRUE))
     cleaned_data <- mc_prep_clean(data, silent=T)
-    expect_warning(hour_data <- mc_agg(cleaned_data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), na.rm=TRUE))
+    hour_data <- mc_agg(cleaned_data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), na.rm=TRUE)
     test_calc_data_format(hour_data)
     expect_equal(length(hour_data$localities[["94184102"]]$sensors), 12)
     calc_data <- mc_agg(cleaned_data)
@@ -41,6 +41,31 @@ test_that("mc_agg empty data", {
     expect_error(expect_warning(calc_data <- mc_agg(data, "min", "day", use_utc = TRUE, na.rm=TRUE)))
 })
 
+test_that("mc_agg 90s step", {
+    table <- read.csv("data/agg-short-step/step_90s_long.csv", stringsAsFactors = FALSE)
+    table$datetime <- lubridate::ymd_hms(table$datetime)
+    table$locality_id <- as.character(table$locality_id)
+    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T_C","RH" = "HOBO_RH", "Wind" = "wind"),
+                         clean = TRUE, silent = TRUE)
+    expect_equal(data$`172`$loggers[[1]]$clean_info@step, 90)
+    calc_data <- mc_agg(data, period = "2 min", fun = "mean")
+    expect_error(calc_data <- mc_agg(data, period = "all", fun = "mean"))
+})
+
+test_that("mc_agg 10s step", {
+    table <- read.csv("data/agg-short-step/step_10s_long.csv", stringsAsFactors = FALSE)
+    table$datetime <- lubridate::ymd_hms(table$datetime)
+    table$locality_id <- as.character(table$locality_id)
+    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T_C","RH" = "HOBO_RH", "Wind" = "wind"),
+                         clean = TRUE, silent = TRUE)
+    expect_equal(data$`172`$loggers[[1]]$clean_info@step, 10)
+    expect_equal(data$`172`$loggers[[1]]$clean_info@count_duplicits, 0)
+    expect_equal(data$`172`$loggers[[1]]$clean_info@count_missed, 0)
+    expect_equal(data$`172`$loggers[[1]]$clean_info@count_disordered, 0)
+    calc_data <- mc_agg(data, period = "1 min", fun = "mean")
+    all_data <- mc_agg(data, period = "all", fun = "mean")
+})
+
 test_that("mc_agg solar aggregation", {
     data <- mc_read_data("data/solar_agg/files_table.csv", "data/solar_agg/localities_table.csv", silent=T)
     data <- mc_prep_solar_tz(data)
@@ -53,7 +78,7 @@ test_that("mc_agg solar aggregation", {
 
 test_that("mc_agg UTC many NA", {
     cleaned_data <- mc_read_files("data/clean-datetime_step/data_94184165_0.csv", "TOMST", silent=T)
-    expect_warning(agg_data <- mc_agg(cleaned_data, c("min", "max", "mean", "percentile", "sum", "count", "coverage"), "hour", percentiles=50, na.rm=TRUE))
+    agg_data <- mc_agg(cleaned_data, c("min", "max", "mean", "percentile", "sum", "count", "coverage"), "hour", percentiles=50, na.rm=TRUE)
     expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_min$values[[2]]))
     expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_max$values[[2]]))
     expect_true(is.na(agg_data$localities[["94184165"]]$sensors$TMS_T1_mean$values[[2]]))
@@ -64,13 +89,13 @@ test_that("mc_agg UTC many NA", {
 test_that("mc_agg long period", {
     data <- mc_read_files("data/agg-month", "TOMST", silent=T)
     data <- mc_prep_meta_locality(data, list(`91184101`=60), "tz_offset")
-    expect_warning(agg_data <- mc_agg(data, "mean", "week", use_utc=FALSE, na.rm=FALSE))
+    agg_data <- mc_agg(data, "mean", "week", use_utc=FALSE, na.rm=FALSE)
     test_calc_data_format(agg_data)
     expect_equal(agg_data$metadata@period, "week")
     expect_equal(agg_data$localities$`91184101`$datetime[[1]], lubridate::ymd_h("2020-11-02 00"))
     expect_false(is.na(agg_data$metadata@step))
     expect_false(any(is.na(agg_data$localities[["91184101"]]$sensors$TS_T_mean$values)))
-    expect_warning(agg_data <- mc_agg(data, "mean", "month", use_utc=FALSE, na.rm=FALSE))
+    agg_data <- mc_agg(data, "mean", "month", use_utc=FALSE, na.rm=FALSE)
     test_calc_data_format(agg_data)
     expect_equal(agg_data$metadata@period, "month")
     expect_true(is.na(agg_data$metadata@step))
@@ -102,7 +127,7 @@ test_that("mc_agg logical sensor", {
     data <- mc_read_files("data/eco-snow/data_94184102_0.csv", "TOMST", silent=T)
     calc_data <- mc_agg(data)
     calc_data <- mc_calc_snow(calc_data, "TMS_T3", tmax=0.5)
-    expect_warning(week_calc_data <- mc_agg(calc_data, list(snow=c("min", "max", "mean", "percentile", "sum", "count", "coverage")), "week", percentiles = 20))
+    week_calc_data <- mc_agg(calc_data, list(snow=c("min", "max", "mean", "percentile", "sum", "count", "coverage")), "week", percentiles = 20)
     expect_equal(week_calc_data$localities$`94184102`$sensors$snow_min$values, c(F, F, F, F))
     expect_equal(week_calc_data$localities$`94184102`$sensors$snow_max$values, c(T, F, F, F))
     expect_equal(week_calc_data$localities$`94184102`$sensors$snow_mean$values, c(T, F, F, F))
@@ -117,7 +142,7 @@ test_that("mc_agg logical sensor", {
 
 test_that("mc_agg integer sensor", {
     data <- mc_read_files("data/TOMST/data_94184102_0.csv", "TOMST", silent=T)
-    expect_warning(calc_data <- mc_agg(data, list(TMS_TMSmoisture=c("min", "max", "mean", "percentile", "sum", "count", "coverage")), "hour", percentiles = 10))
+    calc_data <- mc_agg(data, list(TMS_TMSmoisture=c("min", "max", "mean", "percentile", "sum", "count", "coverage")), "hour", percentiles = 10)
     expect_equal(calc_data$localities$`94184102`$sensors$TMS_TMSmoisture_min$values[[1]], 1551)
     expect_equal(calc_data$localities$`94184102`$sensors$TMS_TMSmoisture_max$values[[1]], 1551)
     expect_equal(calc_data$localities$`94184102`$sensors$TMS_TMSmoisture_mean$values[[2]], 1552)
@@ -167,7 +192,7 @@ test_that("mc_agg custom", {
     table <- readRDS("data/agg-custom/air_humidity.rds")
     data <- mc_read_wide(table, sensor_id = "RH_perc", "humidity", silent=T)
     expect_error(agg_data <- mc_agg(data, "mean", period = "custom"))
-    expect_warning(agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "11-01"))
+    agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "11-01")
     test_calc_data_format(agg_data)
     expect_equal(agg_data$localities$B1BYSH01$datetime, c(lubridate::ymd_h("2018-11-01 00"), lubridate::ymd_h("2019-11-01 00")))
     expect_equal(agg_data$metadata@period, "custom")
@@ -185,7 +210,7 @@ test_that("mc_agg custom", {
     expect_equal(agg_data$metadata@intervals_end, c(lubridate::ymd_hms("2018-09-30 23:59:59"),
                                                     lubridate::ymd_hms("2019-09-30 23:59:59"), lubridate::ymd_hms("2020-09-30 23:59:59")))
     expect_false(is.na(agg_data$metadata@step))
-    expect_warning(agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "12-01", custom_end = "03-01"))
+    agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "12-01", custom_end = "03-01")
     test_calc_data_format(agg_data)
     expect_equal(agg_data$localities$B1BYSH01$datetime, c(lubridate::ymd_h("2018-12-01 00"), lubridate::ymd_h("2019-12-01 00")))
     expect_equal(agg_data$metadata@period, "custom")

@@ -109,7 +109,7 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
             if(is.na(item$clean_info@step)) {
                 warning(stringr::str_glue(.reshape_const_MESSAGE_UNCLEANED))
             }
-            period <- lubridate::minutes(item$clean_info@step)
+            period <- lubridate::seconds(item$clean_info@step)
         }
         if(!is.null(period)) {
             time_to <- c(item$datetime[-1], dplyr::last(item$datetime) + period)

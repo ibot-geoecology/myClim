@@ -11,7 +11,7 @@ Class for myClim object metadata in Calc-format
 \section{Slots}{
 
 \describe{
-\item{\code{step}}{time step of data in minutes}
+\item{\code{step}}{time step of data in seconds}
 
 \item{\code{period}}{value from \code{\link[=mc_agg]{mc_agg()}} (e.g. month, day, all...)}
 

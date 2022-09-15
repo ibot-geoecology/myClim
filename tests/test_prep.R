@@ -18,13 +18,13 @@ test_that("mc_prep_clean", {
     expect_true(myClim:::.prep_clean_was_error_in_logger(cleaned_data[["94184102"]]$loggers[[1]]))
     expect_equal(length(cleaned_data[["94184102"]]$loggers[[1]]$datetime), 49)
     expect_true(is.na(cleaned_data[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[19]]))
-    expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$clean_info@step, 15)
+    expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$clean_info@step, 15 * 60)
     expect_equal(cleaned_data[["91184133"]]$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(cleaned_data[["91184133"]]$loggers[[1]]$datetime))
 })
 
 test_that("mc_prep_clean defined step", {
-    cleaned_data <- mc_read_files("data/clean-datetime_step", "TOMST", step=30, silent=T)
-    expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@step, 30)
+    cleaned_data <- mc_read_files("data/clean-datetime_step", "TOMST", step=30*60, silent=T)
+    expect_equal(cleaned_data[["94184102"]]$loggers[[1]]$clean_info@step, 30*60)
     expect_equal(length(cleaned_data[["94184102"]]$loggers[[1]]$datetime), 25)
 })
 
@@ -109,7 +109,7 @@ test_that("mc_prep_meta_locality rename", {
     renamed_data <- mc_prep_meta_locality(data, values)
     expect_equal(sort(names(renamed_data)), sort(c("ABC05", "CDE32", "A6W79")))
     renamed_data <- mc_prep_clean(renamed_data, silent=T)
-    expect_warning(renamed_data <- mc_agg(renamed_data, c("min", "max"), "hour"))
+    renamed_data <- mc_agg(renamed_data, c("min", "max"), "hour")
     renamed_data <- mc_prep_meta_locality(renamed_data, list(ABC05="AAA05"), "locality_id")
     expect_equal(names(renamed_data$localities), c("AAA05", "CDE32", "A6W79"))
 })
@@ -195,7 +195,7 @@ test_that("mc_prep_merge wrong", {
     cleaned_data <- mc_prep_clean(data, silent=T)
     calc_data <- mc_agg(cleaned_data)
     expect_error(mc_prep_merge(data, calc_data))
-    expect_warning(hour_data <- mc_agg(calc_data, "max", "hour"))
+    hour_data <- mc_agg(calc_data, "max", "hour")
     expect_error(mc_prep_merge(calc_data, hour_data))
 })
 
@@ -210,8 +210,8 @@ test_that("mc_prep_merge", {
     merged_data <- mc_prep_merge(list(data1, data2))
     test_prep_data_format(merged_data)
     expect_equal(length(merged_data), 3)
-    expect_warning(hour_data1 <- mc_agg(data1, c("min", "max"), "hour"))
-    expect_warning(hour_data2 <- mc_agg(data2, c("min", "max"), "hour"))
+    hour_data1 <- mc_agg(data1, c("min", "max"), "hour")
+    hour_data2 <- mc_agg(data2, c("min", "max"), "hour")
     merged_hour_data <- mc_prep_merge(list(hour_data1, hour_data2))
     test_calc_data_format(merged_hour_data)
     expect_equal(length(merged_hour_data$localities), 3)
@@ -227,8 +227,8 @@ test_that("mc_prep_merge prep-format same name", {
 
 test_that("mc_prep_merge calc-format same name", {
     data <- mc_read_data("data/TOMST/files_table.csv", silent=T)
-    expect_warning(day_data_1 <- mc_agg(data, "mean", "hour"))
-    expect_warning(day_data_2 <- mc_agg(data, c("mean", "max"), "hour"))
+    day_data_1 <- mc_agg(data, "mean", "hour")
+    day_data_2 <- mc_agg(data, c("mean", "max"), "hour")
     expect_warning(merged_data <- mc_prep_merge(list(day_data_1, day_data_2)))
     test_calc_data_format(merged_data)
     expect_equal(names(merged_data$localities), c("A1E05", "A2E32", "A6W79"))

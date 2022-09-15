@@ -11,7 +11,7 @@ Class for logger clean info
 \section{Slots}{
 
 \describe{
-\item{\code{step}}{Time step of microclimatic data series in minutes}
+\item{\code{step}}{Time step of microclimatic data series in seconds}
 
 \item{\code{count_duplicits}}{count of duplicated records - values with same date}
 
