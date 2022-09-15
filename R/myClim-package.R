@@ -160,9 +160,9 @@
 #' 
 #' In contrast with Prep-format the Calc-formated myClim objects have additional 
 #' metadata on the level of  whole object [mc_MainMetadata-class] holding information 
-#' on time step which has whole object. Step is stored in minutes (`data$metadata@step`).
-#' But some steps can not be represented by minutes. For example step `month` has variable 
-#' number of minutes. Therefore, metadata contains also text 
+#' on time step which has whole object. Step is stored in seconds (`data$metadata@step`).
+#' But some steps can not be represented by seconds. For example step `month` has variable
+#' number of seconds. Therefore, metadata contains also text
 #' representation of the step (`data$metadata@period`). Common time step
 #' of myClim Calc-format objects is practical when merging multiple object. See [myClim::mc_prep_merge]
 #' 

@@ -18,7 +18,7 @@ data.frame with columns:
 \item sensor_name
 \item start_date - the oldest record on the sensor
 \item end_date - the newest record on the sensor
-\item step - time step of records series (minutes)
+\item step - time step of records series (seconds)
 \item period - time step of records series (text)
 \item min_value - minimal recorded values
 \item max_value - maximal recorded value

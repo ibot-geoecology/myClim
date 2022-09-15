@@ -132,8 +132,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     intervals_end <- lubridate::NA_POSIXct_
     if(is.null(period)) {
         number_of_seconds <- as.numeric(lubridate::as.period(original_period))
-        step <- as.integer(number_of_seconds / 60)
-        period <- stringr::str_glue("{step} min")
+        step <- as.integer(number_of_seconds)
+        period <- stringr::str_glue("{step} sec")
     } else if(!is.null(use_intervals)) {
         step <- .agg_get_step_from_use_intervals(use_intervals)
         intervals_start <- lubridate::int_start(use_intervals)
@@ -280,7 +280,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 
 .agg_get_use_utc <- function(data, use_utc) {
     is_calc <- myClim:::.common_is_calc_format(data)
-    if(!use_utc && is_calc && (is.na(data$metadata@step) || data$metadata@step >= 60*24)) {
+    if(!use_utc && is_calc && (is.na(data$metadata@step) || data$metadata@step >= 60*60*24)) {
         use_utc <- TRUE
     }
     if(!use_utc) {
@@ -310,19 +310,19 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         stop("All steps in loggers must be same.")
     }
     shift_locality_function <- function(locality) {
-        shifts <- purrr::map_int(locality$loggers, function(.x) as.integer(.x$datetime[[1]]) %% as.integer(.x$clean_info@step * 60))
+        shifts <- purrr::map_int(locality$loggers, function(.x) as.integer(.x$datetime[[1]]) %% as.integer(.x$clean_info@step))
         if(length(shifts) > 1 && var(shifts) != 0) {
             stop(stringr::str_glue(.agg_const_MESSAGE_WRONG_SHIFT))
         }
     }
     purrr::walk(data, shift_locality_function)
-    stringr::str_glue("{dplyr::first(steps)} min")
+    stringr::str_glue("{dplyr::first(steps)} sec")
 }
 
 .agg_aggregate_prep_locality <- function(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, custom_functions)
 {
     logger_function <- function (logger) {
-        original_period <- stringr::str_glue("{logger$clean_info@step} min")
+        original_period <- stringr::str_glue("{logger$clean_info@step} sec")
         logger <- .agg_aggregate_item(logger, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_period, custom_functions)
         if(is.null(logger)) {
             return(logger)
@@ -334,7 +334,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         locality$loggers <- purrr::keep(locality$loggers, function (x) !is.null(x))
     } else {
-        period <- stringr::str_glue("{locality$loggers[[1]]$clean_info@step} min")
+        period <- stringr::str_glue("{locality$loggers[[1]]$clean_info@step} sec")
     }
     .agg_get_flat_locality(locality, period, use_intervals)
 }

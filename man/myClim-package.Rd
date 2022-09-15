@@ -164,9 +164,9 @@ see \link{mc_SensorMetadata}, \link{mc_data_sensors}, \link{mc_LocalityMetadata}
 
 In contrast with Prep-format the Calc-formated myClim objects have additional
 metadata on the level of  whole object \linkS4class{mc_MainMetadata} holding information
-on time step which has whole object. Step is stored in minutes (\code{data$metadata@step}).
-But some steps can not be represented by minutes. For example step \code{month} has variable
-number of minutes. Therefore, metadata contains also text
+on time step which has whole object. Step is stored in seconds (\code{data$metadata@step}).
+But some steps can not be represented by seconds. For example step \code{month} has variable
+number of seconds. Therefore, metadata contains also text
 representation of the step (\code{data$metadata@period}). Common time step
 of myClim Calc-format objects is practical when merging multiple object. See \link{mc_prep_merge}
 

@@ -65,7 +65,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 
 .prep_clean_logger <- function(logger) {
     if(is.na(logger$metadata@step)) {
-        logger$clean_info@step <- .prep_detect_step_minutes(logger$datetime)
+        logger$clean_info@step <- .prep_detect_step_seconds(logger$datetime)
     } else {
         logger$clean_info@step <- logger$metadata@step
     }
@@ -82,27 +82,27 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger
 }
 
-.prep_detect_step_minutes <- function(datetime) {
+.prep_detect_step_seconds <- function(datetime) {
     datetime <- tail(datetime, .prep_const_DETECT_STEP_LENGTH)
     datetime <- sort(as.numeric(datetime))
     diff_datetime <- Filter(function(x) x > 0, diff(datetime))
-    round(unname(quantile(diff_datetime, p=0.5, type=1)/60))
+    round(unname(quantile(diff_datetime, p=0.5, type=1)))
 }
 
 .prep_get_rounded_datetime <- function(logger) {
-    step_seconds <- logger$clean_info@step * 60
     datetime_seconds <- as.numeric(logger$datetime)
     shift <- 0
-    if(logger$clean_info@step > 30) {
+    if(logger$clean_info@step > 30 * 60) {
         last_datetime <- dplyr::last(datetime_seconds)
-        new_last_datetime <- (last_datetime + logger$clean_info@step * 30) %/% step_seconds * step_seconds
+        new_last_datetime <- (last_datetime + logger$clean_info@step %/% 2) %/% logger$clean_info@step * logger$clean_info@step
         diff <- new_last_datetime - last_datetime
         diff_rounding <- 30 * 60
         if(abs(diff) > diff_rounding %/% 2) {
             shift <- (diff + diff_rounding %/% 2) %/% diff_rounding * diff_rounding
         }
     }
-    myClim:::.common_as_utc_posixct((datetime_seconds + logger$clean_info@step * 30) %/% step_seconds * step_seconds) - shift
+    myClim:::.common_as_utc_posixct((datetime_seconds + logger$clean_info@step %/% 2) %/%
+                                    logger$clean_info@step * logger$clean_info@step) - shift
 }
 
 .prep_clean_write_info <- function(logger, rounded) {
@@ -111,7 +111,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     sorted_datetime <- sort(as.numeric(logger$datetime))
     diff_datetime <- diff(sorted_datetime) %/% 60
     logger$clean_info@count_duplicits <- length(purrr::keep(diff_datetime, function(x) x == 0))
-    right_count_datetime <- diff(c(sorted_datetime[[1]], tail(sorted_datetime, n=1))) %/% 60 %/% logger$clean_info@step + 1
+    right_count_datetime <- diff(c(sorted_datetime[[1]], tail(sorted_datetime, n=1))) %/% logger$clean_info@step + 1
     logger$clean_info@count_missed <- right_count_datetime - (length(logger$datetime) - logger$clean_info@count_duplicits)
     logger$clean_info@rounded <- rounded
     logger
@@ -126,7 +126,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     grouped_table <- dplyr::group_by(table, datetime)
     table_noduplicits <- dplyr::summarise_all(grouped_table, dplyr::first)
     datetime_range <- range(table_noduplicits$datetime)
-    datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$clean_info@step} min")))
+    datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$clean_info@step} sec")))
     colnames(datetime_seq) <- "datetime"
     output_table <- dplyr::left_join(datetime_seq, table_noduplicits, by="datetime")
     logger$datetime <- output_table$datetime

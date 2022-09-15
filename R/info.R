@@ -51,7 +51,7 @@ mc_info_count <- function(data) {
 #' * serial_number - serial number of logger when provided or automatically detected from file name or header
 #' * start_date - date of the first record on the logger
 #' * end_date  - date of the last record on the logger
-#' * step - detected time step in minutes of the logger measurements. 
+#' * step - detected time step in seconds of the logger measurements.
 #' * count_duplicits - number of duplicated records (identical time and value)
 #' * count_missed - number of missing records (logger outage in time it should record)
 #' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
@@ -100,7 +100,7 @@ mc_info_clean <- function(data) {
 #' * sensor_name
 #' * start_date - the oldest record on the sensor  
 #' * end_date - the newest record on the sensor
-#' * step - time step of records series (minutes)
+#' * step - time step of records series (seconds)
 #' * period - time step of records series (text)
 #' * min_value - minimal recorded values
 #' * max_value - maximal recorded value
