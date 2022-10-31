@@ -85,6 +85,18 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_MESSAGE_COLUMNS_PROBLEM <- "It is not possible detect columns from header."
 .model_const_MESSAGE_HOBO_DATE_FORMAT_PROBLEM <- "HOBO data format required filled in parameter date_format."
 
+.model_const_FORMAT_RAW <- "raw"
+.model_const_FORMAT_AGG <- "agg"
+
+#' Custom list for myClim object
+#' @export
+myClimList <- function(metadata=NULL, localities=list())
+    structure(list(metadata=metadata, localities=localities), class=c("myClimList", "list"))
+
+#' Function convert myClimList to list
+#' @export
+as.list.myClimList <- function(x) {class(x) <- "list"; x;}
+
 # classes ================================================================================
 
 #' Class for sensor definition
@@ -162,27 +174,49 @@ setMethod("initialize",
               return(.Object)
           })
 
-#' Class for myClim object metadata in Calc-format
-#' @slot step time step of data in seconds
-#' @slot period value from [mc_agg()] (e.g. month, day, all...)
-#' @slot intervals_start start datetime of data intervals for spacial periods all and custom (see [mc_agg()])
-#' @slot intervals_end end datetime of data intervals for spacial periods all and custom (see [mc_agg()])
+#' Class for myClim object metadata
+#' @template MainMetadataSlots
 #' @export mc_MainMetadata
 #' @exportClass mc_MainMetadata
-#' @seealso Calc-format section of [myClim-package]
+#' @seealso [myClim-package]
 mc_MainMetadata <- setClass("mc_MainMetadata",
-                            slots = c(step = "numeric",
-                                      period = "character",
-                                      intervals_start = "POSIXct",
-                                      intervals_end = "POSIXct"))
+                            slots = c(version = "ANY",
+                                      format_type = "character"))
 
 setMethod("initialize",
           "mc_MainMetadata",
           function(.Object) {
+              .Object@version <- packageVersion("myClim")
+              .Object@format_type <- .model_const_FORMAT_RAW
+              return(.Object)
+          })
+
+#' Class for myClim object metadata in Raw-format
+#' @template MainMetadataSlots
+#' @slot step time step of data in seconds
+#' @slot period value from [mc_agg()] (e.g. month, day, all...)
+#' @slot intervals_start start datetime of data intervals for spacial periods all and custom (see [mc_agg()])
+#' @slot intervals_end end datetime of data intervals for spacial periods all and custom (see [mc_agg()])
+#' @export mc_MainMetadataAgg
+#' @exportClass mc_MainMetadataAgg
+#' @seealso [mc_MainMetadata] [myClim-package]
+mc_MainMetadataAgg <- setClass("mc_MainMetadataAgg",
+                            slots = c(step = "numeric",
+                                      period = "character",
+                                      intervals_start = "POSIXct",
+                                      intervals_end = "POSIXct"),
+                            contains = "mc_MainMetadata")
+
+setMethod("initialize",
+          "mc_MainMetadataAgg",
+          function(.Object) {
+              .Object@version <- packageVersion("myClim")
+              .Object@format_type <- .model_const_FORMAT_AGG
               .Object@intervals_start <- lubridate::NA_POSIXct_
               .Object@intervals_end <- lubridate::NA_POSIXct_
               return(.Object)
           })
+
 #' Class for locality metadata
 #' @details When reading without metadata, then locality is named after file
 #' where the data come from, or after the sensor id where the data come form.  

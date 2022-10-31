@@ -253,13 +253,13 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         locality$loggers <- purrr::discard(locality$loggers, ~ is.null(.x))
         locality
     }
-    result <- dplyr::group_map(groupped_files, locality_function)
-    result <- purrr::discard(result, ~ length(.x$loggers) == 0)
-    if(length(result) == 0) {
+    result_localities <- dplyr::group_map(groupped_files, locality_function)
+    result_localities <- purrr::discard(result_localities, ~ length(.x$loggers) == 0)
+    if(length(result_localities) == 0) {
         stop(.read_const_MESSAGE_ANY_LOCALITY)
     }
-    names(result) <- purrr::map_chr(result, function(.x) .x$metadata@locality_id)
-    result
+    names(result_localities) <- purrr::map_chr(result_localities, function(.x) .x$metadata@locality_id)
+    .read_get_data_raw_from_localities(result_localities)
 }
 
 .read_get_new_locality <- function(locality_id, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
@@ -272,6 +272,11 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     metadata@tz_offset <- tz_offset
     metadata@tz_type <- tz_type
     list(metadata = metadata, loggers=list())
+}
+
+.read_get_data_raw_from_localities <- function(localities) {
+    metadata <- new("mc_MainMetadata")
+    myClimList(metadata, localities)
 }
 
 .read_logger <- function(filename, data_format, serial_number, step) {
@@ -427,10 +432,11 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
         locality
     }
     localities <- purrr::map(result, locality_function)
+    data <- .read_get_data_raw_from_localities(localities)
     if(clean) {
-        localities <- myClim::mc_prep_clean(localities, silent=silent)
+        data <- myClim::mc_prep_clean(data, silent=silent)
     }
-    localities
+    return(data)
 }
 
 .read_check_datetime <- function(datetime) {
@@ -470,10 +476,11 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
     data_table <- dplyr::group_by(data_table, locality_id)
     localities <- dplyr::group_map(data_table, .read_long_locality, sensor_ids=sensor_ids)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
+    data <- .read_get_data_raw_from_localities(localities)
     if(clean) {
-        localities <- mc_prep_clean(localities, silent=silent)
+        data <- mc_prep_clean(data, silent=silent)
     }
-    localities
+    return(data)
 }
 
 .read_long_locality <- function(locality_table, locality_id, sensor_ids) {

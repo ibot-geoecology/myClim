@@ -37,8 +37,8 @@
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=1, tmax=1.25, days=3) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(is_agg) {
         .calc_check_maximal_day_step(data)
     } else {
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
@@ -62,15 +62,15 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        if(is_calc) {
+        if(is_agg) {
             return(call_snow(locality))
         }
 
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         return(locality)
     }
-    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    .common_set_localities(data, localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .calc_check_maximal_day_step <- function(data) {
@@ -174,15 +174,15 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' mc_calc_snow_agg(data, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=F) {
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if((is_calc && length(data$localities) == 0) || (!is_calc && length(data) == 0)) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if((is_agg && length(data$localities) == 0) || (!is_agg && length(data) == 0)) {
         stop(.calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES)
     }
     if(!use_utc) {
         myClim:::.prep_warn_if_unset_tz_offset(data)
     }
     locality_function <- function(locality) {
-        if(is_calc) {
+        if(is_agg) {
             return(.calc_get_snow_agg_row(locality, locality$metadata@locality_id, locality$metadata@tz_offset, snow_sensor, period, use_utc))
         }
 
@@ -191,7 +191,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
         }
         purrr::map_dfr(locality$loggers, logger_function)
     }
-    as.data.frame(purrr::map_dfr(myClim:::.common_get_localities(data), locality_function))
+    as.data.frame(purrr::map_dfr(data$localities, locality_function))
 }
 
 .calc_get_snow_agg_row <- function(item, locality_id, tz_offset, snow_sensor, period, use_utc) {
@@ -288,7 +288,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 #' 
 #' @examples
-#' calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
+#' agg_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
 mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSmoisture,
                         temp_sensor=myClim:::.model_const_SENSOR_TMS_T1,
                         output_sensor="VWC_moisture",
@@ -297,8 +297,8 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
                         acor_t=myClim:::.calib_MOIST_ACOR_T,
                         wcor_t=myClim:::.calib_MOIST_WCOR_T,
                         frozen2NA=TRUE) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     }
     call_vwc <- function(item) {
@@ -309,15 +309,15 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        if(is_calc) {
+        if(is_agg) {
             return(call_vwc(locality))
         }
 
         locality$loggers <- purrr::map(locality$loggers, ~ call_vwc(.x))
         return(locality)
     }
-    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, out_localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .calc_add_vwc_to_item <- function(item, moist_sensor, temp_sensor, output_sensor,
@@ -417,8 +417,8 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 }
 
 .calc_xdd <- function(data, sensor, output_sensor_id, output_prefix, t_base, localities, values_function) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(is_agg) {
         .calc_check_maximal_day_step(data)
         data_step_part_day <- data$metadata@step / (24 * 60 * 60)
     } else {
@@ -446,15 +446,15 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        if(is_calc) {
+        if(is_agg) {
             return(call_add_sensor(locality, data_step_part_day))
         }
         locality$loggers <- purrr::map(locality$loggers, logger_function)
         return(locality)
     }
 
-    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, out_localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .calc_get_name_with_base <- function(prefix, base) {
@@ -523,8 +523,8 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' @examples
 #' cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))
 mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NULL) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     }
 
@@ -559,7 +559,7 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
             return(locality)
         }
 
-        if(is_calc) {
+        if(is_agg) {
             return(all_sensors_function(locality))
         }
 
@@ -567,8 +567,8 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
         return(locality)
     }
 
-    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, out_localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 #' Converting raw values of TOMST dendrometer to micrometers
@@ -583,12 +583,12 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' @return myClim object same as input but with added dendro_l_um sensor
 #' @export
 #' @examples
-#' calc_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
+#' agg_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
 mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSOR_DEND_TOMSTdendro,
                         output_sensor=myClim:::.model_const_SENSOR_dendro_l_um,
                         localities=NULL) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     }
 
@@ -602,14 +602,14 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        if(is_calc) {
+        if(is_agg) {
             return(call_dendro_function(locality))
         }
         locality$loggers <- purrr::map(locality$loggers, call_dendro_function)
         return(locality)
     }
-    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, out_localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .calc_get_dendro_l_um <- function(item, sensor_name) {
@@ -645,16 +645,16 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 #' Campbell G.S. & Norman J.M. (1998). An Introduction to Environmental Biophysics, Springer New York, New York, NY
 #'
 #' @examples
-#' calc_data <- mc_calc_vpd(mc_data_example_calc, "HOBO_T_C", "HOBO_RH", localities="A2E32")
+#' agg_data <- mc_calc_vpd(mc_data_example_calc, "HOBO_T_C", "HOBO_RH", localities="A2E32")
 mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
                         output_sensor="VPD", altitude=0,
                         metadata_altitude=TRUE, localities=NULL) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     }
 
-    if(is_calc && lubridate::period(data$metadata@period) >= lubridate::days(1)) {
+    if(is_agg && lubridate::period(data$metadata@period) >= lubridate::days(1)) {
         warning(.calc_const_MESSAGE_VPD_AGGREGATED)
     }
 
@@ -670,14 +670,14 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
         if(metadata_altitude && !is.na(locality$metadata@altitude)) {
             local_altitude <- locality$metadata@altitude
         }
-        if(is_calc) {
+        if(is_agg) {
             return(call_vpd_function(locality, local_altitude))
         }
         locality$loggers <- purrr::map2(locality$loggers, local_altitude, call_vpd_function)
         return(locality)
     }
-    out_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, out_localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .calc_add_vpd_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, altitude) {

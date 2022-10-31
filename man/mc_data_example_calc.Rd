@@ -5,7 +5,7 @@
 \alias{mc_data_example_calc}
 \title{Example data in calc-format and 15 minutes step.}
 \format{
-An object of class \code{list} of length 2.
+An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 }
 \usage{
 mc_data_example_calc

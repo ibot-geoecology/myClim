@@ -19,7 +19,7 @@
 #'
 #' **TOMST**
 #'
-#' TOMST data format has stable structure. Datetime is in UTC. Name of data file is in format data_<serial_number>_<x>.csv.
+#' TOMST data format has stable structure. Datetime is in UTC. Name of data file is in format data_\<serial_number\>_\<x\>.csv.
 #' Value serial_number can be automatically detected from file name. Supported loggers are TMS and ThermoDataLogger.
 #'
 #' **TOMST_join**

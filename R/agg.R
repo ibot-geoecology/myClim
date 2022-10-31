@@ -108,21 +108,16 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     .agg_check_fun_period(fun, period_object, use_utc)
     use_utc <- .agg_get_use_utc(data, use_utc)
     original_period <- .agg_check_steps_and_get_original_text(data, fun, period_object)
-    is_prep <- myClim:::.common_is_prep_format(data)
+    is_raw <- myClim:::.common_is_raw_format(data)
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
-        if(is_prep) {
+        if(is_raw) {
             return(.agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, custom_functions))
         } else {
             return(.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_period, custom_functions))
         }
     }
-    if(is_prep) {
-        localities <- data
-    } else {
-        localities <- data$localities
-    }
-    new_localities <- purrr::map(localities, locality_function)
+    new_localities <- purrr::map(data$localities, locality_function)
     new_localities <- purrr::keep(new_localities, function (x) !is.null(x))
     if(length(new_localities) == 0) {
         stop(.agg_const_MESSAGE_EMPTY_DATA)
@@ -141,13 +136,13 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     } else {
         step <- .agg_get_step_from_period_object(period_object)
     }
-    metadata <- new("mc_MainMetadata")
+    metadata <- new("mc_MainMetadataAgg")
     metadata@period <- period
     metadata@step <- step
     metadata@intervals_start <- intervals_start
     metadata@intervals_end <- intervals_end
     options(lubridate.week.start = old_lubridate_week_start)
-    list(metadata=metadata, localities=new_localities)
+    myClimList(metadata, new_localities)
 }
 
 .agg_get_use_intervals <- function(data, period, custom_start, custom_end) {
@@ -279,8 +274,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_get_use_utc <- function(data, use_utc) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!use_utc && is_calc && (is.na(data$metadata@step) || data$metadata@step >= 60*60*24)) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!use_utc && is_agg && (is.na(data$metadata@step) || data$metadata@step >= 60*60*24)) {
         use_utc <- TRUE
     }
     if(!use_utc) {
@@ -290,7 +285,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_check_steps_and_get_original_text <- function(data, fun, period_object) {
-    if(myClim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_agg_format(data)) {
         if(data$metadata@period %in% .agg_const_INTERVAL_PERIODS) {
             stop(.agg_const_MESSAGE_WRONG_PREVIOUS_PERIOD)
         }
@@ -299,7 +294,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     step_locality_function <- function(locality) {
         purrr::map_int(locality$loggers, function(.x) as.integer(.x$clean_info@step))
     }
-    steps <- as.numeric(purrr::flatten(purrr::map(data, step_locality_function)))
+    steps <- as.numeric(purrr::flatten(purrr::map(data$localities, step_locality_function)))
     if(any(is.na(steps))) {
         stop("All steps must be set. Cleaning is required.")
     }
@@ -315,7 +310,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
             stop(stringr::str_glue(.agg_const_MESSAGE_WRONG_SHIFT))
         }
     }
-    purrr::walk(data, shift_locality_function)
+    purrr::walk(data$localities, shift_locality_function)
     .agg_get_period_text_from_step(dplyr::first(steps))
 }
 

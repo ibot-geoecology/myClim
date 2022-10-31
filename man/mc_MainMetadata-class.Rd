@@ -4,22 +4,18 @@
 \name{mc_MainMetadata-class}
 \alias{mc_MainMetadata-class}
 \alias{mc_MainMetadata}
-\title{Class for myClim object metadata in Calc-format}
+\title{Class for myClim object metadata}
 \description{
-Class for myClim object metadata in Calc-format
+Class for myClim object metadata
 }
 \section{Slots}{
 
 \describe{
-\item{\code{step}}{time step of data in seconds}
+\item{\code{version}}{§of the myClim packege in which was created§}
 
-\item{\code{period}}{value from \code{\link[=mc_agg]{mc_agg()}} (e.g. month, day, all...)}
-
-\item{\code{intervals_start}}{start datetime of data intervals for spacial periods all and custom (see \code{\link[=mc_agg]{mc_agg()}})}
-
-\item{\code{intervals_end}}{end datetime of data intervals for spacial periods all and custom (see \code{\link[=mc_agg]{mc_agg()}})}
+\item{\code{format_type}}{§type of format (raw, agg)§}
 }}
 
 \seealso{
-Calc-format section of \link{myClim-package}
+\link{myClim-package}
 }

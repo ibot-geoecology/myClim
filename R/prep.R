@@ -47,11 +47,11 @@ mc_prep_clean <- function(data, silent=FALSE) {
         locality$loggers <- purrr::map(locality$loggers, .prep_clean_logger)
         locality
     }
-    result <- purrr::map(data, locality_function)
+    data$localities <- purrr::map(data$localities, locality_function)
     if(silent) {
-        return(result)
+        return(data)
     }
-    info_table <- mc_info_clean(result)
+    info_table <- mc_info_clean(data)
     count_loggers <- nrow(info_table)
     print(stringr::str_glue("{count_loggers} loggers"))
     start_date <- min(info_table$start_date)
@@ -60,7 +60,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     steps <- paste(unique(info_table$step), collapse = ", ")
     print(stringr::str_glue("detected steps: {steps}"))
     print.data.frame(info_table)
-    result
+    return(data)
 }
 
 .prep_clean_logger <- function(logger) {
@@ -174,7 +174,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
         unprocessed <- purrr::discard(locality$loggers, .prep_is_logger_cleaned)
         purrr::map_chr(unprocessed, function(x) x$metadata@serial_number)
     }
-    loggers <- purrr::map(data, locality_function)
+    loggers <- purrr::map(data$localities, locality_function)
     purrr::reduce(loggers, c)
 }
 
@@ -238,7 +238,7 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
         stop(.prep_const_MESSAGE_PARAM_NAME_NULL)
     }
 
-    localities <- as.environment(myClim:::.common_get_localities(data))
+    localities <- as.environment(data$localities)
 
     change_param_function <- function(locality_id, slot_name, value){
         if(!(locality_id %in% names(localities))) {
@@ -278,7 +278,8 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
         }
     }
 
-    myClim:::.common_set_localities(data, localities)
+    data$localities <- localities
+    return(data)
 }
 
 #' Set metadata of sensors
@@ -297,7 +298,7 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
 #' @examples
 #' data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")
 mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logger_types=NULL) {
-    is_calc_format <- myClim:::.common_is_calc_format(data)
+    is_agg_format <- myClim:::.common_is_agg_format(data)
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
@@ -308,14 +309,14 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
             stop(stringr::str_glue(.prep_const_MESSAGE_SENSOR_METADATA_WRONG_SLOT))
         }
 
-        .prep_edit_sensors_metadata_in_locality(locality, param_name, values, logger_types, is_calc_format)
+        .prep_edit_sensors_metadata_in_locality(locality, param_name, values, logger_types, is_agg_format)
     }
 
-    locality_items <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, locality_items)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
-.prep_edit_sensors_metadata_in_locality <- function(locality, param_name, values, logger_types, is_calc_format) {
+.prep_edit_sensors_metadata_in_locality <- function(locality, param_name, values, logger_types, is_agg_format) {
     logger_function <- function(logger) {
         if(!(is.null(logger_types) || logger$metadata@type %in% logger_types)) {
             return(logger)
@@ -323,7 +324,7 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
         .prep_edit_sensors_metadata(logger, param_name, values)
     }
 
-    if(is_calc_format) {
+    if(is_agg_format) {
         return(.prep_edit_sensors_metadata(locality, param_name, values))
     }
 
@@ -382,12 +383,12 @@ mc_prep_solar_tz <- function(data) {
         locality
     }
 
-    localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .prep_get_utc_localities <- function(data) {
-    items <- purrr::keep(myClim:::.common_get_localities(data), function(x) x$metadata@tz_type == mc_const_TZ_UTC)
+    items <- purrr::keep(data$localities, function(x) x$metadata@tz_type == mc_const_TZ_UTC)
     unname(purrr::map_chr(items, function(x) x$metadata@locality_id))
 }
 
@@ -426,17 +427,17 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
         .prep_crop_data(item, start, end, end_included)
     }
 
-    prep_locality_function <- function(locality) {
+    raw_locality_function <- function(locality) {
         locality$loggers <- purrr::map(locality$loggers, sensors_item_function)
         locality
     }
 
-    if(myClim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_agg_format(data)) {
         data$localities <- purrr::map(data$localities, sensors_item_function)
-        return(data)
     } else {
-        return(purrr::map(data, prep_locality_function))
+        data$localities <- purrr::map(data$localities, raw_locality_function)
     }
+    return(data)
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {
@@ -515,38 +516,37 @@ mc_prep_merge <- function(data_items) {
 
 .prep_do_merge <- function(data1, data2) {
     .prep_merge_check_data(data1, data2)
-    is_prep_format <- myClim:::.common_is_prep_format(data1)
+    is_raw_format <- myClim:::.common_is_raw_format(data1)
 
-    localities1 <- myClim:::.common_get_localities(data1)
-    localities2 <- myClim:::.common_get_localities(data2)
-    common_locality_ids <- intersect(names(localities1), names(localities2))
+    common_locality_ids <- intersect(names(data1$localities), names(data2$localities))
 
     merge_localities_function <- function (locality_id) {
-        locality1 <- localities1[[locality_id]]
-        locality2 <- localities2[[locality_id]]
-        if(is_prep_format) {
+        locality1 <- data1$localities[[locality_id]]
+        locality2 <- data2$localities[[locality_id]]
+        if(is_raw_format) {
             return(.prep_merge_prep_localities(locality1, locality2))
         }
         .prep_merge_calc_localities(locality1, locality2, data1$metadata@period)
     }
 
     common_localities <- purrr::map(common_locality_ids, merge_localities_function)
-    localities <- c(purrr::discard(localities1, ~ .x$metadata@locality_id %in% common_locality_ids),
-                    purrr::discard(localities2, ~ .x$metadata@locality_id %in% common_locality_ids),
+    localities <- c(purrr::discard(data1$localities, ~ .x$metadata@locality_id %in% common_locality_ids),
+                    purrr::discard(data2$localities, ~ .x$metadata@locality_id %in% common_locality_ids),
                     common_localities)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
-    myClim:::.common_set_localities(data1, localities)
+    data1$localities <- localities
+    return(data1)
 }
 
 .prep_merge_check_data <- function(data1, data2) {
-    is_data1_calc_format <- myClim:::.common_is_calc_format(data1)
-    is_data2_calc_format <- myClim:::.common_is_calc_format(data2)
+    is_data1_agg_format <- myClim:::.common_is_agg_format(data1)
+    is_data2_agg_format <- myClim:::.common_is_agg_format(data2)
 
-    if(xor(is_data1_calc_format, is_data2_calc_format)) {
+    if(xor(is_data1_agg_format, is_data2_agg_format)) {
         stop("There is different format in data1 and data2.")
     }
 
-    if(is_data1_calc_format &&
+    if(is_data1_agg_format &&
         (lubridate::as.period(data1$metadata@period) != lubridate::as.period(data2$metadata@period))) {
         stop("There is different step in data1 and data2.")
     }
@@ -593,7 +593,7 @@ mc_prep_merge <- function(data_items) {
 #' @return myClim object with loaded calibration information in metadata. Microclimatic records are not calibrated, only ready for calibration. To calibrate records run [myClim::mc_prep_calib()]
 #' @export
 mc_prep_calib_load <- function(data, calib_table) {
-    myClim:::.common_stop_if_not_prep_format(data)
+    myClim:::.common_stop_if_not_raw_format(data)
     calib_table <- dplyr::group_nest(dplyr::group_by(calib_table, serial_number))
 
     sensor_function <- function(sensor, logger_calib_table) {
@@ -627,7 +627,8 @@ mc_prep_calib_load <- function(data, calib_table) {
         locality
     }
 
-    purrr::map(data, locality_function)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 #' Sensor calibration
@@ -654,8 +655,8 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' @return same myClim object as input but with calibrated sensor values.
 #' @export
 mc_prep_calib <- function(data, sensors=NULL, localities=NULL) {
-    is_prep_format <- myClim:::.common_is_prep_format(data)
-    if(is_prep_format) {
+    is_raw_format <- myClim:::.common_is_raw_format(data)
+    if(is_raw_format) {
         .prep_check_datetime_step_unprocessed(data, stop)
     }
 
@@ -704,7 +705,7 @@ mc_prep_calib <- function(data, sensors=NULL, localities=NULL) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
            return(locality)
         }
-        if(is_prep_format) {
+        if(is_raw_format) {
             locality$loggers <- purrr::map(locality$loggers, ~ logger_function(.x, locality$metadata@locality_id))
         } else {
             locality$sensors <- purrr::map(locality$sensors, ~ sensor_function(.x, locality$datetime, locality$metadata@locality_id))
@@ -712,8 +713,8 @@ mc_prep_calib <- function(data, sensors=NULL, localities=NULL) {
         locality
     }
 
-    data_localities <- purrr::map(myClim:::.common_get_localities(data), locality_function)
-    myClim:::.common_set_localities(data, data_localities)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .prep_split_data_by_calibration <- function(values_table, calib_table) {

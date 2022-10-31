@@ -15,7 +15,7 @@
 #' @examples
 #' \dontrun{mc_plot_loggers(example_tomst_data1, "Figures")}
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
-    myClim:::.common_stop_if_not_prep_format(data)
+    myClim:::.common_stop_if_not_raw_format(data)
     data <- mc_filter(data, localities, sensors)
     myClim:::.prep_check_datetime_step_unprocessed(data)
     loggers <- myClim:::.common_get_loggers(data)
@@ -241,8 +241,8 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 }
 
 .plot_set_ggplot_physical_colors <- function(data, plot, viridis_color_map) {
-    locality <- dplyr::first(myClim:::.common_get_localities(data))
-    if(.common_is_calc_format(data)) {
+    locality <- dplyr::first(data$localities)
+    if(.common_is_agg_format(data)) {
         item <- locality
     } else {
         item <- dplyr::first(locality$loggers)
@@ -356,7 +356,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 }
 
 .plot_get_sensors_table <- function(data) {
-    is_prep_format <- myClim:::.common_is_prep_format(data)
+    is_raw_format <- myClim:::.common_is_raw_format(data)
 
     sensors_item_function <- function(item) {
         physical_function <- function(sensor) {
@@ -384,12 +384,12 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         tibble::tibble(sensor=sensor_names, physical=physicals, color=colors)
     }
 
-    prep_locality_function <- function(locality) {
+    raw_locality_function <- function(locality) {
         purrr::map_dfr(locality$loggers, sensors_item_function)
     }
 
-    if(is_prep_format) {
-        table <- purrr::map_dfr(data, prep_locality_function)
+    if(is_raw_format) {
+        table <- purrr::map_dfr(data$localities, raw_locality_function)
     } else {
         table <- purrr::map_dfr(data$localities, sensors_item_function)
     }

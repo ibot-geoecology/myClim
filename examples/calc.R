@@ -22,21 +22,21 @@ cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
 cleaned_data <- mc_prep_calib(cleaned_data, sensors = "TMS_T1")
 
 # flatting data - loggers are deleted and sensors are moved under locality
-calc_data <- mc_agg(cleaned_data)
+agg_data <- mc_agg(cleaned_data)
 
 # calculating vwc_moisture sensor from TMS_TMSmoisture and TMS_T1
-calc_data <- mc_calc_vwc(calc_data, soiltype = "universal")
+agg_data <- mc_calc_vwc(agg_data, soiltype = "universal")
 
 # calculating new snow sensor
-calc_data <- mc_calc_snow(calc_data, "TMS_T2", output_sensor="snow")
-calc_data <- mc_calc_snow(calc_data, "TMS_T2_secondary", output_sensor="snow_secondary", localities="LOC1")
+agg_data <- mc_calc_snow(agg_data, "TMS_T2", output_sensor="snow")
+agg_data <- mc_calc_snow(agg_data, "TMS_T2_secondary", output_sensor="snow_secondary", localities="LOC1")
 
 # sensors overview
-mc_info(calc_data)
+mc_info(agg_data)
 # calculating snow day overview
-mc_calc_snow_agg(calc_data, snow_sensor="snow")
-mc_calc_snow_agg(calc_data, snow_sensor="snow_secondary", localities="LOC1")
+mc_calc_snow_agg(agg_data, snow_sensor="snow")
+mc_calc_snow_agg(agg_data, snow_sensor="snow_secondary", localities="LOC1")
 # add new aggregated localities with median of day values
-calc_data <- mc_agg(calc_data, c("min", "percentile"), "day", percentiles=c(50, 95), na.rm=TRUE, use_utc=FALSE)
+agg_data <- mc_agg(agg_data, c("min", "percentile"), "day", percentiles=c(50, 95), na.rm=TRUE, use_utc=FALSE)
 # sensors overview
-mc_info(calc_data)
+mc_info(agg_data)

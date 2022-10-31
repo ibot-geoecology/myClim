@@ -18,7 +18,7 @@
 }
 
 .common_get_loggers <- function(data) {
-    unname(do.call(c, lapply(data, function(x) x$loggers)))
+    unname(do.call(c, lapply(data$localities, function(x) x$loggers)))
 }
 
 .common_sensor_values_as_tibble <- function(item) {
@@ -26,16 +26,16 @@
     tibble::as_tibble(data)
 }
 
-.common_is_calc_format <- function(data) {
-    length(data) == 2 && all(names(data) == c("metadata", "localities"))
+.common_is_agg_format <- function(data) {
+    data$metadata@format_type == myClim:::.model_const_FORMAT_AGG
 }
 
-.common_is_prep_format <- function(data) {
-    !.common_is_calc_format(data)
+.common_is_raw_format <- function(data) {
+    data$metadata@format_type == myClim:::.model_const_FORMAT_RAW
 }
 
-.common_stop_if_not_prep_format <- function(data) {
-    if(!.common_is_prep_format(data)) {
+.common_stop_if_not_raw_format <- function(data) {
+    if(!.common_is_raw_format(data)) {
         stop("Format of data isn't right for preparing. Use data before converting with function mc_agg.")
     }
 }
@@ -57,13 +57,6 @@
     item
 }
 
-.common_get_localities <- function(data) {
-    if(.common_is_calc_format(data)) {
-        return(data$localities)
-    }
-    data
-}
-
 .common_get_id_of_item_with_sensors <-function(item) {
     if("locality_id" %in% slotNames(item$metadata)) {
         return(item$metadata@locality_id)
@@ -71,22 +64,14 @@
     item$metadata@serial_number
 }
 
-.common_set_localities <- function(data, localities) {
-    if(.common_is_calc_format(data)) {
-        data$localities <- localities
-        return(data)
-    }
-    localities
-}
-
 .common_get_cleaned_data_range <- function(data, add_step_to_end=FALSE) {
-    is_calc <- .common_is_calc_format(data)
+    is_agg <- .common_is_agg_format(data)
 
-    if(is_calc) {
+    if(is_agg) {
         items <- data$localities
         steps <- NA_real_
     } else {
-        items <- purrr::flatten(purrr::map(data, ~ .x$loggers))
+        items <- purrr::flatten(purrr::map(data$localities, ~ .x$loggers))
         steps <- purrr::map_dbl(items, ~ .x$clean_info@step)
     }
 
@@ -96,7 +81,7 @@
         if(!add_step_to_end) {
             return(list(start=start, end=end))
         }
-        if(!is_calc) {
+        if(!is_agg) {
             end <- end + lubridate::seconds(step)
         } else if(!is.na(data$metadata@step)) {
             end <- end + lubridate::seconds(data$metadata@step)

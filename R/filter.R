@@ -12,30 +12,26 @@
 #' @examples 
 #' \dontrun{mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
-    is_calc_format <- myClim:::.common_is_calc_format(data)
+    is_agg_format <- myClim:::.common_is_agg_format(data)
     if(!is.null(localities)) {
         filter_function <- if(reverse) purrr::discard else purrr::keep
-        localities <- filter_function(myClim:::.common_get_localities(data), function(.x) .x$metadata@locality_id %in% localities)
-        if(is_calc_format) {
-            data$localities <- localities
-        } else {
-            data <- localities
-        }
+        localities <- filter_function(data$localities, function(.x) .x$metadata@locality_id %in% localities)
+        data$localities <- localities
     }
     if(!is.null(sensors)) {
-        if(is_calc_format) {
-            data <- .filter_calc_sensors(data, sensors, reverse)
+        if(is_agg_format) {
+            data <- .filter_agg_sensors(data, sensors, reverse)
         } else {
-            data <- .filter_prep_sensors(data, sensors, reverse)
+            data <- .filter_raw_sensors(data, sensors, reverse)
         }
     }
-    if(stop_if_empty && length(myClim:::.common_get_localities(data)) == 0) {
+    if(stop_if_empty && length(data$localities) == 0) {
         stop("All data are removed by filter.")
     }
     data
 }
 
-.filter_prep_sensors <- function(data, sensors, reverse) {
+.filter_raw_sensors <- function(data, sensors, reverse) {
     logger_function <- function (logger) {
         filter_function <- if(reverse) purrr::discard else purrr::keep
         logger$sensors <- filter_function(logger$sensors, function(.x) .x$metadata@name %in% sensors)
@@ -47,11 +43,12 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_i
         locality$loggers <- purrr::keep(locality$loggers, function(.x) length(.x$sensors) > 0)
         locality
     }
-    data <- purrr::map(data, locality_function)
-    purrr::keep(data, function(.x) length(.x$loggers) > 0)
+    data$localities <- purrr::map(data$localities, locality_function)
+    data$localities <- purrr::keep(data$localities, function(.x) length(.x$loggers) > 0)
+    return(data)
 }
 
-.filter_calc_sensors <- function(data, sensors, reverse) {
+.filter_agg_sensors <- function(data, sensors, reverse) {
     locality_function <- function (locality) {
         filter_function <- if(reverse) purrr::discard else purrr::keep
         locality$sensors <- filter_function(locality$sensors, function(.x) .x$metadata@name %in% sensors)

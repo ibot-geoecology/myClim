@@ -30,15 +30,15 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 }
 
 .reshape_get_all_datetimes <- function(data){
-    is_calc_format <- myClim:::.common_is_calc_format(data)
+    is_agg_format <- myClim:::.common_is_agg_format(data)
     locality_function <- function(locality) {
-        if(is_calc_format) {
+        if(is_agg_format) {
             return(locality$datetime)
         }
         datetimes <- purrr::map(locality$loggers, function(x) x$datetime)
         purrr::reduce(datetimes, union)
     }
-    locality_datetimes <- purrr::map(myClim:::.common_get_localities(data), locality_function)
+    locality_datetimes <- purrr::map(data$localities, locality_function)
     datetimes <- purrr::reduce(locality_datetimes, union)
     datetimes <- sort(datetimes)
     myClim:::.common_as_utc_posixct(datetimes)
@@ -51,15 +51,15 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
         table
     }
 
-    if(myClim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_agg_format(data)) {
         return(purrr::map2(data$localities, names(data$localities), sensors_function))
     }
 
-    prep_locality_function <- function(locality) {
+    raw_locality_function <- function(locality) {
         prefixes <- purrr::map_chr(locality$loggers, function(x) stringr::str_glue("{locality$metadata@locality_id}_{x$metadata@serial_number}"))
         purrr::map2(locality$loggers, prefixes, sensors_function)
     }
-    result <- purrr::map(data, prep_locality_function)
+    result <- purrr::map(data$localities, raw_locality_function)
     purrr::flatten(result)
 }
 
@@ -85,9 +85,9 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 #' head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)
 mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     data <- mc_filter(data, localities, sensors)
-    is_prep_format <- myClim:::.common_is_prep_format(data)
+    is_raw_format <- myClim:::.common_is_raw_format(data)
     period <- NULL
-    if (!is_prep_format && !(data$metadata@period %in% myClim:::.agg_const_INTERVAL_PERIODS)) {
+    if (!is_raw_format && !(data$metadata@period %in% myClim:::.agg_const_INTERVAL_PERIODS)) {
         period <- lubridate::period(data$metadata@period)
     }
 
@@ -104,7 +104,7 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
 
     sensors_item_function <- function(locality_id, item) {
         serial_number <- NA_character_
-        if(is_prep_format) {
+        if(is_raw_format) {
             serial_number <- item$metadata@serial_number
             if(is.na(item$clean_info@step)) {
                 warning(stringr::str_glue(.reshape_const_MESSAGE_UNCLEANED))
@@ -124,12 +124,12 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
                                   sensor_function)
     }
 
-    prep_locality_function <- function(locality) {
+    raw_locality_function <- function(locality) {
         purrr::map2_dfr(locality$metadata@locality_id, locality$loggers, sensors_item_function)
     }
 
-    if(is_prep_format) {
-        result <- purrr::map_dfr(data, prep_locality_function)
+    if(is_raw_format) {
+        result <- purrr::map_dfr(data$localities, raw_locality_function)
     } else {
         result <- purrr::map2_dfr(names(data$localities), data$localities, sensors_item_function)
     }

@@ -42,7 +42,7 @@ from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981
 Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
 }
 \examples{
-calc_data <- mc_calc_vpd(mc_data_example_calc, "HOBO_T_C", "HOBO_RH", localities="A2E32")
+agg_data <- mc_calc_vpd(mc_data_example_calc, "HOBO_T_C", "HOBO_RH", localities="A2E32")
 }
 \references{
 Jones H.G. (2014) Plants and Microclimate, Third Edit. Cambridge University Press, Cambridge Buck A.L. (1981)

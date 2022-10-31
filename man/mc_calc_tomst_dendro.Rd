@@ -27,5 +27,5 @@ myClim object same as input but with added dendro_l_um sensor
 This function convert change in stem size fram raw TOMST units to micrometers.
 }
 \examples{
-calc_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
+agg_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
 }

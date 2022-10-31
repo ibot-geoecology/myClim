@@ -40,8 +40,8 @@
 #' data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 #' mc_env_temp(data, "month")
 mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, gdd_t_base=5, fdd_t_base=0) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
         data <- mc_agg(data)
     }
     prepared <- .env_temp_calc_fdd_gdd_and_rename(data, gdd_t_base, fdd_t_base)
@@ -216,8 +216,8 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 #' data <- mc_calc_vwc(data, localities=c("A2E32", "A6W79"))
 #' mc_env_moist(data, "month")
 mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
         data <- mc_agg(data)
     }
     prepared <- .env_moist_rename_sensors(data)
@@ -293,8 +293,8 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 #' @return table in long format with environment variables
 #' @export
 mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL) {
-    is_calc <- myClim:::.common_is_calc_format(data)
-    if(!is_calc) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
         data <- mc_agg(data)
     }
     prepared <- .env_vpd_rename_sensors(data)

@@ -73,7 +73,7 @@ moisture sensor was not designed to measure in frozen soils and the returned rec
 with values from non frozen soil.
 }
 \examples{
-calc_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
+agg_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
 }
 \references{
 Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:

@@ -9,7 +9,7 @@
 #' count_table <- mc_info_count(example_tomst_data1)
 mc_info_count <- function(data) {
     count_env <- new.env()
-    count_env$localities <- length(.common_get_localities(data))
+    count_env$localities <- length(data$localities)
     count_env$loggers <- 0
     count_env$sensors <- 0
 
@@ -17,21 +17,21 @@ mc_info_count <- function(data) {
         count_env$sensors <- count_env$sensors + length(item$sensors)
     }
 
-    prep_locality_function <- function(locality) {
+    raw_locality_function <- function(locality) {
         count_env$loggers <- count_env$loggers + length(locality$loggers)
         purrr::walk(locality$loggers, sensors_item_function)
     }
 
-    if(myClim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_agg_format(data)) {
         purrr::walk(data$localities, sensors_item_function)
     } else {
-        purrr::walk(data, prep_locality_function)
+        purrr::walk(data$localities, raw_locality_function)
     }
 
     result <- data.frame(item=c("localities", "loggers", "sensors"),
                          count=c(count_env$localities, count_env$loggers, count_env$sensors))
 
-    if(myClim:::.common_is_calc_format(data)) {
+    if(myClim:::.common_is_agg_format(data)) {
         result <- result[-2, ]
     }
     result
@@ -41,9 +41,6 @@ mc_info_count <- function(data) {
 #'
 #' @description 
 #' This function return data.frame with information from cleaning the loggers time series see [myClim::mc_prep_clean()] 
-#' 
-#' @details
-#' 
 #' 
 #' @param data myClim object in Prep-format (see [myClim-package])
 #' @return data.frame with columns:
@@ -59,7 +56,7 @@ mc_info_count <- function(data) {
 #' @seealso [myClim::mc_prep_clean()]
 #' @export
 mc_info_clean <- function(data) {
-    myClim:::.common_stop_if_not_prep_format(data)
+    myClim:::.common_stop_if_not_raw_format(data)
 
     logger_function <- function (logger) {
         list(logger$metadata@serial_number,
@@ -77,7 +74,7 @@ mc_info_clean <- function(data) {
         purrr::map(items, function(x) purrr::prepend(x, locality$metadata@locality_id))
     }
 
-    rows <- purrr::flatten(purrr::map(data, locality_function))
+    rows <- purrr::flatten(purrr::map(data$localities, locality_function))
     columns <- purrr::transpose(rows)
     data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
                start_date=myClim:::.common_as_utc_posixct(unlist(columns[[3]])),
@@ -110,7 +107,7 @@ mc_info_clean <- function(data) {
 #' @examples
 #' mc_info(mc_data_example_calc)
 mc_info <- function(data) {
-    is_prep_format <- myClim:::.common_is_prep_format(data)
+    is_raw_format <- myClim:::.common_is_raw_format(data)
 
     function_with_check_empty <- function(values, f) {
         values <- values[!is.na(values)]
@@ -122,7 +119,7 @@ mc_info <- function(data) {
 
     sensors_item_function <- function(locality_id, item, step, period) {
         serial_number <- NA_character_
-        if(is_prep_format) {
+        if(is_raw_format) {
             serial_number <- item$metadata@serial_number
             step <- as.integer(item$clean_info@step)
         }
@@ -151,8 +148,8 @@ mc_info <- function(data) {
                         sensors_item_function)
     }
 
-    if(is_prep_format) {
-        result <- purrr::map_dfr(data, prep_locality_function)
+    if(is_raw_format) {
+        result <- purrr::map_dfr(data$localities, prep_locality_function)
     } else {
         result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
                                        item=data$localities,
@@ -178,7 +175,7 @@ mc_info <- function(data) {
 #' @examples
 #' mc_info_meta(mc_data_example_calc)
 mc_info_meta <- function(data) {
-    localities <- myClim:::.common_get_localities(data)
+    localities <- data$localities
 
     locality_function <- function (locality) {
         list(locality_id = locality$metadata@locality_id,

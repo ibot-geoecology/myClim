@@ -5,7 +5,7 @@
 \alias{mc_data_example_source}
 \title{Example data in prep-format. Data aren't cleaned.}
 \format{
-An object of class \code{list} of length 3.
+An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 }
 \usage{
 mc_data_example_source

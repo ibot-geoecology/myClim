@@ -49,9 +49,8 @@
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
 #' @return myClim object with joined loggers.
 #' @export
-#' @examples
 mc_join <- function(data, comp_sensors=NULL) {
-    myClim:::.common_stop_if_not_prep_format(data)
+    myClim:::.common_stop_if_not_raw_format(data)
     myClim:::.prep_check_datetime_step_unprocessed(data, stop)
     locality_function <- function(locality) {
         types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
@@ -66,7 +65,8 @@ mc_join <- function(data, comp_sensors=NULL) {
         locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
         locality
     }
-    purrr::map(data, locality_function)
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
 }
 
 .join_loggers_same_type <- function(loggers, comp_sensors, locality_id) {
