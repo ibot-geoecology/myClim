@@ -7,7 +7,7 @@
 mc_reshape_wide(data, localities = NULL, sensors = NULL)
 }
 \arguments{
-\item{data}{myClim object in Prep-format or Calc-format (see \link{myClim-package})}
+\item{data}{myClim object in Raw-format or Agg-format (see \link{myClim-package})}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
@@ -30,8 +30,8 @@ This function converts myClim object to data.frame with values of sensor in wide
 First columnt of the output data.frame is datetime followed by the
 columns for every sensor. Name of the column is in format:
 \itemize{
-\item localityid_serialnumber_sensorname for Prep-format
-\item localityid_sensorname for Calc-format
+\item localityid_serialnumber_sensorname for Raw-format
+\item localityid_sensorname for Agg-format
 }
 }
 \examples{

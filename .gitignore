@@ -9,7 +9,7 @@ myClim.Rproj
 .idea
 docs
 plots
-/tests/plots
+/tests/temp
 inst/doc
 /doc/
 /Meta/

@@ -7,7 +7,7 @@
 mc_calc_cumsum(data, sensors, output_suffix = "_cumsum", localities = NULL)
 }
 \arguments{
-\item{data}{myClim object in cleaned Prep-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
+\item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{sensors}{names of sensors where to calculate cumulative sum}
 

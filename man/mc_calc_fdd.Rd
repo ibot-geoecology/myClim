@@ -7,7 +7,7 @@
 mc_calc_fdd(data, sensor, output_prefix = "FDD", t_base = 0, localities = NULL)
 }
 \arguments{
-\item{data}{myClim object in cleaned Prep-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
+\item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{sensor}{name of temperature sensor used fot FDD calculation e.g. TMS_T3 see \code{names(mc_data_sensors)}}
 

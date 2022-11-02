@@ -7,7 +7,7 @@
 mc_prep_calib(data, sensors = NULL, localities = NULL)
 }
 \arguments{
-\item{data}{myClim object in Prep-format or Calc-format having calibration data in metadata slot \code{sensor$calibration}}
+\item{data}{myClim object in Raw-format or Agg-format having calibration data in metadata slot \code{sensor$calibration}}
 
 \item{sensors}{vector of sensor names where to perform calibration see \code{names(mc_data_sensors)}; if NULL,
 then calibrate all sensors hawing calibration parameters loaded (default NULL)}

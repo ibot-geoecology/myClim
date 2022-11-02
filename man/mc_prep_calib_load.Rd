@@ -7,7 +7,7 @@
 mc_prep_calib_load(data, calib_table)
 }
 \arguments{
-\item{data}{myClim object Prep-format. see \link{myClim-package}}
+\item{data}{myClim object Raw-format. see \link{myClim-package}}
 
 \item{calib_table}{data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)}
 }
@@ -24,7 +24,7 @@ This function allows user to provide calibration values either from DIY or certi
 Calibration data have by default the form of linear function determined by the \code{cor_factor} and \code{cor_slope}.
 \code{calibrated = original * (cor_slope + 1) + cor_factor} This is useful in case of multi-point calibration typically performed by certified calibration labs.
 In case of one-point calibration typically DIY calibrations only \code{cor_factor} is used and \code{cor_slope=0}. One point calibration is thus addition of correction factor.
-This function loads sensor specific calibration values from data frame and writs them into myClim Prep-format object metadata. The structure of input data frame is as follows:
+This function loads sensor specific calibration values from data frame and writs them into myClim Raw-format object metadata. The structure of input data frame is as follows:
 \itemize{
 \item serial_number = unique identificator of logger hosting the sensors e.g. 91184101
 \item sensor_id = the name of sensor to calibrate e.g. TMS_T1

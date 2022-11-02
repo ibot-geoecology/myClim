@@ -50,7 +50,7 @@ object contains 5 columns:
 \item{silent}{if TRUE, then any information is printed in console (default FALSE)}
 }
 \value{
-myClim object in Prep-format see \link{myClim-package}
+myClim object in Raw-format see \link{myClim-package}
 }
 \description{
 This function has two tables parameters. (i) \code{files_table} with paths pointing to raw

@@ -1,10 +1,10 @@
-#' Example data in prep-format. Data aren't cleaned.
+#' Example data in Raw-format. Data aren't cleaned.
 "mc_data_example_source"
 
-#' Example cleaned data in prep-format.
+#' Example cleaned data in Raw-format.
 "mc_data_example_clean"
 
-#' Example data in calc-format and 15 minutes step.
+#' Example data in Agg-format and 15 minutes step.
 "mc_data_example_calc"
 
 #' Formats of source data files

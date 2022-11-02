@@ -13,7 +13,7 @@ mc_env_moist(
 )
 }
 \arguments{
-\item{data}{myClim object in cleaned Prep-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
+\item{data}{myClim object in cleaned Raw-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
 
 \item{period}{output period see \code{\link[=mc_agg]{mc_agg()}}}
 

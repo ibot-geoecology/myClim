@@ -7,7 +7,7 @@
 mc_join(data, comp_sensors = NULL)
 }
 \arguments{
-\item{data}{myClim object in Prep-format. See \link{myClim-package}}
+\item{data}{myClim object in Raw-format. See \link{myClim-package}}
 
 \item{comp_sensors}{senors for compare and select source logger; If NULL then first is used. (default NULL)}
 }

@@ -7,7 +7,7 @@
 mc_prep_meta_locality(data, values, param_name = NULL)
 }
 \arguments{
-\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
+\item{data}{myClim object in Raw-format or Calc-formt see \link{myClim-package}}
 
 \item{values}{for localities can be named list or table
 \itemize{

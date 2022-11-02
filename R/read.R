@@ -34,7 +34,7 @@
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is printed in console (default FALSE)
-#' @return myClim object in Prep-format see [myClim-package]
+#' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
 #' \dontrun{
@@ -102,7 +102,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * tz_offset
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is printed in console (default FALSE)
-#' @return myClim object in Prep-format see [myClim-package]
+#' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
 #' \dontrun{
@@ -412,7 +412,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 #' @param sensor_name custom name of sensor; if NULL (default) than `sensor_name == sensor_id`
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is printed in console (default FALSE)
-#' @return myClim object in Prep-format
+#' @return myClim object in Raw-format
 #' @export
 #' @seealso [myClim::mc_read_long]
 mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
@@ -467,7 +467,7 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is printed in console (default FALSE)
-#' @return myClim object in Prep-format
+#' @return myClim object in Raw-format
 #' @export
 #' @seealso [myClim::mc_read_wide]
 mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE) {

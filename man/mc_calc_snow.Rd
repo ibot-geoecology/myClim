@@ -15,7 +15,7 @@ mc_calc_snow(
 )
 }
 \arguments{
-\item{data}{myClim object in cleaned Prep-format or Calc-formt see \code{\link[=mc_agg]{mc_agg()}} and \link{myClim-package}}
+\item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{sensor}{name of temperature sensor used for snow estimation. (e.g. TMS_T2)}
 

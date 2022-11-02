@@ -26,7 +26,7 @@ it does not have to be in the list.
 \item{silent}{if TRUE, then any information is printed in console (default FALSE)}
 }
 \value{
-myClim object in Prep-format
+myClim object in Raw-format
 }
 \description{
 This is universal function designed to read time series and values

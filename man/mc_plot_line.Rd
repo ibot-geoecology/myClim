@@ -16,7 +16,7 @@ mc_plot_line(
 )
 }
 \arguments{
-\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
+\item{data}{myClim object in Raw-format or Calc-formt see \link{myClim-package}}
 
 \item{filename}{output with the extension - supported formats are .pdf and .png (default NULL)
 

@@ -17,13 +17,13 @@ mc_agg(
 )
 }
 \arguments{
-\item{data}{cleaned myClim object in Prep-format: output of \code{\link[=mc_prep_clean]{mc_prep_clean()}} or Calc-format as it is allowed to aggregate data multiple times.}
+\item{data}{cleaned myClim object in Raw-format: output of \code{\link[=mc_prep_clean]{mc_prep_clean()}} or Agg-format as it is allowed to aggregate data multiple times.}
 
 \item{fun}{aggregation function; one of (\code{"min"}, \code{"max"}, \code{"mean"}, \code{"percentile"}, \code{"sum"}, \code{"range"}, \code{"count"}, \code{"coverage"})
 and functions defined in \code{custom_functions}. See details by custom_functions argument.
 Can be single function name, character vector of function names or named list of vector function names.
 Named list of functions allows apply different function(s) for different sensors e.g. \code{list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")}
-if NULL records are not aggregated, but converted to Calc-format. See details.}
+if NULL records are not aggregated, but converted to Agg-format. See details.}
 
 \item{period}{Time period for aggregation - same as breaks in cut.POSIXt, e.g. (\code{"hour"}, \code{"day"}, \code{"month"}); if NULL then no aggregation
 
@@ -54,24 +54,24 @@ you defined to the \code{fun} parameter. e.g. custom_functions = list(positive_c
 fun="positive_count",}
 }
 \value{
-Returns new myClim object in Calc-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL
-records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
+Returns new myClim object in Agg-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL
+records are not modified but only converted to Agg-format. When fun and period provided then time step is aggregated based on function.
 }
 \description{
 Function has two basic uses:
 \itemize{
 \item aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min records to daily means);
-\item convert myClim object from Prep-format to Calc-format see \link{myClim-package} without records modification, this behavior appears wen fun=NULL, period=NULL.
+\item convert myClim object from Raw-format to Agg-format see \link{myClim-package} without records modification, this behavior appears wen fun=NULL, period=NULL.
 }
 }
 \details{
-Any output of mc_agg is in Calc-format. That means the structure of myClim object is flattened.
+Any output of mc_agg is in Agg-format. That means the structure of myClim object is flattened.
 Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within
 the sensors are joined directly to the level of locality (Locality<-Sensor<-Record).
-This is called Calc-format and is only acceptable format for \code{mc_calc} functions family. See \link{myClim-package}.
+This is called Agg-format and is only acceptable format for \code{mc_calc} functions family. See \link{myClim-package}.
 
-In case \code{mc_agg()} is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic
-records are not modified. Equal step in all sensors is required for conversion from Prep-format to Calc-format.
+In case \code{mc_agg()} is used only for conversion from Raw-format to Agg-format (fun=NULL, period=NULL) then microclimatic
+records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format.
 
 When fun and period is specified, microclimatic records are aggregated based on function into new period.
 Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);

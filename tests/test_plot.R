@@ -17,18 +17,18 @@ test_that("all plots", {
     data <- mc_read_data("data/TOMST/files_table.csv", silent=TRUE)
     data_agg <- mc_agg(data)
 
-    mc_plot_loggers(data, "plots")
+    mc_plot_loggers(data, "temp")
 
-    mc_plot_image(data, "plots/image.png", "T1 sensors", sensors="TMS_T1")
-    mc_plot_image(data_agg, "plots/image.png", "T1 sensors", sensors="TMS_T1")
-    mc_plot_image(data_agg, "plots/image.png")
+    mc_plot_image(data, "temp/image.png", "T1 sensors", sensors="TMS_T1")
+    mc_plot_image(data_agg, "temp/image.png", "T1 sensors", sensors="TMS_T1")
+    mc_plot_image(data_agg, "temp/image.png")
 
-    mc_plot_raster(data, "plots/raster.pdf", sensors = c("TMS_T1", "TMS_T2"))
-    mc_plot_raster(data_agg, "plots/raster.png", sensors = c("TMS_T1", "TMS_T2"), png_height = 500)
+    mc_plot_raster(data, "temp/raster.pdf", sensors = c("TMS_T1", "TMS_T2"))
+    mc_plot_raster(data_agg, "temp/raster.png", sensors = c("TMS_T1", "TMS_T2"), png_height = 500)
 
-    mc_plot_line(data, "plots/line.pdf")
-    mc_plot_line(data_agg, "plots/line_T1.png", png_height = 500, sensors="TMS_T1")
-    mc_plot_line(data_agg, "plots/line.png", png_height = 500)
+    mc_plot_line(data, "temp/line.pdf")
+    mc_plot_line(data_agg, "temp/line_T1.png", png_height = 500, sensors="TMS_T1")
+    mc_plot_line(data_agg, "temp/line.png", png_height = 500)
 
     expect_true(TRUE)
 })

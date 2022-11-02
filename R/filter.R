@@ -2,7 +2,7 @@
 #'
 #' This function filter data by localities and sensors
 #'
-#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
 #' @param localities locality_ids for filtering data; if NULL then do nothing
 #' @param sensors sensor_ids for filtering data; if NULL then do nothing see `names(mc_data_sensors)`
 #' @param reverse - if TRUE then filtered discard else keeped (default FALSE)

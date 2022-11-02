@@ -15,7 +15,7 @@ mc_plot_image(
 )
 }
 \arguments{
-\item{data}{myClim object in Prep-format or Calc-formt see \link{myClim-package}}
+\item{data}{myClim object in Raw-format or Calc-formt see \link{myClim-package}}
 
 \item{filename}{output file name (file path)}
 

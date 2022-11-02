@@ -3,10 +3,10 @@
 
 #' Plot data from loggers
 #'
-#' Function save separate file for the loggers to the directory. Only Prep-format supported. 
-#' For Calc-format use [myClim::mc_plot_line()]
+#' Function save separate file for the loggers to the directory. Only Raw-format supported.
+#' For Agg-format use [myClim::mc_plot_line()]
 #'
-#' @param data myClim object in Prep-format [myClim-package]
+#' @param data myClim object in Raw-format [myClim-package]
 #' @param directory output directory
 #' @param localities filter of localities c("loc1","loc2"); if NULL then all
 #' @param sensors filter of sensors c("TMS_T1","TMS_T2"); if NULL then all see `names(mc_data_sensors)`
@@ -138,7 +138,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #'
 #' Function plot myClim data into file with image function.
 #' @details Be careful with bigger data. Can take some time. 
-#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
 #' @param filename output file name (file path)
 #' @param title of plot; default is empty
 #' @param localities filter the localities; if empty then all
@@ -184,7 +184,7 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' In case of plotting PNG all loclaities and sensors are plotted in one image. Be careful with bigger data in PNG. 
 #' Play with `png_height` and `png_width`. When too small, image does not fit ad is plotted broken.  
 #' 
-#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
 #' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
 #'
 #' If NULL then the plot is return, but not saved to file.
@@ -304,7 +304,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL
 #' than function try detects scale coefficient from physical unit of sensors see [mc_Physical-class].
 #' Scaling is useful when plotting together e.g. temperature and moisture.  
-#' @param data  myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param data  myClim object in Raw-format or Calc-formt see [myClim-package]
 #' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
 #'
 #' If NULL then the plot is return, but not saved to file.

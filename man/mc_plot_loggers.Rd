@@ -13,7 +13,7 @@ mc_plot_loggers(
 )
 }
 \arguments{
-\item{data}{myClim object in Prep-format \link{myClim-package}}
+\item{data}{myClim object in Raw-format \link{myClim-package}}
 
 \item{directory}{output directory}
 
@@ -24,8 +24,8 @@ mc_plot_loggers(
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
 }
 \description{
-Function save separate file for the loggers to the directory. Only Prep-format supported.
-For Calc-format use \code{\link[=mc_plot_line]{mc_plot_line()}}
+Function save separate file for the loggers to the directory. Only Raw-format supported.
+For Agg-format use \code{\link[=mc_plot_line]{mc_plot_line()}}
 }
 \examples{
 \dontrun{mc_plot_loggers(example_tomst_data1, "Figures")}

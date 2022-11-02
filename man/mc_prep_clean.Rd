@@ -7,18 +7,18 @@
 mc_prep_clean(data, silent = FALSE)
 }
 \arguments{
-\item{data}{myClim object in Prep-format (output of \code{mc_read} functions family) see e.g. \code{\link[=mc_read_files]{mc_read_files()}}}
+\item{data}{myClim object in Raw-format (output of \code{mc_read} functions family) see e.g. \code{\link[=mc_read_files]{mc_read_files()}}}
 
 \item{silent}{if true, then cleaning log table is not printed in console (default FALSE), see \code{\link[=mc_info_clean]{mc_info_clean()}}}
 }
 \value{
 \itemize{
-\item cleaned myClim object in Prep-format
+\item cleaned myClim object in Raw-format
 \item cleaning log is by default printed in console, and can be called ex post by \code{\link[=mc_info_clean]{mc_info_clean()}}
 }
 }
 \description{
-Function 'mc_prep_clean' check time-series in myClim object in prep-format for missing, duplicated,
+Function 'mc_prep_clean' check time-series in myClim object in Raw-format for missing, duplicated,
 and disordered records and regularize microclimatic time-series to constant time-step rounded to the nearest interval.
 Duplicit records are removed and missing values are filled with NA's.
 

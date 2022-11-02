@@ -2,7 +2,7 @@
 #'
 #' This function return data.frame with the number of localities, loggers and sensors of input myClim object. 
 #'
-#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
+#' @param data myClim object in Raw-format or Agg-format (see [myClim-package])
 #' @return data.frame with count of localities, loggers and sensors
 #' @export
 #' @examples
@@ -42,7 +42,7 @@ mc_info_count <- function(data) {
 #' @description 
 #' This function return data.frame with information from cleaning the loggers time series see [myClim::mc_prep_clean()] 
 #' 
-#' @param data myClim object in Prep-format (see [myClim-package])
+#' @param data myClim object in Raw-format (see [myClim-package])
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
 #' * serial_number - serial number of logger when provided or automatically detected from file name or header
@@ -89,7 +89,7 @@ mc_info_clean <- function(data) {
 #'
 #' This function return data.frame with info about sensors
 #'
-#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
+#' @param data myClim object in Raw-format or Agg-format (see [myClim-package])
 #' @return data.frame with columns:
 #' * locality_id 
 #' * serial_number
@@ -164,7 +164,7 @@ mc_info <- function(data) {
 #'
 #' This function return data.frame with localities metadata
 #'
-#' @param data myClim object in Prep-format or Calc-format (see [myClim-package])
+#' @param data myClim object in Raw-format or Agg-format (see [myClim-package])
 #' @return data.frame with columns:
 #' * locality_id
 #' * lon_wgs84

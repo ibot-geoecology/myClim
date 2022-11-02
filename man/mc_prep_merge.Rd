@@ -7,7 +7,7 @@
 mc_prep_merge(data_items)
 }
 \arguments{
-\item{data_items}{list of myClim objects in Prep-format or Calc-format see \link{myClim-package}; Format of merged objects must be same.}
+\item{data_items}{list of myClim objects in Raw-format or Agg-format see \link{myClim-package}; Format of merged objects must be same.}
 }
 \value{
 merged myClim object in the same format as input objects
@@ -16,14 +16,14 @@ merged myClim object in the same format as input objects
 This function is designed to merge myClim objects into one.
 }
 \details{
-This function works only when the input myClim objects have the same format (Prep-format, Calc-format) and the same time step.
-It is required same step in Calc-Format data.
+This function works only when the input myClim objects have the same format (Raw-format, Agg-format) and the same time step.
+It is required same step in Agg-format data.
 
-When the two merged myClim objects in Prep-format contains locality with same names (locality_id),
+When the two merged myClim objects in Raw-format contains locality with same names (locality_id),
 than list of loggers are merged on the locality. Sensors with the same name does not matter here.
-Loggers with the same name are allowed in the Prep-format.
+Loggers with the same name are allowed in the Raw-format.
 
-When the two merged myClim objects in Calc-format contains locality with same names (locality_id).
+When the two merged myClim objects in Agg-format contains locality with same names (locality_id).
 than the sensors are merged on the locality. Sensors with same names are renamed.
 }
 \examples{

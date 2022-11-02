@@ -7,7 +7,7 @@
 mc_info_count(data)
 }
 \arguments{
-\item{data}{myClim object in Prep-format or Calc-format (see \link{myClim-package})}
+\item{data}{myClim object in Raw-format or Agg-format (see \link{myClim-package})}
 }
 \value{
 data.frame with count of localities, loggers and sensors

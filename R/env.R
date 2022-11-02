@@ -27,7 +27,7 @@
 #'     - fdd{base}: freezing degree days with base from parameter `fdd_t_base`
 #'     - frostdays: the number of days in which some temerature value was lower than parameter `fdd_t_base`
 #'
-#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Raw-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param period output period see [myClim::mc_agg()]
 #' @param use_utc if FALSE, then local time is used for day aggregation see [myClim::mc_agg()]
 #' @param custom_start start date for custom period see [myClim::mc_agg()]
@@ -204,7 +204,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 #'     - 95p: ninety-fifth percentile
 #'     - sd: standard deviation
 #'
-#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Raw-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param period output period see [myClim::mc_agg()]
 #' @param use_utc if FALSE, then local time is used for day aggregation see [myClim::mc_agg()]
 #' @param custom_start start date for custom period see [myClim::mc_agg()]
@@ -285,7 +285,7 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 #'     - mean: mean of daily mean
 #'     - max95p: ninety-fifth percentile of daily maximum
 #'
-#' @param data myClim object in cleaned Prep-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
+#' @param data myClim object in cleaned Raw-format or Calc-formt see [myClim::mc_agg()] and [myClim-package]
 #' @param period output period see [myClim::mc_agg()]
 #' @param use_utc if FALSE, then local time is used for day aggregation see [myClim::mc_agg()]
 #' @param custom_start start date for custom period see [myClim::mc_agg()]

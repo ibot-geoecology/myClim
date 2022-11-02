@@ -7,7 +7,7 @@
 mc_info_clean(data)
 }
 \arguments{
-\item{data}{myClim object in Prep-format (see \link{myClim-package})}
+\item{data}{myClim object in Raw-format (see \link{myClim-package})}
 }
 \value{
 data.frame with columns:

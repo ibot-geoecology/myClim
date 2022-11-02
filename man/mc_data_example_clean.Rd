@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_data_example_clean}
 \alias{mc_data_example_clean}
-\title{Example cleaned data in prep-format.}
+\title{Example cleaned data in Raw-format.}
 \format{
 An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 }
@@ -11,6 +11,6 @@ An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 mc_data_example_clean
 }
 \description{
-Example cleaned data in prep-format.
+Example cleaned data in Raw-format.
 }
 \keyword{datasets}

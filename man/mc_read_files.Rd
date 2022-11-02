@@ -38,7 +38,7 @@ If not provided (NA), is automatically detected in \link{mc_prep_clean}. (defaul
 \item{silent}{if TRUE, then any information is printed in console (default FALSE)}
 }
 \value{
-myClim object in Prep-format see \link{myClim-package}
+myClim object in Raw-format see \link{myClim-package}
 }
 \description{
 This function read one or more csv files or directories of identical,

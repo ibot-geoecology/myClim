@@ -24,16 +24,16 @@
 #'
 #' Function has two basic uses: 
 #' * aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min records to daily means); 
-#' * convert myClim object from Prep-format to Calc-format see [myClim-package] without records modification, this behavior appears wen fun=NULL, period=NULL.
+#' * convert myClim object from Raw-format to Agg-format see [myClim-package] without records modification, this behavior appears wen fun=NULL, period=NULL.
 #' 
 #' @details 
-#' Any output of mc_agg is in Calc-format. That means the structure of myClim object is flattened.
+#' Any output of mc_agg is in Agg-format. That means the structure of myClim object is flattened.
 #' Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within
 #' the sensors are joined directly to the level of locality (Locality<-Sensor<-Record).
-#' This is called Calc-format and is only acceptable format for `mc_calc` functions family. See [myClim-package].
+#' This is called Agg-format and is only acceptable format for `mc_calc` functions family. See [myClim-package].
 #' 
-#' In case `mc_agg()` is used only for conversion from Prep-format to Calc-format (fun=NULL, period=NULL) then microclimatic
-#' records are not modified. Equal step in all sensors is required for conversion from Prep-format to Calc-format.
+#' In case `mc_agg()` is used only for conversion from Raw-format to Agg-format (fun=NULL, period=NULL) then microclimatic
+#' records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format.
 #' 
 #' When fun and period is specified, microclimatic records are aggregated based on function into new period.
 #' Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
@@ -65,12 +65,12 @@
 #' 
 #' Read carefully details about `sum` and `count` these two may not be intuitive.  
 #'
-#' @param data cleaned myClim object in Prep-format: output of [myClim::mc_prep_clean()] or Calc-format as it is allowed to aggregate data multiple times.
+#' @param data cleaned myClim object in Raw-format: output of [myClim::mc_prep_clean()] or Agg-format as it is allowed to aggregate data multiple times.
 #' @param fun aggregation function; one of (`"min"`, `"max"`, `"mean"`, `"percentile"`, `"sum"`, `"range"`, `"count"`, `"coverage"`)
 #' and functions defined in `custom_functions`. See details by custom_functions argument.
 #' Can be single function name, character vector of function names or named list of vector function names.
 #' Named list of functions allows apply different function(s) for different sensors e.g. `list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")`
-#' if NULL records are not aggregated, but converted to Calc-format. See details.
+#' if NULL records are not aggregated, but converted to Agg-format. See details.
 #'
 #' @param period Time period for aggregation - same as breaks in cut.POSIXt, e.g. (`"hour"`, `"day"`, `"month"`); if NULL then no aggregation
 #'
@@ -93,8 +93,8 @@
 #' @param custom_functions user define one or more functions in format `list(function_name=function(values){...})`; then you will feed function_name(s) 
 #' you defined to the `fun` parameter. e.g. custom_functions = list(positive_count=function(x){length(x[x>0])}),
 #' fun="positive_count",
-#' @return Returns new myClim object in Calc-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
-#' records are not modified but only converted to Calc-format. When fun and period provided then time step is aggregated based on function.
+#' @return Returns new myClim object in Agg-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
+#' records are not modified but only converted to Agg-format. When fun and period provided then time step is aggregated based on function.
 #' @export
 #' @examples
 #' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)

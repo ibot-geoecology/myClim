@@ -13,7 +13,7 @@
 #' Cleaning datetime series
 #'
 #' @description
-#' Function 'mc_prep_clean' check time-series in myClim object in prep-format for missing, duplicated,
+#' Function 'mc_prep_clean' check time-series in myClim object in Raw-format for missing, duplicated,
 #' and disordered records and regularize microclimatic time-series to constant time-step rounded to the nearest interval.
 #' Duplicit records are removed and missing values are filled with NA's.
 #'
@@ -34,10 +34,10 @@
 #' I.e. when the time step is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30). 
 #' When you have 2h time step and wish to round to the whole hour (13:33 -> 14:00, 15:33 -> 16:00) than use  `mc_agg(period="2 hours")` 
 #' 
-#' @param data myClim object in Prep-format (output of `mc_read` functions family) see e.g. [myClim::mc_read_files()]
+#' @param data myClim object in Raw-format (output of `mc_read` functions family) see e.g. [myClim::mc_read_files()]
 #' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @return 
-#' * cleaned myClim object in Prep-format
+#' * cleaned myClim object in Raw-format
 #' * cleaning log is by default printed in console, and can be called ex post by [myClim::mc_info_clean()]
 #' @export
 #' @examples
@@ -211,7 +211,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' Provide locality_id (name) and the value in column of metadata you wish to update. 
 #' In case of using data.frame use `param_name = NULL`  
 #' 
-#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
 #' @param values for localities can be named list or table
 #'
 #' * named list: `metadata <- list(locality_id=value)`; `param_name` must be set
@@ -287,12 +287,12 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
 #' @description
 #' This function allows you to modify sensor metadata including sensor name. See [mc_SensorMetadata]
 #'
-#' @param data myClim object in Prep-format or Calc-format see [myClim-package]
+#' @param data myClim object in Raw-format or Agg-format see [myClim-package]
 #' @param values named list with metadata values; names of items are sensor_names e.g. for changing sensor height use `list(TMS_T1="soil 8 cm")`
 #' @param param_name name of the sensor metadata parameter you want to change; You can change `name` and `height` of sensor.
 #' @param localities optional filter; vector of `locality_id` where to change sensor metadata; if NULL than all localities (default NULL)
 #' @param logger_types optional filter; vector of `logger_type` where to change metadata; if NULL than all logger types (default NULL);
-#' `logger_type`is useful only for Prep-format of myClim having the level of logger see [myClim-package]
+#' `logger_type`is useful only for Raw-format of myClim having the level of logger see [myClim-package]
 #' @return myClim object in the same format as input, with updated metadata
 #' @export
 #' @examples
@@ -367,7 +367,7 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
-#' @param data myClim object in Prep-format or Calc-formt see [myClim-package]
+#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
 #' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata
 #' @export
 #' @examples
@@ -407,7 +407,7 @@ mc_prep_solar_tz <- function(data) {
 #' @details
 #' Function is able to crop data from start and end together but also only from start and end left as is or vice versa.  
 #'
-#' @param data myClim object in Prep-format or Calc-formt see [myClim-package] 
+#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
 #' @param start POSIXct datetime in UTC; is optional; start datetime is included
 #' @param end POSIXct datetime in UTC; is optional
 #' @param end_included if TRUE then  end datetime is included (default TRUE)
@@ -495,17 +495,17 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' This function is designed to merge myClim objects into one.
 #' 
 #' @details
-#' This function works only when the input myClim objects have the same format (Prep-format, Calc-format) and the same time step.
-#' It is required same step in Calc-Format data. 
+#' This function works only when the input myClim objects have the same format (Raw-format, Agg-format) and the same time step.
+#' It is required same step in Agg-format data.
 #' 
-#' When the two merged myClim objects in Prep-format contains locality with same names (locality_id),
+#' When the two merged myClim objects in Raw-format contains locality with same names (locality_id),
 #' than list of loggers are merged on the locality. Sensors with the same name does not matter here. 
-#' Loggers with the same name are allowed in the Prep-format. 
+#' Loggers with the same name are allowed in the Raw-format.
 #' 
-#' When the two merged myClim objects in Calc-format contains locality with same names (locality_id).
+#' When the two merged myClim objects in Agg-format contains locality with same names (locality_id).
 #' than the sensors are merged on the locality. Sensors with same names are renamed.
 #'
-#' @param data_items list of myClim objects in Prep-format or Calc-format see [myClim-package]; Format of merged objects must be same.
+#' @param data_items list of myClim objects in Raw-format or Agg-format see [myClim-package]; Format of merged objects must be same.
 #' @return merged myClim object in the same format as input objects
 #' @examples
 #' merged_data <- mc_prep_merge(list(mc_data_example_source, mc_data_example_source))
@@ -578,7 +578,7 @@ mc_prep_merge <- function(data_items) {
 #' Calibration data have by default the form of linear function determined by the `cor_factor` and `cor_slope`.
 #' `calibrated = original * (cor_slope + 1) + cor_factor` This is useful in case of multi-point calibration typically performed by certified calibration labs.
 #' In case of one-point calibration typically DIY calibrations only `cor_factor` is used and `cor_slope=0`. One point calibration is thus addition of correction factor.
-#' This function loads sensor specific calibration values from data frame and writs them into myClim Prep-format object metadata. The structure of input data frame is as follows: 
+#' This function loads sensor specific calibration values from data frame and writs them into myClim Raw-format object metadata. The structure of input data frame is as follows:
 #'
 #'  * serial_number = unique identificator of logger hosting the sensors e.g. 91184101 
 #'  * sensor_id = the name of sensor to calibrate e.g. TMS_T1
@@ -588,7 +588,7 @@ mc_prep_merge <- function(data_items) {
 #'
 #' It is not possible to change calibration parameters for already calibrated sensor. This prevents repeted calibrations. 
 #'
-#' @param data myClim object Prep-format. see [myClim-package]
+#' @param data myClim object Raw-format. see [myClim-package]
 #' @param calib_table data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
 #' @return myClim object with loaded calibration information in metadata. Microclimatic records are not calibrated, only ready for calibration. To calibrate records run [myClim::mc_prep_calib()]
 #' @export
@@ -648,7 +648,7 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' 
 #' Only sensors with real value type can be calibrated. see [myClim::mc_data_sensors()]
 #' 
-#' @param data myClim object in Prep-format or Calc-format having calibration data in metadata slot `sensor$calibration`
+#' @param data myClim object in Raw-format or Agg-format having calibration data in metadata slot `sensor$calibration`
 #' @param sensors vector of sensor names where to perform calibration see `names(mc_data_sensors)`; if NULL,
 #' then calibrate all sensors hawing calibration parameters loaded (default NULL)
 #' @param localities vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)

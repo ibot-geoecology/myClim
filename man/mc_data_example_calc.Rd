@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_data_example_calc}
 \alias{mc_data_example_calc}
-\title{Example data in calc-format and 15 minutes step.}
+\title{Example data in Agg-format and 15 minutes step.}
 \format{
 An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 }
@@ -11,6 +11,6 @@ An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 mc_data_example_calc
 }
 \description{
-Example data in calc-format and 15 minutes step.
+Example data in Agg-format and 15 minutes step.
 }
 \keyword{datasets}
