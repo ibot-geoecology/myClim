@@ -2,12 +2,12 @@
 #'
 #' This function filter data by localities and sensors
 #'
-#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
+#' @param data myClim object see [myClim-package]
 #' @param localities locality_ids for filtering data; if NULL then do nothing
 #' @param sensors sensor_ids for filtering data; if NULL then do nothing see `names(mc_data_sensors)`
 #' @param reverse - if TRUE then filtered discard else keeped (default FALSE)
 #' @param stop_if_empty - if TRUE then error for empty output (default TRUE)
-#' @return filtered data in same format as input
+#' @return filtered myClim object
 #' @export
 #' @examples 
 #' \dontrun{mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}

@@ -2,7 +2,7 @@
 #'
 #' This function return data.frame with the number of localities, loggers and sensors of input myClim object. 
 #'
-#' @param data myClim object in Raw-format or Agg-format (see [myClim-package])
+#' @param data myClim object see [myClim-package]
 #' @return data.frame with count of localities, loggers and sensors
 #' @export
 #' @examples

@@ -7,7 +7,7 @@
 mc_reshape_wide(data, localities = NULL, sensors = NULL)
 }
 \arguments{
-\item{data}{myClim object in Raw-format or Agg-format (see \link{myClim-package})}
+\item{data}{myClim object see \link{myClim-package}}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 

@@ -13,7 +13,7 @@ mc_filter(
 )
 }
 \arguments{
-\item{data}{myClim object in Raw-format or Calc-formt see \link{myClim-package}}
+\item{data}{myClim object see \link{myClim-package}}
 
 \item{localities}{locality_ids for filtering data; if NULL then do nothing}
 
@@ -28,7 +28,7 @@ mc_filter(
 }}
 }
 \value{
-filtered data in same format as input
+filtered myClim object
 }
 \description{
 This function filter data by localities and sensors

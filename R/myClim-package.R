@@ -110,11 +110,11 @@
 #'             |           |             |              | @height                   |        |||
 #'             |           |             |              | @calibrated               |        |||
 #'             |           |             |              +---------------------------+        |||
+#'             |           |             | $values      numeric/logical vector               |||
 #'             |           |             |              +----------+------------+-----------+|||
 #'             |           |             | $calibration | datetime | cor_factor | cor_slope ||||
 #'             |           |             |              | ...      | ...        | ...       ||||
 #'             |           |             |              +----------+------------+-----------+|||
-#'             |           |             | $values      numeric/logical vector               |||
 #'             |           |             |              +-----+-------+-----+-------+        |||
 #'             |           |             | $states      | tag | start | end | value |        |||
 #'             |           |             |              | ... | ...   | ... | ...   |        |||
@@ -211,11 +211,11 @@
 #'             |            |              | @height                   |        ||
 #'             |            |              | @calibrated               |        ||
 #'             |            |              +---------------------------+        ||
+#'             |            | $values      numeric/logical vector               ||
 #'             |            |              +----------+------------+-----------+||
 #'             |            | $calibration | datetime | cor_factor | cor_slope |||
 #'             |            |              | ...      | ...        | ...       |||
 #'             |            |              +----------+------------+-----------+||
-#'             |            | $values      numeric/logical vector               ||
 #'             |            |              +-----+-------+-----+-------+        ||
 #'             |            | $states      | tag | start | end | value |        ||
 #'             |            |              | ... | ...   | ... | ...   |        ||

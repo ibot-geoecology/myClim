@@ -99,6 +99,38 @@ as.list.myClimList <- function(x) {class(x) <- "list"; x;}
 
 # classes ================================================================================
 
+mc_Serializable <- setClass("mc_Serializable")
+
+setGeneric(
+    ".model_object_to_list",
+    function(object){
+        standardGeneric(".model_object_to_list")
+    }
+)
+
+setMethod(
+    ".model_object_to_list",
+    "mc_Serializable",
+    function(object) {
+        slot_names <- slotNames(object)
+        result <- purrr::map(slot_names, ~ attr(object, .x))
+        names(result) <- slot_names
+        result$class <- class(object)[[1]]
+        return(result)
+    }
+)
+
+.model_list_to_object <- function(obj_list) {
+        object <- new(obj_list$class)
+        slot_names <- slotNames(object)
+        for(slot_name in slot_names)
+        {
+            if(!(slot_name %in% names(obj_list))) next
+            attr(object, slot_name) <- obj_list[[slot_name]]
+        }
+        return(object)
+}
+
 #' Class for sensor definition
 #' 
 #' Sensor definitions intslevesl are stored in [mc_data_sensors].
@@ -181,7 +213,8 @@ setMethod("initialize",
 #' @seealso [myClim-package]
 mc_MainMetadata <- setClass("mc_MainMetadata",
                             slots = c(version = "ANY",
-                                      format_type = "character"))
+                                      format_type = "character"),
+                            contains = "mc_Serializable")
 
 setMethod("initialize",
           "mc_MainMetadata",
@@ -237,7 +270,8 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
                                           lon_wgs84 = "numeric",
                                           tz_offset = "numeric",
                                           tz_type = "character",
-                                          user_data = "list"))
+                                          user_data = "list"),
+                                contains = "mc_Serializable")
 
 setMethod("initialize",
           "mc_LocalityMetadata",
@@ -262,7 +296,8 @@ setMethod("initialize",
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               slots = c(type = "character",
                                         serial_number = "character",
-                                        step = "numeric"))
+                                        step = "numeric"),
+                              contains = "mc_Serializable")
 
 setMethod("initialize",
           "mc_LoggerMetadata",
@@ -284,7 +319,8 @@ mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
                                          count_duplicits = "numeric",
                                          count_missed = "numeric",
                                          count_disordered = "numeric",
-                                         rounded = "logical"))
+                                         rounded = "logical"),
+                               contains = "mc_Serializable")
 
 setMethod("initialize",
           "mc_LoggerCleanInfo",
@@ -312,7 +348,8 @@ mc_SensorMetadata <- setClass("mc_SensorMetadata",
                               slots = c(sensor_id = "character",
                                         name = "character",
                                         height = "character",
-                                        calibrated = "logical"))
+                                        calibrated = "logical"),
+                              contains = "mc_Serializable")
 
 setMethod("initialize",
           "mc_SensorMetadata",

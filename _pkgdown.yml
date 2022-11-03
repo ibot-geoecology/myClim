@@ -60,4 +60,6 @@ reference:
   - title: Other functions
     contents:
       - starts_with("mc_filter")
+      - starts_with("mc_save")
+      - starts_with("mc_load")
       - starts_with("mc_calib")
