@@ -39,6 +39,9 @@ test_that("mc_agg empty data", {
     expect_error(expect_warning(agg_data <- mc_agg(data)))
     data <- mc_read_data("data/TOMST/files_table.csv", "data/TOMST/localities_table.csv", silent=T)
     expect_error(expect_warning(agg_data <- mc_agg(data, "min", "day", use_utc = TRUE, na.rm=TRUE)))
+    data <- mc_load("data/agg/without_data.RDS")
+    expect_warning(agg_data <- mc_agg(data))
+    expect_warning(agg_data <- mc_agg(data, "min", "hour", use_utc = TRUE, na.rm=TRUE))
 })
 
 test_that("mc_agg 90s step", {

@@ -305,7 +305,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         stop("All steps in loggers must be same.")
     }
     shift_locality_function <- function(locality) {
-        shifts <- purrr::map_int(locality$loggers, function(.x) as.integer(.x$datetime[[1]]) %% as.integer(.x$clean_info@step))
+        loggers <- purrr::keep(locality$loggers, ~ length(.x$datetime) > 0)
+        shifts <- purrr::map_int(loggers, function(.x) as.integer(.x$datetime[[1]]) %% as.integer(.x$clean_info@step))
         if(length(shifts) > 1 && var(shifts) != 0) {
             stop(stringr::str_glue(.agg_const_MESSAGE_WRONG_SHIFT))
         }
