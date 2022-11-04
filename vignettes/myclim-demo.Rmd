@@ -233,7 +233,7 @@ kable(metadata, "html", digits=2) %>%
 ```{r,eval=FALSE,comment = ''}
 
 # one locality with two downloads in time 
-data <- readRDS("join_example.rds") 
+data <- mc_load("join_example.rds")
 
 joined_data <- mc_join(data, comp_sensors=c("TMS_T1", "TMS_T2"))
 

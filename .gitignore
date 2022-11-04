@@ -13,3 +13,4 @@ plots
 inst/doc
 /doc/
 /Meta/
+/vignettes/*.pdf

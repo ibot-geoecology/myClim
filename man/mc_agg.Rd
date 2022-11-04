@@ -10,7 +10,7 @@ mc_agg(
   period = NULL,
   use_utc = TRUE,
   percentiles = NULL,
-  na.rm = TRUE,
+  min_coverage = 1,
   custom_start = NULL,
   custom_end = NULL,
   custom_functions = NULL
@@ -41,7 +41,7 @@ Non-UTC time can by used only for period \code{day} and longer.}
 
 \item{percentiles}{vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details}
 
-\item{na.rm}{parameter for aggregation function; Not used for count and coverage. special importance for period \code{"all"} and \code{"custom"} see details}
+\item{min_coverage}{§value from range 0-1 (default 1); Value is threshold coverage for valid value or NA. It is not used for count and coverage.§}
 
 \item{custom_start}{date of start only use for \code{custom} period (defaul NULL); Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}.}
 
@@ -54,21 +54,22 @@ you defined to the \code{fun} parameter. e.g. custom_functions = list(positive_c
 fun="positive_count",}
 }
 \value{
-Returns new myClim object in Agg-format see \link{myClim-package} ready for \code{mc_calc} functions family. When fun=NULL, period=NULL
-records are not modified but only converted to Agg-format. When fun and period provided then time step is aggregated based on function.
+Returns new myClim object in Agg-format see \link{myClim-package} When fun=NULL, period=NULL
+records are not modified but only converted to Agg-format.
+When fun and period provided then time step is aggregated based on function.
 }
 \description{
 Function has two basic uses:
 \itemize{
 \item aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min records to daily means);
-\item convert myClim object from Raw-format to Agg-format see \link{myClim-package} without records modification, this behavior appears wen fun=NULL, period=NULL.
+\item convert myClim object from Raw-format to Agg-format see \link{myClim-package} without records modification,
+this behavior appears when fun=NULL, period=NULL.
 }
 }
 \details{
 Any output of mc_agg is in Agg-format. That means the structure of myClim object is flattened.
 Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within
-the sensors are joined directly to the level of locality (Locality<-Sensor<-Record).
-This is called Agg-format and is only acceptable format for \code{mc_calc} functions family. See \link{myClim-package}.
+the sensors are joined directly to the level of locality (Locality<-Sensor<-Record). See \link{myClim-package}.
 
 In case \code{mc_agg()} is used only for conversion from Raw-format to Agg-format (fun=NULL, period=NULL) then microclimatic
 records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format.
@@ -77,13 +78,7 @@ When fun and period is specified, microclimatic records are aggregated based on 
 Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
 week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...);
 year = c(2021-01-01 00:00, 2022-01-01 00:00...).
-When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown
-(e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted
-and aggregation starts in December).
-
-The behavior is a bit diferent for special period \code{"all"}. Incomplete datetime series aren't
-deleted, but result of aggregation depends on \code{na.rm} parameter. If \code{na.rm=T} then returns value even in case you have only few records out of 365 days.
-CAUTION! \code{na.rm=T} is default. If \code{na.rm=F} returns NA when missing data occures.
+When first or last period is incomplete in original data, §the incomplete part is extenden with NA values§.
 
 Empty sensors with no records are excluded. \code{mc_agg()} return NA for empty vector except from count which returns 0.
 When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they are applied to all sensors
@@ -103,6 +98,6 @@ function  \code{coverage} has sensor_id \code{coverage} and value_type \code{rea
 Read carefully details about \code{sum} and \code{count} these two may not be intuitive.
 }
 \examples{
-hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
-day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", na.rm=FALSE)
+hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, min_coverage=0.5)
+day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", min_coverage=1)
 }

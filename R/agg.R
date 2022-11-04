@@ -24,13 +24,13 @@
 #'
 #' Function has two basic uses: 
 #' * aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min records to daily means); 
-#' * convert myClim object from Raw-format to Agg-format see [myClim-package] without records modification, this behavior appears wen fun=NULL, period=NULL.
+#' * convert myClim object from Raw-format to Agg-format see [myClim-package] without records modification,
+#' this behavior appears when fun=NULL, period=NULL.
 #' 
 #' @details 
 #' Any output of mc_agg is in Agg-format. That means the structure of myClim object is flattened.
 #' Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within
-#' the sensors are joined directly to the level of locality (Locality<-Sensor<-Record).
-#' This is called Agg-format and is only acceptable format for `mc_calc` functions family. See [myClim-package].
+#' the sensors are joined directly to the level of locality (Locality<-Sensor<-Record). See [myClim-package].
 #' 
 #' In case `mc_agg()` is used only for conversion from Raw-format to Agg-format (fun=NULL, period=NULL) then microclimatic
 #' records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format.
@@ -39,15 +39,9 @@
 #' Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
 #' week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...);
 #' year = c(2021-01-01 00:00, 2022-01-01 00:00...).
-#' When first or last period is incomplete in original data, the incomplete part is deleted, and a warning is shown
-#' (e.g. when original data starting on 2021-11-28 00:00 and period = ”month” then incomplete November is deleted
-#' and aggregation starts in December). 
+#' When first or last period is incomplete in original data, §the incomplete part is extenden with NA values§.
 #' 
-#' The behavior is a bit diferent for special period `"all"`. Incomplete datetime series aren't
-#' deleted, but result of aggregation depends on `na.rm` parameter. If `na.rm=T` then returns value even in case you have only few records out of 365 days. 
-#' CAUTION! `na.rm=T` is default. If `na.rm=F` returns NA when missing data occures.      
-#' 
-#' Empty sensors with no records are excluded. `mc_agg()` return NA for empty vector except from count which returns 0. 
+#' Empty sensors with no records are excluded. `mc_agg()` return NA for empty vector except from count which returns 0.
 #' When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they are applied to all sensors
 #' of input myClim object. When named list (names are the sensor ids) of functions is provided then `mc_agg()`
 #' apply specific functions to the specific sensors based on the named list.
@@ -85,7 +79,7 @@
 #' (in locality metadata: tz_offset) local or solar time see (e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta_locality()]);
 #' Non-UTC time can by used only for period `day` and longer. 
 #' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
-#' @param na.rm parameter for aggregation function; Not used for count and coverage. special importance for period `"all"` and `"custom"` see details
+#' @param min_coverage §value from range 0-1 (default 1); Value is threshold coverage for valid value or NA. It is not used for count and coverage.§
 #' @param custom_start date of start only use for `custom` period (defaul NULL); Character in format `"mm-dd"` or `"mm-dd H:MM"`.
 #' @param custom_end date of end only use for `custom` period (defaul NULL); If NULL then calculates in year cycle ending on `custom_start` next year. 
 #' If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped. E.g. vegetation season, winter season... 
@@ -93,13 +87,14 @@
 #' @param custom_functions user define one or more functions in format `list(function_name=function(values){...})`; then you will feed function_name(s) 
 #' you defined to the `fun` parameter. e.g. custom_functions = list(positive_count=function(x){length(x[x>0])}),
 #' fun="positive_count",
-#' @return Returns new myClim object in Agg-format see [myClim-package] ready for `mc_calc` functions family. When fun=NULL, period=NULL
-#' records are not modified but only converted to Agg-format. When fun and period provided then time step is aggregated based on function.
+#' @return Returns new myClim object in Agg-format see [myClim-package] When fun=NULL, period=NULL
+#' records are not modified but only converted to Agg-format.
+#' When fun and period provided then time step is aggregated based on function.
 #' @export
 #' @examples
-#' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, na.rm=TRUE)
-#' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", na.rm=FALSE)
-mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, na.rm=TRUE,
+#' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, min_coverage=0.5)
+#' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", min_coverage=1)
+mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, min_coverage=1,
                    custom_start=NULL, custom_end=NULL, custom_functions=NULL) {
     old_lubridate_week_start <- getOption("lubridate.week.start")
     options(lubridate.week.start = 1)
@@ -112,9 +107,9 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_raw) {
-            return(.agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, custom_functions))
+            return(.agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, min_coverage, tz_offset, custom_functions))
         } else {
-            return(.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_period, custom_functions))
+            return(.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, min_coverage, tz_offset, original_period, custom_functions))
         }
     }
     new_localities <- purrr::map(data$localities, locality_function)
@@ -322,11 +317,11 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     return(stringr::str_glue("{step %/% 60} min"))
 }
 
-.agg_aggregate_prep_locality <- function(locality, fun, period, use_intervals, percentiles, na.rm, tz_offset, custom_functions)
+.agg_aggregate_prep_locality <- function(locality, fun, period, use_intervals, percentiles, min_coverage, tz_offset, custom_functions)
 {
     logger_function <- function (logger) {
         original_period <- .agg_get_period_text_from_step(logger$clean_info@step)
-        logger <- .agg_aggregate_item(logger, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_period, custom_functions)
+        logger <- .agg_aggregate_item(logger, fun, period, use_intervals, percentiles, min_coverage, tz_offset, original_period, custom_functions)
         if(is.null(logger)) {
             return(logger)
         }
@@ -356,7 +351,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     as.integer(as.numeric(period_object) / 60)
 }
 
-.agg_aggregate_item <- function(item, fun, period, use_intervals, percentiles, na.rm, tz_offset, original_period,
+.agg_aggregate_item <- function(item, fun, period, use_intervals, percentiles, min_coverage, tz_offset, original_period,
                                 custom_functions)
 {
     if(is.null(fun) || length(item$datetime) == 0) {
@@ -367,16 +362,11 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         stop("It isn't possible aggregate from longer period to shorter one.")
     }
     item$datetime <- myClim:::.calc_get_datetimes_with_offset(item$datetime, tz_offset)
-    item <- .agg_crop_data_to_whole_periods(item, period, use_intervals, original_period)
-    if(is.null(item)) {
-        return(item)
-    }
     if(is.null(use_intervals)) {
+        item <- .agg_extend_item_by_period(item, period, original_period)
         start_datetimes <- lubridate::floor_date(item$datetime, period)
     } else {
-        if (period == .agg_const_PERIOD_ALL) {
-            item <- .agg_extend_item_to_all_interval(item, use_intervals, original_period)
-        }
+        item <- .agg_extend_item_use_intervals(item, use_intervals, original_period)
         interval_function <- function(interval) {
             count <- sum(lubridate::`%within%`(item$datetime, interval))
             rep(lubridate::int_start(interval), count)
@@ -386,7 +376,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     item$datetime <- unique(start_datetimes)
     by_aggregate <- list(step=as.factor(start_datetimes))
     sensor_function <- function(sensor) {
-        functions <- .agg_get_functions(sensor, fun, percentiles, na.rm, custom_functions)
+        functions <- .agg_get_functions(sensor, fun, percentiles, min_coverage, custom_functions)
         .agg_agregate_sensor(sensor, functions, by_aggregate, custom_functions)
     }
     item$sensors <- purrr::flatten(purrr::map(item$sensors, sensor_function))
@@ -479,105 +469,46 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     purrr::map(sensor_items, rename_sensors_in_item_function)
 }
 
-.agg_crop_data_to_whole_periods <- function(item, period, use_intervals, original_period) {
-    if(!is.null(use_intervals)) {
-        item <- .agg_remove_values_outside_intervals(item, use_intervals)
-        if(length(item$datetime) == 0)
-        {
-            return(NULL)
-        }
+.agg_extend_item_use_intervals <- function(item, use_intervals, original_period) {
+    intervals_with_data <- use_intervals[lubridate::int_start(use_intervals) <= dplyr::last(item$datetime)]
+    intervals_with_data <- intervals_with_data[lubridate::int_end(intervals_with_data) >= dplyr::first(item$datetime)]
+    first_interval <- dplyr::first(intervals_with_data)
+    last_interval <- dplyr::last(intervals_with_data)
+    start <- lubridate::int_start(first_interval)
+    end <- lubridate::int_end(last_interval)
+    item <- .agg_extend_item(item, start, end, original_period)
+    item <- .agg_remove_values_outside_intervals(item, intervals_with_data)
+    if(length(item$datetime) == 0)
+    {
+        return(NULL)
     }
-
-    start <- dplyr::first(item$datetime)
-    end <- dplyr::last(item$datetime)
-
-    if(is.null(use_intervals)) {
-        cropping_info <- .agg_get_cropping_info_by_period_and_original_step(start, end, period, original_period)
-    } else {
-        cropping_info <- .agg_get_cropping_info_by_intervals(start, end, period, use_intervals, original_period)
-    }
-    cropping <- cropping_info$cropping
-    start <- cropping_info$start
-    end <- cropping_info$end
-
-    if(cropping) {
-        item_id <- myClim:::.common_get_id_of_item_with_sensors(item)
-        if(start >= end) {
-            warning(stringr::str_glue("{item_id} is without valid data. It is removed."))
-            return(NULL)
-        }
-        item <- myClim:::.prep_crop_data(item, start, end, end_included=FALSE)
-    }
-    item
+    return(item)
 }
 
-.agg_remove_values_outside_intervals <- function(item, use_intervals) {
-    interval_function <- function(interval) {
-        lubridate::`%within%`(item$datetime, interval)
-    }
-    mask <- purrr::reduce(purrr::map(use_intervals, interval_function), `|`)
-    item$datetime <- item$datetime[mask]
-    sensor_function <- function(sensor) {
-        sensor$values <- sensor$values[mask]
-        sensor
-    }
-    item$sensors <- purrr::map(item$sensors, sensor_function)
-    item
+.agg_extend_item_by_period <- function(item, period, original_period) {
+    start <- lubridate::floor_date(dplyr::first(item$datetime), period)
+    last_period <- lubridate::floor_date(dplyr::last(item$datetime), period)
+    end <- last_period + lubridate::as.period(period) - lubridate::seconds(1)
+    item <- .agg_extend_item(item, start, end, original_period)
+    return(item)
 }
 
-.agg_get_cropping_info_by_period_and_original_step <- function(start, end, period, original_period) {
-    cropping <- FALSE
+.agg_extend_item <- function(item, start, end, original_period) {
     original_step_period <- lubridate::as.period(original_period)
-    first_period <- lubridate::floor_date(start, period)
-    first_period_previous <- lubridate::floor_date(start - original_step_period, period)
-    if(first_period == first_period_previous) {
-        cropping <- TRUE
-        start <- lubridate::ceiling_date(start, period)
+    first_datetime <- dplyr::first(item$datetime)
+    from_start_interval <- lubridate::interval(start, first_datetime)
+    missed_modulo <- as.numeric(from_start_interval) %% as.numeric(original_step_period)
+    if(missed_modulo != 0) {
+        count_missed <- as.numeric(from_start_interval) %/% as.numeric(original_step_period)
+        start <- first_datetime - count_missed * original_step_period
     }
-    last_period <- lubridate::floor_date(end, period)
-    last_period_next <- lubridate::floor_date(end + original_step_period, period)
-    if(last_period == last_period_next) {
-        cropping <- TRUE
-        end <- last_period
-    } else {
-        end <- last_period_next
+    last_datetime <- dplyr::last(item$datetime)
+    to_end_interval <- lubridate::interval(last_datetime, end)
+    missed_modulo <- as.numeric(to_end_interval) %% as.numeric(original_step_period)
+    if(missed_modulo != 0) {
+        count_missed <- as.numeric(to_end_interval) %/% as.numeric(original_step_period)
+        end <- last_datetime + count_missed * original_step_period
     }
-    list(start=start, end=end, cropping=cropping)
-}
-
-.agg_get_cropping_info_by_intervals <- function(start, end, period, use_intervals, original_period) {
-    if(period == .agg_const_PERIOD_ALL) {
-        return(list(start=start, end=end, cropping=FALSE))
-    }
-    cropping <- FALSE
-    mask_interval_start <- lubridate::`%within%`(start, use_intervals)
-    start_index <- (1:length(use_intervals))[mask_interval_start]
-    mask_interval_end <- lubridate::`%within%`(end, use_intervals)
-    end_index <- (seq_along(use_intervals))[mask_interval_end]
-    original_step_period <- lubridate::as.period(original_period)
-    if(lubridate::`%within%`(start - original_step_period, use_intervals[start_index])) {
-        cropping <- TRUE
-        if(start_index < length(use_intervals)) {
-            start <- lubridate::int_start(use_intervals[[start_index + 1]])
-        } else {
-            start <- lubridate::int_end(use_intervals[[start_index]]) + lubridate::seconds(1)
-        }
-    }
-    if(lubridate::`%within%`(end + original_step_period, use_intervals[end_index])) {
-        cropping <- TRUE
-        if(end_index > 1) {
-            end <- lubridate::int_end(use_intervals[[end_index - 1]]) + lubridate::seconds(1)
-        } else {
-            end <- lubridate::int_start(use_intervals[[end_index]]) + lubridate::seconds(1)
-        }
-    }
-
-    list(start=start, end=end, cropping=cropping)
-}
-
-.agg_extend_item_to_all_interval <- function(item, use_intervals, original_period) {
-    start <- lubridate::ceiling_date(lubridate::int_start(use_intervals), original_period)
-    end <- lubridate::floor_date(lubridate::int_end(use_intervals), original_period)
     if(start == dplyr::first(item$datetime) && end == dplyr::last(item$datetime)) {
         return(item)
     }
@@ -595,7 +526,21 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     item
 }
 
-.agg_get_functions <- function(sensor, fun, percentiles, na.rm, custom_functions) {
+.agg_remove_values_outside_intervals <- function(item, use_intervals) {
+    interval_function <- function(interval) {
+        lubridate::`%within%`(item$datetime, interval)
+    }
+    mask <- purrr::reduce(purrr::map(use_intervals, interval_function), `|`)
+    item$datetime <- item$datetime[mask]
+    sensor_function <- function(sensor) {
+        sensor$values <- sensor$values[mask]
+        sensor
+    }
+    item$sensors <- purrr::map(item$sensors, sensor_function)
+    item
+}
+
+.agg_get_functions <- function(sensor, fun, percentiles, min_coverage, custom_functions) {
     if(class(fun) == "character") {
         functions_to_convert <- fun
     } else if (sensor$metadata@name %in% names(fun)) {
@@ -604,33 +549,33 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         return(NULL)
     }
     value_type <- mc_data_sensors[[sensor$metadata@sensor_id]]@value_type
-    purrr::flatten(purrr::map(functions_to_convert, function(x) .agg_convert_function(x, percentiles, na.rm, value_type, custom_functions)))
+    purrr::flatten(purrr::map(functions_to_convert, function(x) .agg_convert_function(x, percentiles, min_coverage, value_type, custom_functions)))
 }
 
-.agg_convert_function <- function(function_text, percentiles, na.rm, value_type, custom_functions) {
+.agg_convert_function <- function(function_text, percentiles, min_coverage, value_type, custom_functions) {
     if(function_text == .agg_const_FUNCTION_MIN) {
         return(list(min=function(x) {
-            x <- .agg_function_prepare_data(x, na.rm)
+            x <- .agg_function_prepare_data(x, min_coverage)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(min(x), value_type)
         }))
     } else if(function_text == .agg_const_FUNCTION_MAX) {
         return(list(max=function(x){
-            x <- .agg_function_prepare_data(x, na.rm)
+            x <- .agg_function_prepare_data(x, min_coverage)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(max(x), value_type)
         }))
     } else if(function_text == .agg_const_FUNCTION_MEAN) {
         return(list(mean=function(x) {
-            x <- .agg_function_prepare_data(x, na.rm)
+            x <- .agg_function_prepare_data(x, min_coverage)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(mean(x), value_type)
         }))
     } else if(function_text == .agg_const_FUNCTION_PERCENTILE) {
-        return(.agg_convert_percentile_functions(percentiles, na.rm, value_type))
+        return(.agg_convert_percentile_functions(percentiles, min_coverage, value_type))
     } else if(function_text == .agg_const_FUNCTION_SUM) {
         return(list(sum=function(x) {
-            x <- .agg_function_prepare_data(x, na.rm)
+            x <- .agg_function_prepare_data(x, min_coverage)
             if(length(x) == 0) return(NA)
             if(value_type == myClim:::.model_const_VALUE_TYPE_LOGICAL) {
                 value_type <- myClim:::.model_const_VALUE_TYPE_INTEGER
@@ -639,7 +584,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         }))
     } else if(function_text == .agg_const_FUNCTION_RANGE) {
         return(list(range=function(x) {
-            x <- .agg_function_prepare_data(x, na.rm)
+            x <- .agg_function_prepare_data(x, min_coverage)
             if(length(x) == 0) return(NA)
             .agg_function_convert_result(max(x) - min(x), value_type)
         }))
@@ -653,7 +598,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     } else if(function_text %in% names(custom_functions)) {
         result <- list()
         result[[function_text]] <- function (x) {
-            x <- .agg_function_prepare_data(x, na.rm)
+            x <- .agg_function_prepare_data(x, min_coverage)
             if(length(x) == 0) return(NA)
             custom_functions[[function_text]] (x)
         }
@@ -662,11 +607,15 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     NULL
 }
 
-.agg_function_prepare_data <- function(values, na.rm) {
-    if(na.rm){
+.agg_function_prepare_data <- function(values, min_coverage) {
+    if(min_coverage == 1 || length(values) == 0){
+        return(values)
+    }
+    coverage <- length(values[!is.na(values)]) / length(values)
+    if(coverage >= min_coverage){
         return(values[!is.na(values)])
     }
-    values
+    return(values)
 }
 
 .agg_function_convert_result <- function(values, value_type) {
@@ -679,14 +628,15 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     values
 }
 
-.agg_convert_percentile_functions <- function(percentiles, na.rm, value_type) {
+.agg_convert_percentile_functions <- function(percentiles, min_coverage, value_type) {
     percentile_function <- function(percentile) {
         quantile <- percentile / 100
         function(x) {
-            if(!na.rm && any(is.na(x))) {
+            x <- .agg_function_prepare_data(x, min_coverage)
+            if(any(is.na(x))) {
                 return(NA)
             }
-            .agg_function_convert_result(unname(quantile(x, quantile, na.rm=na.rm)), value_type)
+            .agg_function_convert_result(unname(quantile(x, quantile, na.rm=FALSE)), value_type)
         }
     }
     result <- purrr::map(percentiles, percentile_function)

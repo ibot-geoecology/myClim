@@ -16,7 +16,7 @@ test_that("mc_calc_snow", {
 
 test_that("mc_calc_snow long period", {
     cleaned_data <- mc_read_files("data/eco-snow", "TOMST", silent=T)
-    expect_warning(agg_data <- mc_agg(cleaned_data, "mean", "week"))
+    agg_data <- mc_agg(cleaned_data, "mean", "week")
     expect_error(agg_data <- mc_calc_snow(agg_data, "TMS_T3_mean", output_sensor="T3_snow", range=1.5, tmax=0.5))
 })
 
