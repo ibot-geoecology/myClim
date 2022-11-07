@@ -149,7 +149,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
         sensor_period <- purrr::map2_chr(sensor_day, period_fun, output_sensor_function)
         result_texts <- c("min5p", .env_const_FROSTDAYS, "mean", "max95p", "drange", gdd_with_base, fdd_with_base)
         height <- substring(sensor, nchar(.env_const_T_PREFIX) + 1)
-        result_names <- stringr::str_glue("{.env_const_T_PREFIX}{result_texts}.{height}")
+        result_names <- stringr::str_glue("{.env_const_T_PREFIX}{height}.{result_texts}")
         list(sensor_base=sensor_base,
              day_fun=day_fun,
              sensor_prep=sensor_day,
@@ -264,7 +264,7 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
                                          output_sensor_function)
         result_texts <- c("5p", "mean", "95p", .env_const_SD)
         height <- substring(sensor, nchar(.env_const_VWC_PREFIX) + 1)
-        result_names <- stringr::str_glue("{.env_const_VWC_PREFIX}{result_texts}.{height}")
+        result_names <- stringr::str_glue("{.env_const_VWC_PREFIX}{height}.{result_texts}")
         list(sensor_prep=sensor_base,
              period_fun=period_fun,
              sensor_period=sensor_period,
@@ -341,7 +341,7 @@ mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end
         sensor_period <- purrr::map2_chr(sensor_day, period_fun, output_sensor_function)
         result_texts <- c("mean", "max95p")
         height <- substring(sensor, nchar(.env_const_VPD_PREFIX) + 1)
-        result_names <- stringr::str_glue("{.env_const_VPD_PREFIX}{result_texts}.{height}")
+        result_names <- stringr::str_glue("{.env_const_VPD_PREFIX}{height}.{result_texts}")
         list(sensor_base=sensor_base,
              day_fun=day_fun,
              sensor_prep=sensor_day,

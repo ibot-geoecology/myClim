@@ -688,6 +688,6 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         warning(stringr::str_glue(.agg_const_MESSAGE_MISSING_HEIGHT))
         return(name)
     }
-    height <- stringr::str_replace_all(height, "[-]", "_")
+    height <- stringr::str_replace_all(height, "[- ]", "_")
     make.names(height)
 }

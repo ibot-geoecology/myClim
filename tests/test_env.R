@@ -8,8 +8,8 @@ test_that("mc_env_temp", {
     env_temp_table <- mc_env_temp(cleaned_data, "week")
     expect_equal(colnames(env_temp_table), c("locality_id", "serial_number", "sensor_name", "height", "datetime", "time_to", "value"))
     expect_equal(sort(unique(env_temp_table$sensor_name)),
-                 c("T.drange.air.200.cm", "T.FDD0.air.200.cm", "T.frostdays.air.200.cm",
-                   "T.GDD5.air.200.cm", "T.max95p.air.200.cm", "T.mean.air.200.cm", "T.min5p.air.200.cm"))
+                 c("T.air_200_cm.drange", "T.air_200_cm.FDD0", "T.air_200_cm.frostdays",
+                   "T.air_200_cm.GDD5", "T.air_200_cm.max95p", "T.air_200_cm.mean", "T.air_200_cm.min5p"))
     expect_equal(sort(unique(env_temp_table$height)), "air 200 cm")
 })
 
@@ -19,7 +19,7 @@ test_that("mc_env_moist", {
     expect_warning(raw_data <- mc_calc_vwc(cleaned_data))
     env_table <- mc_env_moist(raw_data, "all")
     expect_equal(sort(unique(env_table$sensor_name)),
-                 c("VWC.5p.soil.0_14.cm", "VWC.95p.soil.0_14.cm", "VWC.mean.soil.0_14.cm",  "VWC.sd.soil.0_14.cm"))
+                 c("VWC.soil_0_14_cm.5p", "VWC.soil_0_14_cm.95p", "VWC.soil_0_14_cm.mean",  "VWC.soil_0_14_cm.sd"))
     expect_equal(sort(unique(env_table$height)), "soil 0-14 cm")
 })
 
@@ -29,6 +29,6 @@ test_that("mc_env_vpd", {
     expect_error(env_table <- mc_env_vpd(data, "all"))
     vpd_data <- mc_calc_vpd(data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH)
     env_table <- mc_env_vpd(vpd_data, "all")
-    expect_equal(sort(unique(env_table$sensor_name)), c("VPD.max95p.air.150.cm", "VPD.mean.air.150.cm"))
+    expect_equal(sort(unique(env_table$sensor_name)), c("VPD.air_150_cm.max95p", "VPD.air_150_cm.mean"))
     expect_equal(sort(unique(env_table$height)), "air 150 cm")
 })
