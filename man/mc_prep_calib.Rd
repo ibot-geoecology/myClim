@@ -4,15 +4,15 @@
 \alias{mc_prep_calib}
 \title{Sensor calibration}
 \usage{
-mc_prep_calib(data, sensors = NULL, localities = NULL)
+mc_prep_calib(data, localities = NULL, sensors = NULL)
 }
 \arguments{
 \item{data}{myClim object in Raw-format or Agg-format having calibration data in metadata slot \code{sensor$calibration}}
 
+\item{localities}{vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)}
+
 \item{sensors}{vector of sensor names where to perform calibration see \code{names(mc_data_sensors)}; if NULL,
 then calibrate all sensors hawing calibration parameters loaded (default NULL)}
-
-\item{localities}{vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)}
 }
 \value{
 same myClim object as input but with calibrated sensor values.

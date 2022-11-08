@@ -15,15 +15,15 @@ mc_plot_image(
 )
 }
 \arguments{
-\item{data}{myClim object in Raw-format or Calc-formt see \link{myClim-package}}
+\item{data}{myClim object see \link{myClim-package}}
 
 \item{filename}{output file name (file path)}
 
 \item{title}{of plot; default is empty}
 
-\item{localities}{filter the localities; if empty then all}
+\item{localities}{names of localities; if NULL then all (default NULL)}
 
-\item{sensors}{filter the sensors; if empty then all see \code{names(mc_data_sensors)}}
+\item{sensors}{names of sensors; if NULL then all (default NULL) see \code{names(mc_data_sensors)}}
 
 \item{height}{of image; default = 1900}
 

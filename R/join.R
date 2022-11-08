@@ -45,7 +45,7 @@
 #' Clean info is changed to `NA` except step. If  not calibrated sensor is being 
 #' joined with calibrated one, then calibration information must be empty in not calibrated sensor.
 #'
-#' @param data myClim object in Raw-format see [myClim-package]
+#' @template param_myClim_object_raw
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
 #' @return myClim object with joined loggers.
 #' @export

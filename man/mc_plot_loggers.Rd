@@ -13,13 +13,13 @@ mc_plot_loggers(
 )
 }
 \arguments{
-\item{data}{myClim object in Raw-format \link{myClim-package}}
+\item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
 \item{directory}{output directory}
 
-\item{localities}{filter of localities c("loc1","loc2"); if NULL then all}
+\item{localities}{names of localities; if NULL then all (default NULL)}
 
-\item{sensors}{filter of sensors c("TMS_T1","TMS_T2"); if NULL then all see \code{names(mc_data_sensors)}}
+\item{sensors}{names of sensors; if NULL then all (default NULL) see \code{names(mc_data_sensors)}}
 
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
 }

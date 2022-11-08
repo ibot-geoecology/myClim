@@ -25,7 +25,7 @@
 #' The function returns vector of snow cover with same time-step as input data. To get number of days with snow cover
 #' and more info, apply [mc_calc_snow_agg].
 #'
-#' @param data cleaned myClim object see [myClim-package]
+#' @template param_myClim_object_cleaned
 #' @param sensor name of temperature sensor used for snow estimation. (e.g. TMS_T2)
 #' @param output_sensor name of output snow sensor (default "snow")
 #' @param localities list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
@@ -260,7 +260,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' moisture sensor was not designed to measure in frozen soils and the returned records are thus not comparable
 #' with values from non frozen soil.  
 #'
-#' @param data cleaned myClim object see [myClim-package]
+#' @template param_myClim_object_cleaned
 #' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`
 #'
 #' Soil moisture sensor must be in TMSmoisture physical.
@@ -400,7 +400,7 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
 #' Be careful while aggregating growing degree days to longer periods
 #' see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but myClim let you apply anything.
 #'
-#' @param data cleaned myClim object see [myClim-package]
+#' @template param_myClim_object_cleaned
 #' @param sensor name of temperature sensor used fot GDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
 #' @param output_prefix name prefix of new GDD sensor (default "GDD")
 #'
@@ -485,7 +485,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' the same as if you set `t_base=1` you get also positive number. Therefore pay attention to
 #' name of output variable which contains `t_base` value. FDD5_TMS_T3 vs FDDminus5_TMS_T3.
 #'
-#' @param data cleaned myClim object see [myClim-package]
+#' @template param_myClim_object_cleaned
 #' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
 #' @param output_prefix name prefix of new FDD sensor (default "FDD")
 #'
@@ -514,7 +514,7 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' @details
 #' If value type of sensor is logical, then output type is integer.
 #'
-#' @param data cleaned myClim object see [myClim-package]
+#' @template param_myClim_object_cleaned
 #' @param sensors names of sensors where to calculate cumulative sum
 #' @param output_suffix name suffix for new names (default "_cumsum") e.g. TMS_T3_cumsum
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
@@ -576,7 +576,7 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' @description
 #' This function convert change in stem size fram raw TOMST units to micrometers.
 #'
-#' @param data cleaned myClim object see [myClim-package]
+#' @template param_myClim_object_cleaned
 #' @param dendro_sensor name of change in stem size sensor to be converted from raw to micrometers (default "DEND_TOMSTdendro") see `names(mc_data_sensors)`
 #' @param output_sensor name of new change in stem size sensor (default "dendro_l_um")
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
@@ -626,7 +626,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 #' from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981) and adapted by Jones, 2013 (eq. 5.15)
 #' Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
 #'
-#' @param data cleaned myClim object see [myClim-package]
+#' @template param_myClim_object_cleaned
 #' @param temp_sensor name of temperature sensor
 #'
 #' Temperature sensor must be in T_C physical.

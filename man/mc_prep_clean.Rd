@@ -7,7 +7,7 @@
 mc_prep_clean(data, silent = FALSE)
 }
 \arguments{
-\item{data}{myClim object in Raw-format (output of \code{mc_read} functions family) see e.g. \code{\link[=mc_read_files]{mc_read_files()}}}
+\item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
 \item{silent}{if true, then cleaning log table is not printed in console (default FALSE), see \code{\link[=mc_info_clean]{mc_info_clean()}}}
 }

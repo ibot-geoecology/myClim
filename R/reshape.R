@@ -9,9 +9,8 @@
 #' * localityid_serialnumber_sensorname for Raw-format
 #' * localityid_sensorname for Agg-format
 #'
-#' @param data myClim object see [myClim-package]
-#' @param localities names of localities; if NULL then all (default NULL)
-#' @param sensors names of sensors; if NULL then all (default NULL) see `names(mc_data_sensors)`
+#' @template param_myClim_object
+#' @template param_localities_sensors
 #' @return data.frame with columns:
 #' * datetime 
 #' * locality1_sensor1
@@ -69,9 +68,8 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 #'
 #' This function converts myClim object to long data.frame with sensor records.
 #'
-#' @param data myClim object see [myClim-package]
-#' @param localities locality_ids; if NULL then all (default NULL)
-#' @param sensors names of sensors; if NULL then all (default NULL) see `names(mc_data_sensors)`
+#' @template param_myClim_object
+#' @template param_localities_sensors
 #' @return data.frame
 #'
 #' columns:

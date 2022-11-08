@@ -7,7 +7,7 @@
 mc_prep_calib_load(data, calib_table)
 }
 \arguments{
-\item{data}{myClim object Raw-format. see \link{myClim-package}}
+\item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
 \item{calib_table}{data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)}
 }

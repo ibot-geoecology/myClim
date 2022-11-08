@@ -7,7 +7,7 @@
 mc_prep_solar_tz(data)
 }
 \arguments{
-\item{data}{myClim object in Raw-format or Calc-formt see \link{myClim-package}}
+\item{data}{myClim object see \link{myClim-package}}
 }
 \value{
 MyClim object in the same format as input, with \code{tz_offset} filled in locality metadata

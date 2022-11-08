@@ -7,7 +7,7 @@
 mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 }
 \arguments{
-\item{data}{myClim object in Raw-format or Calc-formt see \link{myClim-package}}
+\item{data}{myClim object see \link{myClim-package}}
 
 \item{start}{POSIXct datetime in UTC; is optional; start datetime is included}
 

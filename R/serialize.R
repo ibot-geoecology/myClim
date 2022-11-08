@@ -4,7 +4,7 @@
 #' to save the MyClim object. The mc_save a mc_load functions ensure that the myClim object is correctly loaded
 #' in the newer version.§
 #'
-#' @param data myClim object see [myClim-package]
+#' @template param_myClim_object
 #' @param file path to output RDS file
 #' @export
 mc_save <- function(data, file) {
@@ -31,6 +31,7 @@ mc_save <- function(data, file) {
 #' in the newer version.§
 #'
 #' @param file path to input RDS file
+#' @return loaded myClim object
 #' @export
 mc_load <- function(file) {
     obj_list <- readRDS(file=file)

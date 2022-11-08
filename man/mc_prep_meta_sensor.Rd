@@ -13,7 +13,7 @@ mc_prep_meta_sensor(
 )
 }
 \arguments{
-\item{data}{myClim object in Raw-format or Agg-format see \link{myClim-package}}
+\item{data}{myClim object see \link{myClim-package}}
 
 \item{values}{named list with metadata values; names of items are sensor_names e.g. for changing sensor height use \code{list(TMS_T1="soil 8 cm")}}
 

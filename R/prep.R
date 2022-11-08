@@ -1,6 +1,7 @@
 # constants ================================================================================
 
 .prep_const_DETECT_STEP_LENGTH <- 100
+.prep_const_FILLNA_METHOD_LINEAR <- "linear"
 
 .prep_const_MESSAGE_PARAM_NAME_NOT_NULL <- "param_name can not be NULL"
 .prep_const_MESSAGE_PARAM_NAME_NULL <- "param_name must be NULL"
@@ -9,6 +10,7 @@
 .prep_const_MESSAGE_UNIQUE_SENSOR_NAMES <- "Sensor names must be unique."
 .prep_const_MESSAGE_UNIQUE_LOCALITY_IDS <- "Locality_ids must be unique."
 .prep_const_MESSAGE_UNCLEANED_DATA<- "Data aren't cleaned."
+.prep_const_MESSAGE_NA_APPROX_METHOD_NOT_IMPLEMENTED <- "Method is not implemented."
 
 #' Cleaning datetime series
 #'
@@ -34,7 +36,7 @@
 #' I.e. when the time step is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30). 
 #' When you have 2h time step and wish to round to the whole hour (13:33 -> 14:00, 15:33 -> 16:00) than use  `mc_agg(period="2 hours")` 
 #' 
-#' @param data myClim object in Raw-format (output of `mc_read` functions family) see e.g. [myClim::mc_read_files()]
+#' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @return 
 #' * cleaned myClim object in Raw-format
@@ -211,7 +213,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' Provide locality_id (name) and the value in column of metadata you wish to update. 
 #' In case of using data.frame use `param_name = NULL`  
 #' 
-#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
+#' @template param_myClim_object
 #' @param values for localities can be named list or table
 #'
 #' * named list: `metadata <- list(locality_id=value)`; `param_name` must be set
@@ -287,7 +289,7 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
 #' @description
 #' This function allows you to modify sensor metadata including sensor name. See [mc_SensorMetadata]
 #'
-#' @param data myClim object in Raw-format or Agg-format see [myClim-package]
+#' @template param_myClim_object
 #' @param values named list with metadata values; names of items are sensor_names e.g. for changing sensor height use `list(TMS_T1="soil 8 cm")`
 #' @param param_name name of the sensor metadata parameter you want to change; You can change `name` and `height` of sensor.
 #' @param localities optional filter; vector of `locality_id` where to change sensor metadata; if NULL than all localities (default NULL)
@@ -367,7 +369,7 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
-#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
+#' @template param_myClim_object
 #' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata
 #' @export
 #' @examples
@@ -407,7 +409,7 @@ mc_prep_solar_tz <- function(data) {
 #' @details
 #' Function is able to crop data from start and end together but also only from start and end left as is or vice versa.  
 #'
-#' @param data myClim object in Raw-format or Calc-formt see [myClim-package]
+#' @template param_myClim_object
 #' @param start POSIXct datetime in UTC; is optional; start datetime is included
 #' @param end POSIXct datetime in UTC; is optional
 #' @param end_included if TRUE then  end datetime is included (default TRUE)
@@ -505,7 +507,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' When the two merged myClim objects in Agg-format contains locality with same names (locality_id).
 #' than the sensors are merged on the locality. Sensors with same names are renamed.
 #'
-#' @param data_items list of myClim objects in Raw-format or Agg-format see [myClim-package]; Format of merged objects must be same.
+#' @param data_items list of myClim objects see [myClim-package]; Format (Raw/Agg) of merged objects must be same.
 #' @return merged myClim object in the same format as input objects
 #' @examples
 #' merged_data <- mc_prep_merge(list(mc_data_example_source, mc_data_example_source))
@@ -588,7 +590,7 @@ mc_prep_merge <- function(data_items) {
 #'
 #' It is not possible to change calibration parameters for already calibrated sensor. This prevents repeted calibrations. 
 #'
-#' @param data myClim object Raw-format. see [myClim-package]
+#' @template param_myClim_object_raw
 #' @param calib_table data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
 #' @return myClim object with loaded calibration information in metadata. Microclimatic records are not calibrated, only ready for calibration. To calibrate records run [myClim::mc_prep_calib()]
 #' @export
@@ -649,12 +651,12 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' Only sensors with real value type can be calibrated. see [myClim::mc_data_sensors()]
 #' 
 #' @param data myClim object in Raw-format or Agg-format having calibration data in metadata slot `sensor$calibration`
+#' @param localities vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)
 #' @param sensors vector of sensor names where to perform calibration see `names(mc_data_sensors)`; if NULL,
 #' then calibrate all sensors hawing calibration parameters loaded (default NULL)
-#' @param localities vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)
 #' @return same myClim object as input but with calibrated sensor values.
 #' @export
-mc_prep_calib <- function(data, sensors=NULL, localities=NULL) {
+mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
     is_raw_format <- myClim:::.common_is_raw_format(data)
     if(is_raw_format) {
         .prep_check_datetime_step_unprocessed(data, stop)
@@ -734,3 +736,52 @@ mc_prep_calib <- function(data, sensors=NULL, localities=NULL) {
     calib_table
 }
 
+#' Fill NA - approximate§§§
+#'
+#' @description
+#' This function approximate NA values. Linear method is implemented by [zoo::na.approx] function.
+#'
+#' @template param_myClim_object
+#' @template param_localities_sensors
+#' @param maxgap maximum number of consecutively NA values to fill (default 5)
+#' @param method used for approximation. It is implemented now only "linear". (default "liner")
+#' @return myClim object with filled NA values
+#' @export
+mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method=.prep_const_FILLNA_METHOD_LINEAR) {
+    is_agg <- myClim:::.common_is_agg_format(data)
+    if(!is_agg) {
+        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    }
+
+    sensor_function <- function (sensor) {
+        if(!(is.null(sensors) || sensor$metadata@name %in% sensors)) {
+            return(sensor)
+        }
+        if(method == .prep_const_FILLNA_METHOD_LINEAR){
+            sensor$values <- zoo::na.approx(sensor$values, na.rm=FALSE, maxgap=maxgap)
+        } else {
+            stop(prep_const_MESSAGE_NA_APPROX_METHOD_NOT_IMPLEMENTED)
+        }
+        return(sensor)
+    }
+
+    logger_function <- function (logger) {
+        logger$sensors <- purrr::map(logger$sensors, sensor_function)
+        return(logger)
+    }
+
+    locality_function <- function (locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        if(is_agg) {
+            locality$sensors <- purrr::map(locality$sensors, sensor_function)
+        } else {
+            locality$loggers <- purrr::map(locality$loggers, logger_function)
+        }
+        return(locality)
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
+}

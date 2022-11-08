@@ -283,3 +283,28 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     expect_equal(calib_data$localities$A1E05$sensors$TS_T$values[[1]], 9.875 + 0.1)
     expect_equal(calib_data$localities$A1E05$sensors$TS_T$values[[6]], 6.875 * 0.95)
 })
+
+test_that("mc_prep_fillNA", {
+    data <- mc_read_files("data/agg", "TOMST", clean=F)
+    expect_error(mc_prep_fillNA(data))
+    data <- mc_prep_clean(data, silent=T)
+    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[1:4] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[50:52] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[71:75] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[90:95] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[192]] <- NA_real_
+    data_dupl <- mc_prep_meta_locality(data, list(`91184101`="abc"), "locality_id")
+    data_dupl <- mc_prep_meta_sensor(data_dupl, list(TS_T="T"), "name")
+    data <- mc_prep_merge(list(data, data_dupl))
+    approx_data <- mc_prep_fillNA(data, maxgap=5, localities="91184101")
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[1]]))
+    expect_false(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[51]]))
+    expect_false(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[71]]))
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[95]]))
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[192]]))
+    expect_true(is.na(approx_data$localities$abc$loggers[[1]]$sensors$T$values[[50]]))
+    approx_data <- mc_prep_fillNA(data, maxgap=5, sensors="T")
+    expect_false(is.na(approx_data$localities$abc$loggers[[1]]$sensors$T$values[[50]]))
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[50]]))
+})
+

@@ -9,7 +9,7 @@ mc_reshape_long(data, localities = NULL, sensors = NULL)
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{localities}{locality_ids; if NULL then all (default NULL)}
+\item{localities}{names of localities; if NULL then all (default NULL)}
 
 \item{sensors}{names of sensors; if NULL then all (default NULL) see \code{names(mc_data_sensors)}}
 }

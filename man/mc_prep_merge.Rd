@@ -7,7 +7,7 @@
 mc_prep_merge(data_items)
 }
 \arguments{
-\item{data_items}{list of myClim objects in Raw-format or Agg-format see \link{myClim-package}; Format of merged objects must be same.}
+\item{data_items}{list of myClim objects see \link{myClim-package}; Format (Raw/Agg) of merged objects must be same.}
 }
 \value{
 merged myClim object in the same format as input objects

@@ -207,7 +207,7 @@ setMethod("initialize",
           })
 
 #' Class for myClim object metadata
-#' @template MainMetadataSlots
+#' @template slot_MainMetadata
 #' @export mc_MainMetadata
 #' @exportClass mc_MainMetadata
 #' @seealso [myClim-package]
@@ -225,7 +225,7 @@ setMethod("initialize",
           })
 
 #' Class for myClim object metadata in Raw-format
-#' @template MainMetadataSlots
+#' @template slot_MainMetadata
 #' @slot step time step of data in seconds
 #' @slot period value from [mc_agg()] (e.g. month, day, all...)
 #' @slot intervals_start start datetime of data intervals for spacial periods all and custom (see [mc_agg()])
