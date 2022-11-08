@@ -744,10 +744,10 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
 #' @template param_myClim_object
 #' @template param_localities_sensors
 #' @param maxgap maximum number of consecutively NA values to fill (default 5)
-#' @param method used for approximation. It is implemented now only "linear". (default "liner")
+#' @param method used for approximation. It is implemented now only "linear". (default "linear")
 #' @return myClim object with filled NA values
 #' @export
-mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method=.prep_const_FILLNA_METHOD_LINEAR) {
+mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method="linear") {
     is_agg <- myClim:::.common_is_agg_format(data)
     if(!is_agg) {
         myClim:::.prep_check_datetime_step_unprocessed(data, stop)
