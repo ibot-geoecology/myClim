@@ -11,6 +11,8 @@
 .prep_const_MESSAGE_UNIQUE_LOCALITY_IDS <- "Locality_ids must be unique."
 .prep_const_MESSAGE_UNCLEANED_DATA<- "Data aren't cleaned."
 .prep_const_MESSAGE_NA_APPROX_METHOD_NOT_IMPLEMENTED <- "Method is not implemented."
+.prep_const_MESSAGE_CLEAN_AGG <- "It isn't possible to clean myClim object in Agg-format."
+.prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
 
 #' Cleaning datetime series
 #'
@@ -45,6 +47,12 @@
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_source)
 mc_prep_clean <- function(data, silent=FALSE) {
+    if(myClim:::.common_is_agg_format(data)) {
+        stop(.prep_const_MESSAGE_CLEAN_AGG)
+    }
+    if(.prep_is_datetime_step_processed_in_object(data)) {
+        warning(.prep_const_MESSAGE_RECLEAN)
+    }
     locality_function <- function(locality) {
         locality$loggers <- purrr::map(locality$loggers, .prep_clean_logger)
         locality
@@ -181,10 +189,14 @@ mc_prep_clean <- function(data, silent=FALSE) {
 }
 
 .prep_check_datetime_step_unprocessed <- function(data, func=warning) {
-    unprocessed_loggers <- .prep_get_uncleaned_loggers(data)
-    if(length(unprocessed_loggers) > 0){
+    if(!.prep_is_datetime_step_processed_in_object(data)){
         func(.prep_const_MESSAGE_UNCLEANED_DATA)
     }
+}
+
+.prep_is_datetime_step_processed_in_object <- function(data) {
+    unprocessed_loggers <- .prep_get_uncleaned_loggers(data)
+    return(length(unprocessed_loggers) == 0)
 }
 
 #' Set metadata of localities
@@ -750,7 +762,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
 mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method="linear") {
     is_agg <- myClim:::.common_is_agg_format(data)
     if(!is_agg) {
-        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+        .prep_check_datetime_step_unprocessed(data, stop)
     }
 
     sensor_function <- function (sensor) {

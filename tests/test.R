@@ -46,7 +46,6 @@ test_logger <- function(logger) {
     expect_equal(class(logger$sensors), "list")
     expect_true(length(logger$sensors) > 0)
     test_data_length(logger)
-    test_cleaning(logger)
     test_sensors(logger)
 }
 
@@ -59,13 +58,6 @@ test_datetime <- function(datetime) {
 test_data_length <- function(item) {
     datetime_length <- length(item$datetime)
     purrr::walk(item$sensors, ~ {expect_equal(length(.x$values), datetime_length)})
-}
-
-test_cleaning <- function(logger) {
-    if(!myClim:::.prep_is_logger_cleaned(logger) || is.na(logger$clean_info@count_missed)) {
-        return()
-    }
-    expect_equal(logger$clean_info@count_missed, length(purrr::keep(logger$sensors[[1]]$values, ~ is.na(.x))))
 }
 
 test_sensors <- function(item) {

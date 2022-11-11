@@ -58,7 +58,7 @@ mc_join <- function(data, comp_sensors=NULL) {
         type_function <- function(logger_type) {
             indexes <- which(types == logger_type)
             if(length(indexes) == 1) {
-                return(locality$loggers[[indexes]])
+                return(locality$loggers[indexes])
             }
             .join_loggers_same_type(locality$loggers[indexes], comp_sensors, locality$metadata@locality_id)
         }

@@ -4,6 +4,7 @@ source("test.R")
 
 test_that("mc_prep_clean", {
     cleaned_data <- mc_read_files("data/clean-datetime_step", "TOMST", silent=T)
+    expect_warning(mc_prep_clean(cleaned_data, silent=T))
     test_raw_data_format(cleaned_data)
     expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@count_duplicits, 1)
     expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@count_missed, 2)
@@ -20,6 +21,8 @@ test_that("mc_prep_clean", {
     expect_true(is.na(cleaned_data$localities[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[19]]))
     expect_equal(cleaned_data$localities[["91184133"]]$loggers[[1]]$clean_info@step, 15 * 60)
     expect_equal(cleaned_data$localities[["91184133"]]$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(cleaned_data$localities[["91184133"]]$loggers[[1]]$datetime))
+    agg_data <- mc_agg(cleaned_data)
+    expect_error(mc_prep_clean(agg_data))
 })
 
 test_that("mc_prep_clean defined step", {
@@ -275,8 +278,7 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     expect_equal(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T2$values[[5]], 9.5 * 1.05 + 0.15)
     expect_true(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T3$metadata@calibrated)
     expect_false(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_TMSmoisture$metadata@calibrated)
-    cleaned_data <- mc_prep_clean(param_data, silent = TRUE)
-    agg_data <- mc_agg(cleaned_data)
+    agg_data <- mc_agg(param_data)
     calib_data <- mc_prep_calib(agg_data, sensors = "TS_T")
     test_agg_data_format(calib_data)
     expect_true(calib_data$localities$A1E05$sensors$TS_T$metadata@calibrated)
