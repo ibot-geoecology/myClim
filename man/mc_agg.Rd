@@ -23,7 +23,7 @@ mc_agg(
 and functions defined in \code{custom_functions}. See details by custom_functions argument.
 Can be single function name, character vector of function names or named list of vector function names.
 Named list of functions allows apply different function(s) for different sensors e.g. \code{list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")}
-if NULL records are not aggregated, but converted to Agg-format. See details.}
+if NULL records are not aggregated, but only converted to Agg-format withou any change. See details.}
 
 \item{period}{Time period for aggregation - same as breaks in cut.POSIXt, e.g. (\code{"hour"}, \code{"day"}, \code{"month"}); if NULL then no aggregation
 
@@ -31,21 +31,24 @@ There are special periods \code{"all"} and \code{"custom"}. Period \code{"all"} 
 on function applied across all records within the sensor. E.g. mean and max air temperature from all data from the logger.
 Period \code{"custom"} aggregates data in year time window. You can aggregate e.g. water year, vegetation season etc by providing start, end datetime.
 See \code{custom_start} and \code{custom_end} parameters. The output of special periods \code{"all"} and \code{"custom"}is not allowed to be aggregated
-again in \code{\link[=mc_agg]{mc_agg()}} function.
+again in \code{\link[=mc_agg]{mc_agg()}} function, regardless multiple aggregations are allowed in general.
 
 Start day of week is Monday.}
 
-\item{use_utc}{default TRUE, if set FALSE forced to use UTC time, instead possibly available time offset
-(in locality metadata: tz_offset) local or solar time see (e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}});
+\item{use_utc}{default TRUE using UTC time, if set FALSE before aggregation, time is shifted by offset if available in locality metadata.
+Shift can be e.g. to solar time \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}} or political time with custom shift \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}}).
 Non-UTC time can by used only for period \code{day} and longer.}
 
 \item{percentiles}{vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details}
 
-\item{min_coverage}{§value from range 0-1 (default 1); Value is threshold coverage for valid value or NA. It is not used for count and coverage.§}
+\item{min_coverage}{value from range 0-1 (default 1); the threshold specifying how many missing values can you accept within aggregation period.
+e.g. when aggregating from 15 min to monthly mean and set \code{min_coverage=1} then a single NA value within the specific month cause monthly mean = NA.
+When \code{min_coverage=0.9} then you will get your monthly mean in case there are no more than 10 \% missing values, if there were more than 10\% you will get NA.
+Ignored for functions \code{count} and \code{coverage}}
 
-\item{custom_start}{date of start only use for \code{custom} period (defaul NULL); Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}.}
+\item{custom_start}{date of start only use for \code{custom} period (default NULL); Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}.}
 
-\item{custom_end}{date of end only use for \code{custom} period (defaul NULL); If NULL then calculates in year cycle ending on \code{custom_start} next year.
+\item{custom_end}{date of end only use for \code{custom} period (default NULL); If NULL then calculates in year cycle ending on \code{custom_start} next year.
 If parameter is filled in then data out of range \code{custom_start}-\code{custom_end} are skipped. E.g. vegetation season, winter season...
 Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}. \code{custom_end} row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 \code{custom_end="01-01"}.}
 
@@ -59,9 +62,9 @@ records are not modified but only converted to Agg-format.
 When fun and period provided then time step is aggregated based on function.
 }
 \description{
-Function has two basic uses:
+mc_agg has two basic uses:
 \itemize{
-\item aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min records to daily means);
+\item aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min raw records to daily means);
 \item convert myClim object from Raw-format to Agg-format see \link{myClim-package} without records modification,
 this behavior appears when fun=NULL, period=NULL.
 }
@@ -75,18 +78,20 @@ In case \code{mc_agg()} is used only for conversion from Raw-format to Agg-forma
 records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format.
 
 When fun and period is specified, microclimatic records are aggregated based on function into new period.
-Aggregated time step is marked by a first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
+Aggregated time step is named after the first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
 week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...);
 year = c(2021-01-01 00:00, 2022-01-01 00:00...).
-When first or last period is incomplete in original data, §the incomplete part is extenden with NA values§.
+When first or last period is incomplete in original data, the incomplete part is extended with NA values to fill complete period.
+I.e. when you want to aggregate to monthly mean, but your time-series starts on January 15 ending December 20, myClim will extend the time.series
+to start January 1, ending December 31. Thean you can decide what to do with the NAs, see parameter \code{min_coverage}.
 
 Empty sensors with no records are excluded. \code{mc_agg()} return NA for empty vector except from count which returns 0.
-When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they are applied to all sensors
-of input myClim object. When named list (names are the sensor ids) of functions is provided then \code{mc_agg()}
-apply specific functions to the specific sensors based on the named list.
-Aggregation function creates new sensors on localities putting aggregation
+When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they all are applied to all the sensors
+and multiple results are returned. When named list (names are the sensor ids) of functions is provided then \code{mc_agg()}
+apply specific functions to the specific sensors based on the named list \code{list(TMS_T1=c("max", "min"), TMS_T2="mean")}.
+mc_agg returns new sensors on the localities putting aggregation
 function in its name (TMS_T1 -> TMS_T1_max), despite sensor names contains aggregation
-function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1).
+function, sensor_id stays the same as before aggregation in sensor metadata (e.g. TMS_T1 -> TMS_T1).
 Sensors created with functions \code{min}, \code{max}, \code{mean}, \code{percentile}, \code{sum}, \code{range}
 keeps identical sensor_id and value_type as original input sensors.
 When function \code{sum} is applied on \code{logical} sensor (e.g. snow as TRUE, FALSE) the

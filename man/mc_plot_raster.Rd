@@ -58,6 +58,7 @@ PDF format is recommended as it can distribute the plots on the pages, which is 
 for bigger data. In case of plotting multiple sensors, it is plotted by sensor. All localities from sensor1
 followed by all localities of sensor2 etc. When plotting only few localities, but multiple sensors,
 each sensor has own page. E.g. when plotting data from one locality, and 3 senosrs resulting PDF has 3 pages.
-In case of plotting PNG all loclaities and sensors are plotted in one image. Be careful with bigger data in PNG.
+§In the case of plotting PNG all localities and sensors are plotted in images by physical.
+Sensors with same physical are together in one image.§ Be careful with bigger data in PNG.
 Play with \code{png_height} and \code{png_width}. When too small, image does not fit ad is plotted broken.
 }

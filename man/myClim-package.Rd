@@ -8,12 +8,12 @@
 \description{
 Package myClim was designed for handling the microclimatic data in R.
 myClim workflow begin at the reading data primary from microclimatic dataloggers,
-but can be also reading of meteorological station data from files.
+but can be also reading of meteorological station data from files or tables.
 Cleaning time step, time zone settings and metadata collecting is the next step of the work flow.
 With myClim tools one can crop, join, downscale, and convert microclimatic
-data formats, sort them into localities, request descriptive characteristics
-and compute microclimatic variables. Handy plotting functions are
-provided with smart defaults.
+data formats, sort them into localities, call descriptive statistics
+and compute microclimatic variables as e.g. Growing degree days or Vapor pressure deficit.
+Handy plotting functions are provided with smart defaults.
 
 \strong{myClim object}
 
@@ -21,20 +21,20 @@ We implemented two slightly different data formats of myClim objects calling the
 Raw-format and Agg-format.
 Raw-format is designed for data preparation. Mainly data cleaning,
 metadata gathering, time zones handling and multiple downloading missions
-from single localities joining. Output myClim object from
+from in time joining. Output myClim object from
 read functions \code{\link[=mc_read_files]{mc_read_files()}} and \code{\link[=mc_read_data]{mc_read_data()}} is a Raw-format.
 Raw-format contains information about localities, loggers and sensors.
 Function \code{\link[=mc_agg]{mc_agg()}} converts data from Raw-format to Agg-format.
-Agg-format is designed mainly for calculations,analysis and virtual
-loggers derivations on the basis of cleaned, final microclimatic data.
-Calc-formt has not the level of loggers and their metadata.
-In Agg-format sensors are organized directly in localities, without loggers.
+Agg-format is designed mainly for calculations,analysis and microclimatic variables
+derivations on the basis of cleaned microclimatic data.
+Agg-format is missing the level of loggers. In Agg-format sensors are organized
+directly in localities, without loggers.
 
 Microclimatic data are stored in myClim objects in regular R structure
 consists of classes and lists slightly resembling database scheme.
-The top level of the structure is the \code{locality}. It has on metadata e.g.
+The top level of the structure is the \code{locality}. It has own metadata e.g.
 altitude, latitude or user data  dedicated for any type of metadata user need.
-For detail desription of locality metadata see \link{mc_LocalityMetadata}.
+For detail description of locality metadata see \link{mc_LocalityMetadata}.
 On the locality in Raw-format there are \code{loggers} or in Agg-format directly \code{sensors}.
 See below. Loggers represents the files imported with myClim reading functions.
 Both \code{loggesr} and \code{sensors} have own metadata. One logger could host more sensors e.g.
@@ -49,17 +49,18 @@ see \link{mc_LoggerMetadata}, \link{mc_SensorMetadata}, \link{mc_data_sensors}
 Is the output of reading functions \code{\link[=mc_read_files]{mc_read_files()}} and \code{\link[=mc_read_data]{mc_read_data()}}.
 Raw-format is mainly designed for preparation. Especially for the situation when
 user downloads the logger during more field visits in time. E. g. We have the logger
-on the locality measuring 10 years. We download data twice a year and at the end we
-wan to work with single correctly joined time series of the 10 years records.
-For this type of time joining it is useful to have a level "logger" in myClim
-object which allows to keep separate logger  downloads and prepare them for joining.
+on the locality measuring 10 years. We download data twice a year, thus we have 20 files
+from identical locality, but at the end we wan to work with single correctly joined
+time-series of the 10 years records. For this type of time joining
+it is useful to have a level "logger" in myClim object which allows to keep
+separate logger  downloads and prepare them for joining.
 
 Within the logger all sensors share time series. In Agg-format where level of
-logger is missing, all sensors within the locality sahre time series. In Raw-format
-the time series between the logger or between the localities can be of different time
+logger is missing, all sensors within the locality share time series. In Raw-format
+the time series between the loggers or between the localities can be of different time
 step. E.g. on the locality there can be one logger measuring in time step
 15 minutes and another one measuring once a day.  In Agg-format this is not allowed.
-Therefore it is necessary to use \code{\link[=mc_agg]{mc_agg()}} to switch to the Agg-format.
+Therefore it is necessary to use \code{\link[=mc_agg]{mc_agg()}} to switch from Raw-format to the Agg-format.
 
 Schema of myClim \strong{Raw-format}
 
@@ -152,28 +153,25 @@ $localities | locality[1]                                                       
 
 Is the output of \code{\link[=mc_agg]{mc_agg()}} function.
 Agg-format is mainly designed for calculations with clean, nicely
-organized microclimatic data with unified time step, supplemented with necessary metadata.
-User can calculate various "virtual sensors" on the locality using existing ones
+organized microclimatic time-series with unified time step, supplemented with necessary metadata.
+User can calculate various microclimatic variables on the locality using existing sensors
 e. g. calculate volumetric water content form TMS raw moisture records see \link{mc_calc_vwc};
 calculate growing degree days or freezing degree days see \link{mc_calc_gdd}, \link{mc_calc_fdd};
 or estimate snow presence from near ground temperature \link{mc_calc_snow}.
 
 In Agg-format the level of logger is missing. This is in contrast with Raw-format.
 In Agg-format sensors are organized directly in the localities.
-Within the locality of Agg-format all sensors share time series (start, end, step)
-all localities shares the same time step, can have different start, end.
+Within one locality in Agg-format all sensors share time series (start, end, step).
+All localities shares the same time step, but can have different start, end.
 This is  practical for calculations, and it is achieved using \code{\link[=mc_agg]{mc_agg()}} function.
 E.g. we have 10 localities, each of them hosts several sensors.
-The same as in Raw-format \code{locality} and \code{sensor} has own metadata
-see \link{mc_SensorMetadata}, \link{mc_data_sensors}, \link{mc_LocalityMetadata}.
+\code{locality} and \code{sensor} has own metadata see \link{mc_SensorMetadata},
+\link{mc_data_sensors}, \link{mc_LocalityMetadata}.
 
-In contrast with Raw-format the Agg-formated myClim objects have additional
-metadata on the level of  whole object \linkS4class{mc_MainMetadata} holding information
-on time step which has whole object. Step is stored in seconds (\code{data$metadata@step}).
-But some steps can not be represented by seconds. For example step \code{month} has variable
-number of seconds. Therefore, metadata contains also text
-representation of the step (\code{data$metadata@period}). Common time step
-of myClim Agg-format objects is practical when merging multiple object. See \link{mc_prep_merge}
+myClim time step is defined in seconds (\code{data$metadata@step}).
+But some steps (especially irregular ones) may not be represented by seconds.
+For example step \code{month} has variable number of seconds within the year. Therefore, metadata contains also text
+representation of the step (\code{data$metadata@period}).
 
 Schema of myClim \strong{Agg-format}
 
