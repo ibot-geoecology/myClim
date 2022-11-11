@@ -47,6 +47,9 @@ If NULL then the plot is return, but not saved to file.}
 
 \item{end_crop}{POSIXct datetime for crop data (default NULL)}
 }
+\value{
+list of ggplot2 objects
+}
 \description{
 Function plot data to file with ggplot2 geom_raster
 }

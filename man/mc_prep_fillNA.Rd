@@ -9,7 +9,7 @@ mc_prep_fillNA(
   localities = NULL,
   sensors = NULL,
   maxgap = 5,
-  method = .prep_const_FILLNA_METHOD_LINEAR
+  method = "linear"
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ mc_prep_fillNA(
 
 \item{maxgap}{maximum number of consecutively NA values to fill (default 5)}
 
-\item{method}{used for approximation. It is implemented now only "linear". (default "liner")}
+\item{method}{used for approximation. It is implemented now only "linear". (default "linear")}
 }
 \value{
 myClim object with filled NA values

@@ -1,5 +1,6 @@
 .plot_const_MOISTURE_PHYSICAL <- c(myClim:::.model_const_PHYSICAL_TMSmoisture,
                                    myClim:::.model_const_PHYSICAL_moisture)
+.plot_const_MESSAGE_DUPLICATED_SENSOR <- "Sensor {duplicated_sensors} contains multiple physicals. It is forbidden."
 
 #' Plot data from loggers
 #'
@@ -41,7 +42,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 }
 
 .plot_get_logger_sensors_by_physical <- function(logger) {
-    physical <- sapply(logger$sensors, function(x) {
+    physical <- purrr::map_chr(logger$sensors, function(x) {
         myClim:::.common_get_sensor_info(x$metadata)@physical})
     sensor_names <- names(logger$sensors)
     tapply(sensor_names, physical, c, simplify = FALSE)
@@ -202,6 +203,7 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' * "H" - turbo
 #' @param start_crop POSIXct datetime for crop data (default NULL)
 #' @param end_crop POSIXct datetime for crop data (default NULL)
+#' @return list of ggplot2 objects
 #' @export
 mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900,
                            viridis_color_map=NULL, start_crop=NULL, end_crop=NULL) {
@@ -209,7 +211,57 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
     if(!is.null(start_crop) || !is.null(end_crop)) {
         data <- mc_prep_crop(data, start_crop, end_crop)
     }
-    data_table <-mc_reshape_long(data, )
+    sensors_table <- .plot_get_data_sensors_by_physical(data)
+    sensors_table <- dplyr::group_by(sensors_table, physical)
+
+    group_function <- function(group, .y) {
+        filtered_data <- mc_filter(data, sensors=group$sensor)
+        .plot_raster_physical(filtered_data, by_hour, viridis_color_map)
+    }
+
+    plots <- dplyr::group_map(sensors_table, group_function)
+
+    if(!is.null(filename)) {
+        file_parts <- .plot_get_file_parts(filename)
+        if(file_parts[[2]] == "pdf"){
+            .plot_print_pdf(filename, plots, locality_id ~ sensor_name, 40)
+        } else if(file_parts[[2]] == "png") {
+            .plot_print_raster_pngs(file_parts[[1]], plots, dplyr::group_keys(sensors_table)$physical, png_width, png_height)
+        } else {
+            stop(stringr::str_glue("Format of {filename} isn't supported."))
+        }
+    }
+    plots <- purrr::map(plots, ~ .x + ggplot2::facet_grid(locality_id ~ sensor_name))
+    return(plots)
+}
+
+.plot_get_data_sensors_by_physical <- function(data) {
+    item_function <- function (item) {
+        physical <- purrr::map_chr(item$sensors, function(x) {
+            myClim:::.common_get_sensor_info(x$metadata)@physical})
+        tibble::tibble(sensor=names(physical),
+                       physical=unname(physical))
+    }
+
+    raw_locality_function <- function(locality) {
+        purrr::map_dfr(locality$loggers, item_function)
+    }
+
+    if(.common_is_agg_format(data)) {
+        result <- purrr::map_dfr(data$localities, item_function)
+    } else {
+        result <- purrr::map_dfr(data$localities, raw_locality_function)
+    }
+    result <- dplyr::distinct(result)
+    if(any(duplicated(result$sensor))) {
+        duplicated_sensors <- result$sensor[duplicated(result$sensor)]
+        stop(stringr::str_glue(.plot_const_MESSAGE_DUPLICATED_SENSOR))
+    }
+    return(result)
+}
+
+.plot_raster_physical <- function(data, by_hour, viridis_color_map) {
+    data_table <-mc_reshape_long(data)
     data_table <- dplyr::mutate(data_table, date = lubridate::date(datetime))
     if(by_hour) {
         data_table <- dplyr::mutate(data_table, y_values = lubridate::hour(datetime))
@@ -224,18 +276,6 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
     plot <- .plot_set_ggplot_physical_colors(data, plot, viridis_color_map)
     plot <- plot + .plot_set_ggplot_raster_theme()
     plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
-    if(!is.null(filename)) {
-        file_type <- .plot_get_file_type(filename)
-        if(file_type == "pdf"){
-            .plot_print_pdf(filename, plot, locality_id ~ sensor_name, 40)
-        } else if(file_type == "png") {
-            .plot_print_png(filename, plot, png_width, png_height, locality_id ~ sensor_name)
-        } else {
-            stop(stringr::str_glue("Format of {filename} isn't supported."))
-        }
-    }
-    plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(locality_id))
-    return(plot)
 }
 
 .plot_set_ggplot_physical_colors <- function(data, plot, viridis_color_map) {
@@ -274,17 +314,33 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
                    panel.grid.minor = ggplot2::element_blank())
 }
 
-.plot_get_file_type <- function(filename) {
-    match <- stringr::str_match(filename, ".+\\.([^.]+)$")
-    match[[2]]
+.plot_get_file_parts <- function(filename) {
+    match <- stringr::str_match(filename, "(.+)\\.([^.]+)$")
+    match[2:3]
 }
 
-.plot_print_pdf <- function(filename, plot, facets, nrow) {
-    plot <- plot + ggforce::facet_grid_paginate(facets, ncol = 1, nrow = nrow, page = 1, drop = FALSE, byrow = FALSE)
-    n_pages <- ggforce::n_pages(plot)
+.plot_print_pdf <- function(filename, plots, facets, nrow) {
+    facet_function <- function(page, drop) {
+        ggforce::facet_grid_paginate(facets, ncol = 1, nrow = nrow, page = page, drop = drop, byrow = FALSE)
+    }
+    plots <- purrr::map(plots, ~ .x + facet_function(1, FALSE))
+
+    print_plot <- function(plot) {
+        n_pages <- sum(ggforce::n_pages(plot))
+        purrr::walk(seq(1:n_pages), function (x) print(plot + facet_function(x, TRUE)))
+    }
+
     pdf(filename, family="ArialMT", paper="a4", w=210/25.4, h=297/25.4)
-    purrr::walk(seq(1:n_pages), function (x) print(plot + ggforce::facet_grid_paginate(facets, ncol = 1, nrow = nrow, page = x, drop = TRUE, byrow = FALSE)))
+    purrr::walk(plots, print_plot)
     dev.off()
+}
+
+.plot_print_raster_pngs <- function(filename_prefix, plots, physicals, width, height) {
+    print_function <- function(plot, physical) {
+        filename <- stringr::str_glue("{filename_prefix}_{physical}.png")
+        .plot_print_png(filename, plot, width, height, locality_id ~ sensor_name)
+    }
+    purrr::walk2(plots, physicals, print_function)
 }
 
 .plot_print_png <- function(filename, plot, width, height, facets) {
@@ -341,10 +397,10 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     plot <- plot + .plot_line_set_y_axes(sensors_table)
 
     if(!is.null(filename)) {
-        file_type <- .plot_get_file_type(filename)
-        if(file_type == "pdf"){
-            .plot_print_pdf(filename, plot, ggplot2::vars(locality_id), 8)
-        } else if(file_type == "png") {
+        file_parts <- .plot_get_file_parts(filename)
+        if(file_parts[[2]] == "pdf"){
+            .plot_print_pdf(filename, list(plot), ggplot2::vars(locality_id), 8)
+        } else if(file_parts[[2]] == "png") {
             .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(locality_id))
         } else {
             stop(stringr::str_glue("Format of {filename} isn't supported."))
