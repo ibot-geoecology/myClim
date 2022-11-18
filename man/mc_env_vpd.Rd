@@ -9,19 +9,20 @@ mc_env_vpd(
   period,
   use_utc = TRUE,
   custom_start = NULL,
-  custom_end = NULL
+  custom_end = NULL,
+  min_coverage = 1
 )
 }
 \arguments{
-\item{data}{cleaned myClim object see \link{myClim-package}}
-
 \item{period}{output period see \code{\link[=mc_agg]{mc_agg()}}}
 
-\item{use_utc}{if FALSE, then local time is used for day aggregation see \code{\link[=mc_agg]{mc_agg()}}}
+\item{use_utc}{if FALSE, then local time is used for day aggregation see \code{\link[=mc_agg]{mc_agg()}} (default TRUE)}
 
-\item{custom_start}{start date for custom period see \code{\link[=mc_agg]{mc_agg()}}}
+\item{custom_start}{start date for custom period see \code{\link[=mc_agg]{mc_agg()}} (default NULL)}
 
-\item{custom_end}{end date for custom period see \code{\link[=mc_agg]{mc_agg()}}}
+\item{custom_end}{end date for custom period see \code{\link[=mc_agg]{mc_agg()}} (default NULL)}
+
+\item{min_coverage}{§parameter for mc_agg see \code{\link[=mc_agg]{mc_agg()}} (default 1)§}
 }
 \value{
 table in long format with environment variables

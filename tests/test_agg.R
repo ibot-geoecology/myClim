@@ -32,6 +32,7 @@ test_that("mc_agg day functions", {
     agg_data <- mc_agg(data, c(TS_T=c("min", "max")), "day", use_utc=FALSE, min_coverage = 0)
     expect_equal(length(agg_data$localities$`91184101`$sensors), 2)
     test_agg_data_format(agg_data)
+    mc_agg(agg_data, "mean", "week", use_utc=FALSE)
 })
 
 test_that("mc_agg empty data", {

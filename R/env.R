@@ -27,19 +27,15 @@
 #'     - fdd{base}: freezing degree days with base from parameter `fdd_t_base`
 #'     - frostdays: the number of days in which some temerature value was lower than parameter `fdd_t_base`
 #'
-#' @template param_myClim_object_cleaned
-#' @param period output period see [myClim::mc_agg()]
-#' @param use_utc if FALSE, then local time is used for day aggregation see [myClim::mc_agg()]
-#' @param custom_start start date for custom period see [myClim::mc_agg()]
-#' @param custom_end end date for custom period see [myClim::mc_agg()]
-#' @param gdd_t_base base temeprature for Growing degree days [myClim::mc_calc_gdd()]
-#' @param fdd_t_base base temeprature for freezing degree days [myClim::mc_calc_fdd()]
+#' @template params_env_agg
+#' @param gdd_t_base base temeprature for Growing degree days [myClim::mc_calc_gdd()] (default 5)
+#' @param fdd_t_base base temeprature for freezing degree days [myClim::mc_calc_fdd()] (default 0)
 #' @return table in long format with environment variables
 #' @export
 #' @examples
 #' data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 #' mc_env_temp(data, "month")
-mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, gdd_t_base=5, fdd_t_base=0) {
+mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1, gdd_t_base=5, fdd_t_base=0) {
     is_agg <- myClim:::.common_is_agg_format(data)
     if(!is_agg) {
         data <- mc_agg(data)
@@ -48,7 +44,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
     table <- .env_temp_get_table(prepared$temp_sensors, gdd_t_base, fdd_t_base)
     day_data <- .env_get_day_agg(prepared$data, table, use_utc)
     custom_functions <- list(frostdays=function(values){sum(values < fdd_t_base)})
-    result_data <- .env_get_result_agg(day_data, table, period, custom_start, custom_end, custom_functions)
+    result_data <- .env_get_result_agg(day_data, table, period, TRUE, custom_start, custom_end, min_coverage, custom_functions)
     mc_reshape_long(result_data)
 }
 
@@ -172,7 +168,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
     mc_agg(data, fun, "day", use_utc=use_utc)
 }
 
-.env_get_result_agg <- function(day_data, table, period, custom_start, custom_end, custom_functions=NULL,
+.env_get_result_agg <- function(day_data, table, period, use_utc, custom_start, custom_end, min_coverage, custom_functions=NULL,
                                 percentiles=c(.env_const_MIN_PERCENTILE, .env_const_MAX_PERCENTILE)) {
     agg_table <- dplyr::select(table, sensor_prep, period_fun)
     agg_table <- dplyr::group_by(agg_table, sensor_prep)
@@ -184,7 +180,8 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
     names(fun) <- dplyr::group_keys(agg_table)$sensor_prep
     fun <- purrr::map(fun, ~ unique(.x))
     result_data <- mc_agg(day_data, fun, period, custom_start=custom_start, custom_end=custom_end,
-                          percentiles=percentiles, custom_functions=custom_functions)
+                          percentiles=percentiles, custom_functions=custom_functions, min_coverage=min_coverage,
+                          use_utc=use_utc)
     rename_rules <- as.list(table$result_name)
     names(rename_rules) <- table$sensor_period
     result_data <- mc_prep_meta_sensor(result_data, rename_rules, param_name="name")
@@ -204,18 +201,14 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 #'     - 95p: ninety-fifth percentile
 #'     - sd: standard deviation
 #'
-#' @template param_myClim_object_cleaned
-#' @param period output period see [myClim::mc_agg()]
-#' @param use_utc if FALSE, then local time is used for day aggregation see [myClim::mc_agg()]
-#' @param custom_start start date for custom period see [myClim::mc_agg()]
-#' @param custom_end end date for custom period see [myClim::mc_agg()]
+#' @template params_env_agg
 #' @return table in long format with environment variables
 #' @export
 #' @examples
 #' data <- mc_prep_crop(mc_data_example_calc, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 #' data <- mc_calc_vwc(data, localities=c("A2E32", "A6W79"))
 #' mc_env_moist(data, "month")
-mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL) {
+mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1) {
     is_agg <- myClim:::.common_is_agg_format(data)
     if(!is_agg) {
         data <- mc_agg(data)
@@ -225,7 +218,7 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
     if(nrow(table) == 0) {
         stop(.env_const_MESSAGE_ANY_VWC)
     }
-    result_data <- .env_get_result_agg(prepared$data, table, period, custom_start, custom_end, list(sd=sd))
+    result_data <- .env_get_result_agg(prepared$data, table, period, use_utc, custom_start, custom_end, min_coverage, list(sd=sd))
     mc_reshape_long(result_data)
 }
 
@@ -285,14 +278,10 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 #'     - mean: mean of daily mean
 #'     - max95p: ninety-fifth percentile of daily maximum
 #'
-#' @template param_myClim_object_cleaned
-#' @param period output period see [myClim::mc_agg()]
-#' @param use_utc if FALSE, then local time is used for day aggregation see [myClim::mc_agg()]
-#' @param custom_start start date for custom period see [myClim::mc_agg()]
-#' @param custom_end end date for custom period see [myClim::mc_agg()]
+#' @template params_env_agg
 #' @return table in long format with environment variables
 #' @export
-mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL) {
+mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1) {
     is_agg <- myClim:::.common_is_agg_format(data)
     if(!is_agg) {
         data <- mc_agg(data)
@@ -303,7 +292,8 @@ mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end
         stop(.env_const_MESSAGE_ANY_VPD)
     }
     day_data <- .env_get_day_agg(prepared$data, table, use_utc)
-    result_data <- .env_get_result_agg(day_data, table, period, custom_start, custom_end, percentiles=.env_const_MAX_PERCENTILE)
+    result_data <- .env_get_result_agg(day_data, table, period, TRUE, custom_start, custom_end,
+                                       min_coverage, percentiles=.env_const_MAX_PERCENTILE)
     mc_reshape_long(result_data)
 }
 

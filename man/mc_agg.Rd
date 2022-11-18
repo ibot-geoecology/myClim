@@ -37,7 +37,7 @@ Start day of week is Monday.}
 
 \item{use_utc}{default TRUE using UTC time, if set FALSE before aggregation, time is shifted by offset if available in locality metadata.
 Shift can be e.g. to solar time \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}} or political time with custom shift \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}}).
-Non-UTC time can by used only for period \code{day} and longer.}
+§Non-UTC time can by used only for aggregation from period shorter than \code{day} to period \code{day} and longer.§}
 
 \item{percentiles}{vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details}
 

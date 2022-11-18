@@ -19,6 +19,9 @@
 .agg_const_MESSAGE_WRONG_SHIFT <- "Shift of time-series in {locality$metadata@locality_id} locality is different."
 .agg_const_MESSAGE_MISSING_HEIGHT <- "Height is missing in sensosr {object@name}."
 .agg_const_MESSAGE_WRONG_CUSTOM_FUNCTION <- "Type of values in sensor {new_sensor$metadata@name} is wrong."
+.agg_const_MESSAGE_FUN_AND_PERIOD <- "Parameters fun and period must be both NULL or must be both set."
+.agg_const_MESSAGE_SHORT_PERIOD <- "Period cannot be less then 1s."
+.agg_const_MESSAGE_NONUTC_SHORT_PERIOD <- "Non-UTC time zone can be used only for period day and bigger."
 
 #' Aggregate data by function
 #'
@@ -79,7 +82,7 @@
 #' Start day of week is Monday.
 #' @param use_utc default TRUE using UTC time, if set FALSE before aggregation, time is shifted by offset if available in locality metadata.
 #' Shift can be e.g. to solar time [myClim::mc_prep_solar_tz()] or political time with custom shift [myClim::mc_prep_meta_locality()]).
-#' Non-UTC time can by used only for period `day` and longer. 
+#' §Non-UTC time can by used only for aggregation from period shorter than `day` to period `day` and longer.§
 #' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
 #' @param min_coverage value from range 0-1 (default 1); the threshold specifying how many missing values can you accept within aggregation period. 
 #' e.g. when aggregating from 15 min to monthly mean and set `min_coverage=1` then a single NA value within the specific month cause monthly mean = NA.
@@ -263,13 +266,13 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         return()
     }
     if(is.null(fun) || is.null(period_object)) {
-        stop("Parameters fun and period must be both NULL or must be both set.")
+        stop(.agg_const_MESSAGE_FUN_AND_PERIOD)
     }
-    if(as.numeric(period_object[[1]]) == 0) {
-        stop("Period cannot be 0.")
+    if(as.numeric(period_object[[1]]) < 1) {
+        stop(.agg_const_MESSAGE_SHORT_PERIOD)
     }
     if(!use_utc && period_object[[1]]@year == 0 && period_object[[1]]@month == 0 && period_object[[1]]@day == 0) {
-        stop("Non-UTC time zone can be used only for period day and bigger.")
+        stop(.agg_const_MESSAGE_NONUTC_SHORT_PERIOD)
     }
 }
 
