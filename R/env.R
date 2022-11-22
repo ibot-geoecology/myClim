@@ -27,6 +27,7 @@
 #'     - fdd{base}: freezing degree days with base from parameter `fdd_t_base`
 #'     - frostdays: the number of days in which some temerature value was lower than parameter `fdd_t_base`
 #'
+#' @template param_myClim_object_cleaned
 #' @template params_env_agg
 #' @param gdd_t_base base temeprature for Growing degree days [myClim::mc_calc_gdd()] (default 5)
 #' @param fdd_t_base base temeprature for freezing degree days [myClim::mc_calc_fdd()] (default 0)
@@ -201,6 +202,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 #'     - 95p: ninety-fifth percentile
 #'     - sd: standard deviation
 #'
+#' @template param_myClim_object_cleaned
 #' @template params_env_agg
 #' @return table in long format with environment variables
 #' @export
@@ -278,6 +280,7 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 #'     - mean: mean of daily mean
 #'     - max95p: ninety-fifth percentile of daily maximum
 #'
+#' @template param_myClim_object_cleaned
 #' @template params_env_agg
 #' @return table in long format with environment variables
 #' @export

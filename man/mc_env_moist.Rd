@@ -14,6 +14,8 @@ mc_env_moist(
 )
 }
 \arguments{
+\item{data}{cleaned myClim object see \link{myClim-package}}
+
 \item{period}{output period see \code{\link[=mc_agg]{mc_agg()}}}
 
 \item{use_utc}{if FALSE, then local time is used for day aggregation see \code{\link[=mc_agg]{mc_agg()}} (default TRUE)}
