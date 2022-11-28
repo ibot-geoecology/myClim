@@ -1,4 +1,4 @@
-library(myClim)
+devtools::load_all()
 
 files_table <- as.data.frame(tibble::tribble(
                                     ~path, ~locality_id, ~data_format, ~serial_number,        ~date_format,

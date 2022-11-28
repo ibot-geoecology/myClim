@@ -6,14 +6,14 @@
 \usage{
 mc_calc_vwc(
   data,
-  moist_sensor = myClim:::.model_const_SENSOR_TMS_TMSmoisture,
-  temp_sensor = myClim:::.model_const_SENSOR_TMS_T1,
+  moist_sensor = .model_const_SENSOR_TMS_TMSmoisture,
+  temp_sensor = .model_const_SENSOR_TMS_T1,
   output_sensor = "VWC_moisture",
   soiltype = "universal",
   localities = NULL,
-  ref_t = myClim:::.calib_MOIST_REF_T,
-  acor_t = myClim:::.calib_MOIST_ACOR_T,
-  wcor_t = myClim:::.calib_MOIST_WCOR_T,
+  ref_t = .calib_MOIST_REF_T,
+  acor_t = .calib_MOIST_ACOR_T,
+  wcor_t = .calib_MOIST_WCOR_T,
   frozen2NA = TRUE
 )
 }

@@ -37,7 +37,7 @@
 #' data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 #' mc_env_temp(data, "month")
 mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1, gdd_t_base=5, fdd_t_base=0) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         data <- mc_agg(data)
     }
@@ -50,21 +50,21 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 }
 
 .env_temp_calc_fdd_gdd_and_rename <- function(data, gdd_t_base, fdd_t_base) {
-    temp_sensors <- .env_get_sensors_by_physical_or_id(data, physical=myClim:::.model_const_PHYSICAL_T_C)
+    temp_sensors <- .env_get_sensors_by_physical_or_id(data, physical=.model_const_PHYSICAL_T_C)
     result <- list(temp_sensors=character(), other_sensors=character())
     for(temp_sensor in names(temp_sensors$localities)) {
         localities <- temp_sensors$localities[[temp_sensor]]
         result$data <- mc_calc_gdd(data, temp_sensor, output_prefix=.env_const_GDD, t_base=gdd_t_base, localities=localities)
         result$data <- mc_calc_fdd(result$data, temp_sensor, output_prefix=.env_const_FDD, t_base=fdd_t_base, localities=localities)
-        height_name <- myClim:::.agg_get_height_name(temp_sensor, temp_sensors$heights[[temp_sensor]])
+        height_name <- .agg_get_height_name(temp_sensor, temp_sensors$heights[[temp_sensor]])
         new_name <- paste0(.env_const_T_PREFIX, height_name)
         result$temp_sensors <- append(result$temp_sensors, new_name)
         rename_rules <- list()
         rename_rules[[temp_sensor]] <- new_name
-        gdd_name <- myClim:::.calc_get_name_with_base(.env_const_GDD, gdd_t_base)
+        gdd_name <- .calc_get_name_with_base(.env_const_GDD, gdd_t_base)
         new_gdd_name <- .env_get_calc_sensor_name(gdd_name, new_name)
         rename_rules[[gdd_name]] <- new_gdd_name
-        fdd_name <- myClim:::.calc_get_name_with_base(.env_const_FDD, fdd_t_base)
+        fdd_name <- .calc_get_name_with_base(.env_const_FDD, fdd_t_base)
         new_fdd_name <- .env_get_calc_sensor_name(fdd_name, new_name)
         rename_rules[[fdd_name]] <- new_fdd_name
         result$data <- mc_prep_meta_sensor(result$data, rename_rules, param_name="name")
@@ -77,7 +77,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
     result$localities <- new.env()
     result$heights <- new.env()
     sensor_function <- function(locality_id, sensor) {
-        if(!is.null(physical) && !myClim:::.model_is_physical(sensor$metadata, physical)) {
+        if(!is.null(physical) && !.model_is_physical(sensor$metadata, physical)) {
             return()
         }
         if(!is.null(sensor_id) && sensor$metadata@sensor_id != sensor_id) {
@@ -111,37 +111,37 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 .env_temp_get_table <- function(temp_sensors, gdd_t_base, fdd_t_base) {
     sensor_function <- function(sensor) {
         count_rows <- 7
-        gdd_with_base <- myClim:::.calc_get_name_with_base(.env_const_GDD, gdd_t_base)
-        fdd_with_base <- myClim:::.calc_get_name_with_base(.env_const_FDD, fdd_t_base)
+        gdd_with_base <- .calc_get_name_with_base(.env_const_GDD, gdd_t_base)
+        fdd_with_base <- .calc_get_name_with_base(.env_const_FDD, fdd_t_base)
         gdd_name <- .env_get_calc_sensor_name(gdd_with_base, sensor)
         fdd_name <- .env_get_calc_sensor_name(fdd_with_base, sensor)
         sensor_base <- c(rep(sensor, count_rows - 2), gdd_name, fdd_name)
         day_fun <- c(
-            myClim:::.agg_const_FUNCTION_MIN,
-            myClim:::.agg_const_FUNCTION_MIN,
-            myClim:::.agg_const_FUNCTION_MEAN,
-            myClim:::.agg_const_FUNCTION_MAX,
-            myClim:::.agg_const_FUNCTION_RANGE,
-            myClim:::.agg_const_FUNCTION_SUM,
-            myClim:::.agg_const_FUNCTION_SUM)
-        sensor_day <- purrr::map2_chr(sensor_base, day_fun, ~ myClim:::.agg_get_aggregated_sensor_name(.x, .y))
+            .agg_const_FUNCTION_MIN,
+            .agg_const_FUNCTION_MIN,
+            .agg_const_FUNCTION_MEAN,
+            .agg_const_FUNCTION_MAX,
+            .agg_const_FUNCTION_RANGE,
+            .agg_const_FUNCTION_SUM,
+            .agg_const_FUNCTION_SUM)
+        sensor_day <- purrr::map2_chr(sensor_base, day_fun, ~ .agg_get_aggregated_sensor_name(.x, .y))
         period_fun <- c(
-            myClim:::.agg_const_FUNCTION_PERCENTILE,
+            .agg_const_FUNCTION_PERCENTILE,
             .env_const_FROSTDAYS,
-            myClim:::.agg_const_FUNCTION_MEAN,
-            myClim:::.agg_const_FUNCTION_PERCENTILE,
-            myClim:::.agg_const_FUNCTION_MEAN,
-            myClim:::.agg_const_FUNCTION_SUM,
-            myClim:::.agg_const_FUNCTION_SUM)
+            .agg_const_FUNCTION_MEAN,
+            .agg_const_FUNCTION_PERCENTILE,
+            .agg_const_FUNCTION_MEAN,
+            .agg_const_FUNCTION_SUM,
+            .agg_const_FUNCTION_SUM)
         output_sensor_function <- function(sensor_day, fun) {
-            if(fun == myClim:::.agg_const_FUNCTION_PERCENTILE) {
-                if(stringr::str_ends(sensor_day, myClim:::.agg_const_FUNCTION_MIN)) {
+            if(fun == .agg_const_FUNCTION_PERCENTILE) {
+                if(stringr::str_ends(sensor_day, .agg_const_FUNCTION_MIN)) {
                     fun <- .agg_get_percentile_function_name(.env_const_MIN_PERCENTILE)
                 } else {
                     fun <- .agg_get_percentile_function_name(.env_const_MAX_PERCENTILE)
                 }
             }
-            myClim:::.agg_get_aggregated_sensor_name(sensor_day, fun)
+            .agg_get_aggregated_sensor_name(sensor_day, fun)
         }
         sensor_period <- purrr::map2_chr(sensor_day, period_fun, output_sensor_function)
         result_texts <- c("min5p", .env_const_FROSTDAYS, "mean", "max95p", "drange", gdd_with_base, fdd_with_base)
@@ -211,7 +211,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 #' data <- mc_calc_vwc(data, localities=c("A2E32", "A6W79"))
 #' mc_env_moist(data, "month")
 mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         data <- mc_agg(data)
     }
@@ -225,10 +225,10 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 }
 
 .env_moist_rename_sensors <- function(data) {
-    moist_sensors <- .env_get_sensors_by_physical_or_id(data, physical=myClim:::.model_const_PHYSICAL_moisture)
+    moist_sensors <- .env_get_sensors_by_physical_or_id(data, physical=.model_const_PHYSICAL_moisture)
     result <- list(moist_sensors=character())
     for(moist_sensor in names(moist_sensors$localities)) {
-        height_name <- myClim:::.agg_get_height_name(moist_sensor, moist_sensors$heights[[moist_sensor]])
+        height_name <- .agg_get_height_name(moist_sensor, moist_sensors$heights[[moist_sensor]])
         new_name <- paste0(.env_const_VWC_PREFIX, height_name)
         result$moist_sensors <- append(result$moist_sensors, new_name)
         rename_rules <- list()
@@ -243,15 +243,15 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
         count_rows <- 4
         sensor_base <- rep(sensor, count_rows)
         period_fun <- c(
-            myClim:::.agg_const_FUNCTION_PERCENTILE,
-            myClim:::.agg_const_FUNCTION_MEAN,
-            myClim:::.agg_const_FUNCTION_PERCENTILE,
+            .agg_const_FUNCTION_PERCENTILE,
+            .agg_const_FUNCTION_MEAN,
+            .agg_const_FUNCTION_PERCENTILE,
             .env_const_SD)
         output_sensor_function <- function(sensor, fun, percentile) {
-            if(fun == myClim:::.agg_const_FUNCTION_PERCENTILE) {
+            if(fun == .agg_const_FUNCTION_PERCENTILE) {
                 fun <- .agg_get_percentile_function_name(percentile)
             }
-            myClim:::.agg_get_aggregated_sensor_name(sensor, fun)
+            .agg_get_aggregated_sensor_name(sensor, fun)
         }
         sensor_period <- purrr::pmap_chr(list(sensor=sensor_base,
                                               fun=period_fun,
@@ -285,7 +285,7 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 #' @return table in long format with environment variables
 #' @export
 mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         data <- mc_agg(data)
     }
@@ -301,10 +301,10 @@ mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end
 }
 
 .env_vpd_rename_sensors <- function(data) {
-    vpd_sensors <- .env_get_sensors_by_physical_or_id(data, sensor_id=myClim:::.model_const_SENSOR_VPD)
+    vpd_sensors <- .env_get_sensors_by_physical_or_id(data, sensor_id=.model_const_SENSOR_VPD)
     result <- list(vpd_sensors=character())
     for(vpd_sensor in names(vpd_sensors$localities)) {
-        height_name <- myClim:::.agg_get_height_name(vpd_sensor, vpd_sensors$heights[[vpd_sensor]])
+        height_name <- .agg_get_height_name(vpd_sensor, vpd_sensors$heights[[vpd_sensor]])
         new_name <- paste0(.env_const_VPD_PREFIX, height_name)
         result$vpd_sensors <- append(result$vpd_sensors, new_name)
         rename_rules <- list()
@@ -319,17 +319,17 @@ mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end
         count_rows <- 2
         sensor_base <- rep(sensor, count_rows)
         day_fun <- c(
-            myClim:::.agg_const_FUNCTION_MEAN,
-            myClim:::.agg_const_FUNCTION_MAX)
-        sensor_day <- purrr::map2_chr(sensor_base, day_fun, ~ myClim:::.agg_get_aggregated_sensor_name(.x, .y))
+            .agg_const_FUNCTION_MEAN,
+            .agg_const_FUNCTION_MAX)
+        sensor_day <- purrr::map2_chr(sensor_base, day_fun, ~ .agg_get_aggregated_sensor_name(.x, .y))
         period_fun <- c(
-            myClim:::.agg_const_FUNCTION_MEAN,
-            myClim:::.agg_const_FUNCTION_PERCENTILE)
+            .agg_const_FUNCTION_MEAN,
+            .agg_const_FUNCTION_PERCENTILE)
         output_sensor_function <- function(sensor, fun) {
-            if(fun == myClim:::.agg_const_FUNCTION_PERCENTILE) {
+            if(fun == .agg_const_FUNCTION_PERCENTILE) {
                 fun <- .agg_get_percentile_function_name(.env_const_MAX_PERCENTILE)
             }
-            myClim:::.agg_get_aggregated_sensor_name(sensor, fun)
+            .agg_get_aggregated_sensor_name(sensor, fun)
         }
         sensor_period <- purrr::map2_chr(sensor_day, period_fun, output_sensor_function)
         result_texts <- c("mean", "max95p")

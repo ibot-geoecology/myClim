@@ -6,7 +6,7 @@
 \usage{
 mc_read_wide(
   data_table,
-  sensor_id = myClim:::.model_const_SENSOR_real,
+  sensor_id = .model_const_SENSOR_real,
   sensor_name = NULL,
   clean = TRUE,
   silent = FALSE

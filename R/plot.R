@@ -1,5 +1,5 @@
-.plot_const_MOISTURE_PHYSICAL <- c(myClim:::.model_const_PHYSICAL_TMSmoisture,
-                                   myClim:::.model_const_PHYSICAL_moisture)
+.plot_const_MOISTURE_PHYSICAL <- c(.model_const_PHYSICAL_TMSmoisture,
+                                   .model_const_PHYSICAL_moisture)
 .plot_const_MESSAGE_DUPLICATED_SENSOR <- "Sensor {duplicated_sensors} contains multiple physicals. It is forbidden."
 
 #' Plot data from loggers
@@ -15,10 +15,10 @@
 #' @examples
 #' \dontrun{mc_plot_loggers(example_tomst_data1, "Figures")}
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
-    myClim:::.common_stop_if_not_raw_format(data)
+    .common_stop_if_not_raw_format(data)
     data <- mc_filter(data, localities, sensors)
-    myClim:::.prep_check_datetime_step_unprocessed(data)
-    loggers <- myClim:::.common_get_loggers(data)
+    .prep_check_datetime_step_unprocessed(data)
+    loggers <- .common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {
         filename <- file.path(directory, paste0(logger$metadata@serial_number, ".png"))
@@ -33,7 +33,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
     .plot_logger_set_parameters(physical, moisture_physical)
     xlimit <- .plot_get_xlimit(logger$datetime, crop)
     months <- .plot_get_months_from_xlimit(xlimit)
-    .plot_logger_temperature(logger, xlimit, months, physical[[myClim:::.model_const_PHYSICAL_T_C]])
+    .plot_logger_temperature(logger, xlimit, months, physical[[.model_const_PHYSICAL_T_C]])
     if(length(moisture_physical) > 0){
         .plot_logger_moisture(logger, xlimit, months, physical[[moisture_physical[[1]]]])
     }
@@ -43,7 +43,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 
 .plot_get_logger_sensors_by_physical <- function(logger) {
     physical <- purrr::map_chr(logger$sensors, function(x) {
-        myClim:::.common_get_sensor_info(x$metadata)@physical})
+        .common_get_sensor_info(x$metadata)@physical})
     sensor_names <- names(logger$sensors)
     tapply(sensor_names, physical, c, simplify = FALSE)
 }
@@ -71,7 +71,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
     if(is.na(result[[2]])) {
         result[[2]] <- max(datetime)
     }
-    myClim:::.common_as_utc_posixct(result)
+    .common_as_utc_posixct(result)
 }
 
 .plot_logger_temperature <- function(logger, xlimit, months, sensors)
@@ -81,7 +81,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
     }
     else {
         sensor_info <- sapply(sensors, function(x) {
-            myClim:::.common_get_sensor_info(logger$sensors[[x]]$metadata)})
+            .common_get_sensor_info(logger$sensors[[x]]$metadata)})
         values_range <- .plot_get_values_range(logger, sensors)
         ylimit <- c(min(c(-15, values_range[[1]]), na.rm=T), max(c(30, values_range[[2]]), na.rm=T))
     }
@@ -103,8 +103,8 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 
 .plot_logger_moisture <- function(logger, xlimit, months, sensor)
 {
-    sensor_info <- myClim:::.common_get_sensor_info(logger$sensors[[sensor]]$metadata)
-    physical <- myClim::mc_data_physical[[sensor_info@physical]]
+    sensor_info <- .common_get_sensor_info(logger$sensors[[sensor]]$metadata)
+    physical <- mc_data_physical[[sensor_info@physical]]
     right_margin <- 8
     par(mar=c(5, 5, 0.25, right_margin))
     par(new=F)
@@ -239,7 +239,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 .plot_get_data_sensors_by_physical <- function(data) {
     item_function <- function (item) {
         physical <- purrr::map_chr(item$sensors, function(x) {
-            myClim:::.common_get_sensor_info(x$metadata)@physical})
+            .common_get_sensor_info(x$metadata)@physical})
         tibble::tibble(sensor=names(physical),
                        physical=unname(physical))
     }
@@ -412,7 +412,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 }
 
 .plot_get_sensors_table <- function(data) {
-    is_raw_format <- myClim:::.common_is_raw_format(data)
+    is_raw_format <- .common_is_raw_format(data)
 
     sensors_item_function <- function(item) {
         physical_function <- function(sensor) {
@@ -455,8 +455,8 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         stop("There are more then two physical units.")
     }
     main_physical <- physicals[[1]]
-    if(myClim:::.model_const_PHYSICAL_T_C %in% physicals) {
-        main_physical <- myClim:::.model_const_PHYSICAL_T_C
+    if(.model_const_PHYSICAL_T_C %in% physicals) {
+        main_physical <- .model_const_PHYSICAL_T_C
     }
     table$main_axis <- (table$physical == main_physical)
     table

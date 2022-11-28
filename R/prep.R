@@ -47,7 +47,7 @@
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_source)
 mc_prep_clean <- function(data, silent=FALSE) {
-    if(myClim:::.common_is_agg_format(data)) {
+    if(.common_is_agg_format(data)) {
         stop(.prep_const_MESSAGE_CLEAN_AGG)
     }
     if(.prep_is_datetime_step_processed_in_object(data)) {
@@ -111,7 +111,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
             shift <- (diff + diff_rounding %/% 2) %/% diff_rounding * diff_rounding
         }
     }
-    myClim:::.common_as_utc_posixct((datetime_seconds + logger$clean_info@step %/% 2) %/%
+    .common_as_utc_posixct((datetime_seconds + logger$clean_info@step %/% 2) %/%
                                     logger$clean_info@step * logger$clean_info@step) - shift
 }
 
@@ -131,7 +131,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     if(!.prep_clean_was_error_in_logger(logger)){
         return(logger)
     }
-    table <- myClim:::.common_sensor_values_as_tibble(logger)
+    table <- .common_sensor_values_as_tibble(logger)
     table <- dplyr::arrange(table, datetime)
     grouped_table <- dplyr::group_by(table, datetime)
     table_noduplicits <- dplyr::summarise_all(grouped_table, dplyr::first)
@@ -166,7 +166,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
 
     sensor_function <- function(sensor) {
-        states_index <- which(sensor$states$tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
+        states_index <- which(sensor$states$tag == .model_const_SENSOR_STATE_SOURCE)
         if(length(states_index) != 1) {
             return(sensor)
         }
@@ -264,13 +264,13 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
             slot_name <- "locality_id"
         }
 
-        if(!(slot_name %in% myClim:::.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS)) {
+        if(!(slot_name %in% .model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS)) {
             localities[[locality_id]]$metadata@user_data[[slot_name]] <- value
             return()
         }
         slot(localities[[locality_id]]$metadata, slot_name) <- value
         if(slot_name == "tz_offset") {
-            localities[[locality_id]]$metadata@tz_type <- myClim::mc_const_TZ_USER_DEFINED
+            localities[[locality_id]]$metadata@tz_type <- mc_const_TZ_USER_DEFINED
         }
     }
 
@@ -312,14 +312,14 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
 #' @examples
 #' data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")
 mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logger_types=NULL) {
-    is_agg_format <- myClim:::.common_is_agg_format(data)
+    is_agg_format <- .common_is_agg_format(data)
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
 
-        if(!(param_name %in% myClim:::.model_const_EDITABLE_SENSOR_METADATA_PARAMETERS)) {
+        if(!(param_name %in% .model_const_EDITABLE_SENSOR_METADATA_PARAMETERS)) {
             stop(stringr::str_glue(.prep_const_MESSAGE_SENSOR_METADATA_WRONG_SLOT))
         }
 
@@ -393,7 +393,7 @@ mc_prep_solar_tz <- function(data) {
             return(locality)
         }
         locality$metadata@tz_offset <- round(locality$metadata@lon_wgs84 / 180 * 12 * 60)
-        locality$metadata@tz_type <- myClim::mc_const_TZ_SOLAR
+        locality$metadata@tz_type <- mc_const_TZ_SOLAR
         locality
     }
 
@@ -446,7 +446,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
         locality
     }
 
-    if(myClim:::.common_is_agg_format(data)) {
+    if(.common_is_agg_format(data)) {
         data$localities <- purrr::map(data$localities, sensors_item_function)
     } else {
         data$localities <- purrr::map(data$localities, raw_locality_function)
@@ -455,7 +455,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {
-    table <- myClim:::.common_sensor_values_as_tibble(item)
+    table <- .common_sensor_values_as_tibble(item)
     if(!is.null(start)) {
         table <- dplyr::filter(table, datetime >= start)
     }
@@ -495,7 +495,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     interval <- lubridate::interval(start, end)
 
     sensor_function <- function(sensor) {
-        sensor$states <- myClim:::.common_crop_states_table(sensor$states, interval)
+        sensor$states <- .common_crop_states_table(sensor$states, interval)
         sensor
     }
 
@@ -530,7 +530,7 @@ mc_prep_merge <- function(data_items) {
 
 .prep_do_merge <- function(data1, data2) {
     .prep_merge_check_data(data1, data2)
-    is_raw_format <- myClim:::.common_is_raw_format(data1)
+    is_raw_format <- .common_is_raw_format(data1)
 
     common_locality_ids <- intersect(names(data1$localities), names(data2$localities))
 
@@ -553,8 +553,8 @@ mc_prep_merge <- function(data_items) {
 }
 
 .prep_merge_check_data <- function(data1, data2) {
-    is_data1_agg_format <- myClim:::.common_is_agg_format(data1)
-    is_data2_agg_format <- myClim:::.common_is_agg_format(data2)
+    is_data1_agg_format <- .common_is_agg_format(data1)
+    is_data2_agg_format <- .common_is_agg_format(data2)
 
     if(xor(is_data1_agg_format, is_data2_agg_format)) {
         stop("There is different format in data1 and data2.")
@@ -573,8 +573,8 @@ mc_prep_merge <- function(data_items) {
 
 .prep_merge_calc_localities <- function(locality1, locality2, period){
     localities <- list(locality1, locality2)
-    datetime <- myClim:::.agg_get_datetimes_from_sensor_items(localities, period)
-    sensors <- myClim:::.agg_get_merged_sensors(datetime, localities)
+    datetime <- .agg_get_datetimes_from_sensor_items(localities, period)
+    sensors <- .agg_get_merged_sensors(datetime, localities)
     locality1$datetime <- datetime
     locality1$sensors <- sensors
     locality1
@@ -607,7 +607,7 @@ mc_prep_merge <- function(data_items) {
 #' @return myClim object with loaded calibration information in metadata. Microclimatic records are not calibrated, only ready for calibration. To calibrate records run [myClim::mc_prep_calib()]
 #' @export
 mc_prep_calib_load <- function(data, calib_table) {
-    myClim:::.common_stop_if_not_raw_format(data)
+    .common_stop_if_not_raw_format(data)
     calib_table <- dplyr::group_nest(dplyr::group_by(calib_table, serial_number))
 
     sensor_function <- function(sensor, logger_calib_table) {
@@ -669,7 +669,7 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' @return same myClim object as input but with calibrated sensor values.
 #' @export
 mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
-    is_raw_format <- myClim:::.common_is_raw_format(data)
+    is_raw_format <- .common_is_raw_format(data)
     if(is_raw_format) {
         .prep_check_datetime_step_unprocessed(data, stop)
     }
@@ -685,13 +685,13 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
             warning(stringr::str_glue("Calibration parameters missed in sensor {sensor$metadata@name} in {locality_id}."))
             return(sensor)
         }
-        if(myClim:::.model_is_physical_TMSmoisture(sensor$metadata)) {
+        if(.model_is_physical_TMSmoisture(sensor$metadata)) {
             warning(stringr::str_glue("Using simple linear correction of raw moisture values in sensor {sensor$metadata@name}, for more precisse correction use function mc_calc_vwc."))
         }
         if(sensor$metadata@calibrated) {
             stop(stringr::str_glue("Sensor {sensor$metadata@name} is calibrated. It isn't possible recalibrate sensor."))
         }
-        if(!myClim:::.model_is_type_real(sensor$metadata)) {
+        if(!.model_is_type_real(sensor$metadata)) {
             stop(stringr::str_glue("Value type of sensor {sensor$metadata@name} isn't real."))
         }
 
@@ -760,7 +760,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
 #' @return myClim object with filled NA values
 #' @export
 mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method="linear") {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         .prep_check_datetime_step_unprocessed(data, stop)
     }

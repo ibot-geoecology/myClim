@@ -6,8 +6,8 @@
 \usage{
 mc_calc_tomst_dendro(
   data,
-  dendro_sensor = myClim:::.model_const_SENSOR_DEND_TOMSTdendro,
-  output_sensor = myClim:::.model_const_SENSOR_dendro_l_um,
+  dendro_sensor = .model_const_SENSOR_DEND_TOMSTdendro,
+  output_sensor = .model_const_SENSOR_dendro_l_um,
   localities = NULL
 )
 }

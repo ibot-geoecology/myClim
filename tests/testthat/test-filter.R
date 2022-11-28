@@ -1,9 +1,9 @@
 library(testthat)
 library(myClim)
-source("test.R")
+source("libtest.R")
 
 test_that("mc_filter prep format", {
-    data <- mc_read_data("data/TOMST/files_table.csv", clean=FALSE)
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     filtered <- mc_filter(data, c("A6W79", "A2E32", "A1E05"), "TMS_T2")
     test_raw_data_format(filtered)
     expect_equal(length(filtered), 2)
@@ -14,7 +14,7 @@ test_that("mc_filter prep format", {
 })
 
 test_that("mc_filter reverse prep format", {
-    data <- mc_read_data("data/TOMST/files_table.csv", clean=FALSE)
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     filtered <- mc_filter(data, "A6W79", "TS_T", reverse=T)
     test_raw_data_format(filtered)
     expect_equal(length(filtered$localities), 1)
@@ -22,7 +22,7 @@ test_that("mc_filter reverse prep format", {
 })
 
 test_that("mc_filter calc format", {
-    cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent=T)
+    cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
     agg_data <- mc_agg(cleaned_data)
     filtered <- mc_filter(agg_data, c("A6W79", "A2E32", "A1E05"), "TMS_T2")
     test_agg_data_format(filtered)
@@ -34,7 +34,7 @@ test_that("mc_filter calc format", {
 })
 
 test_that("mc_filter reverse calc format", {
-    cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent=T)
+    cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
     agg_data <- mc_agg(cleaned_data)
     filtered <- mc_filter(agg_data, "A6W79", "TS_T", reverse=T)
     test_agg_data_format(filtered)

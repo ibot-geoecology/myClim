@@ -11,7 +11,7 @@ debug_loading_function <- function (path_prefix) {
 debug_loading_function("./")
 
 # debug tests
-setwd("tests")
+setwd("tests/testthat")
 debug_loading_function("../")
 
 # debug code

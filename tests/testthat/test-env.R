@@ -1,9 +1,9 @@
 library(testthat)
 
-source("test.R")
+source("libtest.R")
 
 test_that("mc_env_temp", {
-    cleaned_data <- mc_read_files("data/agg-month", dataformat_name="TOMST", silent=T)
+    cleaned_data <- mc_read_files("../data/agg-month", dataformat_name="TOMST", silent=T)
     env_temp_table <- mc_env_temp(cleaned_data, "week", min_coverage=0.9)
     expect_equal(nrow(env_temp_table), 119)
     expect_true(is.na(env_temp_table$value[[1]]))
@@ -18,7 +18,7 @@ test_that("mc_env_temp", {
 })
 
 test_that("mc_env_moist", {
-    cleaned_data <- mc_read_data("data/TOMST/files_table.csv", silent = T)
+    cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent = T)
     expect_error(env_table <- mc_env_moist(cleaned_data, "all"))
     expect_warning(raw_data <- mc_calc_vwc(cleaned_data))
     raw_data <- mc_filter(raw_data, localities = c("A2E32", "A6W79"))
@@ -31,10 +31,10 @@ test_that("mc_env_moist", {
 })
 
 test_that("mc_env_vpd", {
-    data <- mc_read_files("data/env-VPD/20024338.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S", silent=TRUE)
+    data <- mc_read_files("../data/env-VPD/20024338.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S", silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`20024338`="LOC"), param_name = "locality_id")
     expect_error(env_table <- mc_env_vpd(data, "all"))
-    vpd_data <- mc_calc_vpd(data, myClim:::.model_const_SENSOR_HOBO_T_C, myClim:::.model_const_SENSOR_HOBO_RH)
+    vpd_data <- mc_calc_vpd(data, .model_const_SENSOR_HOBO_T_C, .model_const_SENSOR_HOBO_RH)
     env_table <- mc_env_vpd(vpd_data, "all")
     expect_true(all(is.na(env_table$value)))
     env_table <- mc_env_vpd(vpd_data, "all", min_coverage=0.6)

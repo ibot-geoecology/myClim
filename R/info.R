@@ -22,7 +22,7 @@ mc_info_count <- function(data) {
         purrr::walk(locality$loggers, sensors_item_function)
     }
 
-    if(myClim:::.common_is_agg_format(data)) {
+    if(.common_is_agg_format(data)) {
         purrr::walk(data$localities, sensors_item_function)
     } else {
         purrr::walk(data$localities, raw_locality_function)
@@ -31,7 +31,7 @@ mc_info_count <- function(data) {
     result <- data.frame(item=c("localities", "loggers", "sensors"),
                          count=c(count_env$localities, count_env$loggers, count_env$sensors))
 
-    if(myClim:::.common_is_agg_format(data)) {
+    if(.common_is_agg_format(data)) {
         result <- result[-2, ]
     }
     result
@@ -56,7 +56,7 @@ mc_info_count <- function(data) {
 #' @seealso [myClim::mc_prep_clean()]
 #' @export
 mc_info_clean <- function(data) {
-    myClim:::.common_stop_if_not_raw_format(data)
+    .common_stop_if_not_raw_format(data)
 
     logger_function <- function (logger) {
         list(logger$metadata@serial_number,
@@ -77,8 +77,8 @@ mc_info_clean <- function(data) {
     rows <- purrr::flatten(purrr::map(data$localities, locality_function))
     columns <- purrr::transpose(rows)
     data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
-               start_date=myClim:::.common_as_utc_posixct(unlist(columns[[3]])),
-               end_date=myClim:::.common_as_utc_posixct(unlist(columns[[4]])),
+               start_date=.common_as_utc_posixct(unlist(columns[[3]])),
+               end_date=.common_as_utc_posixct(unlist(columns[[4]])),
                step=unlist(columns[[5]]), count_duplicits=unlist(columns[[6]]),
                count_missed=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]),
                rounded=unlist(columns[[9]]))
@@ -107,7 +107,7 @@ mc_info_clean <- function(data) {
 #' @examples
 #' mc_info(mc_data_example_calc)
 mc_info <- function(data) {
-    is_raw_format <- myClim:::.common_is_raw_format(data)
+    is_raw_format <- .common_is_raw_format(data)
 
     function_with_check_empty <- function(values, f) {
         values <- values[!is.na(values)]

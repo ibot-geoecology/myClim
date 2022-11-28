@@ -629,7 +629,7 @@ setMethod(
         if(!.model_is_file_in_right_format(object, path)) {
             return(NULL)
         }
-        data <- myClim:::.read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
+        data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
         object@date_format <- .get_tomst_datetime_format(data, object@date_column)
         .change_tomst_columns_and_logger_type(object, data)
     }
@@ -680,7 +680,7 @@ setMethod(
         if(!.model_is_file_in_right_format(object, path)) {
             return(NULL)
         }
-        data <- myClim:::.read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
+        data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
         .change_tomst_join_columns_and_logger_type(object, data)
     }
 )
@@ -725,7 +725,7 @@ setMethod(
         if(is.na(object@separator)) {
             return(NULL)
         }
-        data <- myClim:::.read_get_data_from_file(path, object, nrows = count_lines)
+        data <- .read_get_data_from_file(path, object, nrows = count_lines)
         data[1, 1] <- stringr::str_trim(data[1, 1])
         object <- .model_hobo_set_skip(object, data)
         has_numbers_column <- data[[1]][[object@skip]] == "#"
@@ -871,7 +871,7 @@ setMethod(
     function(object, path) {
         changed_object <- object
         changed_object@skip <- object@skip - 1
-        data <- myClim:::.read_get_data_from_file(path, changed_object, nrows = 1)
+        data <- .read_get_data_from_file(path, changed_object, nrows = 1)
         temp_column <- changed_object@columns[[1]]
         parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?°[CF]\\)? \\(?LGR S\\/N: (\\d+),")
         if(is.na(parts[[1, 2]])) {

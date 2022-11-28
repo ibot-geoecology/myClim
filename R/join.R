@@ -50,8 +50,8 @@
 #' @return myClim object with joined loggers.
 #' @export
 mc_join <- function(data, comp_sensors=NULL) {
-    myClim:::.common_stop_if_not_raw_format(data)
-    myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+    .common_stop_if_not_raw_format(data)
+    .prep_check_datetime_step_unprocessed(data, stop)
     locality_function <- function(locality) {
         types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
         unique_types <- unique(types)
@@ -71,7 +71,7 @@ mc_join <- function(data, comp_sensors=NULL) {
 
 .join_loggers_same_type <- function(loggers, comp_sensors, locality_id) {
     steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
-    shifts <- purrr::map_int(loggers, ~ as.integer(myClim:::.common_get_logger_shift(.x)))
+    shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
     heights <- .join_get_heights(loggers)
     table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts, heights=heights)
     table <- dplyr::group_by(table, steps, shifts, heights)
@@ -102,10 +102,10 @@ mc_join <- function(data, comp_sensors=NULL) {
         end <- max(dplyr::last(logger1$datetime), dplyr::last(logger2$datetime))
         data_table <- tibble::tibble(datetime = seq(start, end, logger1$clean_info@step))
         names_table <- .join_get_names_table(logger1, logger2)
-        l1_table <- myClim:::.common_sensor_values_as_tibble(logger1)
+        l1_table <- .common_sensor_values_as_tibble(logger1)
         colnames(l1_table) <- .join_get_logger_table_column_names(colnames(l1_table), names_table, TRUE)
         data_table <- dplyr::left_join(data_table, l1_table, by="datetime")
-        l2_table <- myClim:::.common_sensor_values_as_tibble(logger2)
+        l2_table <- .common_sensor_values_as_tibble(logger2)
         colnames(l2_table) <- .join_get_logger_table_column_names(colnames(l2_table), names_table, FALSE)
         data_table <- dplyr::left_join(data_table, l2_table, by="datetime")
         data_table <- .join_add_select_column(logger1, logger2, data_table, names_table, comp_sensors, e_choice, locality_id)
@@ -221,7 +221,7 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_print_info_logger <- function(logger, sensor_name) {
-    source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
+    source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, tag == .model_const_SENSOR_STATE_SOURCE)
     print(source_states)
 }
 
@@ -247,7 +247,7 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_get_plot_highlight_data <- function(data_table, problems, plot_data_table, sensors, step) {
-    problem_intervals <- myClim:::.common_get_time_series_intervals(data_table$datetime, problems)
+    problem_intervals <- .common_get_time_series_intervals(data_table$datetime, problems)
     result_function <- function(sensor) {
         select_sensor <- plot_data_table$sensor == sensor
         tibble::tibble(start = lubridate::int_start(problem_intervals),
@@ -264,8 +264,8 @@ mc_join <- function(data, comp_sensors=NULL) {
 
 .join_get_y_label <- function(logger, sensor_name) {
     sensor <- logger$sensors[[sensor_name]]
-    sensor_description <- myClim:::.model_get_sensor_description(sensor$metadata)
-    physical_description <- myClim:::.model_get_physical_description(sensor$metadata)
+    sensor_description <- .model_get_sensor_description(sensor$metadata)
+    physical_description <- .model_get_physical_description(sensor$metadata)
     if(!is.na(physical_description)) {
         return(physical_description)
     }
@@ -307,8 +307,8 @@ mc_join <- function(data, comp_sensors=NULL) {
     result_logger$clean_info@rounded <- NA
     result_logger$datetime <- data_table$datetime
 
-    l1_intervals <- myClim:::.common_get_time_series_intervals(data_table$datetime, data_table$use_l1)
-    l2_intervals <- myClim:::.common_get_time_series_intervals(data_table$datetime, !data_table$use_l1)
+    l1_intervals <- .common_get_time_series_intervals(data_table$datetime, data_table$use_l1)
+    l2_intervals <- .common_get_time_series_intervals(data_table$datetime, !data_table$use_l1)
     l1_origin_interval <- lubridate::interval(dplyr::first(logger1$datetime), dplyr::last(logger1$datetime))
     l2_origin_interval <- lubridate::interval(dplyr::first(logger2$datetime), dplyr::last(logger2$datetime))
     sensor_function <- function (l1_sensor_name) {
@@ -384,8 +384,8 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_get_sensors_states <- function(l1_sensor, l2_sensor, l1_intervals, l2_intervals) {
-    l1_sensor_states <- myClim:::.common_crop_states_table(l1_sensor$states, l1_intervals)
-    l2_sensor_states <- myClim:::.common_crop_states_table(l2_sensor$states, l2_intervals)
+    l1_sensor_states <- .common_crop_states_table(l1_sensor$states, l1_intervals)
+    l2_sensor_states <- .common_crop_states_table(l2_sensor$states, l2_intervals)
     as.data.frame(dplyr::bind_rows(l1_sensor_states, l2_sensor_states))
 }
 

@@ -82,7 +82,7 @@ test_states <- function (sensor) {
         return()
     }
     expect_true(all(colnames(sensor$states) == c("tag", "start", "end", "value")))
-    states <- dplyr::filter(sensor$states, tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
+    states <- dplyr::filter(sensor$states, tag == .model_const_SENSOR_STATE_SOURCE)
     if(length(sensor$values) == 0) {
         expect_equal(nrow(states), 0)
         return()
@@ -90,7 +90,7 @@ test_states <- function (sensor) {
 }
 
 get_empty_raw_data <- function() {
-    data <- mc_read_files("data/TOMST/data_94184102_0.csv", "TOMST", silent=T)
+    data <- mc_read_files("../data/TOMST/data_94184102_0.csv", "TOMST", silent=T)
     data <- mc_prep_crop(data, end=as.POSIXct("2020-01-01", tz="UTC"))
     data
 }

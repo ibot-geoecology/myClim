@@ -10,7 +10,7 @@
 }
 
 .common_get_sensor_info <- function(sensor_metadata) {
-    myClim::mc_data_sensors[[sensor_metadata@sensor_id]]
+    mc_data_sensors[[sensor_metadata@sensor_id]]
 }
 
 .common_as_utc_posixct <- function(datetime) {
@@ -27,11 +27,11 @@
 }
 
 .common_is_agg_format <- function(data) {
-    data$metadata@format_type == myClim:::.model_const_FORMAT_AGG
+    data$metadata@format_type == .model_const_FORMAT_AGG
 }
 
 .common_is_raw_format <- function(data) {
-    data$metadata@format_type == myClim:::.model_const_FORMAT_RAW
+    data$metadata@format_type == .model_const_FORMAT_RAW
 }
 
 .common_stop_if_not_raw_format <- function(data) {

@@ -112,7 +112,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     if(is.character(files_table)) {
         files_table <- .read_get_table_from_csv(files_table)
     }
-    files_table <- myClim:::.common_convert_factors_in_dataframe(files_table)
+    files_table <- .common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
     {
         return(list())
@@ -171,7 +171,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         if(!(is.na(logger_type) || logger_type == "")) {
             data_format_object@logger_type <- logger_type
         }
-        data_format_object <- myClim:::.model_load_data_format_params_from_file(data_format_object, path)
+        data_format_object <- .model_load_data_format_params_from_file(data_format_object, path)
         if(is.null(data_format_object)) {
             warning(stringr::str_glue("{path} is not a supproted data format. File is skipped."))
             return(NULL)
@@ -203,7 +203,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         if(!(is.na(serial_number) || serial_number == "")) {
             return(serial_number)
         }
-        serial_number <- myClim:::.model_get_serial_number_from_file(data_format, path)
+        serial_number <- .model_get_serial_number_from_file(data_format, path)
         if(is.na(serial_number))
         {
             stop(stringr::str_glue("It isn't possible automatically detect serial_number from {path}."))
@@ -263,7 +263,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_get_new_locality <- function(locality_id, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
-    tz_type <- if(is.na(tz_offset)) myClim::mc_const_TZ_UTC else myClim::mc_const_TZ_USER_DEFINED
+    tz_type <- if(is.na(tz_offset)) mc_const_TZ_UTC else mc_const_TZ_USER_DEFINED
     metadata <- new("mc_LocalityMetadata")
     metadata@locality_id <- locality_id
     metadata@altitude <- altitude
@@ -281,7 +281,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_logger <- function(filename, data_format, serial_number, step) {
     data_table <- .read_get_data_from_file(filename, data_format)
-    data_table <- myClim:::.model_edit_data(data_format, data_table)
+    data_table <- .model_edit_data(data_format, data_table)
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
     if(any(is.na(datetime))) {
@@ -346,7 +346,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         }
         sensor_name <- if(is.na(suffix)) sensor_id else paste0(sensor_id, suffix)
         values <- data_table[[column]]
-        sensor <- myClim:::.common_get_new_sensor(sensor_id, sensor_name, values=values, height=height, states=states)
+        sensor <- .common_get_new_sensor(sensor_id, sensor_name, values=values, height=height, states=states)
         sensor <- .read_set_errors_in_sensor(sensor, data_format@error_value, datetime)
         return(sensor)
     }
@@ -363,8 +363,8 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     if(!any(error_filter)) {
         return(sensor)
     }
-    error_intervals <- myClim:::.common_get_time_series_intervals(datetime, error_filter)
-    error_states <- data.frame(tag = myClim:::.model_const_SENSOR_STATE_ERROR,
+    error_intervals <- .common_get_time_series_intervals(datetime, error_filter)
+    error_states <- data.frame(tag = .model_const_SENSOR_STATE_ERROR,
                                start = lubridate::int_start(error_intervals),
                                end = lubridate::int_end(error_intervals),
                                value = as.character(error_value))
@@ -381,7 +381,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     abspath <- normalizePath(path)
     start <- dplyr::first(datetime)
     end <- dplyr::last(datetime)
-    data.frame(tag=myClim:::.model_const_SENSOR_STATE_SOURCE,
+    data.frame(tag=.model_const_SENSOR_STATE_SOURCE,
                start=start, end=end,
                value=abspath)
 }
@@ -415,7 +415,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 #' @return myClim object in Raw-format
 #' @export
 #' @seealso [myClim::mc_read_long]
-mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
+mc_read_wide <- function(data_table, sensor_id=.model_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
     if(ncol(data_table) <= 1) {
        stop(.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE)
     }
@@ -427,14 +427,14 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
     names(result) <- purrr::map_chr(result, ~ .x$metadata@locality_id)
     locality_function <- function(locality) {
         sensors <- list()
-        sensors[[sensor_name]] <- myClim:::.common_get_new_sensor(sensor_id, sensor_name, data_table[[locality$metadata@locality_id]])
+        sensors[[sensor_name]] <- .common_get_new_sensor(sensor_id, sensor_name, data_table[[locality$metadata@locality_id]])
         locality$loggers[[1]] <- .read_get_new_logger(data_table[[1]], sensors)
         locality
     }
     localities <- purrr::map(result, locality_function)
     data <- .read_get_data_raw_from_localities(localities)
     if(clean) {
-        data <- myClim::mc_prep_clean(data, silent=silent)
+        data <- mc_prep_clean(data, silent=silent)
     }
     return(data)
 }
@@ -503,7 +503,7 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
         if(sensor_name %in% names(sensor_ids)) {
             sensor_id <- sensor_ids[[sensor_name]]
         }
-        myClim:::.common_get_new_sensor(sensor_id, sensor_name, table_values[[sensor_name]])
+        .common_get_new_sensor(sensor_id, sensor_name, table_values[[sensor_name]])
     }
 
     sensors <- purrr::map(sensor_names, sensor_function)

@@ -37,16 +37,16 @@
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=1, tmax=1.25, days=3) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(is_agg) {
         .calc_check_maximal_day_step(data)
     } else {
-        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+        .prep_check_datetime_step_unprocessed(data, stop)
     }
 
     call_snow <- function(item) {
-        .calc_add_sensor_to_item(item, sensor, myClim:::.model_const_SENSOR_snow_bool, output_sensor,
-                                 myClim:::.model_const_PHYSICAL_T_C,
+        .calc_add_sensor_to_item(item, sensor, .model_const_SENSOR_snow_bool, output_sensor,
+                                 .model_const_PHYSICAL_T_C,
                                  .calc_snow_values_function, range=range, tmax=tmax, days=days)
     }
 
@@ -107,13 +107,13 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     if(!.calc_check_sensor_in_item(item, sensor_name)){
         return(item)
     }
-    if(!is.null(sensor_physical) && !myClim:::.model_is_physical(item$sensors[[sensor_name]]$metadata, sensor_physical)){
+    if(!is.null(sensor_physical) && !.model_is_physical(item$sensors[[sensor_name]]$metadata, sensor_physical)){
         .calc_wrong_physical_error_function(sensor_name, sensor_physical)
     }
     .calc_warn_if_overwriting(item, output_sensor_name)
     height <- item$sensors[[sensor_name]]$metadata@height
     values <- values_function(item, sensor_name, ...)
-    item$sensors[[output_sensor_name]] <- myClim:::.common_get_new_sensor(output_sensor_id, output_sensor_name, values=values, height=height)
+    item$sensors[[output_sensor_name]] <- .common_get_new_sensor(output_sensor_id, output_sensor_name, values=values, height=height)
     return(item)
 }
 
@@ -174,12 +174,12 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' mc_calc_snow_agg(data, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=F) {
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if((is_agg && length(data$localities) == 0) || (!is_agg && length(data) == 0)) {
         stop(.calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES)
     }
     if(!use_utc) {
-        myClim:::.prep_warn_if_unset_tz_offset(data)
+        .prep_warn_if_unset_tz_offset(data)
     }
     locality_function <- function(locality) {
         if(is_agg) {
@@ -289,17 +289,17 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' 
 #' @examples
 #' agg_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
-mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSmoisture,
-                        temp_sensor=myClim:::.model_const_SENSOR_TMS_T1,
+mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
+                        temp_sensor=.model_const_SENSOR_TMS_T1,
                         output_sensor="VWC_moisture",
                         soiltype="universal", localities=NULL,
-                        ref_t=myClim:::.calib_MOIST_REF_T,
-                        acor_t=myClim:::.calib_MOIST_ACOR_T,
-                        wcor_t=myClim:::.calib_MOIST_WCOR_T,
+                        ref_t=.calib_MOIST_REF_T,
+                        acor_t=.calib_MOIST_ACOR_T,
+                        wcor_t=.calib_MOIST_WCOR_T,
                         frozen2NA=TRUE) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
-        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+        .prep_check_datetime_step_unprocessed(data, stop)
     }
     call_vwc <- function(item) {
         .calc_add_vwc_to_item(item, moist_sensor, temp_sensor, output_sensor,
@@ -334,7 +334,7 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
                                    raw = item$sensors[[moist_sensor]]$values,
                                    temp = item$sensors[[temp_sensor]]$values)
     calibration <- item$sensors[[moist_sensor]]$calibration
-    input_data <- myClim:::.prep_split_data_by_calibration(values_table, calibration)
+    input_data <- .prep_split_data_by_calibration(values_table, calibration)
     data_function <- function(cor_factor, cor_slope, data){
         is_calibrated <- !is.na(cor_factor) && !is.na(cor_slope)
         .calc_get_vwc_values(raw_values = data$raw,
@@ -348,7 +348,7 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
     values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
     is_calibrated <- nrow(calibration) > 0
     height <- item$sensors[[moist_sensor]]$metadata@height
-    item$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_moisture, output_sensor,
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_moisture, output_sensor,
                                                                      values=purrr::flatten_dbl(values), height=height,
                                                                      calibrated = is_calibrated,
                                                                      calibration=item$sensors[[moist_sensor]]$calibration)
@@ -359,14 +359,14 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
     if(!.calc_check_sensor_in_item(item, moist_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical_TMSmoisture(item$sensors[[moist_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(moist_sensor, myClim:::.model_const_PHYSICAL_TMSmoisture)
+    if(!.model_is_physical_TMSmoisture(item$sensors[[moist_sensor]]$metadata)){
+        .calc_wrong_physical_error_function(moist_sensor, .model_const_PHYSICAL_TMSmoisture)
     }
     if(!.calc_check_sensor_in_item(item, temp_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_T_C)
+    if(!.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
+        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_T_C)
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
@@ -413,23 +413,23 @@ mc_calc_vwc <- function(data, moist_sensor=myClim:::.model_const_SENSOR_TMS_TMSm
 #' gdd_data <- mc_calc_gdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
 #' gdd_agg <- mc_agg(gdd_data, list(TMS_T3=c("min", "max"), GDD5="sum"), period="day")
 mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=NULL) {
-    .calc_xdd(data, sensor, myClim:::.model_const_SENSOR_GDD, output_prefix, t_base, localities, .calc_gdd_values_function)
+    .calc_xdd(data, sensor, .model_const_SENSOR_GDD, output_prefix, t_base, localities, .calc_gdd_values_function)
 }
 
 .calc_xdd <- function(data, sensor, output_sensor_id, output_prefix, t_base, localities, values_function) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(is_agg) {
         .calc_check_maximal_day_step(data)
         data_step_part_day <- data$metadata@step / (24 * 60 * 60)
     } else {
-        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+        .prep_check_datetime_step_unprocessed(data, stop)
     }
 
     output_sensor <- .calc_get_name_with_base(output_prefix, t_base)
 
     call_add_sensor <- function(item, step_part_day) {
         .calc_add_sensor_to_item(item, sensor, output_sensor_id, output_sensor,
-                                 myClim:::.model_const_PHYSICAL_T_C,
+                                 .model_const_PHYSICAL_T_C,
                                  values_function, t_base=t_base, step_part_day=step_part_day)
     }
 
@@ -498,7 +498,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' fdd_data <- mc_calc_fdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
 #' fdd_agg <- mc_agg(fdd_data, list(TMS_T3=c("min", "max"), FDD5="sum"), period="day")
 mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=NULL) {
-    .calc_xdd(data, sensor, myClim:::.model_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
+    .calc_xdd(data, sensor, .model_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
 }
 
 .calc_fdd_values_function <- function(locality, sensor_name, t_base, step_part_day) {
@@ -523,9 +523,9 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' @examples
 #' cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))
 mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NULL) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
-        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+        .prep_check_datetime_step_unprocessed(data, stop)
     }
 
     values_function <- function(locality, sensor_name) {
@@ -542,7 +542,7 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
         item <- .calc_add_sensor_to_item(item, sensor_name, output_sensor_id, output_sensor_name,
                                          values_function = values_function)
         if(is.logical(origin_sensor$values) && !is.logical(item$sensors[[output_sensor_name]]$values)) {
-            item$sensors[[output_sensor_name]]$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
+            item$sensors[[output_sensor_name]]$metadata@sensor_id <- .model_const_SENSOR_integer
         }
         item
     }
@@ -584,17 +584,17 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' @export
 #' @examples
 #' agg_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
-mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSOR_DEND_TOMSTdendro,
-                        output_sensor=myClim:::.model_const_SENSOR_dendro_l_um,
+mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TOMSTdendro,
+                        output_sensor=.model_const_SENSOR_dendro_l_um,
                         localities=NULL) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
-        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+        .prep_check_datetime_step_unprocessed(data, stop)
     }
 
     call_dendro_function <- function(item) {
-        .calc_add_sensor_to_item(item, dendro_sensor, myClim:::.model_const_SENSOR_dendro_l_um, output_sensor,
-                                 myClim:::.model_const_PHYSICAL_TOMSTdendro,
+        .calc_add_sensor_to_item(item, dendro_sensor, .model_const_SENSOR_dendro_l_um, output_sensor,
+                                 .model_const_PHYSICAL_TOMSTdendro,
                                  .calc_get_dendro_l_um)
     }
 
@@ -613,9 +613,9 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 }
 
 .calc_get_dendro_l_um <- function(item, sensor_name) {
-    min_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMSTdendro]]@min_value
-    max_raw_value <- mc_data_sensors[[myClim:::.model_const_SENSOR_DEND_TOMSTdendro]]@max_value
-    um_range <- myClim:::.model_const_TOMST_DENDROMETER_UM_RANGE
+    min_raw_value <- mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@min_value
+    max_raw_value <- mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@max_value
+    um_range <- .model_const_TOMST_DENDROMETER_UM_RANGE
     (item$sensors[[sensor_name]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
 }
 
@@ -649,9 +649,9 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=myClim:::.model_const_SENSO
 mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
                         output_sensor="VPD", altitude=0,
                         metadata_altitude=TRUE, localities=NULL) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
-        myClim:::.prep_check_datetime_step_unprocessed(data, stop)
+        .prep_check_datetime_step_unprocessed(data, stop)
     }
 
     if(is_agg && lubridate::period(data$metadata@period) >= lubridate::days(1)) {
@@ -696,7 +696,7 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
     values <- f * a * exp(b * T / (c + T)) * (1 - RH / 100)
 
     height <- item$sensors[[rh_sensor]]$metadata@height
-    item$sensors[[output_sensor]] <- myClim:::.common_get_new_sensor(myClim:::.model_const_SENSOR_VPD, output_sensor,
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_VPD, output_sensor,
                                                                      height=height, values=values)
     return(item)
 }
@@ -705,14 +705,14 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
     if(!.calc_check_sensor_in_item(item, temp_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_T_C)
+    if(!.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
+        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_T_C)
     }
     if(!.calc_check_sensor_in_item(item, rh_sensor)){
         return(TRUE)
     }
-    if(!myClim:::.model_is_physical(item$sensors[[rh_sensor]]$metadata, myClim:::.model_const_PHYSICAL_RH_perc)){
-        .calc_wrong_physical_error_function(temp_sensor, myClim:::.model_const_PHYSICAL_RH_perc)
+    if(!.model_is_physical(item$sensors[[rh_sensor]]$metadata, .model_const_PHYSICAL_RH_perc)){
+        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_RH_perc)
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)

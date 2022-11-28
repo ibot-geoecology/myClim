@@ -111,7 +111,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     .agg_check_fun_period(fun, period_object, use_utc)
     use_utc <- .agg_get_use_utc(data, use_utc)
     original_period <- .agg_check_steps_and_get_original_text(data, fun, period_object)
-    is_raw <- myClim:::.common_is_raw_format(data)
+    is_raw <- .common_is_raw_format(data)
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_raw) {
@@ -151,7 +151,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 .agg_get_use_intervals <- function(data, period, custom_start, custom_end) {
     result <- NULL
     if(!is.null(period) && period %in% .agg_const_INTERVAL_PERIODS) {
-        result <- myClim:::.common_get_cleaned_data_range(data, add_step_to_end = TRUE)
+        result <- .common_get_cleaned_data_range(data, add_step_to_end = TRUE)
         lubridate::int_end(result) <- lubridate::int_end(result) - lubridate::seconds(1)
     }
     if(!is.null(period) && period == .agg_const_PERIOD_CUSTOM) {
@@ -277,18 +277,18 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_get_use_utc <- function(data, use_utc) {
-    is_agg <- myClim:::.common_is_agg_format(data)
+    is_agg <- .common_is_agg_format(data)
     if(!use_utc && is_agg && (is.na(data$metadata@step) || data$metadata@step >= 60*60*24)) {
         use_utc <- TRUE
     }
     if(!use_utc) {
-        myClim:::.prep_warn_if_unset_tz_offset(data)
+        .prep_warn_if_unset_tz_offset(data)
     }
     use_utc
 }
 
 .agg_check_steps_and_get_original_text <- function(data, fun, period_object) {
-    if(myClim:::.common_is_agg_format(data)) {
+    if(.common_is_agg_format(data)) {
         if(data$metadata@period %in% .agg_const_INTERVAL_PERIODS) {
             stop(.agg_const_MESSAGE_WRONG_PREVIOUS_PERIOD)
         }
@@ -369,7 +369,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(output_period < lubridate::as.period(original_period)) {
         stop("It isn't possible aggregate from longer period to shorter one.")
     }
-    item$datetime <- myClim:::.calc_get_datetimes_with_offset(item$datetime, tz_offset)
+    item$datetime <- .calc_get_datetimes_with_offset(item$datetime, tz_offset)
     if(is.null(use_intervals)) {
         item <- .agg_extend_item_by_period(item, period, original_period)
         start_datetimes <- lubridate::floor_date(item$datetime, period)
@@ -379,7 +379,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
             count <- sum(lubridate::`%within%`(item$datetime, interval))
             rep(lubridate::int_start(interval), count)
         }
-        start_datetimes <- myClim:::.common_as_utc_posixct(unlist(purrr::map(use_intervals, interval_function)))
+        start_datetimes <- .common_as_utc_posixct(unlist(purrr::map(use_intervals, interval_function)))
     }
     item$datetime <- unique(start_datetimes)
     by_aggregate <- list(step=as.factor(start_datetimes))
@@ -424,17 +424,17 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     min_datetime_function <- function(.x) {
         if(length(.x$datetime) == 0) return(NA_integer_)
         as.integer(.x$datetime[[1]])}
-    min_datetime <- myClim:::.common_as_utc_posixct(min(purrr::map_int(items, min_datetime_function), na.rm=TRUE))
+    min_datetime <- .common_as_utc_posixct(min(purrr::map_int(items, min_datetime_function), na.rm=TRUE))
     max_datetime_function <- function(.x) {
         if(length(.x$datetime) == 0) return(NA_integer_)
         as.integer(tail(.x$datetime, n=1))}
-    max_datetime <- myClim:::.common_as_utc_posixct(max(purrr::map_int(items, max_datetime_function), na.rm=TRUE))
+    max_datetime <- .common_as_utc_posixct(max(purrr::map_int(items, max_datetime_function), na.rm=TRUE))
     seq(min_datetime, max_datetime, by=period)
 }
 
 .agg_get_merged_sensors <- function(datetime, sensor_items) {
     sensor_items <- .agg_get_items_with_renamed_sensors(sensor_items)
-    tables <- c(list(tibble::tibble(datetime=datetime)), purrr::map(sensor_items, myClim:::.common_sensor_values_as_tibble))
+    tables <- c(list(tibble::tibble(datetime=datetime)), purrr::map(sensor_items, .common_sensor_values_as_tibble))
     table_values <- purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime"))
 
     sensor_function <- function (sensor) {
@@ -523,7 +523,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     datetime <- seq(start, end, by=original_period)
     datetime_table <- tibble::as_tibble(datetime)
     colnames(datetime_table) <- "datetime"
-    item_table <- myClim:::.common_sensor_values_as_tibble(item)
+    item_table <- .common_sensor_values_as_tibble(item)
     result_table <- dplyr::left_join(datetime_table, item_table, by="datetime")
     item$datetime <- result_table$datetime
     sensor_function <- function(sensor){
@@ -585,8 +585,8 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         return(list(sum=function(x) {
             x <- .agg_function_prepare_data(x, min_coverage)
             if(length(x) == 0) return(NA)
-            if(value_type == myClim:::.model_const_VALUE_TYPE_LOGICAL) {
-                value_type <- myClim:::.model_const_VALUE_TYPE_INTEGER
+            if(value_type == .model_const_VALUE_TYPE_LOGICAL) {
+                value_type <- .model_const_VALUE_TYPE_INTEGER
             }
             .agg_function_convert_result(sum(x), value_type)
         }))
@@ -663,19 +663,19 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         if(.y %in% c(.agg_const_FUNCTION_COUNT, .agg_const_FUNCTION_COVERAGE)) {
             new_sensor$metadata@sensor_id <- .y
         }
-        if(sensor_info@value_type == myClim:::.model_const_VALUE_TYPE_LOGICAL &&
+        if(sensor_info@value_type == .model_const_VALUE_TYPE_LOGICAL &&
             .y == .agg_const_FUNCTION_SUM) {
-            new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
+            new_sensor$metadata@sensor_id <- .model_const_SENSOR_integer
         }
         new_sensor$metadata@name <- .agg_get_aggregated_sensor_name(new_sensor$metadata@name, .y)
         new_sensor$values <- aggregate(new_sensor$values, by_aggregate, .x)$x
         if(.y %in% names(custom_functions)) {
             if(is.logical(new_sensor$values)) {
-                new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_logical
+                new_sensor$metadata@sensor_id <- .model_const_SENSOR_logical
             } else if(is.integer(new_sensor$values)) {
-                new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_integer
+                new_sensor$metadata@sensor_id <- .model_const_SENSOR_integer
             } else if(is.numeric(new_sensor$values)) {
-                new_sensor$metadata@sensor_id <- myClim:::.model_const_SENSOR_real
+                new_sensor$metadata@sensor_id <- .model_const_SENSOR_real
             } else {
                 stop(stringr::str_glue(.agg_const_MESSAGE_WRONG_CUSTOM_FUNCTION))
             }

@@ -31,7 +31,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 }
 
 .reshape_get_all_datetimes <- function(data){
-    is_agg_format <- myClim:::.common_is_agg_format(data)
+    is_agg_format <- .common_is_agg_format(data)
     locality_function <- function(locality) {
         if(is_agg_format) {
             return(locality$datetime)
@@ -42,17 +42,17 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
     locality_datetimes <- purrr::map(data$localities, locality_function)
     datetimes <- purrr::reduce(locality_datetimes, union)
     datetimes <- sort(datetimes)
-    myClim:::.common_as_utc_posixct(datetimes)
+    .common_as_utc_posixct(datetimes)
 }
 
 .reshape_get_sensor_tables <- function(data) {
     sensors_function <- function(item, name_prefix) {
-        table <- myClim:::.common_sensor_values_as_tibble(item)
+        table <- .common_sensor_values_as_tibble(item)
         colnames(table)[-1] <- purrr::map_chr(colnames(table)[-1], function(x) stringr::str_glue("{name_prefix}_{x}"))
         table
     }
 
-    if(myClim:::.common_is_agg_format(data)) {
+    if(.common_is_agg_format(data)) {
         return(purrr::map2(data$localities, names(data$localities), sensors_function))
     }
 
@@ -85,9 +85,9 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
 #' head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)
 mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
     data <- mc_filter(data, localities, sensors)
-    is_raw_format <- myClim:::.common_is_raw_format(data)
+    is_raw_format <- .common_is_raw_format(data)
     period <- NULL
-    if (!is_raw_format && !(data$metadata@period %in% myClim:::.agg_const_INTERVAL_PERIODS)) {
+    if (!is_raw_format && !(data$metadata@period %in% .agg_const_INTERVAL_PERIODS)) {
         period <- lubridate::period(data$metadata@period)
     }
 

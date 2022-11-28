@@ -17,7 +17,7 @@ mc_save <- function(data, file) {
         if(is(item, "list")) {
             return(.save_convert_classes_to_lists(item))
         } else if(is(item, "mc_Serializable")) {
-            return(myClim:::.model_object_to_list(item))
+            return(.model_object_to_list(item))
         }
         return(item)
     }
@@ -42,20 +42,20 @@ mc_load <- function(file) {
     is_raw <- obj_list$metadata$format_type == "raw"
 
     sensor_function <- function(item) {
-        metadata <- myClim:::.model_list_to_object(item$metadata)
+        metadata <- .model_list_to_object(item$metadata)
         return(list(metadata=metadata, values=item$values,
                     calibration=item$calibration, states=item$states))
     }
 
     logger_function <- function(item) {
-        metadata <- myClim:::.model_list_to_object(item$metadata)
-        clean_info <- myClim:::.model_list_to_object(item$clean_info)
+        metadata <- .model_list_to_object(item$metadata)
+        clean_info <- .model_list_to_object(item$clean_info)
         sensors <- purrr::map(item$sensors, sensor_function)
         return(list(metadata=metadata, clean_info=clean_info, datetime=item$datetime, sensors=sensors))
     }
 
     locality_function <- function(item) {
-        metadata <- myClim:::.model_list_to_object(item$metadata)
+        metadata <- .model_list_to_object(item$metadata)
         if(is_raw) {
             loggers <- purrr::map(item$loggers, logger_function)
             return(list(metadata=metadata, loggers=loggers))
@@ -67,7 +67,7 @@ mc_load <- function(file) {
     localities <- purrr::map(obj_list$localities, locality_function)
 
     class_name <- if(is_raw) "mc_MainMetadata" else "mc_MainMetadataAgg"
-    main_metadata <- myClim:::.model_list_to_object(obj_list$metadata)
+    main_metadata <- .model_list_to_object(obj_list$metadata)
 
     return(myClimList(main_metadata, localities))
 }
