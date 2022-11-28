@@ -38,7 +38,7 @@ test_that("mc_agg day functions", {
 test_that("mc_agg empty data", {
     data <- get_empty_raw_data()
     expect_error(expect_warning(agg_data <- mc_agg(data)))
-    data <- mc_read_data("../data/TOMST/files_table.csv", "data/TOMST/localities_table.csv", silent=T)
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", silent=T)
     expect_error(expect_warning(agg_data <- mc_agg(data, "min", "day", use_utc = TRUE, min_coverage=0)))
     data <- mc_load("../data/agg/without_data.RDS")
     expect_warning(agg_data <- mc_agg(data))
@@ -73,7 +73,7 @@ test_that("mc_agg 10s step", {
 })
 
 test_that("mc_agg solar aggregation", {
-    data <- mc_read_data("../data/solar_agg/files_table.csv", "data/solar_agg/localities_table.csv", silent=T)
+    data <- mc_read_data("../data/solar_agg/files_table.csv", "../data/solar_agg/localities_table.csv", silent=T)
     data <- mc_prep_solar_tz(data)
     expect_error(agg_data <- mc_agg(data, c("min", "max"), "hour", use_utc=FALSE, na.rm=FALSE))
     agg_data <- mc_agg(data, c("min", "max"), "day", use_utc=FALSE)
@@ -161,7 +161,9 @@ test_that("mc_agg integer sensor", {
 })
 
 test_that("mc_agg reaggregate", {
-    expect_warning(data <- mc_read_files("data/TOMST/", "TOMST", silent=T))
+    not_supported_format_warning(data <- mc_read_files("../data/TOMST/", "TOMST", silent=T)) %>%
+        not_supported_format_warning() %>%
+        not_supported_format_warning()
     agg_data <- mc_agg(data)
     agg_all <- mc_agg(agg_data, period = "all", fun = "mean")
     test_agg_data_format(agg_all)

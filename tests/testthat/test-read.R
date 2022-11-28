@@ -37,7 +37,7 @@ test_that("mc_read_data TOMST format datetime", {
 })
 
 test_that("mc_read_data csv with localities", {
-    data <- mc_read_data("../data/TOMST/files_table2.csv", "data/TOMST/localities_table.csv", clean=FALSE)
+    data <- mc_read_data("../data/TOMST/files_table2.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
     test_raw_data_format(data)
     expect_equal(data$localities$A1E05$metadata@altitude, 255)
     expect_equal(data$localities$A6W79$metadata@tz_type, mc_const_TZ_USER_DEFINED)
@@ -48,7 +48,9 @@ test_that("mc_read_data csv with localities", {
 })
 
 test_that("mc_read_files TOMST directory", {
-    expect_warning(data <- mc_read_files(c("../data/TOMST", "data/eco-snow"), "TOMST", clean=FALSE))
+    not_supported_format_warning(data <- mc_read_files(c("../data/TOMST", "../data/eco-snow"), "TOMST", clean=FALSE)) %>%
+        not_supported_format_warning() %>%
+        not_supported_format_warning()
     test_raw_data_format(data)
     expect_equal(data$localities[[1]]$metadata@tz_type, mc_const_TZ_UTC)
     expect_equal(length(data$localities), 6)
@@ -58,7 +60,7 @@ test_that("mc_read_files TOMST directory", {
 })
 
 test_that("mc_read_files HOBO", {
-    data <- mc_read_files(c("../data/HOBO/20024354_comma.csv", "data/HOBO/20024354_semicolon.txt", "data/HOBO/20024354_tab.txt"),
+    data <- mc_read_files(c("../data/HOBO/20024354_comma.csv", "../data/HOBO/20024354_semicolon.txt", "../data/HOBO/20024354_tab.txt"),
                           "HOBO",  date_format = "%y.%m.%d %H:%M:%S", tz_offset = 120, clean=FALSE)
     test_raw_data_format(data)
 })
@@ -67,17 +69,20 @@ test_that("mc_read_data HOBO", {
     files_table <- as.data.frame(tibble::tribble(
         ~path, ~locality_id, ~data_format, ~serial_number, ~date_format, ~tz_offset,
         "../data/HOBO/20024354.txt", "A", "HOBO", NA_character_, "%d.%m.%Y %H:%M:%S", NA_integer_,
-        "data/HOBO/20024354_comma.csv", "B", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
-        "data/HOBO/20024354_fahrenheit.csv", "C", "HOBO", NA_character_, "%m.%d.%y %H:%M:%S", NA_integer_,
-        "data/HOBO/20024354_minimal.csv", "D", "HOBO", "20024356", "%y.%m.%d %H:%M:%S", 120,
-        "data/HOBO/20024354_minimal_title.csv", "E", "HOBO", "20024356", "%y.%m.%d %H:%M:%S", 120,
-        "data/HOBO/20024354_semicolon.txt", "F", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
-        "data/HOBO/20024354_separated_CEST.csv", "G", "HOBO", NA_character_, "%y.%m.%d", NA_integer_,
-        "data/HOBO/20024354_separeted.csv", "H", "HOBO", "20024356", "%y.%m.%d", NA_integer_,
-        "data/HOBO/20024354_tab.txt", "CH", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
-        "data/HOBO/6265.csv", "I", "HOBO", NA_character_, "%m/%d/%y %I:%M:%S %p", NA_integer_,
+        "../data/HOBO/20024354_comma.csv", "B", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
+        "../data/HOBO/20024354_fahrenheit.csv", "C", "HOBO", NA_character_, "%m.%d.%y %H:%M:%S", NA_integer_,
+        "../data/HOBO/20024354_minimal.csv", "D", "HOBO", "20024356", "%y.%m.%d %H:%M:%S", 120,
+        "../data/HOBO/20024354_minimal_title.csv", "E", "HOBO", "20024356", "%y.%m.%d %H:%M:%S", 120,
+        "../data/HOBO/20024354_semicolon.txt", "F", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
+        "../data/HOBO/20024354_separated_CEST.csv", "G", "HOBO", NA_character_, "%y.%m.%d", NA_integer_,
+        "../data/HOBO/20024354_separeted.csv", "H", "HOBO", "20024356", "%y.%m.%d", NA_integer_,
+        "../data/HOBO/20024354_tab.txt", "CH", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
+        "../data/HOBO/6265.csv", "I", "HOBO", NA_character_, "%m/%d/%y %I:%M:%S %p", NA_integer_,
     ))
-    expect_warning(data <- mc_read_data(files_table, clean=FALSE))
+    not_supported_format_warning(data <- mc_read_data(files_table, clean=FALSE)) %>%
+        not_supported_format_warning() %>%
+        expect_warning("Separated time in source data isn't supported.") %>%
+        expect_warning("Separated time in source data isn't supported.")
     test_raw_data_format(data)
     expect_equal(sort(names(data$localities)), sort(c("A", "B", "C", "D", "E", "F", "CH", "I")))
     expect_true(var(c(data$localities$A$loggers[[1]]$datetime[[1]],
@@ -100,7 +105,7 @@ test_that("mc_read_data HOBO skip wrong datetime", {
     files_table <- as.data.frame(tibble::tribble(
         ~path, ~locality_id, ~data_format, ~serial_number, ~date_format, ~tz_offset,
         "../data/HOBO/20024354.txt", "A", "HOBO", NA_character_, "%d.%m.%Y %H:%M:%S", NA_integer_,
-        "data/HOBO/20024354_comma.csv", "B", "HOBO", NA_character_, "%m.%d.%Y %H:%M:%S", NA_integer_
+        "../data/HOBO/20024354_comma.csv", "B", "HOBO", NA_character_, "%m.%d.%Y %H:%M:%S", NA_integer_
     ))
     expect_warning(data <- mc_read_data(files_table, clean=FALSE))
     test_raw_data_format(data)
@@ -112,7 +117,8 @@ test_that("mc_read_files error", {
 })
 
 test_that("mc_read_files TOMST comma in number", {
-    data <- mc_read_files(c("../data/comma_TOMST/data_91212414_0.csv", "data/comma_TOMST/data_94214606_0.csv"), "TOMST", clean=FALSE)
+    data <- mc_read_files(c("../data/comma_TOMST/data_91212414_0.csv",
+                            "../data/comma_TOMST/data_94214606_0.csv"), "TOMST", clean=FALSE)
     test_raw_data_format(data)
 })
 

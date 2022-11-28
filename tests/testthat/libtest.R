@@ -1,6 +1,10 @@
 library(testthat)
 library(myClim)
 
+not_supported_format_warning <- function(x) {
+    expect_warning(x, regexp = ".* is not a supproted data format. File is skipped.")
+}
+
 test_raw_data_format <- function(data) {
     test_myClimList(data)
     purrr::walk(data$localities, test_raw_locality)

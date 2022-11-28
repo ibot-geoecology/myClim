@@ -110,7 +110,9 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' }
 mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=FALSE) {
     if(is.character(files_table)) {
+        source_csv_file <- files_table
         files_table <- .read_get_table_from_csv(files_table)
+        files_table <- .read_edit_data_file_paths(files_table, source_csv_file)
     }
     files_table <- .common_convert_factors_in_dataframe(files_table)
     if(nrow(files_table) == 0)
@@ -147,6 +149,21 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
                               header = TRUE,
                               sep = ",",
                               stringsAsFactors = FALSE)
+}
+
+.read_edit_data_file_paths <- function(files_table, source_file) {
+    path_function <- function(path) {
+        if(file.exists(path)) {
+            return(path)
+        }
+        new_path <- file.path(dirname(source_file), path)
+        if(file.exists(new_path)) {
+            return(new_path)
+        }
+        return(path)
+    }
+    files_table$path <- purrr::map(files_table$path, path_function)
+    return(files_table)
 }
 
 .read_init_localities_from_table <- function(localities_table) {
