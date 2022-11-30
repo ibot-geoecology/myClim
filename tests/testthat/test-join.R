@@ -3,7 +3,7 @@ source("libtest.R")
 
 test_that("mc_join", {
     data <- mc_read_files("../data/join", "TOMST", clean=FALSE)
-    expect_error(joined_data <- mc_join(data))
+    expect_error(joined_data <- mc_join(data), "Data aren't cleaned.")
     cleaned_data <- mc_prep_clean(data, silent=T)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,
@@ -13,7 +13,9 @@ test_that("mc_join", {
     cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
     cleaned_data$localities$`91184101`$loggers[[2]]$sensors$TS_T$calibration <- data.frame()
     cleaned_data$localities$`91184101`$loggers[[3]]$sensors$TS_T$calibration <- data.frame()
-    expect_warning(joined_data <- mc_join(cleaned_data, comp_sensors=c("TMS_T1", "TMS_T2")))
+    expect_warning(joined_data <- mc_join(cleaned_data, comp_sensors=c("TMS_T1", "TMS_T2")),
+                   "Selected sensors not found - TS_T used.") %>%
+        expect_warning("Selected sensors not found - TS_T used.")
     test_raw_data_format(joined_data)
     expect_equal(length(joined_data$localities$`91184101`$loggers), 1)
     expect_equal(length(joined_data$localities$`94184102`$loggers), 1)
@@ -24,5 +26,5 @@ test_that("mc_join", {
     expect_equal(nrow(joined_data$localities$`94184102`$loggers[[1]]$sensors$TMS_T1$states), 2)
     cleaned_data <- mc_prep_calib(cleaned_data, sensors = "TMS_T1", localities = "94184102")
     cleaned_data$localities$`94184102`$loggers[[2]]$sensors$TMS_T1$metadata@calibrated <- FALSE
-    expect_error(joined_data <- mc_join(cleaned_data))
+    expect_error(joined_data <- mc_join(cleaned_data), "Calibration in sensors is inconsistent.")
 })

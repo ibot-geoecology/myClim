@@ -28,4 +28,4 @@ generate-html: generate-documentation
 	R -e 'pkgdown::build_site(override = list(destination = "../docs"))'
 
 test:
-	R --vanilla -e 'testthat::test_dir("tests")'
+	R --vanilla -e 'devtools::test()'

@@ -23,7 +23,9 @@ test_that("wideformat-all", {
 
 test_that("reshape long", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
-    expect_warning(table <- mc_reshape_long(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")))
+    expect_warning(table <- mc_reshape_long(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")),
+                   "Logger 94184103 isn't cleaned. I can't detect the last time_to.") %>%
+        expect_warning("Logger 94184102 isn't cleaned. I can't detect the last time_to.")
     expect_equal(colnames(table), c("locality_id", "serial_number", "sensor_name", "height", "datetime", "time_to", "value"))
     expect_equal(nrow(table), 2*(49+75))
     cleaned_data <- mc_prep_clean(data, silent=T)

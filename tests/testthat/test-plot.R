@@ -40,6 +40,6 @@ test_that(".plot_get_data_sensors_by_physical", {
     expect_error(test_function(wrong_data))
     table <- test_function(data)
     expect_equal(nrow(table), 5)
-    expect_equal(sort(unique(table$physical)), c("T_C", "TMSmoisture"))
+    expect_equal(stringr::str_sort(unique(table$physical)), c("T_C", "TMSmoisture"))
 })
 

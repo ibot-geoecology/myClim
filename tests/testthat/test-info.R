@@ -38,7 +38,7 @@ test_that("mc_info no data FIX", {
 })
 
 test_that("mc_info_meta", {
-    data <- mc_read_data("../data/TOMST/files_table.csv", "data/TOMST/localities_table.csv", clean=FALSE)
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
     meta_info <- mc_info_meta(data)
     expect_equal(colnames(meta_info), c("locality_id", "lon_wgs84", "lat_wgs84", "altitude", "tz_offset"))
     expect_equal(nrow(meta_info), 3)

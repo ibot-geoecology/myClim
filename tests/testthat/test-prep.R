@@ -65,14 +65,14 @@ test_that("mc_prep_clean ok", {
 })
 
 test_that("mc_prep_solar_tz", {
-    data <- mc_read_data("../data/TOMST/files_table.csv", "data/TOMST/localities_table.csv", clean = FALSE)
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean = FALSE)
     data <- mc_prep_solar_tz(data)
     test_raw_data_format(data)
     expect_equal(data$localities$A1E05$metadata@tz_offset, 57)
 })
 
 test_that("mc_prep_meta_locality", {
-    data <- mc_read_data("../data/TOMST/files_table.csv", "data/TOMST/localities_table.csv", clean = FALSE)
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean = FALSE)
     expect_error(changed_data <- mc_prep_meta_locality(data, list(A1E05=50)))
     changed_data <- mc_prep_meta_locality(data, list(A1E05=50), param_name="tz_offset")
     test_raw_data_format(changed_data)
@@ -88,14 +88,18 @@ test_that("mc_prep_meta_locality", {
         "TEST"      ,          1,          1, 10
     ))
     expect_error(changed_data <- mc_prep_meta_locality(data, metadata, param_name="tz_offset"))
-    expect_warning(changed_data <- mc_prep_meta_locality(data, metadata))
+    expect_warning(changed_data <- mc_prep_meta_locality(data, metadata), "There isn't locality TEST.") %>%
+        expect_warning("There isn't locality TEST.") %>%
+        expect_warning("There isn't locality TEST.")
     test_raw_data_format(changed_data)
     expect_equal(changed_data$localities$A1E05$metadata@lat_wgs84, 1)
     expect_equal(changed_data$localities$A1E05$metadata@lon_wgs84, 2)
     expect_true(is.na(changed_data$localities$A1E05$metadata@user_data[["my"]]))
     data_clean <- mc_prep_clean(data, silent=T)
     data_calc <- mc_agg(data_clean)
-    expect_warning(changed_data <- mc_prep_meta_locality(data_calc, metadata))
+    expect_warning(changed_data <- mc_prep_meta_locality(data_calc, metadata), "There isn't locality TEST.") %>%
+        expect_warning("There isn't locality TEST.") %>%
+        expect_warning("There isn't locality TEST.")
     test_agg_data_format(changed_data)
     expect_equal(changed_data$localities$A1E05$metadata@lat_wgs84, 1)
 })
@@ -118,7 +122,7 @@ test_that("mc_prep_meta_locality rename", {
 })
 
 test_that("mc_prep_crop", {
-    data <- mc_read_data("../data/TOMST/files_table.csv", "data/TOMST/localities_table.csv", clean=FALSE)
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
     cropped_data <- mc_prep_crop(data, start=as.POSIXct("2020-10-16 08:00", tz="UTC"))
     test_raw_data_format(cropped_data)
     expect_equal(length(cropped_data$localities$A2E32$loggers[[1]]$datetime), 68)
@@ -159,7 +163,7 @@ test_that("mc_prep_crop errors", {
 })
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
-    data <- mc_read_data("../data/TOMST/files_table.csv", "data/TOMST/localities_table.csv", clean=FALSE)
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
     test_function <- if(exists(".prep_get_uncleaned_loggers")) .prep_get_uncleaned_loggers else .prep_get_uncleaned_loggers
     expect_equal(test_function(data), c("91184101", "94184103", "94184102"))
     data_clean <- mc_prep_clean(data, silent=T)
@@ -167,7 +171,9 @@ test_that(".prep_get_loggers_datetime_step_unprocessed", {
 })
 
 test_that(".prep_get_utc_localities", {
-    expect_warning(data <- mc_read_files("../data/TOMST", "TOMST", clean=FALSE))
+    not_supported_format_warning(data <- mc_read_files("../data/TOMST", "TOMST", clean=FALSE)) %>%
+        not_supported_format_warning() %>%
+        not_supported_format_warning()
     test_function <- if(exists(".prep_get_utc_localities")) .prep_get_utc_localities else .prep_get_utc_localities
     expect_equal(test_function(data), c("91184101", "92192250", "94184102", "94184103", "94184104", "94230002"))
     data_clean <- mc_prep_meta_locality(data, list(`91184101`=60, `92192250`=60, `94184102`=60, `94184103`=60, `94184104`=60, `94230002`=60), "tz_offset")
@@ -181,7 +187,9 @@ test_that("mc_prep_meta_sensor", {
     cleaned_data <- mc_prep_meta_sensor(cleaned_data, list(TMS_T2="T2"), param_name = "name", logger_types="TMS")
     expect_true("T2" %in% names(cleaned_data$localities$main$loggers[[1]]$sensors))
     expect_false("T2" %in% names(cleaned_data$localities$main$loggers[[2]]$sensors))
-    expect_warning(agg_data <- mc_agg(cleaned_data))
+    expect_warning(agg_data <- mc_agg(cleaned_data), "TMS_Tsoil is renamed to TMS_Tsoil_1") %>%
+        expect_warning("sensor TMS_T3 is renamed to TMS_T3_1") %>%
+        expect_warning("sensor TMS_TMSmoisture is renamed to TMS_TMSmoisture_1")
     agg_data <- mc_prep_meta_sensor(agg_data, list(TMS_T3_1="TMS_T3_secondary"), localities="main", param_name="name")
     expect_true("TMS_T3_secondary" %in% names(agg_data$localities$main$sensors))
     agg_data <- mc_prep_meta_sensor(agg_data, list(TMS_T3_secondary="air"), param_name="height")
@@ -203,7 +211,7 @@ test_that("mc_prep_merge wrong", {
 })
 
 test_that("mc_prep_merge", {
-    data1 <- mc_read_files(c("../data/TOMST/data_91184101_0.csv", "data/TOMST/data_94184102_0.csv"), "TOMST", clean=FALSE)
+    data1 <- mc_read_files(c("../data/TOMST/data_91184101_0.csv", "../data/TOMST/data_94184102_0.csv"), "TOMST", clean=FALSE)
     data2 <- mc_read_files("../data/TOMST/data_94184103_0.csv", "TOMST", clean=FALSE)
     merged_data <- mc_prep_merge(list(data1, data2))
     test_raw_data_format(merged_data)
@@ -232,7 +240,8 @@ test_that("mc_prep_merge agg-format same name", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
     day_data_1 <- mc_agg(data, "mean", "hour")
     day_data_2 <- mc_agg(data, c("mean", "max"), "hour")
-    expect_warning(merged_data <- mc_prep_merge(list(day_data_1, day_data_2)))
+    expect_warning(merged_data <- mc_prep_merge(list(day_data_1, day_data_2)), "sensor .+ is renamed to .+") %>%
+        suppressWarnings()
     test_agg_data_format(merged_data)
     expect_equal(names(merged_data$localities), c("A1E05", "A2E32", "A6W79"))
     expect_equal(length(merged_data$localities$A2E32$sensors), 12)

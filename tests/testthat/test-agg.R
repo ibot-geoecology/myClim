@@ -172,8 +172,12 @@ test_that("mc_agg reaggregate", {
 test_that("mc_agg merging loggers", {
     files_table <- read.table("../data/TOMST/files_table.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
     files_table$locality_id <- "A6W79"
+    files_table$path <- purrr::map(files_table$path, ~ file.path("../data/TOMST", .x))
     data <- mc_read_data(files_table, silent=T)
-    expect_warning(agg_data <- mc_agg(data))
+    expect_warning(agg_data <- mc_agg(data), "sensor TMS_T1 is renamed to TMS_T1_1") %>%
+        expect_warning("sensor TMS_T2 is renamed to TMS_T2_1") %>%
+        expect_warning("sensor TMS_T3 is renamed to TMS_T3_1") %>%
+        expect_warning("sensor TMS_TMSmoisture is renamed to TMS_TMSmoisture_1")
     test_agg_data_format(agg_data)
     expect_equal(length(agg_data$localities$A6W79$sensors), 9)
 })
@@ -233,7 +237,7 @@ test_that("mc_agg shifted series", {
     files_table <- as.data.frame(tibble::tribble(
         ~path, ~locality_id, ~data_format, ~serial_number,
         "../data/clean-rounding/CZ2_HRADEC_TS.csv", "CZ2_HRADEC", "TOMST_join", NA_character_,
-        "data/clean-rounding/CZ2_HRADEC_TMS.csv", "CZ2_HRADEC", "TOMST_join", NA_character_,
+        "../data/clean-rounding/CZ2_HRADEC_TMS.csv", "CZ2_HRADEC", "TOMST_join", NA_character_,
     ))
     data <- mc_read_data(files_table, clean=F, silent=T)
     cleaned_data <- mc_prep_clean(data, silent = TRUE)
