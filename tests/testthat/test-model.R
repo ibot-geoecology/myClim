@@ -1,6 +1,3 @@
-library(testthat)
-library(myClim)
-
 test_that("get_serial_number_from_filename", {
     serial_number <- .model_get_serial_number_from_file(mc_data_formats$TOMST, "data_91184101_0.csv")
     expect_equal(serial_number, "91184101")

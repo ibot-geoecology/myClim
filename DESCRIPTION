@@ -36,7 +36,8 @@ Imports:
     viridis,
     runner,
     plotly,
-    zoo
+    zoo,
+    methods
 Roxygen: list(markdown = TRUE)
 Suggests: 
     rmarkdown,

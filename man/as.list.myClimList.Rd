@@ -2,10 +2,13 @@
 % Please edit documentation in R/model.R
 \name{as.list.myClimList}
 \alias{as.list.myClimList}
-\title{Function convert myClimList to list}
+\title{Function convert myClimList to list §§§}
 \usage{
 \method{as.list}{myClimList}(x)
 }
+\arguments{
+\item{x}{myClim object (see \link{myClim-package})}
+}
 \description{
-Function convert myClimList to list
+Function convert myClimList to list §§§
 }

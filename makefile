@@ -1,7 +1,4 @@
-.PHONY: install, build, remove, generate, test, generate-html, generate-documentation, generate-source, install-no-vignette
-
-install-gitlab:
-	R -e 'devtools::install_gitlab("microclimate_r/microclim", host="git.sorbus.ibot.cas.cz", auth_token="5N6cg1k2TNczNj85xf15")'
+.PHONY: install-no-vignete, install, build, remove, generate, generate-source, generate-documentation, generate-html, test, check
 
 install-no-vignette:
 	R -e 'install.packages(".", repos = NULL)'
@@ -29,3 +26,6 @@ generate-html: generate-documentation
 
 test:
 	R --vanilla -e 'devtools::test()'
+
+check:
+	R --vanilla -e 'devtools::check()'

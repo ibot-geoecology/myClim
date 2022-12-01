@@ -30,5 +30,5 @@ data.frame with columns:
 This function return data.frame with info about sensors
 }
 \examples{
-mc_info(mc_data_example_calc)
+mc_info(mc_data_example_agg)
 }

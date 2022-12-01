@@ -45,7 +45,7 @@
 #' * cleaning log is by default printed in console, and can be called ex post by [myClim::mc_info_clean()]
 #' @export
 #' @examples
-#' cleaned_data <- mc_prep_clean(mc_data_example_source)
+#' cleaned_data <- mc_prep_clean(mc_data_example_raw)
 mc_prep_clean <- function(data, silent=FALSE) {
     if(.common_is_agg_format(data)) {
         stop(.prep_const_MESSAGE_CLEAN_AGG)
@@ -132,8 +132,8 @@ mc_prep_clean <- function(data, silent=FALSE) {
         return(logger)
     }
     table <- .common_sensor_values_as_tibble(logger)
-    table <- dplyr::arrange(table, datetime)
-    grouped_table <- dplyr::group_by(table, datetime)
+    table <- dplyr::arrange(table, .data$datetime)
+    grouped_table <- dplyr::group_by(table, .data$datetime)
     table_noduplicits <- dplyr::summarise_all(grouped_table, dplyr::first)
     datetime_range <- range(table_noduplicits$datetime)
     datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$clean_info@step} sec")))
@@ -236,7 +236,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' @return myClim object in the same format as input, with locality metadata filled in
 #' @export
 #' @examples
-#' data <- mc_prep_meta_locality(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
+#' data <- mc_prep_meta_locality(mc_data_example_raw, list(A1E05=60), param_name="tz_offset")
 mc_prep_meta_locality <- function(data, values, param_name=NULL) {
     if(!is.data.frame(values)) {
         values <- tibble::tibble(locality_id=names(values),
@@ -270,7 +270,7 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
         }
         slot(localities[[locality_id]]$metadata, slot_name) <- value
         if(slot_name == "tz_offset") {
-            localities[[locality_id]]$metadata@tz_type <- mc_const_TZ_USER_DEFINED
+            localities[[locality_id]]$metadata@tz_type <- .model_const_TZ_USER_DEFINED
         }
     }
 
@@ -310,7 +310,7 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
 #' @return myClim object in the same format as input, with updated metadata
 #' @export
 #' @examples
-#' data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")
+#' data <- mc_prep_meta_sensor(mc_data_example_raw, list(TMS_T1="my_TMS_T1"), param_name="name")
 mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logger_types=NULL) {
     is_agg_format <- .common_is_agg_format(data)
 
@@ -393,7 +393,7 @@ mc_prep_solar_tz <- function(data) {
             return(locality)
         }
         locality$metadata@tz_offset <- round(locality$metadata@lon_wgs84 / 180 * 12 * 60)
-        locality$metadata@tz_type <- mc_const_TZ_SOLAR
+        locality$metadata@tz_type <- .model_const_TZ_SOLAR
         locality
     }
 
@@ -402,7 +402,7 @@ mc_prep_solar_tz <- function(data) {
 }
 
 .prep_get_utc_localities <- function(data) {
-    items <- purrr::keep(data$localities, function(x) x$metadata@tz_type == mc_const_TZ_UTC)
+    items <- purrr::keep(data$localities, function(x) x$metadata@tz_type == .model_const_TZ_UTC)
     unname(purrr::map_chr(items, function(x) x$metadata@locality_id))
 }
 
@@ -428,7 +428,7 @@ mc_prep_solar_tz <- function(data) {
 #' @return cropped data in the same myClim format as input. 
 #' @export
 #' @examples
-#' cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01", tz="UTC"))
+#' cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))
 mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
     if(!is.null(start) && format(start, format="%Z") != "UTC") {
         warning(stringr::str_glue("start datetime is not in UTC"))
@@ -457,11 +457,11 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 .prep_crop_data <- function(item, start, end, end_included) {
     table <- .common_sensor_values_as_tibble(item)
     if(!is.null(start)) {
-        table <- dplyr::filter(table, datetime >= start)
+        table <- dplyr::filter(table, .data$datetime >= start)
     }
     last_datetime <- NULL
     if(!is.null(end)) {
-        table <- dplyr::filter(table, datetime < end | (end_included & datetime == end))
+        table <- dplyr::filter(table, .data$datetime < end | (end_included & .data$datetime == end))
         last_datetime <- end
         if(length(table$datetime) > 0) {
             last_datetime <- dplyr::last(table$datetime)
@@ -522,7 +522,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' @param data_items list of myClim objects see [myClim-package]; Format (Raw/Agg) of merged objects must be same.
 #' @return merged myClim object in the same format as input objects
 #' @examples
-#' merged_data <- mc_prep_merge(list(mc_data_example_source, mc_data_example_source))
+#' merged_data <- mc_prep_merge(list(mc_data_example_raw, mc_data_example_raw))
 #' @export
 mc_prep_merge <- function(data_items) {
     purrr::reduce(data_items, .prep_do_merge)
@@ -608,10 +608,10 @@ mc_prep_merge <- function(data_items) {
 #' @export
 mc_prep_calib_load <- function(data, calib_table) {
     .common_stop_if_not_raw_format(data)
-    calib_table <- dplyr::group_nest(dplyr::group_by(calib_table, serial_number))
+    calib_table <- dplyr::group_nest(dplyr::group_by(calib_table, .data$serial_number))
 
     sensor_function <- function(sensor, logger_calib_table) {
-        sensor_calib_table <- dplyr::filter(logger_calib_table, sensor_id == sensor$metadata@sensor_id)
+        sensor_calib_table <- dplyr::filter(logger_calib_table, .data$sensor_id == sensor$metadata@sensor_id)
         if(nrow(sensor_calib_table) == 0) {
             return(sensor)
         }
@@ -621,13 +621,13 @@ mc_prep_calib_load <- function(data, calib_table) {
         if(!("cor_slope" %in% colnames(sensor_calib_table))) {
             sensor_calib_table$cor_slope <- 0
         }
-        sensor_calib_table <- dplyr::select(sensor_calib_table, datetime, cor_factor, cor_slope)
-        sensor$calibration <- as.data.frame(dplyr::arrange(sensor_calib_table, datetime))
+        sensor_calib_table <- dplyr::select(sensor_calib_table, .data$datetime, .data$cor_factor, .data$cor_slope)
+        sensor$calibration <- as.data.frame(dplyr::arrange(sensor_calib_table, .data$datetime))
         sensor
     }
 
     logger_function <- function(logger) {
-        filtered_table <- dplyr::filter(calib_table, serial_number == logger$metadata@serial_number)
+        filtered_table <- dplyr::filter(calib_table, .data$serial_number == logger$metadata@serial_number)
         if(nrow(filtered_table) == 0) {
             return(logger)
         }
@@ -704,7 +704,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
             }
             data$values * (cor_slope + 1) + cor_factor
         }
-        values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
+        values <- purrr::pmap(dplyr::select(input_data, .data$cor_factor, .data$cor_slope, .data$data), data_function)
         sensor$values <- purrr::flatten_dbl(values)
         sensor$metadata@calibrated <- TRUE
         sensor
@@ -742,7 +742,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
     }
     calib_table[["end_datetime"]] <- c(as.numeric(calib_table$datetime), Inf)[-1]
     subset_function <- function(start, end) {
-        dplyr::filter(values_table, datetime >= start & datetime < end)
+        dplyr::filter(values_table, .data$datetime >= start & .data$datetime < end)
     }
     calib_table$data <- purrr::map2(calib_table$datetime, calib_table$end_datetime, subset_function)
     calib_table
@@ -772,7 +772,7 @@ mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method
         if(method == .prep_const_FILLNA_METHOD_LINEAR){
             sensor$values <- zoo::na.approx(sensor$values, na.rm=FALSE, maxgap=maxgap)
         } else {
-            stop(prep_const_MESSAGE_NA_APPROX_METHOD_NOT_IMPLEMENTED)
+            stop(.prep_const_MESSAGE_NA_APPROX_METHOD_NOT_IMPLEMENTED)
         }
         return(sensor)
     }

@@ -25,5 +25,5 @@ This function crop data by datetime
 Function is able to crop data from start and end together but also only from start and end left as is or vice versa.
 }
 \examples{
-cleaned_example_tomst_data1 <- mc_prep_crop(example_tomst_data1, end=as.POSIXct("2020-02-01", tz="UTC"))
+cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))
 }

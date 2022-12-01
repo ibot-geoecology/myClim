@@ -16,5 +16,5 @@ data.frame with count of localities, loggers and sensors
 This function return data.frame with the number of localities, loggers and sensors of input myClim object.
 }
 \examples{
-count_table <- mc_info_count(example_tomst_data1)
+count_table <- mc_info_count(mc_data_example_raw)
 }

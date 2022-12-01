@@ -74,7 +74,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
     heights <- .join_get_heights(loggers)
     table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts, heights=heights)
-    table <- dplyr::group_by(table, steps, shifts, heights)
+    table <- dplyr::group_by(table, .data$steps, .data$shifts, .data$heights)
     e_choice <- new.env()
     e_choice$choice <- NA_integer_
     group_function <- function(group, .y) {
@@ -221,14 +221,14 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_print_info_logger <- function(logger, sensor_name) {
-    source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, tag == .model_const_SENSOR_STATE_SOURCE)
+    source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, .data$tag == .model_const_SENSOR_STATE_SOURCE)
     print(source_states)
 }
 
 .join_get_plot_data <- function(data_table, columns, plot_interval) {
-    problems_data_table <- dplyr::filter(data_table, lubridate::`%within%`(datetime, plot_interval))
+    problems_data_table <- dplyr::filter(data_table, lubridate::`%within%`(.data$datetime, plot_interval))
     problems_data_table <- problems_data_table[c("datetime", columns$l1, columns$l2)]
-    plot_data_table <- tidyr::pivot_longer(problems_data_table, !datetime)
+    plot_data_table <- tidyr::pivot_longer(problems_data_table, !.data$datetime)
     plot_data_table$sensor <- NA_character_
     plot_data_table$size <- NA_character_
     for(i in seq(nrow(columns))) {
@@ -242,7 +242,7 @@ mc_join <- function(data, comp_sensors=NULL) {
         plot_data_table$size[select_old] <- "A"
         plot_data_table$size[select_new] <- "B"
     }
-    plot_data_table <- dplyr::filter(plot_data_table, !is.na(value))
+    plot_data_table <- dplyr::filter(plot_data_table, !is.na(.data$value))
     return(plot_data_table)
 }
 
@@ -343,7 +343,7 @@ mc_join <- function(data, comp_sensors=NULL) {
 
     l1_calibration <- .join_get_sensor_calibration(l1_sensor, l1_origin_interval, l1_intervals)
     l2_calibration <- .join_get_sensor_calibration(l2_sensor, l2_origin_interval, l2_intervals)
-    calibration <- dplyr::arrange(dplyr::bind_rows(l1_calibration, l2_calibration), datetime)
+    calibration <- dplyr::arrange(dplyr::bind_rows(l1_calibration, l2_calibration), .data$datetime)
     na_calibration <- is.na(calibration$cor_factor) & is.na(calibration$cor_slope)
     rle_na <- rle(na_calibration)
     if(rle_na$values[[1]]) {

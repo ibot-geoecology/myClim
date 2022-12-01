@@ -36,6 +36,6 @@ Be careful while aggregating growing degree days to longer periods
 see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum}, but myClim let you apply anything.
 }
 \examples{
-gdd_data <- mc_calc_gdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
+gdd_data <- mc_calc_gdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
 gdd_agg <- mc_agg(gdd_data, list(TMS_T3=c("min", "max"), GDD5="sum"), period="day")
 }

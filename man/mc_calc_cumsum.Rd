@@ -26,5 +26,5 @@ Names of new sensors are original sensor name + \code{outpus_suffix}.
 If value type of sensor is logical, then output type is integer.
 }
 \examples{
-cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))
+cumsum_data <- mc_calc_cumsum(mc_data_example_agg, c("TMS_T1", "TMS_T2"))
 }

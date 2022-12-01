@@ -48,5 +48,5 @@ The function returns vector of snow cover with same time-step as input data. To 
 and more info, apply \link{mc_calc_snow_agg}.
 }
 \examples{
-data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 }

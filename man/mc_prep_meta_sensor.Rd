@@ -31,5 +31,5 @@ myClim object in the same format as input, with updated metadata
 This function allows you to modify sensor metadata including sensor name. See \link{mc_SensorMetadata}
 }
 \examples{
-data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")
+data <- mc_prep_meta_sensor(mc_data_example_raw, list(TMS_T1="my_TMS_T1"), param_name="name")
 }

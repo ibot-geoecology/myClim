@@ -10,13 +10,13 @@ files_table <- as.data.frame(tibble::tribble(
 ))
 
 
-mc_data_example_source <- mc_read_data(files_table, "examples/data/TOMST/localities_table.csv", clean = FALSE)
-mc_data_example_source <- mc_prep_crop(mc_data_example_source, end = lubridate::ymd("2021-02-01"))
+mc_data_example_raw <- mc_read_data(files_table, "examples/data/TOMST/localities_table.csv", clean = FALSE)
+mc_data_example_raw <- mc_prep_crop(mc_data_example_raw, end = lubridate::ymd("2021-02-01"))
 
-mc_data_example_clean <- mc_prep_clean(mc_data_example_source, silent = TRUE)
+mc_data_example_clean <- mc_prep_clean(mc_data_example_raw, silent = TRUE)
 
-mc_data_example_calc <- mc_agg(mc_data_example_clean)
+mc_data_example_agg <- mc_agg(mc_data_example_clean)
 
-usethis::use_data(mc_data_example_source, overwrite = TRUE)
+usethis::use_data(mc_data_example_raw, overwrite = TRUE)
 usethis::use_data(mc_data_example_clean, overwrite = TRUE)
-usethis::use_data(mc_data_example_calc, overwrite = TRUE)
+usethis::use_data(mc_data_example_agg, overwrite = TRUE)

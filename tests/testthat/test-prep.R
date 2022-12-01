@@ -1,5 +1,3 @@
-library(testthat)
-library(myClim)
 source("libtest.R")
 
 test_that("mc_prep_clean", {
@@ -77,7 +75,7 @@ test_that("mc_prep_meta_locality", {
     changed_data <- mc_prep_meta_locality(data, list(A1E05=50), param_name="tz_offset")
     test_raw_data_format(changed_data)
     expect_equal(changed_data$localities$A1E05$metadata@tz_offset, 50)
-    expect_equal(changed_data$localities$A1E05$metadata@tz_type, mc_const_TZ_USER_DEFINED)
+    expect_equal(changed_data$localities$A1E05$metadata@tz_type, myClim:::.model_const_TZ_USER_DEFINED)
     changed_data <- mc_prep_meta_locality(data, list(A1E05="abc", A2E32="def"), param_name="my_super_param")
     test_raw_data_format(changed_data)
     expect_equal(changed_data$localities$A1E05$metadata@user_data[["my_super_param"]], "abc")
@@ -150,7 +148,7 @@ test_that("mc_prep_crop", {
 test_that("mc_prep_crop errors", {
     expect_warning(data <- mc_read_files("../data/TOMST-error", "TOMST", clean=FALSE))
     cropped_data <- mc_prep_crop(data, start=lubridate::ymd_hm("2022-02-24 07:45"), end=lubridate::ymd_hm("2022-02-24 10:30"))
-    states <- dplyr::filter(cropped_data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$states, tag == .model_const_SENSOR_STATE_ERROR)
+    states <- dplyr::filter(cropped_data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$states, .data$tag == .model_const_SENSOR_STATE_ERROR)
     expect_equal(nrow(states), 4)
     expect_equal(states$start, c(lubridate::ymd_hm("2022-02-24 07:45"),
                                  lubridate::ymd_hm("2022-02-24 09:00"),

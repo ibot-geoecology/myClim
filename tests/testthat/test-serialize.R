@@ -1,5 +1,3 @@
-library(testthat)
-library(myClim)
 source("libtest.R")
 
 test_that(".save_convert_classes_to_lists", {

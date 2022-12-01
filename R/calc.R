@@ -35,7 +35,7 @@
 #' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
 #' @export
 #' @examples
-#' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+#' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=1, tmax=1.25, days=3) {
     is_agg <- .common_is_agg_format(data)
     if(is_agg) {
@@ -170,7 +170,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' 
 #' @export
 #' @examples
-#' data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+#' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
 #' mc_calc_snow_agg(data, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=F) {
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
@@ -202,7 +202,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
                    first_day_period = NA,
                    last_day_period = NA)
     snow_table <- tibble::tibble(datetime=item$datetime, snow=item$sensors[[snow_sensor]]$values)
-    snow_table <- dplyr::filter(snow_table, !is.na(snow))
+    snow_table <- dplyr::filter(snow_table, !is.na(.data$snow))
     if(!use_utc) {
         snow_table$datetime <- .calc_get_datetimes_with_offset(snow_table$datetime, tz_offset)
     }
@@ -288,7 +288,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 #' 
 #' @examples
-#' agg_data <- mc_calc_vwc(mc_data_example_calc, soiltype="sand", localities="A2E32")
+#' agg_data <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
 mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
                         temp_sensor=.model_const_SENSOR_TMS_T1,
                         output_sensor="VWC_moisture",
@@ -326,7 +326,7 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
     if(skip) {
         return(item)
     }
-    soil_row <- dplyr::filter(mc_data_vwc_parameters, soiltype == soiltype_value)
+    soil_row <- dplyr::filter(mc_data_vwc_parameters, .data$soiltype == soiltype_value)
     if(nrow(soil_row) != 1) {
         stop(stringr::str_glue(.calc_const_MESSAGE_UNKNONW_SIOLTYPE))
     }
@@ -345,7 +345,7 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
                              ref_t = ref_t, acor_t = acor_t, wcor_t = wcor_t,
                              frozen2NA = frozen2NA)
     }
-    values <- purrr::pmap(dplyr::select(input_data, cor_factor, cor_slope, data), data_function)
+    values <- purrr::pmap(dplyr::select(input_data, .data$cor_factor, .data$cor_slope, .data$data), data_function)
     is_calibrated <- nrow(calibration) > 0
     height <- item$sensors[[moist_sensor]]$metadata@height
     item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_moisture, output_sensor,
@@ -410,7 +410,7 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
 #' @return The same myClim object as input but with added GDD sensor
 #' @export
 #' @examples
-#' gdd_data <- mc_calc_gdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
+#' gdd_data <- mc_calc_gdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
 #' gdd_agg <- mc_agg(gdd_data, list(TMS_T3=c("min", "max"), GDD5="sum"), period="day")
 mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=NULL) {
     .calc_xdd(data, sensor, .model_const_SENSOR_GDD, output_prefix, t_base, localities, .calc_gdd_values_function)
@@ -495,7 +495,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' @return The same myClim object as input but with added GDD sensor
 #' @export
 #' @examples
-#' fdd_data <- mc_calc_fdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
+#' fdd_data <- mc_calc_fdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
 #' fdd_agg <- mc_agg(fdd_data, list(TMS_T3=c("min", "max"), FDD5="sum"), period="day")
 mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=NULL) {
     .calc_xdd(data, sensor, .model_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
@@ -521,7 +521,7 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' @return The same myClim object as input but with added cumsum sensors.
 #' @export
 #' @examples
-#' cumsum_data <- mc_calc_cumsum(mc_data_example_calc, c("TMS_T1", "TMS_T2"))
+#' cumsum_data <- mc_calc_cumsum(mc_data_example_agg, c("TMS_T1", "TMS_T2"))
 mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NULL) {
     is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
@@ -583,7 +583,7 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' @return myClim object same as input but with added dendro_l_um sensor
 #' @export
 #' @examples
-#' agg_data <- mc_calc_tomst_dendro(mc_data_example_calc, localities="A1E05")
+#' agg_data <- mc_calc_tomst_dendro(mc_data_example_agg, localities="A1E05")
 mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TOMSTdendro,
                         output_sensor=.model_const_SENSOR_dendro_l_um,
                         localities=NULL) {
@@ -645,7 +645,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 #' Campbell G.S. & Norman J.M. (1998). An Introduction to Environmental Biophysics, Springer New York, New York, NY
 #'
 #' @examples
-#' agg_data <- mc_calc_vpd(mc_data_example_calc, "HOBO_T_C", "HOBO_RH", localities="A2E32")
+#' agg_data <- mc_calc_vpd(mc_data_example_agg, "HOBO_T_C", "HOBO_RH", localities="A2E32")
 mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
                         output_sensor="VPD", altitude=0,
                         metadata_altitude=TRUE, localities=NULL) {

@@ -254,7 +254,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_get_output_data <- function(files_table, localities, data_formats) {
     files_table$index <- 1:nrow(files_table)
-    groupped_files <- dplyr::group_by(files_table, locality_id)
+    groupped_files <- dplyr::group_by(files_table, .data$locality_id)
     locality_function <- function(.x, .y) {
         if(.y$locality_id %in% names(localities)) {
             locality <- localities[[.y$locality_id]]
@@ -280,7 +280,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_get_new_locality <- function(locality_id, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
-    tz_type <- if(is.na(tz_offset)) mc_const_TZ_UTC else mc_const_TZ_USER_DEFINED
+    tz_type <- if(is.na(tz_offset)) .model_const_TZ_UTC else .model_const_TZ_USER_DEFINED
     metadata <- new("mc_LocalityMetadata")
     metadata@locality_id <- locality_id
     metadata@altitude <- altitude
@@ -352,7 +352,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_get_sensors_from_data_format <- function(data_table, data_format, datetime, states){
-    heights_dataframe <- dplyr::filter(mc_data_heights, logger_type == data_format@logger_type)
+    heights_dataframe <- dplyr::filter(mc_data_heights, .data$logger_type == data_format@logger_type)
     sensor_function <- function(column, sensor_id) {
         height <- NA_character_
         suffix <- NA_character_
@@ -490,7 +490,7 @@ mc_read_wide <- function(data_table, sensor_id=.model_const_SENSOR_real, sensor_
 mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE) {
     .read_check_datetime(data_table$datetime)
 
-    data_table <- dplyr::group_by(data_table, locality_id)
+    data_table <- dplyr::group_by(data_table, .data$locality_id)
     localities <- dplyr::group_map(data_table, .read_long_locality, sensor_ids=sensor_ids)
     names(localities) <- purrr::map_chr(localities, ~ .x$metadata@locality_id)
     data <- .read_get_data_raw_from_localities(localities)
@@ -504,8 +504,8 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
     locality_id <- locality_id$locality_id[[1]]
     sensor_names <- unique(locality_table$sensor_name)
     sensor_table_function <- function(name) {
-        data <- dplyr::filter(locality_table, sensor_name == name)
-        result <- dplyr::select(data, datetime, value)
+        data <- dplyr::filter(locality_table, .data$sensor_name == name)
+        result <- dplyr::select(data, .data$datetime, .data$value)
         names(result)[2] <- name
         result
     }

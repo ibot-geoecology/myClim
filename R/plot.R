@@ -13,7 +13,7 @@
 #' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
 #' @export
 #' @examples
-#' \dontrun{mc_plot_loggers(example_tomst_data1, "Figures")}
+#' \dontrun{mc_plot_loggers(mc_data_example_clean, "Figures")}
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
     .common_stop_if_not_raw_format(data)
     data <- mc_filter(data, localities, sensors)
@@ -85,7 +85,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
         values_range <- .plot_get_values_range(logger, sensors)
         ylimit <- c(min(c(-15, values_range[[1]]), na.rm=T), max(c(30, values_range[[2]]), na.rm=T))
     }
-    plot(logger$datetime, rep(NA, length(logger$datetime)), type="n", xaxt="n", xlab=NA, ylab="Temperature (°C)",
+    plot(logger$datetime, rep(NA, length(logger$datetime)), type="n", xaxt="n", xlab=NA, ylab="Temperature (\u00b0C)",
          main=logger$metadata@serial_number, xlim=xlimit, ylim=ylimit)
     abline(v=months, lty=1, col=gray(0.9))
     grid(nx=NA, ny=NULL, col=gray(0.9), lty=1)
@@ -213,7 +213,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
         data <- mc_prep_crop(data, start_crop, end_crop)
     }
     sensors_table <- .plot_get_data_sensors_by_physical(data)
-    sensors_table <- dplyr::group_by(sensors_table, physical)
+    sensors_table <- dplyr::group_by(sensors_table, .data$physical)
 
     group_function <- function(group, .y) {
         filtered_data <- mc_filter(data, sensors=group$sensor)
@@ -263,17 +263,17 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 
 .plot_raster_physical <- function(data, by_hour, viridis_color_map) {
     data_table <-mc_reshape_long(data)
-    data_table <- dplyr::mutate(data_table, date = lubridate::date(datetime))
+    data_table <- dplyr::mutate(data_table, date = lubridate::date(.data$datetime))
     if(by_hour) {
-        data_table <- dplyr::mutate(data_table, y_values = lubridate::hour(datetime))
+        data_table <- dplyr::mutate(data_table, y_values = lubridate::hour(.data$datetime))
         y_name <- "hour"
     } else {
-        data_table <- dplyr::mutate(data_table, y_values = format(datetime, format = "%H:%M:%S"))
+        data_table <- dplyr::mutate(data_table, y_values = format(.data$datetime, format = "%H:%M:%S"))
         y_name <- "time"
     }
-    plot <- ggplot2::ggplot(data_table, ggplot2::aes(date, y_values, na.rm = FALSE))
+    plot <- ggplot2::ggplot(data_table, ggplot2::aes(.data$date, .data$y_values, na.rm = FALSE))
     plot <- plot + ggplot2::ylab(y_name)
-    plot <- plot + ggplot2::geom_raster(ggplot2::aes(fill=value))
+    plot <- plot + ggplot2::geom_raster(ggplot2::aes(fill=.data$value))
     plot <- .plot_set_ggplot_physical_colors(data, plot, viridis_color_map)
     plot <- plot + .plot_set_ggplot_raster_theme()
     plot <- plot + ggplot2::scale_x_date(date_labels="%Y-%m")
@@ -331,7 +331,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
         purrr::walk(seq(1:n_pages), function (x) print(plot + facet_function(x, TRUE)))
     }
 
-    pdf(filename, family="ArialMT", paper="a4", w=210/25.4, h=297/25.4)
+    pdf(filename, family="ArialMT", paper="a4", width=210/25.4, height=297/25.4)
     purrr::walk(plots, print_plot)
     dev.off()
 }
@@ -386,12 +386,11 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     plot <- ggplot2::ggplot()
 
     line_function <- function(sensor, color, coeff) {
-        sensor_name <- sensor
-        data_plot <- dplyr::filter(data_table, sensor == sensor_name)
-        ggplot2::geom_line(data_plot, mapping = ggplot2::aes(x=datetime, y=value*coeff, group=sensor, color=sensor))
+        data_plot <- dplyr::filter(data_table, sensor == .data$sensor_name)
+        ggplot2::geom_line(data_plot, mapping = ggplot2::aes(x=.data$datetime, y=.data$value*coeff, group=sensor, color=sensor))
     }
 
-    plots <- purrr::pmap(dplyr::select(sensors_table, sensor, color, coeff), line_function)
+    plots <- purrr::pmap(dplyr::select(sensors_table, .data$sensor, .data$color, .data$coeff), line_function)
     plot <- purrr::reduce(plots, `+`, .init=plot)
     plot <- plot + ggplot2::scale_color_manual(values=sensors_table$color)
     plot <- plot + .plot_set_ggplot_line_theme()
@@ -400,14 +399,14 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     if(!is.null(filename)) {
         file_parts <- .plot_get_file_parts(filename)
         if(file_parts[[2]] == "pdf"){
-            .plot_print_pdf(filename, list(plot), ggplot2::vars(locality_id), 8)
+            .plot_print_pdf(filename, list(plot), ggplot2::vars(.data$locality_id), 8)
         } else if(file_parts[[2]] == "png") {
-            .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(locality_id))
+            .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(.data$locality_id))
         } else {
             stop(stringr::str_glue("Format of {filename} isn't supported."))
         }
     }
-    plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(locality_id))
+    plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(data.$locality_id))
     return(plot)
 }
 
@@ -463,7 +462,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 }
 
 .plot_add_coeff_to_sensors_table <- function(sensors_table, scale_coeff) {
-    physical_table <- dplyr::distinct(dplyr::select(sensors_table, physical, main_axis))
+    physical_table <- dplyr::distinct(dplyr::select(sensors_table, .data$physical, .data$main_axis))
 
     get_scale_coeff <- function(selector) {
         physical <- physical_table$physical[selector]
@@ -484,7 +483,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 }
 
 .plot_line_set_y_axes <- function(sensors_table) {
-    physical_table <- dplyr::distinct(dplyr::select(sensors_table, physical, main_axis, coeff))
+    physical_table <- dplyr::distinct(dplyr::select(sensors_table, .data$physical, .data$main_axis, .data$coeff))
     sec.axis <- ggplot2::waiver()
     if(nrow(physical_table) == 2) {
         physical <- physical_table$physical[!physical_table$main_axis]
@@ -512,38 +511,20 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 }
 
 .plot_show_joining_chart <- function(data_table, title, y_label, sizes, highlight_data_table) {
-    p <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=datetime, y=value, group=name)) +
-        ggplot2::geom_line(ggplot2::aes(color=name, size=size)) +
+    p <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value, group=.data$name)) +
+        ggplot2::geom_line(ggplot2::aes(color=.data$name, size=.data$size)) +
         ggplot2::scale_size_manual(values = sizes) +
         ggplot2::theme(legend.position="bottom") +
         ggplot2::ggtitle(title) +
         ggplot2::ylab(y_label) +
         ggplot2::xlab("Date") +
         ggplot2::geom_rect(data=highlight_data_table, inherit.aes = FALSE,
-                           ggplot2::aes(xmin=start, xmax=end, ymin=ymin, ymax=ymax, group=group),
+                           ggplot2::aes(xmin=.data$start, xmax=.data$end,
+                                        ymin=.data$ymin, ymax=.data$ymax, group=.data$group),
                            color="transparent", fill="orange", alpha=0.3) +
-        ggplot2::facet_grid(rows = ggplot2::vars(sensor))
+        ggplot2::facet_grid(rows = ggplot2::vars(.data$sensor))
     if("plotly" %in% installed.packages()[,"Package"]) {
         p <- plotly::ggplotly(p)
     }
-    print(p)
-}
-
-.plot_prep_locality <- function(locality) {
-    logger_function <- function(logger, logger_id) {
-        sensor_function <- function(sensor) {
-            list(datetime=logger$datetime,
-                 name=stringr::str_glue("{logger_id} {sensor$metadata@name}"),
-                 value=sensor$values)
-        }
-        purrr::map_dfr(logger$sensors, sensor_function)
-    }
-
-    data_table <- imap_dfr(locality$loggers, logger_function)
-    p <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=datetime, y=value, group=name)) +
-        ggplot2::geom_line(ggplot2::aes(color=name)) +
-        ggplot2::theme(legend.position="bottom") +
-        ggplot2::ggtitle(locality$locality_id) +
-        ggplot2::xlab("Date")
     print(p)
 }

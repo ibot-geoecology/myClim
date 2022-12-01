@@ -10,7 +10,7 @@
 #' @return filtered myClim object
 #' @export
 #' @examples 
-#' \dontrun{mc_filter(example_tomst_data1, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))}
+#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_agg_format <- .common_is_agg_format(data)
     if(!is.null(localities)) {

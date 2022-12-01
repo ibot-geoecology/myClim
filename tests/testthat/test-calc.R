@@ -1,5 +1,3 @@
-library(testthat)
-
 source("libtest.R")
 
 test_that("mc_calc_snow", {

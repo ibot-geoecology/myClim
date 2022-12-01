@@ -1,4 +1,3 @@
-library(testthat)
 source("libtest.R")
 
 test_that(".common_sensor_values_as_tibble", {
@@ -13,8 +12,8 @@ test_that(".common_crop_states_table", {
     sensor <- data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2
     out_sensor <- sensor
     out_sensor$states <- test_function(sensor$states, lubridate::interval(lubridate::ymd_hm("2022-02-24 07:15"), lubridate::ymd_hm("2022-02-24 16:00")))
-    expect_equal(out_sensor$states$tag, c(.model_const_SENSOR_STATE_SOURCE,
-                                          rep(.model_const_SENSOR_STATE_ERROR, 5)))
+    expect_equal(out_sensor$states$tag, c(myClim:::.model_const_SENSOR_STATE_SOURCE,
+                                          rep(myClim:::.model_const_SENSOR_STATE_ERROR, 5)))
     expect_equal(out_sensor$states$start, c(lubridate::ymd_hm("2022-02-24 07:15"),
                                             lubridate::ymd_hm("2022-02-24 07:15"),
                                             lubridate::ymd_hm("2022-02-24 09:00"),
@@ -29,8 +28,8 @@ test_that(".common_crop_states_table", {
                                           lubridate::ymd_hm("2022-02-24 16:00")))
     out_sensor$states <- test_function(sensor$states, c(lubridate::interval(lubridate::ymd_hm("2022-02-24 07:30"), lubridate::ymd_hm("2022-02-24 9:15")),
                                           lubridate::interval(lubridate::ymd_hm("2022-02-24 12:00"), lubridate::ymd_hm("2022-02-24 16:00"))))
-    expect_equal(out_sensor$states$tag, c(rep(.model_const_SENSOR_STATE_SOURCE, 2),
-                                          rep(.model_const_SENSOR_STATE_ERROR, 3)))
+    expect_equal(out_sensor$states$tag, c(rep(myClim:::.model_const_SENSOR_STATE_SOURCE, 2),
+                                          rep(myClim:::.model_const_SENSOR_STATE_ERROR, 3)))
     expect_equal(out_sensor$states$start, c(lubridate::ymd_hm("2022-02-24 07:30"),
                                             lubridate::ymd_hm("2022-02-24 12:00"),
                                             lubridate::ymd_hm("2022-02-24 07:30"),

@@ -1,6 +1,3 @@
-library(testthat)
-library(myClim)
-
 test_that("mc_info_count", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     count_table <- mc_info_count(data)

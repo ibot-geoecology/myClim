@@ -27,5 +27,5 @@ When the two merged myClim objects in Agg-format contains locality with same nam
 than the sensors are merged on the locality. Sensors with same names are renamed.
 }
 \examples{
-merged_data <- mc_prep_merge(list(mc_data_example_source, mc_data_example_source))
+merged_data <- mc_prep_merge(list(mc_data_example_raw, mc_data_example_raw))
 }

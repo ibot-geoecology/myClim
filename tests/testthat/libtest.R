@@ -1,6 +1,3 @@
-library(testthat)
-library(myClim)
-
 not_supported_format_warning <- function(x) {
     expect_warning(x, regexp = ".* is not a supproted data format. File is skipped.")
 }
@@ -86,7 +83,7 @@ test_states <- function (sensor) {
         return()
     }
     expect_true(all(colnames(sensor$states) == c("tag", "start", "end", "value")))
-    states <- dplyr::filter(sensor$states, tag == .model_const_SENSOR_STATE_SOURCE)
+    states <- dplyr::filter(sensor$states, .data$tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
     if(length(sensor$values) == 0) {
         expect_equal(nrow(states), 0)
         return()

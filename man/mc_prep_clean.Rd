@@ -40,5 +40,5 @@ I.e. when the time step is 2h and goes like (13:33, 15:33, 17:33) then shifted t
 When you have 2h time step and wish to round to the whole hour (13:33 -> 14:00, 15:33 -> 16:00) than use  \code{mc_agg(period="2 hours")}
 }
 \examples{
-cleaned_data <- mc_prep_clean(mc_data_example_source)
+cleaned_data <- mc_prep_clean(mc_data_example_raw)
 }

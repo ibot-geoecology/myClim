@@ -40,6 +40,6 @@ the same as if you set \code{t_base=1} you get also positive number. Therefore p
 name of output variable which contains \code{t_base} value. FDD5_TMS_T3 vs FDDminus5_TMS_T3.
 }
 \examples{
-fdd_data <- mc_calc_fdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))
+fdd_data <- mc_calc_fdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
 fdd_agg <- mc_agg(fdd_data, list(TMS_T3=c("min", "max"), FDD5="sum"), period="day")
 }

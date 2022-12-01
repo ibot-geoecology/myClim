@@ -1,11 +1,8 @@
 # constants ================================================================================
 
-#' @export
-mc_const_TZ_UTC <- "UTC"
-#' @export
-mc_const_TZ_SOLAR <- "solar"
-#' @export
-mc_const_TZ_USER_DEFINED <- "user defined"
+.model_const_TZ_UTC <- "UTC"
+.model_const_TZ_SOLAR <- "solar"
+.model_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_COUNT_TEST_VALUES <- 100
 .model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("locality_id", "altitude", "lat_wgs84", "lon_wgs84", "tz_offset")
@@ -88,12 +85,19 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
 
-#' Custom list for myClim object
+#' Custom list for myClim object §§§
+#'
+#' Top level list for store myClim data. (see [myClim-package])
+#'
+#' @param metadata of data object
+#' @param localities list of licalities
 #' @export
 myClimList <- function(metadata=NULL, localities=list())
     structure(list(metadata=metadata, localities=localities), class=c("myClimList", "list"))
 
-#' Function convert myClimList to list
+#' Function convert myClimList to list §§§
+#'
+#' @param x myClim object (see [myClim-package])
 #' @export
 as.list.myClimList <- function(x) {class(x) <- "list"; x;}
 
@@ -185,7 +189,6 @@ setMethod(f="initialize",
 #' @slot name of physical
 #' @slot description character info
 #' @slot units measurument (°C, %, m3/m3, raw, mm, ...)
-#' @slot calibration_class class for calibration
 #' @slot viridis_color_map viridis color map option
 #' @slot scale_coeff coefficient for plot; value * scale_coef is in range 0-1
 #' @export mc_Physical
@@ -280,7 +283,7 @@ setMethod("initialize",
               .Object@lat_wgs84 <- NA_real_
               .Object@lon_wgs84 <- NA_real_
               .Object@tz_offset <- NA_integer_
-              .Object@tz_type <- mc_const_TZ_UTC
+              .Object@tz_type <- .model_const_TZ_UTC
               .Object@user_data <- list()
               return(.Object)
           })
@@ -813,7 +816,7 @@ setMethod(
         return(object)
     }
     temp_sensor_id <- .model_const_SENSOR_HOBO_T_C
-    if(parts[[1, 2]] == "°F") {
+    if(parts[[1, 2]] == "\u00b0F") {
         temp_sensor_id <- .model_const_SENSOR_HOBO_T_F
     }
     columns <- list()
@@ -873,7 +876,7 @@ setMethod(
         changed_object@skip <- object@skip - 1
         data <- .read_get_data_from_file(path, changed_object, nrows = 1)
         temp_column <- changed_object@columns[[1]]
-        parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?°[CF]\\)? \\(?LGR S\\/N: (\\d+),")
+        parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?\u00b0[CF]\\)? \\(?LGR S\\/N: (\\d+),")
         if(is.na(parts[[1, 2]])) {
             return(callNextMethod())
         }

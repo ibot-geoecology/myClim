@@ -28,8 +28,6 @@ Slot "scale_coeff": 0.03333333
 
 \item{\code{units}}{measurument (°C, \%, m3/m3, raw, mm, ...)}
 
-\item{\code{calibration_class}}{class for calibration}
-
 \item{\code{viridis_color_map}}{viridis color map option}
 
 \item{\code{scale_coeff}}{coefficient for plot; value * scale_coef is in range 0-1}

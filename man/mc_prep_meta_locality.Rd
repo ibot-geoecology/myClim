@@ -47,5 +47,5 @@ Provide locality_id (name) and the value in column of metadata you wish to updat
 In case of using data.frame use \code{param_name = NULL}
 }
 \examples{
-data <- mc_prep_meta_locality(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
+data <- mc_prep_meta_locality(mc_data_example_raw, list(A1E05=60), param_name="tz_offset")
 }

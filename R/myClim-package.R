@@ -1,3 +1,6 @@
+if(getRversion() >= "2.15.1")  globalVariables(c(".", "mc_data_formats", "mc_data_heights", "mc_data_physical",
+                                                        "mc_data_sensors", "mc_data_vwc_parameters", ".data"))
+
 #' @description
 #'
 #' Package myClim was designed for handling the microclimatic data in R.
@@ -234,6 +237,11 @@
 #'             | locality[n]                                                     |
 #'             +-----------------------------------------------------------------+}
 #'
+#' @importFrom grDevices dev.off gray hcl.colors pdf png
+#' @importFrom graphics abline axis axis.POSIXct box grconvertX grconvertY grid image layout legend lines mtext par
+#' @importFrom methods callNextMethod is new slot<- slotNames
+#' @importFrom stats aggregate end quantile sd start var
+#' @importFrom utils installed.packages packageVersion read.table tail
 #' @keywords internal
 "_PACKAGE"
 

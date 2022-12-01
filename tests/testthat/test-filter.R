@@ -1,5 +1,3 @@
-library(testthat)
-library(myClim)
 source("libtest.R")
 
 test_that("mc_filter prep format", {

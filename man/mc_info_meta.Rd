@@ -23,5 +23,5 @@ data.frame with columns:
 This function return data.frame with localities metadata
 }
 \examples{
-mc_info_meta(mc_data_example_calc)
+mc_info_meta(mc_data_example_agg)
 }

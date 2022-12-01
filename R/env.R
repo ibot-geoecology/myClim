@@ -159,8 +159,8 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 }
 
 .env_get_day_agg <- function(data, table, use_utc) {
-    agg_table <- dplyr::distinct(dplyr::select(table, sensor_base, day_fun))
-    agg_table <- dplyr::group_by(agg_table, sensor_base)
+    agg_table <- dplyr::distinct(dplyr::select(table, .data$sensor_base, .data$day_fun))
+    agg_table <- dplyr::group_by(agg_table, .data$sensor_base)
     group_function <- function(fun_table, group) {
         fun_table$day_fun
     }
@@ -171,8 +171,8 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 
 .env_get_result_agg <- function(day_data, table, period, use_utc, custom_start, custom_end, min_coverage, custom_functions=NULL,
                                 percentiles=c(.env_const_MIN_PERCENTILE, .env_const_MAX_PERCENTILE)) {
-    agg_table <- dplyr::select(table, sensor_prep, period_fun)
-    agg_table <- dplyr::group_by(agg_table, sensor_prep)
+    agg_table <- dplyr::select(table, .data$sensor_prep, .data$period_fun)
+    agg_table <- dplyr::group_by(agg_table, .data$sensor_prep)
 
     group_function <- function(fun_table, group) {
         fun_table$period_fun
@@ -207,7 +207,7 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 #' @return table in long format with environment variables
 #' @export
 #' @examples
-#' data <- mc_prep_crop(mc_data_example_calc, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
+#' data <- mc_prep_crop(mc_data_example_agg, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 #' data <- mc_calc_vwc(data, localities=c("A2E32", "A6W79"))
 #' mc_env_moist(data, "month")
 mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1) {

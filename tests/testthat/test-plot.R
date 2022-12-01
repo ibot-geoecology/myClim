@@ -1,6 +1,3 @@
-library(testthat)
-library(myClim)
-
 test_that(".plot_get_logger_sensors_by_physical", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     test_function <- if(exists(".plot_get_logger_sensors_by_physical")) .plot_get_logger_sensors_by_physical else .plot_get_logger_sensors_by_physical

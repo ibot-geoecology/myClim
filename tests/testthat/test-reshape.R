@@ -1,5 +1,3 @@
-library(testthat)
-
 test_that("wideformat-filter", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     table <- mc_reshape_wide(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))

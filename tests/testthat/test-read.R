@@ -1,4 +1,3 @@
-library(testthat)
 source("libtest.R")
 
 test_that("mc_read_data csv without localities", {
@@ -6,7 +5,7 @@ test_that("mc_read_data csv without localities", {
     test_raw_data_format(data)
     expect_equal(length(data$localities), 3)
     expect_equal(length(data$localities$A6W79$loggers[[1]]$datetime), 49)
-    expect_equal(data$localities$A6W79$metadata@tz_type, mc_const_TZ_UTC)
+    expect_equal(data$localities$A6W79$metadata@tz_type, myClim:::.model_const_TZ_UTC)
     expect_equal(length(data$localities$A6W79$loggers[[1]]$sensors), 4)
     expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,
                  mc_data_heights$height[mc_data_heights$logger_type == .model_const_LOGGER_TOMST_TMS_L45 &
@@ -22,7 +21,7 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$localities$A1E05$loggers[[1]]$sensors), 1)
     expect_true(is.na(data$localities$A1E05$loggers[[1]]$metadata@step))
     expect_true(is.na(data$localities$A1E05$metadata@altitude))
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$tag, .model_const_SENSOR_STATE_SOURCE)
+    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
     expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(data$localities$A1E05$loggers[[1]]$datetime))
     expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$end, dplyr::last(data$localities$A1E05$loggers[[1]]$datetime))
     expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$value, normalizePath("../data/TOMST/data_91184101_0.csv"))
@@ -40,7 +39,7 @@ test_that("mc_read_data csv with localities", {
     data <- mc_read_data("../data/TOMST/files_table2.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
     test_raw_data_format(data)
     expect_equal(data$localities$A1E05$metadata@altitude, 255)
-    expect_equal(data$localities$A6W79$metadata@tz_type, mc_const_TZ_USER_DEFINED)
+    expect_equal(data$localities$A6W79$metadata@tz_type, myClim:::.model_const_TZ_USER_DEFINED)
     expect_equal(data$localities$A6W79$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
     expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,
                  mc_data_heights$height[mc_data_heights$logger_type == .model_const_LOGGER_TOMST_TMS_L45 &
@@ -52,7 +51,7 @@ test_that("mc_read_files TOMST directory", {
         not_supported_format_warning() %>%
         not_supported_format_warning()
     test_raw_data_format(data)
-    expect_equal(data$localities[[1]]$metadata@tz_type, mc_const_TZ_UTC)
+    expect_equal(data$localities[[1]]$metadata@tz_type, myClim:::.model_const_TZ_UTC)
     expect_equal(length(data$localities), 6)
     expect_equal(length(data$localities[[1]]$loggers), 1)
     expect_equal(data$localities$`92192250`$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_DENDROMETER)
@@ -125,7 +124,7 @@ test_that("mc_read_files TOMST comma in number", {
 test_that("mc_read_files TOMST with error in data", {
     expect_warning(data <- mc_read_files("../data/TOMST-error", "TOMST", clean=FALSE))
     expect_true(is.na(data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$values[[7]]))
-    states <- dplyr::filter(data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$states, tag == .model_const_SENSOR_STATE_ERROR)
+    states <- dplyr::filter(data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$states, .data$tag == .model_const_SENSOR_STATE_ERROR)
     expect_equal(nrow(states), 6)
     expect_equal(states$start, c(lubridate::ymd_hm("2022-02-24 06:00"),
                                  lubridate::ymd_hm("2022-02-24 07:15"),

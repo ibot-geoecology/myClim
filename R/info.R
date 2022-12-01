@@ -6,7 +6,7 @@
 #' @return data.frame with count of localities, loggers and sensors
 #' @export
 #' @examples
-#' count_table <- mc_info_count(example_tomst_data1)
+#' count_table <- mc_info_count(mc_data_example_raw)
 mc_info_count <- function(data) {
     count_env <- new.env()
     count_env$localities <- length(data$localities)
@@ -105,7 +105,7 @@ mc_info_clean <- function(data) {
 #' * count_na - number of NA records
 #' @export
 #' @examples
-#' mc_info(mc_data_example_calc)
+#' mc_info(mc_data_example_agg)
 mc_info <- function(data) {
     is_raw_format <- .common_is_raw_format(data)
 
@@ -173,7 +173,7 @@ mc_info <- function(data) {
 #' * tz_offset
 #' @export
 #' @examples
-#' mc_info_meta(mc_data_example_calc)
+#' mc_info_meta(mc_data_example_agg)
 mc_info_meta <- function(data) {
     localities <- data$localities
 

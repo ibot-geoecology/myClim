@@ -28,5 +28,5 @@ Function save separate file for the loggers to the directory. Only Raw-format su
 For Agg-format use \code{\link[=mc_plot_line]{mc_plot_line()}}
 }
 \examples{
-\dontrun{mc_plot_loggers(example_tomst_data1, "Figures")}
+\dontrun{mc_plot_loggers(mc_data_example_clean, "Figures")}
 }

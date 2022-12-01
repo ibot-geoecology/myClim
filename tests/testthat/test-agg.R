@@ -1,4 +1,3 @@
-library(testthat)
 source("libtest.R")
 
 test_that("mc_agg UTC", {

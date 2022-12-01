@@ -1,11 +1,11 @@
 #' Example data in Raw-format. Data aren't cleaned.
-"mc_data_example_source"
+"mc_data_example_raw"
 
 #' Example cleaned data in Raw-format.
 "mc_data_example_clean"
 
 #' Example data in Agg-format and 15 minutes step.
-"mc_data_example_calc"
+"mc_data_example_agg"
 
 #' Formats of source data files
 #' 
