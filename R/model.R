@@ -95,12 +95,6 @@
 myClimList <- function(metadata=NULL, localities=list())
     structure(list(metadata=metadata, localities=localities), class=c("myClimList", "list"))
 
-#' Function convert myClimList to list §§§
-#'
-#' @param x myClim object (see [myClim-package])
-#' @export
-as.list.myClimList <- function(x) {class(x) <- "list"; x;}
-
 # classes ================================================================================
 
 mc_Serializable <- setClass("mc_Serializable")

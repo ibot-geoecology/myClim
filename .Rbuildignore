@@ -8,3 +8,6 @@
 ^doc$
 ^Meta$
 ^LICENSE\.md$
+^examples$
+^makefile$
+^man-roxygen$

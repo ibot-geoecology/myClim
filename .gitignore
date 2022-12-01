@@ -8,7 +8,7 @@ myClim.Rproj
 .Rproj.user
 .idea
 docs
-plots
+examples/plots
 /tests/temp
 inst/doc
 /doc/

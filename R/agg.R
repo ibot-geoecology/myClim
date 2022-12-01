@@ -93,8 +93,8 @@
 #' If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped. E.g. vegetation season, winter season... 
 #' Character in format `"mm-dd"` or `"mm-dd H:MM"`. `custom_end` row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 `custom_end="01-01"`.
 #' @param custom_functions user define one or more functions in format `list(function_name=function(values){...})`; then you will feed function_name(s) 
-#' you defined to the `fun` parameter. e.g. custom_functions = list(positive_count=function(x){length(x[x>0])}),
-#' fun="positive_count",
+#' you defined to the `fun` parameter. e.g. `custom_functions = list(positive_count=function(x){length(x[x>0])})`,
+#' `fun="positive_count"`,
 #' @return Returns new myClim object in Agg-format see [myClim-package] When fun=NULL, period=NULL
 #' records are not modified but only converted to Agg-format.
 #' When fun and period provided then time step is aggregated based on function.
@@ -549,7 +549,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 }
 
 .agg_get_functions <- function(sensor, fun, percentiles, min_coverage, custom_functions) {
-    if(class(fun) == "character") {
+    if(is(fun, "character")) {
         functions_to_convert <- fun
     } else if (sensor$metadata@name %in% names(fun)) {
         functions_to_convert <- fun[[sensor$metadata@name]]

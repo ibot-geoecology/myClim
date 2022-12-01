@@ -53,8 +53,8 @@ If parameter is filled in then data out of range \code{custom_start}-\code{custo
 Character in format \code{"mm-dd"} or \code{"mm-dd H:MM"}. \code{custom_end} row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 \code{custom_end="01-01"}.}
 
 \item{custom_functions}{user define one or more functions in format \code{list(function_name=function(values){...})}; then you will feed function_name(s)
-you defined to the \code{fun} parameter. e.g. custom_functions = list(positive_count=function(x){length(x\link{x>0})}),
-fun="positive_count",}
+you defined to the \code{fun} parameter. e.g. \code{custom_functions = list(positive_count=function(x){length(x[x>0])})},
+\code{fun="positive_count"},}
 }
 \value{
 Returns new myClim object in Agg-format see \link{myClim-package} When fun=NULL, period=NULL
