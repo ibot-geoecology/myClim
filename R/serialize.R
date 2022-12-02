@@ -55,6 +55,7 @@ mc_load <- function(file) {
     }
 
     locality_function <- function(item) {
+        item <- .serialize_edit_locality_list_before_load(item, obj_list$metadata$version)
         metadata <- .model_list_to_object(item$metadata)
         if(is_raw) {
             loggers <- purrr::map(item$loggers, logger_function)
@@ -72,3 +73,10 @@ mc_load <- function(file) {
     return(myClimList(main_metadata, localities))
 }
 
+.serialize_edit_locality_list_before_load <- function(item, original_version) {
+    if(original_version < "0.2.6") {
+        item$metadata$elevation <- item$metadata$altitude
+        item$metadata <- item$metadata[names(item$metadata) != "altitude"]
+    }
+    return(item)
+}
