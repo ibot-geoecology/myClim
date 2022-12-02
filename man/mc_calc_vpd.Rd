@@ -17,15 +17,11 @@ mc_calc_vpd(
 \arguments{
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
-\item{temp_sensor}{name of temperature sensor
+\item{temp_sensor}{name of temperature sensor. Temperature sensor must be in T_C physical.}
 
-Temperature sensor must be in T_C physical.}
+\item{rh_sensor}{name of relative air humidity sensor. Humidity sensor must be in RH_perc physical.}
 
-\item{rh_sensor}{name relative humidity sensor
-
-Temperature sensor must be in RH_perc physical.}
-
-\item{output_sensor}{name of new snow sensor (default "VPD")}
+\item{output_sensor}{name of new virtual VPD sensor (default "VPD")}
 
 \item{altitude}{value in meters (default 0)}
 
@@ -37,8 +33,13 @@ Temperature sensor must be in RH_perc physical.}
 myClim object same as input but with added VPD sensor
 }
 \description{
-Function calculate vapor pressure deficit (in kPa) from temperature and relative humidity readings using equation
-from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981) and adapted by Jones, 2013 (eq. 5.15)
+This function creates new virtual sensor on locality within myClim data object.
+The virtual sensor hosts the vapor pressure deficit (in kPa) calculated
+from temperature and relative air humidity.
+}
+\details{
+Equation comes from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981)
+and adapted by Jones, 2013 (eq. 5.15)
 Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
 }
 \examples{

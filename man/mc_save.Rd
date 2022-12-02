@@ -9,10 +9,14 @@ mc_save(data, file)
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{file}{path to output RDS file}
+\item{file}{path to output .rds file}
 }
 \description{
-§This function save the myClim data object to an RDS file. The standard R functions save and saveRDS are unsafe
-to save the MyClim object. The mc_save a mc_load functions ensure that the myClim object is correctly loaded
-in the newer version.§
+This function was designed for saving the myClim data object to an
+.rds file, which can be later correctly loaded by any further version
+of myClim package with \link{mc_load}. This is the safest way how to store and
+share your myClim data.
+}
+\examples{
+\dontrun{mc_save("myClim_data.rds")}
 }

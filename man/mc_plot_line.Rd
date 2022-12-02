@@ -18,9 +18,9 @@ mc_plot_line(
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{filename}{output with the extension - supported formats are .pdf and .png (default NULL)
+\item{filename}{output file name/path with the extension - supported formats are .pdf and .png (default NULL)
 
-If NULL then the plot is return, but not saved to file.}
+If NULL then the plot is displayed and can be returned into r environment but is not saved to file.}
 
 \item{sensors}{select the names of sensors to be plotted (max 2) see \code{names(mc_data_sensors)}}
 
@@ -38,11 +38,29 @@ If NULL then the plot is return, but not saved to file.}
 ggplot2 object
 }
 \description{
-Function plot data to file with ggplot2 geom_line
+Function plots data with ggplot2 geom_line. Plot is returned as ggplot faced grid and
+is primary designed to be saved as PDF file. PNG is also possible, the same as
+plotting ggplot object into R environment. See details.
 }
 \details{
-Maximal number of physical units (elements) of sensors to be plotted  is two. Main and secondary y axis.
-Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL
-than function try detects scale coefficient from physical unit of sensors see \linkS4class{mc_Physical}.
-Scaling is useful when plotting together e.g. temperature and moisture.
+Saving as the PDF file is recommended, because the plot is optimized
+to be paginate PDF (facet raster plot is distributed to pages), which is especially useful
+for bigger data. Maximal number of physical units (elements) of sensors to be plotted in one
+plot is two with main and secondary y axis. In case, there are multiple sensors with
+identical physical on one locality, they are plotted together. E.g., when you have
+TMS_T1, TMS_T2, TMS_T3, TS_T, and moisture you get plot with 5 lines of different colors and
+two y axes. Secondary y axes are scaled with calculation \code{values * scale_coeff}.
+If coefficient is NULL than function try detects scale coefficient from
+physical unit of sensors see \linkS4class{mc_Physical}. Scaling is useful when
+plotting together e.g. temperature and moisture. For TMS and HOBO scaling coefficients
+are estimated automatically, correctly. For other data it is better to set it by hand.
+}
+\examples{
+\dontrun{
+tms.plot <- mc_filter(tms,localities = "A6W79")
+p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_TMSmoisture"))
+p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "\%W")
+p <- p+ggplot2::xlab("week")
+p <- p+ggplot2::scale_color_manual(values=c("hotpink","pink", "darkblue"),name=NULL)
+}
 }

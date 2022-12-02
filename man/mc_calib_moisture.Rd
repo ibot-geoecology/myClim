@@ -2,7 +2,7 @@
 % Please edit documentation in R/calib.R
 \name{mc_calib_moisture}
 \alias{mc_calib_moisture}
-\title{Calculate slope and intercept for TMSmoisture conversion}
+\title{Calculates coefficients for TMS moisture conversion to VWC}
 \usage{
 mc_calib_moisture(
   raw_air,
@@ -17,9 +17,9 @@ mc_calib_moisture(
 )
 }
 \arguments{
-\item{raw_air}{TDT signal in air}
+\item{raw_air}{Raw TMS moisture records in air}
 
-\item{raw_water}{TDT signal in water}
+\item{raw_water}{Raw TMS moisture records in water}
 
 \item{t_air}{temperature of air (default 24)}
 
@@ -39,11 +39,19 @@ mc_calib_moisture(
 list with slope and intercept parameters
 }
 \description{
-Function calculate correction parameters (slope and intercept) from TMS moisture measurements in pure water and air.
+Specialized, service function. You will typically not need to use this one.
+Function calculate correction parameters (slope and intercept)
+from TMS moisture measurements in pure water and air.
 }
 \details{
-This is highly specialized service function designed to derive correction parameters \code{slope} and \code{intercept} for soil moisture sensor of TMS loggers measuring on the air and in the water.
-Slope and intercept derived from this function could be used as sensor-specific alternative in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}} function instead of universal defaults. But this must be done in code, by had. Standard user is not allowed to modify slope and intercept in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}.
+This is highly specialized service function designed to derive correction
+parameters \code{slope} and \code{intercept} for soil moisture sensor of TMS loggers
+measuring on the air and in the water. Slope and intercept calculated in this
+function could be used as sensor-specific alternative in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
+function instead of defaults. User is not allowed to modify slope and
+intercept parameters when calling \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}.
+But this must be done in code of the function. It is possible, but advanced,
+and typically not necessary, the default values should be working well.
 }
 \examples{
 mc_calib_moisture(120, 3650)

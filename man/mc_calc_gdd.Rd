@@ -9,31 +9,30 @@ mc_calc_gdd(data, sensor, output_prefix = "GDD", t_base = 5, localities = NULL)
 \arguments{
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
-\item{sensor}{name of temperature sensor used fot GDD calculation e.g. TMS_T3 see \code{names(mc_data_sensors)}}
+\item{sensor}{name of temperature sensor used for GDD calculation e.g. TMS_T3 see \code{names(mc_data_sensors)}}
 
-\item{output_prefix}{name prefix of new GDD sensor (default "GDD")
-
+\item{output_prefix}{name prefix of new GDD sensor (default "GDD" -> "GDD5_TMS_T3")
 name of output sensor consists of output_prefix and value t_base e.g. GDD5}
 
-\item{t_base}{base temperature for calculation of GDD (default 5)}
+\item{t_base}{base temperature for calculation of GDD (default 5°C)}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 }
 \value{
-The same myClim object as input but with added GDD sensor
+The same myClim object as input but with added virtual GDD sensor
 }
 \description{
-This function creates new virtual sensor on locality within myClim data object. New virtual sensor
-hosts values of GDD (Growing Degree Days) in Celsius degrees in original time step. see details
+This function creates new virtual sensor on locality within myClim data object. The virtual sensor
+with values of GDD (Growing Degree Days) is in Celsius degrees in original time step. see details
 }
 \details{
-Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with
-the same time step as input data. I. e. when the time step is shorter than a day (whch is not very intuitive for growing degree \strong{days})
-than growing degree day is divided into smaller time step but still summing the day.
-For shorter intervals (steps) than the day, the GDD value is the contribution
+The allowed time step length for GDD calculation is day and shorter.
+Function creates new virtual sensor with the same time step as input data.
+For shorter time steps than the day, the GDD value is the contribution
 of the interval to the growing degree day.
 Be careful while aggregating growing degree days to longer periods
-see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum}, but myClim let you apply anything.
+see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum},
+but myClim let you apply anything.
 }
 \examples{
 gdd_data <- mc_calc_gdd(mc_data_example_calc, "TMS_T3", localities = c("A2E32", "A6W79"))

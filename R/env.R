@@ -8,30 +8,42 @@
 .env_const_VWC_PREFIX <- "VWC."
 .env_const_VPD_PREFIX <- "VPD."
 
-.env_const_MESSAGE_ANY_VWC <- "There isn't any moisture sensor in volumetric water content units."
-.env_const_MESSAGE_ANY_VPD <- "There isn't any VPD sensor."
+.env_const_MESSAGE_ANY_VWC <- "There arn't any moisture sensors in volumetric water content units."
+.env_const_MESSAGE_ANY_VPD <- "There arn't any VPD sensors."
 
-#' Tempereature environment variables
+#' Standardised myClim temperature variables
 #'
 #' @description
-#' Function ...
+#' The wrapper function returning 7 standardised ecologically relevant myClim variables
+#' derived from temperature.   
 #'
 #' @details
-#' - used all temperature sensors
-#' - functions
-#'     - min5p: fifth percentile of daily minimum
-#'     - mean: mean of daily mean
-#'     - max95p: ninety-fifth percentile of daily maximum
-#'     - drange: mean of daily range
-#'     - gdd{base}: growing degree days with base from parameter `gdd_t_base`
-#'     - fdd{base}: freezing degree days with base from parameter `fdd_t_base`
-#'     - frostdays: the number of days in which some temerature value was lower than parameter `fdd_t_base`
-#'
+#' This function was designed for time-series of step shorter than one 
+#' day and will not work with coarser data. It automatically use all 
+#' available sensors in myClim object and returns all possible variables based
+#' on sensor type and measurement height/depth. In contrast with other myClim functions
+#' returning myClim objects this wrapper function return long table.
+#' The mc_env_temp function first aggregates time-series to daily time-step 
+#' and then aggregates to the final time-step set in `period` parameter. 
+#' Because freezing and growing degree days are always aggregated with sum function,
+#' these two variables are not first aggregated to the daily time-steps. 
+#' Variables are named based on sensor name, height, and function e.g., 
+#' (T.air_15_cm.max95p, T.air_15_cm.drange)
+#' 
+#' Standardised myClim temperature variables:
+#'   - min5p: Minimum temperature = 5th percentile of daily minimum temperatures
+#'   - mean: Mean temperature = mean of daily mean temperatures
+#'   - max95p: Maximum temperature = 95th percentile of daily maximum temperatures
+#'   - drange: Temperature range = mean of daily temperature range (i.e., difference of daily minima and maxima)
+#'   - GDD{5}: Growing degree days = sum of growing degree days above defined base temperature (default 5°C) `gdd_t_base`
+#'   - FDD{0}: Freezing degree days = sum of freezing degree days below defined base temperature (default 0°C) `fdd_t_base`
+#'   - frostdays: Frost days = number of days with frost (daily minimum < 0°C) `fdd_t_base`
+#'   
 #' @template param_myClim_object_cleaned
 #' @template params_env_agg
-#' @param gdd_t_base base temeprature for Growing degree days [myClim::mc_calc_gdd()] (default 5)
-#' @param fdd_t_base base temeprature for freezing degree days [myClim::mc_calc_fdd()] (default 0)
-#' @return table in long format with environment variables
+#' @param gdd_t_base base temperature for Growing Degree Days [myClim::mc_calc_gdd()] (default 5)
+#' @param fdd_t_base base temperature for Freezing Degree Days [myClim::mc_calc_fdd()] (default 0)
+#' @return table in long format with standardised myClim variables
 #' @export
 #' @examples
 #' data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
@@ -189,22 +201,32 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
     mc_filter(result_data, sensors=table$result_name)
 }
 
-#' Moisture environment variables
+#' Standardised myClim soil moisture variables
 #'
 #' @description
-#' Function ...
+#' The wrapper function returning 4 standardised ecologically relevant myClim variables
+#' derived from soil moisture. The mc_env_moist function needs time-series of 
+#' volumetric water content (VWC) measurements as input. Therefore, non-VWC soil
+#' moisture measurements must be first converted to VWC. 
+#' For Tomst loggers see [myClim::mc_calc_vwc()]
+#'   
 #'
 #' @details
-#' - used all VWC sensors
-#' - functions
-#'     - 5p: fifth percentile
-#'     - mean: mean
-#'     - 95p: ninety-fifth percentile
-#'     - sd: standard deviation
+#' This function was designed for time-series of step shorter than one 
+#' day and will not work with coarser data. In contrast with other myClim functions
+#' returning myClim objects this wrapper function return long table.
+#' Variables are named based on sensor name, height, and function e.g., 
+#' (VWC.soil_0_15_cm.5p, VWC.soil_0_15_cm.mean)
+#' 
+#' Standardised myClim soil moisture variables:
+#'   - VWC.5p: Minimum soil moisture = 5th percentile of VWC values
+#'   - VWC.mean: Mean soil moisture = mean of VWC values
+#'   - VWC.95p: Maximum soil moisture = 95th percentile of VWC values
+#'   - VWC.sd: Standard deviation of VWC measurements
 #'
 #' @template param_myClim_object_cleaned
 #' @template params_env_agg
-#' @return table in long format with environment variables
+#' @return table in long format with standardised myClim variables
 #' @export
 #' @examples
 #' data <- mc_prep_crop(mc_data_example_calc, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
@@ -269,20 +291,32 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
     purrr::map_dfr(moist_sensors, sensor_function)
 }
 
-#' vapor pressure deficit environment variables
+#' Standardised myClim vapor pressure deficit variables
 #'
 #' @description
-#' Function ...
+#' The wrapper function returning 2 standardised ecologically relevant myClim variables
+#' derived from vapor pressure deficit. The mc_env_vpd function needs time-series of 
+#' vapor pressure deficit measurements as input. Therefore, VPD must be first calculated
+#' from temperature and air humidity sensors see [myClim::mc_calc_vpd()]
+#'   
 #'
 #' @details
-#' - used all VPD sensors
-#' - functions
-#'     - mean: mean of daily mean
-#'     - max95p: ninety-fifth percentile of daily maximum
+#' This function was designed for time-series of step shorter than one 
+#' day and will not work with coarser data. The mc_env_vpd function 
+#' first aggregates time-series to daily time-step 
+#' and then aggregates to the final time-step set in `period` parameter. 
+#' In contrast with other myClim functions
+#' returning myClim objects this wrapper function return long table.
+#' Variables are named based on sensor name, height, and function e.g., 
+#' (VPD.air_150_cm.mean, VPD.air_150_cm.max95p)
+#' 
+#' Standardised myClim vapor pressure deficit variables:
+#'   - VPD.mean: Mean vapor pressure deficit = mean of daily mean VPD
+#'   - VPD.max95p: Maximum vapor pressure deficit = 95th percentile of daily maximum VPD	
 #'
 #' @template param_myClim_object_cleaned
 #' @template params_env_agg
-#' @return table in long format with environment variables
+#' @return table in long format with standardised myClim variables
 #' @export
 mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1) {
     is_agg <- myClim:::.common_is_agg_format(data)

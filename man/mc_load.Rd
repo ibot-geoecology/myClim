@@ -7,13 +7,16 @@
 mc_load(file)
 }
 \arguments{
-\item{file}{path to input RDS file}
+\item{file}{path to input .rds file}
 }
 \value{
 loaded myClim object
 }
 \description{
-§This function load the myClim data object from an RDS file. The standard R functions load and readRDS are unsafe
-to load the MyClim object. The mc_save a mc_load functions ensure that the myClim object is correctly loaded
-in the newer version.§
+This function loads the myClim .rds data object saved with \link{mc_save}.
+The \code{mc_save} and \code{mc_load} functions secure that the myClim object is correctly
+loaded across myClim versions.
+}
+\examples{
+\dontrun{data <- mc_load("myClim_data.rds")}
 }

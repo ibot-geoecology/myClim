@@ -9,21 +9,20 @@ mc_read_long(data_table, sensor_ids = list(), clean = TRUE, silent = FALSE)
 \arguments{
 \item{data_table}{long data.frame with Columns:
 \itemize{
-\item locality_id - character id of locality
-\item sensor_name - see \code{names(mc_data_sensors)}
-\item datetime - POSIXct and UTC timezone is required
+\item locality_id - character; id of locality
+\item sensor_name - can be any character string, recommended are these: \code{names(mc_data_sensors)}
+\item datetime - POSIXct in UTC timezone is required
 \item value
 }}
 
 \item{sensor_ids}{list with relations between sensor_names and sensor_ids (default list());
-sensor_id is key from \code{names(mc_data_sensors)}. If sensor_name is the same as sensor_id,
-it does not have to be in the list.
-
-\code{sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)}}
+sensor_id is key from \code{names(mc_data_sensors)}. E.g.,
+\code{sensor_ids <- list(precipitation="real", maxAirT="T_C")}
+If sensor_name is the same as sensor_id does not have to be provided.}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
-\item{silent}{if TRUE, then any information is printed in console (default FALSE)}
+\item{silent}{if TRUE, then any information is not printed in console (default FALSE)}
 }
 \value{
 myClim object in Raw-format
@@ -33,9 +32,10 @@ This is universal function designed to read time series and values
 from long data.frame to myClim object.
 }
 \details{
-Similar like \link{mc_read_wide} but is capable to read multiple sensors.
-By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
-holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks.
+Similar like \link{mc_read_wide} but is capable to read multiple sensors
+from single table. Useful for data not coming from supported microclimatic
+loggers. E.g. meteorological station data.
+By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}.
 }
 \seealso{
 \link{mc_read_wide}

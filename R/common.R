@@ -36,7 +36,7 @@
 
 .common_stop_if_not_raw_format <- function(data) {
     if(!.common_is_raw_format(data)) {
-        stop("Format of data isn't right for preparing. Use data before converting with function mc_agg.")
+        stop("Format of input data isn't correct for preparing. Use non-aggregated data.")
     }
 }
 

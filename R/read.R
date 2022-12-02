@@ -1,36 +1,39 @@
-.read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible combine files and directories"
+.read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible to combine files and directories"
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
 .read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format UTC timezone."
-.read_const_MESSAGE_ANY_FILE <- "There isn't any source file."
-.read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible read datetimes from {filename}. File is skipped."
-.read_const_MESSAGE_ANY_LOCALITY <- "There isn't any valid locality."
+.read_const_MESSAGE_ANY_FILE <- "There aren't any source file."
+.read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible to read datetimes from {filename}. File is skipped."
+.read_const_MESSAGE_ANY_LOCALITY <- "There aren't any valid localities."
 
 #' Reading files or directories
 #'
 #' This function read one or more csv files or directories of identical, 
 #' pre-defined logger type (format) see [mc_DataFormat] and [mc_data_formats]. 
-#' This function does not allow you to provide additional locality or sensor metadata. 
-#' Metadata can be load through [myClim::mc_read_data()] or 
+#' This function does not support loading locality or sensor metadata while reading. 
+#' Metadata can be loaded through [myClim::mc_read_data()] or 
 #' can be provided later with function [myClim::mc_prep_meta()]
 #' 
 #' @details 
 #' If file is not in expected format, then file is skipped and warning printed in console. 
-#' CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.    
-#' Localities are named after serial_number of logger.
+#' CSV files (loggers raw data) are in resulting myClim object placed to separate 
+#' localities with empty metadata. Localities are named after serial_number of logger.
 #' Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
 #' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
-#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
+#' holes in time-series, duplicated records or records in wrong order. 
 #'
-#' @seealso [myClim::mc_DataFormat]
+#' @seealso [myClim::mc_DataFormat], [myClim::mc_prep_celan()]
 #'
 #' @param paths vector of paths to files or directories
-#' @param dataformat_name data format of logger one of `names(mc_data_formats)` see `names(mc_data_formats)`
+#' @param dataformat_name data format of logger one of `names(mc_data_formats)`
 #' @param recursive recursive search in sub-directories (default TRUE)
-#' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA). Required for HOBO files. 
-#' For TMS files ignored, there is fix date format. see [mc_data_formats]
-#' @param logger_type type of logger (default NA), can be one of pre-defined see [myClim::mc_read_data()] or any custom string
-#' @param tz_offset timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)
-#' @param step time step of microclimatic time-series in seconds. When provided, then is used in [mc_prep_clean] instead of automatic step detection.
+#' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA). 
+#' Required for HOBO files. For TMS files ignored, there is known, stable date format. see [mc_data_formats]
+#' @param logger_type type of logger (default NA), can be one of 
+#' pre-defined see [myClim::mc_read_data()] or any custom string
+#' @param tz_offset timezone offset in minutes; It is required only for non-UTC data 
+#' (custom settings in HOBO). Not used in TMS (default NA)
+#' @param step time step of microclimatic time-series in seconds. When provided, then is used in 
+#' [mc_prep_clean] instead of automatic step detection.
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is printed in console (default FALSE)
@@ -63,51 +66,55 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 }
 
 #' Reading files with locality metadata
+#' @description 
+#' This function has two tables as the parameters. 
+#' 
+#' (i) `files_table` with *paths* pointing to raw
+#' csv logger files, specification of *data format* (logger type) and *locality name*.
 #'
-#' This function has two tables parameters. (i) `files_table` with paths pointing to raw
-#' csv logger files, specification of data format (logger type) and locality name. This table is required.
 #' (ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
 #' 
 #' @details 
-#' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
-#' must have header, column separator must be comma ",".
+#' The input tables could be R data.frames or csv files. When loading `files_table` 
+#' and `localities_table` from external CSV they must have header, column separator must be comma ",".
 #' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
-#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
+#' holes in time-series, duplicated records or records in wrong order. 
 #' @seealso [myClim::mc_DataFormat]
 #' @param files_table path to csv file or data.frame object with 3 required columns and few optional:
 #' required columns:
-#' * path - path to file
-#' * locality_id
+#' * path - path to files
+#' * locality_id - the unique locality id
 #' * data_format see [mc_data_formats], `names(mc_data_formats)`
 #'
 #' optional columns:
-#' * serial_number - can be NA, than try detect
-#' * logger_type - type of logger. This is used to set default sensor heights and hlps a lot wen joining the data. 
+#' * serial_number - can be NA, than myClim tries to detect from file name or header
+#' * logger_type - type of logger. This is used to set default sensor heights important when joining the data. 
 #' In some cases myClim detects loger_type from source data file, but sometimes it is not possible. 
-#' Pre-defined loger types are:("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+#' Pre-defined logger types are: ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
-#' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S"); Ignored for TOMST data format
+#' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S"); 
+#' Ignored for Tomst TMS data format
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
-#' Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
-#' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. Ignored for TOMST data format
+#' Value in this column have the highest priority. If NA then auto detection of timezone in files. 
+#' If timezone can't be detected, then UTC is supposed.
+#' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. 
+#' Ignored for Tomst TMS data format (they are always in UTC)
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection.
 #'
 #' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
-#' object contains 5 columns:
+#' object containing 5 columns:
 #' * locality_id
 #' * altitude
 #' * lon_wgs84
 #' * lat_wgs84
 #' * tz_offset
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
-#' @param silent if TRUE, then any information is printed in console (default FALSE)
+#' @param silent if TRUE, then any information is not printed in console (default FALSE)
 #' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
-#' \dontrun{
-#' tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")
-#' }
+#' \dontrun{tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")}
 mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=FALSE) {
     if(is.character(files_table)) {
         files_table <- .read_get_table_from_csv(files_table)
@@ -206,7 +213,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         serial_number <- myClim:::.model_get_serial_number_from_file(data_format, path)
         if(is.na(serial_number))
         {
-            stop(stringr::str_glue("It isn't possible automatically detect serial_number from {path}."))
+            stop(stringr::str_glue("It isn't possible to automatically detect serial_number from {path}."))
         }
         serial_number
     }
@@ -318,7 +325,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
             result <- sub(",", ".", data_table[[column_index]])
             return(as.numeric(result))
         }
-        stop(stringr::str_glue("It isn't possible load sensor data from {column_index}. column in file {filename}."))
+        stop(stringr::str_glue("It isn't possible to load sensor data from {column_index}. column in file {filename}."))
     }
     as.data.frame(purrr::map(seq(ncol(data_table)), values_function))
 }
@@ -388,23 +395,24 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 #' Reading data from wide data.frame
 #'
-#' This is universal function designed to read time series and values 
-#' from wide data.frame to myClim object.
+#' This is universal function designed to read time-series and values 
+#' from wide data.frame to myClim object. Useful for data not coming from 
+#' supported microclimatic loggers. E.g. meteorological station data. 
 #' 
 #' 
 #' @details The first column of input data.frame must be datetime column in POSIXct time format UTC timezone.
-#' Following columns represents localities. Column names are the localities. 
-#' All values in wide data.frame represents the same sensor, e.g. air temperature. If you wish to 
+#' Following columns represents localities. Column names are the localities names. 
+#' All values in wide data.frame represents the same sensor type, e.g. air temperature. If you wish to 
 #' read multiple sensors use [myClim::mc_read_long] or use [myClim::mc_read_wide] multiple times separately
-#' for each sensor and that merge myClim objects with [myClim::mc_prep_merge]
+#' for each sensor type and that merge myClim objects with [myClim::mc_prep_merge]
 #' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
-#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
+#' holes in time-series, duplicated records or records in wrong order. 
 #'
 #' @param data_table data.frame with first column of POSIXct time format UTC timezone, 
-#' followed by columns with microclimatic records. See details.  
+#' followed by columns with (micro)climatic records. See details.  
 #'
 #' Columns:
-#' * datetime column - POSIXct and UTC timezone is required
+#' * datetime column - POSIXct in UTC timezone is required
 #' * Name of locality[1] - values
 #' * ...
 #' * Name of locality[n] - values
@@ -451,22 +459,22 @@ mc_read_wide <- function(data_table, sensor_id=myClim:::.model_const_SENSOR_real
 #' from long data.frame to myClim object. 
 #'
 #' @details 
-#' Similar like [myClim::mc_read_wide] but is capable to read multiple sensors. 
-#' By default data are cleaned with function [myClim::mc_prep_celan()]. See function description. It detects
-#' holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks. 
+#' Similar like [myClim::mc_read_wide] but is capable to read multiple sensors 
+#' from single table. Useful for data not coming from supported microclimatic 
+#' loggers. E.g. meteorological station data. 
+#' By default data are cleaned with function [myClim::mc_prep_celan()].
 #'
 #' @param data_table long data.frame with Columns:
-#' * locality_id - character id of locality
-#' * sensor_name - see `names(mc_data_sensors)`
-#' * datetime - POSIXct and UTC timezone is required
+#' * locality_id - character; id of locality
+#' * sensor_name - can be any character string, recommended are these: `names(mc_data_sensors)`
+#' * datetime - POSIXct in UTC timezone is required
 #' * value
 #' @param sensor_ids list with relations between sensor_names and sensor_ids (default list());
-#' sensor_id is key from `names(mc_data_sensors)`. If sensor_name is the same as sensor_id,
-#' it does not have to be in the list.
-#'
-#' `sensor_ids <- list(sensor_name1=sensor_id1, sensor_name2=sensor_id2)`
+#' sensor_id is key from `names(mc_data_sensors)`. E.g.,
+#' `sensor_ids <- list(precipitation="real", maxAirT="T_C")` 
+#' If sensor_name is the same as sensor_id does not have to be provided. 
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
-#' @param silent if TRUE, then any information is printed in console (default FALSE)
+#' @param silent if TRUE, then any information is not printed in console (default FALSE)
 #' @return myClim object in Raw-format
 #' @export
 #' @seealso [myClim::mc_read_wide]

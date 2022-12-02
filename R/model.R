@@ -79,10 +79,10 @@ mc_const_TZ_USER_DEFINED <- "user defined"
 .model_const_SENSOR_STATE_SOURCE <- "source"
 .model_const_SENSOR_STATE_ERROR <- "error"
 
-.model_const_MESSAGE_NO_DATA <- "There aren't data in source file."
+.model_const_MESSAGE_NO_DATA <- "There aren't any data in source file."
 .model_const_MESSAGE_SEPARATED_TIME <- "Separated time in source data isn't supported."
-.model_const_MESSAGE_DATE_TIME_HEADER <- "It is not possible detect timezone offset from header."
-.model_const_MESSAGE_COLUMNS_PROBLEM <- "It is not possible detect columns from header."
+.model_const_MESSAGE_DATE_TIME_HEADER <- "It is not possible to detect timezone offset from header."
+.model_const_MESSAGE_COLUMNS_PROBLEM <- "It is not possible to detect columns from header."
 .model_const_MESSAGE_HOBO_DATE_FORMAT_PROBLEM <- "HOBO data format required filled in parameter date_format."
 
 .model_const_FORMAT_RAW <- "raw"
@@ -133,7 +133,7 @@ setMethod(
 
 #' Class for sensor definition
 #' 
-#' Sensor definitions intslevesl are stored in [mc_data_sensors].
+#' Sensor definitions are stored in [mc_data_sensors].
 #' @slot sensor_id unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)
 #' @slot logger name of logger (TMS, ThermoDatalogger, ...)
 #' @slot physical unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)
@@ -224,7 +224,7 @@ setMethod("initialize",
               return(.Object)
           })
 
-#' Class for myClim object metadata in Raw-format
+#' Class for myClim object metadata in Agg-format
 #' @template slot_MainMetadata
 #' @slot step time step of data in seconds
 #' @slot period value from [mc_agg()] (e.g. month, day, all...)
@@ -311,7 +311,7 @@ setMethod("initialize",
 #' @slot count_duplicits count of duplicated records - values with same date
 #' @slot count_missed count of missing records; Period between the records should be the same length. If not, than missing. 
 #' @slot count_disordered count of records incorrectly ordered in time. In table, newer record is followed by the older. 
-#' @slot rounded T/F indication whether myClim automatically rounded time series to the closes half (06, 12) e.g. 13:07 -> 13:00 
+#' @slot rounded T/F indication whether myClim automatically rounded time series to the closes half (HH:00, HH:30) e.g. 13:07 -> 13:00 
 #' @export mc_LoggerCleanInfo
 #' @exportClass mc_LoggerCleanInfo
 mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
@@ -465,12 +465,13 @@ setMethod(
 
 #' Class for logger file data format
 #'
-#' The Class used for parsing source data files. Typically the csv files downloaded from microclimatic loggers. 
-#' Each supported logger has established own specific object of class "mc_TOMSTDataFormat" defining the parameters.   
-#' @details The logger definitions are stored in R environment object ./data/mc_data_formats.rda 
-#' And thus it easy to add the ability of reading new, unsupported logger just by defining its Class parameters. 
-#' An object of class "mc_TOMSTDataFormat"
-#' Below see e.g. the Class defining TOMST file format. 
+#' The Class used for parsing source data files. Typically the csv files 
+#' downloaded from microclimatic loggers. Each supported logger has established 
+#' own specific object of class `mc_{logger}DataFormat` defining the parameters.   
+#' @details The logger definitions are stored in R environment object
+#' `./data/mc_data_formats.rda`. And thus it easy to add the ability of 
+#' reading new, unsupported logger just by defining its Class parameters. 
+#' Below see e.g. the Class defining Tomst file format. 
 #'  
 #' \preformatted{
 #' An object of class "mc_TOMSTDataFormat"
@@ -500,7 +501,7 @@ setMethod(
 #' @slot tz_offset timezone offset in minutes from UTC in source data (default 0)
 #' @export mc_DataFormat
 #' @exportClass mc_DataFormat
-#' @seealso [mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
+#' @seealso [mc_data_formats], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
                           slots = c(skip = "numeric",
                                     separator = "character",
@@ -531,7 +532,7 @@ setMethod("initialize",
               return(.Object)
           })
 
-#' Class for reading TOMST logger files
+#' Class for reading Tomst logger files
 #' 
 #' Provides the key for the column in source files. Where is the date, 
 #' in what format is the date, in which columns are records of which sensors.
@@ -548,7 +549,7 @@ mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 #' in what format is the date, in which columns are records of which sensors.
 #' The code defining the class is in section methods ./R/model.R
 #' 
-#' TMS join file format is the output of IBOT internal post-processing of TOMST logger files.  
+#' TMS join file format is the output of IBOT internal post-processing of Tomst logger files.  
 #' @seealso [myClim::mc_DataFormat],[mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 #' @export mc_TOMSTJoinDataFormat
 #' @exportClass mc_TOMSTJoinDataFormat
@@ -556,11 +557,11 @@ mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_Data
 
 #' Class for reading HOBO logger files
 #'
-#' Provides the key for the column in source files. Where is the date,
+#' Provides the key for reading the HOBO source files. In which column is the date,
 #' in what format is the date, in which columns are records of which sensors.
 #' The code defining the class is in section methods ./R/model.R
 #'
-#' @seealso [myClim::mc_DataFormat],[mc_data_formats]
+#' @seealso [myClim::mc_DataFormat], [mc_data_formats]
 #' @export mc_HOBODataFormat
 #' @exportClass mc_HOBODataFormat
 mc_HOBODataFormat <- setClass("mc_HOBODataFormat", contains = "mc_DataFormat")

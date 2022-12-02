@@ -1,11 +1,14 @@
 #' Save myClim object
 #'
-#' §This function save the myClim data object to an RDS file. The standard R functions save and saveRDS are unsafe
-#' to save the MyClim object. The mc_save a mc_load functions ensure that the myClim object is correctly loaded
-#' in the newer version.§
+#' This function was designed for saving the myClim data object to an 
+#' .rds file, which can be later correctly loaded by any further version 
+#' of myClim package with [mc_load]. This is the safest way how to store and 
+#' share your myClim data.
 #'
 #' @template param_myClim_object
-#' @param file path to output RDS file
+#' @param file path to output .rds file
+#' @examples 
+#' \dontrun{mc_save("myClim_data.rds")}
 #' @export
 mc_save <- function(data, file) {
     output_object <- .save_convert_classes_to_lists(data)
@@ -26,12 +29,14 @@ mc_save <- function(data, file) {
 
 #' Load myClim object
 #'
-#' §This function load the myClim data object from an RDS file. The standard R functions load and readRDS are unsafe
-#' to load the MyClim object. The mc_save a mc_load functions ensure that the myClim object is correctly loaded
-#' in the newer version.§
+#' This function loads the myClim .rds data object saved with [mc_save].
+#' The `mc_save` and `mc_load` functions secure that the myClim object is correctly 
+#' loaded across myClim versions.
 #'
-#' @param file path to input RDS file
+#' @param file path to input .rds file
 #' @return loaded myClim object
+#' @examples
+#' \dontrun{data <- mc_load("myClim_data.rds")}
 #' @export
 mc_load <- function(file) {
     obj_list <- readRDS(file=file)

@@ -1,62 +1,57 @@
 #' @description
 #'
-#' Package myClim was designed for handling the microclimatic data in R.
-#' myClim workflow begin at the reading data primary from microclimatic dataloggers,
-#' but can be also reading of meteorological station data from files or tables. 
-#' Cleaning time step, time zone settings and metadata collecting is the next step of the work flow.
-#' With myClim tools one can crop, join, downscale, and convert microclimatic 
-#' data formats, sort them into localities, call descriptive statistics 
-#' and compute microclimatic variables as e.g. Growing degree days or Vapor pressure deficit. 
-#' Handy plotting functions are provided with smart defaults.   
+#' Package myClim was designed for microclimate data processing, storing, and analyzing.
+#' The myClim wofrkflow consists of reading logger files, pre-processing the time-series, 
+#' time-series aggregation, and microclimatic variables calculation. The microclimatic 
+#' data are stored in size-efficient hierarchical structure which respects the 
+#' hierarchy of field microclimate measurement (locality>loggers>sensors).
+#' 
+#' After data import, myClim can summarize the data and automatically correct
+#' for the most common problems.   The myClim package provides functions to 
+#' calculate aggregated microclimate statistics as well as methods for data 
+#' calibration, conversion and calculation of derived microclimatic variables 
+#' like growing degree days, freezing degree days, snow cover duration, 
+#' volumetric water content and vapor pressure deficit.
+#' 
+#' Standardized microclimatic variables can be stored efficiently in myClim 
+#' data format or easily exported to stadard R long or wide tables for further 
+#' analyses and visualization.
 #'
 #' **myClim object** 
 #' 
 #' We implemented two slightly different data formats of myClim objects calling them: 
 #' Raw-format and Agg-format.
 #' Raw-format is designed for data preparation. Mainly data cleaning,
-#' metadata gathering, time zones handling and multiple downloading missions 
-#' from in time joining. Output myClim object from  
-#' read functions [myClim::mc_read_files()] and [myClim::mc_read_data()] is a Raw-format.
-#' Raw-format contains information about localities, loggers and sensors.
+#' metadata gathering, time zones handling and multiple downloads joining. 
+#' Outputs of functions [myClim::mc_read_files()] and [myClim::mc_read_data()] are a Raw-format.
+#' Raw-format has the levels of: localities, loggers and sensors.
 #' Function [myClim::mc_agg()] converts data from Raw-format to Agg-format.
 #' Agg-format is designed mainly for calculations,analysis and microclimatic variables 
 #' derivations on the basis of cleaned microclimatic data. 
 #' Agg-format is missing the level of loggers. In Agg-format sensors are organized 
 #' directly in localities, without loggers.
 #' 
-#' Microclimatic data are stored in myClim objects in regular R structure 
-#' consists of classes and lists slightly resembling database scheme.  
-#' The top level of the structure is the `locality`. It has own metadata e.g. 
-#' altitude, latitude or user data  dedicated for any type of metadata user need. 
-#' For detail description of locality metadata see [mc_LocalityMetadata]. 
-#' On the locality in Raw-format there are `loggers` or in Agg-format directly `sensors`.
+#' The highest hierarchical level of myClim structure is the `locality`. It has own metadata e.g. 
+#' coordinates and elevation. For detail description of locality metadata see [mc_LocalityMetadata]. 
+#' On the locality in Raw-format there are `loggers`; in Agg-format the `sensors`.
 #' See below. Loggers represents the files imported with myClim reading functions.
 #' Both `loggesr` and `sensors` have own metadata. One logger could host more sensors e.g. 
-#' TOMST TMS logger hosing TMS_T1 soil temperature, TMS_T2 surface temperature, 
-#' TMS_T3 air temperature , TMS_TMSmoisture soil moisture; or one logger could host 
-#' single sensor.
+#' Tomst TMS logger hosing TMS_T1 soil temperature, TMS_T2 surface temperature, 
+#' TMS_T3 air temperature , TMS_TMSmoisture soil moisture.
 #' For detailed description of logger and sensor metadata 
 #' see [mc_LoggerMetadata], [mc_SensorMetadata], [mc_data_sensors]
 #' 
-#' 
-#' 
-#' **Raw-format**
-#' 
-#' Is the output of reading functions [myClim::mc_read_files()] and [myClim::mc_read_data()].
-#' Raw-format is mainly designed for preparation. Especially for the situation when
-#' user downloads the logger during more field visits in time. E. g. We have the logger 
-#' on the locality measuring 10 years. We download data twice a year, thus we have 20 files 
-#' from identical locality, but at the end we wan to work with single correctly joined 
-#' time-series of the 10 years records. For this type of time joining 
-#' it is useful to have a level "logger" in myClim object which allows to keep 
-#' separate logger  downloads and prepare them for joining. 
-#' 
-#' Within the logger all sensors share time series. In Agg-format where level of
+#' In Raw-format Within the logger all sensors share time series. In Agg-format where level of
 #' logger is missing, all sensors within the locality share time series. In Raw-format
 #' the time series between the loggers or between the localities can be of different time 
 #' step. E.g. on the locality there can be one logger measuring in time step 
 #' 15 minutes and another one measuring once a day.  In Agg-format this is not allowed.
 #' Therefore it is necessary to use [myClim::mc_agg()] to switch from Raw-format to the Agg-format.
+#' 
+#' myClim time step is defined in seconds (`data$metadata@step`).
+#' But some steps (especially irregular ones) may not be represented by seconds. 
+#' For example step `month` has variable number of seconds within the year. Therefore, metadata contains also text
+#' representation of the step (`data$metadata@period`).
 #'
 #'Schema of myClim **Raw-format**
 #' 
@@ -145,29 +140,10 @@
 #'             | locality[n]                                                                   |
 #'             +-------------------------------------------------------------------------------+}
 #'
-#' **Agg-format**
 #'
-#' Is the output of [myClim::mc_agg()] function.  
-#' Agg-format is mainly designed for calculations with clean, nicely
-#' organized microclimatic time-series with unified time step, supplemented with necessary metadata. 
-#' User can calculate various microclimatic variables on the locality using existing sensors 
-#' e. g. calculate volumetric water content form TMS raw moisture records see [myClim::mc_calc_vwc]; 
-#' calculate growing degree days or freezing degree days see [myClim::mc_calc_gdd], [myClim::mc_calc_fdd]; 
-#' or estimate snow presence from near ground temperature [myClim::mc_calc_snow]. 
-#' 
-#' In Agg-format the level of logger is missing. This is in contrast with Raw-format.
-#' In Agg-format sensors are organized directly in the localities.
-#' Within one locality in Agg-format all sensors share time series (start, end, step).
-#' All localities shares the same time step, but can have different start, end.
-#' This is  practical for calculations, and it is achieved using [myClim::mc_agg()] function. 
-#' E.g. we have 10 localities, each of them hosts several sensors. 
-#' `locality` and `sensor` has own metadata see [mc_SensorMetadata], 
-#' [mc_data_sensors], [mc_LocalityMetadata]. 
-#' 
-#' myClim time step is defined in seconds (`data$metadata@step`).
-#' But some steps (especially irregular ones) may not be represented by seconds. 
-#' For example step `month` has variable number of seconds within the year. Therefore, metadata contains also text
-#' representation of the step (`data$metadata@period`).
+#' Agg-format is the output of [myClim::mc_agg()] function.  
+#' Agg-format is mainly designed for calculations which are faster in Agg and slower in Raw. 
+#'  
 #' 
 #' Schema of myClim **Agg-format**
 #' 

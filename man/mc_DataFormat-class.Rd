@@ -6,14 +6,15 @@
 \alias{mc_DataFormat}
 \title{Class for logger file data format}
 \description{
-The Class used for parsing source data files. Typically the csv files downloaded from microclimatic loggers.
-Each supported logger has established own specific object of class "mc_TOMSTDataFormat" defining the parameters.
+The Class used for parsing source data files. Typically the csv files
+downloaded from microclimatic loggers. Each supported logger has established
+own specific object of class \verb{mc_\{logger\}DataFormat} defining the parameters.
 }
 \details{
-The logger definitions are stored in R environment object ./data/mc_data_formats.rda
-And thus it easy to add the ability of reading new, unsupported logger just by defining its Class parameters.
-An object of class "mc_TOMSTDataFormat"
-Below see e.g. the Class defining TOMST file format.
+The logger definitions are stored in R environment object
+\code{./data/mc_data_formats.rda}. And thus it easy to add the ability of
+reading new, unsupported logger just by defining its Class parameters.
+Below see e.g. the Class defining Tomst file format.
 
 \preformatted{
 An object of class "mc_TOMSTDataFormat"
@@ -57,5 +58,5 @@ If data_row_pattern is NA, then file format is not validated.}
 }}
 
 \seealso{
-\link{mc_data_formats},\linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}
+\link{mc_data_formats}, \linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}, \linkS4class{mc_HOBODataFormat}
 }

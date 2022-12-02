@@ -17,26 +17,35 @@
 #' Cleaning datetime series
 #'
 #' @description
-#' Function 'mc_prep_clean' check time-series in myClim object in Raw-format for missing, duplicated,
-#' and disordered records and regularize microclimatic time-series to constant time-step rounded to the nearest interval.
-#' Duplicit records are removed and missing values are filled with NA's.
+#' By default `mc_prep_clean` runs automatically when [myClim::mc_read_files()], 
+#' [myClim::mc_read_data()] are called. `mc_prep_clean` check time-series in 
+#' myClim object in Raw-format for missing, duplicated, and disordered records 
+#' and regularize microclimatic time-series to constant time-step.
+#' Duplicated records are removed and missing values are filled with NA.
 #'
 #' See details.
 #' 
 #' @details
-#' Processing the data with `mc_prep_clean` is a mandatory step required for further data handling in `myClim` library.
+#' Processing the data with `mc_prep_clean` is a mandatory step 
+#' required for further data handling in `myClim` library.
 #' 
-#' This function guarantee that all time series are in chronological order and have regular time-step, without duplicated records.
-#' Function `mc_prep_clean` use time-step provided by user on import `mc_read` (is stored in metadata of logger[myClim::mc_LoggerMetadata]. 
-#' If time-step is not provided by user on import (NA),than myClim automatically identify the  step 
-#' from input time series based on last 100 records. In case of irregular time series, function returns warning and skip series.
+#' This function guarantee that all time series are in chronological order 
+#' and have regular time-step, without duplicated records.
+#' Function `mc_prep_clean` use time-step provided by user on import `mc_read`
+#' (is stored in metadata of logger [myClim::mc_LoggerMetadata]. 
+#' If time step is not provided by user on import (NA),than myClim automatically 
+#' identify the  time step from input time series based on last 100 records. 
+#' In case of irregular time series, function returns warning and skip series.
 #' 
-#' In case the time step is regular, but is not nicely rounded, function round the time series to the closest nice time
-#' and shift original data to nicely rounded time series. (e.g. original records in 10 min regular step
-#' c(11:58, 12:08, 12:18, 12:28) are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30)
-#' microclimatic records are not modified but only shifted). Maximal allowed shift of time series is 30 minutes. 
-#' I.e. when the time step is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30). 
-#' When you have 2h time step and wish to round to the whole hour (13:33 -> 14:00, 15:33 -> 16:00) than use  `mc_agg(period="2 hours")` 
+#' In case the time step is regular, but is not nicely rounded, function round 
+#' the time series to the closest nice time and shift original data. 
+#' E.g., original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28) 
+#' are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30)
+#' microclimatic records are not modified but only shifted. 
+#' Maximal allowed shift of time series is 30 minutes. I.e. when the time step 
+#' is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30). 
+#' When you have 2h time step and wish to round to the whole hour 
+#' (13:33 -> 14:00, 15:33 -> 16:00) than after clening use  `mc_agg(period="2 hours")` 
 #' 
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
@@ -202,7 +211,8 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' Set metadata of localities
 #' 
 #' @description
-#' This function allows you to add or modify locality metadata including locality names. See [mc_LocalityMetadata].
+#' This function allows you to add or modify locality metadata including 
+#' locality names. See [mc_LocalityMetadata].
 #' You can import metadata from named list or from data frame. See details. 
 #'  
 #' @details
@@ -218,7 +228,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' For minor metadata modification it is practical to use named list in combination
 #' with `param_name` specification. E.g. when you wish to modify only time zone offset,  
 #' then set `param_name="tz_offset"` and provide named list with locality name and 
-#' offset value `list(A1E05=60)`. Simillarly for other metadata slots [mc_LocalityMetadata].
+#' offset value `list(A1E05=60)`. Similarly for other metadata slots [mc_LocalityMetadata].
 #' 
 #' For batch or generally more complex metadata modification you can provide data.frame
 #' with columns specifying `locality_id` and one of `new_locality_id, altitude, lat_wgs84, lon_wgs84, tz_offset`.
@@ -233,7 +243,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' to rename locality use `new_locality_id`. Parameter `param_name` must be NULL.
 #' @param param_name name of locality metadata parameter; Default names are `locality_id`, `altitude`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
 #' Another names are inserted to `user_data` list. see [myClim::mc_LocalityMetadata]
-#' @return myClim object in the same format as input, with locality metadata filled in
+#' @return myClim object in the same format as input, with updated metadata
 #' @export
 #' @examples
 #' data <- mc_prep_meta_locality(mc_data_example_source, list(A1E05=60), param_name="tz_offset")
@@ -302,12 +312,16 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
 #' This function allows you to modify sensor metadata including sensor name. See [mc_SensorMetadata]
 #'
 #' @template param_myClim_object
-#' @param values named list with metadata values; names of items are sensor_names e.g. for changing sensor height use `list(TMS_T1="soil 8 cm")`
-#' @param param_name name of the sensor metadata parameter you want to change; You can change `name` and `height` of sensor.
-#' @param localities optional filter; vector of `locality_id` where to change sensor metadata; if NULL than all localities (default NULL)
-#' @param logger_types optional filter; vector of `logger_type` where to change metadata; if NULL than all logger types (default NULL);
+#' @param values named list with metadata values; names of items are sensor_names e.g. 
+#' for changing sensor height use `list(TMS_T1="soil 8 cm")`
+#' @param param_name name of the sensor metadata parameter you want to change; 
+#' You can change `name` and `height` of sensor.
+#' @param localities optional filter; vector of `locality_id` 
+#' where to change sensor metadata; if NULL than all localities (default NULL)
+#' @param logger_types optional filter; vector of `logger_type` 
+#' where to change metadata; if NULL than all logger types (default NULL);
 #' `logger_type`is useful only for Raw-format of myClim having the level of logger see [myClim-package]
-#' @return myClim object in the same format as input, with updated metadata
+#' @return myClim object in the same format as input, with updated sensor metadata
 #' @export
 #' @examples
 #' data <- mc_prep_meta_sensor(mc_data_example_source, list(TMS_T1="my_TMS_T1"), param_name="name")
@@ -368,21 +382,21 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
     item
 }
 
-#' Set solar time offset against original time
+#' Set solar time offset against UTC time
 #' 
 #' @description
 #' This function calculates the offset against UTC on the locality to get the solar time.
-#' This is based on coordinates. If coordinates not provided, then not working.
-#' 
+#' This is based on coordinates (longitude). If longitude is not provided, then not working.
+#'  
 #' @details
-#' myClim librarry presumes the data in UTC by default. This function require at least longitude provided in locality
-#' metadata slot `lon_wgs84`. If longitude not provided, function not works. Coordinates of locality can be provided
-#' e. g. during data reading see [myClim::mc_read_data()] or ex post with [myClim::mc_prep_meta()] function.
+#' myClim library presumes the data in UTC by default. This function require at least longitude provided in locality
+#' metadata slot `lon_wgs84`. If longitude is not provided, function does not work. Coordinates of locality can be provided
+#' e.g. during data reading see [myClim::mc_read_data()] or ex post with [myClim::mc_prep_meta()] function.
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
 #' @template param_myClim_object
-#' @return MyClim object in the same format as input, with `tz_offset` filled in locality metadata
+#' @return myClim object in the same format as input, with `tz_offset` filled in locality metadata
 #' @export
 #' @examples
 #' data_solar <- mc_prep_solar_tz(mc_data_example_clean)
@@ -419,12 +433,14 @@ mc_prep_solar_tz <- function(data) {
 #' This function crop data by datetime
 #'
 #' @details
-#' Function is able to crop data from start and end together but also only from start and end left as is or vice versa.  
+#' Function is able to crop data from start to end but works also 
+#' with only start and only end. When only start provided, then crop only start and
+#' do not touch the end and vice versa.   
 #'
 #' @template param_myClim_object
 #' @param start POSIXct datetime in UTC; is optional; start datetime is included
 #' @param end POSIXct datetime in UTC; is optional
-#' @param end_included if TRUE then  end datetime is included (default TRUE)
+#' @param end_included if TRUE then end datetime is included (default TRUE)
 #' @return cropped data in the same myClim format as input. 
 #' @export
 #' @examples
@@ -506,18 +522,19 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
 #' Merge myClim objects
 #'
 #' @description
-#' This function is designed to merge myClim objects into one.
+#' This function is designed to merge more existing myClim objects into one.
 #' 
 #' @details
-#' This function works only when the input myClim objects have the same format (Raw-format, Agg-format) and the same time step.
-#' It is required same step in Agg-format data.
+#' This function works only when the input myClim objects have the same format 
+#' (Raw-format, Agg-format) It is not possible to merge Raw wit Agg format. 
+#' Identical time-step is required for Agg-format data.
 #' 
-#' When the two merged myClim objects in Raw-format contains locality with same names (locality_id),
+#' When the merged myClim objects in Raw-format contains locality with same names (locality_id),
 #' than list of loggers are merged on the locality. Sensors with the same name does not matter here. 
-#' Loggers with the same name are allowed in the Raw-format.
+#' Loggers with the same name within the locality are allowed in the Raw-format.
 #' 
-#' When the two merged myClim objects in Agg-format contains locality with same names (locality_id).
-#' than the sensors are merged on the locality. Sensors with same names are renamed.
+#' When the merged myClim objects in Agg-format contains locality with same names (locality_id).
+#' than the sensors are merged on the locality. Sensors with same names are renamed. 
 #'
 #' @param data_items list of myClim objects see [myClim-package]; Format (Raw/Agg) of merged objects must be same.
 #' @return merged myClim object in the same format as input objects
@@ -580,31 +597,43 @@ mc_prep_merge <- function(data_items) {
     locality1
 }
 
-#' load calibration parameters to correct microclimatic records
+#' Load calibration to correct microclimatic records
 #'
 #' @description
-#' This function load calibration parameters from data.frame and write them into myClim object metadata. This function
+#' This function loads calibration parameters from data.frame 
+#' and writes them into myClim object metadata. This function
 #' does not calibrate data. For calibration itself run [myClim::mc_prep_calib()]
 #'
 #' @details
-#' It is a good idea to care about the microclimatic sensors/loggers calibration as the records can be shifted from various reasons.
-#' This function allows user to provide calibration values either from DIY or certified calibration procedure.
-#' Calibration data have by default the form of linear function determined by the `cor_factor` and `cor_slope`.
-#' `calibrated = original * (cor_slope + 1) + cor_factor` This is useful in case of multi-point calibration typically performed by certified calibration labs.
-#' In case of one-point calibration typically DIY calibrations only `cor_factor` is used and `cor_slope=0`. One point calibration is thus addition of correction factor.
-#' This function loads sensor specific calibration values from data frame and writs them into myClim Raw-format object metadata. The structure of input data frame is as follows:
+#' This function allows user to provide calibration values either from DIY or 
+#' certified calibration procedure. Calibration data have by default the form 
+#' of linear function determined by the `cor_factor` and `cor_slope`:
+#' 
+#' `calibrated = original * (cor_slope + 1) + cor_factor` 
+#' 
+#' This is useful in 
+#' case of multi-point calibration typically performed by certified calibration 
+#' labs. In case of one-point calibration typically DIY 
+#' calibrations only `cor_factor` is used and `cor_slope=0`. One point calibration
+#' is thus only the addition of correction factor. This function loads sensor specific 
+#' calibration values from data frame and writs them into myClim Raw-format 
+#' object metadata. The structure of input data frame is as follows:
 #'
-#'  * serial_number = unique identificator of logger hosting the sensors e.g. 91184101 
+#'  * serial_number = unique identification of logger hosting the sensors e.g. 91184101 
 #'  * sensor_id = the name of sensor to calibrate e.g. TMS_T1
 #'  * datetime = the date of the calibration
 #'  * cor_factor = the correction factor, in case of multi-point calibration the intercept of calibration curve.
 #'  * cor_slope = the slope of calibration curve (in case of one-point calibration slope = 0)
 #'
-#' It is not possible to change calibration parameters for already calibrated sensor. This prevents repeted calibrations. 
+#' It is not possible to change calibration parameters for already calibrated sensor. 
+#' This prevents repeated calibrations. Once [myClim::mc_prep_calib()] is called then 
+#' it is not allowed to provide new calibration data, neither run calibration again. 
 #'
 #' @template param_myClim_object_raw
 #' @param calib_table data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
-#' @return myClim object with loaded calibration information in metadata. Microclimatic records are not calibrated, only ready for calibration. To calibrate records run [myClim::mc_prep_calib()]
+#' @return myClim object with loaded calibration information in metadata. 
+#' Microclimatic records are not calibrated, only ready for calibration. 
+#' To calibrate records run [myClim::mc_prep_calib()]
 #' @export
 mc_prep_calib_load <- function(data, calib_table) {
     myClim:::.common_stop_if_not_raw_format(data)
@@ -645,27 +674,31 @@ mc_prep_calib_load <- function(data, calib_table) {
     return(data)
 }
 
-#' Sensor calibration
+#' Sensors calibration
 #'
 #' @description
-#' This function calibrate values of sensor (microclimatic records) with the myClim object sensor$calibration parameters provided by [myClim::mc_prep_calib_load()]. 
-#' Microclimatic records are changed and myClim object parameter sensor$metadata@calibrated is set to TRUE. It isn't possible to calibrate sensor multiple times.
+#' This function calibrate values of sensor (microclimatic records) using the 
+#' myClim object `sensor$calibration` parameters provided by [myClim::mc_prep_calib_load()]. 
+#' Microclimatic records are changed and myClim object parameter `sensor$metadata@calibrated` 
+#' is set to TRUE. It isn't allowed to calibrate sensor multiple times.
 #'
 #' @details
-#' This function performs callibartion itself. It uses the calibration values (cor_factor, cor_slope) stored
-#' in myClim object sensor metadata sensor calibration loaded with [myClim::mc_prep_calib_load()].
-#' Older micrroclimatic records then first calibration `datetime` are calibrated anyway. 
-#' First calibration parameters are used for older records than calibration.
+#' This function performs calibration itself. It uses the calibration values (cor_factor, cor_slope) stored
+#' in myClim object sensor metadata sensor calibration loaded with [myClim::mc_prep_calib_load()]. 
+#' As it is possible to have multiple calibration values for one sensor in time (re-calibration after some time)
+#' different calibration values can be applied based on the calibration time. Older microclimatic records 
+#' then first calibration `datetime` available are calibrated anyway (in case sensor was calibrated ex-post)
+#' with the first calibration parameters available.
 #' 
-#' It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function.
-#' For TMSmoisture calibration (conversion to volumetric water content) use [myClim::mc_calc_vwc()]
+#' This function is not designed for TMSmoisture calibration 
+#' (conversion to volumetric water content) for this use [myClim::mc_calc_vwc()]
 #' 
 #' Only sensors with real value type can be calibrated. see [myClim::mc_data_sensors()]
 #' 
 #' @param data myClim object in Raw-format or Agg-format having calibration data in metadata slot `sensor$calibration`
 #' @param localities vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)
 #' @param sensors vector of sensor names where to perform calibration see `names(mc_data_sensors)`; if NULL,
-#' then calibrate all sensors hawing calibration parameters loaded (default NULL)
+#' then calibrate all sensors having calibration parameters loaded (default NULL)
 #' @return same myClim object as input but with calibrated sensor values.
 #' @export
 mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
@@ -682,14 +715,14 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
             return(sensor)
         }
         if(!is.null(sensors) && nrow(sensor$calibration) == 0) {
-            warning(stringr::str_glue("Calibration parameters missed in sensor {sensor$metadata@name} in {locality_id}."))
+            warning(stringr::str_glue("Calibration parameters are missing in sensor {sensor$metadata@name} in {locality_id}."))
             return(sensor)
         }
         if(myClim:::.model_is_physical_TMSmoisture(sensor$metadata)) {
             warning(stringr::str_glue("Using simple linear correction of raw moisture values in sensor {sensor$metadata@name}, for more precisse correction use function mc_calc_vwc."))
         }
         if(sensor$metadata@calibrated) {
-            stop(stringr::str_glue("Sensor {sensor$metadata@name} is calibrated. It isn't possible recalibrate sensor."))
+            stop(stringr::str_glue("Sensor {sensor$metadata@name} was already calibrated. It isn't possible recalibrate sensor."))
         }
         if(!myClim:::.model_is_type_real(sensor$metadata)) {
             stop(stringr::str_glue("Value type of sensor {sensor$metadata@name} isn't real."))
@@ -748,10 +781,13 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
     calib_table
 }
 
-#' Fill NA - approximate§§§
-#'
+#' Fill NA
+#' 
 #' @description
-#' This function approximate NA values. Linear method is implemented by [zoo::na.approx] function.
+#' This function approximate NA (missing) values. It was designed to fill 
+#' only small gaps in microclimatic time-series therefore, the default maximum 
+#' length of the gap is 5 missing records and longer gaps are not filled
+#' Only linear method is implemented from [zoo::na.approx] function.
 #'
 #' @template param_myClim_object
 #' @template param_localities_sensors

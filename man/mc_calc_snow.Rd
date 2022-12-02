@@ -21,31 +21,32 @@ mc_calc_snow(
 
 \item{output_sensor}{name of output snow sensor (default "snow")}
 
-\item{localities}{list of locality_ids where snow sill be calculated; if NULL then all (default NULL)}
+\item{localities}{list of locality_ids where snow will be calculated; if NULL then all (default NULL)}
 
-\item{range}{maximal temperature range threshold for snow-covered sensor (default 1°C)}
+\item{range}{maximum temperature range threshold for snow-covered sensor (default 1°C)}
 
-\item{tmax}{maximal temperature threshold for snow-covered sensor  (default 1.25°C)}
+\item{tmax}{maximum temperature threshold for snow-covered sensor  (default 1.25°C)}
 
 \item{days}{number of days to be used for moving-window for snow detection algorithm (default 3 days)}
 }
 \value{
-myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
+myClim object with added virtual sensor 'snow' (logical) indicating snow presence/absence (TRUE/FALSE).
 }
 \description{
-Function detects snow cover from temperature time-series.
+This function creates new virtual sensor on locality within myClim data object.
+Virtual sensor hosts values of snow cover presence/absence detected from temperature time-series.
 }
 \details{
 Function detects snow cover from temperature time-series. Temperature sensor is considered as covered by snow
-when the maximal temperature in the preceding or subsequent time-window (specified by 'days' param)
-does not exceed specific 'tmax' threshold value (default 1.25°C) and the temperature range remain below specified
-'range' threshold (default 1°C). This function rely on insulating effect of a thick layer of snow,
+when the maximal temperature in the preceding or subsequent time-window (specified by \code{days} param)
+does not exceed specific \code{tmax} threshold value (default 1.25°C) and the temperature range remain below specified
+\code{range} threshold (default 1°C). This function rely on insulating effect of a of snow layer,
 significantly reducing diurnal temperature variation and restricting the maximal temperature near the ground
-close to freezing point. Temperature sensor near the ground ('TMS_T2') is default choice for snow-cover detection.
+close to freezing point. Temperature sensor near the ground (\code{TMS_T2}) is default choice for snow-cover detection from Tomst TMS4 loggers.
 Snow detection with default values accurately detects snow of depth > 15cm (unpublished data).
 For detection of thin snow, range parameter should be set to 3-4 °C.
-The function returns vector of snow cover with same time-step as input data. To get number of days with snow cover
-and more info, apply \link{mc_calc_snow_agg}.
+The function returns vector of snow cover (TRUE/FLASE) with same time-step as input data. To get number of days with snow cover
+and more snow summary characteristics use \link{mc_calc_snow_agg} after snow detection.
 }
 \examples{
 data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))

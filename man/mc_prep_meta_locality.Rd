@@ -20,10 +20,11 @@ to rename locality use \code{new_locality_id}. Parameter \code{param_name} must 
 Another names are inserted to \code{user_data} list. see \link{mc_LocalityMetadata}}
 }
 \value{
-myClim object in the same format as input, with locality metadata filled in
+myClim object in the same format as input, with updated metadata
 }
 \description{
-This function allows you to add or modify locality metadata including locality names. See \link{mc_LocalityMetadata}.
+This function allows you to add or modify locality metadata including
+locality names. See \link{mc_LocalityMetadata}.
 You can import metadata from named list or from data frame. See details.
 }
 \details{
@@ -39,7 +40,7 @@ If tz_offset is set manually, than tz_type is set to \verb{user defined}.
 For minor metadata modification it is practical to use named list in combination
 with \code{param_name} specification. E.g. when you wish to modify only time zone offset,
 then set \code{param_name="tz_offset"} and provide named list with locality name and
-offset value \code{list(A1E05=60)}. Simillarly for other metadata slots \link{mc_LocalityMetadata}.
+offset value \code{list(A1E05=60)}. Similarly for other metadata slots \link{mc_LocalityMetadata}.
 
 For batch or generally more complex metadata modification you can provide data.frame
 with columns specifying \code{locality_id} and one of \verb{new_locality_id, altitude, lat_wgs84, lon_wgs84, tz_offset}.

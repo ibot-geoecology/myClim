@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{mc_prep_calib}
 \alias{mc_prep_calib}
-\title{Sensor calibration}
+\title{Sensors calibration}
 \usage{
 mc_prep_calib(data, localities = NULL, sensors = NULL)
 }
@@ -12,23 +12,27 @@ mc_prep_calib(data, localities = NULL, sensors = NULL)
 \item{localities}{vector of locality_ids where to perform calibration, if NULL, then calibrate sensors on all localities (default NULL)}
 
 \item{sensors}{vector of sensor names where to perform calibration see \code{names(mc_data_sensors)}; if NULL,
-then calibrate all sensors hawing calibration parameters loaded (default NULL)}
+then calibrate all sensors having calibration parameters loaded (default NULL)}
 }
 \value{
 same myClim object as input but with calibrated sensor values.
 }
 \description{
-This function calibrate values of sensor (microclimatic records) with the myClim object sensor$calibration parameters provided by \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
-Microclimatic records are changed and myClim object parameter sensor$metadata@calibrated is set to TRUE. It isn't possible to calibrate sensor multiple times.
+This function calibrate values of sensor (microclimatic records) using the
+myClim object \code{sensor$calibration} parameters provided by \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
+Microclimatic records are changed and myClim object parameter \code{sensor$metadata@calibrated}
+is set to TRUE. It isn't allowed to calibrate sensor multiple times.
 }
 \details{
-This function performs callibartion itself. It uses the calibration values (cor_factor, cor_slope) stored
+This function performs calibration itself. It uses the calibration values (cor_factor, cor_slope) stored
 in myClim object sensor metadata sensor calibration loaded with \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}.
-Older micrroclimatic records then first calibration \code{datetime} are calibrated anyway.
-First calibration parameters are used for older records than calibration.
+As it is possible to have multiple calibration values for one sensor in time (re-calibration after some time)
+different calibration values can be applied based on the calibration time. Older microclimatic records
+then first calibration \code{datetime} available are calibrated anyway (in case sensor was calibrated ex-post)
+with the first calibration parameters available.
 
-It is not possible calibrate (convert to volumetric water content) TMSmoisture sensor with this function.
-For TMSmoisture calibration (conversion to volumetric water content) use \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
+This function is not designed for TMSmoisture calibration
+(conversion to volumetric water content) for this use \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
 
 Only sensors with real value type can be calibrated. see \code{\link[=mc_data_sensors]{mc_data_sensors()}}
 }

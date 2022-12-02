@@ -19,14 +19,14 @@ mc_calc_snow_agg(
 
 \item{localities}{optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)}
 
-\item{period}{number of days defining the continuous snow cover period of interest (default 3 days)}
+\item{period}{number of days defining the continual snow cover period of interest (default 3 days)}
 
-\item{use_utc}{if set FALSE then time is corrected based on offset provided in locality metadata \code{tz_offset}, see e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta]{mc_prep_meta()}}; (default FALSE)}
+\item{use_utc}{if set FALSE then time is shifted based on offset provided in locality metadata \code{tz_offset}, see e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta]{mc_prep_meta()}}; (default FALSE)}
 }
 \value{
 Returns data.frame with columns:
 \itemize{
-\item locality - locality name
+\item locality - locality id
 \item snow_days - number of days with snow cover
 \item first_day - first day with snow
 \item last_day - last day with snow
@@ -37,15 +37,18 @@ Returns data.frame with columns:
 \description{
 This function works with the virtual snow sensor of TRUE/FALSE
 which is the output of \code{\link[=mc_calc_snow]{mc_calc_snow()}}. So, before calling
-\code{mc_calc_snow_agg} you need to calculate or import TRUE/FALSE snow detection sensor.
-\code{mc_calc_snow_agg}returns the summary table of snow sensor
-(e.g number of days with snow cover, the longest continual snow period...).
-The snow summary is returned for whole date range provided.
+\code{mc_calc_snow_agg} you need to calculate or import \code{mc_read_}
+TRUE/FALSE snow sensor.
+\code{mc_calc_snow_agg} returns the summary table of snow sensor
+(e.g number of days with snow cover, first and last date of continual
+snow cover longer than input period).
+The snow summary is returned for whole date range provided. And is returned as
+new data.frame in contrast with other mc_calc functions returning virtual sensors.
 }
 \details{
-Primary designed for virtual snow sensor created by \code{\link[=mc_calc_snow]{mc_calc_snow()}},
+Primary designed for virtual snow sensor calculated by \code{\link[=mc_calc_snow]{mc_calc_snow()}},
 but accepts any sensor with TRUE/FLAST snow event detection. If \code{snow_sensor}
-on the locality missing, then locality is skipped.
+on the locality is missing, then locality is skipped.
 }
 \examples{
 data <- mc_calc_snow(mc_data_example_calc, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))

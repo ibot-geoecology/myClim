@@ -20,10 +20,9 @@ mc_plot_raster(
 \item{data}{myClim object see \link{myClim-package}}
 
 \item{filename}{output with the extension - supported formats are .pdf and .png (default NULL)
+If NULL then the plot is shown/returned into R environment as ggplot object, but not saved to file.}
 
-If NULL then the plot is return, but not saved to file.}
-
-\item{sensors}{names of sensor; should have same unit see \code{names(mc_data_sensors)}}
+\item{sensors}{names of sensor; should have same physical unit see \code{names(mc_data_sensors)}}
 
 \item{by_hour}{if TRUE, then y axis is plotted as an hour, else original time step (default TRUE)}
 
@@ -51,14 +50,26 @@ If NULL then the plot is return, but not saved to file.}
 list of ggplot2 objects
 }
 \description{
-Function plot data to file with ggplot2 geom_raster
+Function plots data with ggplot2 geom_raster. Plot is returned as ggplot faced raster and
+is primary designed to be saved as .pdf file (recommended) or .png file.
+Plotting into R environment without saving any file is also possible.
+See details.
 }
 \details{
-PDF format is recommended as it can distribute the plots on the pages, which is especially useful
-for bigger data. In case of plotting multiple sensors, it is plotted by sensor. All localities from sensor1
-followed by all localities of sensor2 etc. When plotting only few localities, but multiple sensors,
-each sensor has own page. E.g. when plotting data from one locality, and 3 senosrs resulting PDF has 3 pages.
-§In the case of plotting PNG all localities and sensors are plotted in images by physical.
-Sensors with same physical are together in one image.§ Be careful with bigger data in PNG.
-Play with \code{png_height} and \code{png_width}. When too small, image does not fit ad is plotted broken.
+Saving as the .pdf file is recommended, because the plot is optimized
+to be paginate PDF (facet raster plot is distributed to pages), which is especially useful
+for bigger data. In case of plotting multiple sensors to PDF, the facet grids are grouped by sensor.
+I.e., all localities of sensor_1 followed by all localities of sensor_2 etc.
+When plotting only few localities, but multiple sensors,
+each sensor has own page. I.e., when plotting data from one locality, and 3 sensors resulting PDF has 3 pages.
+In case of plotting PNG, sensors are plotted in separated images (PNG files) by physical.
+I.e, when plotting 3 sensors in PNG it will save 3 PNG files named after sensors.
+Be careful with bigger data in PNG. Play with \code{png_height} and \code{png_width}.
+When too small height/width, image does not fit and is plotted incorrectly. Plotting into
+R environment instead of saving PDF or PNG is possible, but is recommended only for
+low number  of localities (e.g. up to 10), because
+high number of localities plotted in R environment results in very small picture which is hard/impossible to read.
+}
+\examples{
+\dontrun{mc_plot_raster(tms,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))}
 }

@@ -13,7 +13,7 @@ mc_data_sensors
 \description{
 R object of class environment with the definitions of (micro)climatic sensors.
 see \linkS4class{mc_Sensor}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
-to add new, unsupported sensor here. There is also universal sensor \code{real} where you can store any real values.
+to add new, sensor here. There is also universal sensor \code{real} where you can store any real values.
 }
 \details{
 Names of items are sensor_ids.
@@ -21,8 +21,8 @@ Currently supported sensors:
 \itemize{
 \item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}
 \item coverage - result of \code{coverage} function \code{\link[=mc_agg]{mc_agg()}}
-\item DEND_T - temperature in TOMST dendrometer (°C)
-\item DEND_TOMSTdendro - change in stem size in TOMST dendrometer (raw units) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
+\item DEND_T - temperature in Tomst dendrometer (°C)
+\item DEND_TOMSTdendro - change in stem size in Tomst dendrometer (raw units) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item dendro_l_um - change in stem size (μm) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item FDD - result of function \code{\link[=mc_calc_fdd]{mc_calc_fdd()}}
 \item GDD - result of function \code{\link[=mc_calc_gdd]{mc_calc_gdd()}}
@@ -31,21 +31,21 @@ Currently supported sensors:
 \item HOBO_T_F - temperature in HOBO logger (°F)
 \item integer - universal sensor with integer values
 \item logical - universal sensor with logical values
-\item moisture - volumetric soil moisture (ratio)
-\item precipitation (mm)
+\item moisture - volumetric water content in soil (ratio)
+\item precipitation - (mm)
 \item real - universal sensor with real values
-\item RH_perc - Relative humidity sensor (\%)
+\item RH_perc - relative humidity sensor (\%)
 \item snow_bool - result of function \code{\link[=mc_calc_snow]{mc_calc_snow()}}
-\item snow_fresh - new snow (cm)
-\item snow_total - total hight snow (cm)
+\item snow_fresh - fresh snow height (cm)
+\item snow_total - total snow height (cm)
 \item sun_shine - time of sun shine (hours)
 \item T_C - universal temperature sensor (°C)
-\item TS_T - temperature sensor in TOMST ThermoDatalogger (°C)
-\item TMS_T1 - soil temperature sensor in TOMST TMS (°C)
-\item TMS_T2 - surface temperature sensor in TOMST TMS (°C)
-\item TMS_T3 - air temperature sensor in TOMST TMS (°C)
-\item TMS_TMSmoisture - soil moisture sensor in TOMST TMS (TDT signal)
-\item wind - speed of wind (m/s)
+\item TS_T - temperature sensor in Tomst Thermologger (°C)
+\item TMS_T1 - soil temperature sensor in Tomst TMS (°C)
+\item TMS_T2 - surface temperature sensor in Tomst TMS (°C)
+\item TMS_T3 - air temperature sensor in Tomst TMS (°C)
+\item TMS_TMSmoisture - soil moisture sensor in Tomst TMS (raw TMS units)
+\item wind - wind speed (m/s)
 }
 }
 \keyword{datasets}

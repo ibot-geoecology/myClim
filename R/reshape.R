@@ -1,13 +1,15 @@
 .reshape_const_MESSAGE_UNCLEANED <- "Logger {serial_number} isn't cleaned. I can't detect the last time_to."
 
-#' Wideformat of sensor values
+#' Export values to wide table
 #'
-#' This function converts myClim object to data.frame with values of sensor in wide format.
+#' This function converts myClim object to the R data.frame with values of sensor in wide format.
 #'
-#' @details First columnt of the output data.frame is datetime followed by the
+#' @details First column of the output data.frame is datetime followed by the
 #' columns for every sensor. Name of the column is in format:
 #' * localityid_serialnumber_sensorname for Raw-format
 #' * localityid_sensorname for Agg-format
+#' 
+#' The less complex wide table is returned when exporting single sensor ascross localities. 
 #'
 #' @template param_myClim_object
 #' @template param_localities_sensors
@@ -64,9 +66,9 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL) {
     purrr::flatten(result)
 }
 
-#' Long format of sensor values
+#' Export values to long table
 #'
-#' This function converts myClim object to long data.frame with sensor records.
+#' This function converts myClim object to long R data.frame.
 #'
 #' @template param_myClim_object
 #' @template param_localities_sensors
