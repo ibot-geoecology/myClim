@@ -169,7 +169,7 @@ mc_info <- function(data) {
 #' * locality_id
 #' * lon_wgs84
 #' * lat_wgs84
-#' * altitude
+#' * elevation
 #' * tz_offset
 #' @export
 #' @examples
@@ -181,7 +181,7 @@ mc_info_meta <- function(data) {
         list(locality_id = locality$metadata@locality_id,
              lon_wgs84 = locality$metadata@lon_wgs84,
              lat_wgs84 = locality$metadata@lat_wgs84,
-             altitude = locality$metadata@altitude,
+             elevation = locality$metadata@elevation,
              tz_offset = locality$metadata@tz_offset
         )
     }

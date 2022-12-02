@@ -221,7 +221,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' offset value `list(A1E05=60)`. Simillarly for other metadata slots [mc_LocalityMetadata].
 #' 
 #' For batch or generally more complex metadata modification you can provide data.frame
-#' with columns specifying `locality_id` and one of `new_locality_id, altitude, lat_wgs84, lon_wgs84, tz_offset`.
+#' with columns specifying `locality_id` and one of `new_locality_id, elevation, lat_wgs84, lon_wgs84, tz_offset`.
 #' Provide locality_id (name) and the value in column of metadata you wish to update. 
 #' In case of using data.frame use `param_name = NULL`  
 #' 
@@ -231,7 +231,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' * named list: `metadata <- list(locality_id=value)`; `param_name` must be set
 #' * table with column `locality_id` and another columns named by metadata parameter name;
 #' to rename locality use `new_locality_id`. Parameter `param_name` must be NULL.
-#' @param param_name name of locality metadata parameter; Default names are `locality_id`, `altitude`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
+#' @param param_name name of locality metadata parameter; Default names are `locality_id`, `elevation`, `lat_wgs84`, `lon_wgs84`, `tz_offset`.
 #' Another names are inserted to `user_data` list. see [myClim::mc_LocalityMetadata]
 #' @return myClim object in the same format as input, with locality metadata filled in
 #' @export

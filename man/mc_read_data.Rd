@@ -39,7 +39,7 @@ instead of automatic step detection.
 object contains 5 columns:
 \itemize{
 \item locality_id
-\item altitude
+\item elevation
 \item lon_wgs84
 \item lat_wgs84
 \item tz_offset
@@ -55,7 +55,7 @@ myClim object in Raw-format see \link{myClim-package}
 \description{
 This function has two tables parameters. (i) \code{files_table} with paths pointing to raw
 csv logger files, specification of data format (logger type) and locality name. This table is required.
-(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
+(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, elevation...
 }
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table} and \code{localities_table} from external CSV it

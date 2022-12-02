@@ -183,7 +183,7 @@ test_that("mc_calc_vpd", {
     expect_equal(vpd_martin(agg_data$localities$LOC$sensors$HOBO_T_C$values[[1]],
                             agg_data$localities$LOC$sensors$HOBO_RH$values[[1]]),
                  agg_data$localities$LOC$sensors$VPD$values[[1]])
-    agg_data <- mc_prep_meta_locality(agg_data, list(LOC = 500), "altitude")
+    agg_data <- mc_prep_meta_locality(agg_data, list(LOC = 500), "elevation")
     agg_data <- mc_calc_vpd(agg_data, .model_const_SENSOR_HOBO_T_C, .model_const_SENSOR_HOBO_RH,
                              output_sensor = "VPD500")
     expect_equal(vpd_martin(agg_data$localities$LOC$sensors$HOBO_T_C$values[[1]],

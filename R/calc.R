@@ -634,8 +634,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 #'
 #' Temperature sensor must be in RH_perc physical.
 #' @param output_sensor name of new snow sensor (default "VPD")
-#' @param altitude value in meters (default 0)
-#' @param metadata_altitude if TRUE then altitude from metadata of locality is used (default TRUE)
+#' @param elevation value in meters (default 0)
+#' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return myClim object same as input but with added VPD sensor
 #' @export
@@ -647,8 +647,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 #' @examples
 #' agg_data <- mc_calc_vpd(mc_data_example_agg, "HOBO_T_C", "HOBO_RH", localities="A2E32")
 mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
-                        output_sensor="VPD", altitude=0,
-                        metadata_altitude=TRUE, localities=NULL) {
+                        output_sensor="VPD", elevation=0,
+                        metadata_elevation=TRUE, localities=NULL) {
     is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         .prep_check_datetime_step_unprocessed(data, stop)
@@ -658,29 +658,29 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
         warning(.calc_const_MESSAGE_VPD_AGGREGATED)
     }
 
-    call_vpd_function <- function(item, altitude) {
-        .calc_add_vpd_to_item(item, temp_sensor, rh_sensor, output_sensor, altitude)
+    call_vpd_function <- function(item, elevation) {
+        .calc_add_vpd_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
     }
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
-        local_altitude <- altitude
-        if(metadata_altitude && !is.na(locality$metadata@altitude)) {
-            local_altitude <- locality$metadata@altitude
+        local_elevation <- elevation
+        if(metadata_elevation && !is.na(locality$metadata@elevation)) {
+            local_elevation <- locality$metadata@elevation
         }
         if(is_agg) {
-            return(call_vpd_function(locality, local_altitude))
+            return(call_vpd_function(locality, local_elevation))
         }
-        locality$loggers <- purrr::map2(locality$loggers, local_altitude, call_vpd_function)
+        locality$loggers <- purrr::map2(locality$loggers, local_elevation, call_vpd_function)
         return(locality)
     }
     data$localities <- purrr::map(data$localities, locality_function)
     return(data)
 }
 
-.calc_add_vpd_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, altitude) {
+.calc_add_vpd_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, elevation) {
     skip <- .calc_vpd_check_sensors_get_skip(item, temp_sensor, rh_sensor, output_sensor)
     if(skip) {
         return(item)
@@ -691,7 +691,7 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
     a <- 0.61121
     b <- 18.678 - (T / 234.5)
     c <- 257.14
-    P <- 101300 * exp(- altitude / 8200)
+    P <- 101300 * exp(- elevation / 8200)
     f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * T^2)) #enhancement factor
     values <- f * a * exp(b * T / (c + T)) * (1 - RH / 100)
 

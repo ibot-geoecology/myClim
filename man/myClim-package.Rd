@@ -33,7 +33,7 @@ directly in localities, without loggers.
 Microclimatic data are stored in myClim objects in regular R structure
 consists of classes and lists slightly resembling database scheme.
 The top level of the structure is the \code{locality}. It has own metadata e.g.
-altitude, latitude or user data  dedicated for any type of metadata user need.
+elevation, latitude or user data  dedicated for any type of metadata user need.
 For detail description of locality metadata see \link{mc_LocalityMetadata}.
 On the locality in Raw-format there are \code{loggers} or in Agg-format directly \code{sensors}.
 See below. Loggers represents the files imported with myClim reading functions.
@@ -78,7 +78,7 @@ $localities | locality[1]                                                       
             | $metadata | mc_LocalityMetadata - class |                                     |
             |           +-----------------------------+                                     |
             |           | @locality_id                |                                     |
-            |           | @altitude                   |                                     |
+            |           | @elevation                   |                                     |
             |           | @lat_wgs84                  |                                     |
             |           | @lon_wgs84                  |                                     |
             |           | @tz_offset                  |                                     |
@@ -193,7 +193,7 @@ $localities | locality[1]                                                     |
             | $metadata  | mc_LocalityMetadata - class |                      |
             |            +-----------------------------+                      |
             |            | @locality_id                |                      |
-            |            | @altitude                   |                      |
+            |            | @elevation                   |                      |
             |            | @lat_wgs84                  |                      |
             |            | @lon_wgs84                  |                      |
             |            | @tz_offset                  |                      |

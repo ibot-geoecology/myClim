@@ -66,7 +66,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #'
 #' This function has two tables parameters. (i) `files_table` with paths pointing to raw
 #' csv logger files, specification of data format (logger type) and locality name. This table is required.
-#' (ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
+#' (ii) `localities_table` with locality id and metadata e.g. longitude, latitude, elevation...
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table` and `localities_table` from external CSV it 
@@ -96,7 +96,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
 #' object contains 5 columns:
 #' * locality_id
-#' * altitude
+#' * elevation
 #' * lon_wgs84
 #' * lat_wgs84
 #' * tz_offset
@@ -279,11 +279,11 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     .read_get_data_raw_from_localities(result_localities)
 }
 
-.read_get_new_locality <- function(locality_id, altitude=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
+.read_get_new_locality <- function(locality_id, elevation=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
     tz_type <- if(is.na(tz_offset)) .model_const_TZ_UTC else .model_const_TZ_USER_DEFINED
     metadata <- new("mc_LocalityMetadata")
     metadata@locality_id <- locality_id
-    metadata@altitude <- altitude
+    metadata@elevation <- elevation
     metadata@lon_wgs84 <- lon_wgs84
     metadata@lat_wgs84 <- lat_wgs84
     metadata@tz_offset <- tz_offset

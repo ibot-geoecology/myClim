@@ -9,8 +9,8 @@ mc_calc_vpd(
   temp_sensor = "HOBO_T_C",
   rh_sensor = "HOBO_RH",
   output_sensor = "VPD",
-  altitude = 0,
-  metadata_altitude = TRUE,
+  elevation = 0,
+  metadata_elevation = TRUE,
   localities = NULL
 )
 }
@@ -27,9 +27,9 @@ Temperature sensor must be in RH_perc physical.}
 
 \item{output_sensor}{name of new snow sensor (default "VPD")}
 
-\item{altitude}{value in meters (default 0)}
+\item{elevation}{value in meters (default 0)}
 
-\item{metadata_altitude}{if TRUE then altitude from metadata of locality is used (default TRUE)}
+\item{metadata_elevation}{if TRUE then elevation from metadata of locality is used (default TRUE)}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 }

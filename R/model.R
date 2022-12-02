@@ -5,7 +5,7 @@
 .model_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_COUNT_TEST_VALUES <- 100
-.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("locality_id", "altitude", "lat_wgs84", "lon_wgs84", "tz_offset")
+.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("locality_id", "elevation", "lat_wgs84", "lon_wgs84", "tz_offset")
 .model_const_EDITABLE_SENSOR_METADATA_PARAMETERS <- c("name", "height")
 .model_const_TOMST_THERMODATALOGGER_VALUE <- 65336
 .model_const_TOMST_DENDROMETER_UM_RANGE <- 8890
@@ -247,7 +247,7 @@ setMethod("initialize",
 #' @details When reading without metadata, then locality is named after file
 #' where the data come from, or after the sensor id where the data come form.  
 #' @slot locality_id name of locality
-#' @slot altitude of locality
+#' @slot elevation of locality
 #' @slot lat_wgs84 latitude of locality in WGS-84
 #' @slot lon_wgs84 longitude of locality in WGS-84
 #' @slot tz_offset offset from UTC in minutes
@@ -257,7 +257,7 @@ setMethod("initialize",
 #' @seealso [myClim-package], [mc_LoggerMetadata], [mc_SensorMetadata]
 mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
                                 slots = c(locality_id = "character",
-                                          altitude = "numeric",
+                                          elevation = "numeric",
                                           lat_wgs84 = "numeric",
                                           lon_wgs84 = "numeric",
                                           tz_offset = "numeric",
@@ -268,7 +268,7 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
 setMethod("initialize",
           "mc_LocalityMetadata",
           function(.Object) {
-              .Object@altitude <- NA_real_
+              .Object@elevation <- NA_real_
               .Object@lat_wgs84 <- NA_real_
               .Object@lon_wgs84 <- NA_real_
               .Object@tz_offset <- NA_integer_

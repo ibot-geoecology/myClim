@@ -20,7 +20,7 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$localities$A1E05$loggers[[1]]$datetime), 11)
     expect_equal(length(data$localities$A1E05$loggers[[1]]$sensors), 1)
     expect_true(is.na(data$localities$A1E05$loggers[[1]]$metadata@step))
-    expect_true(is.na(data$localities$A1E05$metadata@altitude))
+    expect_true(is.na(data$localities$A1E05$metadata@elevation))
     expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
     expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(data$localities$A1E05$loggers[[1]]$datetime))
     expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$end, dplyr::last(data$localities$A1E05$loggers[[1]]$datetime))
@@ -38,7 +38,7 @@ test_that("mc_read_data TOMST format datetime", {
 test_that("mc_read_data csv with localities", {
     data <- mc_read_data("../data/TOMST/files_table2.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
     test_raw_data_format(data)
-    expect_equal(data$localities$A1E05$metadata@altitude, 255)
+    expect_equal(data$localities$A1E05$metadata@elevation, 255)
     expect_equal(data$localities$A6W79$metadata@tz_type, myClim:::.model_const_TZ_USER_DEFINED)
     expect_equal(data$localities$A6W79$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
     expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,

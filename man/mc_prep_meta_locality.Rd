@@ -16,7 +16,7 @@ mc_prep_meta_locality(data, values, param_name = NULL)
 to rename locality use \code{new_locality_id}. Parameter \code{param_name} must be NULL.
 }}
 
-\item{param_name}{name of locality metadata parameter; Default names are \code{locality_id}, \code{altitude}, \code{lat_wgs84}, \code{lon_wgs84}, \code{tz_offset}.
+\item{param_name}{name of locality metadata parameter; Default names are \code{locality_id}, \code{elevation}, \code{lat_wgs84}, \code{lon_wgs84}, \code{tz_offset}.
 Another names are inserted to \code{user_data} list. see \link{mc_LocalityMetadata}}
 }
 \value{
@@ -42,7 +42,7 @@ then set \code{param_name="tz_offset"} and provide named list with locality name
 offset value \code{list(A1E05=60)}. Simillarly for other metadata slots \link{mc_LocalityMetadata}.
 
 For batch or generally more complex metadata modification you can provide data.frame
-with columns specifying \code{locality_id} and one of \verb{new_locality_id, altitude, lat_wgs84, lon_wgs84, tz_offset}.
+with columns specifying \code{locality_id} and one of \verb{new_locality_id, elevation, lat_wgs84, lon_wgs84, tz_offset}.
 Provide locality_id (name) and the value in column of metadata you wish to update.
 In case of using data.frame use \code{param_name = NULL}
 }

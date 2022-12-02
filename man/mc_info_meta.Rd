@@ -15,7 +15,7 @@ data.frame with columns:
 \item locality_id
 \item lon_wgs84
 \item lat_wgs84
-\item altitude
+\item elevation
 \item tz_offset
 }
 }

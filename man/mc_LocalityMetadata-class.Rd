@@ -17,7 +17,7 @@ where the data come from, or after the sensor id where the data come form.
 \describe{
 \item{\code{locality_id}}{name of locality}
 
-\item{\code{altitude}}{of locality}
+\item{\code{elevation}}{of locality}
 
 \item{\code{lat_wgs84}}{latitude of locality in WGS-84}
 
