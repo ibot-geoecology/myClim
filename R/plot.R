@@ -104,7 +104,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 .plot_logger_moisture <- function(logger, xlimit, months, sensor)
 {
     sensor_info <- .common_get_sensor_info(logger$sensors[[sensor]]$metadata)
-    physical <- mc_data_physical[[sensor_info@physical]]
+    physical <- myClim::mc_data_physical[[sensor_info@physical]]
     right_margin <- 8
     par(mar=c(5, 5, 0.25, right_margin))
     par(new=F)
@@ -287,16 +287,16 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
         item <- dplyr::first(locality$loggers)
     }
     sensor_metadata <- dplyr::first(item$sensors)$metadata
-    if(is.na(sensor_metadata@sensor_id) || !(sensor_metadata@sensor_id %in% names(mc_data_sensors)) ||
-        is.na(mc_data_sensors[[sensor_metadata@sensor_id]]@physical)) {
+    if(is.na(sensor_metadata@sensor_id) || !(sensor_metadata@sensor_id %in% names(myClim::mc_data_sensors)) ||
+        is.na(myClim::mc_data_sensors[[sensor_metadata@sensor_id]]@physical)) {
         if(is.null(viridis_color_map)) {
             viridis_color_map <- "D"
         }
         return(plot + viridis::scale_fill_viridis(name=sensor_metadata@name, option=viridis_color_map, direction=1))
     }
 
-    sensor <- mc_data_sensors[[sensor_metadata@sensor_id]]
-    physical <- mc_data_physical[[sensor@physical]]
+    sensor <- myClim::mc_data_sensors[[sensor_metadata@sensor_id]]
+    physical <- myClim::mc_data_physical[[sensor@physical]]
     if(is.null(viridis_color_map)) {
         viridis_color_map <- physical@viridis_color_map
     }
@@ -415,7 +415,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 
     sensors_item_function <- function(item) {
         physical_function <- function(sensor) {
-            sensor_info <- mc_data_sensors[[sensor$metadata@sensor_id]]
+            sensor_info <- myClim::mc_data_sensors[[sensor$metadata@sensor_id]]
             if(!is.na(sensor_info@physical)) {
                 return(sensor_info@physical)
             }
@@ -426,7 +426,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         }
 
         color_function <- function(sensor) {
-            sensor_info <- mc_data_sensors[[sensor$metadata@sensor_id]]
+            sensor_info <- myClim::mc_data_sensors[[sensor$metadata@sensor_id]]
             if(is.na(sensor_info@plot_color)) {
                 return("black")
             }
@@ -466,8 +466,8 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 
     get_scale_coeff <- function(selector) {
         physical <- physical_table$physical[selector]
-        if(physical %in% names(mc_data_physical)) {
-            return(mc_data_physical[[physical]]@scale_coeff)
+        if(physical %in% names(myClim::mc_data_physical)) {
+            return(myClim::mc_data_physical[[physical]]@scale_coeff)
         }
         1
     }
@@ -489,15 +489,15 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         physical <- physical_table$physical[!physical_table$main_axis]
         coeff <- physical_table$coeff[!physical_table$main_axis]
         description <- physical
-        if(physical %in% names(mc_data_physical)) {
-            description <- mc_data_physical[[physical]]@description
+        if(physical %in% names(myClim::mc_data_physical)) {
+            description <- myClim::mc_data_physical[[physical]]@description
         }
         sec.axis <- ggplot2::sec_axis(~./coeff, name=description)
     }
     main_physical <- physical_table$physical[physical_table$main_axis]
     main_description <- main_physical
-    if(main_physical %in% names(mc_data_physical)) {
-        main_description <- mc_data_physical[[main_physical]]@description
+    if(main_physical %in% names(myClim::mc_data_physical)) {
+        main_description <- myClim::mc_data_physical[[main_physical]]@description
     }
     ggplot2::scale_y_continuous(name=main_description, sec.axis=sec.axis)
 }

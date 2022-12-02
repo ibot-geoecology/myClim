@@ -1,4 +1,4 @@
-source("R/model.R")
+devtools::load_all()
 
 mc_data_formats <- new.env()
 

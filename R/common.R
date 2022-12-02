@@ -10,7 +10,7 @@
 }
 
 .common_get_sensor_info <- function(sensor_metadata) {
-    mc_data_sensors[[sensor_metadata@sensor_id]]
+    myClim::mc_data_sensors[[sensor_metadata@sensor_id]]
 }
 
 .common_as_utc_posixct <- function(datetime) {
@@ -42,7 +42,7 @@
 
 .common_get_new_sensor <- function(sensor_id, sensor_name, values=NULL, height=NA_character_,
                                    calibrated=FALSE, calibration=data.frame(), states=data.frame()){
-    if(!(sensor_id %in% names(mc_data_sensors))) {
+    if(!(sensor_id %in% names(myClim::mc_data_sensors))) {
         warning(stringr::str_glue(.common_const_MESSAGE_UNKNOWN_SENSOR_ID))
     }
     metadata <- new("mc_SensorMetadata")

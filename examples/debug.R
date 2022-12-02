@@ -1,17 +1,5 @@
-debug_loading_function <- function (path_prefix) {
-    files_sources <- list.files(stringr::str_glue("{path_prefix}R"), full.names = T)
-    purrr::walk(files_sources, source)
-    files_data <- list.files(stringr::str_glue("{path_prefix}data"), full.names = T)
-    for(data_file in files_data){
-        load(data_file, envir = globalenv())
-    }
-}
-
-# debug package
-debug_loading_function("./")
-
-# debug tests
+detach("package:myClim", unload=TRUE)
+devtools::load_all()
 setwd("tests/testthat")
-debug_loading_function("../")
 
 # debug code

@@ -141,7 +141,6 @@ setMethod(
 #' @slot max_value maximal value (default NA)
 #' @slot plot_color color in pot (default "")
 #' @slot plot_line_width width of line in plot (default 1)
-#' @export mc_Sensor
 #' @exportClass mc_Sensor
 #' @seealso [mc_data_sensors]
 mc_Sensor <- setClass("mc_Sensor",
@@ -185,7 +184,6 @@ setMethod(f="initialize",
 #' @slot units measurument (°C, %, m3/m3, raw, mm, ...)
 #' @slot viridis_color_map viridis color map option
 #' @slot scale_coeff coefficient for plot; value * scale_coef is in range 0-1
-#' @export mc_Physical
 #' @exportClass mc_Physical
 #' @seealso [mc_data_physical] 
 mc_Physical <- setClass("mc_Physical",
@@ -205,7 +203,6 @@ setMethod("initialize",
 
 #' Class for myClim object metadata
 #' @template slot_MainMetadata
-#' @export mc_MainMetadata
 #' @exportClass mc_MainMetadata
 #' @seealso [myClim-package]
 mc_MainMetadata <- setClass("mc_MainMetadata",
@@ -227,7 +224,6 @@ setMethod("initialize",
 #' @slot period value from [mc_agg()] (e.g. month, day, all...)
 #' @slot intervals_start start datetime of data intervals for spacial periods all and custom (see [mc_agg()])
 #' @slot intervals_end end datetime of data intervals for spacial periods all and custom (see [mc_agg()])
-#' @export mc_MainMetadataAgg
 #' @exportClass mc_MainMetadataAgg
 #' @seealso [mc_MainMetadata] [myClim-package]
 mc_MainMetadataAgg <- setClass("mc_MainMetadataAgg",
@@ -257,7 +253,6 @@ setMethod("initialize",
 #' @slot tz_offset offset from UTC in minutes
 #' @slot tz_type type of time zone
 #' @slot user_data list for user data
-#' @export mc_LocalityMetadata
 #' @exportClass mc_LocalityMetadata
 #' @seealso [myClim-package], [mc_LoggerMetadata], [mc_SensorMetadata]
 mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
@@ -288,7 +283,6 @@ setMethod("initialize",
 #' @slot step time step of microclimatic time-seris in seconds.
 #' When provided by user, is used in [mc_prep_clean()] function instead of
 #' automatic step detection 
-#' @export mc_LoggerMetadata
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               slots = c(type = "character",
@@ -309,7 +303,6 @@ setMethod("initialize",
 #' @slot count_missed count of missing records; Period between the records should be the same length. If not, than missing. 
 #' @slot count_disordered count of records incorrectly ordered in time. In table, newer record is followed by the older. 
 #' @slot rounded T/F indication whether myClim automatically rounded time series to the closes half (06, 12) e.g. 13:07 -> 13:00 
-#' @export mc_LoggerCleanInfo
 #' @exportClass mc_LoggerCleanInfo
 mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
                                slots = c(step = "numeric",
@@ -338,7 +331,6 @@ setMethod("initialize",
 #' @slot name character, could be same as `sensor_id` but also defined by function or user.  
 #' @slot height character
 #' @slot calibrated logical - detect if sensor is calibrated
-#' @export mc_SensorMetadata
 #' @exportClass mc_SensorMetadata
 #' @seealso [myClim-package], [mc_LoggerMetadata], [mc_data_sensors]
 mc_SensorMetadata <- setClass("mc_SensorMetadata",
@@ -367,7 +359,7 @@ setMethod(
     ".model_is_physical",
     "mc_SensorMetadata",
     function(object, physical) {
-        physical_id <- mc_data_sensors[[object@sensor_id]]@physical
+        physical_id <- myClim::mc_data_sensors[[object@sensor_id]]@physical
         return(!is.na(physical_id) && physical_id == physical)
     }
 )
@@ -413,7 +405,7 @@ setMethod(
     ".model_is_type_real",
     "mc_SensorMetadata",
     function(object) {
-        value_type <- mc_data_sensors[[object@sensor_id]]@value_type
+        value_type <- myClim::mc_data_sensors[[object@sensor_id]]@value_type
         return(value_type == .model_const_VALUE_TYPE_REAL)
     }
 )
@@ -429,14 +421,14 @@ setMethod(
     ".model_get_physical_description",
     "mc_SensorMetadata",
     function(object) {
-        if(!(object@sensor_id %in% names(mc_data_sensors))) {
+        if(!(object@sensor_id %in% names(myClim::mc_data_sensors))) {
             return(NA_character_)
         }
-        sensor_info <- mc_data_sensors[[object@sensor_id]]
+        sensor_info <- myClim::mc_data_sensors[[object@sensor_id]]
         if(is.na(sensor_info@physical)) {
             return(NA_character_)
         }
-        physical <- mc_data_physical[[sensor_info@physical]]
+        physical <- myClim::mc_data_physical[[sensor_info@physical]]
         physical@description
     }
 )
@@ -452,10 +444,10 @@ setMethod(
     ".model_get_sensor_description",
     "mc_SensorMetadata",
     function(object) {
-        if(!(object@sensor_id %in% names(mc_data_sensors))) {
+        if(!(object@sensor_id %in% names(myClim::mc_data_sensors))) {
             return(NA_character_)
         }
-        sensor_info <- mc_data_sensors[[object@sensor_id]]
+        sensor_info <- myClim::mc_data_sensors[[object@sensor_id]]
         sensor_info@description
     }
 )
@@ -495,7 +487,6 @@ setMethod(
 #' If data_row_pattern is NA, then file format is not validated.
 #' @slot logger_type type of logger: TMS, TMS_L45, ThermoDatalogger, Dendrometer, HOBO, ... (default NA)
 #' @slot tz_offset timezone offset in minutes from UTC in source data (default 0)
-#' @export mc_DataFormat
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
@@ -534,10 +525,10 @@ setMethod("initialize",
 #' in what format is the date, in which columns are records of which sensors.
 #' The code defining the class is in section methods ./R/model.R  
 #' 
-#' @seealso [myClim::mc_DataFormat],[mc_data_formats], [mc_TOMSTJoinDataFormat-class]
-#' @export mc_TOMSTDataFormat
+#' @seealso [myClim::mc_DataFormat], [mc_data_formats], [mc_TOMSTJoinDataFormat-class]
 #' @exportClass mc_TOMSTDataFormat
-mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
+mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat",
+                               contains = "mc_DataFormat")
 
 #' Class for reading TMS join files
 #' 
@@ -547,7 +538,6 @@ mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat", contains = "mc_DataFormat")
 #' 
 #' TMS join file format is the output of IBOT internal post-processing of TOMST logger files.  
 #' @seealso [myClim::mc_DataFormat],[mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
-#' @export mc_TOMSTJoinDataFormat
 #' @exportClass mc_TOMSTJoinDataFormat
 mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_DataFormat")
 
@@ -558,7 +548,6 @@ mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_Data
 #' The code defining the class is in section methods ./R/model.R
 #'
 #' @seealso [myClim::mc_DataFormat],[mc_data_formats]
-#' @export mc_HOBODataFormat
 #' @exportClass mc_HOBODataFormat
 mc_HOBODataFormat <- setClass("mc_HOBODataFormat", contains = "mc_DataFormat")
 

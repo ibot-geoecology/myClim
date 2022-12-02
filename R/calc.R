@@ -326,7 +326,7 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
     if(skip) {
         return(item)
     }
-    soil_row <- dplyr::filter(mc_data_vwc_parameters, .data$soiltype == soiltype_value)
+    soil_row <- dplyr::filter(myClim::mc_data_vwc_parameters, .data$soiltype == soiltype_value)
     if(nrow(soil_row) != 1) {
         stop(stringr::str_glue(.calc_const_MESSAGE_UNKNONW_SIOLTYPE))
     }
@@ -613,8 +613,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 }
 
 .calc_get_dendro_l_um <- function(item, sensor_name) {
-    min_raw_value <- mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@min_value
-    max_raw_value <- mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@max_value
+    min_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@min_value
+    max_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@max_value
     um_range <- .model_const_TOMST_DENDROMETER_UM_RANGE
     (item$sensors[[sensor_name]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
 }

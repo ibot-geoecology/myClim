@@ -556,7 +556,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     } else {
         return(NULL)
     }
-    value_type <- mc_data_sensors[[sensor$metadata@sensor_id]]@value_type
+    value_type <- myClim::mc_data_sensors[[sensor$metadata@sensor_id]]@value_type
     purrr::flatten(purrr::map(functions_to_convert, function(x) .agg_convert_function(x, percentiles, min_coverage, value_type, custom_functions)))
 }
 
@@ -658,7 +658,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
 
 .agg_agregate_sensor <- function(sensor, functions, by_aggregate, custom_functions) {
     sensor_function <- function(.x, .y) {
-        sensor_info <- mc_data_sensors[[sensor$metadata@sensor_id]]
+        sensor_info <- myClim::mc_data_sensors[[sensor$metadata@sensor_id]]
         new_sensor <- sensor
         if(.y %in% c(.agg_const_FUNCTION_COUNT, .agg_const_FUNCTION_COVERAGE)) {
             new_sensor$metadata@sensor_id <- .y

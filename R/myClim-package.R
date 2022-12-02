@@ -1,5 +1,4 @@
-if(getRversion() >= "2.15.1")  globalVariables(c(".", "mc_data_formats", "mc_data_heights", "mc_data_physical",
-                                                        "mc_data_sensors", "mc_data_vwc_parameters", ".data"))
+if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 
 #' @description
 #'

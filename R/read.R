@@ -174,11 +174,11 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_get_data_formats <- function(files_table) {
     file_function <- function (path, data_format, logger_type, date_format, tz_offset) {
-        if(!(data_format %in% names(mc_data_formats))){
+        if(!(data_format %in% names(myClim::mc_data_formats))){
             warning(stringr::str_glue("{data_format} is not aplicable format to {path}. File is skipped."))
             return(NULL)
         }
-        data_format_object <- mc_data_formats[[data_format]]
+        data_format_object <- myClim::mc_data_formats[[data_format]]
         if(is.na(data_format_object@date_format) && !is.na(date_format)) {
             data_format_object@date_format <- date_format
         }
@@ -352,7 +352,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_get_sensors_from_data_format <- function(data_table, data_format, datetime, states){
-    heights_dataframe <- dplyr::filter(mc_data_heights, .data$logger_type == data_format@logger_type)
+    heights_dataframe <- dplyr::filter(myClim::mc_data_heights, .data$logger_type == data_format@logger_type)
     sensor_function <- function(column, sensor_id) {
         height <- NA_character_
         suffix <- NA_character_

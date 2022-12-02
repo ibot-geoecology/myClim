@@ -11,5 +11,5 @@ in what format is the date, in which columns are records of which sensors.
 The code defining the class is in section methods ./R/model.R
 }
 \seealso{
-\link{mc_DataFormat},\link{mc_data_formats}, \linkS4class{mc_TOMSTJoinDataFormat}
+\link{mc_DataFormat}, \link{mc_data_formats}, \linkS4class{mc_TOMSTJoinDataFormat}
 }
