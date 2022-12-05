@@ -11,44 +11,46 @@
 .agg_const_FUNCTION_COUNT <- "count"
 .agg_const_FUNCTION_COVERAGE <- "coverage"
 
-.agg_const_MESSAGE_LOCALITY_WITHOUT_DATA <- "Locality {locality$metadata@locality_id} is without valid data. It is removed."
+.agg_const_MESSAGE_LOCALITY_WITHOUT_DATA <- "Locality {locality$metadata@locality_id} without any valid data. It was removed."
 .agg_const_MESSAGE_CUSTOM_START_NULL <- "Parameter custom_start must be set."
 .agg_const_MESSAGE_CUSTOM_WRONG_FORMAT <- "Prameter {parameter_name} is in wrong format. Required format is 'mm-dd' or 'mm-dd H:MM'."
 .agg_const_MESSAGE_EMPTY_DATA <- "Data are empty."
-.agg_const_MESSAGE_WRONG_PREVIOUS_PERIOD <- "It is not possible aggregate all or custom data."
+.agg_const_MESSAGE_WRONG_PREVIOUS_PERIOD <- "It is not possible to aggregate all or custom data."
 .agg_const_MESSAGE_WRONG_SHIFT <- "Shift of time-series in {locality$metadata@locality_id} locality is different."
 .agg_const_MESSAGE_MISSING_HEIGHT <- "Height is missing in sensosr {object@name}."
 .agg_const_MESSAGE_WRONG_CUSTOM_FUNCTION <- "Type of values in sensor {new_sensor$metadata@name} is wrong."
-.agg_const_MESSAGE_FUN_AND_PERIOD <- "Parameters fun and period must be both NULL or must be both set."
-.agg_const_MESSAGE_SHORT_PERIOD <- "Period cannot be less then 1s."
-.agg_const_MESSAGE_NONUTC_SHORT_PERIOD <- "Non-UTC time zone can be used only for period day and bigger."
+.agg_const_MESSAGE_FUN_AND_PERIOD <- "Parameters 'fun' and 'period' must be both NULL or must be both specified."
+.agg_const_MESSAGE_SHORT_PERIOD <- "Period cannot be shorter then 1s."
+.agg_const_MESSAGE_NONUTC_SHORT_PERIOD <- "Non-UTC time zone can be used only for period day and longer."
 
 #' Aggregate data by function
 #'
 #' mc_agg has two basic uses: 
-#' * aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min raw records to daily means); 
-#' * convert myClim object from Raw-format to Agg-format see [myClim-package] without records modification,
-#' this behavior appears when fun=NULL, period=NULL.
+#' * aggregate (upscale) time step of microclimatic records with specified function (e. g. 15 min records to daily mean); 
+#' * convert myClim object from Raw-format to Agg-format see [myClim-package] without time-series modification,
+#' this behavior appears when `fun=NULL`, `period=NULL`.
 #' 
 #' @details 
-#' Any output of mc_agg is in Agg-format. That means the structure of myClim object is flattened.
-#' Hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within
-#' the sensors are joined directly to the level of locality (Locality<-Sensor<-Record). See [myClim-package].
+#' Any output of mc_agg is in Agg-format. That means the 
+#' hierarchical level of logger is removed (Locality<-Logger<-Sensor<-Record), and all microclimatic records within
+#' the sensors are on the level of locality (Locality<-Sensor<-Record). See [myClim-package].
 #' 
-#' In case `mc_agg()` is used only for conversion from Raw-format to Agg-format (fun=NULL, period=NULL) then microclimatic
-#' records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format.
+#' In case `mc_agg()` is used only for conversion from Raw-format to Agg-format (`fun=NULL, period=NULL`) then microclimatic
+#' records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format, otherwise
+#' period must be specified.
 #' 
-#' When fun and period is specified, microclimatic records are aggregated based on function into new period.
+#' When fun and period are specified, microclimatic records are aggregated based on function into new period.
 #' Aggregated time step is named after the first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
 #' week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...);
 #' year = c(2021-01-01 00:00, 2022-01-01 00:00...).
-#' When first or last period is incomplete in original data, the incomplete part is extended with NA values to fill complete period. 
-#' I.e. when you want to aggregate to monthly mean, but your time-series starts on January 15 ending December 20, myClim will extend the time.series 
-#' to start January 1, ending December 31. Thean you can decide what to do with the NAs, see parameter `min_coverage`. 
+#' When first or last period is incomplete in original data, the incomplete part is extended with NA values to match specified period. 
+#' I.e. when you want to aggregate to monthly mean, but your time-series starts on January 15 ending December 20, 
+#' myClim will extend the time.series 
+#' to start January 1, ending December 31. Then you can decide what to do with the NAs, see parameter `min_coverage`. 
 #' 
-#' Empty sensors with no records are excluded. `mc_agg()` return NA for empty vector except from count which returns 0.
-#' When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they all are applied to all the sensors
-#' and multiple results are returned. When named list (names are the sensor ids) of functions is provided then `mc_agg()`
+#' Empty sensors with no records are excluded. `mc_agg()` return NA for empty vector except from `fun=count` which returns 0.
+#' When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they are all applied to all the sensors
+#' and multiple results are returned from each sensors. When named list (names are the sensor ids) of functions is provided then `mc_agg()`
 #' apply specific functions to the specific sensors based on the named list `list(TMS_T1=c("max", "min"), TMS_T2="mean")`.
 
 #' mc_agg returns new sensors on the localities putting aggregation 
@@ -62,46 +64,46 @@
 #' Sensors created with functions `count` has sensor_id `count` and value_type `integer`,
 #' function  `coverage` has sensor_id `coverage` and value_type `real`
 #' 
-#' Read carefully details about `sum` and `count` these two may not be intuitive.  
 #'
 #' @param data cleaned myClim object in Raw-format: output of [myClim::mc_prep_clean()] or Agg-format as it is allowed to aggregate data multiple times.
 #' @param fun aggregation function; one of (`"min"`, `"max"`, `"mean"`, `"percentile"`, `"sum"`, `"range"`, `"count"`, `"coverage"`)
-#' and functions defined in `custom_functions`. See details by custom_functions argument.
+#' and functions defined in `custom_functions`. See details of custom_functions argument.
 #' Can be single function name, character vector of function names or named list of vector function names.
-#' Named list of functions allows apply different function(s) for different sensors e.g. `list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")`
-#' if NULL records are not aggregated, but only converted to Agg-format withou any change. See details.
+#' Named list of functions allows apply different function(s) to different sensors e.g. `list(TMS_T1=c("max", "min"), TMS_T2="mean", TMS_T3_GDD="sum")`
+#' if NULL records are not aggregated, but myClim object is only converted to Agg-format without modifing time-series. See details.
 #'
 #' @param period Time period for aggregation - same as breaks in cut.POSIXt, e.g. (`"hour"`, `"day"`, `"month"`); if NULL then no aggregation
 #'
 #' There are special periods `"all"` and `"custom"`. Period `"all"` returning single value for each sensor based
-#' on function applied across all records within the sensor. E.g. mean and max air temperature from all data from the logger.
-#' Period `"custom"` aggregates data in year time window. You can aggregate e.g. water year, vegetation season etc by providing start, end datetime.  
-#' See `custom_start` and `custom_end` parameters. The output of special periods `"all"` and `"custom"`is not allowed to be aggregated 
+#' on function applied across all records within the sensor.
+#' Period `"custom"` aggregates data in yearly cycle. You can aggregate e.g. water year, vegetation season etc. by providing start, end datetime.  
+#' See `custom_start` and `custom_end` parameters. The output of special periods `"all"` and `"custom"`are not allowed to be aggregated 
 #' again in [myClim::mc_agg()] function, regardless multiple aggregations are allowed in general. 
 #'
 #' Start day of week is Monday.
-#' @param use_utc default TRUE using UTC time, if set FALSE before aggregation, time is shifted by offset if available in locality metadata.
-#' Shift can be e.g. to solar time [myClim::mc_prep_solar_tz()] or political time with custom shift [myClim::mc_prep_meta_locality()]).
-#' §Non-UTC time can by used only for aggregation from period shorter than `day` to period `day` and longer.§
-#' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new sensor, see details
+#' @param use_utc default TRUE using UTC time, if set FALSE, the time is shifted by offset if available in locality metadata.
+#' Shift can be e.g. to solar time [myClim::mc_prep_solar_tz()] or political time with custom offset [myClim::mc_prep_meta_locality()]).
+#' Non-UTC time can by used only for aggregation of the data with period shorter than `day` (seconds, minutes, hours) into period `day` and longer. 
+#' @param percentiles vector of percentile numbers; numbers are from range 0-100; each specified percentile number generate new virtual sensor, see details
 #' @param min_coverage value from range 0-1 (default 1); the threshold specifying how many missing values can you accept within aggregation period. 
 #' e.g. when aggregating from 15 min to monthly mean and set `min_coverage=1` then a single NA value within the specific month cause monthly mean = NA.
-#'  When `min_coverage=0.9` then you will get your monthly mean in case there are no more than 10 % missing values, if there were more than 10% you will get NA. 
-#'  Ignored for functions `count` and `coverage`
-#' @param custom_start date of start only use for `custom` period (default NULL); Character in format `"mm-dd"` or `"mm-dd H:MM"`.
-#' @param custom_end date of end only use for `custom` period (default NULL); If NULL then calculates in year cycle ending on `custom_start` next year. 
-#' If parameter is filled in then data out of range `custom_start`-`custom_end` are skipped. E.g. vegetation season, winter season... 
-#' Character in format `"mm-dd"` or `"mm-dd H:MM"`. `custom_end` row is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 `custom_end="01-01"`.
+#' When `min_coverage=0.9` then you will get your monthly mean in case there are no more than 10 % missing values, if there were more than 10% you will get NA. 
+#' Ignored for functions `count` and `coverage`
+#' @param custom_start date of start, only use for `custom` period (default NULL); Character in format `"mm-dd"` or `"mm-dd H:MM"` recycled in yearly cycle for time-series longer than 1 year. 
+#' @param custom_end date of end only use for `custom` period (default NULL); If NULL then calculates in year cycle ending on `custom_start` next year. (useful e.g. for hydrological year) 
+#' When custom_end is provided, then data out of range `custom_start`-`custom_end` are ignored.  
+#' Character in format `"mm-dd"` or `"mm-dd H:MM"`. `custom_end` row (the last record) is not included. I.e.complete daily data from year 2020 ends in 2021-01-01 `custom_end="01-01"`.
 #' @param custom_functions user define one or more functions in format `list(function_name=function(values){...})`; then you will feed function_name(s) 
 #' you defined to the `fun` parameter. e.g. `custom_functions = list(positive_count=function(x){length(x[x>0])})`,
 #' `fun="positive_count"`,
 #' @return Returns new myClim object in Agg-format see [myClim-package] When fun=NULL, period=NULL
 #' records are not modified but only converted to Agg-format.
-#' When fun and period provided then time step is aggregated based on function.
+#' When fun and period are provided then time step is aggregated based on function.
 #' @export
 #' @examples
 #' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, min_coverage=0.5)
 #' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", min_coverage=1)
+#' month_data <- mc_agg(mc_data_example_clean, fun=list(TMS_T3="below5"),period = "month",custom_functions = list(below5=function(x){length(x[x<(-5)])})) 
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, min_coverage=1,
                    custom_start=NULL, custom_end=NULL, custom_functions=NULL) {
     old_lubridate_week_start <- getOption("lubridate.week.start")

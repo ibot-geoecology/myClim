@@ -1,12 +1,21 @@
-#' Filter data
-#'
-#' This function filter data by localities and sensors
-#'
+#' Filter data from myClim object
+#' @description 
+#' This function filter data by localities and sensors.
+#' 
+#' @details 
+#' In default settings it returns the object containing input sensors / localities.
+#' It is possible to filter selected sensors from all localities, selected 
+#' localities with all sensors or combine both. 
+#' 
+#' When `reverse = TRUE` then 
+#' resulting myClim object contains all localities and sensors as input except
+#' those you listed in parameters `localities, sensors`
+#' 
 #' @template param_myClim_object
 #' @param localities locality_ids for filtering data; if NULL then do nothing
 #' @param sensors sensor_ids for filtering data; if NULL then do nothing see `names(mc_data_sensors)`
-#' @param reverse - if TRUE then filtered discard else keeped (default FALSE)
-#' @param stop_if_empty - if TRUE then error for empty output (default TRUE)
+#' @param reverse if TRUE then input localities and/or sensors are excluded (default FALSE)
+#' @param stop_if_empty if TRUE then error for empty output (default TRUE)
 #' @return filtered myClim object
 #' @export
 #' @examples 

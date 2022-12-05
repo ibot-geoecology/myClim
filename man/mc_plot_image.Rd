@@ -29,11 +29,10 @@ mc_plot_image(
 
 \item{left_margin}{width of space for sensor_labels; default = 12}
 }
-\value{
-ggplot2 object
-}
 \description{
-Function plot myClim data into file with image function.
+Function plots single sensor form myClim data into file with image() R base function.
+This was designed for fast, and easy data visualization especially focusing on missing
+values visualization and general data picture.
 }
 \details{
 Be careful with bigger data. Can take some time.

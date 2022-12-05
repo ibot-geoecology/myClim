@@ -15,28 +15,31 @@ mc_read_data(
 \item{files_table}{path to csv file or data.frame object with 3 required columns and few optional:
 required columns:
 \itemize{
-\item path - path to file
-\item locality_id
+\item path - path to files
+\item locality_id - the unique locality id
 \item data_format see \link{mc_data_formats}, \code{names(mc_data_formats)}
 }
 
 optional columns:
 \itemize{
-\item serial_number - can be NA, than try detect
-\item logger_type - type of logger. This is used to set default sensor heights and hlps a lot wen joining the data.
+\item serial_number - can be NA, than myClim tries to detect from file name or header
+\item logger_type - type of logger. This is used to set default sensor heights important when joining the data.
 In some cases myClim detects loger_type from source data file, but sometimes it is not possible.
-Pre-defined loger types are:("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+Pre-defined logger types are: ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
 Default heights of sensor based on logger types are defined in table \link{mc_data_heights}
-\item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S"); Ignored for TOMST data format
+\item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S");
+Ignored for Tomst TMS data format
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
-Value in this column have the highest priority. If NA then auto detection of timezone in files. If timezone can't be detected, then UTC is supposed.
-Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically. Ignored for TOMST data format
+Value in this column have the highest priority. If NA then auto detection of timezone in files.
+If timezone can't be detected, then UTC is supposed.
+Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
+Ignored for Tomst TMS data format (they are always in UTC)
 \item step - Time step of microclimatic time-series in seconds. When provided, then used in \link{mc_prep_clean}
 instead of automatic step detection.
 }}
 
 \item{localities_table}{path to csv file or data.frame. Localities table is optional (default NULL).
-object contains 5 columns:
+object containing 5 columns:
 \itemize{
 \item locality_id
 \item elevation
@@ -47,26 +50,27 @@ object contains 5 columns:
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
-\item{silent}{if TRUE, then any information is printed in console (default FALSE)}
+\item{silent}{if TRUE, then any information is not printed in console (default FALSE)}
 }
 \value{
 myClim object in Raw-format see \link{myClim-package}
 }
 \description{
-This function has two tables parameters. (i) \code{files_table} with paths pointing to raw
-csv logger files, specification of data format (logger type) and locality name. This table is required.
-(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, elevation...
+This function has two tables as the parameters.
+
+(i) \code{files_table} with \emph{paths} pointing to raw
+csv logger files, specification of \emph{data format} (logger type) and \emph{locality name}.
+
+(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
 }
 \details{
-The input tables could be R data.frames or csv files. When loading \code{files_table} and \code{localities_table} from external CSV it
-must have header, column separator must be comma ",".
+The input tables could be R data.frames or csv files. When loading \code{files_table}
+and \code{localities_table} from external CSV they must have header, column separator must be comma ",".
 By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
-holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks.
+holes in time-series, duplicated records or records in wrong order.
 }
 \examples{
-\dontrun{
-tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")
-}
+\dontrun{tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")}
 }
 \seealso{
 \link{mc_DataFormat}

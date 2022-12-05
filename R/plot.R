@@ -1,14 +1,16 @@
 .plot_const_MOISTURE_PHYSICAL <- c(.model_const_PHYSICAL_TMSmoisture,
                                    .model_const_PHYSICAL_moisture)
-.plot_const_MESSAGE_DUPLICATED_SENSOR <- "Sensor {duplicated_sensors} contains multiple physicals. It is forbidden."
+.plot_const_MESSAGE_DUPLICATED_SENSOR <- "Sensor {duplicated_sensors} contains multiple physicals. It is not allowed."
 
 #' Plot data from loggers
 #'
-#' Function save separate file for the loggers to the directory. Only Raw-format supported.
-#' For Agg-format use [myClim::mc_plot_line()]
+#' Function save separate files (*.png) per the loggers to the directory.
+#' Only Raw-format supported, Agg-format not supported.
+#' For Agg-format use [myClim::mc_plot_line()]. Function was primary designed
+#' for Tomst  TMS loggers for fast, and easy data visualization.
 #'
 #' @template param_myClim_object_raw
-#' @param directory output directory
+#' @param directory path to output directory
 #' @template param_localities_sensors
 #' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
 #' @export
@@ -136,7 +138,10 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 
 #' Plot data - image
 #'
-#' Function plot myClim data into file with image function.
+#' Function plots single sensor form myClim data into file with image() R base function.
+#' This was designed for fast, and easy data visualization especially focusing on missing
+#' values visualization and general data picture.
+#'
 #' @details Be careful with bigger data. Can take some time. 
 #' @template param_myClim_object
 #' @param filename output file name (file path)
@@ -144,7 +149,6 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @template param_localities_sensors
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
-#' @return ggplot2 object
 #' @export
 #' @examples
 #' \dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
@@ -175,20 +179,30 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 
 #' Plot data - ggplot2 geom_raster
 #'
-#' Function plot data to file with ggplot2 geom_raster
-#' @details PDF format is recommended as it can distribute the plots on the pages, which is especially useful
-#' for bigger data. In case of plotting multiple sensors, it is plotted by sensor. All localities from sensor1
-#' followed by all localities of sensor2 etc. When plotting only few localities, but multiple sensors,
-#' each sensor has own page. E.g. when plotting data from one locality, and 3 senosrs resulting PDF has 3 pages. 
-#' §In the case of plotting PNG all localities and sensors are plotted in images by physical.
-#' Sensors with same physical are together in one image.§ Be careful with bigger data in PNG.
-#' Play with `png_height` and `png_width`. When too small, image does not fit ad is plotted broken.  
+#' Function plots data with ggplot2 geom_raster. Plot is returned as ggplot faced raster and
+#' is primary designed to be saved as .pdf file (recommended) or .png file.
+#' Plotting into R environment without saving any file is also possible.
+#' See details.
+#'
+#' @details Saving as the .pdf file is recommended, because the plot is optimized
+#' to be paginate PDF (facet raster plot is distributed to pages), which is especially useful
+#' for bigger data. In case of plotting multiple sensors to PDF, the facet grids are grouped by sensor.
+#' I.e., all localities of sensor_1 followed by all localities of sensor_2 etc.
+#' When plotting only few localities, but multiple sensors,
+#' each sensor has own page. I.e., when plotting data from one locality, and 3 sensors resulting PDF has 3 pages.
+#' In case of plotting PNG, sensors are plotted in separated images (PNG files) by physical.
+#' I.e, when plotting 3 sensors in PNG it will save 3 PNG files named after sensors.
+#' Be careful with bigger data in PNG. Play with `png_height` and `png_width`.
+#' When too small height/width, image does not fit and is plotted incorrectly. Plotting into
+#' R environment instead of saving PDF or PNG is possible, but is recommended only for
+#' low number  of localities (e.g. up to 10), because
+#' high number of localities plotted in R environment results in very small picture which is hard/impossible to read.
+#'
 #' 
 #' @template param_myClim_object
 #' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
-#'
-#' If NULL then the plot is return, but not saved to file.
-#' @param sensors names of sensor; should have same unit see `names(mc_data_sensors)`
+#' If NULL then the plot is shown/returned into R environment as ggplot object, but not saved to file.
+#' @param sensors names of sensor; should have same physical unit see `names(mc_data_sensors)`
 #' @param by_hour if TRUE, then y axis is plotted as an hour, else original time step (default TRUE) 
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
@@ -205,6 +219,8 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' @param start_crop POSIXct datetime for crop data (default NULL)
 #' @param end_crop POSIXct datetime for crop data (default NULL)
 #' @return list of ggplot2 objects
+#' @examples
+#' \dontrun{mc_plot_raster(tms,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))}
 #' @export
 mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900,
                            viridis_color_map=NULL, start_crop=NULL, end_crop=NULL) {
@@ -353,17 +369,27 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 
 #' Plot data - ggplot2 geom_line
 #'
-#' Function plot data to file with ggplot2 geom_line
+#' Function plots data with ggplot2 geom_line. Plot is returned as ggplot faced grid and
+#' is primary designed to be saved as PDF file. PNG is also possible, the same as
+#' plotting ggplot object into R environment. See details.
 #'
-#' Maximal number of physical units (elements) of sensors to be plotted  is two. Main and secondary y axis.
-#' Values from secondary axis are scaled with calculation values * scale_coeff. If coefficient is NULL
-#' than function try detects scale coefficient from physical unit of sensors see [mc_Physical-class].
-#' Scaling is useful when plotting together e.g. temperature and moisture.
+#' @details
+#' Saving as the PDF file is recommended, because the plot is optimized
+#' to be paginate PDF (facet raster plot is distributed to pages), which is especially useful
+#' for bigger data. Maximal number of physical units (elements) of sensors to be plotted in one
+#' plot is two with main and secondary y axis. In case, there are multiple sensors with
+#' identical physical on one locality, they are plotted together. E.g., when you have
+#' TMS_T1, TMS_T2, TMS_T3, TS_T, and moisture you get plot with 5 lines of different colors and
+#' two y axes. Secondary y axes are scaled with calculation `values * scale_coeff`.
+#' If coefficient is NULL than function try detects scale coefficient from
+#' physical unit of sensors see [mc_Physical-class]. Scaling is useful when
+#' plotting together e.g. temperature and moisture. For TMS and HOBO scaling coefficients
+#' are estimated automatically, correctly. For other data it is better to set it by hand.
 #'
 #' @template param_myClim_object
-#' @param filename output with the extension - supported formats are .pdf and .png (default NULL)
+#' @param filename output file name/path with the extension - supported formats are .pdf and .png (default NULL)
 #'
-#' If NULL then the plot is return, but not saved to file.
+#' If NULL then the plot is displayed and can be returned into r environment but is not saved to file.
 #' @param sensors select the names of sensors to be plotted (max 2) see `names(mc_data_sensors)`
 #' @param scale_coeff scale coefficient for secondary axis (default NULL)
 #' @param png_width width for png output (default 1900)
@@ -371,6 +397,14 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @param start_crop POSIXct datetime for crop data (default NULL)
 #' @param end_crop POSIXct datetime for crop data (default NULL)
 #' @return ggplot2 object
+#' @examples
+#' \dontrun{
+#' tms.plot <- mc_filter(tms,localities = "A6W79")
+#' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_TMSmoisture"))
+#' p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
+#' p <- p+ggplot2::xlab("week")
+#' p <- p+ggplot2::scale_color_manual(values=c("hotpink","pink", "darkblue"),name=NULL)
+#' }
 #' @export
 mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          scale_coeff=NULL,

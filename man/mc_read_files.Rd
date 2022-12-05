@@ -19,18 +19,21 @@ mc_read_files(
 \arguments{
 \item{paths}{vector of paths to files or directories}
 
-\item{dataformat_name}{data format of logger one of \code{names(mc_data_formats)} see \code{names(mc_data_formats)}}
+\item{dataformat_name}{data format of logger one of \code{names(mc_data_formats)}}
 
-\item{logger_type}{type of logger (default NA), can be one of pre-defined see \code{\link[=mc_read_data]{mc_read_data()}} or any custom string}
+\item{logger_type}{type of logger (default NA), can be one of
+pre-defined see \code{\link[=mc_read_data]{mc_read_data()}} or any custom string}
 
 \item{recursive}{recursive search in sub-directories (default TRUE)}
 
-\item{date_format}{format of date in your hobo files e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA). Required for HOBO files.
-For TMS files ignored, there is fix date format. see \link{mc_data_formats}}
+\item{date_format}{format of date in your hobo files e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA).
+Required for HOBO files. For TMS files ignored, there is known, stable date format. see \link{mc_data_formats}}
 
-\item{tz_offset}{timezone offset in minutes; It is required fill only for non-UTC data (custom settings in HOBO). Not used in TMS (default NA)}
+\item{tz_offset}{timezone offset in minutes; It is required only for non-UTC data
+(custom settings in HOBO). Not used in TMS (default NA)}
 
-\item{step}{time step of microclimatic time-series in seconds. When provided, then is used in \link{mc_prep_clean} instead of automatic step detection.
+\item{step}{time step of microclimatic time-series in seconds. When provided, then is used in
+\link{mc_prep_clean} instead of automatic step detection.
 If not provided (NA), is automatically detected in \link{mc_prep_clean}. (default NA)}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
@@ -43,17 +46,17 @@ myClim object in Raw-format see \link{myClim-package}
 \description{
 This function read one or more csv files or directories of identical,
 pre-defined logger type (format) see \link{mc_DataFormat} and \link{mc_data_formats}.
-This function does not allow you to provide additional locality or sensor metadata.
-Metadata can be load through \code{\link[=mc_read_data]{mc_read_data()}} or
+This function does not support loading locality or sensor metadata while reading.
+Metadata can be loaded through \code{\link[=mc_read_data]{mc_read_data()}} or
 can be provided later with function \code{\link[=mc_prep_meta]{mc_prep_meta()}}
 }
 \details{
 If file is not in expected format, then file is skipped and warning printed in console.
-CSV files (loggers raw data) are in resulting myClim object placed to separate localities with empty metadata.
-Localities are named after serial_number of logger.
+CSV files (loggers raw data) are in resulting myClim object placed to separate
+localities with empty metadata. Localities are named after serial_number of logger.
 Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
 By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
-holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks.
+holes in time-series, duplicated records or records in wrong order.
 }
 \examples{
 \dontrun{
@@ -61,5 +64,5 @@ tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "exampl
 }
 }
 \seealso{
-\link{mc_DataFormat}
+\link{mc_DataFormat}, \code{\link[=mc_prep_celan]{mc_prep_celan()}}
 }

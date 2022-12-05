@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{mc_prep_fillNA}
 \alias{mc_prep_fillNA}
-\title{Fill NA - approximate§§§}
+\title{Fill NA}
 \usage{
 mc_prep_fillNA(
   data,
@@ -27,5 +27,8 @@ mc_prep_fillNA(
 myClim object with filled NA values
 }
 \description{
-This function approximate NA values. Linear method is implemented by \link[zoo:na.approx]{zoo::na.approx} function.
+This function approximate NA (missing) values. It was designed to fill
+only small gaps in microclimatic time-series therefore, the default maximum
+length of the gap is 5 missing records and longer gaps are not filled
+Only linear method is implemented from \link[zoo:na.approx]{zoo::na.approx} function.
 }

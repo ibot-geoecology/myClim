@@ -14,11 +14,11 @@ mc_read_wide(
 }
 \arguments{
 \item{data_table}{data.frame with first column of POSIXct time format UTC timezone,
-followed by columns with microclimatic records. See details.
+followed by columns with (micro)climatic records. See details.
 
 Columns:
 \itemize{
-\item datetime column - POSIXct and UTC timezone is required
+\item datetime column - POSIXct in UTC timezone is required
 \item Name of locality\link{1} - values
 \item ...
 \item Name of locality\link{n} - values
@@ -36,17 +36,18 @@ Columns:
 myClim object in Raw-format
 }
 \description{
-This is universal function designed to read time series and values
-from wide data.frame to myClim object.
+This is universal function designed to read time-series and values
+from wide data.frame to myClim object. Useful for data not coming from
+supported microclimatic loggers. E.g. meteorological station data.
 }
 \details{
 The first column of input data.frame must be datetime column in POSIXct time format UTC timezone.
-Following columns represents localities. Column names are the localities.
-All values in wide data.frame represents the same sensor, e.g. air temperature. If you wish to
+Following columns represents localities. Column names are the localities names.
+All values in wide data.frame represents the same sensor type, e.g. air temperature. If you wish to
 read multiple sensors use \link{mc_read_long} or use \link{mc_read_wide} multiple times separately
-for each sensor and that merge myClim objects with \link{mc_prep_merge}
+for each sensor type and that merge myClim objects with \link{mc_prep_merge}
 By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
-holes in time-series, duplicit records or records in wrong order, it also round time to nice breaks.
+holes in time-series, duplicated records or records in wrong order.
 }
 \seealso{
 \link{mc_read_long}

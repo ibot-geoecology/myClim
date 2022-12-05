@@ -6,7 +6,7 @@
 \alias{mc_Sensor}
 \title{Class for sensor definition}
 \description{
-Sensor definitions intslevesl are stored in \link{mc_data_sensors}.
+Sensor definitions are stored in \link{mc_data_sensors}.
 }
 \section{Slots}{
 

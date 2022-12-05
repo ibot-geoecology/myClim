@@ -2,7 +2,7 @@
 % Please edit documentation in R/env.R
 \name{mc_env_vpd}
 \alias{mc_env_vpd}
-\title{vapor pressure deficit environment variables}
+\title{Standardised myClim vapor pressure deficit variables}
 \usage{
 mc_env_vpd(
   data,
@@ -24,21 +24,30 @@ mc_env_vpd(
 
 \item{custom_end}{end date for custom period see \code{\link[=mc_agg]{mc_agg()}} (default NULL)}
 
-\item{min_coverage}{§parameter for mc_agg see \code{\link[=mc_agg]{mc_agg()}} (default 1)§}
+\item{min_coverage}{the threshold specifying how many missing values can you accept within aggregation period. see \code{\link[=mc_agg]{mc_agg()}} value from range 0-1 (default 1)}
 }
 \value{
-table in long format with environment variables
+table in long format with standardised myClim variables
 }
 \description{
-Function ...
+The wrapper function returning 2 standardised ecologically relevant myClim variables
+derived from vapor pressure deficit. The mc_env_vpd function needs time-series of
+vapor pressure deficit measurements as input. Therefore, VPD must be first calculated
+from temperature and air humidity sensors see \code{\link[=mc_calc_vpd]{mc_calc_vpd()}}
 }
 \details{
+This function was designed for time-series of step shorter than one
+day and will not work with coarser data. The mc_env_vpd function
+first aggregates time-series to daily time-step
+and then aggregates to the final time-step set in \code{period} parameter.
+In contrast with other myClim functions
+returning myClim objects this wrapper function return long table.
+Variables are named based on sensor name, height, and function e.g.,
+(VPD.air_150_cm.mean, VPD.air_150_cm.max95p)
+
+Standardised myClim vapor pressure deficit variables:
 \itemize{
-\item used all VPD sensors
-\item functions
-\itemize{
-\item mean: mean of daily mean
-\item max95p: ninety-fifth percentile of daily maximum
-}
+\item VPD.mean: Mean vapor pressure deficit = mean of daily mean VPD
+\item VPD.max95p: Maximum vapor pressure deficit = 95th percentile of daily maximum VPD
 }
 }

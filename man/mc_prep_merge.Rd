@@ -13,17 +13,18 @@ mc_prep_merge(data_items)
 merged myClim object in the same format as input objects
 }
 \description{
-This function is designed to merge myClim objects into one.
+This function is designed to merge more existing myClim objects into one.
 }
 \details{
-This function works only when the input myClim objects have the same format (Raw-format, Agg-format) and the same time step.
-It is required same step in Agg-format data.
+This function works only when the input myClim objects have the same format
+(Raw-format, Agg-format) It is not possible to merge Raw wit Agg format.
+Identical time-step is required for Agg-format data.
 
-When the two merged myClim objects in Raw-format contains locality with same names (locality_id),
+When the merged myClim objects in Raw-format contains locality with same names (locality_id),
 than list of loggers are merged on the locality. Sensors with the same name does not matter here.
-Loggers with the same name are allowed in the Raw-format.
+Loggers with the same name within the locality are allowed in the Raw-format.
 
-When the two merged myClim objects in Agg-format contains locality with same names (locality_id).
+When the merged myClim objects in Agg-format contains locality with same names (locality_id).
 than the sensors are merged on the locality. Sensors with same names are renamed.
 }
 \examples{

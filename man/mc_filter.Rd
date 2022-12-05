@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter.R
 \name{mc_filter}
 \alias{mc_filter}
-\title{Filter data}
+\title{Filter data from myClim object}
 \usage{
 mc_filter(
   data,
@@ -19,19 +19,24 @@ mc_filter(
 
 \item{sensors}{sensor_ids for filtering data; if NULL then do nothing see \code{names(mc_data_sensors)}}
 
-\item{reverse}{\itemize{
-\item if TRUE then filtered discard else keeped (default FALSE)
-}}
+\item{reverse}{if TRUE then input localities and/or sensors are excluded (default FALSE)}
 
-\item{stop_if_empty}{\itemize{
-\item if TRUE then error for empty output (default TRUE)
-}}
+\item{stop_if_empty}{if TRUE then error for empty output (default TRUE)}
 }
 \value{
 filtered myClim object
 }
 \description{
-This function filter data by localities and sensors
+This function filter data by localities and sensors.
+}
+\details{
+In default settings it returns the object containing input sensors / localities.
+It is possible to filter selected sensors from all localities, selected
+localities with all sensors or combine both.
+
+When \code{reverse = TRUE} then
+resulting myClim object contains all localities and sensors as input except
+those you listed in parameters \verb{localities, sensors}
 }
 \examples{
 mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))

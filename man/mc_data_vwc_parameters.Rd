@@ -11,7 +11,7 @@ An object of class \code{data.frame} with 13 rows and 9 columns.
 mc_data_vwc_parameters
 }
 \description{
-Data frame hosting the coefficients enable the conversion of TMS raw moisture data to
+Data frame hosting the coefficients for the conversion of TMS raw moisture units to
 volumetric warer content. The coefficients come from laboratory calibration for several
 soil types. For the best performance you should specify the soil type in case you know it
 and in case it could be approximated to the available calibration e.g sand, loam, loamy sand....
@@ -30,5 +30,13 @@ data.frame with columns:
 \item sand
 \item ref
 }
+}
+\references{
+Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:
+A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
+https://doi.org/10.1016/j.agrformet.2018.12.018
+
+Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil
+moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 }
 \keyword{datasets}

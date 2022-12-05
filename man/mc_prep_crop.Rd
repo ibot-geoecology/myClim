@@ -13,7 +13,7 @@ mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
 
 \item{end}{POSIXct datetime in UTC; is optional}
 
-\item{end_included}{if TRUE then  end datetime is included (default TRUE)}
+\item{end_included}{if TRUE then end datetime is included (default TRUE)}
 }
 \value{
 cropped data in the same myClim format as input.
@@ -22,7 +22,9 @@ cropped data in the same myClim format as input.
 This function crop data by datetime
 }
 \details{
-Function is able to crop data from start and end together but also only from start and end left as is or vice versa.
+Function is able to crop data from start to end but works also
+with only start and only end. When only start provided, then crop only start and
+do not touch the end and vice versa.
 }
 \examples{
 cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))

@@ -16,23 +16,30 @@ myClim object with joined loggers.
 }
 \description{
 Function join time-series from repeated download on the same locality.
-If time-series overlaps and values are different,
-then user interactively select which source logger to use.
-Plot with conflict interval is shown during interactive joining.
+If time-series overlaps and values are identical or first and last
+records fit, then automatically joined without any user action.
+If values are different on overlap, then user interactively selects
+which source logger to use.
+Description of conflict and interactive line plots with conflict intervals
+are shown during joining of each logger one-by-one.
 }
 \details{
 Joining is semi-automatic pairwise process.
-In case the end of older and start of the newer fits
-myClim is sequentially joining the oldest logger file with the newer.
-In case the time series overlap and values on the overlap are not identical,
-user interactively selects which time series to us on the
-plot with conflict interval.
+In case the end of older and start of the newer time-series fits
+myClim is sequentially adding the newer time-series to the older without
+any user action. In case the time series overlap and values on the
+overlap are not identical, user interactively selects which
+time series to use or type in the specific datetime where to trim
+older time-series and continue newer. To support joining interactive lines
+and text description of conflict time-series are shown.
+User can zoom in/out the plot and with mouse identify
+specific datetime where to trim older series and continue newer.
 
 Loggers with multiple sensors are joined base on one or more selected sensors.
 See parameter \code{comp_sensors}.
 
-Name of result sensor is used from logger with older data. If \code{serial_number}
-is not equal while joining loggers, then the result \code{serial_number} is \code{NA}.
-Clean info is changed to \code{NA} except step. If  not calibrated sensor is being
-joined with calibrated one, then calibration information must be empty in not calibrated sensor.
+Name of resulting joined sensor is used from logger with the oldest data. If \code{serial_number}
+is not equal while joining loggers, then the resulting \code{serial_number} is \code{NA}.
+Clean info is changed to \code{NA} except step. In case you are joining not calibrated
+sensor with calibrated one, then calibration information must be empty in not calibrated sensor.
 }

@@ -15,17 +15,21 @@ mc_prep_meta_sensor(
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{values}{named list with metadata values; names of items are sensor_names e.g. for changing sensor height use \code{list(TMS_T1="soil 8 cm")}}
+\item{values}{named list with metadata values; names of items are sensor_names e.g.
+for changing sensor height use \code{list(TMS_T1="soil 8 cm")}}
 
-\item{param_name}{name of the sensor metadata parameter you want to change; You can change \code{name} and \code{height} of sensor.}
+\item{param_name}{name of the sensor metadata parameter you want to change;
+You can change \code{name} and \code{height} of sensor.}
 
-\item{localities}{optional filter; vector of \code{locality_id} where to change sensor metadata; if NULL than all localities (default NULL)}
+\item{localities}{optional filter; vector of \code{locality_id}
+where to change sensor metadata; if NULL than all localities (default NULL)}
 
-\item{logger_types}{optional filter; vector of \code{logger_type} where to change metadata; if NULL than all logger types (default NULL);
+\item{logger_types}{optional filter; vector of \code{logger_type}
+where to change metadata; if NULL than all logger types (default NULL);
 \code{logger_type}is useful only for Raw-format of myClim having the level of logger see \link{myClim-package}}
 }
 \value{
-myClim object in the same format as input, with updated metadata
+myClim object in the same format as input, with updated sensor metadata
 }
 \description{
 This function allows you to modify sensor metadata including sensor name. See \link{mc_SensorMetadata}

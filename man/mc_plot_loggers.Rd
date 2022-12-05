@@ -15,7 +15,7 @@ mc_plot_loggers(
 \arguments{
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
-\item{directory}{output directory}
+\item{directory}{path to output directory}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
@@ -24,8 +24,10 @@ mc_plot_loggers(
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
 }
 \description{
-Function save separate file for the loggers to the directory. Only Raw-format supported.
-For Agg-format use \code{\link[=mc_plot_line]{mc_plot_line()}}
+Function save separate files (*.png) per the loggers to the directory.
+Only Raw-format supported, Agg-format not supported.
+For Agg-format use \code{\link[=mc_plot_line]{mc_plot_line()}}. Function was primary designed
+for Tomst  TMS loggers for fast, and easy data visualization.
 }
 \examples{
 \dontrun{mc_plot_loggers(mc_data_example_clean, "Figures")}

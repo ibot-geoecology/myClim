@@ -12,8 +12,8 @@ mc_data_heights
 }
 \description{
 This table is used to set the default heights in metadata of sensors based on logger type.
-The defaults were set based on the most common uses in community,
-defaults can overwrite be user. see \link{mc_prep_meta_sensor}
+The defaults were set based on the most common uses,
+defaults can be overwrite be user. see \link{mc_prep_meta_sensor}
 }
 \details{
 data.frame with columns:
@@ -22,6 +22,23 @@ data.frame with columns:
 \item sensor_name
 \item height - character representation of height
 \item suffix - suffix for sensor_name. If suffix is NA, then sensor_name is not modified.
+}
+
+Default heights are:
+\itemize{
+\item TS_T = air 200 cm
+\item TMS_T1 = soil 8 cm
+\item TMS_T2 = air 2 cm
+\item TMS_T3 = air 15 cm
+\item TMS_TMSmoisture = soil 0-15 cm
+\item DEND_T = 130 cm
+\item DEND_TOMSTdendro = 130 cm
+\item HOBO_T_C = air 150 cm
+\item HOBO_RH = air 150 cm
+\item TMS_T1 = soil 40 cm
+\item TMS_T2 = soil 30 cm
+\item TMS_T3 = air 15 cm
+\item TMS_TMSmoisture = soil 30-44 cm
 }
 }
 \seealso{

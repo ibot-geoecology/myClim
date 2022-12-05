@@ -2,7 +2,7 @@
 % Please edit documentation in R/env.R
 \name{mc_env_moist}
 \alias{mc_env_moist}
-\title{Moisture environment variables}
+\title{Standardised myClim soil moisture variables}
 \usage{
 mc_env_moist(
   data,
@@ -24,24 +24,31 @@ mc_env_moist(
 
 \item{custom_end}{end date for custom period see \code{\link[=mc_agg]{mc_agg()}} (default NULL)}
 
-\item{min_coverage}{§parameter for mc_agg see \code{\link[=mc_agg]{mc_agg()}} (default 1)§}
+\item{min_coverage}{the threshold specifying how many missing values can you accept within aggregation period. see \code{\link[=mc_agg]{mc_agg()}} value from range 0-1 (default 1)}
 }
 \value{
-table in long format with environment variables
+table in long format with standardised myClim variables
 }
 \description{
-Function ...
+The wrapper function returning 4 standardised ecologically relevant myClim variables
+derived from soil moisture. The mc_env_moist function needs time-series of
+volumetric water content (VWC) measurements as input. Therefore, non-VWC soil
+moisture measurements must be first converted to VWC.
+For Tomst loggers see \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
 }
 \details{
+This function was designed for time-series of step shorter than one
+day and will not work with coarser data. In contrast with other myClim functions
+returning myClim objects this wrapper function return long table.
+Variables are named based on sensor name, height, and function e.g.,
+(VWC.soil_0_15_cm.5p, VWC.soil_0_15_cm.mean)
+
+Standardised myClim soil moisture variables:
 \itemize{
-\item used all VWC sensors
-\item functions
-\itemize{
-\item 5p: fifth percentile
-\item mean: mean
-\item 95p: ninety-fifth percentile
-\item sd: standard deviation
-}
+\item VWC.5p: Minimum soil moisture = 5th percentile of VWC values
+\item VWC.mean: Mean soil moisture = mean of VWC values
+\item VWC.95p: Maximum soil moisture = 95th percentile of VWC values
+\item VWC.sd: Standard deviation of VWC measurements
 }
 }
 \examples{

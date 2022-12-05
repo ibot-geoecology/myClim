@@ -2,7 +2,7 @@
 % Please edit documentation in R/reshape.R
 \name{mc_reshape_wide}
 \alias{mc_reshape_wide}
-\title{Wideformat of sensor values}
+\title{Export values to wide table}
 \usage{
 mc_reshape_wide(data, localities = NULL, sensors = NULL)
 }
@@ -24,15 +24,17 @@ data.frame with columns:
 }
 }
 \description{
-This function converts myClim object to data.frame with values of sensor in wide format.
+This function converts myClim object to the R data.frame with values of sensor in wide format.
 }
 \details{
-First columnt of the output data.frame is datetime followed by the
+First column of the output data.frame is datetime followed by the
 columns for every sensor. Name of the column is in format:
 \itemize{
 \item localityid_serialnumber_sensorname for Raw-format
 \item localityid_sensorname for Agg-format
 }
+
+The less complex wide table is returned when exporting single sensor ascross localities.
 }
 \examples{
 example_tms_wideformat <- mc_reshape_wide(mc_data_example_raw, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))

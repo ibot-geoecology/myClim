@@ -2,7 +2,7 @@
 % Please edit documentation in R/reshape.R
 \name{mc_reshape_long}
 \alias{mc_reshape_long}
-\title{Long format of sensor values}
+\title{Export values to long table}
 \usage{
 mc_reshape_long(data, localities = NULL, sensors = NULL)
 }
@@ -28,7 +28,7 @@ columns:
 }
 }
 \description{
-This function converts myClim object to long data.frame with sensor records.
+This function converts myClim object to long R data.frame.
 }
 \examples{
 head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)

@@ -18,9 +18,9 @@ data.frame with columns:
 \item end_date  - date of the last record on the logger
 \item step - detected time step in seconds of the logger measurements.
 \item count_duplicits - number of duplicated records (identical time and value)
-\item count_missed - number of missing records (logger outage in time it should record)
+\item count_missed - number of missing records (logger outage in time when it should record)
 \item count_disordered - number of records incorrectly ordered in time (newer followed by older)
-\item rounded - T/F indication whether myClim automatically rounded time series to the closes half (06, 12) e.g. 13:07 -> 13:00
+\item rounded - T/F indication whether myClim automatically rounded time series minutes to the closes half (HH:00, HH:30) e.g. 13:07 -> 13:00
 }
 }
 \description{

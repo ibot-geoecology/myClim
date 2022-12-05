@@ -50,9 +50,9 @@ mc_info_count <- function(data) {
 #' * end_date  - date of the last record on the logger
 #' * step - detected time step in seconds of the logger measurements.
 #' * count_duplicits - number of duplicated records (identical time and value)
-#' * count_missed - number of missing records (logger outage in time it should record)
+#' * count_missed - number of missing records (logger outage in time when it should record)
 #' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
-#' * rounded - T/F indication whether myClim automatically rounded time series to the closes half (06, 12) e.g. 13:07 -> 13:00 
+#' * rounded - T/F indication whether myClim automatically rounded time series minutes to the closes half (HH:00, HH:30) e.g. 13:07 -> 13:00 
 #' @seealso [myClim::mc_prep_clean()]
 #' @export
 mc_info_clean <- function(data) {
@@ -91,10 +91,10 @@ mc_info_clean <- function(data) {
 #'
 #' @template param_myClim_object
 #' @return data.frame with columns:
-#' * locality_id 
-#' * serial_number
-#' * sensor_id
-#' * sensor_name
+#' * locality_id - when provided by user then locality ID, when not provided identical with serial number
+#' * serial_number - serial number of logger when provided or automatically detected from file name or header
+#' * sensor_id - original sensor id (e.g.,"GDD", "HOBO_T_C" ,"TMS_T1", "TMS_T2")
+#' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_C_mean" ,"TMS_T1_max", "my_sensor01")
 #' * start_date - the oldest record on the sensor  
 #' * end_date - the newest record on the sensor
 #' * step - time step of records series (seconds)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/env.R
 \name{mc_env_temp}
 \alias{mc_env_temp}
-\title{Tempereature environment variables}
+\title{Standardised myClim temperature variables}
 \usage{
 mc_env_temp(
   data,
@@ -26,31 +26,41 @@ mc_env_temp(
 
 \item{custom_end}{end date for custom period see \code{\link[=mc_agg]{mc_agg()}} (default NULL)}
 
-\item{min_coverage}{§parameter for mc_agg see \code{\link[=mc_agg]{mc_agg()}} (default 1)§}
+\item{min_coverage}{the threshold specifying how many missing values can you accept within aggregation period. see \code{\link[=mc_agg]{mc_agg()}} value from range 0-1 (default 1)}
 
-\item{gdd_t_base}{base temeprature for Growing degree days \code{\link[=mc_calc_gdd]{mc_calc_gdd()}} (default 5)}
+\item{gdd_t_base}{base temperature for Growing Degree Days \code{\link[=mc_calc_gdd]{mc_calc_gdd()}} (default 5)}
 
-\item{fdd_t_base}{base temeprature for freezing degree days \code{\link[=mc_calc_fdd]{mc_calc_fdd()}} (default 0)}
+\item{fdd_t_base}{base temperature for Freezing Degree Days \code{\link[=mc_calc_fdd]{mc_calc_fdd()}} (default 0)}
 }
 \value{
-table in long format with environment variables
+table in long format with standardised myClim variables
 }
 \description{
-Function ...
+The wrapper function returning 7 standardised ecologically relevant myClim variables
+derived from temperature.
 }
 \details{
+This function was designed for time-series of step shorter than one
+day and will not work with coarser data. It automatically use all
+available sensors in myClim object and returns all possible variables based
+on sensor type and measurement height/depth. In contrast with other myClim functions
+returning myClim objects this wrapper function return long table.
+The mc_env_temp function first aggregates time-series to daily time-step
+and then aggregates to the final time-step set in \code{period} parameter.
+Because freezing and growing degree days are always aggregated with sum function,
+these two variables are not first aggregated to the daily time-steps.
+Variables are named based on sensor name, height, and function e.g.,
+(T.air_15_cm.max95p, T.air_15_cm.drange)
+
+Standardised myClim temperature variables:
 \itemize{
-\item used all temperature sensors
-\item functions
-\itemize{
-\item min5p: fifth percentile of daily minimum
-\item mean: mean of daily mean
-\item max95p: ninety-fifth percentile of daily maximum
-\item drange: mean of daily range
-\item gdd{base}: growing degree days with base from parameter \code{gdd_t_base}
-\item fdd{base}: freezing degree days with base from parameter \code{fdd_t_base}
-\item frostdays: the number of days in which some temerature value was lower than parameter \code{fdd_t_base}
-}
+\item min5p: Minimum temperature = 5th percentile of daily minimum temperatures
+\item mean: Mean temperature = mean of daily mean temperatures
+\item max95p: Maximum temperature = 95th percentile of daily maximum temperatures
+\item drange: Temperature range = mean of daily temperature range (i.e., difference of daily minima and maxima)
+\item GDD{5}: Growing degree days = sum of growing degree days above defined base temperature (default 5°C) \code{gdd_t_base}
+\item FDD{0}: Freezing degree days = sum of freezing degree days below defined base temperature (default 0°C) \code{fdd_t_base}
+\item frostdays: Frost days = number of days with frost (daily minimum < 0°C) \code{fdd_t_base}
 }
 }
 \examples{

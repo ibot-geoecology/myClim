@@ -4,16 +4,16 @@
 \name{mc_MainMetadataAgg-class}
 \alias{mc_MainMetadataAgg-class}
 \alias{mc_MainMetadataAgg}
-\title{Class for myClim object metadata in Raw-format}
+\title{Class for myClim object metadata in Agg-format}
 \description{
-Class for myClim object metadata in Raw-format
+Class for myClim object metadata in Agg-format
 }
 \section{Slots}{
 
 \describe{
-\item{\code{version}}{§of the myClim packege in which was created§}
+\item{\code{version}}{the version of the myClim package in which the object was created}
 
-\item{\code{format_type}}{§type of format (raw, agg)§}
+\item{\code{format_type}}{type of format (Raw-format, Agg-format)}
 
 \item{\code{step}}{time step of data in seconds}
 

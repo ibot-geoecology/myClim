@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_data_example_raw}
 \alias{mc_data_example_raw}
-\title{Example data in Raw-format. Data aren't cleaned.}
+\title{Example data in Raw-format}
 \format{
 An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 }
@@ -11,6 +11,16 @@ An object of class \code{myClimList} (inherits from \code{list}) of length 2.
 mc_data_example_raw
 }
 \description{
-Example data in Raw-format. Data aren't cleaned.
+Raw data, not cleaned. Three example localities situated
+in Saxon Switzerland National Park.
+myClim object has metadata and covers time period from 2020-10 to 2021-02.
+
+Data includes time-series from 4 loggers:
+\itemize{
+\item Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture")
+\item Tomst Thermologger with 1 sensor ("TS_T)
+\item Tomst Point Dendrometer with 2 sensors ("DEND_T", "DEND_TOMSTdendro")
+\item HOBO U23 with 2 sensors ("HOBO_T_C", "HOBO_RH")
+}
 }
 \keyword{datasets}

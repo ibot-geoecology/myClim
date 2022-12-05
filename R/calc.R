@@ -1,7 +1,7 @@
-.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {item$metadata@locality_id} doesn't contains sensor {sensor}. It is skipped."
-.calc_const_MESSAGE_LOGGER_NOT_CONTAINS_SENSOR <- "Loger {item$metadata@serial_number} doesn't contains sensor {sensor}. It is skipped."
-.calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@period} in data is too long. Maximal step is day."
-.calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY <- "Step in logger {logger$metadata@serial_number} is too long. Maximal step is day. It is skipped."
+.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {item$metadata@locality_id} doesn't contains any sensor {sensor}. It is skipped."
+.calc_const_MESSAGE_LOGGER_NOT_CONTAINS_SENSOR <- "Loger {item$metadata@serial_number} doesn't contains any sensor {sensor}. It is skipped."
+.calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@period} in data is too long. Maximal allowed step is day."
+.calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY <- "Step in logger {logger$metadata@serial_number} is too long. Maximal allowed step is day. It is skipped."
 .calc_const_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
 .calc_const_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
 .calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
@@ -11,28 +11,29 @@
 #' Snow detection from temperature
 #'
 #' @description
-#' Function detects snow cover from temperature time-series.
+#' This function creates new virtual sensor on locality within myClim data object.
+#' Virtual sensor hosts values of snow cover presence/absence detected from temperature time-series.
 #'
 #' @details
 #' Function detects snow cover from temperature time-series. Temperature sensor is considered as covered by snow
-#' when the maximal temperature in the preceding or subsequent time-window (specified by 'days' param)
-#' does not exceed specific 'tmax' threshold value (default 1.25°C) and the temperature range remain below specified
-#' 'range' threshold (default 1°C). This function rely on insulating effect of a thick layer of snow,
+#' when the maximal temperature in the preceding or subsequent time-window (specified by `days` param)
+#' does not exceed specific `tmax` threshold value (default 1.25°C) and the temperature range remain below specified
+#' `range` threshold (default 1°C). This function rely on insulating effect of a of snow layer,
 #' significantly reducing diurnal temperature variation and restricting the maximal temperature near the ground
-#' close to freezing point. Temperature sensor near the ground ('TMS_T2') is default choice for snow-cover detection.
+#' close to freezing point. Temperature sensor near the ground (`TMS_T2`) is default choice for snow-cover detection from Tomst TMS4 loggers.
 #' Snow detection with default values accurately detects snow of depth > 15cm (unpublished data).
 #' For detection of thin snow, range parameter should be set to 3-4 °C.
-#' The function returns vector of snow cover with same time-step as input data. To get number of days with snow cover
-#' and more info, apply [mc_calc_snow_agg].
+#' The function returns vector of snow cover (TRUE/FLASE) with same time-step as input data. To get number of days with snow cover
+#' and more snow summary characteristics use [mc_calc_snow_agg] after snow detection.
 #'
 #' @template param_myClim_object_cleaned
 #' @param sensor name of temperature sensor used for snow estimation. (e.g. TMS_T2)
 #' @param output_sensor name of output snow sensor (default "snow")
-#' @param localities list of locality_ids where snow sill be calculated; if NULL then all (default NULL)
-#' @param range maximal temperature range threshold for snow-covered sensor (default 1°C)
-#' @param tmax maximal temperature threshold for snow-covered sensor  (default 1.25°C)
+#' @param localities list of locality_ids where snow will be calculated; if NULL then all (default NULL)
+#' @param range maximum temperature range threshold for snow-covered sensor (default 1°C)
+#' @param tmax maximum temperature threshold for snow-covered sensor  (default 1.25°C)
 #' @param days number of days to be used for moving-window for snow detection algorithm (default 3 days)
-#' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence.
+#' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence/absence (TRUE/FALSE).
 #' @export
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
@@ -144,24 +145,27 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' @description
 #' This function works with the virtual snow sensor of TRUE/FALSE 
 #' which is the output of [myClim::mc_calc_snow()]. So, before calling 
-#' `mc_calc_snow_agg` you need to calculate or import TRUE/FALSE snow detection sensor.  
-#' `mc_calc_snow_agg`returns the summary table of snow sensor 
-#' (e.g number of days with snow cover, the longest continual snow period...). 
-#' The snow summary is returned for whole date range provided. 
+#' `mc_calc_snow_agg` you need to calculate or import `mc_read_`
+#'  TRUE/FALSE snow sensor.
+#' `mc_calc_snow_agg` returns the summary table of snow sensor
+#' (e.g number of days with snow cover, first and last date of continual
+#' snow cover longer than input period).
+#' The snow summary is returned for whole date range provided. And is returned as
+#' new data.frame in contrast with other mc_calc functions returning virtual sensors.
 #'
 #' @details
-#' Primary designed for virtual snow sensor created by [myClim::mc_calc_snow()], 
+#' Primary designed for virtual snow sensor calculated by [myClim::mc_calc_snow()],
 #' but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor` 
-#' on the locality missing, then locality is skipped.
+#' on the locality is missing, then locality is skipped.
 #'
 #' @param data cleaned myClim object see [myClim-package] with TRUE/FALSE snow sensor see [myClim::mc_calc_snow()]
 #' @param snow_sensor name of snow sensor containing TRUE/FALS snow detection, suitable for virtual sensors created by function `mc_calc_snow`; (default "snow")
 #' @param localities optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)
-#' @param period number of days defining the continuous snow cover period of interest (default 3 days)
-#' @param use_utc if set FALSE then time is corrected based on offset provided in locality metadata `tz_offset`, see e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta()]; (default FALSE)
+#' @param period number of days defining the continual snow cover period of interest (default 3 days)
+#' @param use_utc if set FALSE then time is shifted based on offset provided in locality metadata `tz_offset`, see e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta()]; (default FALSE)
 #' @return 
 #' Returns data.frame with columns:
-#' * locality - locality name
+#' * locality - locality id
 #' * snow_days - number of days with snow cover
 #' * first_day - first day with snow
 #' * last_day - last day with snow 
@@ -233,50 +237,59 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
     datetimes + (tz_offset * 60)
 }
 
-#' Converting soil moisture from raw TMS units to volumetric water content
+#' Calibrating TMS soil moisture from raw TMS to VWC
 #'
 #' @description
 #' This function creates new virtual sensor on locality within myClim data object.
-#' Function converts the soil moisture from raw TMS units (scaled TDT signal) to volumetric water content. 
+#' Function converts the soil moisture from raw TMS units (scaled TDT signal)
+#' to volumetric water content (VWC).
 #'
 #' @details
-#'This function is suitable for TMS loggers measuring soil moisture in raw TDT units (TMS units).
-#' Raw TDT units represents inverted and scaled (1-4095) number of high frequency-shaped electromagnetic
-#' pulses (ca 2.5 GHz) sent through a ca 30 cm long circuit within a 640-microsecond time window.
-#' For more details see (Wild et al. 2019). Pulses counted is directly related to the soil moisture content,
-#' with higher soil moisture. Therefore, based on experimental calibration curves, it is possible to directly
-#' convert to standardized volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
+#' This function is suitable for Tomst TMS loggers measuring soil moisture in raw TDT
+#' units (TMS units). Raw TDT units represents inverted and scaled (1-4095)
+#' number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz)
+#' sent through a ca 30 cm long circuit within a 640-microsecond time window.
+#' For more details see (Wild et al. 2019). Pulse count is directly related to
+#' the soil moisture content. Therefore, based on experimental calibration
+#' curves, it is possible to directly convert TMS units to standardized
+#' volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
 #'
-#' The function uses experimentally derived calibration curves under reference temperatures for several soil types.
-#' For the volumetric water content conversion the reference temperature is corrected with the actual soil temperature
-#' using TMS_T1 soil temperature sensor records. As the calibration curves were derived for several soil types,
-#' in case user know specific soil type, where the logger was measuring, then it is possible to chose the closest
+#' The function uses experimentally derived calibration curves under
+#' reference temperatures for several soil types. For the volumetric
+#' water content conversion the reference temperature is corrected with the
+#' actual soil temperature using TMS_T1 soil temperature sensor records.
+#' As the calibration curves were derived for several soil types,
+#' in case user know specific soil type, where the logger was measuring,
+#' then it is strongly recommended to chose the closest
 #' existing calibration curve for specific soil type instead of default "universal".
-#' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
-#' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
+#' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A,
+#' sandy loam B, loam, silt loam, peat, water, #' universal, sand TMS1,
+#' loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 #' For full table of function parameters see [mc_data_vwc_parameters]
 #' 
-#' The function by default replace the moisture records while soil is frozen with NA, because the soil
-#' moisture sensor was not designed to measure in frozen soils and the returned records are thus not comparable
-#' with values from non frozen soil.  
+#' The function by default replace the moisture records in frozen soils with NA,
+#' because the soil moisture sensor was not designed to measure in
+#' frozen soils and the returned records are thus not comparable
+#' with values from non-frozen soil.
 #'
 #' @template param_myClim_object_cleaned
-#' @param moist_sensor name of soil moisture sensor to be converted from raw to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`
-#'
-#' Soil moisture sensor must be in TMSmoisture physical.
-#' @param temp_sensor name of soil temperature sensor (default "TMS_T1") see `names(mc_data_sensors)`
-#'
-#' Temperature sensor must be in T_C physical.
-#' @param output_sensor name of new snow sensor (default "VWC_moisture")
-#' @param soiltype value from mc_data_vwc_parameters in column soiltype (default "universal")
-#'
-#' Parameters a, b and c are used in calculation.
+#' @param moist_sensor name of soil moisture sensor to be converted from TMS
+#' units to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`.
+#' Soil moisture sensor must be in TMSmoisture physical see `names(mc_data_physical)`.
+#' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
+#' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
+#' @param output_sensor name of new snow virtual sensor with VWC values (default "VWC_moisture")
+#' @param soiltype value from [mc_data_vwc_parameters] in column soiltype
+#' (default "universal").  Parameters a, b and c are used in calculation.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @param ref_t (default 24)
-#' @param acor_t (default 1.91132689118083) correction temperature while sensor on the air see [myClim::mc_calib_moisture()]
-#' @param wcor_t (default 0.64108) correction temperature while sensor in the water [myClim::mc_calib_moisture()]
-#' @param frozen2NA if TRUE then those moisture records are set to NA when soil temperature is below 0 (default TRUE)
-#' @return myClim object same as input but with added VWC moisture sensor
+#' @param acor_t (default 1.91132689118083) correction temperature while
+#' sensor on the air see [myClim::mc_calib_moisture()]
+#' @param wcor_t (default 0.64108) correction temperature while
+#' sensor in the water [myClim::mc_calib_moisture()]
+#' @param frozen2NA if TRUE then those moisture records are set to
+#' NA when soil temperature is below 0 (default TRUE)
+#' @return myClim object same as input but with added virtual VWC moisture sensor
 #' @export
 #' @seealso [mc_data_vwc_parameters]
 #' @references
@@ -388,26 +401,25 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
 #' Growing Degree Days
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object. New virtual sensor 
-#' hosts values of GDD (Growing Degree Days) in Celsius degrees in original time step. see details 
+#' This function creates new virtual sensor on locality within myClim data object. The virtual sensor
+#' with values of GDD (Growing Degree Days) is in Celsius degrees in original time step. see details
 #'
 #' @details
-#' Maximal allowed step length for GDD calculation is day and shorter. Function creates new virtual sensor with
-#' the same time step as input data. I. e. when the time step is shorter than a day (whch is not very intuitive for growing degree **days**) 
-#' than growing degree day is divided into smaller time step but still summing the day. 
-#' For shorter intervals (steps) than the day, the GDD value is the contribution
+#' The allowed time step length for GDD calculation is day and shorter.
+#' Function creates new virtual sensor with the same time step as input data.
+#' For shorter time steps than the day, the GDD value is the contribution
 #' of the interval to the growing degree day.
 #' Be careful while aggregating growing degree days to longer periods
-#' see [myClim::mc_agg()] only meaningful aggregation function is `sum`, but myClim let you apply anything.
+#' see [myClim::mc_agg()] only meaningful aggregation function is `sum`,
+#' but myClim let you apply anything.
 #'
 #' @template param_myClim_object_cleaned
-#' @param sensor name of temperature sensor used fot GDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
-#' @param output_prefix name prefix of new GDD sensor (default "GDD")
-#'
+#' @param sensor name of temperature sensor used for GDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
+#' @param output_prefix name prefix of new GDD sensor (default "GDD" -> "GDD5_TMS_T3")
 #' name of output sensor consists of output_prefix and value t_base e.g. GDD5
-#' @param t_base base temperature for calculation of GDD (default 5)
+#' @param t_base base temperature for calculation of GDD (default 5°C)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @return The same myClim object as input but with added GDD sensor
+#' @return The same myClim object as input but with added virtual GDD sensor
 #' @export
 #' @examples
 #' gdd_data <- mc_calc_gdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
@@ -469,30 +481,30 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Freezing Degree Days
 #'
 #' @description
-#' Function add new virtual sensor with values of FDD Freezing Degree Days.
+#' This function creates new virtual sensor on locality within myClim data object.
+#' The virtual sensor hosts FDD Freezing Degree Days.
 #'
 #' @details
-#' Maximal allowed step length for FDD calculation is day and shorter.
+#' The allowed step length for FDD calculation is day and shorter.
 #' Function creates new virtual sensor with the same time step as input data.
-#' I. e. when the time step is shorter than a day than freezing degree day is divided
-#' into smaller time step but still summing the day. For shorter intervals than the day
-#' the FDD value is the contribution of the interval to the freezing degree day.
+#' For shorter time steps than the day (which is not intuitive for FDD)
+#' the FDD value is the contribution of the time step to the freezing degree day.
 #' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()]
-#' only meaningful aggregation function is `sum`, but user is allowed to apply anything.
+#' only meaningful aggregation function is `sum`, but myClim allow you to apply anything.
 #'
-#' Note that  FDD is always positive number, despite summing freezing event. When you set
+#' Note that  FDD is always positive number, despite summing freezing events. When you set
 #' `t_base=-1` you get the sum of degree days below -1 °C but expressed in positive number
-#' the same as if you set `t_base=1` you get also positive number. Therefore pay attention to
-#' name of output variable which contains `t_base` value. FDD5_TMS_T3 vs FDDminus5_TMS_T3.
+#' if you set `t_base=1` you get also positive number. Therefore pay attention to
+#' name of output variable which contains `t_base` value. FDD1_TMS_T3, t_base=1 vs FDDminus1_TMS_T3, t_base=-1
 #'
 #' @template param_myClim_object_cleaned
-#' @param sensor name of temperature sensor used fot FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
+#' @param sensor name of temperature sensor used for FDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
 #' @param output_prefix name prefix of new FDD sensor (default "FDD")
 #'
-#' name of output sensor consists of output_prefix and value t_base
-#' @param t_base threshold temperaturefor calculation FDD (default 0)
+#' name of output sensor consists of output_prefix and value t_base (FDD0_TMS_T3)
+#' @param t_base threshold temperature for FDD calculation (default 0)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @return The same myClim object as input but with added GDD sensor
+#' @return The same myClim object as input but with added virtual FDD sensor
 #' @export
 #' @examples
 #' fdd_data <- mc_calc_fdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
@@ -508,15 +520,16 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' Cumulative sum
 #'
 #' @description
-#' Function calculate cumulative sum for the values on the sensor and add output as new sensors.
+#' This function creates new virtual sensor on locality within myClim data object.
+#'  The virtual sensor hosts the cumulative sum of the values on the input sensor.
 #' Names of new sensors are original sensor name + `outpus_suffix`.
 #'
 #' @details
-#' If value type of sensor is logical, then output type is integer.
+#' If value type of sensor is logical, then output type is integer. (TRUE, TRUE, FALSE -> 2)
 #'
 #' @template param_myClim_object_cleaned
 #' @param sensors names of sensors where to calculate cumulative sum
-#' @param output_suffix name suffix for new names (default "_cumsum") e.g. TMS_T3_cumsum
+#' @param output_suffix name suffix for virtual sensor names (default "_cumsum") e.g. TMS_T3_cumsum
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return The same myClim object as input but with added cumsum sensors.
 #' @export
@@ -571,10 +584,13 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
     return(data)
 }
 
-#' Converting raw values of TOMST dendrometer to micrometers
+#' Calibrating Tomst dendrometer values to micrometers
 #'
 #' @description
-#' This function convert change in stem size fram raw TOMST units to micrometers.
+#' This function creates new virtual sensor on locality within myClim data object.
+#' The virtual sensor hosts the values of the change in stem size converted from raw
+#' Tomst units to micrometers. Note that newer versions of Tomst Lolly downloading
+#' software can converts raw Tomst units to micrometers.
 #'
 #' @template param_myClim_object_cleaned
 #' @param dendro_sensor name of change in stem size sensor to be converted from raw to micrometers (default "DEND_TOMSTdendro") see `names(mc_data_sensors)`
@@ -622,20 +638,21 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 #' Calculate vapor pressure deficit (in kPa)
 #'
 #' @description
-#' Function calculate vapor pressure deficit (in kPa) from temperature and relative humidity readings using equation
-#' from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981) and adapted by Jones, 2013 (eq. 5.15)
+#' This function creates new virtual sensor on locality within myClim data object.
+#' The virtual sensor hosts the vapor pressure deficit (in kPa) calculated
+#' from temperature and relative air humidity.
+#'
+#' @details
+#' Equation comes from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981)
+#' and adapted by Jones, 2013 (eq. 5.15)
 #' Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
 #'
 #' @template param_myClim_object_cleaned
-#' @param temp_sensor name of temperature sensor
-#'
-#' Temperature sensor must be in T_C physical.
-#' @param rh_sensor name relative humidity sensor
-#'
-#' Temperature sensor must be in RH_perc physical.
-#' @param output_sensor name of new snow sensor (default "VPD")
-#' @param elevation value in meters (default 0)
-#' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
+#' @param temp_sensor name of temperature sensor. Temperature sensor must be in T_C physical.
+#' @param rh_sensor name of relative air humidity sensor. Humidity sensor must be in RH_perc physical.
+#' @param output_sensor name of new virtual VPD sensor (default "VPD")
+#' @param altitude value in meters (default 0)
+#' @param metadata_altitude if TRUE then altitude from metadata of locality is used (default TRUE)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return myClim object same as input but with added VPD sensor
 #' @export

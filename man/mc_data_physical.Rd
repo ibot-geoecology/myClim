@@ -14,22 +14,22 @@ mc_data_physical
 R object of class environment with the definitions of physical elements
 for recording the microclimate e.g. temperature, speed, depth, volumetric water content...
 see \linkS4class{mc_Physical}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
-to add new, unsupported physical here.
+to add new, physical here.
 }
 \seealso{
 \linkS4class{mc_Physical}
 
-Currently supported physical quantities:
+Currently supported physical elements:
 \itemize{
 \item l_cm - length in cm
-\item l_mm - lenght in mm
-\item l_um - lenght in μm
+\item l_mm - length in mm
+\item l_um - length in μm
 \item moisture - moisture in ratio 0-1
-\item RH_perc - Relative humidity in \%
-\item T_C - Temperature in °C
-\item T_F - Temperature in °F
+\item RH_perc - relative humidity in \%
+\item T_C - temperature in °C
+\item T_F - temperature in °F
 \item t_h - time in hours
-\item TMSmoisture - TDT signal from TMS moisture sensor
+\item TMSmoisture - raw TMS moisture sensor units
 \item TOMSTdendro - radius difference in raw units
 \item v - speed in m/s
 }

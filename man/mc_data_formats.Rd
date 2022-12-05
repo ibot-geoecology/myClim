@@ -16,7 +16,8 @@ parse specific microclimatic logger files. In case you would like to add
 new, unsupported logger, this is the place where the reading key is stored.
 }
 \details{
-Package myClim support formats TOMST, TOMST_join and HOBO
+Package myClim support formats TOMST, TOMST_join and HOBO.
+The environment object is stored in \code{./data/mc_data_formats.rda}.
 
 \strong{TOMST}
 
