@@ -75,7 +75,7 @@ $localities | locality[1]                                                       
             | $metadata | mc_LocalityMetadata - class |                                     |
             |           +-----------------------------+                                     |
             |           | @locality_id                |                                     |
-            |           | @elevation                   |                                     |
+            |           | @elevation                  |                                     |
             |           | @lat_wgs84                  |                                     |
             |           | @lon_wgs84                  |                                     |
             |           | @tz_offset                  |                                     |
@@ -169,7 +169,7 @@ $localities | locality[1]                                                     |
             | $metadata  | mc_LocalityMetadata - class |                      |
             |            +-----------------------------+                      |
             |            | @locality_id                |                      |
-            |            | @elevation                   |                      |
+            |            | @elevation                  |                      |
             |            | @lat_wgs84                  |                      |
             |            | @lon_wgs84                  |                      |
             |            | @tz_offset                  |                      |

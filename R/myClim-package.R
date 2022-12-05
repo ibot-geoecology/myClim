@@ -71,7 +71,7 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #'             | $metadata | mc_LocalityMetadata - class |                                     |
 #'             |           +-----------------------------+                                     |
 #'             |           | @locality_id                |                                     |
-#'             |           | @elevation                   |                                     |
+#'             |           | @elevation                  |                                     |
 #'             |           | @lat_wgs84                  |                                     |
 #'             |           | @lon_wgs84                  |                                     |
 #'             |           | @tz_offset                  |                                     |
@@ -167,7 +167,7 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #'             | $metadata  | mc_LocalityMetadata - class |                      |
 #'             |            +-----------------------------+                      |
 #'             |            | @locality_id                |                      |
-#'             |            | @elevation                   |                      |
+#'             |            | @elevation                  |                      |
 #'             |            | @lat_wgs84                  |                      |
 #'             |            | @lon_wgs84                  |                      |
 #'             |            | @tz_offset                  |                      |
