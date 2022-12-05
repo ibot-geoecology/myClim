@@ -46,7 +46,8 @@
 #' @return table in long format with standardised myClim variables
 #' @export
 #' @examples
-#' data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
+#' data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"),
+#'                      lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 #' mc_env_temp(data, "month")
 mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1, gdd_t_base=5, fdd_t_base=0) {
     is_agg <- .common_is_agg_format(data)
@@ -63,10 +64,10 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 
 .env_temp_calc_fdd_gdd_and_rename <- function(data, gdd_t_base, fdd_t_base) {
     temp_sensors <- .env_get_sensors_by_physical_or_id(data, physical=.model_const_PHYSICAL_T_C)
-    result <- list(temp_sensors=character(), other_sensors=character())
+    result <- list(temp_sensors=character(), other_sensors=character(), data=data)
     for(temp_sensor in names(temp_sensors$localities)) {
         localities <- temp_sensors$localities[[temp_sensor]]
-        result$data <- mc_calc_gdd(data, temp_sensor, output_prefix=.env_const_GDD, t_base=gdd_t_base, localities=localities)
+        result$data <- mc_calc_gdd(result$data, temp_sensor, output_prefix=.env_const_GDD, t_base=gdd_t_base, localities=localities)
         result$data <- mc_calc_fdd(result$data, temp_sensor, output_prefix=.env_const_FDD, t_base=fdd_t_base, localities=localities)
         height_name <- .agg_get_height_name(temp_sensor, temp_sensors$heights[[temp_sensor]])
         new_name <- paste0(.env_const_T_PREFIX, height_name)
@@ -229,7 +230,8 @@ mc_env_temp <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_en
 #' @return table in long format with standardised myClim variables
 #' @export
 #' @examples
-#' data <- mc_prep_crop(mc_data_example_agg, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
+#' data <- mc_prep_crop(mc_data_example_agg, lubridate::ymd_h("2020-11-01 00"),
+#'                      lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 #' data <- mc_calc_vwc(data, localities=c("A2E32", "A6W79"))
 #' mc_env_moist(data, "month")
 mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end=NULL, min_coverage=1) {
@@ -248,14 +250,14 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 
 .env_moist_rename_sensors <- function(data) {
     moist_sensors <- .env_get_sensors_by_physical_or_id(data, physical=.model_const_PHYSICAL_moisture)
-    result <- list(moist_sensors=character())
+    result <- list(moist_sensors=character(), data=data)
     for(moist_sensor in names(moist_sensors$localities)) {
         height_name <- .agg_get_height_name(moist_sensor, moist_sensors$heights[[moist_sensor]])
         new_name <- paste0(.env_const_VWC_PREFIX, height_name)
         result$moist_sensors <- append(result$moist_sensors, new_name)
         rename_rules <- list()
         rename_rules[[moist_sensor]] <- new_name
-        result$data <- mc_prep_meta_sensor(data, rename_rules, param_name="name")
+        result$data <- mc_prep_meta_sensor(result$data, rename_rules, param_name="name")
     }
     return(result)
 }
@@ -336,14 +338,14 @@ mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end
 
 .env_vpd_rename_sensors <- function(data) {
     vpd_sensors <- .env_get_sensors_by_physical_or_id(data, sensor_id=.model_const_SENSOR_VPD)
-    result <- list(vpd_sensors=character())
+    result <- list(vpd_sensors=character(), data=data)
     for(vpd_sensor in names(vpd_sensors$localities)) {
         height_name <- .agg_get_height_name(vpd_sensor, vpd_sensors$heights[[vpd_sensor]])
         new_name <- paste0(.env_const_VPD_PREFIX, height_name)
         result$vpd_sensors <- append(result$vpd_sensors, new_name)
         rename_rules <- list()
         rename_rules[[vpd_sensor]] <- new_name
-        result$data <- mc_prep_meta_sensor(data, rename_rules, param_name="name")
+        result$data <- mc_prep_meta_sensor(result$data, rename_rules, param_name="name")
     }
     return(result)
 }

@@ -41,7 +41,8 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+#' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv",
+#'                               "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 #' }
 mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, recursive=TRUE, date_format=NA_character_,
                           tz_offset=NA_integer_, step=NA_integer_, clean=TRUE, silent=FALSE) {
@@ -114,7 +115,9 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
-#' \dontrun{tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")}
+#' \dontrun{
+#' tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv",
+#'                            "examples/data/TOMST/localities_table.csv")}
 mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=FALSE) {
     if(is.character(files_table)) {
         source_csv_file <- files_table

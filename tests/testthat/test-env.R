@@ -1,7 +1,6 @@
 source("libtest.R")
 
 test_that("mc_env_temp", {
-    OPRAVIT SENZORY - teď to vrátí jen jeden
     cleaned_data <- mc_read_files("../data/agg-month", dataformat_name="TOMST", silent=T)
     env_temp_table <- mc_env_temp(cleaned_data, "week", min_coverage=0.9)
     expect_equal(nrow(env_temp_table), 119)
@@ -14,6 +13,14 @@ test_that("mc_env_temp", {
     expect_equal(stringr::str_sort(unique(env_temp_table$height)), "air 200 cm")
     env_temp_table <- mc_env_temp(cleaned_data, "week", min_coverage=0.5)
     expect_false(is.na(env_temp_table$value[[1]]))
+})
+
+test_that("mc_env_temp more sensors", {
+    cleaned_data <- mc_read_files("../data/eco-snow", dataformat_name="TOMST", silent=T)
+    env_temp_table <- mc_env_temp(cleaned_data, "week", min_coverage=0.9)
+    expect_true("T.air_15_cm.drange" %in% env_temp_table$sensor_name)
+    expect_true("T.air_2_cm.min5p" %in% env_temp_table$sensor_name)
+    expect_true("T.soil_8_cm.frostdays" %in% env_temp_table$sensor_name)
 })
 
 test_that("mc_env_moist", {

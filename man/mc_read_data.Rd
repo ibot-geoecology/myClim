@@ -61,7 +61,7 @@ This function has two tables as the parameters.
 (i) \code{files_table} with \emph{paths} pointing to raw
 csv logger files, specification of \emph{data format} (logger type) and \emph{locality name}.
 
-(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, altitude...
+(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, elevation...
 }
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table}

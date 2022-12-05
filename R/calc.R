@@ -36,7 +36,8 @@
 #' @return myClim object with added virtual sensor 'snow' (logical) indicating snow presence/absence (TRUE/FALSE).
 #' @export
 #' @examples
-#' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+#' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow",
+#'                      localities = c("A2E32", "A6W79"))
 mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, range=1, tmax=1.25, days=3) {
     is_agg <- .common_is_agg_format(data)
     if(is_agg) {
@@ -174,7 +175,8 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' 
 #' @export
 #' @examples
-#' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+#' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow",
+#'                      localities = c("A2E32", "A6W79"))
 #' mc_calc_snow_agg(data, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=F) {
     data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)

@@ -101,9 +101,12 @@
 #' When fun and period are provided then time step is aggregated based on function.
 #' @export
 #' @examples
-#' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"), "hour", percentiles = 50, min_coverage=0.5)
-#' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"), "day", min_coverage=1)
-#' month_data <- mc_agg(mc_data_example_clean, fun=list(TMS_T3="below5"),period = "month",custom_functions = list(below5=function(x){length(x[x<(-5)])})) 
+#' hour_data <- mc_agg(mc_data_example_clean, #' c("min", "max", "percentile"),
+#'                     "hour", percentiles = 50, min_coverage=0.5)
+#' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"),
+#'                    "day", min_coverage=1)
+#' month_data <- mc_agg(mc_data_example_clean, fun=list(TMS_T3="below5"),period = "month",
+#'                      custom_functions = list(below5=function(x){length(x[x<(-5)])}))
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, min_coverage=1,
                    custom_start=NULL, custom_end=NULL, custom_functions=NULL) {
     old_lubridate_week_start <- getOption("lubridate.week.start")
