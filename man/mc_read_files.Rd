@@ -48,21 +48,22 @@ This function read one or more csv files or directories of identical,
 pre-defined logger type (format) see \link{mc_DataFormat} and \link{mc_data_formats}.
 This function does not support loading locality or sensor metadata while reading.
 Metadata can be loaded through \code{\link[=mc_read_data]{mc_read_data()}} or
-can be provided later with function \code{\link[=mc_prep_meta]{mc_prep_meta()}}
+can be provided later with function \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}}
 }
 \details{
 If file is not in expected format, then file is skipped and warning printed in console.
 CSV files (loggers raw data) are in resulting myClim object placed to separate
 localities with empty metadata. Localities are named after serial_number of logger.
 Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
-By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
+By default data are cleaned with function \code{\link[=mc_prep_clean]{mc_prep_clean()}}. See function description. It detects
 holes in time-series, duplicated records or records in wrong order.
 }
 \examples{
 \dontrun{
-tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv", "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
+tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv",
+                              "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
 }
 }
 \seealso{
-\link{mc_DataFormat}, \code{\link[=mc_prep_celan]{mc_prep_celan()}}
+\link{mc_DataFormat}, \code{\link[=mc_prep_clean]{mc_prep_clean()}}
 }

@@ -49,5 +49,6 @@ The function returns vector of snow cover (TRUE/FLASE) with same time-step as in
 and more snow summary characteristics use \link{mc_calc_snow_agg} after snow detection.
 }
 \examples{
-data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow",
+                     localities = c("A2E32", "A6W79"))
 }

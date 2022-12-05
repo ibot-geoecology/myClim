@@ -3,7 +3,7 @@ library(myClim)
 data <- mc_read_data("examples/data/calc/files_table.csv")
 cleaned_data <- mc_prep_clean(data)
 # user defined tz offset - 60 minutes for both localities
-cleaned_data <- mc_prep_meta(cleaned_data, list(LOC1=60, LOC2=60), "tz_offset")
+cleaned_data <- mc_prep_meta_locality(cleaned_data, list(LOC1=60, LOC2=60), "tz_offset")
 # renaming sensors
 cleaned_data <- mc_prep_rename_sensor(cleaned_data, list(TMS_T1="TMS_T1_secondary",
                                                          TMS_T2="TMS_T2_secondary",

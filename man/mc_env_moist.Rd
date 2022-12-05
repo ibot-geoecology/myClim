@@ -52,7 +52,8 @@ Standardised myClim soil moisture variables:
 }
 }
 \examples{
-data <- mc_prep_crop(mc_data_example_agg, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
+data <- mc_prep_crop(mc_data_example_agg, lubridate::ymd_h("2020-11-01 00"),
+                     lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 data <- mc_calc_vwc(data, localities=c("A2E32", "A6W79"))
 mc_env_moist(data, "month")
 }

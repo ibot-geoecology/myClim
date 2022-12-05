@@ -37,5 +37,6 @@ columns for every sensor. Name of the column is in format:
 The less complex wide table is returned when exporting single sensor ascross localities.
 }
 \examples{
-example_tms_wideformat <- mc_reshape_wide(mc_data_example_raw, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+example_tms_wideformat <- mc_reshape_wide(mc_data_example_raw, c("A6W79", "A2E32"),
+                                          c("TMS_T1", "TMS_T2"))
 }

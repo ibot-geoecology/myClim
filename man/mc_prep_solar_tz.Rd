@@ -19,7 +19,7 @@ This is based on coordinates (longitude). If longitude is not provided, then not
 \details{
 myClim library presumes the data in UTC by default. This function require at least longitude provided in locality
 metadata slot \code{lon_wgs84}. If longitude is not provided, function does not work. Coordinates of locality can be provided
-e.g. during data reading see \code{\link[=mc_read_data]{mc_read_data()}} or ex post with \code{\link[=mc_prep_meta]{mc_prep_meta()}} function.
+e.g. during data reading see \code{\link[=mc_read_data]{mc_read_data()}} or ex post with \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}} function.
 
 TZ offset in minutes is calculated as \code{longitude / 180 * 12 * 60}.
 }

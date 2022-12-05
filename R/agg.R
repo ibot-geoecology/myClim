@@ -101,7 +101,7 @@
 #' When fun and period are provided then time step is aggregated based on function.
 #' @export
 #' @examples
-#' hour_data <- mc_agg(mc_data_example_clean, #' c("min", "max", "percentile"),
+#' hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"),
 #'                     "hour", percentiles = 50, min_coverage=0.5)
 #' day_data <- mc_agg(mc_data_example_clean, list(TMS_T1=c("max", "min"), TMS_T2="mean"),
 #'                    "day", min_coverage=1)

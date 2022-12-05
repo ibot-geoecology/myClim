@@ -66,11 +66,13 @@ csv logger files, specification of \emph{data format} (logger type) and \emph{lo
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table}
 and \code{localities_table} from external CSV they must have header, column separator must be comma ",".
-By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}. See function description. It detects
+By default data are cleaned with function \code{\link[=mc_prep_clean]{mc_prep_clean()}}. See function description. It detects
 holes in time-series, duplicated records or records in wrong order.
 }
 \examples{
-\dontrun{tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv", "examples/data/TOMST/localities_table.csv")}
+\dontrun{
+tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv",
+                           "examples/data/TOMST/localities_table.csv")}
 }
 \seealso{
 \link{mc_DataFormat}

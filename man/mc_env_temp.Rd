@@ -64,6 +64,7 @@ Standardised myClim temperature variables:
 }
 }
 \examples{
-data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"), lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
+data <- mc_prep_crop(mc_data_example_clean, lubridate::ymd_h("2020-11-01 00"),
+                     lubridate::ymd_h("2021-02-01 00"), end_included = FALSE)
 mc_env_temp(data, "month")
 }

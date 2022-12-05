@@ -35,7 +35,7 @@ from long data.frame to myClim object.
 Similar like \link{mc_read_wide} but is capable to read multiple sensors
 from single table. Useful for data not coming from supported microclimatic
 loggers. E.g. meteorological station data.
-By default data are cleaned with function \code{\link[=mc_prep_celan]{mc_prep_celan()}}.
+By default data are cleaned with function \code{\link[=mc_prep_clean]{mc_prep_clean()}}.
 }
 \seealso{
 \link{mc_read_wide}

@@ -21,7 +21,7 @@ mc_calc_snow_agg(
 
 \item{period}{number of days defining the continual snow cover period of interest (default 3 days)}
 
-\item{use_utc}{if set FALSE then time is shifted based on offset provided in locality metadata \code{tz_offset}, see e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta]{mc_prep_meta()}}; (default FALSE)}
+\item{use_utc}{if set FALSE then time is shifted based on offset provided in locality metadata \code{tz_offset}, see e.g. \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}, \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}}; (default FALSE)}
 }
 \value{
 Returns data.frame with columns:
@@ -51,6 +51,7 @@ but accepts any sensor with TRUE/FLAST snow event detection. If \code{snow_senso
 on the locality is missing, then locality is skipped.
 }
 \examples{
-data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow", localities = c("A2E32", "A6W79"))
+data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow",
+                     localities = c("A2E32", "A6W79"))
 mc_calc_snow_agg(data, "TMS_T2_snow")
 }

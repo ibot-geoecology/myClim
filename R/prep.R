@@ -391,7 +391,7 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
 #' @details
 #' myClim library presumes the data in UTC by default. This function require at least longitude provided in locality
 #' metadata slot `lon_wgs84`. If longitude is not provided, function does not work. Coordinates of locality can be provided
-#' e.g. during data reading see [myClim::mc_read_data()] or ex post with [myClim::mc_prep_meta()] function.
+#' e.g. during data reading see [myClim::mc_read_data()] or ex post with [myClim::mc_prep_meta_locality()] function.
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
