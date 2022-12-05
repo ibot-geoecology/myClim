@@ -72,7 +72,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' (i) `files_table` with *paths* pointing to raw
 #' csv logger files, specification of *data format* (logger type) and *locality name*.
 #'
-#' (ii) `localities_table` with locality id and metadata e.g. longitude, latitude, altitude...
+#' (ii) `localities_table` with locality id and metadata e.g. longitude, latitude, elevation...
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table`

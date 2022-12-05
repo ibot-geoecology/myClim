@@ -651,8 +651,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 #' @param temp_sensor name of temperature sensor. Temperature sensor must be in T_C physical.
 #' @param rh_sensor name of relative air humidity sensor. Humidity sensor must be in RH_perc physical.
 #' @param output_sensor name of new virtual VPD sensor (default "VPD")
-#' @param altitude value in meters (default 0)
-#' @param metadata_altitude if TRUE then altitude from metadata of locality is used (default TRUE)
+#' @param elevation value in meters (default 0)
+#' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return myClim object same as input but with added VPD sensor
 #' @export

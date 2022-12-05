@@ -176,7 +176,7 @@ tms.if<-mc_info(tms.m) # see info
 ```
 
 
-* **Updating metadata** For update locality metadata there is`mc_prep_meta_locality()`. Using this, user can e.g., rename the locality, set time offset, coordinates, altitude.... For updating sensor metadata there is `mc_prep_meta_sensor()` which can only rename the sensor and update sensor height/depth. Many sensors have pre-defined height, height is important for data joining.
+* **Updating metadata** For update locality metadata there is`mc_prep_meta_locality()`. Using this, user can e.g., rename the locality, set time offset, coordinates, elevation.... For updating sensor metadata there is `mc_prep_meta_sensor()` which can only rename the sensor and update sensor height/depth. Many sensors have pre-defined height, height is important for data joining.
 
 ```{r eval=TRUE}
 ## upload metadata from data frame

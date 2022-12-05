@@ -1,6 +1,7 @@
 source("libtest.R")
 
 test_that("mc_env_temp", {
+    OPRAVIT SENZORY - teď to vrátí jen jeden
     cleaned_data <- mc_read_files("../data/agg-month", dataformat_name="TOMST", silent=T)
     env_temp_table <- mc_env_temp(cleaned_data, "week", min_coverage=0.9)
     expect_equal(nrow(env_temp_table), 119)

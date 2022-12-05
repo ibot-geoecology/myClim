@@ -11,3 +11,5 @@ example_cleaned_tomst_data1 <- myClim::mc_prep_solar_tz(example_cleaned_tomst_da
 example_tms_wideformat_table <- myClim::mc_reshape_wide(example_cleaned_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
 # The function returns a longformat table with the values of the TMS_T1, and TMS_T2 sensors in the localities A6W79 and A2E32.
 example_tms_longformat_table <- myClim::mc_reshape_long(example_cleaned_tomst_data1, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
+# The function returns a longformat table with the values of the TMS_T1, and TMS_T2 sensors in the localities A6W79 and A2E32.
+example_env_temp <- myClim::mc_env_temp(myClim::mc_filter(example_cleaned_tomst_data1, sensors = "TMS_T3"), "month")
