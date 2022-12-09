@@ -4,6 +4,7 @@
 .read_const_MESSAGE_ANY_FILE <- "There aren't any source file."
 .read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible to read datetimes from {filename}. File is skipped."
 .read_const_MESSAGE_ANY_LOCALITY <- "There aren't any valid localities."
+.read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL <- "Plot or region must be set."
 
 #' Reading files or directories
 #'
@@ -538,4 +539,71 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
     names(sensors) <- purrr::map_chr(sensors, ~ .x$metadata@name)
     result$loggers[[1]] <- .read_get_new_logger(table_values$datetime, sensors)
     result
+}
+
+#' Reading data from TubeDB §§§
+#'
+#' @param tubedb object for connection to server see [rTubeDB::TubeDB-class]
+#' @param region TubeDB region id - see [rTubeDB::query_regions] (default NULL)
+#'
+#' Region is used mainly for loading metadata from TubeDB plots.
+#' @param plot vector of plot ids see [rTubeDB::query_region_plots] [rTubeDB::query_timeseries] (default NULL)
+#'
+#' If plot is NULL, then all plots are loaded from region.
+#' @param sensor_ids list in format `list(tubedb_sensor_name=myClim_sensor_name)`
+#' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
+#' @param silent if TRUE, then any information is not printed in console (default FALSE)
+#' @param aggregation parameter used in function [rTubeDB::query_timeseries] (default raw)
+#' @param quality parameter used in function [rTubeDB::query_timeseries] (default no)
+#' @param ... other parameters from function [rTubeDB::query_timeseries]
+#' @return myClim object in Raw-format
+#' @export
+#' @examples
+#' \dontrun{
+#' tubedb <- TubeDB(url="server", user="user", password="password")
+#' data <- mc_read_tubedb(tubedb, region="ckras", plot=c("HOSEK-606", "HOSEK-618"))
+#' }
+mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
+                           sensor_ids=list(T1="TMS_T1", T2="TMS_T2", T3="TMS_T3", moist="TMS_TMSmoisture", T_2m="TS_T"),
+                           clean=TRUE, silent=FALSE, aggregation="raw", quality="no", ...) {
+    if(is.null(plot) && is.null(region)) {
+        stop(.read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL)
+    }
+    plot_table <- NULL
+    if(!is.null(region)) {
+        plot_table <- rTubeDB::query_region_plots(tubedb, region)
+    }
+    if(is.null(plot)) {
+        plot <- plot_table$id
+    }
+    plot_function <- function(plot_item) {
+        tubedb_table <- rTubeDB::query_timeseries(tubedb, plot=plot_item, datetimeFormat="POSIXct",
+                                            sensor=names(sensor_ids),
+                                            aggregation=aggregation, quality=quality, ...)
+        result <- tidyr::pivot_longer(tubedb_table, !c(.data$plot, .data$datetime), names_to="sensor_name", values_to="value")
+        return(result)
+    }
+    data_table <- purrr::map_dfr(plot, plot_function)
+    data_table <- .read_get_data_table_for_import_from_tubedb(data_table)
+    result <- mc_read_long(data_table, sensor_ids, clean, silent)
+    if(is.null(plot_table)) {
+        return(result)
+    }
+    result <- .read_load_metadata_from_tubedb_plots(result, plot_table, plot)
+    return(result)
+}
+
+.read_get_data_table_for_import_from_tubedb <- function(data_table) {
+    data_table <- dplyr::relocate(data_table, .data$plot, .data$sensor_name, .data$datetime, .data$value)
+    colnames(data_table) <- c("locality_id", "sensor_name", "datetime", "value")
+    data_table$datetime <- lubridate::force_tz(data_table$datetime, "UTC")
+    return(data_table)
+}
+
+.read_load_metadata_from_tubedb_plots <- function(data, plot_table, plot) {
+    plot_table <- dplyr::filter(plot_table, .data$id %in% plot)
+    plot_table <- dplyr::select(plot_table, .data$id, .data$latitude, .data$longitude, .data$elevation)
+    colnames(plot_table) <- c("locality_id", "lat_wgs84", "lon_wgs84", "elevation")
+    result <- mc_prep_meta_locality(data, plot_table)
+    return(result)
 }
