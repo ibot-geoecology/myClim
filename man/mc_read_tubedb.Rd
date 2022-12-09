@@ -46,3 +46,9 @@ myClim object in Raw-format
 \description{
 Reading data from TubeDB §§§
 }
+\examples{
+\dontrun{
+tubedb <- TubeDB(url="server", user="user", password="password")
+data <- mc_read_tubedb(tubedb, region="ckras", plot=c("HOSEK-606", "HOSEK-618"))
+}
+}
