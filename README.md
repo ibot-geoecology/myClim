@@ -1,6 +1,6 @@
 # Install
 
-It is necessary to manually install dependencies first. 
+It is necessary to manually install dependencies. 
 ```R
 requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr",
                         "ggplot2", "ggforce", "viridis", "runner",

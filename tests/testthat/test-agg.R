@@ -7,12 +7,16 @@ test_that("mc_agg UTC", {
     hour_data <- mc_agg(cleaned_data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), min_coverage = 0)
     test_agg_data_format(hour_data)
     expect_equal(length(hour_data$localities[["94184102"]]$sensors), 12)
+    expect_equal(hour_data$metadata@step, 60*60)
+    expect_equal(hour_data$metadata@period, "hour")
     agg_data <- mc_agg(cleaned_data)
     test_agg_data_format(agg_data)
     expect_equal(length(agg_data$localities[["94184102"]]$sensors), 4)
     hour2_data <- mc_agg(agg_data, "percentile", "2 hours", use_utc = TRUE, percentiles = c(10, 50, 90), min_coverage = 0)
     test_agg_data_format(hour2_data)
     expect_equal(length(hour2_data$localities[["94184102"]]$sensors), 12)
+    expect_equal(hour2_data$metadata@step, 2*60*60)
+    expect_equal(hour2_data$metadata@period, "2 hours")
 })
 
 test_that("mc_agg day functions", {

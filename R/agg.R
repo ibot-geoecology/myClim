@@ -361,7 +361,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     if(period_object@year > 0 || period_object@month > 0) {
         return(NA_integer_)
     }
-    as.integer(as.numeric(period_object) / 60)
+    as.integer(as.numeric(period_object))
 }
 
 .agg_aggregate_item <- function(item, fun, period, use_intervals, percentiles, min_coverage, tz_offset, original_period,
