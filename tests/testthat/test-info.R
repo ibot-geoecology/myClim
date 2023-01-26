@@ -11,7 +11,7 @@ test_that("mc_info_count", {
 test_that("mc_info_clean", {
     cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", silent=T)
     info_table <- mc_info_clean(cleaned_data)
-    expect_equal(colnames(info_table), c("locality_id", "serial_number", "start_date", "end_date", "step", "count_duplicits", "count_missed", "count_disordered", "rounded"))
+    expect_equal(colnames(info_table), c("locality_id", "serial_number", "start_date", "end_date", "step", "count_duplicities", "count_missing", "count_disordered", "rounded"))
 })
 
 test_that("mc_info", {

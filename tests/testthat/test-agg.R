@@ -68,8 +68,8 @@ test_that("mc_agg 10s step", {
     data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T_C","RH" = "HOBO_RH", "Wind" = "wind"),
                          clean = TRUE, silent = TRUE)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@step, 10)
-    expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_duplicits, 0)
-    expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_missed, 0)
+    expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_duplicities, 0)
+    expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_missing, 0)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_disordered, 0)
     agg_data <- mc_agg(data, period = "1 min", fun = "mean")
     all_data <- mc_agg(data, period = "all", fun = "mean")

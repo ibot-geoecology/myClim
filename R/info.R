@@ -49,8 +49,8 @@ mc_info_count <- function(data) {
 #' * start_date - date of the first record on the logger
 #' * end_date  - date of the last record on the logger
 #' * step - detected time step in seconds of the logger measurements.
-#' * count_duplicits - number of duplicated records (identical time and value)
-#' * count_missed - number of missing records (logger outage in time when it should record)
+#' * count_duplicities - number of duplicated records (identical time)
+#' * count_missing - number of missing records (logger outage in time when it should record)
 #' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
 #' * rounded - T/F indication whether myClim automatically rounded time series minutes to the closes half (HH:00, HH:30) e.g. 13:07 -> 13:00 
 #' @seealso [myClim::mc_prep_clean()]
@@ -63,8 +63,8 @@ mc_info_clean <- function(data) {
              min(logger$datetime),
              max(logger$datetime),
              logger$clean_info@step,
-             logger$clean_info@count_duplicits,
-             logger$clean_info@count_missed,
+             logger$clean_info@count_duplicities,
+             logger$clean_info@count_missing,
              logger$clean_info@count_disordered,
              logger$clean_info@rounded)
     }
@@ -79,8 +79,8 @@ mc_info_clean <- function(data) {
     data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
                start_date=.common_as_utc_posixct(unlist(columns[[3]])),
                end_date=.common_as_utc_posixct(unlist(columns[[4]])),
-               step=unlist(columns[[5]]), count_duplicits=unlist(columns[[6]]),
-               count_missed=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]),
+               step=unlist(columns[[5]]), count_duplicities=unlist(columns[[6]]),
+               count_missing=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]),
                rounded=unlist(columns[[9]]))
 }
 

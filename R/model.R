@@ -299,15 +299,15 @@ setMethod("initialize",
 
 #' Class for logger clean info
 #' @slot step Time step of microclimatic data series in seconds
-#' @slot count_duplicits count of duplicated records - values with same date
-#' @slot count_missed count of missing records; Period between the records should be the same length. If not, than missing. 
+#' @slot count_duplicities count of duplicated records - values with same date
+#' @slot count_missing count of missing records; Period between the records should be the same length. If not, than missing.
 #' @slot count_disordered count of records incorrectly ordered in time. In table, newer record is followed by the older. 
 #' @slot rounded T/F indication whether myClim automatically rounded time series to the closes half (HH:00, HH:30) e.g. 13:07 -> 13:00
 #' @exportClass mc_LoggerCleanInfo
 mc_LoggerCleanInfo <- setClass("mc_LoggerCleanInfo",
                                slots = c(step = "numeric",
-                                         count_duplicits = "numeric",
-                                         count_missed = "numeric",
+                                         count_duplicities = "numeric",
+                                         count_missing = "numeric",
                                          count_disordered = "numeric",
                                          rounded = "logical"),
                                contains = "mc_Serializable")
@@ -316,8 +316,8 @@ setMethod("initialize",
           "mc_LoggerCleanInfo",
           function(.Object) {
               .Object@step <- NA_integer_
-              .Object@count_duplicits <- NA_integer_
-              .Object@count_missed <- NA_integer_
+              .Object@count_duplicities <- NA_integer_
+              .Object@count_missing <- NA_integer_
               .Object@count_disordered <- NA_integer_
               .Object@rounded <- FALSE
               return(.Object)

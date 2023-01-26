@@ -96,8 +96,8 @@ test_that("mc_read_data HOBO", {
     expect_equal(length(data$localities$I$loggers[[1]]$sensors), 1)
     cleaned_data <- mc_prep_clean(data, silent = T)
     clean_info <- mc_info_clean(cleaned_data)
-    expect_true(all(clean_info$count_duplicits == 0))
-    expect_true(all(clean_info$count_missed == 0))
+    expect_true(all(clean_info$count_duplicities == 0))
+    expect_true(all(clean_info$count_missing == 0))
 })
 
 test_that("mc_read_data HOBO skip wrong datetime", {

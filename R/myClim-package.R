@@ -91,8 +91,8 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #'             |           | $clean_info | mc_LoggerCleanInfo - class |                       ||
 #'             |           |             +----------------------------+                       ||
 #'             |           |             | @step                      |                       ||
-#'             |           |             | @count_duplicits           |                       ||
-#'             |           |             | @count_missed              |                       ||
+#'             |           |             | @count_duplicities         |                       ||
+#'             |           |             | @count_missing             |                       ||
 #'             |           |             | @count_disordered          |                       ||
 #'             |           |             | @rounded                   |                       ||
 #'             |           |             +----------------------------+                       ||

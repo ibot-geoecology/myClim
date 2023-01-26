@@ -13,9 +13,9 @@ Class for logger clean info
 \describe{
 \item{\code{step}}{Time step of microclimatic data series in seconds}
 
-\item{\code{count_duplicits}}{count of duplicated records - values with same date}
+\item{\code{count_duplicities}}{count of duplicated records - values with same date}
 
-\item{\code{count_missed}}{count of missing records; Period between the records should be the same length. If not, than missing.}
+\item{\code{count_missing}}{count of missing records; Period between the records should be the same length. If not, than missing.}
 
 \item{\code{count_disordered}}{count of records incorrectly ordered in time. In table, newer record is followed by the older.}
 

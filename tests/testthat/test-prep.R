@@ -4,9 +4,9 @@ test_that("mc_prep_clean", {
     cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", silent=T)
     expect_warning(mc_prep_clean(cleaned_data, silent=T))
     test_raw_data_format(cleaned_data)
-    expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@count_duplicits, 1)
-    expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@count_missed, 2)
-    expect_equal(cleaned_data$localities[["94184165"]]$loggers[[1]]$clean_info@count_duplicits, 25)
+    expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@count_duplicities, 1)
+    expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@count_missing, 2)
+    expect_equal(cleaned_data$localities[["94184165"]]$loggers[[1]]$clean_info@count_duplicities, 25)
     expect_equal(cleaned_data$localities[["94184169"]]$loggers[[1]]$clean_info@count_disordered, 1)
     diff_datetime <- diff(as.numeric(cleaned_data$localities[["94184169"]]$loggers[[1]]$datetime)) %/% 60
     expect_equal(diff_datetime, rep(15, 5))
@@ -51,9 +51,9 @@ test_that("mc_prep_clean one record", {
     data <- mc_read_files("../data/clean-one-record", "TOMST", clean = FALSE)
     expect_warning(cleaned_data <- mc_prep_clean(data, silent=T))
     expect_true(is.na(cleaned_data$localities[["94208611"]]$loggers[[1]]$clean_info@step))
-    expect_true(is.na(cleaned_data$localities[["94208611"]]$loggers[[1]]$clean_info@count_duplicits))
+    expect_true(is.na(cleaned_data$localities[["94208611"]]$loggers[[1]]$clean_info@count_duplicities))
     expect_true(is.na(cleaned_data$localities[["94208611"]]$loggers[[1]]$clean_info@count_disordered))
-    expect_true(is.na(cleaned_data$localities[["94208611"]]$loggers[[1]]$clean_info@count_missed))
+    expect_true(is.na(cleaned_data$localities[["94208611"]]$loggers[[1]]$clean_info@count_missing))
 })
 
 test_that("mc_prep_clean ok", {
