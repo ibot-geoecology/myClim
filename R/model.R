@@ -85,7 +85,7 @@
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
 
-#' Custom list for myClim object §§§
+#' Custom list for myClim object
 #'
 #' Top level list for store myClim data. (see [myClim-package])
 #'
