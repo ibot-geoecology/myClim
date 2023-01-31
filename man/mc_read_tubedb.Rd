@@ -2,7 +2,7 @@
 % Please edit documentation in R/read.R
 \name{mc_read_tubedb}
 \alias{mc_read_tubedb}
-\title{Reading data from TubeDB §§§}
+\title{Reading data from TubeDB}
 \usage{
 mc_read_tubedb(
   tubedb,
@@ -22,11 +22,11 @@ mc_read_tubedb(
 
 \item{region}{TubeDB region id - see \link[rTubeDB:query_regions]{rTubeDB::query_regions} (default NULL)
 
-Region is used mainly for loading metadata from TubeDB plots.}
+Region is used mainly for loading metadata from TubeDB localities.}
 
-\item{plot}{vector of plot ids see \link[rTubeDB:query_region_plots]{rTubeDB::query_region_plots} \link[rTubeDB:query_timeseries]{rTubeDB::query_timeseries} (default NULL)
+\item{plot}{vector of localities ids see \link[rTubeDB:query_region_plots]{rTubeDB::query_region_plots} \link[rTubeDB:query_timeseries]{rTubeDB::query_timeseries} (default NULL)
 
-If plot is NULL, then all plots are loaded from region.}
+If plot is NULL, then all localities are loaded from whole region.}
 
 \item{sensor_ids}{list in format \code{list(tubedb_sensor_name=myClim_sensor_name)}}
 
@@ -44,7 +44,11 @@ If plot is NULL, then all plots are loaded from region.}
 myClim object in Raw-format
 }
 \description{
-Reading data from TubeDB §§§
+Function redaing data from TubeDB (https://environmentalinformatics-marburg.github.io/tubedb/) into myClim object.
+}
+\details{
+In case you store your microclimatic time-series in TubeDB, you can read data
+with TubeDB API into myClim object. You need to know databse URL, username and password.
 }
 \examples{
 \dontrun{

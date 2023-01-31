@@ -541,15 +541,20 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
     result
 }
 
-#' Reading data from TubeDB §§§
+#' Reading data from TubeDB
+#'
+#' Function redaing data from TubeDB (https://environmentalinformatics-marburg.github.io/tubedb/) into myClim object.
+#' @details 
+#' In case you store your microclimatic time-series in TubeDB, you can read data
+#' with TubeDB API into myClim object. You need to know databse URL, username and password.
 #'
 #' @param tubedb object for connection to server see [rTubeDB::TubeDB-class]
 #' @param region TubeDB region id - see [rTubeDB::query_regions] (default NULL)
 #'
-#' Region is used mainly for loading metadata from TubeDB plots.
-#' @param plot vector of plot ids see [rTubeDB::query_region_plots] [rTubeDB::query_timeseries] (default NULL)
+#' Region is used mainly for loading metadata from TubeDB localities.
+#' @param plot vector of localities ids see [rTubeDB::query_region_plots] [rTubeDB::query_timeseries] (default NULL)
 #'
-#' If plot is NULL, then all plots are loaded from region.
+#' If plot is NULL, then all localities are loaded from whole region.
 #' @param sensor_ids list in format `list(tubedb_sensor_name=myClim_sensor_name)`
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is not printed in console (default FALSE)

@@ -4,12 +4,19 @@
 #' 
 #' @details 
 #' In default settings it returns the object containing input sensors / localities.
-#' It is possible to filter selected sensors from all localities, selected 
-#' localities with all sensors or combine both. 
+#' When you provide vector of localities e.g. `localities=c("A6W79", "A2E32")` 
+#' selected localities are filtered with all sensors on those localities.
+#' The same as When you provide vector of sensors `sensors=c("TMS_T1", "TMS_T2")`, 
+#' selected sensors are filtered through all localities.
+#' When you combine localities and sensors, then filtering return 
+#' selected sensors on selected localities. 
 #' 
-#' When `reverse = TRUE` then 
-#' resulting myClim object contains all localities and sensors as input except
-#' those you listed in parameters `localities, sensors`
+#' When `reverse = TRUE` and using only localities parameter then 
+#' the listed localities are removed. Similarly `reverse = TRUE` with proving only 
+#' sensors parameter, then the listed sensors are removed from all localities. When 
+#' using `reverse = TRUE` and combining sensors and localities parameters then
+#' selected sensors are removed from selected localities.   
+#' 
 #' 
 #' @template param_myClim_object
 #' @param localities locality_ids for filtering data; if NULL then do nothing
@@ -19,7 +26,23 @@
 #' @return filtered myClim object
 #' @export
 #' @examples 
+#' ## keep only "A6W79", "A2E32" localities with all their sensors
+#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"))
+#' 
+#' ## remove "A6W79", "A2E32" localities and keep all others
+#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), reverse=T)
+#' 
+#' ## keep only "TMS_T1", and "TMS_T2" sensors on all localities
+#' mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"))
+#' 
+#' ## remove "TMS_T1", and "TMS_T2" sensors from all localities
+#' mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"),reverse=T)
+#' 
+#' ## keep only "TMS_T1", and "TMS_T2" sensors on "A6W79", "A2E32" localities
 #' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
+#' 
+#' ## remove "TMS_T1", and "TMS_T2" sensors from "A6W79", "A2E32" localities and keep all other sensors and localities
+#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"),reverse=T)
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_agg_format <- .common_is_agg_format(data)
     if(!is.null(localities)) {
