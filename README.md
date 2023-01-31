@@ -17,3 +17,5 @@ install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=
 * [functions documentation](http://labgis.ibot.cas.cz/myclim/index.html)   
 * [vignette: user manual](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html)
 
+# Source code of package
+* [GitHub repository](https://github.com/ibot-geoecology/myClim)   

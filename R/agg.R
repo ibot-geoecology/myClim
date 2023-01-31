@@ -512,15 +512,15 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     from_start_interval <- lubridate::interval(start, first_datetime)
     missed_modulo <- as.numeric(from_start_interval) %% as.numeric(original_step_period)
     if(missed_modulo != 0) {
-        count_missed <- as.numeric(from_start_interval) %/% as.numeric(original_step_period)
-        start <- first_datetime - count_missed * original_step_period
+        count_missing <- as.numeric(from_start_interval) %/% as.numeric(original_step_period)
+        start <- first_datetime - count_missing * original_step_period
     }
     last_datetime <- dplyr::last(item$datetime)
     to_end_interval <- lubridate::interval(last_datetime, end)
     missed_modulo <- as.numeric(to_end_interval) %% as.numeric(original_step_period)
     if(missed_modulo != 0) {
-        count_missed <- as.numeric(to_end_interval) %/% as.numeric(original_step_period)
-        end <- last_datetime + count_missed * original_step_period
+        count_missing <- as.numeric(to_end_interval) %/% as.numeric(original_step_period)
+        end <- last_datetime + count_missing * original_step_period
     }
     if(start == dplyr::first(item$datetime) && end == dplyr::last(item$datetime)) {
         return(item)

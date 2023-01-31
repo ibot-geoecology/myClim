@@ -1,3 +1,5 @@
+.filter_const_MESSAGE_FILTERED_ALL <- "All data are removed by filter."
+
 #' Filter data from myClim object
 #' @description 
 #' This function filter data by localities and sensors.
@@ -26,6 +28,7 @@
 #' @return filtered myClim object
 #' @export
 #' @examples 
+
 #' ## keep only "A6W79", "A2E32" localities with all their sensors
 #' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"))
 #' 
@@ -43,50 +46,54 @@
 #' 
 #' ## remove "TMS_T1", and "TMS_T2" sensors from "A6W79", "A2E32" localities and keep all other sensors and localities
 #' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"),reverse=T)
+
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_agg_format <- .common_is_agg_format(data)
-    if(!is.null(localities)) {
+
+    sensors_item_function <- function(item) {
         filter_function <- if(reverse) purrr::discard else purrr::keep
-        localities <- filter_function(data$localities, function(.x) .x$metadata@locality_id %in% localities)
-        data$localities <- localities
-    }
-    if(!is.null(sensors)) {
-        if(is_agg_format) {
-            data <- .filter_agg_sensors(data, sensors, reverse)
-        } else {
-            data <- .filter_raw_sensors(data, sensors, reverse)
+        item$sensors <- filter_function(item$sensors, function(.x) .x$metadata@name %in% sensors)
+        if(length(item$sensors) == 0) {
+            return(NULL)
         }
+        return(item)
     }
+
+    locality_function <- function(locality) {
+        is_in <- is.null(localities) || locality$metadata@locality_id %in% localities
+
+        if(is.null(sensors)) {
+            return(if(is_in == reverse) NULL else locality)
+        }
+
+        if(!reverse && !is_in) {
+            return(NULL)
+        }
+
+        if (!is_agg_format) {
+            loggers <- purrr::map(locality$loggers, sensors_item_function)
+            locality$loggers <- purrr::discard(loggers, is.null)
+            if(length(locality$loggers) == 0) {
+                return(NULL)
+            }
+        } else {
+            locality <- sensors_item_function(locality)
+        }
+        return(locality)
+    }
+
+    if(is.null(localities) && is.null(sensors) && !reverse) {
+        return(data)
+    }
+    if(is.null(localities) && is.null(sensors) && reverse) {
+        data$localities <- list()
+    } else {
+        out_localities <- purrr::map(data$localities, locality_function)
+        data$localities <- purrr::discard(out_localities, is.null)
+    }
+
     if(stop_if_empty && length(data$localities) == 0) {
-        stop("All data are removed by filter.")
+        stop(.filter_const_MESSAGE_FILTERED_ALL)
     }
-    data
-}
-
-.filter_raw_sensors <- function(data, sensors, reverse) {
-    logger_function <- function (logger) {
-        filter_function <- if(reverse) purrr::discard else purrr::keep
-        logger$sensors <- filter_function(logger$sensors, function(.x) .x$metadata@name %in% sensors)
-        logger
-    }
-
-    locality_function <- function (locality) {
-        locality$loggers <- purrr::map(locality$loggers, logger_function)
-        locality$loggers <- purrr::keep(locality$loggers, function(.x) length(.x$sensors) > 0)
-        locality
-    }
-    data$localities <- purrr::map(data$localities, locality_function)
-    data$localities <- purrr::keep(data$localities, function(.x) length(.x$loggers) > 0)
-    return(data)
-}
-
-.filter_agg_sensors <- function(data, sensors, reverse) {
-    locality_function <- function (locality) {
-        filter_function <- if(reverse) purrr::discard else purrr::keep
-        locality$sensors <- filter_function(locality$sensors, function(.x) .x$metadata@name %in% sensors)
-        locality
-    }
-    data$localities <- purrr::map(data$localities, locality_function)
-    data$localities <- purrr::keep(data$localities, function(.x) length(.x$sensors) > 0)
     data
 }

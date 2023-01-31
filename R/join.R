@@ -308,8 +308,8 @@ mc_join <- function(data, comp_sensors=NULL) {
         logger1$metadata@serial_number != logger2$metadata@serial_number) {
         result_logger$metadata@serial_number <- NA_character_
     }
-    result_logger$clean_info@count_duplicits <- NA_integer_
-    result_logger$clean_info@count_missed <- NA_integer_
+    result_logger$clean_info@count_duplicities <- NA_integer_
+    result_logger$clean_info@count_missing <- NA_integer_
     result_logger$clean_info@count_disordered <- NA_integer_
     result_logger$clean_info@rounded <- NA
     result_logger$datetime <- data_table$datetime

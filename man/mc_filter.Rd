@@ -45,6 +45,7 @@ using \code{reverse = TRUE} and combining sensors and localities parameters then
 selected sensors are removed from selected localities.
 }
 \examples{
+<<<<<<< HEAD
 ## keep only "A6W79", "A2E32" localities with all their sensors
 mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"))
 
@@ -62,4 +63,9 @@ mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1
 
 ## remove "TMS_T1", and "TMS_T2" sensors from "A6W79", "A2E32" localities and keep all other sensors and localities
 mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"),reverse=T)
+=======
+filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
+                           sensors=c("TMS_T1", "TMS_T2"))
+mc_info(filtered_data)
+>>>>>>> 65b2940e4f014b0b0433863a2eb31f10f40f23a0
 }

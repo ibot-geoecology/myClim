@@ -95,8 +95,8 @@ $localities | locality[1]                                                       
             |           | $clean_info | mc_LoggerCleanInfo - class |                       ||
             |           |             +----------------------------+                       ||
             |           |             | @step                      |                       ||
-            |           |             | @count_duplicits           |                       ||
-            |           |             | @count_missed              |                       ||
+            |           |             | @count_duplicities         |                       ||
+            |           |             | @count_missing             |                       ||
             |           |             | @count_disordered          |                       ||
             |           |             | @rounded                   |                       ||
             |           |             +----------------------------+                       ||

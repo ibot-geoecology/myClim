@@ -76,7 +76,10 @@ mc_prep_clean <- function(data, silent=FALSE) {
     start_date <- min(info_table$start_date)
     end_date <- max(info_table$end_date)
     print(stringr::str_glue("datetime range: {start_date} - {end_date}"))
-    steps <- paste(unique(info_table$step), collapse = ", ")
+    step_repr_function <- function(step) {
+        return(stringr::str_glue("({step}s = {round(step/60, 2)}min)"))
+    }
+    steps <- paste(purrr::map(sort(unique(info_table$step)), step_repr_function), collapse = ", ")
     print(stringr::str_glue("detected steps: {steps}"))
     print.data.frame(info_table)
     return(data)
@@ -129,9 +132,9 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger$clean_info@count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
     sorted_datetime <- sort(as.numeric(logger$datetime))
     diff_datetime <- diff(sorted_datetime)
-    logger$clean_info@count_duplicits <- length(purrr::keep(diff_datetime, function(x) x == 0))
+    logger$clean_info@count_duplicities <- length(purrr::keep(diff_datetime, function(x) x == 0))
     right_count_datetime <- diff(c(sorted_datetime[[1]], tail(sorted_datetime, n=1))) %/% logger$clean_info@step + 1
-    logger$clean_info@count_missed <- right_count_datetime - (length(logger$datetime) - logger$clean_info@count_duplicits)
+    logger$clean_info@count_missing <- right_count_datetime - (length(logger$datetime) - logger$clean_info@count_duplicities)
     logger$clean_info@rounded <- rounded
     logger
 }
@@ -163,8 +166,8 @@ mc_prep_clean <- function(data, silent=FALSE) {
 
 .prep_clean_was_error_in_logger <- function(logger) {
     is_ok <- c(logger$clean_info@count_disordered == 0,
-               logger$clean_info@count_duplicits == 0,
-               logger$clean_info@count_missed == 0,
+               logger$clean_info@count_duplicities == 0,
+               logger$clean_info@count_missing == 0,
                !logger$clean_info@rounded)
     !all(is_ok)
 }
