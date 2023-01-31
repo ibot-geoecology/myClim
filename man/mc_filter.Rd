@@ -39,5 +39,7 @@ resulting myClim object contains all localities and sensors as input except
 those you listed in parameters \verb{localities, sensors}
 }
 \examples{
-mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
+filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
+                           sensors=c("TMS_T1", "TMS_T2"))
+mc_info(filtered_data)
 }

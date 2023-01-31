@@ -2,7 +2,7 @@
 % Please edit documentation in R/model.R
 \name{myClimList}
 \alias{myClimList}
-\title{Custom list for myClim object §§§}
+\title{Custom list for myClim object}
 \usage{
 myClimList(metadata = NULL, localities = list())
 }
