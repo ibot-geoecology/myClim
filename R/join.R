@@ -2,6 +2,7 @@
 .join_const_MESSAGE_INCONSISTENT_CALIBRATION <- "Calibration in sensors is inconsistent."
 .join_const_MESSAGE_SENSORS_NOT_FOUND <- "Selected sensors not found - {sensor_name} used."
 .join_const_MESSAGE_JOINING_EXIT <- "Joining canceled by user."
+.join_const_MESSAGE_DIFFERENT_LOGGER_SENSORS <- "There aren't same sensors in loggers."
 
 .join_const_MENU_TITLE <- "Loggers are different. They cannot be joined automatically."
 .join_const_MENU_INFO <- "Type choice number or type the start datetime of newer logger to be used in format YYYY-MM-DD hh:mm."
@@ -79,9 +80,8 @@ mc_join <- function(data, comp_sensors=NULL) {
 .join_loggers_same_type <- function(loggers, comp_sensors, locality_id) {
     steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
     shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
-    heights <- .join_get_heights(loggers)
-    table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts, heights=heights)
-    table <- dplyr::group_by(table, .data$steps, .data$shifts, .data$heights)
+    table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts)
+    table <- dplyr::group_by(table, .data$steps, .data$shifts)
     e_choice <- new.env()
     e_choice$choice <- NA_integer_
     group_function <- function(group, .y) {
@@ -126,20 +126,19 @@ mc_join <- function(data, comp_sensors=NULL) {
     l1_heights <- purrr::map_chr(logger1$sensors, ~ .x$metadata@height)
     l2_names <- purrr::map_chr(logger2$sensors, ~ .x$metadata@name)
     l2_heights <- purrr::map_chr(logger2$sensors, ~ .x$metadata@height)
-    l1 <- tibble::tibble(height=l1_heights, l1_name=l1_names, l1_new_name=paste0("l1_", l1_names))
-    l2 <- tibble::tibble(height=l2_heights, l2_name=l2_names, l2_new_name=paste0("l2_", l2_names))
-    dplyr::left_join(l1, l2, by="height")
+    l1 <- tibble::tibble(height=l1_heights, name=l1_names, l1_new_name=paste0("l1_", l1_names))
+    l2 <- tibble::tibble(height=l2_heights, name=l2_names, l2_new_name=paste0("l2_", l2_names))
+    dplyr::full_join(l1, l2, by=c("height", "name"))
 }
 
 .join_get_logger_table_column_names <- function (old_names, names_table, is_l1) {
-    search_column <- if(is_l1) "l1_name" else "l2_name"
     result_column <- if(is_l1) "l1_new_name" else "l2_new_name"
 
     new_name_function <- function (old_name) {
         if(old_name == "datetime") {
             return(old_name)
         }
-        row_index <- which(names_table[[search_column]] == old_name)
+        row_index <- which(names_table$name == old_name)
         names_table[[result_column]][[row_index]]
     }
 
@@ -174,23 +173,26 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_get_compare_columns <- function(names_table, comp_sensors) {
-    l1_columns <- dplyr::first(names_table$l1_new_name)
-    l1_orig <- dplyr::first(names_table$l1_name)
-    l2_columns <- dplyr::first(names_table$l2_new_name)
-    l2_orig <- dplyr::first(names_table$l2_name)
+    not_na_sensors <- !(is.na(names_table$l1_new_name) | is.na(names_table$l2_new_name))
+    if(!any(not_na_sensors))
+    {
+        stop(.join_const_MESSAGE_DIFFERENT_LOGGER_SENSORS)
+    }
+    l1_columns <- dplyr::first(names_table$l1_new_name[not_na_sensors])
+    l2_columns <- dplyr::first(names_table$l2_new_name[not_na_sensors])
+    orig <- dplyr::first(names_table$name)
     if(!is.null(comp_sensors)) {
-        sensors_select <- names_table$l1_name %in% comp_sensors | names_table$l2_name %in% comp_sensors
+        sensors_select <- names_table$name %in% comp_sensors
         if(!any(sensors_select)) {
-            sensor_name <- dplyr::first(names_table$l1_name)
+            sensor_name <- dplyr::first(names_table$name[not_na_sensors])
             warning(stringr::str_glue(.join_const_MESSAGE_SENSORS_NOT_FOUND))
         } else {
             l1_columns <- names_table$l1_new_name[sensors_select]
-            l1_orig <- names_table$l1_name[sensors_select]
             l2_columns <- names_table$l2_new_name[sensors_select]
-            l2_orig <- names_table$l2_name[sensors_select]
+            orig <- names_table$name[sensors_select]
         }
     }
-    tibble::tibble(l1=l1_columns, l1_orig=l1_orig, l2=l2_columns, l2_orig=l2_orig)
+    tibble::tibble(l1=l1_columns, l2=l2_columns, orig=orig)
 }
 
 .join_get_equal_data <- function(data_table, columns) {
@@ -208,13 +210,13 @@ mc_join <- function(data, comp_sensors=NULL) {
     writeLines(stringr::str_glue("Problematic interval: {problem_interval}"))
     logger1_text <- .join_get_logger_text(logger1, TRUE)
     writeLines(logger1_text)
-    .join_print_info_logger(logger1, dplyr::first(columns$l1_orig))
+    .join_print_info_logger(logger1, dplyr::first(columns$orig))
     logger2_text <- .join_get_logger_text(logger2, FALSE)
     writeLines(logger2_text)
-    .join_print_info_logger(logger2, dplyr::first(columns$l2_orig))
+    .join_print_info_logger(logger2, dplyr::first(columns$orig))
     plot_data_table <- .join_get_plot_data(data_table, columns, plot_interval)
-    highlight_data_table <- .join_get_plot_highlight_data(data_table, problems, plot_data_table, columns$l1_orig, logger1$clean_info@step)
-    y_label <- .join_get_y_label(logger1, dplyr::first(columns$l1_orig))
+    highlight_data_table <- .join_get_plot_highlight_data(data_table, problems, plot_data_table, columns$orig, logger1$clean_info@step)
+    y_label <- .join_get_y_label(logger1, dplyr::first(columns$orig))
     .plot_show_joining_chart(plot_data_table, stringr::str_glue("{locality_id}: {logger1_text} - {logger2_text}"),
                              y_label, c(.join_const_PLOT_SIZE_OLDER, .join_const_PLOT_SIZE_NEWER), highlight_data_table)
     .join_select_choice()
@@ -241,11 +243,11 @@ mc_join <- function(data, comp_sensors=NULL) {
     for(i in seq(nrow(columns))) {
         select_old <- plot_data_table$name == columns[[i, "l1"]]
         select_new <- plot_data_table$name == columns[[i, "l2"]]
-        old_name <- paste0("A. Older ", columns[[i, "l1_orig"]])
-        new_name <- paste0("B. Newer ", columns[[i, "l2_orig"]])
+        old_name <- paste0("A. Older ", columns[[i, "orig"]])
+        new_name <- paste0("B. Newer ", columns[[i, "orig"]])
         plot_data_table$name[select_old] <- old_name
         plot_data_table$name[select_new] <- new_name
-        plot_data_table$sensor[select_old | select_new] <- columns[[i, "l1_orig"]]
+        plot_data_table$sensor[select_old | select_new] <- columns[[i, "orig"]]
         plot_data_table$size[select_old] <- "A"
         plot_data_table$size[select_new] <- "B"
     }
@@ -313,33 +315,63 @@ mc_join <- function(data, comp_sensors=NULL) {
     result_logger$clean_info@count_disordered <- NA_integer_
     result_logger$clean_info@rounded <- NA
     result_logger$datetime <- data_table$datetime
+    if(any(is.na(names_table$l1_new_name))) {
+        na_names <- names_table$name[is.na(names_table$l1_new_name)]
+        result_logger$sensors <- c(result_logger$sensors, logger2$sensors[na_names])
+    }
 
     l1_intervals <- .common_get_time_series_intervals(data_table$datetime, data_table$use_l1)
     l2_intervals <- .common_get_time_series_intervals(data_table$datetime, !data_table$use_l1)
     l1_origin_interval <- lubridate::interval(dplyr::first(logger1$datetime), dplyr::last(logger1$datetime))
     l2_origin_interval <- lubridate::interval(dplyr::first(logger2$datetime), dplyr::last(logger2$datetime))
-    sensor_function <- function (l1_sensor_name) {
-        l1_sensor <- result_logger$sensors[[l1_sensor_name]]
-        current_name <- l1_sensor_name == names_table$l1_name
-        l2_sensor_name <- unname(names_table$l2_name[current_name])
-        l2_sensor <- logger2$sensors[[l2_sensor_name]]
-        if(l1_sensor$metadata@sensor_id != l2_sensor$metadata@sensor_id) {
-            stop(stringr::str_glue(.join_const_MESSAGE_DIFFERENT_SENSOR_ID))
+    sensor_function <- function (sensor_name) {
+        current_name <- sensor_name == names_table$name
+        l1_sensor <- NULL
+        l2_sensor <- NULL
+        l1_new_name <- names_table$l1_new_name[current_name]
+        l2_new_name <- names_table$l2_new_name[current_name]
+        if(!is.na(l1_new_name)) {
+            l1_sensor <- logger1$sensors[[sensor_name]]
         }
-        result <- l1_sensor
-        result$metadata@calibrated <- l1_sensor$metadata@calibrated || l2_sensor$metadata@calibrated
-        result$calibration <- .join_get_sensors_calibration(l1_sensor, l2_sensor,
-                                                            l1_origin_interval, l2_origin_interval,
-                                                            l1_intervals, l2_intervals)
-        result$states <- .join_get_sensors_states(l1_sensor, l2_sensor, l1_intervals, l2_intervals)
-        result$values <- data_table[[names_table$l2_new_name[current_name]]]
-        result$values[data_table$use_l1] <- data_table[[names_table$l1_new_name[current_name]]][data_table$use_l1]
-        result
+        if(!is.na(l2_new_name)) {
+            l2_sensor <- logger2$sensors[[sensor_name]]
+        }
+        return(.join_get_joined_sensor(l1_sensor, l2_sensor, l1_new_name, l2_new_name,
+                                       l1_intervals, l2_intervals, l1_origin_interval, l2_origin_interval,
+                                       data_table))
     }
     sensor_names <- names(result_logger$sensors)
     result_logger$sensors <- purrr::map(sensor_names, sensor_function)
     names(result_logger$sensors) <- sensor_names
     result_logger
+}
+
+.join_get_joined_sensor <- function(l1_sensor, l2_sensor,
+                                    l1_new_name, l2_new_name,
+                                    l1_intervals, l2_intervals,
+                                    l1_origin_interval, l2_origin_interval,
+                                    data_table) {
+    is_only_one <- is.null(l1_sensor) || is.null(l2_sensor)
+    result <- if(!is.null(l1_sensor)) l1_sensor else l2_sensor
+
+    if(is_only_one) {
+        new_name <- if(is.na(l1_new_name)) l2_new_name else l1_new_name
+        result$values <- data_table[[new_name]]
+        return(result)
+    }
+
+    if(l1_sensor$metadata@sensor_id != l2_sensor$metadata@sensor_id) {
+        stop(stringr::str_glue(.join_const_MESSAGE_DIFFERENT_SENSOR_ID))
+    }
+    result$metadata@calibrated <- l1_sensor$metadata@calibrated || l2_sensor$metadata@calibrated
+    result$calibration <- .join_get_sensors_calibration(l1_sensor, l2_sensor,
+                                                        l1_origin_interval, l2_origin_interval,
+                                                        l1_intervals, l2_intervals)
+    result$states <- .join_get_sensors_states(l1_sensor, l2_sensor, l1_intervals, l2_intervals)
+
+    result$values <- data_table[[l2_new_name]]
+    result$values[data_table$use_l1] <- data_table[[l1_new_name]][data_table$use_l1]
+    result
 }
 
 .join_get_sensors_calibration <- function(l1_sensor, l2_sensor, l1_origin_interval, l2_origin_interval, l1_intervals, l2_intervals) {

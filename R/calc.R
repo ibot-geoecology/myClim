@@ -360,7 +360,7 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
                              ref_t = ref_t, acor_t = acor_t, wcor_t = wcor_t,
                              frozen2NA = frozen2NA)
     }
-    values <- purrr::pmap(dplyr::select(input_data, .data$cor_factor, .data$cor_slope, .data$data), data_function)
+    values <- purrr::pmap(dplyr::select(input_data, "cor_factor", "cor_slope", "data"), data_function)
     is_calibrated <- nrow(calibration) > 0
     height <- item$sensors[[moist_sensor]]$metadata@height
     item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_moisture, output_sensor,

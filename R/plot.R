@@ -424,7 +424,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         ggplot2::geom_line(data_plot, mapping = ggplot2::aes(x=.data$datetime, y=.data$value*coeff, group=sensor, color=sensor))
     }
 
-    plots <- purrr::pmap(dplyr::select(sensors_table, .data$sensor, .data$color, .data$coeff), line_function)
+    plots <- purrr::pmap(dplyr::select(sensors_table, "sensor", "color", "coeff"), line_function)
     plot <- purrr::reduce(plots, `+`, .init=plot)
     plot <- plot + ggplot2::scale_color_manual(values=sensors_table$color)
     plot <- plot + .plot_set_ggplot_line_theme()
@@ -496,7 +496,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 }
 
 .plot_add_coeff_to_sensors_table <- function(sensors_table, scale_coeff) {
-    physical_table <- dplyr::distinct(dplyr::select(sensors_table, .data$physical, .data$main_axis))
+    physical_table <- dplyr::distinct(dplyr::select(sensors_table, "physical", "main_axis"))
 
     get_scale_coeff <- function(selector) {
         physical <- physical_table$physical[selector]
@@ -517,7 +517,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 }
 
 .plot_line_set_y_axes <- function(sensors_table) {
-    physical_table <- dplyr::distinct(dplyr::select(sensors_table, .data$physical, .data$main_axis, .data$coeff))
+    physical_table <- dplyr::distinct(dplyr::select(sensors_table, "physical", "main_axis", "coeff"))
     sec.axis <- ggplot2::waiver()
     if(nrow(physical_table) == 2) {
         physical <- physical_table$physical[!physical_table$main_axis]

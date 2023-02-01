@@ -517,7 +517,7 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
     sensor_names <- unique(locality_table$sensor_name)
     sensor_table_function <- function(name) {
         data <- dplyr::filter(locality_table, .data$sensor_name == name)
-        result <- dplyr::select(data, .data$datetime, .data$value)
+        result <- dplyr::select(data, "datetime", "value")
         names(result)[2] <- name
         result
     }
@@ -607,7 +607,7 @@ mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
 
 .read_load_metadata_from_tubedb_plots <- function(data, plot_table, plot) {
     plot_table <- dplyr::filter(plot_table, .data$id %in% plot)
-    plot_table <- dplyr::select(plot_table, .data$id, .data$latitude, .data$longitude, .data$elevation)
+    plot_table <- dplyr::select(plot_table, "id", "latitude", "longitude", "elevation")
     colnames(plot_table) <- c("locality_id", "lat_wgs84", "lon_wgs84", "elevation")
     result <- mc_prep_meta_locality(data, plot_table)
     return(result)

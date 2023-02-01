@@ -27,3 +27,25 @@ test_that("mc_join", {
     cleaned_data$localities$`94184102`$loggers[[2]]$sensors$TMS_T1$metadata@calibrated <- FALSE
     expect_error(joined_data <- mc_join(cleaned_data), "Calibration in sensors is inconsistent.")
 })
+
+test_that("mc_join same height", {
+    data <- mc_read_files("../data/join", "TOMST", clean=TRUE, silent=TRUE)
+    data <- mc_filter(data, localities = c("94184102", "94184103"))
+    data <- mc_calc_vwc(data)
+    joined_data <- mc_join(data)
+    test_raw_data_format(joined_data)
+    expect_equal(length(joined_data$localities$`94184102`$loggers), 1)
+    expect_equal(length(joined_data$localities$`94184102`$loggers[[1]]$sensors), 5)
+    expect_equal(length(joined_data$localities$`94184103`$loggers), 1)
+    expect_equal(length(joined_data$localities$`94184103`$loggers[[1]]$sensors), 5)
+    data$localities$`94184102`$loggers[[1]]$sensors <- data$localities$`94184102`$loggers[[1]]$sensors[-5]
+    data$localities$`94184103`$loggers[[2]]$sensors <- data$localities$`94184103`$loggers[[2]]$sensors[-5]
+    joined_data <- mc_join(data)
+    test_raw_data_format(joined_data)
+    expect_equal(length(joined_data$localities$`94184102`$loggers), 1)
+    expect_equal(length(joined_data$localities$`94184102`$loggers[[1]]$sensors), 5)
+    expect_true(is.na(dplyr::first(joined_data$localities$`94184102`$loggers[[1]]$sensors$VWC_moisture$values)))
+    expect_equal(length(joined_data$localities$`94184103`$loggers), 1)
+    expect_equal(length(joined_data$localities$`94184103`$loggers[[1]]$sensors), 5)
+    expect_true(is.na(dplyr::last(joined_data$localities$`94184103`$loggers[[1]]$sensors$VWC_moisture$values)))
+})

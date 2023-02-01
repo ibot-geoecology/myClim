@@ -22,30 +22,32 @@
 #' 
 #' @template param_myClim_object
 #' @param localities locality_ids for filtering data; if NULL then do nothing
-#' @param sensors sensor_ids for filtering data; if NULL then do nothing see `names(mc_data_sensors)`
+#' @param sensors sensor_names for filtering data; if NULL then do nothing see `names(mc_data_sensors)`
 #' @param reverse if TRUE then input localities and/or sensors are excluded (default FALSE)
 #' @param stop_if_empty if TRUE then error for empty output (default TRUE)
 #' @return filtered myClim object
 #' @export
 #' @examples 
-
 #' ## keep only "A6W79", "A2E32" localities with all their sensors
-#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"))
+#' \dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"))}
 #' 
 #' ## remove "A6W79", "A2E32" localities and keep all others
-#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), reverse=T)
+#' \dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), reverse=T)}
 #' 
 #' ## keep only "TMS_T1", and "TMS_T2" sensors on all localities
-#' mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"))
+#' \dontrun{mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"))}
 #' 
 #' ## remove "TMS_T1", and "TMS_T2" sensors from all localities
-#' mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"),reverse=T)
+#' \dontrun{mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"),reverse=T)}
 #' 
 #' ## keep only "TMS_T1", and "TMS_T2" sensors on "A6W79", "A2E32" localities
-#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"))
+#' \dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
+#'                    sensors=c("TMS_T1", "TMS_T2"))}
 #' 
-#' ## remove "TMS_T1", and "TMS_T2" sensors from "A6W79", "A2E32" localities and keep all other sensors and localities
-#' mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), sensors=c("TMS_T1", "TMS_T2"),reverse=T)
+#' ## remove "TMS_T1", and "TMS_T2" sensors from "A6W79", "A2E32" localities
+#' ## and keep all other sensors and localities
+#' \dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
+#'                    sensors=c("TMS_T1", "TMS_T2"), reverse=T)}
 
 mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_agg_format <- .common_is_agg_format(data)

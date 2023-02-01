@@ -653,7 +653,7 @@ mc_prep_calib_load <- function(data, calib_table) {
         if(!("cor_slope" %in% colnames(sensor_calib_table))) {
             sensor_calib_table$cor_slope <- 0
         }
-        sensor_calib_table <- dplyr::select(sensor_calib_table, .data$datetime, .data$cor_factor, .data$cor_slope)
+        sensor_calib_table <- dplyr::select(sensor_calib_table, "datetime", "cor_factor", "cor_slope")
         sensor$calibration <- as.data.frame(dplyr::arrange(sensor_calib_table, .data$datetime))
         sensor
     }
@@ -740,7 +740,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
             }
             data$values * (cor_slope + 1) + cor_factor
         }
-        values <- purrr::pmap(dplyr::select(input_data, .data$cor_factor, .data$cor_slope, .data$data), data_function)
+        values <- purrr::pmap(dplyr::select(input_data, "cor_factor", "cor_slope", "data"), data_function)
         sensor$values <- purrr::flatten_dbl(values)
         sensor$metadata@calibrated <- TRUE
         sensor

@@ -71,7 +71,7 @@ mc_info_clean <- function(data) {
 
     locality_function <- function(locality) {
         items <- purrr::map(locality$loggers, logger_function)
-        purrr::map(items, function(x) purrr::prepend(x, locality$metadata@locality_id))
+        purrr::map(items, ~ append(.x, locality$metadata@locality_id, after=0))
     }
 
     rows <- purrr::flatten(purrr::map(data$localities, locality_function))
