@@ -566,7 +566,7 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
 #' @examples
 #' \dontrun{
 #' tubedb <- TubeDB(url="server", user="user", password="password")
-#' data <- mc_read_tubedb(tubedb, region="ckras", plot=c("HOSEK-606", "HOSEK-618"))
+#' data <- mc_read_tubedb(tubedb, region="ckras", plot=c("TP_KAR_19", "TP_KODA_61"))
 #' }
 mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
                            sensor_ids=list(T1="TMS_T1", T2="TMS_T2", T3="TMS_T3", moist="TMS_TMSmoisture", T_2m="TS_T"),

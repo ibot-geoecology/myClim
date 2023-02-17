@@ -31,7 +31,7 @@ install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=
 
 ## Reading microclimatic data
 myClim supports natively import of several file formats: `r names(myClim::mc_data_formats)`. For reading set parameter
-`dataformat_name`. myClim can also read records from any wide
+`dataformat_name`. The myClim can also read records from any wide
 or long data frame in R.
 
 **`mc_read_files()`, `mc_read_wide()`, `mc_read_long()`** use for reading without metadata. Easy, fast, exploratory. myClim automatically organize data into artificial localities. Metadata can be updated later.
@@ -75,9 +75,9 @@ tms.m <- mc_read_data(files_table = "files_table.csv",
 ```
 
 
-## Pre-Prprocessing
+## Pre-Processing
 
-* **Cleaning time series:** `mc_prep_clean()` corrects the time-series if it is in wrong order, duplicated or missing. cleaning log is saved in myClim object and can be called ex post `mc_info_clean()`. Cleaning is called by default during reading.
+* **Cleaning time series:** `mc_prep_clean()` corrects the time-series if it is in wrong order, duplicated or missing. Cleaning log is saved in myClim object and can be called ex post `mc_info_clean()`. Cleaning is called by default during reading.
 
 ```{r eval=TRUE}
 # clean runs automatically while reading
@@ -86,7 +86,7 @@ tms.info <- mc_info_clean(tms) # call cleaning log
 ```
 
 
-* **Handling time zones:** `mc_prep_solar_tz()` myClim expect input data in UTC time. It is ecologically meaningful to use rather solar time, which respects local photo-period especially when working with global data sets. Solar time is calculated from longitude of locality. The offset can be set manually, eg. to respect political time with `mc_prep_meta_locality()`.
+* **Handling time zones:** `mc_prep_solar_tz()` myClim expect input data in UTC time. It is ecologically meaningful to use rather solar time, which respects local photo-period especially when working with global data sets. Solar time is calculated from longitude of locality. The offset can be set manually, e.g,. to respect political time with `mc_prep_meta_locality()`.
 
 ```{r eval=TRUE}
 tms <- mc_prep_solar_tz(tms) # calculate solar time
@@ -181,7 +181,7 @@ tms.if<-mc_info(tms.m) # see info
 ```{r eval=TRUE}
 ## upload metadata from data frame
 
-# load  data frame with metadata (coordinates)
+# load data frame with metadata (coordinates)
 metadata<-readRDS("metadata.rds")
 
 # upload metadata from data.frame
@@ -237,7 +237,7 @@ joined_data <- mc_join(data, comp_sensors=c("TMS_T1", "TMS_T2"))
 <img src="join_plot.png" width="700"/>
 
 ## Plotting
-`myClim` It is possible to plot raster plot with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports max. two different physical units to be plotted (primary and secondary y axis. Plotting functions save pdf or png files on your drive. 
+It is possible to plot raster plot with `mc_plot_raster()` or line time series with `mc_plot_line()`. Line time series supports max. two different physical units to be plotted (primary and secondary y axis. Plotting functions save pdf or png files on your drive. 
 
 ```{r,eval=FALSE,comment = ''}
 ## lines
@@ -271,7 +271,7 @@ mc_plot_raster(tms,filename = "raster.png",
 <img src="lines.png" width="700"/>
 
 ## Aggregation
-With the `mc_agg()` function you can  aggregate e.g., form 15 min time-series to hours, days, weeks months, seasons, years with several functions e.g., mean, max, percentile, sum...
+With the `mc_agg()` function you can  aggregate e.g., form 15 min time-series to hours, days, weeks, months, seasons, years with several functions e.g., mean, max, percentile, sum...
 ```{r,eval=TRUE,warning=F}
 # with defaults only convert Raw-format  to Agg-format
 tms.ag <- mc_agg(tms.m,fun = NULL, period = NULL)
@@ -284,7 +284,7 @@ tms.day <- mc_agg(tms, fun=c("mean","range","coverage","percentile"),
 tms.all <- mc_agg(tms, fun=c("mean","range","coverage","percentile"),
                 percentiles = 95, period = "all", min_coverage = 0.95)
 
-# aggregate with your custom function. (how many records below -5°C per month)
+# aggregate with your custom function. (how many records are below -5°C per month)
 tms.all.custom <- mc_agg(tms.out, fun=list(TMS_T3="below5"),period = "month",
                          custom_functions = list(below5=function(x){length(x[x<(-5)])}))
 mc_info(tms.all.custom)
@@ -294,7 +294,7 @@ r<-mc_reshape_long(tms.all.custom)
 ## Calculation
 With myClim Calc-format objects it is possible to calculate new virtual sensors = microclimatic variables. E.g., volumetric water content, growing and freezing degree days, snow cover duration. 
 ```{r,eval=TRUE,warning=F}
-## calculate virtual sensor VWC from raw Tomst moisture
+## calculate virtual sensor VWC from raw TMS moisture signal
 tms.calc <- mc_calc_vwc(tms.out,soiltype = "loamy sand A")
 # call mc_data_vwc_parameters() for soil type selection (sand, loam, peat....)
 
@@ -327,7 +327,7 @@ kable(tms.snow, "html", digits=2) %>%
 
 
 ## myClim standard envi
-Fast track to ecological analysis. Return single value for given period across all localities.    
+Return single value for given period across all localities.    
 ```{r}
 # calculate standard myClim envi from your data 
 temp_env <- mc_env_temp(tms,period="all",min_coverage = 0.9)
