@@ -53,6 +53,6 @@ with TubeDB API into myClim object. You need to know databse URL, username and p
 \examples{
 \dontrun{
 tubedb <- TubeDB(url="server", user="user", password="password")
-data <- mc_read_tubedb(tubedb, region="ckras", plot=c("HOSEK-606", "HOSEK-618"))
+data <- mc_read_tubedb(tubedb, region="ckras", plot=c("TP_KAR_19", "TP_KODA_61"))
 }
 }
