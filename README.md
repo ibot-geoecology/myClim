@@ -14,7 +14,7 @@ Installation of myClim package:
 install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
 ```
 # Documentation & user manual
-* [functions documentation](http://labgis.ibot.cas.cz/myclim/index.html)   
+* [functions documentation](http://labgis.ibot.cas.cz/myclim/reference/index.html)   
 * [vignette: user manual](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html)
 
 # Source code of package
