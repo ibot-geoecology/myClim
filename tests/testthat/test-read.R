@@ -41,7 +41,7 @@ test_that("mc_read_data csv with localities", {
     expect_equal(data$localities$A1E05$metadata@elevation, 255)
     expect_equal(data$localities$A6W79$metadata@tz_type, myClim:::.model_const_TZ_USER_DEFINED)
     expect_equal(data$localities$A6W79$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
-    expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,
+    expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1_L45$metadata@height,
                  mc_data_heights$height[mc_data_heights$logger_type == .model_const_LOGGER_TOMST_TMS_L45 &
                                             mc_data_heights$sensor_name == .model_const_SENSOR_TMS_T1])
 })
