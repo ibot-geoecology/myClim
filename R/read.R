@@ -592,9 +592,10 @@ mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
         stop(.read_const_MESSAGE_TUBEDB_SENSORS_NULL)
     }
     plot_function <- function(plot_item) {
-        tubedb_table <- rTubeDB::query_timeseries(tubedb, plot=plot_item, datetimeFormat="POSIXct",
+        tubedb_table <- rTubeDB::query_timeseries(tubedb, plot=plot_item, datetimeFormat="character",
                                             sensor=names(sensor_ids),
                                             aggregation=aggregation, quality=quality, ...)
+        tubedb_table$datetime <- lubridate::ymd_hm(tubedb_table$datetime)
         result <- tidyr::pivot_longer(tubedb_table, !c(.data$plot, .data$datetime), names_to="sensor_name", values_to="value")
         return(result)
     }
@@ -629,7 +630,19 @@ mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
 .read_get_tubedb_sensors <- function(tubedb, region) {
     sensors_table <- rTubeDB::query_region_sensors(tubedb, regionID = region)
     sensors_table <- dplyr::filter(sensors_table, !.data$derived)
-    result <- sensors_table$id
+    sensors_with_suffix <- dplyr::filter(myClim::mc_data_heights, !is.na(.data$suffix))
+    sensors_with_suffix$full_name <- paste0(sensors_with_suffix$sensor_name, sensors_with_suffix$suffix)
+    sensor_id_function <- function(sensor_id) {
+        if(sensor_id %in% names(myClim::mc_data_sensors)) {
+            return(sensor_id)
+        }
+        condition <- sensors_with_suffix$full_name == sensor_id
+        if(any(condition)) {
+            return(sensors_with_suffix$sensor_name[condition])
+        }
+        return(sensor_id)
+    }
+    result <- purrr::map(sensors_table$id, sensor_id_function)
     names(result) <- sensors_table$id
     return(result)
 }

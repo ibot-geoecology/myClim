@@ -145,8 +145,8 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
     table <- .common_sensor_values_as_tibble(logger)
     table <- dplyr::arrange(table, .data$datetime)
-    grouped_table <- dplyr::group_by(table, .data$datetime)
-    table_noduplicits <- dplyr::summarise_all(grouped_table, dplyr::first)
+    unique_rows <- !duplicated(table$datetime)
+    table_noduplicits <- table[unique_rows, ]
     datetime_range <- range(table_noduplicits$datetime)
     datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$clean_info@step} sec")))
     colnames(datetime_seq) <- "datetime"

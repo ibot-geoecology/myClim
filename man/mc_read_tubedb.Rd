@@ -8,8 +8,7 @@ mc_read_tubedb(
   tubedb,
   region = NULL,
   plot = NULL,
-  sensor_ids = list(T1 = "TMS_T1", T2 = "TMS_T2", T3 = "TMS_T3", moist =
-    "TMS_TMSmoisture", T_2m = "TS_T"),
+  sensor_ids = NULL,
   clean = TRUE,
   silent = FALSE,
   aggregation = "raw",
@@ -28,7 +27,9 @@ Region is used mainly for loading metadata from TubeDB localities.}
 
 If plot is NULL, then all localities are loaded from whole region.}
 
-\item{sensor_ids}{list in format \code{list(tubedb_sensor_name=myClim_sensor_name)}}
+\item{sensor_ids}{list in format \code{list(tubedb_sensor_name=myClim_sensor_name)} (default NULL)
+§If the region is specified and the names in TubeDB match the default sensor names in myClim,
+then the value is detected automatically.§}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
