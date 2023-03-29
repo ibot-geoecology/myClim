@@ -213,8 +213,8 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #'             +-----------------------------------------------------------------+}
 #'
 #' @importFrom grDevices dev.off gray hcl.colors pdf png
-#' @importFrom graphics abline axis axis.POSIXct box grconvertX grconvertY grid image layout legend lines mtext par
-#' @importFrom methods callNextMethod is new slot<- slotNames
+#' @importFrom graphics abline axis axis.POSIXct box grconvertX grconvertY grid image layout legend lines mtext par plot
+#' @importFrom methods callNextMethod is new slot<- slotNames as
 #' @importFrom stats aggregate end quantile sd start var
 #' @importFrom utils installed.packages packageVersion read.table tail
 #' @keywords internal

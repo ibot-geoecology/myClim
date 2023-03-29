@@ -1,3 +1,13 @@
+# myClim 1.0.0
+
+* Improved the vignette.
+* Added the ability to specify multiple TubeDB regions using the `region` parameter in the `mc_read_tubedb()` function,
+  providing more flexibility in data retrieval.
+* Automatically prepared the `sensor_ids` parameter in the `mc_read_tubedb()` function even if region is `NULL`.
+* Fixed the issue with factors in the `localities_table` in the `mc_read_data()` function.
+* Fixed the issue with factors in the `states` table in the sensor data list.
+* Concluded beta testing.
+
 # myClim 0.3.1
 
 * Deletion of duplicated items in function `mc_prep_clean()` is more effective.

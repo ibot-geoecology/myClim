@@ -5,7 +5,6 @@
 .read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible to read datetimes from {filename}. File is skipped."
 .read_const_MESSAGE_ANY_LOCALITY <- "There aren't any valid localities."
 .read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL <- "Plot or region must be set."
-.read_const_MESSAGE_TUBEDB_SENSORS_NULL <- "Sensor ids aren't set."
 
 #' Reading files or directories
 #'
@@ -137,6 +136,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         if(is.character(localities_table)) {
             localities_table <- .read_get_table_from_csv(localities_table)
         }
+        localities_table <- .common_convert_factors_in_dataframe(localities_table)
         localities <- .read_init_localities_from_table(localities_table)
     }
 
@@ -410,9 +410,9 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     abspath <- normalizePath(path)
     start <- dplyr::first(datetime)
     end <- dplyr::last(datetime)
-    data.frame(tag=.model_const_SENSOR_STATE_SOURCE,
-               start=start, end=end,
-               value=abspath)
+    result <- data.frame(tag=.model_const_SENSOR_STATE_SOURCE,
+                         start=start, end=end, value=abspath)
+    return(.common_convert_factors_in_dataframe(result))
 }
 
 #' Reading data from wide data.frame
@@ -550,15 +550,14 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
 #' with TubeDB API into myClim object. You need to know database URL, username and password.
 #'
 #' @param tubedb object for connection to server see [rTubeDB::TubeDB-class]
-#' @param region TubeDB region id - see [rTubeDB::query_regions] (default NULL)
+#' @param region vector of TubeDB region ids - see [rTubeDB::query_regions] (default NULL)
 #'
-#' Region is used mainly for loading metadata from TubeDB localities.
+#' Regions are used mainly for loading metadata from TubeDB localities.
 #' @param plot vector of localities ids see [rTubeDB::query_region_plots] [rTubeDB::query_timeseries] (default NULL)
 #'
 #' If plot is NULL, then all localities are loaded from whole region.
 #' @param sensor_ids list in format `list(tubedb_sensor_name=myClim_sensor_name)` (default NULL)
-#' If the region is specified and the names in TubeDB match the default sensor names in myClim,
-#' then the value is detected automatically.
+#' If sensor names in TubeDB match the default sensor names in myClim, then the value is detected automatically.
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is not printed in console (default FALSE)
 #' @param aggregation parameter used in function [rTubeDB::query_timeseries] (default raw)
@@ -577,19 +576,18 @@ mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
     if(is.null(plot) && is.null(region)) {
         stop(.read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL)
     }
-    plot_table <- NULL
-    if(!is.null(region)) {
-        plot_table <- rTubeDB::query_region_plots(tubedb, region)
-        if(is.null(sensor_ids))
-        {
-            sensor_ids <- .read_get_tubedb_sensors(tubedb, region)
-        }
+    if(is.null(region))
+    {
+        region <- .read_get_regions_from_plots(tubedb, plot)
     }
+    plot_table <- .read_get_plot_table_from_regions(tubedb, region)
+    if(is.null(sensor_ids))
+    {
+        sensor_ids <- .read_get_tubedb_sensors(tubedb, region)
+    }
+
     if(is.null(plot)) {
         plot <- plot_table$id
-    }
-    if(is.null(sensor_ids)) {
-        stop(.read_const_MESSAGE_TUBEDB_SENSORS_NULL)
     }
     plot_function <- function(plot_item) {
         tubedb_table <- rTubeDB::query_timeseries(tubedb, plot=plot_item, datetimeFormat="character",
@@ -607,6 +605,22 @@ mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
     }
     result <- .read_load_metadata_from_tubedb_plots(result, plot_table, plot)
     return(result)
+}
+
+.read_get_regions_from_plots <- function(tubedb, plot) {
+    regions <- rTubeDB::query_regions(tubedb)$id
+    region_function <- function (region) {
+        region_plots <- rTubeDB::query_region_plots(tubedb, region)$id
+        return(any(plot %in% region_plots))
+    }
+    return(purrr::keep(regions, region_function))
+}
+
+.read_get_plot_table_from_regions <- function(tubedb, regions) {
+    plot_table_function <- function(region) {
+        return(rTubeDB::query_region_plots(tubedb, region))
+    }
+    return(purrr::map_dfr(regions, plot_table_function))
 }
 
 .read_get_data_table_for_import_from_tubedb <- function(data_table) {
@@ -627,9 +641,13 @@ mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
     return(result)
 }
 
-.read_get_tubedb_sensors <- function(tubedb, region) {
-    sensors_table <- rTubeDB::query_region_sensors(tubedb, regionID = region)
+.read_get_tubedb_sensors <- function(tubedb, regions) {
+    region_function <- function(region) {
+        sensors_table <- rTubeDB::query_region_sensors(tubedb, regionID = region)
+    }
+    sensors_table <- purrr::map_dfr(regions, region_function)
     sensors_table <- dplyr::filter(sensors_table, !.data$derived)
+    sensors_table <- unique(sensors_table)
     sensors_with_suffix <- dplyr::filter(myClim::mc_data_heights, !is.na(.data$suffix))
     sensors_with_suffix$full_name <- paste0(sensors_with_suffix$sensor_name, sensors_with_suffix$suffix)
     sensor_id_function <- function(sensor_id) {

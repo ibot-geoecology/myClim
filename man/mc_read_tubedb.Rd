@@ -19,17 +19,16 @@ mc_read_tubedb(
 \arguments{
 \item{tubedb}{object for connection to server see \link[rTubeDB:TubeDB-class]{rTubeDB::TubeDB}}
 
-\item{region}{TubeDB region id - see \link[rTubeDB:query_regions]{rTubeDB::query_regions} (default NULL)
+\item{region}{vector of TubeDB region ids - see \link[rTubeDB:query_regions]{rTubeDB::query_regions} (default NULL)
 
-Region is used mainly for loading metadata from TubeDB localities.}
+Regions are used mainly for loading metadata from TubeDB localities.}
 
 \item{plot}{vector of localities ids see \link[rTubeDB:query_region_plots]{rTubeDB::query_region_plots} \link[rTubeDB:query_timeseries]{rTubeDB::query_timeseries} (default NULL)
 
 If plot is NULL, then all localities are loaded from whole region.}
 
 \item{sensor_ids}{list in format \code{list(tubedb_sensor_name=myClim_sensor_name)} (default NULL)
-§If the region is specified and the names in TubeDB match the default sensor names in myClim,
-then the value is detected automatically.§}
+If sensor names in TubeDB match the default sensor names in myClim, then the value is detected automatically.}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
@@ -45,11 +44,11 @@ then the value is detected automatically.§}
 myClim object in Raw-format
 }
 \description{
-Function redaing data from TubeDB (https://environmentalinformatics-marburg.github.io/tubedb/) into myClim object.
+Function is reading data from TubeDB (https://environmentalinformatics-marburg.github.io/tubedb/) into myClim object.
 }
 \details{
 In case you store your microclimatic time-series in TubeDB, you can read data
-with TubeDB API into myClim object. You need to know databse URL, username and password.
+with TubeDB API into myClim object. You need to know database URL, username and password.
 }
 \examples{
 \dontrun{
