@@ -2,7 +2,7 @@ Package: myClim
 Type: Package
 Title: R package for processing microclimatic data
 Version: 1.0.0
-URL: http://labgis.ibot.cas.cz/myclim/index.html https://github.com/ibot-geoecology/myClim
+URL: http://labgis.ibot.cas.cz/myclim/index.html, https://github.com/ibot-geoecology/myClim
 Authors@R: c(
     person("Matěj", "Man", email = "Matej.Man@ibot.cas.cz", role = "aut"),
     person("Vojtěch", "Kalčík", email = "Vojtech.Kalcik@ibot.cas.cz", role = c("aut", "cre")),

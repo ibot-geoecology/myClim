@@ -217,7 +217,8 @@ $localities | locality[1]                                                     |
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://labgis.ibot.cas.cz/myclim/index.html https://github.com/ibot-geoecology/myClim}
+  \item \url{http://labgis.ibot.cas.cz/myclim/index.html}
+  \item \url{https://github.com/ibot-geoecology/myClim}
 }
 
 }
