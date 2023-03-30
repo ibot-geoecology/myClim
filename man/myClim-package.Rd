@@ -214,6 +214,13 @@ $localities | locality[1]                                                     |
             | locality[n]                                                     |
             +-----------------------------------------------------------------+}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{http://labgis.ibot.cas.cz/myclim/index.html https://github.com/ibot-geoecology/myClim}
+}
+
+}
 \author{
 \strong{Maintainer}: Vojtěch Kalčík \email{Vojtech.Kalcik@ibot.cas.cz}
 
