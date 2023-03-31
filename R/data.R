@@ -110,7 +110,7 @@
 #' * coverage - result of `coverage` function [myClim::mc_agg()]
 #' * DEND_T - temperature in Tomst dendrometer (°C)
 #' * DEND_TOMSTdendro - change in stem size in Tomst dendrometer (raw units) [myClim::mc_calc_tomst_dendro()]
-#' * dendro_l_um - change in stem size (μm) [myClim::mc_calc_tomst_dendro()]
+#' * dendro_l_um - change in stem size (um) [myClim::mc_calc_tomst_dendro()]
 #' * FDD - result of function [myClim::mc_calc_fdd()]
 #' * GDD - result of function [myClim::mc_calc_gdd()]
 #' * HOBO_RH - relative humidity in HOBO logger (%)
@@ -146,7 +146,7 @@
 #' Currently supported physical elements:
 #' * l_cm - length in cm
 #' * l_mm - length in mm
-#' * l_um - length in μm
+#' * l_um - length in um
 #' * moisture - moisture in ratio 0-1
 #' * RH_perc - relative humidity in %
 #' * T_C - temperature in °C

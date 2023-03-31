@@ -1,6 +1,6 @@
 Package: myClim
 Type: Package
-Title: R package for processing microclimatic data
+Title: R Package for Processing Microclimatic Data
 Version: 1.0.0
 URL: http://labgis.ibot.cas.cz/myclim/index.html, https://github.com/ibot-geoecology/myClim
 Authors@R: c(
@@ -23,7 +23,7 @@ License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
-Depends: 
+Depends:
     R (>= 3.5)
 Imports:
     stringr,
@@ -38,7 +38,7 @@ Imports:
     runner,
     plotly,
     zoo,
-    methods,
+    methods
 Roxygen: list(markdown = TRUE)
 Suggests: 
     rmarkdown,

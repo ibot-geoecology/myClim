@@ -4,7 +4,7 @@
 \name{myClim-package}
 \alias{myClim}
 \alias{myClim-package}
-\title{myClim: R package for processing microclimatic data}
+\title{myClim: R Package for Processing Microclimatic Data}
 \description{
 Package myClim was designed for microclimate data processing, storing, and analyzing.
 The myClim wofrkflow consists of reading logger files, pre-processing the time-series,

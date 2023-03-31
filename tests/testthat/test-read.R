@@ -153,7 +153,7 @@ test_that("mc_read_wide", {
     data_table <- readRDS("../data/read_table/precip.Rds")
     expect_error(data <- mc_read_wide(data_table, .model_const_SENSOR_precipitation, clean=FALSE))
     dates <- data_table$date
-    data_table$date <- as.POSIXct(lubridate::ymd(dates))
+    data_table$date <- as.POSIXct(lubridate::ymd(dates), tz="CET")
     expect_error(data <- mc_read_wide(data_table, .model_const_SENSOR_precipitation, clean=FALSE))
     data_table$date <- as.POSIXct(lubridate::ymd(dates, tz="UTC"))
     data <- mc_read_wide(data_table, .model_const_SENSOR_precipitation, clean=FALSE)

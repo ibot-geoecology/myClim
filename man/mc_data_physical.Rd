@@ -23,7 +23,7 @@ Currently supported physical elements:
 \itemize{
 \item l_cm - length in cm
 \item l_mm - length in mm
-\item l_um - length in μm
+\item l_um - length in um
 \item moisture - moisture in ratio 0-1
 \item RH_perc - relative humidity in \%
 \item T_C - temperature in °C

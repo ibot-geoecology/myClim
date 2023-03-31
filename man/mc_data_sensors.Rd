@@ -23,7 +23,7 @@ Currently supported sensors:
 \item coverage - result of \code{coverage} function \code{\link[=mc_agg]{mc_agg()}}
 \item DEND_T - temperature in Tomst dendrometer (°C)
 \item DEND_TOMSTdendro - change in stem size in Tomst dendrometer (raw units) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
-\item dendro_l_um - change in stem size (μm) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
+\item dendro_l_um - change in stem size (um) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item FDD - result of function \code{\link[=mc_calc_fdd]{mc_calc_fdd()}}
 \item GDD - result of function \code{\link[=mc_calc_gdd]{mc_calc_gdd()}}
 \item HOBO_RH - relative humidity in HOBO logger (\%)
