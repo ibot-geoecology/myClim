@@ -1,6 +1,6 @@
 Package: myClim
 Type: Package
-Title: R Package for Processing Microclimatic Data
+Title: Microclimatic Data Processing
 Version: 1.0.0
 URL: http://labgis.ibot.cas.cz/myclim/index.html, https://github.com/ibot-geoecology/myClim
 Authors@R: c(
@@ -12,11 +12,11 @@ Authors@R: c(
     person("Josef", "Brůna", email = "Josef.Bruna@ibot.cas.cz", role = "aut"),
     person("Lucia", "Hederová", email = "Lucia.Hederova@ibot.cas.cz", role = "aut"),
     person("Institute of Botany of the Czech Academy of Sciences", role = "cph"))
-Description: Package myClim was designed for handling the microclimatic data in R.
-    myClim workflow begin at the reading data primary from microclimatic dataloggers,
+Description: Handling the microclimatic data in R. The 'myClim' workflow begin 
+    at the reading data primary from microclimatic dataloggers,
     but can be also reading of meteorological station data from files.
     Cleaning time step, time zone settings and metadata collecting is the next step of the work flow.
-    With myClim tools one can crop, join, downscale, and convert microclimatic data formats, sort them into localities,
+    With 'myClim' tools one can crop, join, downscale, and convert microclimatic data formats, sort them into localities,
     request descriptive characteristics and compute microclimatic variables.
     Handy plotting functions are provided with smart defaults.
 License: GPL (>= 2)
