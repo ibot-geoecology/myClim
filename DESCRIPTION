@@ -40,12 +40,12 @@ Imports:
     zoo,
     methods
 Roxygen: list(markdown = TRUE)
-Suggests: 
+Additional_repositories: https://ibot-geoecology.github.io/drat
+Suggests:
     rmarkdown,
     knitr,
     kableExtra,
     rTubeDB,
     testthat (>= 3.0.0)
-Remotes: github::environmentalinformatics-marburg/tubedb/rTubeDB
 VignetteBuilder: knitr
 Config/testthat/edition: 3

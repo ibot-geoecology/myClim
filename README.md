@@ -7,6 +7,8 @@ requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr",
                         "rmarkdown", "knitr", "kableExtra", "tidyr", "plotly", "zoo")
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
+# optional package rTubeDB
+remotes::install_github('environmentalinformatics-marburg/tubedb/rTubeDB')
 ```
 
 Installation of myClim package:
