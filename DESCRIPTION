@@ -46,5 +46,6 @@ Suggests:
     kableExtra,
     rTubeDB,
     testthat (>= 3.0.0)
+Remotes: github::environmentalinformatics-marburg/tubedb/rTubeDB
 VignetteBuilder: knitr
 Config/testthat/edition: 3
