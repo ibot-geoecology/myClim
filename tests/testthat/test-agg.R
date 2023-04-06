@@ -242,8 +242,8 @@ test_that("mc_agg shifted series", {
         "../data/clean-rounding/CZ2_HRADEC_TS.csv", "CZ2_HRADEC", "TOMST_join", NA_character_,
         "../data/clean-rounding/CZ2_HRADEC_TMS.csv", "CZ2_HRADEC", "TOMST_join", NA_character_,
     ))
-    data <- mc_read_data(files_table, clean=F, silent=T)
-    cleaned_data <- mc_prep_clean(data, silent = TRUE)
+    data <- mc_read_data(files_table, clean=FALSE, silent=TRUE)
+    cleaned_data <- mc_prep_clean(data, silent=TRUE)
     expect_equal(cleaned_data$localities$CZ2_HRADEC$loggers[[1]]$clean_info@step, cleaned_data$localities$CZ2_HRADEC$loggers[[2]]$clean_info@step)
     expect_error(agg_data <- mc_agg(cleaned_data))
     agg_data <- mc_agg(cleaned_data, "mean", "2 hours")

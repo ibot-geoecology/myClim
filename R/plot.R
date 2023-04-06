@@ -39,7 +39,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
     if(length(moisture_physical) > 0){
         .plot_logger_moisture(logger, xlimit, months, physical[[moisture_physical[[1]]]])
     }
-    axis.POSIXct(1, at=months, labels=T, format="%m/%Y", las=2)
+    axis.POSIXct(1, at=months, labels=TRUE, format="%m/%Y", las=2)
     dev.off()
 }
 

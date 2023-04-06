@@ -9,7 +9,7 @@ mc_calc_snow_agg(
   snow_sensor = "snow",
   localities = NULL,
   period = 3,
-  use_utc = F
+  use_utc = FALSE
 )
 }
 \arguments{

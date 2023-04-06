@@ -41,7 +41,7 @@ test_that("mc_prep_clean rounding", {
 })
 
 test_that("mc_prep_clean 1.5 hour step", {
-    data <- mc_read_files("../data/HOBO/6265.csv", "HOBO", date_format = "%m/%d/%y %I:%M:%S %p", clean=F, silent=T)
+    data <- mc_read_files("../data/HOBO/6265.csv", "HOBO", date_format = "%m/%d/%y %I:%M:%S %p", clean=FALSE, silent=TRUE)
     cleaned_data <- mc_prep_clean(data, silent=T)
     test_raw_data_format(cleaned_data)
     expect_equal(data$`20396265`$loggers[[1]]$datetime, cleaned_data$`20396265`$loggers[[1]]$datetime)
