@@ -14,6 +14,7 @@
 #' @template param_localities_sensors
 #' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
 #' @export
+#' @return PNG files created in the output directory
 #' @examples
 #' \dontrun{mc_plot_loggers(mc_data_example_clean, "Figures")}
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
@@ -138,7 +139,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 
 #' Plot data - image
 #'
-#' Function plots single sensor form myClim data into file with image() R base function.
+#' Function plots single sensor form myClim data into PNG file with image() R base function.
 #' This was designed for fast, and easy data visualization especially focusing on missing
 #' values visualization and general data picture.
 #'
@@ -149,6 +150,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @template param_localities_sensors
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
+#' @return PNG file created as specified in output file name
 #' @export
 #' @examples
 #' \dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
