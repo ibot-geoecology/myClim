@@ -87,10 +87,13 @@
 
 #' Custom list for myClim object
 #'
-#' Top level list for store myClim data. (see [myClim-package])
+#' Top level list for store myClim data. (see [myClim-package]) Rather service function used
+#' for checking, whether object is myClimList. The same time can be used to create standard
+#' R list from myClimList.
 #'
 #' @param metadata of data object
 #' @param localities list of licalities
+#' @return the list containing myClim object’s metadata and localities
 #' @export
 myClimList <- function(metadata=NULL, localities=list())
     structure(list(metadata=metadata, localities=localities), class=c("myClimList", "list"))

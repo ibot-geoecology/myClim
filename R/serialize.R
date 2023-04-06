@@ -8,6 +8,7 @@
 #' @template param_myClim_object
 #' @param file path to output .rds file
 #' @examples 
+#' @return RDS file saved at the output path destination
 #' \dontrun{mc_save("myClim_data.rds")}
 #' @export
 mc_save <- function(data, file) {
