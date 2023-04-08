@@ -11,6 +11,11 @@ myClimList(metadata = NULL, localities = list())
 
 \item{localities}{list of licalities}
 }
+\value{
+the list containing myClim object’s metadata and localities
+}
 \description{
-Top level list for store myClim data. (see \link{myClim-package})
+Top level list for store myClim data. (see \link{myClim-package}) Rather service function used
+for checking, whether object is myClimList. The same time can be used to create standard
+R list from myClimList.
 }

@@ -11,12 +11,13 @@ mc_save(data, file)
 
 \item{file}{path to output .rds file}
 }
+\value{
+RDS file saved at the output path destination
+\donttest{mc_save(mc_data_example_agg, "myClim_data.rds")}
+}
 \description{
 This function was designed for saving the myClim data object to an
 .rds file, which can be later correctly loaded by any further version
 of myClim package with \link{mc_load}. This is the safest way how to store and
 share your myClim data.
-}
-\examples{
-\dontrun{mc_save("myClim_data.rds")}
 }

@@ -56,11 +56,9 @@ plotting together e.g. temperature and moisture. For TMS and HOBO scaling coeffi
 are estimated automatically, correctly. For other data it is better to set it by hand.
 }
 \examples{
-\dontrun{
-tms.plot <- mc_filter(tms,localities = "A6W79")
+tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
 p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_TMSmoisture"))
 p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "\%W")
 p <- p+ggplot2::xlab("week")
 p <- p+ggplot2::scale_color_manual(values=c("hotpink","pink", "darkblue"),name=NULL)
-}
 }

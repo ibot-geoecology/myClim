@@ -16,7 +16,7 @@
 #' @export
 #' @return PNG files created in the output directory
 #' @examples
-#' \dontrun{mc_plot_loggers(mc_data_example_clean, "Figures")}
+#' \donttest{mc_plot_loggers(mc_data_example_clean, "Figures")}
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
     .common_stop_if_not_raw_format(data)
     data <- mc_filter(data, localities, sensors)
@@ -153,7 +153,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @return PNG file created as specified in output file name
 #' @export
 #' @examples
-#' \dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
+#' \donttest{mc_plot_image(mc_data_example_clean, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
 mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NULL, height=1900, left_margin=12) {
     data_table <- mc_reshape_wide(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
@@ -222,7 +222,7 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' @param end_crop POSIXct datetime for crop data (default NULL)
 #' @return list of ggplot2 objects
 #' @examples
-#' \dontrun{mc_plot_raster(tms,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))}
+#' \donttest{mc_plot_raster(mc_data_example_agg, filename="raster.pdf", sensors=c("TMS_T3","TM_T"))}
 #' @export
 mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900,
                            viridis_color_map=NULL, start_crop=NULL, end_crop=NULL) {
@@ -400,13 +400,11 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @param end_crop POSIXct datetime for crop data (default NULL)
 #' @return ggplot2 object
 #' @examples
-#' \dontrun{
-#' tms.plot <- mc_filter(tms,localities = "A6W79")
+#' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
 #' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_TMSmoisture"))
 #' p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
 #' p <- p+ggplot2::xlab("week")
 #' p <- p+ggplot2::scale_color_manual(values=c("hotpink","pink", "darkblue"),name=NULL)
-#' }
 #' @export
 mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          scale_coeff=NULL,

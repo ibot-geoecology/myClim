@@ -23,6 +23,9 @@ mc_plot_loggers(
 
 \item{crop}{datetime range for plot, not cropping if NA (default c(NA, NA))}
 }
+\value{
+PNG files created in the output directory
+}
 \description{
 Function save separate files (*.png) per the loggers to the directory.
 Only Raw-format supported, Agg-format not supported.
@@ -30,5 +33,5 @@ For Agg-format use \code{\link[=mc_plot_line]{mc_plot_line()}}. Function was pri
 for Tomst  TMS loggers for fast, and easy data visualization.
 }
 \examples{
-\dontrun{mc_plot_loggers(mc_data_example_clean, "Figures")}
+\donttest{mc_plot_loggers(mc_data_example_clean, "Figures")}
 }

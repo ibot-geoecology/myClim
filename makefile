@@ -1,4 +1,4 @@
-.PHONY: install-no-vignete, install, build, remove, generate, generate-source, generate-documentation, generate-html, test, check
+.PHONY: install-no-vignete, install, build, build-dev remove, generate, generate-source, generate-documentation, generate-html, test, check, check-dev
 
 install-no-vignette:
 	R -e 'install.packages(".", repos = NULL)'
@@ -8,6 +8,9 @@ install: build
 
 build:
 	R -e 'devtools::build(".", path="../myClim_latest.tar.gz")'
+
+build-dev:
+	cd .. && RD CMD build myClim
 
 remove:
 	R -e 'remove.packages("myClim")'
@@ -29,3 +32,6 @@ test:
 
 check:
 	R --vanilla -e 'devtools::check()'
+
+check-dev:
+	cd .. && RD CMD check --as-cran myClim_*.*.*.tar.gz

@@ -9,7 +9,7 @@
 #' @param file path to output .rds file
 #' @examples 
 #' @return RDS file saved at the output path destination
-#' \dontrun{mc_save("myClim_data.rds")}
+#' \donttest{mc_save(mc_data_example_agg, "myClim_data.rds")}
 #' @export
 mc_save <- function(data, file) {
     output_object <- .save_convert_classes_to_lists(data)

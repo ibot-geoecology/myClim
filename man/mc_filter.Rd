@@ -46,23 +46,23 @@ selected sensors are removed from selected localities.
 }
 \examples{
 ## keep only "A6W79", "A2E32" localities with all their sensors
-\dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"))}
+filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"))
 
 ## remove "A6W79", "A2E32" localities and keep all others
-\dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), reverse=T)}
+filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"), reverse=TRUE)
 
 ## keep only "TMS_T1", and "TMS_T2" sensors on all localities
-\dontrun{mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"))}
+filtered_data <- mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"))
 
 ## remove "TMS_T1", and "TMS_T2" sensors from all localities
-\dontrun{mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"),reverse=T)}
+filtered_data <- mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"),reverse=TRUE)
 
 ## keep only "TMS_T1", and "TMS_T2" sensors on "A6W79", "A2E32" localities
-\dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
-                   sensors=c("TMS_T1", "TMS_T2"))}
+filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
+                           sensors=c("TMS_T1", "TMS_T2"))
 
 ## remove "TMS_T1", and "TMS_T2" sensors from "A6W79", "A2E32" localities
 ## and keep all other sensors and localities
-\dontrun{mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
-                   sensors=c("TMS_T1", "TMS_T2"), reverse=T)}
+filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
+                           sensors=c("TMS_T1", "TMS_T2"), reverse=TRUE)
 }

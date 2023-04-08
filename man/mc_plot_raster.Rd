@@ -71,5 +71,5 @@ low number  of localities (e.g. up to 10), because
 high number of localities plotted in R environment results in very small picture which is hard/impossible to read.
 }
 \examples{
-\dontrun{mc_plot_raster(tms,filename = "raster.pdf",sensors = c("TMS_T3","TM_T"))}
+\donttest{mc_plot_raster(mc_data_example, filename="raster.pdf", sensors=c("TMS_T3","TM_T"))}
 }

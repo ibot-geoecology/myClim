@@ -29,8 +29,11 @@ mc_plot_image(
 
 \item{left_margin}{width of space for sensor_labels; default = 12}
 }
+\value{
+PNG file created as specified in output file name
+}
 \description{
-Function plots single sensor form myClim data into file with image() R base function.
+Function plots single sensor form myClim data into PNG file with image() R base function.
 This was designed for fast, and easy data visualization especially focusing on missing
 values visualization and general data picture.
 }
@@ -38,5 +41,5 @@ values visualization and general data picture.
 Be careful with bigger data. Can take some time.
 }
 \examples{
-\dontrun{mc_plot_image(data, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
+\donttest{mc_plot_image(mc_data_example_clean, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
 }
