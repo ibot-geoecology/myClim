@@ -40,6 +40,3 @@ values visualization and general data picture.
 \details{
 Be careful with bigger data. Can take some time.
 }
-\examples{
-\donttest{mc_plot_image(mc_data_example_clean, "T1_image.png", "T1 sensor", sensors="TMS_T1")}
-}

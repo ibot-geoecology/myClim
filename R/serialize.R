@@ -12,7 +12,7 @@
 #' tmp_dir <- tempdir()
 #' tmp_file <- tempfile(tmpdir = tmp_dir)
 #' mc_save(mc_data_example_agg, tmp_file)
-#' unlink(tmp_dir, recursive = TRUE)
+#' file.remove(tmp_file)
 #' @export
 mc_save <- function(data, file) {
     output_object <- .save_convert_classes_to_lists(data)
@@ -44,7 +44,7 @@ mc_save <- function(data, file) {
 #' tmp_file <- tempfile(tmpdir = tmp_dir)
 #' mc_save(mc_data_example_agg, tmp_file)
 #' data <- mc_load(tmp_file)
-#' unlink(tmp_dir, recursive = TRUE)
+#' file.remove(tmp_file)
 #' @export
 mc_load <- function(file) {
     obj_list <- readRDS(file=file)

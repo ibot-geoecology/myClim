@@ -51,6 +51,8 @@ In case you store your microclimatic time-series in TubeDB, you can read data
 with TubeDB API into myClim object. You need to know database URL, username and password.
 }
 \examples{
+# Not run: To retrieve data from TubeDB, a running TubeDB server with a user account
+#          and a secret password is required.
 \dontrun{
 tubedb <- TubeDB(url="server", user="user", password="password")
 data <- mc_read_tubedb(tubedb, region="ckras", plot=c("TP_KAR_19", "TP_KODA_61"))

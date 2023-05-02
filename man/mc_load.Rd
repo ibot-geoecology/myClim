@@ -18,5 +18,9 @@ The \code{mc_save} and \code{mc_load} functions secure that the myClim object is
 loaded across myClim versions.
 }
 \examples{
-\dontrun{data <- mc_load("myClim_data.rds")}
+tmp_dir <- tempdir()
+tmp_file <- tempfile(tmpdir = tmp_dir)
+mc_save(mc_data_example_agg, tmp_file)
+data <- mc_load(tmp_file)
+file.remove(tmp_file)
 }

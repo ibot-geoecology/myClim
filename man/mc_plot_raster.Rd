@@ -71,5 +71,8 @@ low number  of localities (e.g. up to 10), because
 high number of localities plotted in R environment results in very small picture which is hard/impossible to read.
 }
 \examples{
-\donttest{mc_plot_raster(mc_data_example, filename="raster.pdf", sensors=c("TMS_T3","TM_T"))}
+tmp_dir <- tempdir()
+tmp_file <- tempfile(tmpdir = tmp_dir, fileext=".pdf")
+mc_plot_raster(mc_data_example_agg, filename=tmp_file, sensors=c("TMS_T3","TM_T"))
+file.remove(tmp_file)
 }

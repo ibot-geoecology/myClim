@@ -33,5 +33,6 @@ For Agg-format use \code{\link[=mc_plot_line]{mc_plot_line()}}. Function was pri
 for Tomst  TMS loggers for fast, and easy data visualization.
 }
 \examples{
-\donttest{mc_plot_loggers(mc_data_example_clean, "Figures")}
+tmp_dir <- tempdir()
+mc_plot_loggers(mc_data_example_clean, tmp_dir)
 }

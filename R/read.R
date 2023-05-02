@@ -41,10 +41,9 @@
 #' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
-#' \dontrun{
-#' tomst_data <- mc_read_files(c("examples/data/TOMST/data_91184101_0.csv",
-#'                               "examples/data/TOMST/data_94184102_0.csv"), "TOMST")
-#' }
+#' files <- c(system.file("extdata", "data_91184101_0.csv", package = "myClim"),
+#'            system.file("extdata", "data_94184102_0.csv", package = "myClim"))
+#' tomst_data <- mc_read_files(files, "TOMST")
 mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, recursive=TRUE, date_format=NA_character_,
                           tz_offset=NA_integer_, step=NA_integer_, clean=TRUE, silent=FALSE) {
     if(all(dir.exists(paths))) {
@@ -116,9 +115,9 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
-#' \dontrun{
-#' tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv",
-#'                            "examples/data/TOMST/localities_table.csv")}
+#' files_csv <- system.file("extdata", "files_table.csv", package = "myClim")
+#' localities_csv <- system.file("extdata", "localities_table.csv", package = "myClim")
+#' tomst_data <- mc_read_data(files_csv, localities_csv)
 mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=FALSE) {
     if(is.character(files_table)) {
         source_csv_file <- files_table
@@ -566,6 +565,8 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
 #' @return myClim object in Raw-format
 #' @export
 #' @examples
+#' # Not run: To retrieve data from TubeDB, a running TubeDB server with a user account
+#' #          and a secret password is required.
 #' \dontrun{
 #' tubedb <- TubeDB(url="server", user="user", password="password")
 #' data <- mc_read_tubedb(tubedb, region="ckras", plot=c("TP_KAR_19", "TP_KODA_61"))

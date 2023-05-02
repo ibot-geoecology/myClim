@@ -70,9 +70,9 @@ By default data are cleaned with function \code{\link[=mc_prep_clean]{mc_prep_cl
 holes in time-series, duplicated records or records in wrong order.
 }
 \examples{
-\dontrun{
-tomst_data <- mc_read_data("examples/data/TOMST/files_table.csv",
-                           "examples/data/TOMST/localities_table.csv")}
+files_csv <- system.file("extdata", "files_table.csv", package = "myClim")
+localities_csv <- system.file("extdata", "localities_table.csv", package = "myClim")
+tomst_data <- mc_read_data(files_csv, localities_csv)
 }
 \seealso{
 \link{mc_DataFormat}

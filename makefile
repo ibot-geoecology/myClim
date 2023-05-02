@@ -31,7 +31,7 @@ test:
 	R --vanilla -e 'devtools::test()'
 
 check:
-	R --vanilla -e 'devtools::check()'
+	R --vanilla --no-multiarch -e 'devtools::check()'
 
 check-dev:
 	cd .. && RD CMD check --as-cran myClim_*.*.*.tar.gz
