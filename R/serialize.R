@@ -7,9 +7,12 @@
 #'
 #' @template param_myClim_object
 #' @param file path to output .rds file
-#' @examples 
 #' @return RDS file saved at the output path destination
-#' \donttest{mc_save(mc_data_example_agg, "myClim_data.rds")}
+#' @examples
+#' tmp_dir <- tempdir()
+#' tmp_file <- tempfile(tmpdir = tmp_dir)
+#' mc_save(mc_data_example_agg, tmp_file)
+#' unlink(tmp_dir, recursive = TRUE)
 #' @export
 mc_save <- function(data, file) {
     output_object <- .save_convert_classes_to_lists(data)
@@ -37,7 +40,11 @@ mc_save <- function(data, file) {
 #' @param file path to input .rds file
 #' @return loaded myClim object
 #' @examples
-#' \dontrun{data <- mc_load("myClim_data.rds")}
+#' tmp_dir <- tempdir()
+#' tmp_file <- tempfile(tmpdir = tmp_dir)
+#' mc_save(mc_data_example_agg, tmp_file)
+#' data <- mc_load(tmp_file)
+#' unlink(tmp_dir, recursive = TRUE)
 #' @export
 mc_load <- function(file) {
     obj_list <- readRDS(file=file)
