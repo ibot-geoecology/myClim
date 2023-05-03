@@ -231,7 +231,7 @@ mc_join <- function(data, comp_sensors=NULL) {
 
 .join_print_info_logger <- function(logger, sensor_name) {
     source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, .data$tag == .model_const_SENSOR_STATE_SOURCE)
-    print(source_states)
+    message(source_states)
 }
 
 .join_get_plot_data <- function(data_table, columns, plot_interval) {

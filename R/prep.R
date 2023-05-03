@@ -72,15 +72,15 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
     info_table <- mc_info_clean(data)
     count_loggers <- nrow(info_table)
-    print(stringr::str_glue("{count_loggers} loggers"))
+    message(stringr::str_glue("{count_loggers} loggers"))
     start_date <- min(info_table$start_date)
     end_date <- max(info_table$end_date)
-    print(stringr::str_glue("datetime range: {start_date} - {end_date}"))
+    message(stringr::str_glue("datetime range: {start_date} - {end_date}"))
     step_repr_function <- function(step) {
         return(stringr::str_glue("({step}s = {round(step/60, 2)}min)"))
     }
     steps <- paste(purrr::map(sort(unique(info_table$step)), step_repr_function), collapse = ", ")
-    print(stringr::str_glue("detected steps: {steps}"))
+    message(stringr::str_glue("detected steps: {steps}"))
     print.data.frame(info_table)
     return(data)
 }
