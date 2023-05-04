@@ -13,15 +13,17 @@ test_that(".save_convert_classes_to_lists", {
 
 test_that("save and load", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent = T)
-    mc_save(data, "../temp/data.RDS")
-    loaded_data <- mc_load("../temp/data.RDS")
+    data_file <- file.path(tempdir(), "data.RDS")
+    mc_save(data, data_file)
+    loaded_data <- mc_load(data_file)
     test_raw_data_format(loaded_data)
     expect_equal(data, loaded_data)
     agg_data <- mc_agg(data, "mean", "hour")
-    mc_save(agg_data, "../temp/data.RDS")
-    loaded_agg_data <- mc_load("../temp/data.RDS")
+    mc_save(agg_data, data_file)
+    loaded_agg_data <- mc_load(data_file)
     test_agg_data_format(loaded_agg_data)
     expect_equal(agg_data, loaded_agg_data)
+    file.remove(data_file)
 })
 
 test_that("load objects v 0.2.1", {

@@ -16,8 +16,9 @@
 #' @export
 #' @return PNG files created in the output directory
 #' @examples
-#' tmp_dir <- tempdir()
+#' tmp_dir <- file.path(tempdir(), "plot")
 #' mc_plot_loggers(mc_data_example_clean, tmp_dir)
+#' unlink(tmp_dir, recursive=TRUE)
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
     .common_stop_if_not_raw_format(data)
     data <- mc_filter(data, localities, sensors)
