@@ -238,7 +238,7 @@ You can create a raster plot using `mc_plot_raster()` or a line time series plot
 ## lines
 tms.plot <- mc_filter(tms, localities = "A6W79")
 
-p <- mc_plot_line(tms.plot, filename = "lines.pdf", sensors = c("TMS_T3", "TMS_T1", "TMS_TMSmoisture"))
+p <- mc_plot_line(tms.plot, sensors = c("TMS_T3", "TMS_T1", "TMS_TMSmoisture"))
 p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
 p <- p+ggplot2::xlab("week")
 p <- p+ggplot2::aes(size = sensor_name)
@@ -246,20 +246,9 @@ p <- p+ggplot2::scale_size_manual(values = c(1, 1 ,2))
 p <- p+ggplot2::guides(size = "none")
 p <- p+ggplot2::scale_color_manual(values = c("hotpink", "pink", "darkblue"), name = NULL)
 
-mc_plot_line(tms, filename = "lines.pdf",
-             sensors = c("TMS_T3", "TMS_TMSmoisture"))
-
-mc_plot_line(tms, filename = "lines.png",
-             sensors = c("TMS_T3", "TMS_TMSmoisture"), png_width = 2500)
-
 ## raster
 mc_plot_raster(tms, sensors = c("TMS_T3"))
 
-mc_plot_raster(tms, filename = "raster.pdf", sensors = c("TMS_T3", "TM_T"))
-
-mc_plot_raster(tms, filename = "raster.png",
-               sensors = c("TMS_T3","TM_T"),
-               png_width = 2500, png_height = 500)
 ```
 
 <img src="raster.png" width="700"/>
