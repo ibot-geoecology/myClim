@@ -1,3 +1,11 @@
+# myClim 1.0.1
+* Updated help texts to comply with CRAN rules.
+* Restored `options` and `par` using the `on.exit()` function.
+* Replaced `print()` with `message()` in the code.
+* Utilized temporary directories in tests, examples, and vignettes.
+* Some `dontrun` examples have been modified to run.
+* Detection of the installed plotly package using the `system.file()` function.
+ 
 # myClim 1.0.0
 
 * Improved the vignette.

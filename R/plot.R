@@ -20,6 +20,8 @@
 #' mc_plot_loggers(mc_data_example_clean, tmp_dir)
 #' unlink(tmp_dir, recursive=TRUE)
 mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop=c(NA, NA)) {
+    oldpar <- par(no.readonly = TRUE)
+    on.exit(par(oldpar))
     .common_stop_if_not_raw_format(data)
     data <- mc_filter(data, localities, sensors)
     .prep_check_datetime_step_unprocessed(data)
@@ -160,6 +162,8 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' mc_plot_image(mc_data_example_clean, tmp_file, "T1 sensor", sensors="TMS_T1")}
 #' file.remove(tmp_file)
 mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NULL, height=1900, left_margin=12) {
+    oldpar <- par(no.readonly = TRUE)
+    on.exit(par(oldpar))
     data_table <- mc_reshape_wide(data, localities, sensors)
     values_matrix <- as.matrix(data_table[,-1])
     png(filename=filename,width=1900, height=height, res=200)
@@ -565,7 +569,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                                         ymin=.data$ymin, ymax=.data$ymax, group=.data$group),
                            color="transparent", fill="orange", alpha=0.3) +
         ggplot2::facet_grid(rows = ggplot2::vars(.data$sensor))
-    if("plotly" %in% installed.packages()[,"Package"]) {
+    if(system.file("plotly") != "") {
         p <- plotly::ggplotly(p)
     }
     print(p)

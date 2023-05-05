@@ -110,8 +110,8 @@
 mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, min_coverage=1,
                    custom_start=NULL, custom_end=NULL, custom_functions=NULL) {
     old_lubridate_week_start <- getOption("lubridate.week.start")
-    options(lubridate.week.start = 1)
     on.exit(options(lubridate.week.start = old_lubridate_week_start))
+    options(lubridate.week.start = 1)
     use_intervals <- .agg_get_use_intervals(data, period, custom_start, custom_end)
     period_object <- .agg_get_period_object(use_intervals, period)
     .agg_check_fun_period(fun, period_object, use_utc)
