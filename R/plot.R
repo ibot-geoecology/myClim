@@ -569,8 +569,6 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                                         ymin=.data$ymin, ymax=.data$ymax, group=.data$group),
                            color="transparent", fill="orange", alpha=0.3) +
         ggplot2::facet_grid(rows = ggplot2::vars(.data$sensor))
-    if(system.file("plotly") != "") {
-        p <- plotly::ggplotly(p)
-    }
+    p <- plotly::ggplotly(p)
     print(p)
 }

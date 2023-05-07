@@ -12,7 +12,7 @@ Authors@R: c(
     person("Josef", "Brůna", email = "Josef.Bruna@ibot.cas.cz", role = "aut"),
     person("Lucia", "Hederová", email = "Lucia.Hederova@ibot.cas.cz", role = "aut"),
     person("Institute of Botany of the Czech Academy of Sciences", role = "cph"))
-Description: Handling the microclimatic data in R. The 'myClim' workflow begin 
+Description: Handling the microclimatic data in R. The 'myClim' workflow begins
     at the reading data primary from microclimatic dataloggers,
     but can be also reading of meteorological station data from files.
     Cleaning time step, time zone settings and metadata collecting is the next step of the work flow.
