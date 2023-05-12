@@ -49,19 +49,22 @@
 #'
 #' **TOMST**
 #'
-#' TOMST data format has stable structure. Datetime is in UTC. Name of data file is in format data_\<serial_number\>_\<x\>.csv.
-#' Value serial_number can be automatically detected from file name. Supported loggers are TMS and ThermoDataLogger.
+#' TOMST data format has defined structure. Expected name of data file is in format data_\<serial_number\>_\<x\>.csv.
+#' Value serial_number can be automatically detected from file name. 
+#' Datetime is in UTC and is stored in col 2. Temperature values are stored in col 3-5. Moisture ()
+#' Supported logger types are TMS (for TMS-3/TMS-4), ThermoDataLogger (for Thermologger), Dendrometer and TMS_L45 (for TMS-4 Long 45cm).
 #'
 #' **TOMST_join**
 #'
-#' TOMST_join data format is custom format for internal using of Institute of Botany of the Czech Academy of Sciences. 
-#' It is the output of joinTMS.exe modified, checked, curated and validated by Lucia.  
+#' TOMST_join data format is used by output files from JoinTMS.exe software and from tupomanager.exe (TMS-1). 
+#' Datetime in col 4, temperatures in col 5-7, moisture in col 8.
 #'
 #' **HOBO**
 #'
-#' HOBO data format is export format from software HOBOware of Onset company. Format is very variable
-#' and can be adjusted by user in preferences of HOBOware. Strucuture of HOBO files format can be partly detected automatically from header of data.
-#' Except of  format of date-time (`date_format`) which must be set manually in myClim reading functions ([mc_read_files()], [mc_read_data()]).
+#' HOBO data format is export format from software HOBOware of Onset company for HOBO U23 Pro v2 loggers (Temperature/RH). 
+#' Format is very variable and can be adjusted by user in preferences of HOBOware. Strucuture of HOBO files format can be partly 
+#' detected automatically from header of data.
+#' Format of date-time (`date_format`) must be set manually in myClim reading functions ([mc_read_files()], [mc_read_data()]).
 #' Date and time separated in more columns is not supported in myClim reading. If time zone is not defined in header of HOBO txt or csv file
 #' and is not UTC, then `tz_offset` must be filled in while reading. UTF-8 encoding of HOBO file is required for reding to myClim.
 #'
@@ -81,19 +84,29 @@
 #' - suffix - suffix for sensor_name. If suffix is NA, then sensor_name is not modified.
 #'
 #' Default heights are:
+#' 
+#' TOMST - ThermoDatalogger
 #' * TS_T = air 200 cm
+#' 
+#' TOMST - TMS
 #' * TMS_T1 = soil 8 cm
 #' * TMS_T2 = air 2 cm
 #' * TMS_T3 = air 15 cm
 #' * TMS_TMSmoisture = soil 0-15 cm
+#' 
+#' TOMST - Dendrometer
 #' * DEND_T = 130 cm
 #' * DEND_TOMSTdendro = 130 cm
-#' * HOBO_T_C = air 150 cm
-#' * HOBO_RH = air 150 cm
+#' 
+#' TOMST - TMS_L45
 #' * TMS_T1 = soil 40 cm
 #' * TMS_T2 = soil 30 cm
 #' * TMS_T3 = air 15 cm
 #' * TMS_TMSmoisture = soil 30-44 cm
+#' 
+#' HOBO - HOBO
+#' * HOBO_T_C = air 150 cm
+#' * HOBO_RH = air 150 cm
 #'
 #' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]
 "mc_data_heights"
@@ -147,12 +160,12 @@
 #' * l_cm - length in cm
 #' * l_mm - length in mm
 #' * l_um - length in um
-#' * moisture - moisture in ratio 0-1
+#' * moisture - volumetric moisture in m3/m3
 #' * RH_perc - relative humidity in %
 #' * T_C - temperature in °C
 #' * T_F - temperature in °F
 #' * t_h - time in hours
-#' * TMSmoisture - raw TMS moisture sensor units
+#' * TMSmoisture - raw TMS moisture sensor values
 #' * TOMSTdendro - radius difference in raw units
 #' * v - speed in m/s
 "mc_data_physical"
