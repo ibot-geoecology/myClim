@@ -34,8 +34,8 @@
 #' Function `mc_prep_clean` use time-step provided by user on import `mc_read`
 #' (is stored in metadata of logger [myClim::mc_LoggerMetadata]. 
 #' If time step is not provided by user on import (NA),than myClim automatically 
-#' identify the  time step from input time series based on last 100 records. 
-#' In case of irregular time series, function returns warning and skip series.
+#' detects the time step from input time series based on the last 100 records. 
+#' In case of irregular time series, function returns warning and skip the series.
 #' 
 #' In case the time step is regular, but is not nicely rounded, function round 
 #' the time series to the closest nice time and shift original data. 
@@ -45,7 +45,7 @@
 #' Maximal allowed shift of time series is 30 minutes. I.e. when the time step 
 #' is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30). 
 #' When you have 2h time step and wish to round to the whole hour 
-#' (13:33 -> 14:00, 15:33 -> 16:00) than after clening use  `mc_agg(period="2 hours")` 
+#' (13:33 -> 14:00, 15:33 -> 16:00) than after clening use `mc_agg(period="2 hours")` 
 #' 
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
@@ -392,9 +392,9 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
 #' This is based on coordinates (longitude). If longitude is not provided, then not working.
 #'  
 #' @details
-#' myClim library presumes the data in UTC by default. This function require at least longitude provided in locality
-#' metadata slot `lon_wgs84`. If longitude is not provided, function does not work. Coordinates of locality can be provided
-#' e.g. during data reading see [myClim::mc_read_data()] or ex post with [myClim::mc_prep_meta_locality()] function.
+#' myClim library presumes the data in UTC by default. This function requires longitude to be provided in locality
+#' metadata slot `lon_wgs84` (in decimal degrees). Coordinates of locality can be provided
+#' during data reading, see [myClim::mc_read_data()], or ex post with [myClim::mc_prep_meta_locality()] function.
 #' 
 #' TZ offset in minutes is calculated as `longitude / 180 * 12 * 60`.
 #'
@@ -600,33 +600,31 @@ mc_prep_merge <- function(data_items) {
     locality1
 }
 
-#' Load calibration to correct microclimatic records
+#' Load sensor calibration parameters to correct microclimatic records
 #'
 #' @description
-#' This function loads calibration parameters from data.frame 
-#' and writes them into myClim object metadata. This function
+#' This function loads calibration parameters from data.frame *logger_calib_table*
+#' and stores them in the myClim object metadata. This function
 #' does not calibrate data. For calibration itself run [myClim::mc_prep_calib()]
 #'
 #' @details
-#' This function allows user to provide calibration values either from DIY or 
-#' certified calibration procedure. Calibration data have by default the form 
-#' of linear function determined by the `cor_factor` and `cor_slope`:
+#' This function allows user to provide correction coefficients `cor_factor` and `cor_slope` for linear sensor calibration.
+#' Calibrated data have by default the form of linear function terms:
 #' 
-#' `calibrated = original * (cor_slope + 1) + cor_factor` 
+#' `calibrated value = original value * (cor_slope + 1) + cor_factor` 
 #' 
-#' This is useful in 
-#' case of multi-point calibration typically performed by certified calibration 
-#' labs. In case of one-point calibration typically DIY 
-#' calibrations only `cor_factor` is used and `cor_slope=0`. One point calibration
-#' is thus only the addition of correction factor. This function loads sensor specific 
-#' calibration values from data frame and writs them into myClim Raw-format 
-#' object metadata. The structure of input data frame is as follows:
+#' In case of one-point calibration, `cor_factor` can be estimated as:
+#' `cor_factor = reference value - sensor value` 
+#' and `cor_slope` should be set to 0.
+#' This function loads sensor-specific 
+#' calibration coefficients from *calib_table* and stores them into myClim Raw-format 
+#' object metadata. The *calib_table* is data.frame with 5 columns:
 #'
-#'  * serial_number = unique identification of logger hosting the sensors e.g. 91184101 
-#'  * sensor_id = the name of sensor to calibrate e.g. TMS_T1
+#'  * serial_number = serial number of the logger
+#'  * sensor_id = name of sensor, e.g. "TMS_T1"
 #'  * datetime = the date of the calibration
-#'  * cor_factor = the correction factor, in case of multi-point calibration the intercept of calibration curve.
-#'  * cor_slope = the slope of calibration curve (in case of one-point calibration slope = 0)
+#'  * cor_factor = the correction factor
+#'  * cor_slope = the slope of calibration curve (in case of one-point calibration, use cor_slope = 0)
 #'
 #' It is not possible to change calibration parameters for already calibrated sensor. 
 #' This prevents repeated calibrations. Once [myClim::mc_prep_calib()] is called then 
