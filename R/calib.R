@@ -5,8 +5,8 @@
 #' Calculates coefficients for TMS moisture conversion to VWC
 #'
 #' @description
-#' Specialized, service function. You will typically not need to use this one. 
-#' Function calculate correction parameters (slope and intercept) 
+#' Specialized function for calibration of TOMST TMS moisture sensor.
+#' Function calculate correction parameters for individual logger (slope and intercept) 
 #' from TMS moisture measurements in pure water and air.
 #'
 #' @details
@@ -19,15 +19,15 @@
 #' But this must be done in code of the function. It is possible, but advanced, 
 #' and typically not necessary, the default values should be working well.     
 #'
-#' @param raw_air Raw TMS moisture records in air
-#' @param raw_water Raw TMS moisture records in water
+#' @param raw_air Raw TMS moisture signal in air
+#' @param raw_water Raw TMS moisture signal in water
 #' @param t_air temperature of air (default 24)
 #' @param t_water temperature of water (default 24)
 #' @param ref_air (default 114.534) 
 #' @param ref_water (default 3634.723)
 #' @param ref_t (default 24)
-#' @param acor_t (default 1.91132689118083)
-#' @param wcor_t (default 0.64108)
+#' @param acor_t temperature drift correction parameter for air (default 1.91132689118083)
+#' @param wcor_t temperature drift correction parameter for water (default 0.64108)
 #' @return list with slope and intercept parameters
 #' @export
 #' @examples
