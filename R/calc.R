@@ -239,11 +239,11 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
     datetimes + (tz_offset * 60)
 }
 
-#' Calibrating TMS soil moisture from raw TMS to VWC
+#' Conversion of raw TMS soil moisture values to volumetric water content (VWC)
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object.
-#' Function converts the soil moisture from raw TMS units (scaled TDT signal)
+#' This function creates new virtual sensor on the locality within myClim data object.
+#' Function converts the raw TMS soil moisture (scaled TDT signal)
 #' to volumetric water content (VWC).
 #'
 #' @details
@@ -265,11 +265,14 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' then it is strongly recommended to chose the closest
 #' existing calibration curve for specific soil type instead of default "universal".
 #' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A,
-#' sandy loam B, loam, silt loam, peat, water, #' universal, sand TMS1,
+#' sandy loam B, loam, silt loam, peat, water,
+#' universal, sand TMS1,
 #' loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 #' For full table of function parameters see [mc_data_vwc_parameters]
+#' When logger-specific correction parameters are available (see [myClim::mc_calib_moisture()]), it use these values to correct 
+#' resulting VWC.
 #' 
-#' The function by default replace the moisture records in frozen soils with NA,
+#' The function by default replace the moisture records in frozen soils with NA (param *frozen2NA*),
 #' because the soil moisture sensor was not designed to measure in
 #' frozen soils and the returned records are thus not comparable
 #' with values from non-frozen soil.
@@ -285,10 +288,10 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' (default "universal").  Parameters a, b and c are used in calculation.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @param ref_t (default 24)
-#' @param acor_t (default 1.91132689118083) correction temperature while
-#' sensor on the air see [myClim::mc_calib_moisture()]
-#' @param wcor_t (default 0.64108) correction temperature while
-#' sensor in the water [myClim::mc_calib_moisture()]
+#' @param acor_t (default 1.91132689118083) correction parameter for temperature drift 
+#' in the air, see [myClim::mc_calib_moisture()]
+#' @param wcor_t (default 0.64108) correction parameter for temperature drift
+#' in the water, see [myClim::mc_calib_moisture()]
 #' @param frozen2NA if TRUE then those moisture records are set to
 #' NA when soil temperature is below 0 (default TRUE)
 #' @return myClim object same as input but with added virtual VWC moisture sensor
@@ -403,14 +406,15 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
 #' Growing Degree Days
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object. The virtual sensor
-#' with values of GDD (Growing Degree Days) is in Celsius degrees in original time step. see details
+#' This function creates new virtual sensor on the locality within myClim data object. The virtual sensor
+#' with values of GDD (Growing Degree Days) in degees Celsius . days, using original time step. see details
 #'
 #' @details
+#' Function calculates growing degree days as follows:  GDD = max(0;(T - Tbase)) . period(days) 
 #' The allowed time step length for GDD calculation is day and shorter.
 #' Function creates new virtual sensor with the same time step as input data.
 #' For shorter time steps than the day, the GDD value is the contribution
-#' of the interval to the growing degree day.
+#' of the interval to the growing degree day, supposing constant temperature over this period.
 #' Be careful while aggregating growing degree days to longer periods
 #' see [myClim::mc_agg()] only meaningful aggregation function is `sum`,
 #' but myClim let you apply anything.
