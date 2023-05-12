@@ -73,7 +73,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' (i) `files_table` with *paths* pointing to raw
 #' csv logger files, specification of *data format* (logger type) and *locality name*.
 #'
-#' (ii) `localities_table` with locality id and metadata e.g. longitude, latitude, elevation...
+#' (ii) `localities_table` with *locality id* and metadata e.g. longitude, latitude, elevation...
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table`
@@ -84,17 +84,17 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' @param files_table path to csv file or data.frame object with 3 required columns and few optional:
 #' required columns:
 #' * path - path to files
-#' * locality_id - the unique locality id
+#' * locality_id - unique locality id
 #' * data_format see [mc_data_formats], `names(mc_data_formats)`
 #'
 #' optional columns:
-#' * serial_number - can be NA, than myClim tries to detect from file name or header
-#' * logger_type - type of logger. This is used to set default sensor heights important when joining the data.
-#' In some cases myClim detects loger_type from source data file, but sometimes it is not possible. 
-#' Pre-defined logger types are: ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+#' * serial_number - logger serial number. If is NA, than myClim tries to detect serial number from file name (for TOMST) or header (for HOBO)
+#' * logger_type - type of logger. This defines individual sensors attributes (measurement heights and physical units) of the logger. Important when combining the data from multiple loggers on the locality.
+#' If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendrometer, ThermoDatalogger and TMS), but automatic detection of TMS_L45 is not possible.
+#' Pre-defined logger types are: ("Dendrometer", "HOBO", "ThermoDatalogger", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S");
-#' Ignored for Tomst TMS data format
+#' Ignored for TOMST data format
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files.
 #' If timezone can't be detected, then UTC is supposed.
@@ -105,11 +105,11 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #'
 #' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
 #' object containing 5 columns:
-#' * locality_id
-#' * elevation
-#' * lon_wgs84
-#' * lat_wgs84
-#' * tz_offset
+#' * locality_id - unique locality id
+#' * elevation - elevation (in m)
+#' * lon_wgs84 - longitude (in decimal degrees)
+#' * lat_wgs84 - latitude (in decimal degrees)
+#' * tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is not printed in console (default FALSE)
 #' @return myClim object in Raw-format see [myClim-package]
@@ -186,7 +186,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 .read_get_data_formats <- function(files_table) {
     file_function <- function (path, data_format, logger_type, date_format, tz_offset) {
         if(!(data_format %in% names(myClim::mc_data_formats))){
-            warning(stringr::str_glue("{data_format} is not aplicable format to {path}. File is skipped."))
+            warning(stringr::str_glue("{data_format} is not a supported data format. File is skipped."))
             return(NULL)
         }
         data_format_object <- myClim::mc_data_formats[[data_format]]
@@ -201,7 +201,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         }
         data_format_object <- .model_load_data_format_params_from_file(data_format_object, path)
         if(is.null(data_format_object)) {
-            warning(stringr::str_glue("{path} is not a supproted data format. File is skipped."))
+            warning(stringr::str_glue("{data_format} is not aplicable format to {path}. File is skipped."))
             return(NULL)
         }
         return(data_format_object)
@@ -346,7 +346,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
             result <- sub(",", ".", data_table[[column_index]])
             return(as.numeric(result))
         }
-        stop(stringr::str_glue("It isn't possible to load sensor data from {column_index}. column in file {filename}."))
+        stop(stringr::str_glue("It isn't possible to load sensor data from {column_index} column in file {filename}."))
     }
     as.data.frame(purrr::map(seq(ncol(data_table)), values_function))
 }
