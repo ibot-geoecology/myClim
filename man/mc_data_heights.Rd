@@ -25,20 +25,38 @@ data.frame with columns:
 }
 
 Default heights are:
+
+TOMST - ThermoDatalogger
 \itemize{
 \item TS_T = air 200 cm
+}
+
+TOMST - TMS
+\itemize{
 \item TMS_T1 = soil 8 cm
 \item TMS_T2 = air 2 cm
 \item TMS_T3 = air 15 cm
 \item TMS_TMSmoisture = soil 0-15 cm
+}
+
+TOMST - Dendrometer
+\itemize{
 \item DEND_T = 130 cm
 \item DEND_TOMSTdendro = 130 cm
-\item HOBO_T_C = air 150 cm
-\item HOBO_RH = air 150 cm
+}
+
+TOMST - TMS_L45
+\itemize{
 \item TMS_T1 = soil 40 cm
 \item TMS_T2 = soil 30 cm
 \item TMS_T3 = air 15 cm
 \item TMS_TMSmoisture = soil 30-44 cm
+}
+
+HOBO - HOBO
+\itemize{
+\item HOBO_T_C = air 150 cm
+\item HOBO_RH = air 150 cm
 }
 }
 \seealso{

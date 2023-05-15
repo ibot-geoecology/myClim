@@ -22,14 +22,15 @@ name of output sensor consists of output_prefix and value t_base e.g. GDD5}
 The same myClim object as input but with added virtual GDD sensor
 }
 \description{
-This function creates new virtual sensor on locality within myClim data object. The virtual sensor
-with values of GDD (Growing Degree Days) is in Celsius degrees in original time step. see details
+This function creates new virtual sensor on the locality within myClim data object. The virtual sensor
+with values of GDD (Growing Degree Days) in degees Celsius . days, using original time step. see details
 }
 \details{
+Function calculates growing degree days as follows:  GDD = max(0;(T - Tbase)) . period(days)
 The allowed time step length for GDD calculation is day and shorter.
 Function creates new virtual sensor with the same time step as input data.
 For shorter time steps than the day, the GDD value is the contribution
-of the interval to the growing degree day.
+of the interval to the growing degree day, supposing constant temperature over this period.
 Be careful while aggregating growing degree days to longer periods
 see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum},
 but myClim let you apply anything.

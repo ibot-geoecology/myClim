@@ -1,5 +1,5 @@
-not_supported_format_warning <- function(x) {
-    expect_warning(x, regexp = ".* is not a supproted data format. File is skipped.")
+not_applicable_format_warning <- function(x) {
+    expect_warning(x, regexp = ".* is not applicable format to .*\\. File is skipped.")
 }
 
 test_raw_data_format <- function(data) {

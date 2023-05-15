@@ -16,19 +16,19 @@ mc_read_data(
 required columns:
 \itemize{
 \item path - path to files
-\item locality_id - the unique locality id
+\item locality_id - unique locality id
 \item data_format see \link{mc_data_formats}, \code{names(mc_data_formats)}
 }
 
 optional columns:
 \itemize{
-\item serial_number - can be NA, than myClim tries to detect from file name or header
-\item logger_type - type of logger. This is used to set default sensor heights important when joining the data.
-In some cases myClim detects loger_type from source data file, but sometimes it is not possible.
-Pre-defined logger types are: ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+\item serial_number - logger serial number. If is NA, than myClim tries to detect serial number from file name (for TOMST) or header (for HOBO)
+\item logger_type - type of logger. This defines individual sensors attributes (measurement heights and physical units) of the logger. Important when combining the data from multiple loggers on the locality.
+If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendrometer, ThermoDatalogger and TMS), but automatic detection of TMS_L45 is not possible.
+Pre-defined logger types are: ("Dendrometer", "HOBO", "ThermoDatalogger", "TMS", "TMS_L45")
 Default heights of sensor based on logger types are defined in table \link{mc_data_heights}
 \item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S");
-Ignored for Tomst TMS data format
+Ignored for TOMST data format
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column have the highest priority. If NA then auto detection of timezone in files.
 If timezone can't be detected, then UTC is supposed.
@@ -41,11 +41,11 @@ instead of automatic step detection.
 \item{localities_table}{path to csv file or data.frame. Localities table is optional (default NULL).
 object containing 5 columns:
 \itemize{
-\item locality_id
-\item elevation
-\item lon_wgs84
-\item lat_wgs84
-\item tz_offset
+\item locality_id - unique locality id
+\item elevation - elevation (in m)
+\item lon_wgs84 - longitude (in decimal degrees)
+\item lat_wgs84 - latitude (in decimal degrees)
+\item tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
 }}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
@@ -61,7 +61,7 @@ This function has two tables as the parameters.
 (i) \code{files_table} with \emph{paths} pointing to raw
 csv logger files, specification of \emph{data format} (logger type) and \emph{locality name}.
 
-(ii) \code{localities_table} with locality id and metadata e.g. longitude, latitude, elevation...
+(ii) \code{localities_table} with \emph{locality id} and metadata e.g. longitude, latitude, elevation...
 }
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table}

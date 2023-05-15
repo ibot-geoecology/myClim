@@ -35,8 +35,8 @@ and have regular time-step, without duplicated records.
 Function \code{mc_prep_clean} use time-step provided by user on import \code{mc_read}
 (is stored in metadata of logger \link{mc_LoggerMetadata}.
 If time step is not provided by user on import (NA),than myClim automatically
-identify the  time step from input time series based on last 100 records.
-In case of irregular time series, function returns warning and skip series.
+detects the time step from input time series based on the last 100 records.
+In case of irregular time series, function returns warning and skip the series.
 
 In case the time step is regular, but is not nicely rounded, function round
 the time series to the closest nice time and shift original data.
@@ -46,7 +46,7 @@ microclimatic records are not modified but only shifted.
 Maximal allowed shift of time series is 30 minutes. I.e. when the time step
 is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30).
 When you have 2h time step and wish to round to the whole hour
-(13:33 -> 14:00, 15:33 -> 16:00) than after clening use  \code{mc_agg(period="2 hours")}
+(13:33 -> 14:00, 15:33 -> 16:00) than after clening use \code{mc_agg(period="2 hours")}
 }
 \examples{
 cleaned_data <- mc_prep_clean(mc_data_example_raw)

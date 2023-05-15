@@ -21,19 +21,22 @@ The environment object is stored in \code{./data/mc_data_formats.rda}.
 
 \strong{TOMST}
 
-TOMST data format has stable structure. Datetime is in UTC. Name of data file is in format data_\<serial_number\>_\<x\>.csv.
-Value serial_number can be automatically detected from file name. Supported loggers are TMS and ThermoDataLogger.
+TOMST data format has defined structure. Expected name of data file is in format data_\<serial_number\>_\<x\>.csv.
+Value serial_number can be automatically detected from file name.
+Datetime is in UTC and is stored in col 2. Temperature values are stored in col 3-5. Moisture ()
+Supported logger types are TMS (for TMS-3/TMS-4), ThermoDataLogger (for Thermologger), Dendrometer and TMS_L45 (for TMS-4 Long 45cm).
 
 \strong{TOMST_join}
 
-TOMST_join data format is custom format for internal using of Institute of Botany of the Czech Academy of Sciences.
-It is the output of joinTMS.exe modified, checked, curated and validated by Lucia.
+TOMST_join data format is used by output files from JoinTMS.exe software and from tupomanager.exe (TMS-1).
+Datetime in col 4, temperatures in col 5-7, moisture in col 8.
 
 \strong{HOBO}
 
-HOBO data format is export format from software HOBOware of Onset company. Format is very variable
-and can be adjusted by user in preferences of HOBOware. Strucuture of HOBO files format can be partly detected automatically from header of data.
-Except of  format of date-time (\code{date_format}) which must be set manually in myClim reading functions (\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}).
+HOBO data format is export format from software HOBOware of Onset company for HOBO U23 Pro v2 loggers (Temperature/RH).
+Format is very variable and can be adjusted by user in preferences of HOBOware. Strucuture of HOBO files format can be partly
+detected automatically from header of data.
+Format of date-time (\code{date_format}) must be set manually in myClim reading functions (\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}).
 Date and time separated in more columns is not supported in myClim reading. If time zone is not defined in header of HOBO txt or csv file
 and is not UTC, then \code{tz_offset} must be filled in while reading. UTF-8 encoding of HOBO file is required for reding to myClim.
 }

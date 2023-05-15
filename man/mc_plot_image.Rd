@@ -40,3 +40,9 @@ values visualization and general data picture.
 \details{
 Be careful with bigger data. Can take some time.
 }
+\examples{
+tmp_dir <- tempdir()
+tmp_file <- tempfile(tmpdir = tmp_dir)
+mc_plot_image(mc_data_example_clean, tmp_file, "T1 sensor", sensors="TMS_T1")
+file.remove(tmp_file)
+}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{mc_calc_vwc}
 \alias{mc_calc_vwc}
-\title{Calibrating TMS soil moisture from raw TMS to VWC}
+\title{Conversion of raw TMS soil moisture values to volumetric water content (VWC)}
 \usage{
 mc_calc_vwc(
   data,
@@ -36,11 +36,11 @@ see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical.}
 
 \item{ref_t}{(default 24)}
 
-\item{acor_t}{(default 1.91132689118083) correction temperature while
-sensor on the air see \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
+\item{acor_t}{(default 1.91132689118083) correction parameter for temperature drift
+in the air, see \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
 
-\item{wcor_t}{(default 0.64108) correction temperature while
-sensor in the water \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
+\item{wcor_t}{(default 0.64108) correction parameter for temperature drift
+in the water, see \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}}
 
 \item{frozen2NA}{if TRUE then those moisture records are set to
 NA when soil temperature is below 0 (default TRUE)}
@@ -49,8 +49,8 @@ NA when soil temperature is below 0 (default TRUE)}
 myClim object same as input but with added virtual VWC moisture sensor
 }
 \description{
-This function creates new virtual sensor on locality within myClim data object.
-Function converts the soil moisture from raw TMS units (scaled TDT signal)
+This function creates new virtual sensor on the locality within myClim data object.
+Function converts the raw TMS soil moisture (scaled TDT signal)
 to volumetric water content (VWC).
 }
 \details{
@@ -72,11 +72,14 @@ in case user know specific soil type, where the logger was measuring,
 then it is strongly recommended to chose the closest
 existing calibration curve for specific soil type instead of default "universal".
 Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A,
-sandy loam B, loam, silt loam, peat, water, #' universal, sand TMS1,
+sandy loam B, loam, silt loam, peat, water,
+universal, sand TMS1,
 loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 For full table of function parameters see \link{mc_data_vwc_parameters}
+When logger-specific correction parameters are available (see \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}), it use these values to correct
+resulting VWC.
 
-The function by default replace the moisture records in frozen soils with NA,
+The function by default replace the moisture records in frozen soils with NA (param \emph{frozen2NA}),
 because the soil moisture sensor was not designed to measure in
 frozen soils and the returned records are thus not comparable
 with values from non-frozen soil.

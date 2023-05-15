@@ -47,9 +47,9 @@ test_that("mc_read_data csv with localities", {
 })
 
 test_that("mc_read_files TOMST directory", {
-    not_supported_format_warning(data <- mc_read_files(c("../data/TOMST", "../data/eco-snow"), "TOMST", clean=FALSE)) %>%
-        not_supported_format_warning() %>%
-        not_supported_format_warning()
+    not_applicable_format_warning(data <- mc_read_files(c("../data/TOMST", "../data/eco-snow"), "TOMST", clean=FALSE)) %>%
+        not_applicable_format_warning() %>%
+        not_applicable_format_warning()
     test_raw_data_format(data)
     expect_equal(data$localities[[1]]$metadata@tz_type, myClim:::.model_const_TZ_UTC)
     expect_equal(length(data$localities), 6)
@@ -78,8 +78,8 @@ test_that("mc_read_data HOBO", {
         "../data/HOBO/20024354_tab.txt", "CH", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
         "../data/HOBO/6265.csv", "I", "HOBO", NA_character_, "%m/%d/%y %I:%M:%S %p", NA_integer_,
     ))
-    not_supported_format_warning(data <- mc_read_data(files_table, clean=FALSE)) %>%
-        not_supported_format_warning() %>%
+    not_applicable_format_warning(data <- mc_read_data(files_table, clean=FALSE)) %>%
+        not_applicable_format_warning() %>%
         expect_warning("Separated time in source data isn't supported.") %>%
         expect_warning("Separated time in source data isn't supported.")
     test_raw_data_format(data)

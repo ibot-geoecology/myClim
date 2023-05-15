@@ -19,9 +19,9 @@ test_that("mc_calc_snow long period", {
 })
 
 test_that("mc_calc_snow_logger_without_sensor", {
-    not_supported_format_warning(cleaned_data <- mc_read_files("../data/TOMST", "TOMST", silent = T)) %>%
-        not_supported_format_warning() %>%
-        not_supported_format_warning()
+    not_applicable_format_warning(cleaned_data <- mc_read_files("../data/TOMST", "TOMST", silent = T)) %>%
+        not_applicable_format_warning() %>%
+        not_applicable_format_warning()
     agg_data <- mc_agg(cleaned_data)
     expect_warning(agg_data <- mc_calc_snow(agg_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5),
                    "Locality 91184101 doesn't contains any sensor TMS_T3. It is skipped.") %>%
@@ -138,9 +138,9 @@ test_that("mc_calc_cumsum", {
 })
 
 test_that("mc_calc_tomst_dendro", {
-    not_supported_format_warning(cleaned_data <- mc_read_files("../data/TOMST", "TOMST", silent = T)) %>%
-        not_supported_format_warning() %>%
-        not_supported_format_warning()
+    not_applicable_format_warning(cleaned_data <- mc_read_files("../data/TOMST", "TOMST", silent = T)) %>%
+        not_applicable_format_warning() %>%
+        not_applicable_format_warning()
     expect_warning(raw_data <- mc_calc_tomst_dendro(cleaned_data),
                    "Loger 91184101 doesn't contains any sensor DEND_TOMSTdendro. It is skipped.") %>%
         expect_warning("Loger 94184102 doesn't contains any sensor DEND_TOMSTdendro. It is skipped.") %>%

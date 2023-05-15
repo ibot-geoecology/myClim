@@ -13,6 +13,8 @@
 .prep_const_MESSAGE_NA_APPROX_METHOD_NOT_IMPLEMENTED <- "Method is not implemented."
 .prep_const_MESSAGE_CLEAN_AGG <- "It isn't possible to clean myClim object in Agg-format."
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
+.prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
+.prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
 
 #' Cleaning datetime series
 #'
@@ -622,7 +624,7 @@ mc_prep_merge <- function(data_items) {
 #'
 #'  * serial_number = serial number of the logger
 #'  * sensor_id = name of sensor, e.g. "TMS_T1"
-#'  * datetime = the date of the calibration
+#'  * datetime = the date of the calibration in POSIXct type
 #'  * cor_factor = the correction factor
 #'  * cor_slope = the slope of calibration curve (in case of one-point calibration, use cor_slope = 0)
 #'
@@ -638,6 +640,9 @@ mc_prep_merge <- function(data_items) {
 #' @export
 mc_prep_calib_load <- function(data, calib_table) {
     .common_stop_if_not_raw_format(data)
+    if(!lubridate::is.POSIXct(calib_table$datetime)) {
+        stop(.prep_const_MESSAGE_DATETIME_WRONG_TYPE)
+    }
     calib_table <- dplyr::group_nest(dplyr::group_by(calib_table, .data$serial_number))
 
     sensor_function <- function(sensor, logger_calib_table) {
@@ -646,7 +651,7 @@ mc_prep_calib_load <- function(data, calib_table) {
             return(sensor)
         }
         if(sensor$metadata@calibrated) {
-            stop("It is not possible change calibration parameters in calibrated sensor.")
+            stop(.prep_const_MESSAGE_ALREADY_CALIBRATED)
         }
         if(!("cor_slope" %in% colnames(sensor_calib_table))) {
             sensor_calib_table$cor_slope <- 0

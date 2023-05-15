@@ -2,7 +2,7 @@
 % Please edit documentation in R/prep.R
 \name{mc_prep_calib_load}
 \alias{mc_prep_calib_load}
-\title{Load calibration to correct microclimatic records}
+\title{Load sensor calibration parameters to correct microclimatic records}
 \usage{
 mc_prep_calib_load(data, calib_table)
 }
@@ -17,30 +17,28 @@ Microclimatic records are not calibrated, only ready for calibration.
 To calibrate records run \code{\link[=mc_prep_calib]{mc_prep_calib()}}
 }
 \description{
-This function loads calibration parameters from data.frame
-and writes them into myClim object metadata. This function
+This function loads calibration parameters from data.frame \emph{logger_calib_table}
+and stores them in the myClim object metadata. This function
 does not calibrate data. For calibration itself run \code{\link[=mc_prep_calib]{mc_prep_calib()}}
 }
 \details{
-This function allows user to provide calibration values either from DIY or
-certified calibration procedure. Calibration data have by default the form
-of linear function determined by the \code{cor_factor} and \code{cor_slope}:
+This function allows user to provide correction coefficients \code{cor_factor} and \code{cor_slope} for linear sensor calibration.
+Calibrated data have by default the form of linear function terms:
 
-\code{calibrated = original * (cor_slope + 1) + cor_factor}
+\verb{calibrated value = original value * (cor_slope + 1) + cor_factor}
 
-This is useful in
-case of multi-point calibration typically performed by certified calibration
-labs. In case of one-point calibration typically DIY
-calibrations only \code{cor_factor} is used and \code{cor_slope=0}. One point calibration
-is thus only the addition of correction factor. This function loads sensor specific
-calibration values from data frame and writs them into myClim Raw-format
-object metadata. The structure of input data frame is as follows:
+In case of one-point calibration, \code{cor_factor} can be estimated as:
+\verb{cor_factor = reference value - sensor value}
+and \code{cor_slope} should be set to 0.
+This function loads sensor-specific
+calibration coefficients from \emph{calib_table} and stores them into myClim Raw-format
+object metadata. The \emph{calib_table} is data.frame with 5 columns:
 \itemize{
-\item serial_number = unique identification of logger hosting the sensors e.g. 91184101
-\item sensor_id = the name of sensor to calibrate e.g. TMS_T1
-\item datetime = the date of the calibration
-\item cor_factor = the correction factor, in case of multi-point calibration the intercept of calibration curve.
-\item cor_slope = the slope of calibration curve (in case of one-point calibration slope = 0)
+\item serial_number = serial number of the logger
+\item sensor_id = name of sensor, e.g. "TMS_T1"
+\item datetime = the date of the calibration in POSIXct type
+\item cor_factor = the correction factor
+\item cor_slope = the slope of calibration curve (in case of one-point calibration, use cor_slope = 0)
 }
 
 It is not possible to change calibration parameters for already calibrated sensor.

@@ -17,9 +17,9 @@ mc_calib_moisture(
 )
 }
 \arguments{
-\item{raw_air}{Raw TMS moisture records in air}
+\item{raw_air}{Raw TMS moisture signal in air}
 
-\item{raw_water}{Raw TMS moisture records in water}
+\item{raw_water}{Raw TMS moisture signal in water}
 
 \item{t_air}{temperature of air (default 24)}
 
@@ -31,16 +31,16 @@ mc_calib_moisture(
 
 \item{ref_t}{(default 24)}
 
-\item{acor_t}{(default 1.91132689118083)}
+\item{acor_t}{temperature drift correction parameter for air (default 1.91132689118083)}
 
-\item{wcor_t}{(default 0.64108)}
+\item{wcor_t}{temperature drift correction parameter for water (default 0.64108)}
 }
 \value{
 list with slope and intercept parameters
 }
 \description{
-Specialized, service function. You will typically not need to use this one.
-Function calculate correction parameters (slope and intercept)
+Specialized function for calibration of TOMST TMS moisture sensor.
+Function calculate correction parameters for individual logger (slope and intercept)
 from TMS moisture measurements in pure water and air.
 }
 \details{

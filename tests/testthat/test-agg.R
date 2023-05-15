@@ -164,9 +164,9 @@ test_that("mc_agg integer sensor", {
 })
 
 test_that("mc_agg reaggregate", {
-    not_supported_format_warning(data <- mc_read_files("../data/TOMST/", "TOMST", silent=T)) %>%
-        not_supported_format_warning() %>%
-        not_supported_format_warning()
+    not_applicable_format_warning(data <- mc_read_files("../data/TOMST/", "TOMST", silent=T)) %>%
+        not_applicable_format_warning() %>%
+        not_applicable_format_warning()
     agg_data <- mc_agg(data)
     agg_all <- mc_agg(agg_data, period = "all", fun = "mean")
     test_agg_data_format(agg_all)

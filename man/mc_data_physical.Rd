@@ -24,12 +24,12 @@ Currently supported physical elements:
 \item l_cm - length in cm
 \item l_mm - length in mm
 \item l_um - length in um
-\item moisture - moisture in ratio 0-1
+\item moisture - volumetric moisture in m3/m3
 \item RH_perc - relative humidity in \%
 \item T_C - temperature in °C
 \item T_F - temperature in °F
 \item t_h - time in hours
-\item TMSmoisture - raw TMS moisture sensor units
+\item TMSmoisture - raw TMS moisture sensor values
 \item TOMSTdendro - radius difference in raw units
 \item v - speed in m/s
 }

@@ -5,6 +5,8 @@
 .read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible to read datetimes from {filename}. File is skipped."
 .read_const_MESSAGE_ANY_LOCALITY <- "There aren't any valid localities."
 .read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL <- "Plot or region must be set."
+.read_const_MESSAGE_UNSUPPOERTED_FORMAT <- "{data_format} is not a supported data format. File is skipped."
+.read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not applicable format to {path}. File is skipped."
 
 #' Reading files or directories
 #'
@@ -186,7 +188,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 .read_get_data_formats <- function(files_table) {
     file_function <- function (path, data_format, logger_type, date_format, tz_offset) {
         if(!(data_format %in% names(myClim::mc_data_formats))){
-            warning(stringr::str_glue("{data_format} is not a supported data format. File is skipped."))
+            warning(stringr::str_glue(.read_const_MESSAGE_UNSUPPOERTED_FORMAT))
             return(NULL)
         }
         data_format_object <- myClim::mc_data_formats[[data_format]]
@@ -201,7 +203,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         }
         data_format_object <- .model_load_data_format_params_from_file(data_format_object, path)
         if(is.null(data_format_object)) {
-            warning(stringr::str_glue("{data_format} is not aplicable format to {path}. File is skipped."))
+            warning(stringr::str_glue(.read_const_MESSAGE_UNAPLICABLE_FORMAT))
             return(NULL)
         }
         return(data_format_object)

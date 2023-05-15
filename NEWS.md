@@ -1,3 +1,7 @@
+# myClim 1.0.2
+* Enhanced help texts.
+* Added a check in `mc_prep_calib_load()` to verify if the type of `calib_table$datetime` is `POSIXct`.
+
 # myClim 1.0.1
 * Updated help texts to comply with CRAN rules.
 * Restored `options` and `par` using the `on.exit()` function.
