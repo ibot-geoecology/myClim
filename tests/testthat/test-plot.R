@@ -44,3 +44,10 @@ test_that(".plot_get_data_sensors_by_physical", {
     expect_equal(stringr::str_sort(unique(table$physical)), c("T_C", "TMSmoisture"))
 })
 
+test_that("mc_plot_raster snow", {
+    data <- mc_read_files("../data/eco-snow", dataformat_name = "TOMST", silent=TRUE)
+    data_agg <- mc_agg(data)
+    data_agg <- mc_calc_snow(data_agg, "TMS_T2")
+    plot <- mc_plot_raster(data_agg, sensors="snow")
+    expect_true(TRUE)
+})

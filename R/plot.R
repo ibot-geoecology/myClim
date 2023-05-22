@@ -294,6 +294,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 .plot_raster_physical <- function(data, by_hour, viridis_color_map) {
     data_table <-mc_reshape_long(data)
     data_table <- dplyr::mutate(data_table, date = lubridate::date(.data$datetime))
+    data_table$value <- as.numeric(data_table$value)
     if(by_hour) {
         data_table <- dplyr::mutate(data_table, y_values = lubridate::hour(.data$datetime))
         y_name <- "hour"

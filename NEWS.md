@@ -1,3 +1,6 @@
+# myClim 1.0.3
+* Function `mc_plot_raster()` can plot bool type sensors, such as snow.
+
 # myClim 1.0.2
 * Enhanced help texts.
 * Added a check in `mc_prep_calib_load()` to verify if the type of `calib_table$datetime` is `POSIXct`.
