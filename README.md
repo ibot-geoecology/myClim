@@ -1,5 +1,7 @@
 <!-- badges: start -->
 [![CRAN Status](https://www.r-pkg.org/badges/version/myClim)](https://cran.r-project.org/package=myClim)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/myClim)](https://cran.r-project.org/package=myClim)
+[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/myClim)](https://cran.r-project.org/package=myClim)
 <!-- badges: end -->
 
 # Install
