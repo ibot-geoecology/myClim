@@ -83,7 +83,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' By default data are cleaned with function [myClim::mc_prep_clean()]. See function description. It detects
 #' holes in time-series, duplicated records or records in wrong order.
 #' @seealso [myClim::mc_DataFormat]
-#' @param files_table path to csv file or data.frame object with 3 required columns and few optional:
+#' @param files_table path to csv file or data.frame object see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv) 
+#' with 3 required columns and few optional:
 #' required columns:
 #' * path - path to files
 #' * locality_id - unique locality id
@@ -105,7 +106,9 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection.
 #'
-#' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
+#' @param localities_table path to csv file or data.frame [
+#' see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv). 
+#' Localities table is optional (default NULL).
 #' object containing 5 columns:
 #' * locality_id - unique locality id
 #' * elevation - elevation (in m)

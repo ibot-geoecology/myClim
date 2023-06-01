@@ -12,7 +12,8 @@ mc_read_data(
 )
 }
 \arguments{
-\item{files_table}{path to csv file or data.frame object with 3 required columns and few optional:
+\item{files_table}{path to csv file or data.frame object see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv)
+with 3 required columns and few optional:
 required columns:
 \itemize{
 \item path - path to files
@@ -38,7 +39,8 @@ Ignored for Tomst TMS data format (they are always in UTC)
 instead of automatic step detection.
 }}
 
-\item{localities_table}{path to csv file or data.frame. Localities table is optional (default NULL).
+\item{localities_table}{path to csv file or data.frame \href{https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv}{ see example}.
+Localities table is optional (default NULL).
 object containing 5 columns:
 \itemize{
 \item locality_id - unique locality id
