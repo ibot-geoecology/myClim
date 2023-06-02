@@ -85,6 +85,8 @@
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
 
+.model_const_MAX_PRINT_LOCALITIES <- 10
+
 #' Custom list for myClim object
 #'
 #' Top level list for store myClim data. (see [myClim-package]) Rather service function used
@@ -97,6 +99,58 @@
 #' @export
 myClimList <- function(metadata=NULL, localities=list())
     structure(list(metadata=metadata, localities=localities), class=c("myClimList", "list"))
+
+#' Print function for myClim object
+#'
+#' Function print info about first localities.
+#'
+#' @param x myClim object see [myClim-package]
+#' @export
+print.myClimList <- function(x, ...) {
+    sensor_function <- function(sensor) {
+        space <- "    "
+        if(.common_is_raw_format(x)) {
+            space <- "        "
+        }
+        print(stringr::str_glue("{space}{sensor$metadata@name} {sensor$metadata@sensor_id} {sensor$metadata@height}"))
+    }
+    logger_function <- function(logger) {
+        space <- "    "
+        range <- .model_get_item_datetime_range(logger)
+        print(stringr::str_glue("{space}Logger {logger$metadata@type} {logger$metadata@serial_number} {range}"))
+        purrr::walk(logger$sensors, sensor_function)
+    }
+    locality_function <- function(locality) {
+        range <- ""
+        if(.common_is_agg_format(x)) {
+             range <- .model_get_item_datetime_range(locality)
+        }
+        print(stringr::str_glue("Locality {locality$metadata@locality_id} {range}"))
+        if(.common_is_raw_format(x)) {
+            purrr::walk(locality$loggers, logger_function)
+        } else {
+            purrr::walk(locality$sensors, sensor_function)
+        }
+    }
+
+    print(stringr::str_glue("format: {x$metadata@format_type}"))
+    if(.common_is_agg_format(x)) {
+        print(stringr::str_glue("period: {x$metadata@period}"))
+    }
+    count_localities <- length(x$localities)
+    if(count_localities > .model_const_MAX_PRINT_LOCALITIES) {
+        purrr::walk(x$localities[1:.model_const_MAX_PRINT_LOCALITIES], locality_function)
+        print(stringr::str_glue("... {count_localities - .model_const_MAX_PRINT_LOCALITIES} more localities"))
+    } else {
+        purrr::walk(x$localities, locality_function)
+    }
+}
+
+.model_get_item_datetime_range <- function(item) {
+    start <- dplyr::first(item$datetime)
+    end <- dplyr::last(item$datetime)
+    return(stringr::str_glue("{start} - {end}"))
+}
 
 # classes ================================================================================
 
