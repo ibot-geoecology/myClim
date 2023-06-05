@@ -38,7 +38,8 @@ Imports:
     runner,
     plotly,
     zoo,
-    methods
+    methods,
+    vroom
 Roxygen: list(markdown = TRUE)
 Additional_repositories: https://ibot-geoecology.github.io/drat
 Suggests:
