@@ -1,3 +1,7 @@
+# myClim 1.0.4
+* Updated the `print(myClim_data)` function to display the metadata of the `myClim` object and the head of the table from `mc_info()`.
+* Enabled the use of the extraction operator `[]` to extract specific localities from the `myClim` object.
+
 # myClim 1.0.3
 * Function `mc_plot_raster()` can plot bool type sensors, such as snow.
 

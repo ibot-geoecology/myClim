@@ -105,6 +105,8 @@ myClimList <- function(metadata=NULL, localities=list())
 #' @param x myClim object see [myClim-package]
 #' @param ... other parameters from function print for tibble [tibble::tibble]
 #' @export
+#' @examples
+#' print(mc_data_example_agg, n=10)
 print.myClimList <- function(x, ...) {
     print(stringr::str_glue("myClim object created with myClim package version {x$metadata@version}"))
     print(stringr::str_glue("{x$metadata@format_type} format"))
@@ -121,6 +123,21 @@ print.myClimList <- function(x, ...) {
     sensors_text <- paste0(sort(unique(info_df$sensor_name)), collapse = ", ")
     print(stringr::str_glue("sensors: {sensors_text}"))
     print(tibble::as_tibble(info_df), ...)
+}
+
+#' Extract localities with []
+#'
+#' Using [] for extract localities.
+#'
+#' @param x myClim object see [myClim-package]
+#' @param ... indexes for extract localities
+#' @return myClim object with subset of localities see [myClim-package]
+#' @export
+#' @examples
+#' filtered_data <- mc_data_example_raw[1:2]
+`[.myClimList` <- function(x, ...) {
+    x$localities <- `[`(x$localities, ...)
+    return(x)
 }
 
 # classes ================================================================================
