@@ -118,3 +118,26 @@
     end_indexes <- cumsum_lengths[rle_output$values]
     lubridate::interval(datetime[start_indexes], datetime[end_indexes])
 }
+
+.common_get_count_items <- function(data) {
+    count_env <- new.env()
+    count_env$localities <- length(data$localities)
+    count_env$loggers <- 0
+    count_env$sensors <- 0
+
+    sensors_item_function <- function(item) {
+        count_env$sensors <- count_env$sensors + length(item$sensors)
+    }
+
+    raw_locality_function <- function(locality) {
+        count_env$loggers <- count_env$loggers + length(locality$loggers)
+        purrr::walk(locality$loggers, sensors_item_function)
+    }
+
+    if(.common_is_agg_format(data)) {
+        purrr::walk(data$localities, sensors_item_function)
+    } else {
+        purrr::walk(data$localities, raw_locality_function)
+    }
+    return(count_env)
+}
