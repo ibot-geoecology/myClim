@@ -1,4 +1,5 @@
 .common_const_MESSAGE_UNKNOWN_SENSOR_ID <- "Sensor_id {sensor_id} is unknown."
+.common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME <- "It isn't possible change time zone for period longer than day. Apply tz_offset in mc_agg function (parameter use_utc)."
 
 .common_convert_factors_in_dataframe <- function(dataframe) {
     factor_columns <- sapply(dataframe, is.factor)
@@ -140,4 +141,20 @@
         purrr::walk(data$localities, raw_locality_function)
     }
     return(count_env)
+}
+
+.common_check_agg_use_utc <- function(use_utc, period) {
+    if(use_utc) {
+        return(use_utc)
+    }
+    if(period %in% .agg_const_INTERVAL_PERIODS) {
+        warning(.common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME)
+        return(TRUE)
+    }
+    period_object <- lubridate::period(period)
+    if(period_object[[1]]@year == 0 && period_object[[1]]@month == 0 && period_object[[1]]@day == 0) {
+        return(use_utc)
+    }
+    warning(.common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME)
+    return(TRUE)
 }

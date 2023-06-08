@@ -4,7 +4,7 @@
 \alias{mc_reshape_wide}
 \title{Export values to wide table}
 \usage{
-mc_reshape_wide(data, localities = NULL, sensors = NULL)
+mc_reshape_wide(data, localities = NULL, sensors = NULL, use_utc = TRUE)
 }
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
@@ -12,6 +12,10 @@ mc_reshape_wide(data, localities = NULL, sensors = NULL)
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
 \item{sensors}{names of sensors; if NULL then all (default NULL) see \code{names(mc_data_sensors)}}
+
+\item{use_utc}{§if FALSE, then \code{tz_offset} is used for output timeseries (default TRUE)
+
+Agg-format accept the FALSE value only for step shorter than day. In Raw-format isn't parameter limited.§}
 }
 \value{
 data.frame with columns:
