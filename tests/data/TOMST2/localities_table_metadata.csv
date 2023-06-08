@@ -1,0 +1,4 @@
+tz_offset,locality_id,lon_wgs84,lat_wgs84,description,distance
+60,A1E05,14.2393200,50.9049290,wrong accuracy,1
+60,A6W79,14.3216230,50.9256400,most important,10
+60,A2E32,14.0918540,50.9508990,,100

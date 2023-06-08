@@ -41,13 +41,15 @@ instead of automatic step detection.
 
 \item{localities_table}{path to csv file or data.frame \href{https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv}{ see example}.
 Localities table is optional (default NULL).
-object containing 5 columns:
+§Object contains predefined columns and aditional columns from which values are saved to
+\code{metadata@user_data} \link{myClim-package}. All columns, except for \code{locality_id}, are optional.
 \itemize{
 \item locality_id - unique locality id
 \item elevation - elevation (in m)
 \item lon_wgs84 - longitude (in decimal degrees)
 \item lat_wgs84 - latitude (in decimal degrees)
 \item tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
+\item ... - additional values are saved to user_data§
 }}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}

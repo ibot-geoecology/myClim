@@ -109,12 +109,15 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' @param localities_table path to csv file or data.frame [
 #' see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv). 
 #' Localities table is optional (default NULL).
-#' object containing 5 columns:
+#' §Object contains predefined columns and aditional columns from which values are saved to
+#' `metadata@user_data` [myClim-package]. All columns, except for `locality_id`, are optional.
+#'
 #' * locality_id - unique locality id
 #' * elevation - elevation (in m)
 #' * lon_wgs84 - longitude (in decimal degrees)
 #' * lat_wgs84 - latitude (in decimal degrees)
 #' * tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
+#' * ... - additional values are saved to user_data§
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is not printed in console (default FALSE)
 #' @return myClim object in Raw-format see [myClim-package]
@@ -295,7 +298,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     .read_get_data_raw_from_localities(result_localities)
 }
 
-.read_get_new_locality <- function(locality_id, elevation=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
+.read_get_new_locality <- function(locality_id, elevation=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_, ...) {
     tz_type <- if(is.na(tz_offset)) .model_const_TZ_UTC else .model_const_TZ_USER_DEFINED
     metadata <- new("mc_LocalityMetadata")
     metadata@locality_id <- locality_id
@@ -304,6 +307,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     metadata@lat_wgs84 <- lat_wgs84
     metadata@tz_offset <- tz_offset
     metadata@tz_type <- tz_type
+    metadata@user_data <- list(...)
     list(metadata = metadata, loggers=list())
 }
 

@@ -46,6 +46,15 @@ test_that("mc_read_data csv with localities", {
                                             mc_data_heights$sensor_name == .model_const_SENSOR_TMS_T1])
 })
 
+test_that("mc_read_data csv with localities and metadata", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST2/localities_table_metadata.csv", clean=FALSE)
+    test_raw_data_format(data)
+    expect_true(is.na(data$localities$A1E05$metadata@elevation))
+    expect_equal(data$localities$A2E32$metadata@user_data$description, "")
+    expect_equal(data$localities$A6W79$metadata@user_data$description, "most important")
+    expect_equal(data$localities$A6W79$metadata@user_data$distance, 10)
+})
+
 test_that("mc_read_files TOMST directory", {
     not_applicable_format_warning(data <- mc_read_files(c("../data/TOMST", "../data/eco-snow"), "TOMST", clean=FALSE)) %>%
         not_applicable_format_warning() %>%
