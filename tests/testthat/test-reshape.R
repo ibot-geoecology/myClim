@@ -28,6 +28,14 @@ test_that("wideformat-all local time", {
                  table$A1E05_91184101_TS_T[table$datetime == lubridate::ymd_h("2020-10-28 10")])
     table$datetime <- table$datetime - (60 * 60)
     expect_equal(table_utc, table)
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    agg_data <- mc_agg(cleaned_data)
+    table_utc <- mc_reshape_wide(agg_data, use_utc=TRUE)
+    table <- mc_reshape_wide(agg_data, use_utc=FALSE)
+    table$datetime <- table$datetime - (60 * 60)
+    expect_equal(table_utc, table)
+    agg_data <- mc_agg(cleaned_data, fun="coverage", period="day")
+    expect_warning(table <- mc_reshape_wide(agg_data, use_utc=FALSE))
 })
 
 test_that("reshape long", {
@@ -46,4 +54,20 @@ test_that("reshape long", {
     all_data <- mc_agg(cleaned_data, "mean", "all")
     table <- mc_reshape_long(all_data)
     expect_true(all(table$time_to == lubridate::ymd_hm("2020-10-28 11:30")))
+})
+
+test_that("reshape long local time", {
+    data <- mc_read_data("../data/TOMST/files_table.csv",
+                         localities_table = "../data/TOMST/localities_table.csv", clean=TRUE, silent=TRUE)
+    table_utc <- mc_reshape_long(data, use_utc=TRUE)
+    table <- mc_reshape_long(data, use_utc=FALSE)
+    table$datetime <- table$datetime - (60 * 60)
+    table$time_to <- table$time_to - (60 * 60)
+    expect_equal(table_utc, table)
+    agg_data <- mc_agg(data)
+    table_utc <- mc_reshape_long(agg_data, use_utc=TRUE)
+    table <- mc_reshape_long(agg_data, use_utc=FALSE)
+    table$datetime <- table$datetime - (60 * 60)
+    table$time_to <- table$time_to - (60 * 60)
+    expect_equal(table_utc, table)
 })

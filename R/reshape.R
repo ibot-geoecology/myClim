@@ -91,6 +91,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
 #'
 #' @template param_myClim_object
 #' @template param_localities_sensors
+#' @template param_use_utc
 #' @return data.frame
 #'
 #' columns:
@@ -104,12 +105,15 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
 #' @export
 #' @examples
 #' head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)
-mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
+mc_reshape_long <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
     data <- mc_filter(data, localities, sensors)
     is_raw_format <- .common_is_raw_format(data)
     period <- NULL
     if (!is_raw_format && !(data$metadata@period %in% .agg_const_INTERVAL_PERIODS)) {
         period <- lubridate::period(data$metadata@period)
+    }
+    if(!is_raw_format) {
+        use_utc <- .common_check_agg_use_utc(use_utc, data$metadata@period)
     }
 
     sensor_function <- function(locality_id, serial_number, sensor_item, datetime, time_to) {
@@ -123,8 +127,10 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
                        value=sensor_item$values)
     }
 
-    sensors_item_function <- function(locality_id, item) {
+    sensors_item_function <- function(locality_id, tz_offset, item) {
         serial_number <- NA_character_
+        tz_offset <- if(use_utc) 0 else tz_offset
+        datetime <- .calc_get_datetimes_with_offset(item$datetime, tz_offset)
         if(is_raw_format) {
             serial_number <- item$metadata@serial_number
             if(is.na(item$clean_info@step)) {
@@ -133,26 +139,30 @@ mc_reshape_long <- function(data, localities=NULL, sensors=NULL) {
             period <- lubridate::seconds(item$clean_info@step)
         }
         if(!is.null(period)) {
-            time_to <- c(item$datetime[-1], dplyr::last(item$datetime) + period)
+            time_to <- c(datetime[-1], dplyr::last(datetime) + period)
         } else {
-            first_index <- match(dplyr::first(item$datetime), data$metadata@intervals_start)
-            intervals_end <- data$metadata@intervals_end[seq(first_index, first_index + length(item$datetime) - 1)]
+            first_index <- match(dplyr::first(datetime), data$metadata@intervals_start)
+            intervals_end <- data$metadata@intervals_end[seq(first_index, first_index + length(datetime) - 1)]
             time_to <- intervals_end + lubridate::seconds(1)
         }
         tables <- purrr::pmap_dfr(list(locality_id=locality_id, serial_number=serial_number,
-                                       sensor_item=item$sensors, datetime=list(item$datetime),
+                                       sensor_item=item$sensors, datetime=list(datetime),
                                        time_to=list(time_to)),
                                   sensor_function)
     }
 
     raw_locality_function <- function(locality) {
-        purrr::map2_dfr(locality$metadata@locality_id, locality$loggers, sensors_item_function)
+        purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
+                             tz_offset=locality$metadata@tz_offset,
+                             item=locality$loggers), sensors_item_function)
     }
 
     if(is_raw_format) {
         result <- purrr::map_dfr(data$localities, raw_locality_function)
     } else {
-        result <- purrr::map2_dfr(names(data$localities), data$localities, sensors_item_function)
+        result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
+                                       tz_offset=purrr::map(data$localities, ~ .x$metadata@tz_offset),
+                                       item=data$localities), sensors_item_function)
     }
     as.data.frame(result)
 }
