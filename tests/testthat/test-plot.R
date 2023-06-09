@@ -12,6 +12,7 @@ test_that(".plot_get_logger_sensors_by_physical", {
 
 test_that("all plots", {
     data <- mc_read_files("../data/eco-snow", dataformat_name = "TOMST", silent=TRUE)
+    data <- mc_prep_meta_locality(data, list(`94184102`=30, `94184103`=90), param_name="tz_offset")
     data_agg <- mc_agg(data)
     tmp_dir <- tempdir()
     plot_dir <- file.path(tmp_dir, "plot")
@@ -21,13 +22,16 @@ test_that("all plots", {
     mc_plot_image(data, image_path, "T1 sensors", sensors="TMS_T1")
     mc_plot_image(data_agg, image_path, "T1 sensors", sensors="TMS_T1")
     mc_plot_image(data_agg, image_path)
+    mc_plot_image(data_agg, image_path, use_utc=FALSE)
 
     mc_plot_raster(data, file.path(plot_dir, "raster.pdf"))
+    mc_plot_raster(data, file.path(plot_dir, "raster.pdf"), use_utc=FALSE)
     mc_plot_raster(data_agg, file.path(plot_dir, "raster.png"), png_height = 500)
 
     mc_plot_line(data, file.path(plot_dir, "line.pdf"))
     mc_plot_line(data_agg, file.path(plot_dir, "line_T1.png"), png_height = 500, sensors="TMS_T1")
     mc_plot_line(data_agg, file.path(plot_dir, "line.png"), png_height = 500)
+    mc_plot_line(data_agg, file.path(plot_dir, "line.png"), png_height = 500, use_utc=FALSE)
 
     unlink(plot_dir, recursive=TRUE)
 

@@ -11,7 +11,8 @@ mc_plot_image(
   localities = NULL,
   sensors = NULL,
   height = 1900,
-  left_margin = 12
+  left_margin = 12,
+  use_utc = TRUE
 )
 }
 \arguments{
@@ -28,6 +29,10 @@ mc_plot_image(
 \item{height}{of image; default = 1900}
 
 \item{left_margin}{width of space for sensor_labels; default = 12}
+
+\item{use_utc}{§if FALSE, then \code{tz_offset} is used for output timeseries (default TRUE)
+
+Agg-format accept the FALSE value only for step shorter than day. In Raw-format isn't parameter limited.§}
 }
 \value{
 PNG file created as specified in output file name

@@ -13,7 +13,8 @@ mc_plot_raster(
   png_height = 1900,
   viridis_color_map = NULL,
   start_crop = NULL,
-  end_crop = NULL
+  end_crop = NULL,
+  use_utc = TRUE
 )
 }
 \arguments{
@@ -42,9 +43,13 @@ If NULL then the plot is shown/returned into R environment as ggplot object, but
 \item "H" - turbo
 }}
 
-\item{start_crop}{POSIXct datetime for crop data (default NULL)}
+\item{start_crop}{POSIXct datetime in UTC for crop data (default NULL)}
 
-\item{end_crop}{POSIXct datetime for crop data (default NULL)}
+\item{end_crop}{POSIXct datetime in UTC for crop data (default NULL)}
+
+\item{use_utc}{§if FALSE, then \code{tz_offset} is used for output timeseries (default TRUE)
+
+Agg-format accept the FALSE value only for step shorter than day. In Raw-format isn't parameter limited.§}
 }
 \value{
 list of ggplot2 objects
