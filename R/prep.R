@@ -15,6 +15,8 @@
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
 .prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
+.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- paste0("Start and end datetime can be NULL, ",
+                                                   "single value or vector with same length as localities.")
 
 #' Cleaning datetime series
 #'
@@ -440,48 +442,88 @@ mc_prep_solar_tz <- function(data) {
 #' @details
 #' Function is able to crop data from start to end but works also 
 #' with only start and only end. When only start provided, then crop only start and
-#' do not touch the end and vice versa.   
+#' do not touch the end and vice versa.
+#'
+#' If `start` or `end` is a single datetime value, it is used for all or selected localities.
+#' However, if `start` and `end` are vectors with the same length as the localities vector,
+#' each locality is cropped by its own datetime range.§
 #'
 #' @template param_myClim_object
-#' @param start POSIXct datetime in UTC; is optional; start datetime is included
-#' @param end POSIXct datetime in UTC; is optional
+#' @param start POSIXct datetime in UTC; §single value or vector;§ is optional; start datetime is included (default NULL)
+#' @param end POSIXct datetime in UTC; §single value or vector;§ is optional (default NULL)
+#' @param localities §locality_ids; if NULL then all localities cropping (default NULL)§
 #' @param end_included if TRUE then end datetime is included (default TRUE)
 #' @return cropped data in the same myClim format as input. 
 #' @export
 #' @examples
 #' cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))
-mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
-    if(!is.null(start) && format(start, format="%Z") != "UTC") {
+mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_included=TRUE) {
+    if(!is.null(start) && any(format(start, format="%Z") != "UTC")) {
         warning(stringr::str_glue("start datetime is not in UTC"))
     }
-    if(!is.null(end) && format(end, format="%Z") != "UTC") {
+    if(!is.null(end) && any(format(end, format="%Z") != "UTC")) {
         warning(stringr::str_glue("end datetime is not in UTC"))
     }
-
-    sensors_item_function <- function(item) {
-        .prep_crop_data(item, start, end, end_included)
+    if(!.prep_crop_is_datetime_correct(start, localities) ||
+        !.prep_crop_is_datetime_correct(end, localities)) {
+        stop(.prep_const_MESSAGE_CROP_DATETIME_LENGTH)
+    }
+    all_table <- tibble::tibble(locality_id=names(data$localities))
+    if(!is.null(localities)) {
+        table <- tibble::tibble(locality_id=localities)
+        table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
+        all_table <- dplyr::left_join(all_table, table, by="locality_id")
+    }
+    else {
+        all_table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        all_table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
     }
 
-    raw_locality_function <- function(locality) {
-        locality$loggers <- purrr::map(locality$loggers, sensors_item_function)
-        locality
+    sensors_item_function <- function(item, start_datetime, end_datetime) {
+        .prep_crop_data(item, start_datetime, end_datetime, end_included)
+    }
+
+    raw_locality_function <- function(locality_id, start_datetime, end_datetime) {
+        locality <- data$localities[[locality_id]]
+        if(!is.na(start_datetime) || !is.na(end_datetime)) {
+            locality$loggers <- purrr::pmap(list(item=locality$loggers,
+                                                 start_datetime=start_datetime,
+                                                 end_datetime=end_datetime),
+                                            sensors_item_function)
+        }
+        return(locality)
+    }
+
+    agg_locality_function <- function(locality_id, start_datetime, end_datetime) {
+        locality <- data$localities[[locality_id]]
+        if(!is.na(start_datetime) || !is.na(end_datetime)) {
+            locality <- sensors_item_function(locality, start_datetime, end_datetime)
+        }
+        return(locality)
     }
 
     if(.common_is_agg_format(data)) {
-        data$localities <- purrr::map(data$localities, sensors_item_function)
+        data$localities <- purrr::pmap(all_table, agg_locality_function)
     } else {
-        data$localities <- purrr::map(data$localities, raw_locality_function)
+        data$localities <- purrr::pmap(all_table, raw_locality_function)
     }
+    names(data$localities) <- all_table$locality_id
     return(data)
+}
+
+.prep_crop_is_datetime_correct <- function(datetime, localities) {
+    return(is.null(datetime) || length(datetime) == 1 ||
+        (!is.null(localities) && length(datetime) == length(localities)))
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {
     table <- .common_sensor_values_as_tibble(item)
-    if(!is.null(start)) {
+    if(!is.na(start)) {
         table <- dplyr::filter(table, .data$datetime >= start)
     }
-    last_datetime <- NULL
-    if(!is.null(end)) {
+    last_datetime <- lubridate::NA_POSIXct_
+    if(!is.na(end)) {
         table <- dplyr::filter(table, .data$datetime < end | (end_included & .data$datetime == end))
         last_datetime <- end
         if(length(table$datetime) > 0) {
@@ -507,10 +549,10 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
         return(item)
     }
 
-    if(is.null(start)) {
+    if(is.na(start)) {
         start <- min(item$datetime)
     }
-    if(is.null(end)) {
+    if(is.na(end)) {
         end <- max(item$datetime)
     }
     interval <- lubridate::interval(start, end)

@@ -1,7 +1,7 @@
 # myClim 1.0.5
 * Metadata of a locality can now be loaded from a table using the `mc_read_data()` function.
 * The parameter `use_utc` has been added to the following functions: `mc_reshape_wide()`, `mc_reshape_long()`,
-  `mc_plot_image()`, `mc_plot_line()`, and `mc_plot_raster()`. This parameter allows for the use of local time.
+  `mc_plot_image()`, `mc_plot_line()` and `mc_plot_raster()`. This parameter allows for the use of local time.
 
 # myClim 1.0.4
 * Updated the `print(myClim_data)` function to display the metadata of the `myClim` object and the head of the table from `mc_info()`.

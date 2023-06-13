@@ -4,14 +4,22 @@
 \alias{mc_prep_crop}
 \title{Crop datetime}
 \usage{
-mc_prep_crop(data, start = NULL, end = NULL, end_included = TRUE)
+mc_prep_crop(
+  data,
+  start = NULL,
+  end = NULL,
+  localities = NULL,
+  end_included = TRUE
+)
 }
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{start}{POSIXct datetime in UTC; is optional; start datetime is included}
+\item{start}{POSIXct datetime in UTC; §single value or vector;§ is optional; start datetime is included (default NULL)}
 
-\item{end}{POSIXct datetime in UTC; is optional}
+\item{end}{POSIXct datetime in UTC; §single value or vector;§ is optional (default NULL)}
+
+\item{localities}{§locality_ids; if NULL then all localities cropping (default NULL)§}
 
 \item{end_included}{if TRUE then end datetime is included (default TRUE)}
 }
@@ -25,6 +33,10 @@ This function crop data by datetime
 Function is able to crop data from start to end but works also
 with only start and only end. When only start provided, then crop only start and
 do not touch the end and vice versa.
+
+If \code{start} or \code{end} is a single datetime value, it is used for all or selected localities.
+However, if \code{start} and \code{end} are vectors with the same length as the localities vector,
+each locality is cropped by its own datetime range.§
 }
 \examples{
 cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))

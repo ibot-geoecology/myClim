@@ -145,6 +145,52 @@ test_that("mc_prep_crop", {
     test_agg_data_format(cropped_agg_data)
 })
 
+test_that("mc_prep_crop by localities", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean=TRUE, silent=TRUE)
+    agg_data <- mc_agg(data)
+    cropped_data <- mc_prep_crop(data,
+                                 start=as.POSIXct("2020-10-16 06:00", tz="UTC"),
+                                 end=as.POSIXct("2020-10-16 08:00", tz="UTC"),
+                                 localities=c("A1E05", "A2E32"))
+    test_raw_data_format(cropped_data)
+    expect_equal(length(cropped_data$localities$A2E32$loggers[[1]]$datetime), 8)
+    expect_equal(cropped_data$localities$A6W79$loggers[[1]]$datetime, data$localities$A6W79$loggers[[1]]$datetime)
+    cropped_agg_data <- mc_prep_crop(agg_data,
+                                     start=as.POSIXct("2020-10-16 06:00", tz="UTC"),
+                                     end=as.POSIXct("2020-10-16 08:00", tz="UTC"),
+                                     localities=c("A1E05", "A2E32"))
+    test_agg_data_format(cropped_agg_data)
+    expect_equal(length(cropped_agg_data$localities$A2E32$datetime), 8)
+    expect_equal(cropped_agg_data$localities$A6W79$datetime, agg_data$localities$A6W79$datetime)
+    expect_error(cropped_data <- mc_prep_crop(data,
+                                              start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
+                                              end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC"),
+                                              localities="A1E05"))
+    expect_error(cropped_data <- mc_prep_crop(data,
+                                              start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
+                                              end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC")))
+    cropped_data <- mc_prep_crop(data,
+                                 start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
+                                 end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC"),
+                                 localities=c("A1E05", "A2E32"))
+    test_raw_data_format(cropped_data)
+    expect_equal(cropped_data$localities$A1E05$loggers[[1]]$datetime,
+                 as.POSIXct(c("2020-10-28 09:00", "2020-10-28 09:15", "2020-10-28 09:30", "2020-10-28 09:45", "2020-10-28 10:00"), tz="UTC"))
+    expect_equal(cropped_data$localities$A2E32$loggers[[1]]$datetime,
+                 as.POSIXct(c("2020-10-16 07:00", "2020-10-16 07:15", "2020-10-16 07:30", "2020-10-16 07:45", "2020-10-16 08:00"), tz="UTC"))
+    expect_equal(cropped_data$localities$A6W79$loggers[[1]]$datetime, data$localities$A6W79$loggers[[1]]$datetime)
+    cropped_agg_data <- mc_prep_crop(agg_data,
+                                     start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
+                                     end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC"),
+                                     localities=c("A1E05", "A2E32"))
+    test_agg_data_format(cropped_agg_data)
+    expect_equal(cropped_agg_data$localities$A1E05$datetime,
+                 as.POSIXct(c("2020-10-28 09:00", "2020-10-28 09:15", "2020-10-28 09:30", "2020-10-28 09:45", "2020-10-28 10:00"), tz="UTC"))
+    expect_equal(cropped_agg_data$localities$A2E32$datetime,
+                 as.POSIXct(c("2020-10-16 07:00", "2020-10-16 07:15", "2020-10-16 07:30", "2020-10-16 07:45", "2020-10-16 08:00"), tz="UTC"))
+    expect_equal(cropped_agg_data$localities$A6W79$datetime, agg_data$localities$A6W79$datetime)
+})
+
 test_that("mc_prep_crop errors", {
     expect_warning(data <- mc_read_files("../data/TOMST-error", "TOMST", clean=FALSE))
     cropped_data <- mc_prep_crop(data, start=lubridate::ymd_hm("2022-02-24 07:45"), end=lubridate::ymd_hm("2022-02-24 10:30"))

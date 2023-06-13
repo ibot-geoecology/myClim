@@ -18,6 +18,7 @@ test_myClimList <- function(data) {
     expect_equal(names(data), c("metadata", "localities"))
     expect_true(is(data$metadata, "mc_MainMetadata"))
     expect_equal(class(data$localities), "list")
+    expect_false(is.null(names(data$localities)))
 }
 
 test_raw_locality <- function(locality) {
