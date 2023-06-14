@@ -39,7 +39,7 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #' See below. Loggers represents the files imported with myClim reading functions.
 #' Both `loggesr` and `sensors` have own metadata. One logger could host more sensors e.g. 
 #' Tomst TMS logger hosing TMS_T1 soil temperature, TMS_T2 surface temperature,
-#' TMS_T3 air temperature , TMS_TMSmoisture soil moisture.
+#' TMS_T3 air temperature , TMS_moist soil moisture.
 #' For detailed description of logger and sensor metadata 
 #' see [mc_LoggerMetadata], [mc_SensorMetadata], [mc_data_sensors]
 #' 

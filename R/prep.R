@@ -738,7 +738,7 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' then first calibration `datetime` available are calibrated anyway (in case sensor was calibrated ex-post)
 #' with the first calibration parameters available.
 #' 
-#' This function is not designed for TMSmoisture calibration 
+#' This function is not designed for moisture_raw calibration
 #' (conversion to volumetric water content) for this use [myClim::mc_calc_vwc()]
 #' 
 #' Only sensors with real value type can be calibrated. see [myClim::mc_data_sensors()]
@@ -766,7 +766,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
             warning(stringr::str_glue("Calibration parameters are missing in sensor {sensor$metadata@name} in {locality_id}."))
             return(sensor)
         }
-        if(.model_is_physical_TMSmoisture(sensor$metadata)) {
+        if(.model_is_physical_moisture_raw(sensor$metadata)) {
             warning(stringr::str_glue("Using simple linear correction of raw moisture values in sensor {sensor$metadata@name}, for more precisse correction use function mc_calc_vwc."))
         }
         if(sensor$metadata@calibrated) {

@@ -16,7 +16,7 @@ Through \code{sensor_id} myClim assign pre-deined physicyl units or plotting col
 \section{Slots}{
 
 \describe{
-\item{\code{sensor_id}}{unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...) \link{mc_data_sensors} e.g. TMS_T1, TMS_TMSmoisture, snow_fresh...}
+\item{\code{sensor_id}}{unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moist, ...) \link{mc_data_sensors} e.g. TMS_T1, TMS_moist, snow_fresh...}
 
 \item{\code{name}}{character, could be same as \code{sensor_id} but also defined by function or user.}
 

@@ -31,7 +31,7 @@ different calibration values can be applied based on the calibration time. Older
 then first calibration \code{datetime} available are calibrated anyway (in case sensor was calibrated ex-post)
 with the first calibration parameters available.
 
-This function is not designed for TMSmoisture calibration
+This function is not designed for moisture_raw calibration
 (conversion to volumetric water content) for this use \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
 
 Only sensors with real value type can be calibrated. see \code{\link[=mc_data_sensors]{mc_data_sensors()}}

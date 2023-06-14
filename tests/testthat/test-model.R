@@ -37,12 +37,12 @@ test_that(".model_load_data_format_params_from_data HOBO", {
     expect_equal(hobo_format@skip, 2)
     expect_equal(hobo_format@date_column, 2)
     expect_equal(hobo_format@tz_offset, 120)
-    expect_equal(hobo_format@columns, list(HOBO_T_C=3, HOBO_RH=4))
+    expect_equal(hobo_format@columns, list(HOBO_T=3, HOBO_RH=4))
 })
 
 test_that(".model_edit_data HOBO", {
     hobo_format <- mc_data_formats$HOBO
-    hobo_format@columns <- list(HOBO_T_C=3, HOBO_RH=4)
+    hobo_format@columns <- list(HOBO_T=3, HOBO_RH=4)
     hobo_format@skip <- 2
     hobo_format@separator <- ","
     path <- "../data/HOBO/20024354_comma.csv"
@@ -54,7 +54,7 @@ test_that(".model_edit_data HOBO", {
 
 test_that(".model_is_physical", {
     data <- mc_read_files("../data/calc-gdd", "TOMST", silent = T)
-    raw_data <- mc_calc_gdd(data, "TS_T")
+    raw_data <- mc_calc_gdd(data, "Thermo_T")
     test_function <- if(exists(".model_is_physical")) .model_is_physical else .model_is_physical
     expect_false(test_function(raw_data$localities$`91184101`$loggers[[1]]$sensors$GDD5$metadata, "moisture"))
 })

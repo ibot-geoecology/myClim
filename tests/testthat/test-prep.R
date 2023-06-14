@@ -18,7 +18,7 @@ test_that("mc_prep_clean", {
     expect_equal(length(cleaned_data$localities[["94184102"]]$loggers[[1]]$datetime), 49)
     expect_true(is.na(cleaned_data$localities[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[19]]))
     expect_equal(cleaned_data$localities[["91184133"]]$loggers[[1]]$clean_info@step, 15 * 60)
-    expect_equal(cleaned_data$localities[["91184133"]]$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(cleaned_data$localities[["91184133"]]$loggers[[1]]$datetime))
+    expect_equal(cleaned_data$localities[["91184133"]]$loggers[[1]]$sensors$Thermo_T$states$start, dplyr::first(cleaned_data$localities[["91184133"]]$loggers[[1]]$datetime))
     agg_data <- mc_agg(cleaned_data)
     expect_error(mc_prep_clean(agg_data))
 })
@@ -141,7 +141,7 @@ test_that("mc_prep_crop", {
     cropped_agg_data <- mc_prep_crop(data_calc, start=as.POSIXct("2020-10-16 06:00", tz="UTC"), end=as.POSIXct("2020-10-16 08:00", tz="UTC"))
     expect_equal(cropped_agg_data$localities$A6W79$sensors$TMS_T1$states$start, lubridate::ymd_h("2020-10-16 06"))
     expect_equal(cropped_agg_data$localities$A6W79$sensors$TMS_T1$states$end, lubridate::ymd_h("2020-10-16 08"))
-    expect_equal(nrow(cropped_agg_data$localities$A1E05$sensors$TS_T$states), 0)
+    expect_equal(nrow(cropped_agg_data$localities$A1E05$sensors$Thermo_T$states), 0)
     test_agg_data_format(cropped_agg_data)
 })
 
@@ -233,7 +233,7 @@ test_that("mc_prep_meta_sensor", {
     expect_false("T2" %in% names(cleaned_data$localities$main$loggers[[2]]$sensors))
     expect_warning(agg_data <- mc_agg(cleaned_data), "TMS_Tsoil is renamed to TMS_Tsoil_1") %>%
         expect_warning("sensor TMS_T3 is renamed to TMS_T3_1") %>%
-        expect_warning("sensor TMS_TMSmoisture is renamed to TMS_TMSmoisture_1")
+        expect_warning("sensor TMS_moist is renamed to TMS_moist_1")
     agg_data <- mc_prep_meta_sensor(agg_data, list(TMS_T3_1="TMS_T3_secondary"), localities="main", param_name="name")
     expect_true("TMS_T3_secondary" %in% names(agg_data$localities$main$sensors))
     agg_data <- mc_prep_meta_sensor(agg_data, list(TMS_T3_secondary="air"), param_name="height")
@@ -300,23 +300,23 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                     ~datetime, ~cor_factor,
-        "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 00"),         0.1,
-        "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 10"),           0,
+        "91184101",              "Thermo_T", lubridate::ymd_h("2020-10-28 00"),         0.1,
+        "91184101",              "Thermo_T", lubridate::ymd_h("2020-10-28 10"),           0,
         "94184102",            "TMS_T1", lubridate::ymd_h("2020-10-16 00"),        0.12,
         "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,
         "94184102",            "TMS_T3", lubridate::ymd_h("2020-10-16 00"),         0.2,
-        "94184102",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 00"),        0.01,
+        "94184102",   "TMS_moist", lubridate::ymd_h("2020-10-16 00"),        0.01,
     ))
     param_data <- mc_prep_calib_load(data, calib_table)
     test_raw_data_format(param_data)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
-            "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 00"),         0.1,          0,
-            "91184101",              "TS_T", lubridate::ymd_h("2020-10-28 10"),           0,      -0.05,
+            "91184101",              "Thermo_T", lubridate::ymd_h("2020-10-28 00"),         0.1,          0,
+            "91184101",              "Thermo_T", lubridate::ymd_h("2020-10-28 10"),           0,      -0.05,
             "94184102",            "TMS_T1", lubridate::ymd_h("2020-10-16 00"),        0.12,        0.1,
             "94184102",            "TMS_T2", lubridate::ymd_h("2020-10-16 01"),        0.15,       0.05,
             "94184102",            "TMS_T3", lubridate::ymd_h("2020-10-16 00"),         0.2,          0,
-            "94184102",   "TMS_TMSmoisture", lubridate::ymd_h("2020-10-16 00"),        0.01,          0,
+            "94184102",   "TMS_moist", lubridate::ymd_h("2020-10-16 00"),        0.01,          0,
     ))
     param_data <- mc_prep_calib_load(data, calib_table)
     test_raw_data_format(param_data)
@@ -324,33 +324,33 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     param_data <- mc_prep_clean(param_data, silent = T)
     calib_data <- mc_prep_calib(param_data)
     test_raw_data_format(calib_data)
-    expect_true(calib_data$localities$A1E05$loggers[[1]]$sensors$TS_T$metadata@calibrated)
-    expect_equal(calib_data$localities$A1E05$loggers[[1]]$sensors$TS_T$values[[1]], 9.875 + 0.1)
-    expect_equal(calib_data$localities$A1E05$loggers[[1]]$sensors$TS_T$values[[6]], 6.875 * 0.95)
+    expect_true(calib_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$metadata@calibrated)
+    expect_equal(calib_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[[1]], 9.875 + 0.1)
+    expect_equal(calib_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[[6]], 6.875 * 0.95)
     expect_equal(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T2$values[[1]], 9.5 * 1.05 + 0.15)
     expect_equal(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T2$values[[5]], 9.5 * 1.05 + 0.15)
     expect_true(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T3$metadata@calibrated)
-    expect_false(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_TMSmoisture$metadata@calibrated)
+    expect_false(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_moist$metadata@calibrated)
     agg_data <- mc_agg(param_data)
-    calib_data <- mc_prep_calib(agg_data, sensors = "TS_T")
+    calib_data <- mc_prep_calib(agg_data, sensors = "Thermo_T")
     test_agg_data_format(calib_data)
-    expect_true(calib_data$localities$A1E05$sensors$TS_T$metadata@calibrated)
-    expect_equal(calib_data$localities$A1E05$sensors$TS_T$values[[1]], 9.875 + 0.1)
-    expect_equal(calib_data$localities$A1E05$sensors$TS_T$values[[6]], 6.875 * 0.95)
+    expect_true(calib_data$localities$A1E05$sensors$Thermo_T$metadata@calibrated)
+    expect_equal(calib_data$localities$A1E05$sensors$Thermo_T$values[[1]], 9.875 + 0.1)
+    expect_equal(calib_data$localities$A1E05$sensors$Thermo_T$values[[6]], 6.875 * 0.95)
 })
 
 test_that("mc_prep_calib_load wrong type", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     calib_table <- as.data.frame(tibble::tribble(
       ~serial_number,          ~sensor_id,   ~datetime, ~cor_factor,
-      "91184101",              "TS_T", "2020-10-28 00",         0.1,
-      "91184101",              "TS_T", "2020-10-28 10",           0,
+      "91184101",              "Thermo_T", "2020-10-28 00",         0.1,
+      "91184101",              "Thermo_T", "2020-10-28 10",           0,
     ))
     expect_error(mc_prep_calib_load(data, calib_table))
     calib_table <- as.data.frame(tibble::tribble(
       ~serial_number,          ~sensor_id,                ~datetime, ~cor_factor,
-      "91184101",              "TS_T", lubridate::ymd("2020-10-28"),         0.1,
-      "91184101",              "TS_T", lubridate::ymd("2020-10-29"),           0,
+      "91184101",              "Thermo_T", lubridate::ymd("2020-10-28"),         0.1,
+      "91184101",              "Thermo_T", lubridate::ymd("2020-10-29"),           0,
     ))
     expect_error(mc_prep_calib_load(data, calib_table))
 })
@@ -358,23 +358,23 @@ test_that("mc_prep_fillNA", {
     data <- mc_read_files("../data/agg", "TOMST", clean=F)
     expect_error(mc_prep_fillNA(data))
     data <- mc_prep_clean(data, silent=T)
-    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[1:4] <- NA_real_
-    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[50:52] <- NA_real_
-    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[71:75] <- NA_real_
-    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[90:95] <- NA_real_
-    data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[192]] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[1:4] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[50:52] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[71:75] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[90:95] <- NA_real_
+    data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[192]] <- NA_real_
     data_dupl <- mc_prep_meta_locality(data, list(`91184101`="abc"), "locality_id")
-    data_dupl <- mc_prep_meta_sensor(data_dupl, list(TS_T="T"), "name")
+    data_dupl <- mc_prep_meta_sensor(data_dupl, list(Thermo_T="T"), "name")
     data <- mc_prep_merge(list(data, data_dupl))
     approx_data <- mc_prep_fillNA(data, maxgap=5, localities="91184101")
-    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[1]]))
-    expect_false(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[51]]))
-    expect_false(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[71]]))
-    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[95]]))
-    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[192]]))
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[1]]))
+    expect_false(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[51]]))
+    expect_false(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[71]]))
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[95]]))
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[192]]))
     expect_true(is.na(approx_data$localities$abc$loggers[[1]]$sensors$T$values[[50]]))
     approx_data <- mc_prep_fillNA(data, maxgap=5, sensors="T")
     expect_false(is.na(approx_data$localities$abc$loggers[[1]]$sensors$T$values[[50]]))
-    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$TS_T$values[[50]]))
+    expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[50]]))
 })
 

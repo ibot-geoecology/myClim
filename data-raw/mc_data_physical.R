@@ -23,12 +23,12 @@ mc_data_physical[[.model_const_PHYSICAL_l_um]]@units <- "μm"
 mc_data_physical[[.model_const_PHYSICAL_l_um]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_l_um]]@scale_coeff <- 1/1000
 
-mc_data_physical[[.model_const_PHYSICAL_moisture]] <- new("mc_Physical")
-mc_data_physical[[.model_const_PHYSICAL_moisture]]@name <- .model_const_PHYSICAL_moisture
-mc_data_physical[[.model_const_PHYSICAL_moisture]]@description <- "Volum. soil moisture"
-mc_data_physical[[.model_const_PHYSICAL_moisture]]@units <- "ratio"
-mc_data_physical[[.model_const_PHYSICAL_moisture]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_moisture]]@scale_coeff <- 1
+mc_data_physical[[.model_const_PHYSICAL_VWC]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_VWC]]@name <- .model_const_PHYSICAL_VWC
+mc_data_physical[[.model_const_PHYSICAL_VWC]]@description <- "Volum. soil moisture"
+mc_data_physical[[.model_const_PHYSICAL_VWC]]@units <- "m3/m3"
+mc_data_physical[[.model_const_PHYSICAL_VWC]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_VWC]]@scale_coeff <- 1
 
 mc_data_physical[[.model_const_PHYSICAL_p_kPa]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_p_kPa]]@name <- .model_const_PHYSICAL_p_kPa
@@ -37,12 +37,12 @@ mc_data_physical[[.model_const_PHYSICAL_p_kPa]]@units <- "kPa"
 mc_data_physical[[.model_const_PHYSICAL_p_kPa]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_p_kPa]]@scale_coeff <- 1/100
 
-mc_data_physical[[.model_const_PHYSICAL_RH_perc]] <- new("mc_Physical")
-mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@name <- .model_const_PHYSICAL_RH_perc
-mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@description <- "Relative humidity %"
-mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@units <- "%"
-mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_RH_perc]]@scale_coeff <- 1
+mc_data_physical[[.model_const_PHYSICAL_RH]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_RH]]@name <- .model_const_PHYSICAL_RH
+mc_data_physical[[.model_const_PHYSICAL_RH]]@description <- "Relative humidity %"
+mc_data_physical[[.model_const_PHYSICAL_RH]]@units <- "%"
+mc_data_physical[[.model_const_PHYSICAL_RH]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_RH]]@scale_coeff <- 1
 
 mc_data_physical[[.model_const_PHYSICAL_T_C]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_T_C]]@name <- .model_const_PHYSICAL_T_C
@@ -51,13 +51,6 @@ mc_data_physical[[.model_const_PHYSICAL_T_C]]@units <- "°C"
 mc_data_physical[[.model_const_PHYSICAL_T_C]]@viridis_color_map <- "C"
 mc_data_physical[[.model_const_PHYSICAL_T_C]]@scale_coeff <- 1/30
 
-mc_data_physical[[.model_const_PHYSICAL_T_F]] <- new("mc_Physical")
-mc_data_physical[[.model_const_PHYSICAL_T_F]]@name <- .model_const_PHYSICAL_T_F
-mc_data_physical[[.model_const_PHYSICAL_T_F]]@description <- "Temperature °F"
-mc_data_physical[[.model_const_PHYSICAL_T_F]]@units <- "°F"
-mc_data_physical[[.model_const_PHYSICAL_T_F]]@viridis_color_map <- "C"
-mc_data_physical[[.model_const_PHYSICAL_T_F]]@scale_coeff <- 1/54
-
 mc_data_physical[[.model_const_PHYSICAL_t_h]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@name <- .model_const_PHYSICAL_t_h
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@description <- "Time hour"
@@ -65,19 +58,19 @@ mc_data_physical[[.model_const_PHYSICAL_t_h]]@units <- "hour"
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_t_h]]@scale_coeff <- 1/24
 
-mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]] <- new("mc_Physical")
-mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@name <- .model_const_PHYSICAL_TMSmoisture
-mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@description <- "Soil moisture (TDT signal)"
-mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@units <- "TDT signal"
-mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_TMSmoisture]]@scale_coeff <- 1/3000
+mc_data_physical[[.model_const_PHYSICAL_moisture_raw]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_moisture_raw]]@name <- .model_const_PHYSICAL_moisture_raw
+mc_data_physical[[.model_const_PHYSICAL_moisture_raw]]@description <- "Moisture signal"
+mc_data_physical[[.model_const_PHYSICAL_moisture_raw]]@units <- "raw units"
+mc_data_physical[[.model_const_PHYSICAL_moisture_raw]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_moisture_raw]]@scale_coeff <- 1/3000
 
-mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]] <- new("mc_Physical")
-mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@name <- .model_const_PHYSICAL_TOMSTdendro
-mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@description <- "Radius difference raw units"
-mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@units <- "raw units"
-mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_TOMSTdendro]]@scale_coeff <- 1/10000
+mc_data_physical[[.model_const_PHYSICAL_radius_raw]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_radius_raw]]@name <- .model_const_PHYSICAL_radius_raw
+mc_data_physical[[.model_const_PHYSICAL_radius_raw]]@description <- "Dendrometer signal"
+mc_data_physical[[.model_const_PHYSICAL_radius_raw]]@units <- "raw units"
+mc_data_physical[[.model_const_PHYSICAL_radius_raw]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_radius_raw]]@scale_coeff <- 1/10000
 
 mc_data_physical[[.model_const_PHYSICAL_v]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_v]]@name <- .model_const_PHYSICAL_v

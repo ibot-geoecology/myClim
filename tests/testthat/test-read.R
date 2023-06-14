@@ -21,10 +21,10 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$localities$A1E05$loggers[[1]]$sensors), 1)
     expect_true(is.na(data$localities$A1E05$loggers[[1]]$metadata@step))
     expect_true(is.na(data$localities$A1E05$metadata@elevation))
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$start, dplyr::first(data$localities$A1E05$loggers[[1]]$datetime))
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$end, dplyr::last(data$localities$A1E05$loggers[[1]]$datetime))
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$TS_T$states$value, normalizePath("../data/TOMST/data_91184101_0.csv"))
+    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
+    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$start, dplyr::first(data$localities$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$end, dplyr::last(data$localities$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$value, normalizePath("../data/TOMST/data_91184101_0.csv"))
     expect_equal(data$localities$A1E05$loggers[[2]]$metadata@serial_number, "94230002")
 })
 
@@ -100,7 +100,8 @@ test_that("mc_read_data HOBO", {
                       data$localities$E$loggers[[1]]$datetime[[1]],
                       data$localities$F$loggers[[1]]$datetime[[1]],
                       data$localities$CH$loggers[[1]]$datetime[[1]])) == 0)
-    expect_true(.model_const_SENSOR_HOBO_T_F %in% names(data$localities$C$loggers[[1]]$sensors))
+    expect_true(.model_const_SENSOR_HOBO_T %in% names(data$localities$C$loggers[[1]]$sensors))
+    expect_equal(data$localities$C$loggers[[1]]$sensors$HOBO_T$values[[1]], 5 * (65.788 - 32) / 9)
     expect_equal(length(data$localities$A$loggers[[1]]$sensors), 2)
     expect_equal(length(data$localities$I$loggers[[1]]$sensors), 1)
     cleaned_data <- mc_prep_clean(data, silent = T)
@@ -153,9 +154,9 @@ test_that("mc_read_files joined TOMST direcory", {
     data <- mc_read_files("../data/joined_TOMST", "TOMST_join", clean=FALSE)
     test_raw_data_format(data)
     expect_equal(names(data$localities), c("A1E01_TS", "A1W14_TMS", "A4E53_TMS", "CKras_Loc_2_15", "CZ2_HRADEC_TMS", "CZ2_HRADEC_TS"))
-    expect_equal(names(data$localities$A1W14_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture"))
-    expect_equal(names(data$localities$CZ2_HRADEC_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture", "moisture"))
-    expect_equal(names(data$localities$CZ2_HRADEC_TS$loggers[[1]]$sensors), "TS_T")
+    expect_equal(names(data$localities$A1W14_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist"))
+    expect_equal(names(data$localities$CZ2_HRADEC_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist", "VWC"))
+    expect_equal(names(data$localities$CZ2_HRADEC_TS$loggers[[1]]$sensors), "Thermo_T")
 })
 
 test_that("mc_read_wide", {

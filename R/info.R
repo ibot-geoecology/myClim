@@ -29,7 +29,7 @@ mc_info_count <- function(data) {
 #' * serial_number - serial number of logger when provided or automatically detected from file name or header
 #' * start_date - date of the first record on the logger
 #' * end_date  - date of the last record on the logger
-#' * step - detected time step in seconds of the logger measurements.
+#' * step_seconds - detected time step in seconds of the logger measurements.
 #' * count_duplicities - number of duplicated records (identical time)
 #' * count_missing - number of missing records (logger outage in time when it should record)
 #' * count_disordered - number of records incorrectly ordered in time (newer followed by older)
@@ -60,7 +60,7 @@ mc_info_clean <- function(data) {
     data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
                start_date=.common_as_utc_posixct(unlist(columns[[3]])),
                end_date=.common_as_utc_posixct(unlist(columns[[4]])),
-               step=unlist(columns[[5]]), count_duplicities=unlist(columns[[6]]),
+               step_seconds=unlist(columns[[5]]), count_duplicities=unlist(columns[[6]]),
                count_missing=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]),
                rounded=unlist(columns[[9]]))
 }
@@ -74,11 +74,11 @@ mc_info_clean <- function(data) {
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
 #' * serial_number - serial number of logger when provided or automatically detected from file name or header
-#' * sensor_id - original sensor id (e.g.,"GDD", "HOBO_T_C" ,"TMS_T1", "TMS_T2")
-#' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_C_mean" ,"TMS_T1_max", "my_sensor01")
+#' * sensor_id - original sensor id (e.g.,"GDD", "HOBO_T" ,"TMS_T1", "TMS_T2")
+#' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
 #' * start_date - the oldest record on the sensor  
 #' * end_date - the newest record on the sensor
-#' * step - time step of records series (seconds)
+#' * step_seconds - time step of records series (seconds)
 #' * period - time step of records series (text)
 #' * min_value - minimal recorded values
 #' * max_value - maximal recorded value
@@ -113,7 +113,7 @@ mc_info <- function(data) {
                        sensor_name=names(item$sensors),
                        start_date=rep(min(item$datetime), count),
                        end_date=rep(max(item$datetime), count),
-                       step=rep(step, count),
+                       step_seconds=rep(step, count),
                        period=rep(period, count),
                        min_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, min)),
                        max_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, max)),

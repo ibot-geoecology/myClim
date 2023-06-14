@@ -24,8 +24,8 @@ test_that("wideformat-all local time", {
                          localities_table = "../data/TOMST/localities_table.csv", clean=FALSE)
     table_utc <- mc_reshape_wide(data, use_utc=TRUE)
     table <- mc_reshape_wide(data, use_utc=FALSE)
-    expect_equal(table_utc$A1E05_91184101_TS_T[table_utc$datetime == lubridate::ymd_h("2020-10-28 9")],
-                 table$A1E05_91184101_TS_T[table$datetime == lubridate::ymd_h("2020-10-28 10")])
+    expect_equal(table_utc$A1E05_91184101_Thermo_T[table_utc$datetime == lubridate::ymd_h("2020-10-28 9")],
+                 table$A1E05_91184101_Thermo_T[table$datetime == lubridate::ymd_h("2020-10-28 10")])
     table$datetime <- table$datetime - (60 * 60)
     expect_equal(table_utc, table)
     cleaned_data <- mc_prep_clean(data, silent=T)

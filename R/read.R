@@ -20,7 +20,7 @@
 #' If file is not in expected format, then file is skipped and warning printed in console. 
 #' CSV files (loggers raw data) are in resulting myClim object placed to separate
 #' localities with empty metadata. Localities are named after serial_number of logger.
-#' Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+#' Pre-defined logger types are ("Dendro","HOBO","Thermo","TMS","TMS_L45")
 #' By default data are cleaned with function [myClim::mc_prep_clean()]. See function description. It detects
 #' holes in time-series, duplicated records or records in wrong order.
 #'
@@ -93,8 +93,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' optional columns:
 #' * serial_number - logger serial number. If is NA, than myClim tries to detect serial number from file name (for TOMST) or header (for HOBO)
 #' * logger_type - type of logger. This defines individual sensors attributes (measurement heights and physical units) of the logger. Important when combining the data from multiple loggers on the locality.
-#' If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendrometer, ThermoDatalogger and TMS), but automatic detection of TMS_L45 is not possible.
-#' Pre-defined logger types are: ("Dendrometer", "HOBO", "ThermoDatalogger", "TMS", "TMS_L45")
+#' If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendro, Thermo and TMS), but automatic detection of TMS_L45 is not possible.
+#' Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S");
 #' Ignored for TOMST data format

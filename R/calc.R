@@ -279,8 +279,8 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #'
 #' @template param_myClim_object_cleaned
 #' @param moist_sensor name of soil moisture sensor to be converted from TMS
-#' units to volumetric (default "TMS_TMSmoisture") see `names(mc_data_sensors)`.
-#' Soil moisture sensor must be in TMSmoisture physical see `names(mc_data_physical)`.
+#' units to volumetric (default "TMS_moist") see `names(mc_data_sensors)`.
+#' Soil moisture sensor must be in moisture_raw physical see `names(mc_data_physical)`.
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
 #' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
 #' @param output_sensor name of new snow virtual sensor with VWC values (default "VWC_moisture")
@@ -307,7 +307,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' 
 #' @examples
 #' agg_data <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
-mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
+mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_moist,
                         temp_sensor=.model_const_SENSOR_TMS_T1,
                         output_sensor="VWC_moisture",
                         soiltype="universal", localities=NULL,
@@ -366,7 +366,7 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
     values <- purrr::pmap(dplyr::select(input_data, "cor_factor", "cor_slope", "data"), data_function)
     is_calibrated <- nrow(calibration) > 0
     height <- item$sensors[[moist_sensor]]$metadata@height
-    item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_moisture, output_sensor,
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_VWC, output_sensor,
                                                                      values=purrr::flatten_dbl(values), height=height,
                                                                      calibrated = is_calibrated,
                                                                      calibration=item$sensors[[moist_sensor]]$calibration)
@@ -377,8 +377,8 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_TMSmoisture,
     if(!.calc_check_sensor_in_item(item, moist_sensor)){
         return(TRUE)
     }
-    if(!.model_is_physical_TMSmoisture(item$sensors[[moist_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(moist_sensor, .model_const_PHYSICAL_TMSmoisture)
+    if(!.model_is_physical_moisture_raw(item$sensors[[moist_sensor]]$metadata)){
+        .calc_wrong_physical_error_function(moist_sensor, .model_const_PHYSICAL_moisture_raw)
     }
     if(!.calc_check_sensor_in_item(item, temp_sensor)){
         return(TRUE)
@@ -599,14 +599,14 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' software can converts raw Tomst units to micrometers.
 #'
 #' @template param_myClim_object_cleaned
-#' @param dendro_sensor name of change in stem size sensor to be converted from raw to micrometers (default "DEND_TOMSTdendro") see `names(mc_data_sensors)`
+#' @param dendro_sensor name of change in stem size sensor to be converted from raw to micrometers (default "Dendro_raw") see `names(mc_data_sensors)`
 #' @param output_sensor name of new change in stem size sensor (default "dendro_l_um")
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return myClim object same as input but with added dendro_l_um sensor
 #' @export
 #' @examples
 #' agg_data <- mc_calc_tomst_dendro(mc_data_example_agg, localities="A1E05")
-mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TOMSTdendro,
+mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_Dendro_raw,
                         output_sensor=.model_const_SENSOR_dendro_l_um,
                         localities=NULL) {
     is_agg <- .common_is_agg_format(data)
@@ -616,7 +616,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 
     call_dendro_function <- function(item) {
         .calc_add_sensor_to_item(item, dendro_sensor, .model_const_SENSOR_dendro_l_um, output_sensor,
-                                 .model_const_PHYSICAL_TOMSTdendro,
+                                 .model_const_PHYSICAL_radius_raw,
                                  .calc_get_dendro_l_um)
     }
 
@@ -635,8 +635,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 }
 
 .calc_get_dendro_l_um <- function(item, sensor_name) {
-    min_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@min_value
-    max_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@max_value
+    min_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@min_value
+    max_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@max_value
     um_range <- .model_const_TOMST_DENDROMETER_UM_RANGE
     (item$sensors[[sensor_name]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
 }
@@ -655,7 +655,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 #'
 #' @template param_myClim_object_cleaned
 #' @param temp_sensor name of temperature sensor. Temperature sensor must be in T_C physical.
-#' @param rh_sensor name of relative air humidity sensor. Humidity sensor must be in RH_perc physical.
+#' @param rh_sensor name of relative air humidity sensor. Humidity sensor must be in RH physical.
 #' @param output_sensor name of new virtual VPD sensor (default "VPD")
 #' @param elevation value in meters (default 0)
 #' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
@@ -668,8 +668,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_DEND_TO
 #' Campbell G.S. & Norman J.M. (1998). An Introduction to Environmental Biophysics, Springer New York, New York, NY
 #'
 #' @examples
-#' agg_data <- mc_calc_vpd(mc_data_example_agg, "HOBO_T_C", "HOBO_RH", localities="A2E32")
-mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
+#' agg_data <- mc_calc_vpd(mc_data_example_agg, "HOBO_T", "HOBO_RH", localities="A2E32")
+mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
                         output_sensor="VPD", elevation=0,
                         metadata_elevation=TRUE, localities=NULL) {
     is_agg <- .common_is_agg_format(data)
@@ -734,8 +734,8 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T_C", rh_sensor="HOBO_RH",
     if(!.calc_check_sensor_in_item(item, rh_sensor)){
         return(TRUE)
     }
-    if(!.model_is_physical(item$sensors[[rh_sensor]]$metadata, .model_const_PHYSICAL_RH_perc)){
-        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_RH_perc)
+    if(!.model_is_physical(item$sensors[[rh_sensor]]$metadata, .model_const_PHYSICAL_RH)){
+        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_RH)
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)

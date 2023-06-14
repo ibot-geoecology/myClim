@@ -24,15 +24,15 @@ test_that("mc_agg day functions", {
     data <- mc_prep_meta_locality(data, list(`91184101`=60), "tz_offset")
     agg_data <- mc_agg(data, c("min", "max", "mean", "percentile", "sum", "range", "count", "coverage"), "day", percentiles=50, use_utc=FALSE, min_coverage=1)
     test_agg_data_format(agg_data)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_min$values, c(NA, 4.125), tolerance = 1e-3)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_max$values, c(NA, 11.3125), tolerance = 1e-3)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_mean$values, c(NA, 8.434896), tolerance = 1e-3)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_percentile50$values, c(NA, 8.4375), tolerance = 1e-3)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_sum$values, c(NA, 809.75), tolerance = 1e-3)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_range$values, c(NA, 11.3125 - 4.125), tolerance = 1e-3)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_count$values, c(87, 96))
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_coverage$values, c(87/96, 1), tolerance = 1e-3)
-    agg_data <- mc_agg(data, c(TS_T=c("min", "max")), "day", use_utc=FALSE, min_coverage = 0)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_min$values, c(NA, 4.125), tolerance = 1e-3)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_max$values, c(NA, 11.3125), tolerance = 1e-3)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_mean$values, c(NA, 8.434896), tolerance = 1e-3)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_percentile50$values, c(NA, 8.4375), tolerance = 1e-3)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_sum$values, c(NA, 809.75), tolerance = 1e-3)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_range$values, c(NA, 11.3125 - 4.125), tolerance = 1e-3)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_count$values, c(87, 96))
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_coverage$values, c(87/96, 1), tolerance = 1e-3)
+    agg_data <- mc_agg(data, c(Thermo_T=c("min", "max")), "day", use_utc=FALSE, min_coverage = 0)
     expect_equal(length(agg_data$localities$`91184101`$sensors), 2)
     test_agg_data_format(agg_data)
     mc_agg(agg_data, "mean", "week", use_utc=FALSE)
@@ -52,7 +52,7 @@ test_that("mc_agg 90s step", {
     table <- read.csv("../data/agg-short-step/step_90s_long.csv", stringsAsFactors = FALSE)
     table$datetime <- lubridate::ymd_hms(table$datetime)
     table$locality_id <- as.character(table$locality_id)
-    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T_C","RH" = "HOBO_RH", "Wind" = "wind"),
+    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T","RH" = "HOBO_RH", "Wind" = "wind"),
                          clean = TRUE, silent = TRUE)
     test_raw_data_format(data)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@step, 90)
@@ -65,7 +65,7 @@ test_that("mc_agg 10s step", {
     table <- read.csv("../data/agg-short-step/step_10s_long.csv", stringsAsFactors = FALSE)
     table$datetime <- lubridate::ymd_hms(table$datetime)
     table$locality_id <- as.character(table$locality_id)
-    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T_C","RH" = "HOBO_RH", "Wind" = "wind"),
+    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T","RH" = "HOBO_RH", "Wind" = "wind"),
                          clean = TRUE, silent = TRUE)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@step, 10)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_duplicities, 0)
@@ -103,7 +103,7 @@ test_that("mc_agg long period", {
     expect_equal(agg_data$metadata@period, "week")
     expect_equal(agg_data$localities$`91184101`$datetime[[1]], lubridate::ymd_h("2020-10-26 00"))
     expect_false(is.na(agg_data$metadata@step))
-    expect_true(any(is.na(agg_data$localities[["91184101"]]$sensors$TS_T_mean$values)))
+    expect_true(any(is.na(agg_data$localities[["91184101"]]$sensors$Thermo_T_mean$values)))
     agg_data <- mc_agg(data, "mean", "month", use_utc=FALSE)
     test_agg_data_format(agg_data)
     expect_equal(agg_data$metadata@period, "month")
@@ -151,16 +151,16 @@ test_that("mc_agg logical sensor", {
 
 test_that("mc_agg integer sensor", {
     data <- mc_read_files("../data/TOMST/data_94184102_0.csv", "TOMST", silent=T)
-    agg_data <- mc_agg(data, list(TMS_TMSmoisture=c("min", "max", "mean", "percentile", "sum", "count", "coverage")), "hour", percentiles = 10)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_min$values[[1]], 1551)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_max$values[[1]], 1551)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_mean$values[[2]], 1552)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_percentile10$values[[8]], 1549)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_sum$values[[1]], 6204)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_count$values[[1]], 4)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_count$metadata@sensor_id, "count")
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_coverage$values[[1]], 1)
-    expect_equal(agg_data$localities$`94184102`$sensors$TMS_TMSmoisture_coverage$metadata@sensor_id, "coverage")
+    agg_data <- mc_agg(data, list(TMS_moist=c("min", "max", "mean", "percentile", "sum", "count", "coverage")), "hour", percentiles = 10)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_min$values[[1]], 1551)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_max$values[[1]], 1551)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_mean$values[[2]], 1552)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_percentile10$values[[8]], 1549)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_sum$values[[1]], 6204)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_count$values[[1]], 4)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_count$metadata@sensor_id, "count")
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_coverage$values[[1]], 1)
+    expect_equal(agg_data$localities$`94184102`$sensors$TMS_moist_coverage$metadata@sensor_id, "coverage")
 })
 
 test_that("mc_agg reaggregate", {
@@ -180,7 +180,7 @@ test_that("mc_agg merging loggers", {
     expect_warning(agg_data <- mc_agg(data), "sensor TMS_T1 is renamed to TMS_T1_1") %>%
         expect_warning("sensor TMS_T2 is renamed to TMS_T2_1") %>%
         expect_warning("sensor TMS_T3 is renamed to TMS_T3_1") %>%
-        expect_warning("sensor TMS_TMSmoisture is renamed to TMS_TMSmoisture_1")
+        expect_warning("sensor TMS_moist is renamed to TMS_moist_1")
     test_agg_data_format(agg_data)
     expect_equal(length(agg_data$localities$A6W79$sensors), 9)
 })
@@ -205,7 +205,7 @@ test_that(".agg_get_custom_intervals", {
 
 test_that("mc_agg custom", {
     table <- readRDS("../data/agg-custom/air_humidity.rds")
-    data <- mc_read_wide(table, sensor_id = "RH_perc", "humidity", silent=T)
+    data <- mc_read_wide(table, sensor_id = "RH", "humidity", silent=T)
     expect_error(agg_data <- mc_agg(data, "mean", period = "custom"))
     agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "11-01")
     test_agg_data_format(agg_data)
@@ -247,7 +247,7 @@ test_that("mc_agg shifted series", {
     expect_equal(cleaned_data$localities$CZ2_HRADEC$loggers[[1]]$clean_info@step, cleaned_data$localities$CZ2_HRADEC$loggers[[2]]$clean_info@step)
     expect_error(agg_data <- mc_agg(cleaned_data))
     agg_data <- mc_agg(cleaned_data, "mean", "2 hours")
-    expect_false(all(is.na(agg_data$localities$CZ2_HRADEC$sensors$TS_T_mean$values)))
+    expect_false(all(is.na(agg_data$localities$CZ2_HRADEC$sensors$Thermo_T_mean$values)))
 })
 
 test_that("mc_agg custom functions", {
@@ -255,9 +255,9 @@ test_that("mc_agg custom functions", {
     custom_functions <- list(frost_days=function(values){min(values) < 5})
     agg_data <- mc_agg(data, c("min", "frost_days"), "hour", custom_functions=custom_functions)
     test_agg_data_format(agg_data)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_min$values < 5,
-                 agg_data$localities$`91184101`$sensors$TS_T_frost_days$values)
-    expect_equal(agg_data$localities$`91184101`$sensors$TS_T_frost_days$metadata@sensor_id, .model_const_SENSOR_logical)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_min$values < 5,
+                 agg_data$localities$`91184101`$sensors$Thermo_T_frost_days$values)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_frost_days$metadata@sensor_id, .model_const_SENSOR_logical)
 })
 
 test_that("mc_agg min_coverage", {
@@ -265,15 +265,15 @@ test_that("mc_agg min_coverage", {
     data <- mc_prep_meta_locality(data, list(`91184101`="ABC"), "locality_id")
     agg_data <- mc_agg(data, c("min", "coverage"), "12 hours", min_coverage = 0.9)
     test_agg_data_format(agg_data)
-    expect_true(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[1]]))
-    expect_true(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[2]]))
-    expect_false(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[3]]))
-    expect_false(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[5]]))
+    expect_true(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[1]]))
+    expect_true(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[2]]))
+    expect_false(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[3]]))
+    expect_false(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[5]]))
     agg_data <- mc_agg(data, c("min", "coverage"), "12 hours", min_coverage = 0.5)
-    expect_true(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[1]]))
-    expect_false(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[2]]))
-    expect_false(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[5]]))
+    expect_true(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[1]]))
+    expect_false(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[2]]))
+    expect_false(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[5]]))
     agg_data <- mc_agg(data, c("min", "coverage"), "12 hours", min_coverage = 0)
-    expect_false(is.na(agg_data$localities$ABC$sensors$TS_T_min$values[[1]]))
+    expect_false(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[1]]))
 })
 

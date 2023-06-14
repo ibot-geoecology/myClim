@@ -54,7 +54,7 @@ can be provided later with function \code{\link[=mc_prep_meta_locality]{mc_prep_
 If file is not in expected format, then file is skipped and warning printed in console.
 CSV files (loggers raw data) are in resulting myClim object placed to separate
 localities with empty metadata. Localities are named after serial_number of logger.
-Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+Pre-defined logger types are ("Dendro","HOBO","Thermo","TMS","TMS_L45")
 By default data are cleaned with function \code{\link[=mc_prep_clean]{mc_prep_clean()}}. See function description. It detects
 holes in time-series, duplicated records or records in wrong order.
 }

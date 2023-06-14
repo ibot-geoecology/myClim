@@ -16,7 +16,7 @@ data.frame with columns:
 \item serial_number - serial number of logger when provided or automatically detected from file name or header
 \item start_date - date of the first record on the logger
 \item end_date  - date of the last record on the logger
-\item step - detected time step in seconds of the logger measurements.
+\item step_seconds - detected time step in seconds of the logger measurements.
 \item count_duplicities - number of duplicated records (identical time)
 \item count_missing - number of missing records (logger outage in time when it should record)
 \item count_disordered - number of records incorrectly ordered in time (newer followed by older)

@@ -32,60 +32,53 @@ mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@min_value <- -40
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@max_value <- 60
 mc_data_sensors[[.model_const_SENSOR_TMS_T3]]@plot_color <- "red3"
 
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@sensor_id <- .model_const_SENSOR_TMS_TMSmoisture
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@logger <- .model_const_LOGGER_TOMST_TMS
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@physical <- .model_const_PHYSICAL_TMSmoisture
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@value_type <- .model_const_VALUE_TYPE_INTEGER
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@min_value <- 0
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@max_value <- 4000
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@plot_color <- "steelblue"
-mc_data_sensors[[.model_const_SENSOR_TMS_TMSmoisture]]@plot_line_width <- 2
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@sensor_id <- .model_const_SENSOR_TMS_moist
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@logger <- .model_const_LOGGER_TOMST_TMS
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@physical <- .model_const_PHYSICAL_moisture_raw
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@value_type <- .model_const_VALUE_TYPE_INTEGER
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@min_value <- 0
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@max_value <- 4000
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@plot_color <- "steelblue"
+mc_data_sensors[[.model_const_SENSOR_TMS_moist]]@plot_line_width <- 2
 
-mc_data_sensors[[.model_const_SENSOR_TS_T]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_TS_T]]@sensor_id <- .model_const_SENSOR_TS_T
-mc_data_sensors[[.model_const_SENSOR_TS_T]]@logger <- .model_const_LOGGER_TOMST_THERMODATALOGGER
-mc_data_sensors[[.model_const_SENSOR_TS_T]]@physical <- .model_const_PHYSICAL_T_C
-mc_data_sensors[[.model_const_SENSOR_TS_T]]@min_value <- -40
-mc_data_sensors[[.model_const_SENSOR_TS_T]]@max_value <- 60
-mc_data_sensors[[.model_const_SENSOR_TS_T]]@plot_color <- "#2000EEB0"
-mc_data_sensors[[.model_const_SENSOR_TS_T]]@plot_line_width <- 2
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]]@sensor_id <- .model_const_SENSOR_Thermo_T
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]]@logger <- .model_const_LOGGER_TOMST_THERMODATALOGGER
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]]@physical <- .model_const_PHYSICAL_T_C
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]]@min_value <- -40
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]]@max_value <- 60
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]]@plot_color <- "#2000EEB0"
+mc_data_sensors[[.model_const_SENSOR_Thermo_T]]@plot_line_width <- 2
 
-mc_data_sensors[[.model_const_SENSOR_DEND_T]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_DEND_T]]@sensor_id <- .model_const_SENSOR_DEND_T
-mc_data_sensors[[.model_const_SENSOR_DEND_T]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
-mc_data_sensors[[.model_const_SENSOR_DEND_T]]@physical <- .model_const_PHYSICAL_T_C
-mc_data_sensors[[.model_const_SENSOR_DEND_T]]@min_value <- -40
-mc_data_sensors[[.model_const_SENSOR_DEND_T]]@max_value <- 60
-mc_data_sensors[[.model_const_SENSOR_DEND_T]]@plot_color <- "#2000EEB0"
-mc_data_sensors[[.model_const_SENSOR_DEND_T]]@plot_line_width <- 2
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]]@sensor_id <- .model_const_SENSOR_Dendro_T
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]]@physical <- .model_const_PHYSICAL_T_C
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]]@min_value <- -40
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]]@max_value <- 60
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]]@plot_color <- "#2000EEB0"
+mc_data_sensors[[.model_const_SENSOR_Dendro_T]]@plot_line_width <- 2
 
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@sensor_id <- .model_const_SENSOR_DEND_TOMSTdendro
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@physical <- .model_const_PHYSICAL_TOMSTdendro
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@min_value <- 1279
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@max_value <- 34000
-mc_data_sensors[[.model_const_SENSOR_DEND_TOMSTdendro]]@value_type <- .model_const_VALUE_TYPE_INTEGER
+mc_data_sensors[[.model_const_SENSOR_Dendro_raw]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@sensor_id <- .model_const_SENSOR_Dendro_raw
+mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@logger <- .model_const_LOGGER_TOMST_DENDROMETER
+mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@physical <- .model_const_PHYSICAL_radius_raw
+mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@min_value <- 1279
+mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@max_value <- 34000
+mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@value_type <- .model_const_VALUE_TYPE_INTEGER
 
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@sensor_id <- .model_const_SENSOR_HOBO_T_C
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@logger <- .model_const_LOGGER_HOBO
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@physical <- .model_const_PHYSICAL_T_C
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@min_value <- -40
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_C]]@max_value <- 70
-
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@sensor_id <- .model_const_SENSOR_HOBO_T_F
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@logger <- .model_const_LOGGER_HOBO
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@physical <- .model_const_PHYSICAL_T_F
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@min_value <- -40
-mc_data_sensors[[.model_const_SENSOR_HOBO_T_F]]@max_value <- 158
+mc_data_sensors[[.model_const_SENSOR_HOBO_T]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_HOBO_T]]@sensor_id <- .model_const_SENSOR_HOBO_T
+mc_data_sensors[[.model_const_SENSOR_HOBO_T]]@logger <- .model_const_LOGGER_HOBO
+mc_data_sensors[[.model_const_SENSOR_HOBO_T]]@physical <- .model_const_PHYSICAL_T_C
+mc_data_sensors[[.model_const_SENSOR_HOBO_T]]@min_value <- -40
+mc_data_sensors[[.model_const_SENSOR_HOBO_T]]@max_value <- 70
 
 mc_data_sensors[[.model_const_SENSOR_HOBO_RH]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@sensor_id <- .model_const_SENSOR_HOBO_RH
 mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@logger <- .model_const_LOGGER_HOBO
-mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@physical <- .model_const_PHYSICAL_RH_perc
+mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@physical <- .model_const_PHYSICAL_RH
 mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@min_value <- 0
 mc_data_sensors[[.model_const_SENSOR_HOBO_RH]]@max_value <- 100
 
@@ -144,24 +137,24 @@ mc_data_sensors[[.model_const_SENSOR_FDD]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_FDD]]@sensor_id <- .model_const_SENSOR_FDD
 mc_data_sensors[[.model_const_SENSOR_FDD]]@description <- "Freezing degree days"
 
-mc_data_sensors[[.model_const_SENSOR_moisture]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_moisture]]@sensor_id <- .model_const_SENSOR_moisture
-mc_data_sensors[[.model_const_SENSOR_moisture]]@physical <- .model_const_PHYSICAL_moisture
-mc_data_sensors[[.model_const_SENSOR_moisture]]@min_value <- 0
-mc_data_sensors[[.model_const_SENSOR_moisture]]@max_value <- 1
-mc_data_sensors[[.model_const_SENSOR_moisture]]@plot_color <- "steelblue"
-mc_data_sensors[[.model_const_SENSOR_moisture]]@plot_line_width <- 2
+mc_data_sensors[[.model_const_SENSOR_VWC]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_VWC]]@sensor_id <- .model_const_SENSOR_VWC
+mc_data_sensors[[.model_const_SENSOR_VWC]]@physical <- .model_const_PHYSICAL_VWC
+mc_data_sensors[[.model_const_SENSOR_VWC]]@min_value <- 0
+mc_data_sensors[[.model_const_SENSOR_VWC]]@max_value <- 1
+mc_data_sensors[[.model_const_SENSOR_VWC]]@plot_color <- "steelblue"
+mc_data_sensors[[.model_const_SENSOR_VWC]]@plot_line_width <- 2
 
 mc_data_sensors[[.model_const_SENSOR_T_C]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_T_C]]@sensor_id <- .model_const_SENSOR_T_C
 mc_data_sensors[[.model_const_SENSOR_T_C]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[.model_const_SENSOR_T_C]]@plot_color <- "red"
 
-mc_data_sensors[[.model_const_SENSOR_RH_perc]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@sensor_id <- .model_const_SENSOR_RH_perc
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@physical <- .model_const_PHYSICAL_RH_perc
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@min_value <- 0
-mc_data_sensors[[.model_const_SENSOR_RH_perc]]@max_value <- 100
+mc_data_sensors[[.model_const_SENSOR_RH]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_RH]]@sensor_id <- .model_const_SENSOR_RH
+mc_data_sensors[[.model_const_SENSOR_RH]]@physical <- .model_const_PHYSICAL_RH
+mc_data_sensors[[.model_const_SENSOR_RH]]@min_value <- 0
+mc_data_sensors[[.model_const_SENSOR_RH]]@max_value <- 100
 
 mc_data_sensors[[.model_const_SENSOR_dendro_l_um]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_dendro_l_um]]@sensor_id <- .model_const_SENSOR_dendro_l_um

@@ -3,7 +3,7 @@ source("libtest.R")
 test_that(".common_sensor_values_as_tibble", {
     data <- mc_read_files("../data/TOMST/data_94184102_0.csv", "TOMST", clean=FALSE)
     table <- .common_sensor_values_as_tibble(data$localities[[1]]$loggers[[1]])
-    expect_equal(colnames(table), c("datetime", "TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture"))
+    expect_equal(colnames(table), c("datetime", "TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist"))
 })
 
 test_that(".common_crop_states_table", {

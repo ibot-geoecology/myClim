@@ -5,7 +5,7 @@
 \alias{mc_data_sensors}
 \title{Sensors definition.}
 \format{
-An object of class \code{environment} of length 28.
+An object of class \code{environment} of length 27.
 }
 \usage{
 mc_data_sensors
@@ -21,30 +21,29 @@ Currently supported sensors:
 \itemize{
 \item count - result of \code{count} function \code{\link[=mc_agg]{mc_agg()}}
 \item coverage - result of \code{coverage} function \code{\link[=mc_agg]{mc_agg()}}
-\item DEND_T - temperature in Tomst dendrometer (°C)
-\item DEND_TOMSTdendro - change in stem size in Tomst dendrometer (raw units) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
+\item Dendro_T - temperature in Tomst dendrometer (°C)
+\item Dendro_raw - change in stem size in Tomst dendrometer (raw units) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item dendro_l_um - change in stem size (um) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item FDD - result of function \code{\link[=mc_calc_fdd]{mc_calc_fdd()}}
 \item GDD - result of function \code{\link[=mc_calc_gdd]{mc_calc_gdd()}}
 \item HOBO_RH - relative humidity in HOBO logger (\%)
-\item HOBO_T_C - temperature in HOBO logger (°C)
-\item HOBO_T_F - temperature in HOBO logger (°F)
+\item HOBO_T - temperature in HOBO logger (°C)
 \item integer - universal sensor with integer values
 \item logical - universal sensor with logical values
-\item moisture - volumetric water content in soil (ratio)
+\item VWC - volumetric water content in soil (m3/m3)
 \item precipitation - (mm)
 \item real - universal sensor with real values
-\item RH_perc - relative humidity sensor (\%)
+\item RH - relative humidity sensor (\%)
 \item snow_bool - result of function \code{\link[=mc_calc_snow]{mc_calc_snow()}}
 \item snow_fresh - fresh snow height (cm)
 \item snow_total - total snow height (cm)
 \item sun_shine - time of sun shine (hours)
 \item T_C - universal temperature sensor (°C)
-\item TS_T - temperature sensor in Tomst Thermologger (°C)
+\item Thermo_T - temperature sensor in Tomst Thermologger (°C)
 \item TMS_T1 - soil temperature sensor in Tomst TMS (°C)
 \item TMS_T2 - surface temperature sensor in Tomst TMS (°C)
 \item TMS_T3 - air temperature sensor in Tomst TMS (°C)
-\item TMS_TMSmoisture - soil moisture sensor in Tomst TMS (raw TMS units)
+\item TMS_moist - soil moisture sensor in Tomst TMS (raw TMS units)
 \item wind - wind speed (m/s)
 }
 }

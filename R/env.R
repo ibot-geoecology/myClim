@@ -249,7 +249,7 @@ mc_env_moist <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_e
 }
 
 .env_moist_rename_sensors <- function(data) {
-    moist_sensors <- .env_get_sensors_by_physical_or_id(data, physical=.model_const_PHYSICAL_moisture)
+    moist_sensors <- .env_get_sensors_by_physical_or_id(data, physical=.model_const_PHYSICAL_VWC)
     result <- list(moist_sensors=character(), data=data)
     for(moist_sensor in names(moist_sensors$localities)) {
         height_name <- .agg_get_height_name(moist_sensor, moist_sensors$heights[[moist_sensor]])

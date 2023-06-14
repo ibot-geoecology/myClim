@@ -52,7 +52,7 @@ attr(,"logger_type"): character(0)
 
 If data_row_pattern is NA, then file format is not validated.}
 
-\item{\code{logger_type}}{type of logger: TMS, TMS_L45, ThermoDatalogger, Dendrometer, HOBO, ... (default NA)}
+\item{\code{logger_type}}{type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA)}
 
 \item{\code{tz_offset}}{timezone offset in minutes from UTC in source data (default 0)}
 }}

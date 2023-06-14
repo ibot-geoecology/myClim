@@ -1,3 +1,8 @@
+# myClim 1.0.6
+* The `mc_prep_crop()` function now includes a new parameter, `localities`, which allows for specific localities to be selected.
+* The definitions of physicals, loggers, and sensors have been modified.
+* Data from HOBO loggers in °F are now automatically converted to °C.
+
 # myClim 1.0.5
 * Metadata of a locality can now be loaded from a table using the `mc_read_data()` function.
 * The parameter `use_utc` has been added to the following functions: `mc_reshape_wide()`, `mc_reshape_long()`,

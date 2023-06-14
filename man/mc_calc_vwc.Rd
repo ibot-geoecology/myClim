@@ -6,7 +6,7 @@
 \usage{
 mc_calc_vwc(
   data,
-  moist_sensor = .model_const_SENSOR_TMS_TMSmoisture,
+  moist_sensor = .model_const_SENSOR_TMS_moist,
   temp_sensor = .model_const_SENSOR_TMS_T1,
   output_sensor = "VWC_moisture",
   soiltype = "universal",
@@ -21,8 +21,8 @@ mc_calc_vwc(
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{moist_sensor}{name of soil moisture sensor to be converted from TMS
-units to volumetric (default "TMS_TMSmoisture") see \code{names(mc_data_sensors)}.
-Soil moisture sensor must be in TMSmoisture physical see \code{names(mc_data_physical)}.}
+units to volumetric (default "TMS_moist") see \code{names(mc_data_sensors)}.
+Soil moisture sensor must be in moisture_raw physical see \code{names(mc_data_physical)}.}
 
 \item{temp_sensor}{name of soil temperature sensor (default "TMS_T1")
 see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical.}

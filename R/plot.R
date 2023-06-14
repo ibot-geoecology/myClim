@@ -1,5 +1,5 @@
-.plot_const_MOISTURE_PHYSICAL <- c(.model_const_PHYSICAL_TMSmoisture,
-                                   .model_const_PHYSICAL_moisture)
+.plot_const_MOISTURE_PHYSICAL <- c(.model_const_PHYSICAL_moisture_raw,
+                                   .model_const_PHYSICAL_VWC)
 .plot_const_MESSAGE_DUPLICATED_SENSOR <- "Sensor {duplicated_sensors} contains multiple physicals. It is not allowed."
 
 #' Plot data from loggers
@@ -397,7 +397,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' for bigger data. Maximal number of physical units (elements) of sensors to be plotted in one
 #' plot is two with main and secondary y axis. In case, there are multiple sensors with
 #' identical physical on one locality, they are plotted together. E.g., when you have
-#' TMS_T1, TMS_T2, TMS_T3, TS_T, and moisture you get plot with 5 lines of different colors and
+#' TMS_T1, TMS_T2, TMS_T3, Thermo_T, and VWC you get plot with 5 lines of different colors and
 #' two y axes. Secondary y axes are scaled with calculation `values * scale_coeff`.
 #' If coefficient is NULL than function try detects scale coefficient from
 #' physical unit of sensors see [mc_Physical-class]. Scaling is useful when
@@ -418,7 +418,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @return ggplot2 object
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
-#' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_TMSmoisture"))
+#' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_moist"))
 #' p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
 #' p <- p+ggplot2::xlab("week")
 #' p <- p+ggplot2::scale_color_manual(values=c("hotpink","pink", "darkblue"),name=NULL)

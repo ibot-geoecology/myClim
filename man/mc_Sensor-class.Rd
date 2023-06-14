@@ -11,11 +11,11 @@ Sensor definitions are stored in \link{mc_data_sensors}.
 \section{Slots}{
 
 \describe{
-\item{\code{sensor_id}}{unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_TMSmoisture, ...)}
+\item{\code{sensor_id}}{unique identifier of sensor (TMS_T1, TMS_T2, TMS_T3, TMS_moist, ...)}
 
-\item{\code{logger}}{name of logger (TMS, ThermoDatalogger, ...)}
+\item{\code{logger}}{name of logger (TMS, Thermo, ...)}
 
-\item{\code{physical}}{unit of sensor (T_C, TMSmoisture, moisture, RH_perc) (default NA)}
+\item{\code{physical}}{unit of sensor (T_C, moisture_raw, moisture, RH) (default NA)}
 
 \item{\code{description}}{character info}
 
