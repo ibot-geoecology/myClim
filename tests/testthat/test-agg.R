@@ -52,7 +52,9 @@ test_that("mc_agg 90s step", {
     table <- read.csv("../data/agg-short-step/step_90s_long.csv", stringsAsFactors = FALSE)
     table$datetime <- lubridate::ymd_hms(table$datetime)
     table$locality_id <- as.character(table$locality_id)
-    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T","RH" = "HOBO_RH", "Wind" = "wind"),
+    data <- mc_read_long(table, sensor_ids = list("Temp" = myClim:::.model_const_SENSOR_HOBO_T,
+                                                  "RH" = myClim:::.model_const_SENSOR_HOBO_RH,
+                                                  "Wind" = myClim:::.model_const_SENSOR_wind_speed),
                          clean = TRUE, silent = TRUE)
     test_raw_data_format(data)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@step, 90)
@@ -65,7 +67,9 @@ test_that("mc_agg 10s step", {
     table <- read.csv("../data/agg-short-step/step_10s_long.csv", stringsAsFactors = FALSE)
     table$datetime <- lubridate::ymd_hms(table$datetime)
     table$locality_id <- as.character(table$locality_id)
-    data <- mc_read_long(table, sensor_ids = list("Temp" = "HOBO_T","RH" = "HOBO_RH", "Wind" = "wind"),
+    data <- mc_read_long(table, sensor_ids = list("Temp" = myClim:::.model_const_SENSOR_HOBO_T,
+                                                  "RH" = myClim:::.model_const_SENSOR_HOBO_RH,
+                                                  "Wind" = myClim:::.model_const_SENSOR_wind_speed),
                          clean = TRUE, silent = TRUE)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@step, 10)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_duplicities, 0)

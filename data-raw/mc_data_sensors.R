@@ -123,11 +123,11 @@ mc_data_sensors[[.model_const_SENSOR_sun_shine]]@value_type <- .model_const_VALU
 mc_data_sensors[[.model_const_SENSOR_sun_shine]]@physical <- .model_const_PHYSICAL_t_h
 mc_data_sensors[[.model_const_SENSOR_sun_shine]]@description <- "Time of sun shine"
 
-mc_data_sensors[[.model_const_SENSOR_wind]] <- new("mc_Sensor")
-mc_data_sensors[[.model_const_SENSOR_wind]]@sensor_id <- .model_const_SENSOR_wind
-mc_data_sensors[[.model_const_SENSOR_wind]]@value_type <- .model_const_VALUE_TYPE_REAL
-mc_data_sensors[[.model_const_SENSOR_wind]]@physical <- .model_const_PHYSICAL_v
-mc_data_sensors[[.model_const_SENSOR_wind]]@description <- "Speed of wind"
+mc_data_sensors[[.model_const_SENSOR_wind_speed]] <- new("mc_Sensor")
+mc_data_sensors[[.model_const_SENSOR_wind_speed]]@sensor_id <- .model_const_SENSOR_wind_speed
+mc_data_sensors[[.model_const_SENSOR_wind_speed]]@value_type <- .model_const_VALUE_TYPE_REAL
+mc_data_sensors[[.model_const_SENSOR_wind_speed]]@physical <- .model_const_PHYSICAL_v
+mc_data_sensors[[.model_const_SENSOR_wind_speed]]@description <- "Speed of wind"
 
 mc_data_sensors[[.model_const_SENSOR_GDD]] <- new("mc_Sensor")
 mc_data_sensors[[.model_const_SENSOR_GDD]]@sensor_id <- .model_const_SENSOR_GDD
