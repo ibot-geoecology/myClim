@@ -11,6 +11,7 @@
 .serialize_MAP_1_0_6$sensor_ids$HOBO_T_C <- "HOBO_T"
 .serialize_MAP_1_0_6$sensor_ids$moisture <- "VWC"
 .serialize_MAP_1_0_6$sensor_ids$RH_perc <- "RH"
+.serialize_MAP_1_0_6$sensor_ids$wind <- "wind_speed"
 
 
 #' Save myClim object

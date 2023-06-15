@@ -90,6 +90,7 @@ test_that("mc_read_data HOBO", {
     not_applicable_format_warning(data <- mc_read_data(files_table, clean=FALSE)) %>%
         not_applicable_format_warning() %>%
         expect_warning("Separated time in source data isn't supported.") %>%
+        expect_warning("Temperature data in °F is converted to °C.") %>%
         expect_warning("Separated time in source data isn't supported.")
     test_raw_data_format(data)
     expect_equal(sort(names(data$localities)), sort(c("A", "B", "C", "D", "E", "F", "CH", "I")))

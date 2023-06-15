@@ -51,7 +51,7 @@
 .model_const_SENSOR_snow_total <- "snow_total"
 .model_const_SENSOR_sun_shine <- "sun_shine"
 .model_const_SENSOR_VPD <- "VPD"
-.model_const_SENSOR_wind <- "wind"
+.model_const_SENSOR_wind_speed <- "wind_speed"
 
 .model_const_SENSOR_VWC <- .model_const_PHYSICAL_VWC
 .model_const_SENSOR_RH <- .model_const_PHYSICAL_RH
@@ -87,6 +87,7 @@
 .model_const_MESSAGE_DATE_TIME_HEADER <- "It is not possible to detect timezone offset from header."
 .model_const_MESSAGE_COLUMNS_PROBLEM <- "It is not possible to detect columns from header."
 .model_const_MESSAGE_HOBO_DATE_FORMAT_PROBLEM <- "HOBO data format required filled in parameter date_format."
+.model_const_MESSAGE_HOBO_CONVERT_FAHRENHEIT <- "Temperature data in \u00b0F is converted to \u00b0C."
 
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
@@ -944,6 +945,7 @@ setMethod(
     function(object, data_table) {
         if(object@convert_fahrenheit && .model_const_SENSOR_HOBO_T %in% names(object@columns)) {
             column_index <- object@columns[[.model_const_SENSOR_HOBO_T]]
+            warning(.model_const_MESSAGE_HOBO_CONVERT_FAHRENHEIT)
             data_table[[column_index]] <- (data_table[[column_index]] - 32) * 5 / 9
         }
         last_value_column <- max(unlist(object@columns))
