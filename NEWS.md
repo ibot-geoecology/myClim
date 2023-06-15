@@ -1,6 +1,15 @@
 # myClim 1.0.6
 * The `mc_prep_crop()` function now includes a new parameter, `localities`, which allows for specific localities to be selected.
 * The definitions of physicals, loggers, and sensors have been modified.
+  * `TMS_TMSmoisture` -> `TMS_moist`
+  * `TS_T` -> `Thermo_T`
+  * `DEND_T` -> `Dendro_T`
+  * `DEND_TOMSTdendro` -> `Dendro_raw`
+  * `HOBO_T_C` -> `HOBO_T`
+  * `moisture` -> `VWC`
+  * `RH_perc` -> `RH`
+  * `wind` -> `wind_speed`
+  * deleted `HOBO_T_F`
 * Data from HOBO loggers in °F are now automatically converted to °C.
 
 # myClim 1.0.5
