@@ -1,5 +1,5 @@
 # myClim 1.0.6
-* The `mc_prep_crop()` function now includes a new parameter, `localities`, which allows for specific localities to be selected.
+* The `mc_prep_crop()` function now includes a new parameter `localities`, which allows for specific localities to be selected.
 * The definitions of physicals, loggers, and sensors have been modified.
   * `TMS_TMSmoisture` -> `TMS_moist`
   * `TS_T` -> `Thermo_T`
