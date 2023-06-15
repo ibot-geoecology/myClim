@@ -106,18 +106,23 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection.
 #'
-#' @param localities_table path to csv file or data.frame [
+#' @param localities_table path to csv file ("c:/user/localities.table.csv") or R data.frame [
 #' see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv). 
 #' Localities table is optional (default NULL).
-#' §Object contains predefined columns and aditional columns from which values are saved to
-#' `metadata@user_data` [myClim-package]. All columns, except for `locality_id`, are optional.
-#'
+#' The `locality_id` is the only required column. Other columns are optional. Column names corresponding 
+#' with the myclim pre-defined locality metadata (elevation, lon_wgs84, lat_wgs84, tz_offset) 
+#' are associted withthose pre-defined metadata slots, other columns are  written into 
+#' `metadata@user_data` [myClim-package].
+#' 
+#'required columns:
 #' * locality_id - unique locality id
+#' 
+#' optional columns:
 #' * elevation - elevation (in m)
 #' * lon_wgs84 - longitude (in decimal degrees)
 #' * lat_wgs84 - latitude (in decimal degrees)
-#' * tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
-#' * ... - additional values are saved to user_data§
+#' * tz_offset - locality time zone offset from UTC, applicable for converting time-series from UTC to local time.
+#' * ... - any other columns are imported to `metadata@user_data`
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is not printed in console (default FALSE)
 #' @return myClim object in Raw-format see [myClim-package]

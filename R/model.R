@@ -599,7 +599,7 @@ mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_Data
 #' in what format is the date, in which columns are records of which sensors.
 #' The code defining the class is in section methods ./R/model.R
 #'
-#' @slot convert_fahrenheit §if TRUE temperature values are converted from °F to °C§ (default FALSE)
+#' @slot convert_fahrenheit if TRUE temperature values are converted from °F to °C (default FALSE)
 #' @seealso [myClim::mc_DataFormat], [mc_data_formats]
 #' @exportClass mc_HOBODataFormat
 mc_HOBODataFormat <- setClass("mc_HOBODataFormat",

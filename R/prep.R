@@ -440,19 +440,26 @@ mc_prep_solar_tz <- function(data) {
 #' This function crop data by datetime
 #'
 #' @details
-#' Function is able to crop data from start to end but works also 
-#' with only start and only end. When only start provided, then crop only start and
-#' do not touch the end and vice versa.
+#' Function is able to crop data from `start` to `end` but works also 
+#' with `start` only and `end` only. When only `start` is provided, then function crops only 
+#' the beginning of the tim-series and vice versa with end.
 #'
-#' If `start` or `end` is a single datetime value, it is used for all or selected localities.
-#' However, if `start` and `end` are vectors with the same length as the localities vector,
-#' each locality is cropped by its own datetime range.§
+#' If `start` or `end` is a single POSIXct value, it is used for all or selected localities (regular crop).
+#' However, if `start` and `end` are vectors of POSIXct values with the same length as the localities vector,
+#' each locality is cropped by its own time window (irregular crop).
+#' 
+#' The `end_included` parameter is used for selecting, whether to return data which contains `end` 
+#' time or not. For example when cropping the data to rounded days, typically users use midnight.
+#' 2023-06-15 00:00:00 UTC. But midnight is the last date of ending day and the same
+#' time first date of the next day. Thus, there will be the last day with single record. 
+#' This can be confusing in aggregation (e.g. daily mean of single record per day, typically NA) so  
+#' sometimes it is better to exclude end and crop on 2023-06-14 23:45:00 UTC (15 minutes records). 
 #'
 #' @template param_myClim_object
-#' @param start POSIXct datetime in UTC; §single value or vector;§ is optional; start datetime is included (default NULL)
-#' @param end POSIXct datetime in UTC; §single value or vector;§ is optional (default NULL)
-#' @param localities §locality_ids; if NULL then all localities cropping (default NULL)§
-#' @param end_included if TRUE then end datetime is included (default TRUE)
+#' @param start optional; POSIXct datetime **in UTC**; single value or vector; start datetime is included (default NULL)
+#' @param end optional, POSIXct datetime **in UTC**; single value or vector (default NULL)
+#' @param localities vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)
+#' @param end_included if TRUE then end datetime is included (default TRUE), see details
 #' @return cropped data in the same myClim format as input. 
 #' @export
 #' @examples
