@@ -13,7 +13,7 @@ The code defining the class is in section methods ./R/model.R
 \section{Slots}{
 
 \describe{
-\item{\code{convert_fahrenheit}}{§if TRUE temperature values are converted from °F to °C§ (default FALSE)}
+\item{\code{convert_fahrenheit}}{if TRUE temperature values are converted from °F to °C (default FALSE)}
 }}
 
 \seealso{

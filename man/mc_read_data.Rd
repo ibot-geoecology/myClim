@@ -39,17 +39,25 @@ Ignored for Tomst TMS data format (they are always in UTC)
 instead of automatic step detection.
 }}
 
-\item{localities_table}{path to csv file or data.frame \href{https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv}{ see example}.
+\item{localities_table}{path to csv file ("c:/user/localities.table.csv") or R data.frame \href{https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv}{ see example}.
 Localities table is optional (default NULL).
-§Object contains predefined columns and aditional columns from which values are saved to
-\code{metadata@user_data} \link{myClim-package}. All columns, except for \code{locality_id}, are optional.
+The \code{locality_id} is the only required column. Other columns are optional. Column names corresponding
+with the myclim pre-defined locality metadata (elevation, lon_wgs84, lat_wgs84, tz_offset)
+are associted withthose pre-defined metadata slots, other columns are  written into
+\code{metadata@user_data} \link{myClim-package}.
+
+required columns:
 \itemize{
 \item locality_id - unique locality id
+}
+
+optional columns:
+\itemize{
 \item elevation - elevation (in m)
 \item lon_wgs84 - longitude (in decimal degrees)
 \item lat_wgs84 - latitude (in decimal degrees)
-\item tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
-\item ... - additional values are saved to user_data§
+\item tz_offset - locality time zone offset from UTC, applicable for converting time-series from UTC to local time.
+\item ... - any other columns are imported to \code{metadata@user_data}
 }}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}

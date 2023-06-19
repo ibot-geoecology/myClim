@@ -30,9 +30,15 @@ mc_plot_image(
 
 \item{left_margin}{width of space for sensor_labels; default = 12}
 
-\item{use_utc}{§if FALSE, then \code{tz_offset} is used for output timeseries (default TRUE)
+\item{use_utc}{if FALSE, then the time shift from \code{tz_offset} metadata is used to correct
+(shift) the output time-series (default TRUE)
 
-Agg-format accept the FALSE value only for step shorter than day. In Raw-format isn't parameter limited.§}
+In the Agg-format myClim object \code{use_utc = FALSE} is allowed only for steps shorter than one day. In myClim
+the day nd longer time steps are defined by the midnight, but this represent whole day, week, month, year...
+shifting daily, weekly, monthly... data (shift midnight) does not make sense in our opinion.
+But when user need more flexibility, then myClim Raw-format
+can be used, In Raw-format \code{use_utc} is not limited, user can shift an data without the restrictions.
+See \link{myClim-package}}
 }
 \value{
 PNG file created as specified in output file name
