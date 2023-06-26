@@ -1,3 +1,6 @@
+# myClim 1.0.7
+* The temperature correction is no longer applied in the `mc_calc_vwc()` function when the `temp_sensor` value is NA.
+
 # myClim 1.0.6
 * The `mc_prep_crop()` function now includes a new parameter `localities`, which allows for specific localities to be selected.
 * The definitions of physicals, loggers, and sensors have been modified.

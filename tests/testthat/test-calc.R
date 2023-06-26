@@ -66,9 +66,11 @@ test_that("mc_calc_vwc", {
             "94184103",   "TMS_moist", lubridate::ymd_h("2020-10-16 14"),      -0.015,          1,
     ))
     cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
+    cleaned_data$localities$A2E32$loggers[[1]]$sensors$TMS_T1$values[[1]] <- NA_real_
     expect_warning(raw_data <- mc_calc_vwc(cleaned_data, localities=c("A1E05", "A2E32")))
     test_raw_data_format(raw_data)
     expect_true("VWC_moisture" %in% names(raw_data$localities$A2E32$loggers[[1]]$sensors))
+    expect_false(is.na(raw_data$localities$A2E32$loggers[[1]]$sensors$VWC_moisture$values[[1]]))
     agg_data <- mc_agg(cleaned_data)
     expect_warning(agg_data <- mc_calc_vwc(agg_data, localities=c("A1E05", "A2E32")))
     test_agg_data_format(agg_data)
