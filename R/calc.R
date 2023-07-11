@@ -286,8 +286,8 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
 #' @param output_sensor name of new snow virtual sensor with VWC values (default "VWC_moisture")
 #' @param soiltype §is `list(a=number1, b=number2, c=number3)` or character value§
-#' from [mc_data_vwc_parameters] in column soiltype (default "universal").
-#' Parameters a, b and c are used in calculation.
+#' from [mc_data_vwc_parameters] in column `soiltype` (default `"universal"`).
+#' Parameters `a`, `b` and `c` are used in calculation.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @param ref_t (default 24)
 #' @param acor_t (default 1.91132689118083) correction parameter for temperature drift 

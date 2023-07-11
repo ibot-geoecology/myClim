@@ -30,8 +30,8 @@ see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical.}
 \item{output_sensor}{name of new snow virtual sensor with VWC values (default "VWC_moisture")}
 
 \item{soiltype}{§is \code{list(a=number1, b=number2, c=number3)} or character value§
-from \link{mc_data_vwc_parameters} in column soiltype (default "universal").
-Parameters a, b and c are used in calculation.}
+from \link{mc_data_vwc_parameters} in column \code{soiltype} (default \code{"universal"}).
+Parameters \code{a}, \code{b} and \code{c} are used in calculation.}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 
