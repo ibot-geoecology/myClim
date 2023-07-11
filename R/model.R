@@ -280,7 +280,7 @@ setMethod(f="initialize",
 #' physicals can be added like modules. 
 #' \preformatted{
 #' Slot "name": "T_C"
-#' slot "description": "Temperature °C"
+#' Slot "description": "Temperature °C"
 #' Slot "units": "°C"
 #' Slot "viridis_color_map": "C"
 #' Slot "scale_coeff": 0.03333333
