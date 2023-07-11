@@ -337,7 +337,7 @@ mc_env_vpd <- function(data, period, use_utc=TRUE, custom_start=NULL, custom_end
 }
 
 .env_vpd_rename_sensors <- function(data) {
-    vpd_sensors <- .env_get_sensors_by_physical_or_id(data, sensor_id=.model_const_SENSOR_VPD)
+    vpd_sensors <- .env_get_sensors_by_physical_or_id(data, sensor_id=mc_const_SENSOR_VPD)
     result <- list(vpd_sensors=character(), data=data)
     for(vpd_sensor in names(vpd_sensors$localities)) {
         height_name <- .agg_get_height_name(vpd_sensor, vpd_sensors$heights[[vpd_sensor]])

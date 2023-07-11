@@ -6,6 +6,7 @@
 .calc_const_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
 .calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
 .calc_const_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
+.calc_const_MESSAGE_WRONG_SOILTYPE <- "Soiltype doesn't contain all a, b, c parameters."
 .calc_const_MESSAGE_VPD_AGGREGATED <- "You are attempting to calculate VPD from aggregated temperature / RH values. Due to non-linear relationship between VPD and T/RH, this may produce biased VPD estimates."
 
 #' Snow detection from temperature
@@ -47,7 +48,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     }
 
     call_snow <- function(item) {
-        .calc_add_sensor_to_item(item, sensor, .model_const_SENSOR_snow_bool, output_sensor,
+        .calc_add_sensor_to_item(item, sensor, mc_const_SENSOR_snow_bool, output_sensor,
                                  .model_const_PHYSICAL_T_C,
                                  .calc_snow_values_function, range=range, tmax=tmax, days=days)
     }
@@ -284,8 +285,9 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
 #' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
 #' @param output_sensor name of new snow virtual sensor with VWC values (default "VWC_moisture")
-#' @param soiltype value from [mc_data_vwc_parameters] in column soiltype
-#' (default "universal").  Parameters a, b and c are used in calculation.
+#' @param soiltype §is `list(a=number1, b=number2, c=number3)` or character value§
+#' from [mc_data_vwc_parameters] in column soiltype (default "universal").
+#' Parameters a, b and c are used in calculation.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @param ref_t (default 24)
 #' @param acor_t (default 1.91132689118083) correction parameter for temperature drift 
@@ -306,22 +308,25 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 #' 
 #' @examples
-#' agg_data <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
-mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_moist,
-                        temp_sensor=.model_const_SENSOR_TMS_T1,
+#' data1 <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
+#' data2 <- mc_calc_vwc(mc_data_example_agg, localities="A2E32",
+#'                      soiltype=list(a=-3.00e-09, b=0.000161192, c=-0.109956505))
+mc_calc_vwc <- function(data, moist_sensor=mc_const_SENSOR_TMS_moist,
+                        temp_sensor=mc_const_SENSOR_TMS_T1,
                         output_sensor="VWC_moisture",
                         soiltype="universal", localities=NULL,
-                        ref_t=.calib_MOIST_REF_T,
-                        acor_t=.calib_MOIST_ACOR_T,
-                        wcor_t=.calib_MOIST_WCOR_T,
+                        ref_t=mc_const_CALIB_MOIST_REF_T,
+                        acor_t=mc_const_CALIB_MOIST_ACOR_T,
+                        wcor_t=mc_const_CALIB_MOIST_WCOR_T,
                         frozen2NA=TRUE) {
     is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         .prep_check_datetime_step_unprocessed(data, stop)
     }
+    soil_parameters <- .calc_get_vwc_soil_parameters(soiltype)
     call_vwc <- function(item) {
         .calc_add_vwc_to_item(item, moist_sensor, temp_sensor, output_sensor,
-                              soiltype, ref_t, acor_t, wcor_t, frozen2NA)
+                              soil_parameters, ref_t, acor_t, wcor_t, frozen2NA)
     }
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
@@ -338,15 +343,27 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_moist,
     return(data)
 }
 
+.calc_get_vwc_soil_parameters <- function(soiltype_value) {
+    if(is.character(soiltype_value)) {
+        soil_row <- dplyr::filter(myClim::mc_data_vwc_parameters, .data$soiltype == soiltype_value)
+        if(nrow(soil_row) != 1) {
+            stop(stringr::str_glue(.calc_const_MESSAGE_UNKNONW_SIOLTYPE))
+        }
+        return(list(a=soil_row$a, b=soil_row$b, c=soil_row$c))
+    }
+    soiltype_names <- names(soiltype_value)
+    if(!("a" %in% soiltype_names && "b" %in% soiltype_names && "c" %in% soiltype_names)) {
+        stop(stringr::str_glue(.calc_const_MESSAGE_WRONG_SOILTYPE))
+    }
+    return(soiltype_value)
+}
+
+
 .calc_add_vwc_to_item <- function(item, moist_sensor, temp_sensor, output_sensor,
-                                  soiltype_value, ref_t, acor_t, wcor_t, frozen2NA) {
+                                  soil_parameters, ref_t, acor_t, wcor_t, frozen2NA) {
     skip <- .calc_vwc_check_sensors_get_skip(item, moist_sensor, temp_sensor, output_sensor)
     if(skip) {
         return(item)
-    }
-    soil_row <- dplyr::filter(myClim::mc_data_vwc_parameters, .data$soiltype == soiltype_value)
-    if(nrow(soil_row) != 1) {
-        stop(stringr::str_glue(.calc_const_MESSAGE_UNKNONW_SIOLTYPE))
     }
     values_table <- tibble::tibble(datetime = item$datetime,
                                    raw = item$sensors[[moist_sensor]]$values,
@@ -359,14 +376,14 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_moist,
                              temp_values = data$temp,
                              cal_cor_factor = if(is_calibrated) cor_factor else 0,
                              cal_cor_slope = if(is_calibrated) cor_slope else 0,
-                             a = soil_row$a, b = soil_row$b, c = soil_row$c,
-                             ref_t = ref_t, acor_t = acor_t, wcor_t = wcor_t,
-                             frozen2NA = frozen2NA)
+                             a=soil_parameters$a, b=soil_parameters$b, c=soil_parameters$c,
+                             ref_t=ref_t, acor_t=acor_t, wcor_t=wcor_t,
+                             frozen2NA=frozen2NA)
     }
     values <- purrr::pmap(dplyr::select(input_data, "cor_factor", "cor_slope", "data"), data_function)
     is_calibrated <- nrow(calibration) > 0
     height <- item$sensors[[moist_sensor]]$metadata@height
-    item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_VWC, output_sensor,
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_VWC, output_sensor,
                                                                      values=purrr::flatten_dbl(values), height=height,
                                                                      calibrated = is_calibrated,
                                                                      calibration=item$sensors[[moist_sensor]]$calibration)
@@ -431,7 +448,7 @@ mc_calc_vwc <- function(data, moist_sensor=.model_const_SENSOR_TMS_moist,
 #' gdd_data <- mc_calc_gdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
 #' gdd_agg <- mc_agg(gdd_data, list(TMS_T3=c("min", "max"), GDD5="sum"), period="day")
 mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=NULL) {
-    .calc_xdd(data, sensor, .model_const_SENSOR_GDD, output_prefix, t_base, localities, .calc_gdd_values_function)
+    .calc_xdd(data, sensor, mc_const_SENSOR_GDD, output_prefix, t_base, localities, .calc_gdd_values_function)
 }
 
 .calc_xdd <- function(data, sensor, output_sensor_id, output_prefix, t_base, localities, values_function) {
@@ -516,7 +533,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' fdd_data <- mc_calc_fdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))
 #' fdd_agg <- mc_agg(fdd_data, list(TMS_T3=c("min", "max"), FDD5="sum"), period="day")
 mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=NULL) {
-    .calc_xdd(data, sensor, .model_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
+    .calc_xdd(data, sensor, mc_const_SENSOR_FDD, output_prefix, t_base, localities, .calc_fdd_values_function)
 }
 
 .calc_fdd_values_function <- function(locality, sensor_name, t_base, step_part_day) {
@@ -561,7 +578,7 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
         item <- .calc_add_sensor_to_item(item, sensor_name, output_sensor_id, output_sensor_name,
                                          values_function = values_function)
         if(is.logical(origin_sensor$values) && !is.logical(item$sensors[[output_sensor_name]]$values)) {
-            item$sensors[[output_sensor_name]]$metadata@sensor_id <- .model_const_SENSOR_integer
+            item$sensors[[output_sensor_name]]$metadata@sensor_id <- mc_const_SENSOR_integer
         }
         item
     }
@@ -606,8 +623,8 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' @export
 #' @examples
 #' agg_data <- mc_calc_tomst_dendro(mc_data_example_agg, localities="A1E05")
-mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_Dendro_raw,
-                        output_sensor=.model_const_SENSOR_dendro_l_um,
+mc_calc_tomst_dendro <- function(data, dendro_sensor=mc_const_SENSOR_Dendro_raw,
+                        output_sensor=mc_const_SENSOR_dendro_l_um,
                         localities=NULL) {
     is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
@@ -615,7 +632,7 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_Dendro_
     }
 
     call_dendro_function <- function(item) {
-        .calc_add_sensor_to_item(item, dendro_sensor, .model_const_SENSOR_dendro_l_um, output_sensor,
+        .calc_add_sensor_to_item(item, dendro_sensor, mc_const_SENSOR_dendro_l_um, output_sensor,
                                  .model_const_PHYSICAL_radius_raw,
                                  .calc_get_dendro_l_um)
     }
@@ -635,8 +652,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=.model_const_SENSOR_Dendro_
 }
 
 .calc_get_dendro_l_um <- function(item, sensor_name) {
-    min_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@min_value
-    max_raw_value <- myClim::mc_data_sensors[[.model_const_SENSOR_Dendro_raw]]@max_value
+    min_raw_value <- myClim::mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@min_value
+    max_raw_value <- myClim::mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@max_value
     um_range <- .model_const_TOMST_DENDROMETER_UM_RANGE
     (item$sensors[[sensor_name]]$values - min_raw_value) * (um_range / (max_raw_value - min_raw_value))
 }
@@ -719,7 +736,7 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
     values <- f * a * exp(b * T / (c + T)) * (1 - RH / 100)
 
     height <- item$sensors[[rh_sensor]]$metadata@height
-    item$sensors[[output_sensor]] <- .common_get_new_sensor(.model_const_SENSOR_VPD, output_sensor,
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_VPD, output_sensor,
                                                                      height=height, values=values)
     return(item)
 }

@@ -52,9 +52,9 @@ test_that("mc_agg 90s step", {
     table <- read.csv("../data/agg-short-step/step_90s_long.csv", stringsAsFactors = FALSE)
     table$datetime <- lubridate::ymd_hms(table$datetime)
     table$locality_id <- as.character(table$locality_id)
-    data <- mc_read_long(table, sensor_ids = list("Temp" = myClim:::.model_const_SENSOR_HOBO_T,
-                                                  "RH" = myClim:::.model_const_SENSOR_HOBO_RH,
-                                                  "Wind" = myClim:::.model_const_SENSOR_wind_speed),
+    data <- mc_read_long(table, sensor_ids = list("Temp" = mc_const_SENSOR_HOBO_T,
+                                                  "RH" = mc_const_SENSOR_HOBO_RH,
+                                                  "Wind" = mc_const_SENSOR_wind_speed),
                          clean = TRUE, silent = TRUE)
     test_raw_data_format(data)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@step, 90)
@@ -67,9 +67,9 @@ test_that("mc_agg 10s step", {
     table <- read.csv("../data/agg-short-step/step_10s_long.csv", stringsAsFactors = FALSE)
     table$datetime <- lubridate::ymd_hms(table$datetime)
     table$locality_id <- as.character(table$locality_id)
-    data <- mc_read_long(table, sensor_ids = list("Temp" = myClim:::.model_const_SENSOR_HOBO_T,
-                                                  "RH" = myClim:::.model_const_SENSOR_HOBO_RH,
-                                                  "Wind" = myClim:::.model_const_SENSOR_wind_speed),
+    data <- mc_read_long(table, sensor_ids = list("Temp" = mc_const_SENSOR_HOBO_T,
+                                                  "RH" = mc_const_SENSOR_HOBO_RH,
+                                                  "Wind" = mc_const_SENSOR_wind_speed),
                          clean = TRUE, silent = TRUE)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@step, 10)
     expect_equal(data$localities$`172`$loggers[[1]]$clean_info@count_duplicities, 0)
@@ -145,7 +145,7 @@ test_that("mc_agg logical sensor", {
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_max$values, c(NA, T, F, F, F))
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_mean$values, c(NA, T, F, F, F))
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_percentile20$values, c(NA, F, F, F, F))
-    expect_equal(week_agg_data$localities$`94184102`$sensors$snow_sum$metadata@sensor_id, .model_const_SENSOR_integer)
+    expect_equal(week_agg_data$localities$`94184102`$sensors$snow_sum$metadata@sensor_id, mc_const_SENSOR_integer)
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_sum$values, c(NA, 378, 0, 0, 0))
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_count$values, c(287, 672, 672, 672, 672))
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_count$metadata@sensor_id, "count")
@@ -261,7 +261,7 @@ test_that("mc_agg custom functions", {
     test_agg_data_format(agg_data)
     expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_min$values < 5,
                  agg_data$localities$`91184101`$sensors$Thermo_T_frost_days$values)
-    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_frost_days$metadata@sensor_id, .model_const_SENSOR_logical)
+    expect_equal(agg_data$localities$`91184101`$sensors$Thermo_T_frost_days$metadata@sensor_id, mc_const_SENSOR_logical)
 })
 
 test_that("mc_agg min_coverage", {

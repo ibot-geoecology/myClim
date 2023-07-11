@@ -11,9 +11,9 @@ mc_calib_moisture(
   t_water = 24,
   ref_air = 114.534,
   ref_water = 3634.723,
-  ref_t = .calib_MOIST_REF_T,
-  acor_t = .calib_MOIST_ACOR_T,
-  wcor_t = .calib_MOIST_WCOR_T
+  ref_t = mc_const_CALIB_MOIST_REF_T,
+  acor_t = mc_const_CALIB_MOIST_ACOR_T,
+  wcor_t = mc_const_CALIB_MOIST_WCOR_T
 )
 }
 \arguments{

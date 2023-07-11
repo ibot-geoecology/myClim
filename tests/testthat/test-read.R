@@ -9,7 +9,7 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$localities$A6W79$loggers[[1]]$sensors), 4)
     expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,
                  mc_data_heights$height[mc_data_heights$logger_type == .model_const_LOGGER_TOMST_TMS_L45 &
-                                        mc_data_heights$sensor_name == .model_const_SENSOR_TMS_T1])
+                                        mc_data_heights$sensor_name == mc_const_SENSOR_TMS_T1])
     expect_equal(data$localities$A6W79$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
     expect_equal(data$localities$A6W79$loggers[[1]]$metadata@serial_number, "94184102")
     expect_equal(data$localities$A6W79$loggers[[1]]$metadata@step, 15)
@@ -43,7 +43,7 @@ test_that("mc_read_data csv with localities", {
     expect_equal(data$localities$A6W79$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
     expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1_L45$metadata@height,
                  mc_data_heights$height[mc_data_heights$logger_type == .model_const_LOGGER_TOMST_TMS_L45 &
-                                            mc_data_heights$sensor_name == .model_const_SENSOR_TMS_T1])
+                                            mc_data_heights$sensor_name == mc_const_SENSOR_TMS_T1])
 })
 
 test_that("mc_read_data csv with localities and metadata", {
@@ -101,7 +101,7 @@ test_that("mc_read_data HOBO", {
                       data$localities$E$loggers[[1]]$datetime[[1]],
                       data$localities$F$loggers[[1]]$datetime[[1]],
                       data$localities$CH$loggers[[1]]$datetime[[1]])) == 0)
-    expect_true(.model_const_SENSOR_HOBO_T %in% names(data$localities$C$loggers[[1]]$sensors))
+    expect_true(mc_const_SENSOR_HOBO_T %in% names(data$localities$C$loggers[[1]]$sensors))
     expect_equal(data$localities$C$loggers[[1]]$sensors$HOBO_T$values[[1]], 5 * (65.788 - 32) / 9)
     expect_equal(length(data$localities$A$loggers[[1]]$sensors), 2)
     expect_equal(length(data$localities$I$loggers[[1]]$sensors), 1)
@@ -162,15 +162,15 @@ test_that("mc_read_files joined TOMST direcory", {
 
 test_that("mc_read_wide", {
     data_table <- readRDS("../data/read_table/precip.Rds")
-    expect_error(data <- mc_read_wide(data_table, .model_const_SENSOR_precipitation, clean=FALSE))
+    expect_error(data <- mc_read_wide(data_table, mc_const_SENSOR_precipitation, clean=FALSE))
     dates <- data_table$date
     data_table$date <- as.POSIXct(lubridate::ymd(dates), tz="CET")
-    expect_error(data <- mc_read_wide(data_table, .model_const_SENSOR_precipitation, clean=FALSE))
+    expect_error(data <- mc_read_wide(data_table, mc_const_SENSOR_precipitation, clean=FALSE))
     data_table$date <- as.POSIXct(lubridate::ymd(dates, tz="UTC"))
-    data <- mc_read_wide(data_table, .model_const_SENSOR_precipitation, clean=FALSE)
+    data <- mc_read_wide(data_table, mc_const_SENSOR_precipitation, clean=FALSE)
     test_raw_data_format(data)
     expect_equal(length(data$localities), 49)
-    expect_equal(names(data$localities$B1BLAT01$loggers[[1]]$sensors), .model_const_SENSOR_precipitation)
+    expect_equal(names(data$localities$B1BLAT01$loggers[[1]]$sensors), mc_const_SENSOR_precipitation)
     expect_equal(data$localities$B1BLAT01$loggers[[1]]$sensors[[1]]$values[[1]], 0.7)
 })
 

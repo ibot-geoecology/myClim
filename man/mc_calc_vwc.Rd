@@ -6,14 +6,14 @@
 \usage{
 mc_calc_vwc(
   data,
-  moist_sensor = .model_const_SENSOR_TMS_moist,
-  temp_sensor = .model_const_SENSOR_TMS_T1,
+  moist_sensor = mc_const_SENSOR_TMS_moist,
+  temp_sensor = mc_const_SENSOR_TMS_T1,
   output_sensor = "VWC_moisture",
   soiltype = "universal",
   localities = NULL,
-  ref_t = .calib_MOIST_REF_T,
-  acor_t = .calib_MOIST_ACOR_T,
-  wcor_t = .calib_MOIST_WCOR_T,
+  ref_t = mc_const_CALIB_MOIST_REF_T,
+  acor_t = mc_const_CALIB_MOIST_ACOR_T,
+  wcor_t = mc_const_CALIB_MOIST_WCOR_T,
   frozen2NA = TRUE
 )
 }
@@ -29,8 +29,9 @@ see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical.}
 
 \item{output_sensor}{name of new snow virtual sensor with VWC values (default "VWC_moisture")}
 
-\item{soiltype}{value from \link{mc_data_vwc_parameters} in column soiltype
-(default "universal").  Parameters a, b and c are used in calculation.}
+\item{soiltype}{§is \code{list(a=number1, b=number2, c=number3)} or character value§
+from \link{mc_data_vwc_parameters} in column soiltype (default "universal").
+Parameters a, b and c are used in calculation.}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 
@@ -85,7 +86,9 @@ frozen soils and the returned records are thus not comparable
 with values from non-frozen soil.
 }
 \examples{
-agg_data <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
+data1 <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
+data2 <- mc_calc_vwc(mc_data_example_agg, localities="A2E32",
+                     soiltype=list(a=-3.00e-09, b=0.000161192, c=-0.109956505))
 }
 \references{
 Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:

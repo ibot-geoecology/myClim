@@ -61,9 +61,9 @@ test_that("mc_calc_snow_agg no sensor", {
 test_that("mc_calc_vwc", {
     cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent = T)
     calib_table <- as.data.frame(tibble::tribble(
-        ~serial_number,          ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
-            "94184103",   "TMS_moist",          lubridate::ymd(20201016),        0.02,        1.1,
-            "94184103",   "TMS_moist", lubridate::ymd_h("2020-10-16 14"),      -0.015,          1,
+        ~serial_number,  ~sensor_id,                         ~datetime, ~cor_factor, ~cor_slope,
+            "94184103", "TMS_moist",          lubridate::ymd(20201016),        0.02,        1.1,
+            "94184103", "TMS_moist", lubridate::ymd_h("2020-10-16 14"),      -0.015,          1,
     ))
     cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
     cleaned_data$localities$A2E32$loggers[[1]]$sensors$TMS_T1$values[[1]] <- NA_real_
@@ -71,6 +71,13 @@ test_that("mc_calc_vwc", {
     test_raw_data_format(raw_data)
     expect_true("VWC_moisture" %in% names(raw_data$localities$A2E32$loggers[[1]]$sensors))
     expect_false(is.na(raw_data$localities$A2E32$loggers[[1]]$sensors$VWC_moisture$values[[1]]))
+    sand_data1 <- mc_calc_vwc(cleaned_data, localities="A2E32", soiltype="sand")
+    test_raw_data_format(sand_data1)
+    expect_true("VWC_moisture" %in% names(sand_data1$localities$A2E32$loggers[[1]]$sensors))
+    sand_data2 <- mc_calc_vwc(cleaned_data, localities="A2E32", soiltype=list(a=-3.00e-09, b=0.000161192, c=-0.109956505))
+    test_raw_data_format(sand_data2)
+    expect_equal(sand_data1$localities$A2E32$loggers[[1]]$sensors$VWC_moisture$values,
+                 sand_data2$localities$A2E32$loggers[[1]]$sensors$VWC_moisture$values)
     agg_data <- mc_agg(cleaned_data)
     expect_warning(agg_data <- mc_calc_vwc(agg_data, localities=c("A1E05", "A2E32")))
     test_agg_data_format(agg_data)
@@ -94,6 +101,8 @@ test_that("mc_calc_vwc wrong", {
     agg_data <- mc_agg(cleaned_data)
     expect_error(agg_data <- mc_calc_vwc(agg_data, temp_sensor="TMS_moist", localities="A2E32"))
     expect_error(agg_data <- mc_calc_vwc(agg_data, moist_sensor="TMS_T1", localities="A2E32"))
+    expect_error(agg_data <- mc_calc_vwc(agg_data, soiltype="none"))
+    expect_error(agg_data <- mc_calc_vwc(agg_data, soiltype=list(aa=1, bb=2, c=3)))
 })
 
 test_that("mc_calc_gdd", {
@@ -136,7 +145,7 @@ test_that("mc_calc_cumsum", {
         expect_warning("Locality A1E05 doesn't contains any sensor snow. It is skipped.")
     test_agg_data_format(agg_data)
     expect_equal(cumsum(cumsum_data$localities$A2E32$sensors$TMS_T1$values), cumsum_data$localities$A2E32$sensors$TMS_T1_cumsum$values)
-    expect_equal(cumsum_data$localities$A2E32$sensors$snow_cumsum$metadata@sensor_id, .model_const_SENSOR_integer)
+    expect_equal(cumsum_data$localities$A2E32$sensors$snow_cumsum$metadata@sensor_id, mc_const_SENSOR_integer)
 })
 
 test_that("mc_calc_tomst_dendro", {
@@ -167,11 +176,11 @@ test_that("mc_calc_vpd", {
     data <- mc_read_files("../data/HOBO/20024354.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S", clean=FALSE, silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`20024354`="LOC"), param_name = "locality_id")
     cleaned_data <- mc_prep_clean(data, silent=T)
-    raw_data <- mc_calc_vpd(cleaned_data, .model_const_SENSOR_HOBO_T, .model_const_SENSOR_HOBO_RH)
+    raw_data <- mc_calc_vpd(cleaned_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
     test_raw_data_format(raw_data)
     expect_true("VPD" %in% names(raw_data$localities$LOC$loggers[[1]]$sensors))
     agg_data <- mc_agg(cleaned_data)
-    agg_data <- mc_calc_vpd(agg_data, .model_const_SENSOR_HOBO_T, .model_const_SENSOR_HOBO_RH)
+    agg_data <- mc_calc_vpd(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
     test_agg_data_format(agg_data)
     vpd_martin <- function(t,rh,elev = 0) {
         a <- 0.61121
@@ -186,7 +195,7 @@ test_that("mc_calc_vpd", {
                             agg_data$localities$LOC$sensors$HOBO_RH$values[[1]]),
                  agg_data$localities$LOC$sensors$VPD$values[[1]])
     agg_data <- mc_prep_meta_locality(agg_data, list(LOC = 500), "elevation")
-    agg_data <- mc_calc_vpd(agg_data, .model_const_SENSOR_HOBO_T, .model_const_SENSOR_HOBO_RH,
+    agg_data <- mc_calc_vpd(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH,
                              output_sensor = "VPD500")
     expect_equal(vpd_martin(agg_data$localities$LOC$sensors$HOBO_T$values[[1]],
                             agg_data$localities$LOC$sensors$HOBO_RH$values[[1]], elev = 500),

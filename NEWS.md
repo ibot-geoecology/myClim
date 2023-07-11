@@ -1,3 +1,10 @@
+# myClim 1.0.8
+* The calibration constants for the `mc_calc_vwc()` function are now visible to the user under new names:
+  `mc_const_CALIB_MOIST_REF_T`, `mc_const_CALIB_MOIST_ACOR_T`, and `mc_const_CALIB_MOIST_WCOR_T`.
+* The sensor ID constants are now visible to the user under new names: `mc_const_SENSOR_*`.
+* The `soiltype` parameter in the `mc_calc_vwc()` function can now be a list with user-defined parameters
+  in the format `list(a=number1, b=number2, c=number3)`. 
+
 # myClim 1.0.7
 * The temperature correction is no longer applied in the `mc_calc_vwc()` function when the `temp_sensor` value is NA.
 

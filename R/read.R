@@ -458,7 +458,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 #' @return myClim object in Raw-format
 #' @export
 #' @seealso [myClim::mc_read_long]
-mc_read_wide <- function(data_table, sensor_id=.model_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
+mc_read_wide <- function(data_table, sensor_id=mc_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
     if(ncol(data_table) <= 1) {
        stop(.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE)
     }

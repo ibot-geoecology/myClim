@@ -1,6 +1,12 @@
-.calib_MOIST_REF_T <- 24
-.calib_MOIST_ACOR_T <- 1.91132689118083
-.calib_MOIST_WCOR_T <- 0.64108
+#' default reference calibration temperate for TMS moisture sensor
+#' @export
+mc_const_CALIB_MOIST_REF_T <- 24
+#' default temperature drift correction parameter for air - TMS moisture sensor
+#' @export
+mc_const_CALIB_MOIST_ACOR_T <- 1.91132689118083
+#' default temperature drift correction parameter for water for - TMS moisture sensor
+#' @export
+mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 
 #' Calculates coefficients for TMS moisture conversion to VWC
 #'
@@ -35,9 +41,9 @@
 mc_calib_moisture <- function(raw_air, raw_water,
                               t_air=24, t_water=24,
                               ref_air=114.534, ref_water=3634.723,
-                              ref_t=.calib_MOIST_REF_T,
-                              acor_t=.calib_MOIST_ACOR_T,
-                              wcor_t=.calib_MOIST_WCOR_T) {
+                              ref_t=mc_const_CALIB_MOIST_REF_T,
+                              acor_t=mc_const_CALIB_MOIST_ACOR_T,
+                              wcor_t=mc_const_CALIB_MOIST_WCOR_T) {
     norm_period_air <- raw_air + (ref_t - t_air) * acor_t
     norm_period_water <- raw_water + (ref_t - t_water) * wcor_t
     intercept <- ref_air - norm_period_air

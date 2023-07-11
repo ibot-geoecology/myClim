@@ -64,3 +64,8 @@ reference:
       - starts_with("mc_save")
       - starts_with("mc_load")
       - starts_with("mc_calib")
+
+  - title: Constants
+    contents:
+      - starts_with("mc_const")
+

@@ -27,39 +27,93 @@
 .model_const_VALUE_TYPE_LOGICAL <- "logical"
 
 # logger sensors
-.model_const_SENSOR_TMS_T1 <- "TMS_T1"
-.model_const_SENSOR_TMS_T2 <- "TMS_T2"
-.model_const_SENSOR_TMS_T3 <- "TMS_T3"
-.model_const_SENSOR_TMS_moist <- "TMS_moist"
-.model_const_SENSOR_Thermo_T <- "Thermo_T"
-.model_const_SENSOR_Dendro_T <- "Dendro_T"
-.model_const_SENSOR_Dendro_raw <- "Dendro_raw"
-.model_const_SENSOR_HOBO_T <- "HOBO_T"
-.model_const_SENSOR_HOBO_RH <- "HOBO_RH"
+#' TMS temperature sensor id - soil
+#' @export
+mc_const_SENSOR_TMS_T1 <- "TMS_T1"
+#' TMS temperature sensor id - surface of soil
+#' @export
+mc_const_SENSOR_TMS_T2 <- "TMS_T2"
+#' TMS temperature sensor id - air
+#' @export
+mc_const_SENSOR_TMS_T3 <- "TMS_T3"
+#' TMS moisture sensor id
+#' @export
+mc_const_SENSOR_TMS_moist <- "TMS_moist"
+#' TOMST Thermologger temperature sensor id
+#' @export
+mc_const_SENSOR_Thermo_T <- "Thermo_T"
+#' TOMST Dendrometer temperature sensor id
+#' @export
+mc_const_SENSOR_Dendro_T <- "Dendro_T"
+#' TOMST Dendrometer radius difference sensor id
+#' @export
+mc_const_SENSOR_Dendro_raw <- "Dendro_raw"
+#' Onset HOBO temperature sensor id
+#' @export
+mc_const_SENSOR_HOBO_T <- "HOBO_T"
+#' Onset HOBO humidity sensor id
+#' @export
+mc_const_SENSOR_HOBO_RH <- "HOBO_RH"
 
-.model_const_WRONG_CALIBRATION_SENSOR_ID <- .model_const_SENSOR_TMS_moist
+.model_const_WRONG_CALIBRATION_SENSOR_ID <- mc_const_SENSOR_TMS_moist
 
 # universal sensors
-.model_const_SENSOR_count <- "count"
-.model_const_SENSOR_coverage <- "coverage"
-.model_const_SENSOR_FDD <- "FDD"
-.model_const_SENSOR_GDD <- "GDD"
-.model_const_SENSOR_precipitation <- "precipitation"
-.model_const_SENSOR_dendro_l_um <- "dendro_l_um"
-.model_const_SENSOR_snow_bool <- "snow_bool"
-.model_const_SENSOR_snow_fresh <- "snow_fresh"
-.model_const_SENSOR_snow_total <- "snow_total"
-.model_const_SENSOR_sun_shine <- "sun_shine"
-.model_const_SENSOR_VPD <- "VPD"
-.model_const_SENSOR_wind_speed <- "wind_speed"
+#' Count sensor id see [myClim::mc_agg()]
+#' @export
+mc_const_SENSOR_count <- "count"
+#' Coverage sensor id see [myClim::mc_agg()]
+#' @export
+mc_const_SENSOR_coverage <- "coverage"
+#' Freezing Degree Days sensor id see [myClim::mc_calc_fdd()]
+#' @export
+mc_const_SENSOR_FDD <- "FDD"
+#' Growing Degree Days sensor id see [myClim::mc_calc_gdd()]
+#' @export
+mc_const_SENSOR_GDD <- "GDD"
+#' Precipitation sensor id
+#' @export
+mc_const_SENSOR_precipitation <- "precipitation"
+#' Radius difference sensor id
+#' @export
+mc_const_SENSOR_dendro_l_um <- "dendro_l_um"
+#' Snow existence sensor id see [myClim::mc_calc_snow()]
+#' @export
+mc_const_SENSOR_snow_bool <- "snow_bool"
+#' Height of newly fallen snow sensor id
+#' @export
+mc_const_SENSOR_snow_fresh <- "snow_fresh"
+#' Height snow sensor id
+#' @export
+mc_const_SENSOR_snow_total <- "snow_total"
+#' Time of sun shine sensor id
+#' @export
+mc_const_SENSOR_sun_shine <- "sun_shine"
+#' Vapor Pressure Deficit sensor id see [myClim::mc_calc_vpd()]
+#' @export
+mc_const_SENSOR_VPD <- "VPD"
+#' Speed of wind sensor id
+#' @export
+mc_const_SENSOR_wind_speed <- "wind_speed"
 
-.model_const_SENSOR_VWC <- .model_const_PHYSICAL_VWC
-.model_const_SENSOR_RH <- .model_const_PHYSICAL_RH
-.model_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
+#' Volumetric soil moisture sensor id see [myClim::mc_calc_vwc()]
+#' @export
+mc_const_SENSOR_VWC <- .model_const_PHYSICAL_VWC
+#' Relative humidity sensor id
+#' @export
+mc_const_SENSOR_RH <- .model_const_PHYSICAL_RH
+#' Temperature sensor id
+#' @export
+mc_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
 
-.model_const_SENSOR_real <- .model_const_VALUE_TYPE_REAL
-.model_const_SENSOR_integer <- .model_const_VALUE_TYPE_INTEGER
-.model_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
+#' General real sensor id
+#' @export
+mc_const_SENSOR_real <- .model_const_VALUE_TYPE_REAL
+#' General integer sensor id
+#' @export
+mc_const_SENSOR_integer <- .model_const_VALUE_TYPE_INTEGER
+#' General logical sensor id
+#' @export
+mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
 .model_const_LOGGER_TOMST_TMS_L45 <- "TMS_L45"
@@ -699,14 +753,14 @@ setMethod(
 
 .change_tomst_columns_and_logger_type <- function(object, data){
     tm_columns <- list(4)
-    names(tm_columns) <- .model_const_SENSOR_Thermo_T
+    names(tm_columns) <- mc_const_SENSOR_Thermo_T
     dendro_columns <- list(4, 7)
-    names(dendro_columns) <- c(.model_const_SENSOR_Dendro_T, .model_const_SENSOR_Dendro_raw)
+    names(dendro_columns) <- c(mc_const_SENSOR_Dendro_T, mc_const_SENSOR_Dendro_raw)
     tms_columns <- list(4, 5, 6, 7)
-    names(tms_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2, .model_const_SENSOR_TMS_T3,
-                            .model_const_SENSOR_TMS_moist)
-    if(all(is.na(data[[tms_columns[[.model_const_SENSOR_TMS_T2]]]]))) {
-        if(all(data[[dendro_columns[[.model_const_SENSOR_Dendro_raw]]]] == .model_const_TOMST_THERMODATALOGGER_VALUE)) {
+    names(tms_columns) <- c(mc_const_SENSOR_TMS_T1, mc_const_SENSOR_TMS_T2, mc_const_SENSOR_TMS_T3,
+                            mc_const_SENSOR_TMS_moist)
+    if(all(is.na(data[[tms_columns[[mc_const_SENSOR_TMS_T2]]]]))) {
+        if(all(data[[dendro_columns[[mc_const_SENSOR_Dendro_raw]]]] == .model_const_TOMST_THERMODATALOGGER_VALUE)) {
             object@columns <- tm_columns
             logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
         } else {
@@ -737,15 +791,15 @@ setMethod(
 
 .change_tomst_join_columns_and_logger_type <- function(object, data){
     tmj_columns <- list(5)
-    names(tmj_columns) <- .model_const_SENSOR_Thermo_T
+    names(tmj_columns) <- mc_const_SENSOR_Thermo_T
     tmsj_columns <- list(5, 6, 7, 8, 9)
-    names(tmsj_columns) <- c(.model_const_SENSOR_TMS_T1, .model_const_SENSOR_TMS_T2,.model_const_SENSOR_TMS_T3,
-                             .model_const_SENSOR_TMS_moist, .model_const_SENSOR_VWC)
-    is_T1_NA <- all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]]))
-    is_NA_T2_T3 <- all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T2]]]])) &&
-        all(is.na(data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
-    is_T1_T2_T3_equals <- (all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T2]]]]) &&
-        all(data[[tmsj_columns[[.model_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[.model_const_SENSOR_TMS_T3]]]]))
+    names(tmsj_columns) <- c(mc_const_SENSOR_TMS_T1, mc_const_SENSOR_TMS_T2,mc_const_SENSOR_TMS_T3,
+                             mc_const_SENSOR_TMS_moist, mc_const_SENSOR_VWC)
+    is_T1_NA <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]]))
+    is_NA_T2_T3 <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]])) &&
+        all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
+    is_T1_T2_T3_equals <- (all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]]) &&
+        all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
     if(!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals)) {
         object@columns <- tmj_columns
         if(is.na(object@logger_type)) {
@@ -756,9 +810,9 @@ setMethod(
     if(is.na(object@logger_type)) {
         object@logger_type <- .model_const_LOGGER_TOMST_TMS
     }
-    moisture <- data[[tmsj_columns[[.model_const_SENSOR_VWC]]]]
+    moisture <- data[[tmsj_columns[[mc_const_SENSOR_VWC]]]]
     if(!any(is.na(moisture)) && all(moisture == 0)) {
-        object@columns <- tmsj_columns[names(tmsj_columns) != .model_const_SENSOR_VWC]
+        object@columns <- tmsj_columns[names(tmsj_columns) != mc_const_SENSOR_VWC]
         return(object)
     }
     object@columns <- tmsj_columns
@@ -862,7 +916,7 @@ setMethod(
         warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
         return(object)
     }
-    temp_sensor_id <- .model_const_SENSOR_HOBO_T
+    temp_sensor_id <- mc_const_SENSOR_HOBO_T
     if(parts[[1, 2]] == "\u00b0F") {
         object@convert_fahrenheit <- TRUE
     }
@@ -877,7 +931,7 @@ setMethod(
         object@columns <- columns
         return(object)
     }
-    columns[[.model_const_SENSOR_HOBO_RH]] <- rh_column
+    columns[[mc_const_SENSOR_HOBO_RH]] <- rh_column
     object@columns <- columns
     object
 }
@@ -943,8 +997,8 @@ setMethod(
     ".model_edit_data",
     "mc_HOBODataFormat",
     function(object, data_table) {
-        if(object@convert_fahrenheit && .model_const_SENSOR_HOBO_T %in% names(object@columns)) {
-            column_index <- object@columns[[.model_const_SENSOR_HOBO_T]]
+        if(object@convert_fahrenheit && mc_const_SENSOR_HOBO_T %in% names(object@columns)) {
+            column_index <- object@columns[[mc_const_SENSOR_HOBO_T]]
             warning(.model_const_MESSAGE_HOBO_CONVERT_FAHRENHEIT)
             data_table[[column_index]] <- (data_table[[column_index]] - 32) * 5 / 9
         }
