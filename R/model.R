@@ -277,7 +277,7 @@ setMethod(f="initialize",
 #' 
 #' Class defining the element of the records (temperature, volumetric water content, height...)
 #' @details See e.g. definition of temperature. Similarly as the definition of new loggers, new
-#' physicals cn be added like modules. 
+#' physicals can be added like modules. 
 #' \preformatted{
 #' Slot "name": "T_C"
 #' slot "description": "Temperature °C"
