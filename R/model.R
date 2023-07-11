@@ -31,85 +31,77 @@
 #' @description 
 #' This constant is used in the function [myClim::mc_calc_vwc] to account for soil temperature effect
 #' while converting the raw TMS soil moisture (scaled TDT signal) to volumetric water content (VWC). 
-#' mc_const_SENSOR_TMS_T1 = "TMS_T1"
+#' mc_const_SENSOR_TMS_T1 = "`r mc_const_SENSOR_TMS_T1`"
 #' @export
 mc_const_SENSOR_TMS_T1 <- "TMS_T1"
-#' Default sensor for TOMST TMS temperature of soil surface
-#' @description 
-#' mc_const_SENSOR_TMS_T2 = "TMS_T2"
+# Default sensor for TOMST TMS temperature of soil surface
 mc_const_SENSOR_TMS_T2 <- "TMS_T2"
-#' Default sensor for TOMST TMS air temperature 
-#' @description 
-#' mc_const_SENSOR_TMS_T3 = "TMS_T3"
+# Default sensor for TOMST TMS air temperature
 mc_const_SENSOR_TMS_T3 <- "TMS_T3"
 #' Default sensor for TOMMST TMS raw soil moisture
 #' @description 
 #' This constant is used in the function [myClim::mc_calc_vwc] as default for sensor for
 #' converting the raw TMS soil moisture (scaled TDT signal) to volumetric water content (VWC).
-#' mc_const_SENSOR_TMS_moist = "TMS_moist"
+#' mc_const_SENSOR_TMS_moist = "`r mc_const_SENSOR_TMS_moist`"
 #' @export
 mc_const_SENSOR_TMS_moist <- "TMS_moist"
-#' Default sensor for TOMST Thermologger temperature
-#' @description 
-#' mc_const_SENSOR_Thermo_T = "Thermo_T"
+# Default sensor for TOMST Thermologger temperature
 mc_const_SENSOR_Thermo_T <- "Thermo_T"
-#' Default sensor for TOMST Dendrometer temperature
-#' @description 
-#' mc_const_SENSOR_Dendro_T = "Dendro_T"
+# Default sensor for TOMST Dendrometer temperature
 mc_const_SENSOR_Dendro_T <- "Dendro_T"
 #' Default sensor for TOMST Dendrometer radius difference
 #' @description
-#' This constant is used in the function [myClim::mc_calc_tomst_dendro] 
+#' This constant is used in the function [myClim::mc_calc_tomst_dendro]
 #' as default sensor for converting the change in stem size from raw
-#' Tomst units to micrometers. 
-#' mc_const_SENSOR_Dendro_raw = "Dendro_raw"
+#' Tomst units to micrometers.
+#' mc_const_SENSOR_Dendro_raw = "`r mc_const_SENSOR_Dendro_raw`"
 #' @export
 mc_const_SENSOR_Dendro_raw <- "Dendro_raw"
-#' Onset HOBO temperature sensor id
+# Onset HOBO temperature sensor id
 mc_const_SENSOR_HOBO_T <- "HOBO_T"
-#' Onset HOBO humidity sensor id
+# Onset HOBO humidity sensor id
 mc_const_SENSOR_HOBO_RH <- "HOBO_RH"
 
 .model_const_WRONG_CALIBRATION_SENSOR_ID <- mc_const_SENSOR_TMS_moist
 
-# universal sensors
-#' Count sensor id see [myClim::mc_agg()]
+### universal sensors
+# Count sensor id see [myClim::mc_agg()]
 mc_const_SENSOR_count <- "count"
-#' Coverage sensor id see [myClim::mc_agg()]
+# Coverage sensor id see [myClim::mc_agg()]
 mc_const_SENSOR_coverage <- "coverage"
-#' Freezing Degree Days sensor id see [myClim::mc_calc_fdd()]
+# Freezing Degree Days sensor id see [myClim::mc_calc_fdd()]
 mc_const_SENSOR_FDD <- "FDD"
-#' Growing Degree Days sensor id see [myClim::mc_calc_gdd()]
+# Growing Degree Days sensor id see [myClim::mc_calc_gdd()]
 mc_const_SENSOR_GDD <- "GDD"
-#' Precipitation sensor id
+# Precipitation sensor id
 mc_const_SENSOR_precipitation <- "precipitation"
-#' Radius difference sensor id
+# Radius difference sensor id
 mc_const_SENSOR_dendro_l_um <- "dendro_l_um"
-#' Snow existence sensor id see [myClim::mc_calc_snow()]
+# Snow existence sensor id see [myClim::mc_calc_snow()]
 mc_const_SENSOR_snow_bool <- "snow_bool"
-#' Height of newly fallen snow sensor id
+# Height of newly fallen snow sensor id
 mc_const_SENSOR_snow_fresh <- "snow_fresh"
-#' Height snow sensor id
+# Height snow sensor id
 mc_const_SENSOR_snow_total <- "snow_total"
-#' Time of sun shine sensor id
+# Time of sun shine sensor id
 mc_const_SENSOR_sun_shine <- "sun_shine"
-#' Vapor Pressure Deficit sensor id see [myClim::mc_calc_vpd()]
+# Vapor Pressure Deficit sensor id see [myClim::mc_calc_vpd()]
 mc_const_SENSOR_VPD <- "VPD"
-#' Speed of wind sensor id
+# Speed of wind sensor id
 mc_const_SENSOR_wind_speed <- "wind_speed"
 
-#' Volumetric soil moisture sensor id see [myClim::mc_calc_vwc()]
+# Volumetric soil moisture sensor id see [myClim::mc_calc_vwc()]
 mc_const_SENSOR_VWC <- .model_const_PHYSICAL_VWC
-#' Relative humidity sensor id
+# Relative humidity sensor id
 mc_const_SENSOR_RH <- .model_const_PHYSICAL_RH
-#' Temperature sensor id
+# Temperature sensor id
 mc_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
 
-#' General real sensor id
+# General real sensor id
 mc_const_SENSOR_real <- .model_const_VALUE_TYPE_REAL
-#' General integer sensor id
+# General integer sensor id
 mc_const_SENSOR_integer <- .model_const_VALUE_TYPE_INTEGER
-#' General logical sensor id
+# General logical sensor id
 mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
