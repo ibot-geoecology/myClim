@@ -560,9 +560,10 @@ setMethod(
 
 #' Class for logger file data format
 #'
-#' The Class used for parsing source data files. Typically the csv files
+#' The Class used for parsing source data files. Typically the txt/csv files
 #' downloaded from microclimatic loggers. Each supported logger has established
-#' own specific object of class `mc_{logger}DataFormat` defining the parameters.
+#' their own specific object of class `mc_{logger}DataFormat` defining the 
+#' parameters.
 #' @details The logger definitions are stored in R environment object
 #' `./data/mc_data_formats.rda`. And thus it easy to add the ability of
 #' reading new, unsupported logger just by defining its Class parameters.
