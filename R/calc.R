@@ -248,7 +248,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' to volumetric water content (VWC).
 #'
 #' @details
-#' This function is suitable for Tomst TMS loggers measuring soil moisture in raw TDT
+#' This function is suitable for TOMST TMS loggers measuring soil moisture in raw TDT
 #' units (TMS units). Raw TDT units represents inverted and scaled (1-4095)
 #' number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz)
 #' sent through a ca 30 cm long circuit within a 640-microsecond time window.
@@ -263,15 +263,18 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' actual soil temperature using TMS_T1 soil temperature sensor records.
 #' As the calibration curves were derived for several soil types,
 #' in case user know specific soil type, where the logger was measuring,
-#' then it is strongly recommended to chose the closest
-#' existing calibration curve for specific soil type instead of default "universal".
-#' Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A,
-#' sandy loam B, loam, silt loam, peat, water,
-#' universal, sand TMS1,
-#' loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
+#' then it is possible to chose the closest¨existing calibration curve for specific soil 
+#' type instead of default "universal". Available soil types are: sand, loamy sand A, 
+#' loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
+#' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 #' For full table of function parameters see [mc_data_vwc_parameters]
-#' When logger-specific correction parameters are available (see [myClim::mc_calib_moisture()]), it use these values to correct 
-#' resulting VWC.
+#' 
+#' It is also possible to use custom parameters `a`, `b` and `c`. These can be 
+#' derived from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
+#' 
+#' **Warning:** TOMST TMS Calibr utility was developed for TMS3 series of TOMST sensor which are
+#' different from commonly used.newer TMS4 series. Therefore we rather recommend to use 
+#' pre-defined `universal` calibration according to (Kopecký et al. 2021).
 #' 
 #' The function by default replace the moisture records in frozen soils with NA (param *frozen2NA*),
 #' because the soil moisture sensor was not designed to measure in
@@ -284,10 +287,10 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' Soil moisture sensor must be in moisture_raw physical see `names(mc_data_physical)`.
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
 #' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
-#' @param output_sensor name of new snow virtual sensor with VWC values (default "VWC_moisture")
-#' @param soiltype §is `list(a=number1, b=number2, c=number3)` or character value§
-#' from [mc_data_vwc_parameters] in column `soiltype` (default `"universal"`).
-#' Parameters `a`, `b` and `c` are used in calculation.
+#' @param output_sensor name of new virtual sensor with VWC values (default "VWC_moisture")
+#' @param soiltype either character corresponding to one of `soiltype` from [mc_data_vwc_parameters] 
+#' (default `"universal"`). Or a list with parameters `a`, `b` and `c` manually filled in
+#' by user i.e.,`list(a=Value_1, b=Value_2, c=Value_3)`.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @param ref_t (default 24)
 #' @param acor_t (default 1.91132689118083) correction parameter for temperature drift 

@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_const_SENSOR_Dendro_T}
 \alias{mc_const_SENSOR_Dendro_T}
-\title{TOMST Dendrometer temperature sensor id}
+\title{Default sensor for TOMST Dendrometer temperature}
 \format{
 An object of class \code{character} of length 1.
 }
@@ -11,6 +11,6 @@ An object of class \code{character} of length 1.
 mc_const_SENSOR_Dendro_T
 }
 \description{
-TOMST Dendrometer temperature sensor id
+mc_const_SENSOR_Dendro_T = "Dendro_T"
 }
 \keyword{datasets}

@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_const_CALIB_MOIST_REF_T}
 \alias{mc_const_CALIB_MOIST_REF_T}
-\title{default reference calibration temperate for TMS moisture sensor}
+\title{Default ref. temperate for TMS moisture calibration}
 \format{
 An object of class \code{numeric} of length 1.
 }
@@ -11,6 +11,6 @@ An object of class \code{numeric} of length 1.
 mc_const_CALIB_MOIST_REF_T
 }
 \description{
-default reference calibration temperate for TMS moisture sensor
+24°C = default reference calibration temperate for TMS moisture sensor
 }
 \keyword{datasets}

@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_const_SENSOR_TMS_T1}
 \alias{mc_const_SENSOR_TMS_T1}
-\title{TMS temperature sensor id - soil}
+\title{Default sensor for TOMST TMS soil temperature}
 \format{
 An object of class \code{character} of length 1.
 }
@@ -11,6 +11,8 @@ An object of class \code{character} of length 1.
 mc_const_SENSOR_TMS_T1
 }
 \description{
-TMS temperature sensor id - soil
+This constant is used in the function \link{mc_calc_vwc} to account for soil temperature effect
+while converting the raw TMS soil moisture (scaled TDT signal) to volumetric water content (VWC).
+mc_const_SENSOR_TMS_T1 = "TMS_T1"
 }
 \keyword{datasets}

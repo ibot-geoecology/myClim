@@ -1,13 +1,20 @@
-#' default reference calibration temperate for TMS moisture sensor
+#' Default ref. temperate for TMS moisture calibration
+#' @description
+#' 24°C = default reference calibration temperate for TMS moisture sensor
 #' @export
 mc_const_CALIB_MOIST_REF_T <- 24
-#' default temperature drift correction parameter for air - TMS moisture sensor
+#' Default temperature drift for TMS moisture in the air.
+#' @description
+#' 1.91132689118083 = default temperature drift correction parameter in the air - 
+#' TMS moisture sensor. This constant is used in the function [myClim::mc_calc_vwc].
 #' @export
 mc_const_CALIB_MOIST_ACOR_T <- 1.91132689118083
-#' default temperature drift correction parameter for water for - TMS moisture sensor
+#' Default temperature drift for TMS moisture in the water
+#' @description
+#' 0.64108 = default temperature drift correction parameter in the water - 
+#' TMS moisture sensor. This constant is used in the function [myClim::mc_calc_vwc].
 #' @export
 mc_const_CALIB_MOIST_WCOR_T <- 0.64108
-
 #' Calculates coefficients for TMS moisture conversion to VWC
 #'
 #' @description
@@ -32,8 +39,8 @@ mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #' @param ref_air (default 114.534) 
 #' @param ref_water (default 3634.723)
 #' @param ref_t (default 24)
-#' @param acor_t temperature drift correction parameter for air (default 1.91132689118083)
-#' @param wcor_t temperature drift correction parameter for water (default 0.64108)
+#' @param acor_t temperature drift correction parameter in the air (default 1.91132689118083)
+#' @param wcor_t temperature drift correction parameter in the water (default 0.64108)
 #' @return list with slope and intercept parameters
 #' @export
 #' @examples

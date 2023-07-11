@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_const_SENSOR_TMS_T2}
 \alias{mc_const_SENSOR_TMS_T2}
-\title{TMS temperature sensor id - surface of soil}
+\title{Default sensor for TOMST TMS temperature of soil surface}
 \format{
 An object of class \code{character} of length 1.
 }
@@ -11,6 +11,6 @@ An object of class \code{character} of length 1.
 mc_const_SENSOR_TMS_T2
 }
 \description{
-TMS temperature sensor id - surface of soil
+mc_const_SENSOR_TMS_T2 = "TMS_T2"
 }
 \keyword{datasets}

@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_const_CALIB_MOIST_WCOR_T}
 \alias{mc_const_CALIB_MOIST_WCOR_T}
-\title{default temperature drift correction parameter for water for - TMS moisture sensor}
+\title{Default temperature drift for TMS moisture in the water}
 \format{
 An object of class \code{numeric} of length 1.
 }
@@ -11,6 +11,7 @@ An object of class \code{numeric} of length 1.
 mc_const_CALIB_MOIST_WCOR_T
 }
 \description{
-default temperature drift correction parameter for water for - TMS moisture sensor
+0.64108 = default temperature drift correction parameter in the water -
+TMS moisture sensor. This constant is used in the function \link{mc_calc_vwc}.
 }
 \keyword{datasets}

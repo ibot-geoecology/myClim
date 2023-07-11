@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_const_SENSOR_Dendro_raw}
 \alias{mc_const_SENSOR_Dendro_raw}
-\title{TOMST Dendrometer radius difference sensor id}
+\title{Default sensor for TOMST Dendrometer radius difference}
 \format{
 An object of class \code{character} of length 1.
 }
@@ -11,6 +11,9 @@ An object of class \code{character} of length 1.
 mc_const_SENSOR_Dendro_raw
 }
 \description{
-TOMST Dendrometer radius difference sensor id
+This constant is used in the function \link{mc_calc_tomst_dendro}
+as default sensor for converting the change in stem size from raw
+Tomst units to micrometers.
+mc_const_SENSOR_Dendro_raw = "Dendro_raw"
 }
 \keyword{datasets}

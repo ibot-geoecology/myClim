@@ -6,9 +6,10 @@
 \alias{mc_DataFormat}
 \title{Class for logger file data format}
 \description{
-The Class used for parsing source data files. Typically the csv files
+The Class used for parsing source data files. Typically the txt/csv files
 downloaded from microclimatic loggers. Each supported logger has established
-own specific object of class \verb{mc_\{logger\}DataFormat} defining the parameters.
+their own specific object of class \verb{mc_\{logger\}DataFormat} defining the
+parameters.
 }
 \details{
 The logger definitions are stored in R environment object
