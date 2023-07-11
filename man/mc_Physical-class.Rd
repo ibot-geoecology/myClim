@@ -10,10 +10,10 @@ Class defining the element of the records (temperature, volumetric water content
 }
 \details{
 See e.g. definition of temperature. Similarly as the definition of new loggers, new
-physicals cn be added like modules.
+physicals can be added like modules.
 \preformatted{
 Slot "name": "T_C"
-slot "description": "Temperature °C"
+Slot "description": "Temperature °C"
 Slot "units": "°C"
 Slot "viridis_color_map": "C"
 Slot "scale_coeff": 0.03333333

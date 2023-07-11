@@ -289,10 +289,10 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' from [mc_data_vwc_parameters] in column `soiltype` (default `"universal"`).
 #' Parameters `a`, `b` and `c` are used in calculation.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @param ref_t (default 24)
-#' @param acor_t (default 1.91132689118083) correction parameter for temperature drift 
+#' @param ref_t (default `r mc_const_CALIB_MOIST_REF_T`)
+#' @param acor_t (default `r sprintf("%.14f", mc_const_CALIB_MOIST_ACOR_T)`) correction parameter for temperature drift
 #' in the air, see [myClim::mc_calib_moisture()]
-#' @param wcor_t (default 0.64108) correction parameter for temperature drift
+#' @param wcor_t (default `r mc_const_CALIB_MOIST_WCOR_T`) correction parameter for temperature drift
 #' in the water, see [myClim::mc_calib_moisture()]
 #' @param frozen2NA if TRUE then those moisture records are set to
 #' NA when soil temperature is below 0 (default TRUE)
