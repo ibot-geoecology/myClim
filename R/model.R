@@ -38,7 +38,7 @@ mc_const_SENSOR_TMS_T1 <- "TMS_T1"
 mc_const_SENSOR_TMS_T2 <- "TMS_T2"
 # Default sensor for TOMST TMS air temperature
 mc_const_SENSOR_TMS_T3 <- "TMS_T3"
-#' Default sensor for TOMMST TMS raw soil moisture
+#' Default sensor for TOMST TMS raw soil moisture
 #' @description 
 #' This constant is used in the function [myClim::mc_calc_vwc] as default for sensor for
 #' converting the raw TMS soil moisture (scaled TDT signal) to volumetric water content (VWC).
