@@ -3,7 +3,7 @@
 \docType{data}
 \name{mc_const_SENSOR_TMS_moist}
 \alias{mc_const_SENSOR_TMS_moist}
-\title{Default sensor for TOMMST TMS raw soil moisture}
+\title{Default sensor for TOMST TMS raw soil moisture}
 \format{
 An object of class \code{character} of length 1.
 }
