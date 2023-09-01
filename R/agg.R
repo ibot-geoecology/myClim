@@ -670,17 +670,17 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
         }
         if(sensor_info@value_type == .model_const_VALUE_TYPE_LOGICAL &&
             .y == .agg_const_FUNCTION_SUM) {
-            new_sensor$metadata@sensor_id <- .model_const_SENSOR_integer
+            new_sensor$metadata@sensor_id <- mc_const_SENSOR_integer
         }
         new_sensor$metadata@name <- .agg_get_aggregated_sensor_name(new_sensor$metadata@name, .y)
         new_sensor$values <- aggregate(new_sensor$values, by_aggregate, .x)$x
         if(.y %in% names(custom_functions)) {
             if(is.logical(new_sensor$values)) {
-                new_sensor$metadata@sensor_id <- .model_const_SENSOR_logical
+                new_sensor$metadata@sensor_id <- mc_const_SENSOR_logical
             } else if(is.integer(new_sensor$values)) {
-                new_sensor$metadata@sensor_id <- .model_const_SENSOR_integer
+                new_sensor$metadata@sensor_id <- mc_const_SENSOR_integer
             } else if(is.numeric(new_sensor$values)) {
-                new_sensor$metadata@sensor_id <- .model_const_SENSOR_real
+                new_sensor$metadata@sensor_id <- mc_const_SENSOR_real
             } else {
                 stop(stringr::str_glue(.agg_const_MESSAGE_WRONG_CUSTOM_FUNCTION))
             }

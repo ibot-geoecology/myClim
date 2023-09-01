@@ -5,7 +5,7 @@
 \alias{mc_data_physical}
 \title{Physical quantities definition}
 \format{
-An object of class \code{environment} of length 12.
+An object of class \code{environment} of length 11.
 }
 \usage{
 mc_data_physical
@@ -24,13 +24,12 @@ Currently supported physical elements:
 \item l_cm - length in cm
 \item l_mm - length in mm
 \item l_um - length in um
-\item moisture - volumetric moisture in m3/m3
-\item RH_perc - relative humidity in \%
+\item VWC - volumetric moisture in m3/m3
+\item RH - relative humidity in \%
 \item T_C - temperature in °C
-\item T_F - temperature in °F
 \item t_h - time in hours
-\item TMSmoisture - raw TMS moisture sensor values
-\item TOMSTdendro - radius difference in raw units
+\item moisture_raw - raw TMS moisture sensor values
+\item radius_raw - radius difference in raw units
 \item v - speed in m/s
 }
 }

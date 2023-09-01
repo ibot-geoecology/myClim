@@ -14,11 +14,11 @@ data.frame with columns:
 \itemize{
 \item locality_id - when provided by user then locality ID, when not provided identical with serial number
 \item serial_number - serial number of logger when provided or automatically detected from file name or header
-\item sensor_id - original sensor id (e.g.,"GDD", "HOBO_T_C" ,"TMS_T1", "TMS_T2")
-\item sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_C_mean" ,"TMS_T1_max", "my_sensor01")
+\item sensor_id - original sensor id (e.g.,"GDD", "HOBO_T" ,"TMS_T1", "TMS_T2")
+\item sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
 \item start_date - the oldest record on the sensor
 \item end_date - the newest record on the sensor
-\item step - time step of records series (seconds)
+\item step_seconds - time step of records series (seconds)
 \item period - time step of records series (text)
 \item min_value - minimal recorded values
 \item max_value - maximal recorded value

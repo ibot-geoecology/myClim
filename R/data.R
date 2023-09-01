@@ -5,10 +5,10 @@
 #' myClim object has metadata and covers time period from 2020-10 to 2021-02.
 #'
 #' Data includes time-series from 4 loggers:
-#' * Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture")
-#' * Tomst Thermologger with 1 sensor ("TS_T)
-#' * Tomst Point Dendrometer with 2 sensors ("DEND_T", "DEND_TOMSTdendro")
-#' * HOBO U23 with 2 sensors ("HOBO_T_C", "HOBO_RH")
+#' * Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist")
+#' * Tomst Thermologger with 1 sensor ("Thermo_T)
+#' * Tomst Point Dendrometer with 2 sensors ("Dendro_T", "Dendro_raw")
+#' * HOBO U23 with 2 sensors ("HOBO_T", "HOBO_RH")
 "mc_data_example_raw"
 
 #' Example cleaned data in Raw-format.
@@ -17,10 +17,10 @@
 #' myClim object has metadata and covers time period from 2020-10 to 2021-02.
 #'
 #' Data includes time-series from 4 loggers:
-#' * Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture")
-#' * Tomst Thermologger with 1 sensor ("TS_T)
-#' * Tomst Point Dendrometer with 2 sensors ("DEND_T", "DEND_TOMSTdendro")
-#' * HOBO U23 with 2 sensors ("HOBO_T_C", "HOBO_RH")
+#' * Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist")
+#' * Tomst Thermologger with 1 sensor ("Thermo_T)
+#' * Tomst Point Dendrometer with 2 sensors ("Dendro_T", "Dendro_raw")
+#' * HOBO U23 with 2 sensors ("HOBO_T", "HOBO_RH")
 "mc_data_example_clean"
 
 #' Example data in Agg-format.
@@ -30,10 +30,10 @@
 #' myClim object has metadata and covers time period from 2020-10 to 2021-02.
 #'
 #' Data includes time-series from 4 loggers:
-#' * Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture")
-#' * Tomst Thermologger with 1 sensor ("TS_T)
-#' * Tomst Point Dendrometer with 2 sensors ("DEND_T", "DEND_TOMSTdendro")
-#' * HOBO U23 with 2 sensors ("HOBO_T_C", "HOBO_RH")
+#' * Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist")
+#' * Tomst Thermologger with 1 sensor ("Thermo_T)
+#' * Tomst Point Dendrometer with 2 sensors ("Dendro_T", "Dendro_raw")
+#' * HOBO U23 with 2 sensors ("HOBO_T", "HOBO_RH")
 "mc_data_example_agg"
 
 #' Formats of source data files
@@ -85,27 +85,27 @@
 #'
 #' Default heights are:
 #' 
-#' TOMST - ThermoDatalogger
-#' * TS_T = air 200 cm
+#' TOMST - Thermo
+#' * Thermo_T = air 200 cm
 #' 
 #' TOMST - TMS
 #' * TMS_T1 = soil 8 cm
 #' * TMS_T2 = air 2 cm
 #' * TMS_T3 = air 15 cm
-#' * TMS_TMSmoisture = soil 0-15 cm
+#' * TMS_moist = soil 0-15 cm
 #' 
-#' TOMST - Dendrometer
-#' * DEND_T = 130 cm
-#' * DEND_TOMSTdendro = 130 cm
+#' TOMST - Dendro
+#' * Dendro_T = 130 cm
+#' * Dendro_raw = 130 cm
 #' 
 #' TOMST - TMS_L45
 #' * TMS_T1 = soil 40 cm
 #' * TMS_T2 = soil 30 cm
 #' * TMS_T3 = air 15 cm
-#' * TMS_TMSmoisture = soil 30-44 cm
+#' * TMS_moist = soil 30-44 cm
 #' 
 #' HOBO - HOBO
-#' * HOBO_T_C = air 150 cm
+#' * HOBO_T = air 150 cm
 #' * HOBO_RH = air 150 cm
 #'
 #' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]
@@ -121,30 +121,29 @@
 #' Currently supported sensors:
 #' * count - result of `count` function [myClim::mc_agg()]
 #' * coverage - result of `coverage` function [myClim::mc_agg()]
-#' * DEND_T - temperature in Tomst dendrometer (°C)
-#' * DEND_TOMSTdendro - change in stem size in Tomst dendrometer (raw units) [myClim::mc_calc_tomst_dendro()]
+#' * Dendro_T - temperature in Tomst dendrometer (°C)
+#' * Dendro_raw - change in stem size in Tomst dendrometer (raw units) [myClim::mc_calc_tomst_dendro()]
 #' * dendro_l_um - change in stem size (um) [myClim::mc_calc_tomst_dendro()]
 #' * FDD - result of function [myClim::mc_calc_fdd()]
 #' * GDD - result of function [myClim::mc_calc_gdd()]
 #' * HOBO_RH - relative humidity in HOBO logger (%)
-#' * HOBO_T_C - temperature in HOBO logger (°C)
-#' * HOBO_T_F - temperature in HOBO logger (°F)
+#' * HOBO_T - temperature in HOBO logger (°C)
 #' * integer - universal sensor with integer values
 #' * logical - universal sensor with logical values
-#' * moisture - volumetric water content in soil (ratio)
+#' * VWC - volumetric water content in soil (m3/m3)
 #' * precipitation - (mm)
 #' * real - universal sensor with real values
-#' * RH_perc - relative humidity sensor (%)
+#' * RH - relative humidity sensor (%)
 #' * snow_bool - result of function [myClim::mc_calc_snow()]
 #' * snow_fresh - fresh snow height (cm)
 #' * snow_total - total snow height (cm)
 #' * sun_shine - time of sun shine (hours)
 #' * T_C - universal temperature sensor (°C)
-#' * TS_T - temperature sensor in Tomst Thermologger (°C)
+#' * Thermo_T - temperature sensor in Tomst Thermologger (°C)
 #' * TMS_T1 - soil temperature sensor in Tomst TMS (°C)
 #' * TMS_T2 - surface temperature sensor in Tomst TMS (°C)
 #' * TMS_T3 - air temperature sensor in Tomst TMS (°C)
-#' * TMS_TMSmoisture - soil moisture sensor in Tomst TMS (raw TMS units)
+#' * TMS_moist - soil moisture sensor in Tomst TMS (raw TMS units)
 #' * wind - wind speed (m/s)
 "mc_data_sensors"
 
@@ -160,13 +159,12 @@
 #' * l_cm - length in cm
 #' * l_mm - length in mm
 #' * l_um - length in um
-#' * moisture - volumetric moisture in m3/m3
-#' * RH_perc - relative humidity in %
+#' * VWC - volumetric moisture in m3/m3
+#' * RH - relative humidity in %
 #' * T_C - temperature in °C
-#' * T_F - temperature in °F
 #' * t_h - time in hours
-#' * TMSmoisture - raw TMS moisture sensor values
-#' * TOMSTdendro - radius difference in raw units
+#' * moisture_raw - raw TMS moisture sensor values
+#' * radius_raw - radius difference in raw units
 #' * v - speed in m/s
 "mc_data_physical"
 

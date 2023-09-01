@@ -15,6 +15,8 @@
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
 .prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
+.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- paste0("Start and end datetime can be NULL, ",
+                                                   "single value or vector with same length as localities.")
 
 #' Cleaning datetime series
 #'
@@ -438,50 +440,97 @@ mc_prep_solar_tz <- function(data) {
 #' This function crop data by datetime
 #'
 #' @details
-#' Function is able to crop data from start to end but works also 
-#' with only start and only end. When only start provided, then crop only start and
-#' do not touch the end and vice versa.   
+#' Function is able to crop data from `start` to `end` but works also 
+#' with `start` only and `end` only. When only `start` is provided, then function crops only 
+#' the beginning of the tim-series and vice versa with end.
+#'
+#' If `start` or `end` is a single POSIXct value, it is used for all or selected localities (regular crop).
+#' However, if `start` and `end` are vectors of POSIXct values with the same length as the localities vector,
+#' each locality is cropped by its own time window (irregular crop).
+#' 
+#' The `end_included` parameter is used for selecting, whether to return data which contains `end` 
+#' time or not. For example when cropping the data to rounded days, typically users use midnight.
+#' 2023-06-15 00:00:00 UTC. But midnight is the last date of ending day and the same
+#' time first date of the next day. Thus, there will be the last day with single record. 
+#' This can be confusing in aggregation (e.g. daily mean of single record per day, typically NA) so  
+#' sometimes it is better to exclude end and crop on 2023-06-14 23:45:00 UTC (15 minutes records). 
 #'
 #' @template param_myClim_object
-#' @param start POSIXct datetime in UTC; is optional; start datetime is included
-#' @param end POSIXct datetime in UTC; is optional
-#' @param end_included if TRUE then end datetime is included (default TRUE)
+#' @param start optional; POSIXct datetime **in UTC**; single value or vector; start datetime is included (default NULL)
+#' @param end optional, POSIXct datetime **in UTC**; single value or vector (default NULL)
+#' @param localities vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)
+#' @param end_included if TRUE then end datetime is included (default TRUE), see details
 #' @return cropped data in the same myClim format as input. 
 #' @export
 #' @examples
 #' cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))
-mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
-    if(!is.null(start) && format(start, format="%Z") != "UTC") {
+mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_included=TRUE) {
+    if(!is.null(start) && any(format(start, format="%Z") != "UTC")) {
         warning(stringr::str_glue("start datetime is not in UTC"))
     }
-    if(!is.null(end) && format(end, format="%Z") != "UTC") {
+    if(!is.null(end) && any(format(end, format="%Z") != "UTC")) {
         warning(stringr::str_glue("end datetime is not in UTC"))
     }
-
-    sensors_item_function <- function(item) {
-        .prep_crop_data(item, start, end, end_included)
+    if(!.prep_crop_is_datetime_correct(start, localities) ||
+        !.prep_crop_is_datetime_correct(end, localities)) {
+        stop(.prep_const_MESSAGE_CROP_DATETIME_LENGTH)
+    }
+    all_table <- tibble::tibble(locality_id=names(data$localities))
+    if(!is.null(localities)) {
+        table <- tibble::tibble(locality_id=localities)
+        table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
+        all_table <- dplyr::left_join(all_table, table, by="locality_id")
+    }
+    else {
+        all_table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        all_table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
     }
 
-    raw_locality_function <- function(locality) {
-        locality$loggers <- purrr::map(locality$loggers, sensors_item_function)
-        locality
+    sensors_item_function <- function(item, start_datetime, end_datetime) {
+        .prep_crop_data(item, start_datetime, end_datetime, end_included)
+    }
+
+    raw_locality_function <- function(locality_id, start_datetime, end_datetime) {
+        locality <- data$localities[[locality_id]]
+        if(!is.na(start_datetime) || !is.na(end_datetime)) {
+            locality$loggers <- purrr::pmap(list(item=locality$loggers,
+                                                 start_datetime=start_datetime,
+                                                 end_datetime=end_datetime),
+                                            sensors_item_function)
+        }
+        return(locality)
+    }
+
+    agg_locality_function <- function(locality_id, start_datetime, end_datetime) {
+        locality <- data$localities[[locality_id]]
+        if(!is.na(start_datetime) || !is.na(end_datetime)) {
+            locality <- sensors_item_function(locality, start_datetime, end_datetime)
+        }
+        return(locality)
     }
 
     if(.common_is_agg_format(data)) {
-        data$localities <- purrr::map(data$localities, sensors_item_function)
+        data$localities <- purrr::pmap(all_table, agg_locality_function)
     } else {
-        data$localities <- purrr::map(data$localities, raw_locality_function)
+        data$localities <- purrr::pmap(all_table, raw_locality_function)
     }
+    names(data$localities) <- all_table$locality_id
     return(data)
+}
+
+.prep_crop_is_datetime_correct <- function(datetime, localities) {
+    return(is.null(datetime) || length(datetime) == 1 ||
+        (!is.null(localities) && length(datetime) == length(localities)))
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {
     table <- .common_sensor_values_as_tibble(item)
-    if(!is.null(start)) {
+    if(!is.na(start)) {
         table <- dplyr::filter(table, .data$datetime >= start)
     }
-    last_datetime <- NULL
-    if(!is.null(end)) {
+    last_datetime <- lubridate::NA_POSIXct_
+    if(!is.na(end)) {
         table <- dplyr::filter(table, .data$datetime < end | (end_included & .data$datetime == end))
         last_datetime <- end
         if(length(table$datetime) > 0) {
@@ -507,10 +556,10 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, end_included=TRUE) {
         return(item)
     }
 
-    if(is.null(start)) {
+    if(is.na(start)) {
         start <- min(item$datetime)
     }
-    if(is.null(end)) {
+    if(is.na(end)) {
         end <- max(item$datetime)
     }
     interval <- lubridate::interval(start, end)
@@ -696,7 +745,7 @@ mc_prep_calib_load <- function(data, calib_table) {
 #' then first calibration `datetime` available are calibrated anyway (in case sensor was calibrated ex-post)
 #' with the first calibration parameters available.
 #' 
-#' This function is not designed for TMSmoisture calibration 
+#' This function is not designed for moisture_raw calibration
 #' (conversion to volumetric water content) for this use [myClim::mc_calc_vwc()]
 #' 
 #' Only sensors with real value type can be calibrated. see [myClim::mc_data_sensors()]
@@ -724,7 +773,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
             warning(stringr::str_glue("Calibration parameters are missing in sensor {sensor$metadata@name} in {locality_id}."))
             return(sensor)
         }
-        if(.model_is_physical_TMSmoisture(sensor$metadata)) {
+        if(.model_is_physical_moisture_raw(sensor$metadata)) {
             warning(stringr::str_glue("Using simple linear correction of raw moisture values in sensor {sensor$metadata@name}, for more precisse correction use function mc_calc_vwc."))
         }
         if(sensor$metadata@calibrated) {

@@ -1,5 +1,5 @@
-.plot_const_MOISTURE_PHYSICAL <- c(.model_const_PHYSICAL_TMSmoisture,
-                                   .model_const_PHYSICAL_moisture)
+.plot_const_MOISTURE_PHYSICAL <- c(.model_const_PHYSICAL_moisture_raw,
+                                   .model_const_PHYSICAL_VWC)
 .plot_const_MESSAGE_DUPLICATED_SENSOR <- "Sensor {duplicated_sensors} contains multiple physicals. It is not allowed."
 
 #' Plot data from loggers
@@ -154,6 +154,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @template param_localities_sensors
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
+#' @template param_use_utc
 #' @return PNG file created as specified in output file name
 #' @export
 #' @examples
@@ -161,10 +162,11 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' tmp_file <- tempfile(tmpdir = tmp_dir)
 #' mc_plot_image(mc_data_example_clean, tmp_file, "T1 sensor", sensors="TMS_T1")
 #' file.remove(tmp_file)
-mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NULL, height=1900, left_margin=12) {
+mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NULL,
+                          height=1900, left_margin=12, use_utc=TRUE) {
     oldpar <- par(no.readonly = TRUE)
     on.exit(suppressWarnings(par(oldpar)))
-    data_table <- mc_reshape_wide(data, localities, sensors)
+    data_table <- mc_reshape_wide(data, localities, sensors, use_utc=use_utc)
     values_matrix <- as.matrix(data_table[,-1])
     png(filename=filename,width=1900, height=height, res=200)
     x_labels <- substr(data_table$datetime[seq(1, nrow(data_table), len=20)], 1, 10)
@@ -227,8 +229,9 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' * "F" - rocket
 #' * "G" - mako
 #' * "H" - turbo
-#' @param start_crop POSIXct datetime for crop data (default NULL)
-#' @param end_crop POSIXct datetime for crop data (default NULL)
+#' @param start_crop POSIXct datetime in UTC for crop data (default NULL)
+#' @param end_crop POSIXct datetime in UTC for crop data (default NULL)
+#' @template param_use_utc
 #' @return list of ggplot2 objects
 #' @examples
 #' tmp_dir <- tempdir()
@@ -237,7 +240,7 @@ mc_plot_image <- function(data, filename, title="", localities=NULL, sensors=NUL
 #' file.remove(tmp_file)
 #' @export
 mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_width=1900, png_height=1900,
-                           viridis_color_map=NULL, start_crop=NULL, end_crop=NULL) {
+                           viridis_color_map=NULL, start_crop=NULL, end_crop=NULL, use_utc=TRUE) {
     data <- mc_filter(data, sensors=sensors)
     if(!is.null(start_crop) || !is.null(end_crop)) {
         data <- mc_prep_crop(data, start_crop, end_crop)
@@ -247,7 +250,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 
     group_function <- function(group, .y) {
         filtered_data <- mc_filter(data, sensors=group$sensor)
-        .plot_raster_physical(filtered_data, by_hour, viridis_color_map)
+        .plot_raster_physical(filtered_data, by_hour, viridis_color_map, use_utc)
     }
 
     plots <- dplyr::group_map(sensors_table, group_function)
@@ -291,8 +294,8 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
     return(result)
 }
 
-.plot_raster_physical <- function(data, by_hour, viridis_color_map) {
-    data_table <-mc_reshape_long(data)
+.plot_raster_physical <- function(data, by_hour, viridis_color_map, use_utc) {
+    data_table <- mc_reshape_long(data, use_utc=use_utc)
     data_table <- dplyr::mutate(data_table, date = lubridate::date(.data$datetime))
     data_table$value <- as.numeric(data_table$value)
     if(by_hour) {
@@ -394,7 +397,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' for bigger data. Maximal number of physical units (elements) of sensors to be plotted in one
 #' plot is two with main and secondary y axis. In case, there are multiple sensors with
 #' identical physical on one locality, they are plotted together. E.g., when you have
-#' TMS_T1, TMS_T2, TMS_T3, TS_T, and moisture you get plot with 5 lines of different colors and
+#' TMS_T1, TMS_T2, TMS_T3, Thermo_T, and VWC you get plot with 5 lines of different colors and
 #' two y axes. Secondary y axes are scaled with calculation `values * scale_coeff`.
 #' If coefficient is NULL than function try detects scale coefficient from
 #' physical unit of sensors see [mc_Physical-class]. Scaling is useful when
@@ -409,12 +412,13 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @param scale_coeff scale coefficient for secondary axis (default NULL)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
-#' @param start_crop POSIXct datetime for crop data (default NULL)
-#' @param end_crop POSIXct datetime for crop data (default NULL)
+#' @param start_crop POSIXct datetime in UTC for crop data (default NULL)
+#' @param end_crop POSIXct datetime in UTC for crop data (default NULL)
+#' @template param_use_utc
 #' @return ggplot2 object
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
-#' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_TMSmoisture"))
+#' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_moist"))
 #' p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
 #' p <- p+ggplot2::xlab("week")
 #' p <- p+ggplot2::scale_color_manual(values=c("hotpink","pink", "darkblue"),name=NULL)
@@ -422,14 +426,14 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          scale_coeff=NULL,
                          png_width=1900, png_height=1900,
-                         start_crop=NULL, end_crop=NULL) {
+                         start_crop=NULL, end_crop=NULL, use_utc=TRUE) {
     data <- mc_filter(data, sensors=sensors)
     if(!is.null(start_crop) || !is.null(end_crop)) {
         data <- mc_prep_crop(data, start_crop, end_crop)
     }
     sensors_table <- .plot_get_sensors_table(data)
     sensors_table <- .plot_add_coeff_to_sensors_table(sensors_table, scale_coeff)
-    data_table <- mc_reshape_long(data)
+    data_table <- mc_reshape_long(data, use_utc=use_utc)
     plot <- ggplot2::ggplot()
 
     line_function <- function(sensor, color, coeff) {

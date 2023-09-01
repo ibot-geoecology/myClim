@@ -1,3 +1,36 @@
+# myClim 1.0.8
+* The calibration constants for the `mc_calc_vwc()` function are now visible to the user under new names:
+  `mc_const_CALIB_MOIST_REF_T`, `mc_const_CALIB_MOIST_ACOR_T`, and `mc_const_CALIB_MOIST_WCOR_T`.
+* The sensor ID constants are now visible to the user under new names: `mc_const_SENSOR_*`.
+* The `soiltype` parameter in the `mc_calc_vwc()` function can now be a list with user-defined parameters
+  in the format `list(a=number1, b=number2, c=number3)`. 
+
+# myClim 1.0.7
+* The temperature correction is no longer applied in the `mc_calc_vwc()` function when the `temp_sensor` value is NA.
+
+# myClim 1.0.6
+* The `mc_prep_crop()` function now includes a new parameter `localities`, which allows for specific localities to be selected.
+* The definitions of physicals, loggers, and sensors have been modified.
+  * `TMS_TMSmoisture` -> `TMS_moist`
+  * `TS_T` -> `Thermo_T`
+  * `DEND_T` -> `Dendro_T`
+  * `DEND_TOMSTdendro` -> `Dendro_raw`
+  * `HOBO_T_C` -> `HOBO_T`
+  * `moisture` -> `VWC`
+  * `RH_perc` -> `RH`
+  * `wind` -> `wind_speed`
+  * deleted `HOBO_T_F`
+* Data from HOBO loggers in °F are now automatically converted to °C.
+
+# myClim 1.0.5
+* Metadata of a locality can now be loaded from a table using the `mc_read_data()` function.
+* The parameter `use_utc` has been added to the following functions: `mc_reshape_wide()`, `mc_reshape_long()`,
+  `mc_plot_image()`, `mc_plot_line()` and `mc_plot_raster()`. This parameter allows for the use of local time.
+
+# myClim 1.0.4
+* Updated the `print(myClim_data)` function to display the metadata of the `myClim` object and the head of the table from `mc_info()`.
+* Enabled the use of the extraction operator `[]` to extract specific localities from the `myClim` object.
+
 # myClim 1.0.3
 * Function `mc_plot_raster()` can plot bool type sensors, such as snow.
 

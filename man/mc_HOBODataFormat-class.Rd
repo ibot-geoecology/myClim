@@ -10,6 +10,12 @@ Provides the key for reading the HOBO source files. In which column is the date,
 in what format is the date, in which columns are records of which sensors.
 The code defining the class is in section methods ./R/model.R
 }
+\section{Slots}{
+
+\describe{
+\item{\code{convert_fahrenheit}}{if TRUE temperature values are converted from °F to °C (default FALSE)}
+}}
+
 \seealso{
 \link{mc_DataFormat}, \link{mc_data_formats}
 }

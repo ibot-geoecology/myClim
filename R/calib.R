@@ -1,7 +1,20 @@
-.calib_MOIST_REF_T <- 24
-.calib_MOIST_ACOR_T <- 1.91132689118083
-.calib_MOIST_WCOR_T <- 0.64108
-
+#' Default ref. temperate for TMS moisture calibration
+#' @description
+#' `r mc_const_CALIB_MOIST_REF_T`°C = default reference calibration temperate for TMS moisture sensor
+#' @export
+mc_const_CALIB_MOIST_REF_T <- 24
+#' Default temperature drift for TMS moisture in the air.
+#' @description
+#' `r sprintf("%.14f", mc_const_CALIB_MOIST_ACOR_T)` = default temperature drift correction parameter in the air -
+#' TMS moisture sensor. This constant is used in the function [myClim::mc_calc_vwc].
+#' @export
+mc_const_CALIB_MOIST_ACOR_T <- 1.91132689118083
+#' Default temperature drift for TMS moisture in the water
+#' @description
+#' `r mc_const_CALIB_MOIST_WCOR_T` = default temperature drift correction parameter in the water -
+#' TMS moisture sensor. This constant is used in the function [myClim::mc_calc_vwc].
+#' @export
+mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #' Calculates coefficients for TMS moisture conversion to VWC
 #'
 #' @description
@@ -26,8 +39,8 @@
 #' @param ref_air (default 114.534) 
 #' @param ref_water (default 3634.723)
 #' @param ref_t (default 24)
-#' @param acor_t temperature drift correction parameter for air (default 1.91132689118083)
-#' @param wcor_t temperature drift correction parameter for water (default 0.64108)
+#' @param acor_t temperature drift correction parameter in the air (default 1.91132689118083)
+#' @param wcor_t temperature drift correction parameter in the water (default 0.64108)
 #' @return list with slope and intercept parameters
 #' @export
 #' @examples
@@ -35,9 +48,9 @@
 mc_calib_moisture <- function(raw_air, raw_water,
                               t_air=24, t_water=24,
                               ref_air=114.534, ref_water=3634.723,
-                              ref_t=.calib_MOIST_REF_T,
-                              acor_t=.calib_MOIST_ACOR_T,
-                              wcor_t=.calib_MOIST_WCOR_T) {
+                              ref_t=mc_const_CALIB_MOIST_REF_T,
+                              acor_t=mc_const_CALIB_MOIST_ACOR_T,
+                              wcor_t=mc_const_CALIB_MOIST_WCOR_T) {
     norm_period_air <- raw_air + (ref_t - t_air) * acor_t
     norm_period_water <- raw_water + (ref_t - t_water) * wcor_t
     intercept <- ref_air - norm_period_air

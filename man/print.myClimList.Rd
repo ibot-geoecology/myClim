@@ -8,7 +8,12 @@
 }
 \arguments{
 \item{x}{myClim object see \link{myClim-package}}
+
+\item{...}{other parameters from function print for tibble \link[tibble:tibble]{tibble::tibble}}
 }
 \description{
-Function print info about first localities.
+Function print metadata of myClim object and table from function mc_info().
+}
+\examples{
+print(mc_data_example_agg, n=10)
 }

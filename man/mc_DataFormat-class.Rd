@@ -6,9 +6,10 @@
 \alias{mc_DataFormat}
 \title{Class for logger file data format}
 \description{
-The Class used for parsing source data files. Typically the csv files
+The Class used for parsing source data files. Typically the txt/csv files
 downloaded from microclimatic loggers. Each supported logger has established
-own specific object of class \verb{mc_\{logger\}DataFormat} defining the parameters.
+their own specific object of class \verb{mc_\{logger\}DataFormat} defining the
+parameters.
 }
 \details{
 The logger definitions are stored in R environment object
@@ -52,7 +53,7 @@ attr(,"logger_type"): character(0)
 
 If data_row_pattern is NA, then file format is not validated.}
 
-\item{\code{logger_type}}{type of logger: TMS, TMS_L45, ThermoDatalogger, Dendrometer, HOBO, ... (default NA)}
+\item{\code{logger_type}}{type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA)}
 
 \item{\code{tz_offset}}{timezone offset in minutes from UTC in source data (default 0)}
 }}

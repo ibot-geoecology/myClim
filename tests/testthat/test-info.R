@@ -11,18 +11,18 @@ test_that("mc_info_count", {
 test_that("mc_info_clean", {
     cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", silent=T)
     info_table <- mc_info_clean(cleaned_data)
-    expect_equal(colnames(info_table), c("locality_id", "serial_number", "start_date", "end_date", "step", "count_duplicities", "count_missing", "count_disordered", "rounded"))
+    expect_equal(colnames(info_table), c("locality_id", "serial_number", "start_date", "end_date", "step_seconds", "count_duplicities", "count_missing", "count_disordered", "rounded"))
 })
 
 test_that("mc_info", {
     data <- mc_read_files("../data/clean-datetime_step", "TOMST", clean=FALSE)
     info_data <- mc_info(data)
-    expect_equal(colnames(info_data), c("locality_id", "serial_number", "sensor_id", "sensor_name", "start_date", "end_date", "step", "period", "min_value", "max_value", "count_values", "count_na"))
+    expect_equal(colnames(info_data), c("locality_id", "serial_number", "sensor_id", "sensor_name", "start_date", "end_date", "step_seconds", "period", "min_value", "max_value", "count_values", "count_na"))
     expect_equal(nrow(info_data), 17)
     cleaned_data <- mc_prep_clean(data, silent=T)
     info_cleaned_data <- mc_info(cleaned_data)
     expect_equal(nrow(info_cleaned_data), 17)
-    expect_warning(agg_data <- mc_agg(cleaned_data, list(TMS_T1=c("min", "max"), TMS_TMSmoisture="mean"), "hour"))
+    expect_warning(agg_data <- mc_agg(cleaned_data, list(TMS_T1=c("min", "max"), TMS_moist="mean"), "hour"))
     info_agg_data <- mc_info(agg_data)
     expect_equal(nrow(info_agg_data), 12)
 })

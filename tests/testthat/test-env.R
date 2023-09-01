@@ -40,7 +40,7 @@ test_that("mc_env_vpd", {
     data <- mc_read_files("../data/env-VPD/20024338.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S", silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`20024338`="LOC"), param_name = "locality_id")
     expect_error(env_table <- mc_env_vpd(data, "all"))
-    vpd_data <- mc_calc_vpd(data, .model_const_SENSOR_HOBO_T_C, .model_const_SENSOR_HOBO_RH)
+    vpd_data <- mc_calc_vpd(data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
     env_table <- mc_env_vpd(vpd_data, "all")
     expect_true(all(is.na(env_table$value)))
     env_table <- mc_env_vpd(vpd_data, "all", min_coverage=0.6)

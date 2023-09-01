@@ -11,9 +11,9 @@ mc_calib_moisture(
   t_water = 24,
   ref_air = 114.534,
   ref_water = 3634.723,
-  ref_t = .calib_MOIST_REF_T,
-  acor_t = .calib_MOIST_ACOR_T,
-  wcor_t = .calib_MOIST_WCOR_T
+  ref_t = mc_const_CALIB_MOIST_REF_T,
+  acor_t = mc_const_CALIB_MOIST_ACOR_T,
+  wcor_t = mc_const_CALIB_MOIST_WCOR_T
 )
 }
 \arguments{
@@ -31,9 +31,9 @@ mc_calib_moisture(
 
 \item{ref_t}{(default 24)}
 
-\item{acor_t}{temperature drift correction parameter for air (default 1.91132689118083)}
+\item{acor_t}{temperature drift correction parameter in the air (default 1.91132689118083)}
 
-\item{wcor_t}{temperature drift correction parameter for water (default 0.64108)}
+\item{wcor_t}{temperature drift correction parameter in the water (default 0.64108)}
 }
 \value{
 list with slope and intercept parameters

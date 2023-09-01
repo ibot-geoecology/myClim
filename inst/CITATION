@@ -1,0 +1,15 @@
+# citation(auto = meta)
+
+bibentry(bibtype = "Article",
+         title = "myClim: Microclimate data handling and standardised analyses in R.",
+         author = c(person("Matěj", "Man"),
+                    person("Vojtěch", "Kalčík"),
+                    person("Martin", "Macek"),
+                    person("Josef", "Brůna"),
+                    person("Lucia", "Hederová"),
+                    person("Jan", "Wild"),
+                    person("Martin", "Kopecký")),
+         year = "2023",
+         journal = "Methods in Ecology and Evolution",
+         pages = "1-13",
+         doi = "10.1111/2041-210X.14192")

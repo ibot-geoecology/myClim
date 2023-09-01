@@ -20,7 +20,7 @@
 #' If file is not in expected format, then file is skipped and warning printed in console. 
 #' CSV files (loggers raw data) are in resulting myClim object placed to separate
 #' localities with empty metadata. Localities are named after serial_number of logger.
-#' Pre-defined logger types are ("Dendrometer","HOBO","ThermoDatalogger","TMS","TMS_L45")
+#' Pre-defined logger types are ("Dendro","HOBO","Thermo","TMS","TMS_L45")
 #' By default data are cleaned with function [myClim::mc_prep_clean()]. See function description. It detects
 #' holes in time-series, duplicated records or records in wrong order.
 #'
@@ -83,7 +83,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' By default data are cleaned with function [myClim::mc_prep_clean()]. See function description. It detects
 #' holes in time-series, duplicated records or records in wrong order.
 #' @seealso [myClim::mc_DataFormat]
-#' @param files_table path to csv file or data.frame object with 3 required columns and few optional:
+#' @param files_table path to csv file or data.frame object see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv) 
+#' with 3 required columns and few optional:
 #' required columns:
 #' * path - path to files
 #' * locality_id - unique locality id
@@ -92,8 +93,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' optional columns:
 #' * serial_number - logger serial number. If is NA, than myClim tries to detect serial number from file name (for TOMST) or header (for HOBO)
 #' * logger_type - type of logger. This defines individual sensors attributes (measurement heights and physical units) of the logger. Important when combining the data from multiple loggers on the locality.
-#' If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendrometer, ThermoDatalogger and TMS), but automatic detection of TMS_L45 is not possible.
-#' Pre-defined logger types are: ("Dendrometer", "HOBO", "ThermoDatalogger", "TMS", "TMS_L45")
+#' If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendro, Thermo and TMS), but automatic detection of TMS_L45 is not possible.
+#' Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S");
 #' Ignored for TOMST data format
@@ -105,13 +106,23 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection.
 #'
-#' @param localities_table path to csv file or data.frame. Localities table is optional (default NULL).
-#' object containing 5 columns:
+#' @param localities_table path to csv file ("c:/user/localities.table.csv") or R data.frame [
+#' see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv). 
+#' Localities table is optional (default NULL).
+#' The `locality_id` is the only required column. Other columns are optional. Column names corresponding 
+#' with the myclim pre-defined locality metadata (elevation, lon_wgs84, lat_wgs84, tz_offset) 
+#' are associted withthose pre-defined metadata slots, other columns are  written into 
+#' `metadata@user_data` [myClim-package].
+#' 
+#'required columns:
 #' * locality_id - unique locality id
+#' 
+#' optional columns:
 #' * elevation - elevation (in m)
 #' * lon_wgs84 - longitude (in decimal degrees)
 #' * lat_wgs84 - latitude (in decimal degrees)
-#' * tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
+#' * tz_offset - locality time zone offset from UTC, applicable for converting time-series from UTC to local time.
+#' * ... - any other columns are imported to `metadata@user_data`
 #' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
 #' @param silent if TRUE, then any information is not printed in console (default FALSE)
 #' @return myClim object in Raw-format see [myClim-package]
@@ -292,7 +303,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     .read_get_data_raw_from_localities(result_localities)
 }
 
-.read_get_new_locality <- function(locality_id, elevation=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_) {
+.read_get_new_locality <- function(locality_id, elevation=NA_real_, lon_wgs84=NA_real_, lat_wgs84=NA_real_, tz_offset=NA_integer_, ...) {
     tz_type <- if(is.na(tz_offset)) .model_const_TZ_UTC else .model_const_TZ_USER_DEFINED
     metadata <- new("mc_LocalityMetadata")
     metadata@locality_id <- locality_id
@@ -301,6 +312,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     metadata@lat_wgs84 <- lat_wgs84
     metadata@tz_offset <- tz_offset
     metadata@tz_type <- tz_type
+    metadata@user_data <- list(...)
     list(metadata = metadata, loggers=list())
 }
 
@@ -444,7 +456,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 #' @return myClim object in Raw-format
 #' @export
 #' @seealso [myClim::mc_read_long]
-mc_read_wide <- function(data_table, sensor_id=.model_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
+mc_read_wide <- function(data_table, sensor_id=mc_const_SENSOR_real, sensor_name=NULL, clean=TRUE, silent=FALSE) {
     if(ncol(data_table) <= 1) {
        stop(.read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE)
     }

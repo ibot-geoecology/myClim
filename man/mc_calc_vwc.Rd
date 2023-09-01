@@ -6,14 +6,14 @@
 \usage{
 mc_calc_vwc(
   data,
-  moist_sensor = .model_const_SENSOR_TMS_TMSmoisture,
-  temp_sensor = .model_const_SENSOR_TMS_T1,
+  moist_sensor = mc_const_SENSOR_TMS_moist,
+  temp_sensor = mc_const_SENSOR_TMS_T1,
   output_sensor = "VWC_moisture",
   soiltype = "universal",
   localities = NULL,
-  ref_t = .calib_MOIST_REF_T,
-  acor_t = .calib_MOIST_ACOR_T,
-  wcor_t = .calib_MOIST_WCOR_T,
+  ref_t = mc_const_CALIB_MOIST_REF_T,
+  acor_t = mc_const_CALIB_MOIST_ACOR_T,
+  wcor_t = mc_const_CALIB_MOIST_WCOR_T,
   frozen2NA = TRUE
 )
 }
@@ -21,16 +21,17 @@ mc_calc_vwc(
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{moist_sensor}{name of soil moisture sensor to be converted from TMS
-units to volumetric (default "TMS_TMSmoisture") see \code{names(mc_data_sensors)}.
-Soil moisture sensor must be in TMSmoisture physical see \code{names(mc_data_physical)}.}
+units to volumetric (default "TMS_moist") see \code{names(mc_data_sensors)}.
+Soil moisture sensor must be in moisture_raw physical see \code{names(mc_data_physical)}.}
 
 \item{temp_sensor}{name of soil temperature sensor (default "TMS_T1")
 see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical.}
 
-\item{output_sensor}{name of new snow virtual sensor with VWC values (default "VWC_moisture")}
+\item{output_sensor}{name of new virtual sensor with VWC values (default "VWC_moisture")}
 
-\item{soiltype}{value from \link{mc_data_vwc_parameters} in column soiltype
-(default "universal").  Parameters a, b and c are used in calculation.}
+\item{soiltype}{either character corresponding to one of \code{soiltype} from \link{mc_data_vwc_parameters}
+(default \code{"universal"}). Or a list with parameters \code{a}, \code{b} and \code{c} manually filled in
+by user i.e.,\code{list(a=Value_1, b=Value_2, c=Value_3)}.}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 
@@ -54,7 +55,7 @@ Function converts the raw TMS soil moisture (scaled TDT signal)
 to volumetric water content (VWC).
 }
 \details{
-This function is suitable for Tomst TMS loggers measuring soil moisture in raw TDT
+This function is suitable for TOMST TMS loggers measuring soil moisture in raw TDT
 units (TMS units). Raw TDT units represents inverted and scaled (1-4095)
 number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz)
 sent through a ca 30 cm long circuit within a 640-microsecond time window.
@@ -69,15 +70,18 @@ water content conversion the reference temperature is corrected with the
 actual soil temperature using TMS_T1 soil temperature sensor records.
 As the calibration curves were derived for several soil types,
 in case user know specific soil type, where the logger was measuring,
-then it is strongly recommended to chose the closest
-existing calibration curve for specific soil type instead of default "universal".
-Available soil types are: sand, loamy sand A, loamy sand B, sandy loam A,
-sandy loam B, loam, silt loam, peat, water,
-universal, sand TMS1,
-loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
+then it is possible to chose the closest¨existing calibration curve for specific soil
+type instead of default "universal". Available soil types are: sand, loamy sand A,
+loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
+universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 For full table of function parameters see \link{mc_data_vwc_parameters}
-When logger-specific correction parameters are available (see \code{\link[=mc_calib_moisture]{mc_calib_moisture()}}), it use these values to correct
-resulting VWC.
+
+It is also possible to use custom parameters \code{a}, \code{b} and \code{c}. These can be
+derived from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
+
+\strong{Warning:} TOMST TMS Calibr utility was developed for TMS3 series of TOMST sensor which are
+different from commonly used.newer TMS4 series. Therefore we rather recommend to use
+pre-defined \code{universal} calibration according to (Kopecký et al. 2021).
 
 The function by default replace the moisture records in frozen soils with NA (param \emph{frozen2NA}),
 because the soil moisture sensor was not designed to measure in
@@ -85,7 +89,9 @@ frozen soils and the returned records are thus not comparable
 with values from non-frozen soil.
 }
 \examples{
-agg_data <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
+data1 <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
+data2 <- mc_calc_vwc(mc_data_example_agg, localities="A2E32",
+                     soiltype=list(a=-3.00e-09, b=0.000161192, c=-0.109956505))
 }
 \references{
 Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:

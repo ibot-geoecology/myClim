@@ -1,4 +1,5 @@
 .common_const_MESSAGE_UNKNOWN_SENSOR_ID <- "Sensor_id {sensor_id} is unknown."
+.common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME <- "It isn't possible change time zone for period longer than day. Apply tz_offset in mc_agg function (parameter use_utc)."
 
 .common_convert_factors_in_dataframe <- function(dataframe) {
     factor_columns <- sapply(dataframe, is.factor)
@@ -117,4 +118,43 @@
     start_indexes <- (c(0, cumsum_lengths[-length(cumsum_lengths)]) + 1)[rle_output$values]
     end_indexes <- cumsum_lengths[rle_output$values]
     lubridate::interval(datetime[start_indexes], datetime[end_indexes])
+}
+
+.common_get_count_items <- function(data) {
+    count_env <- new.env()
+    count_env$localities <- length(data$localities)
+    count_env$loggers <- 0
+    count_env$sensors <- 0
+
+    sensors_item_function <- function(item) {
+        count_env$sensors <- count_env$sensors + length(item$sensors)
+    }
+
+    raw_locality_function <- function(locality) {
+        count_env$loggers <- count_env$loggers + length(locality$loggers)
+        purrr::walk(locality$loggers, sensors_item_function)
+    }
+
+    if(.common_is_agg_format(data)) {
+        purrr::walk(data$localities, sensors_item_function)
+    } else {
+        purrr::walk(data$localities, raw_locality_function)
+    }
+    return(count_env)
+}
+
+.common_check_agg_use_utc <- function(use_utc, period) {
+    if(use_utc) {
+        return(use_utc)
+    }
+    if(period %in% .agg_const_INTERVAL_PERIODS) {
+        warning(.common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME)
+        return(TRUE)
+    }
+    period_object <- lubridate::period(period)
+    if(period_object[[1]]@year == 0 && period_object[[1]]@month == 0 && period_object[[1]]@day == 0) {
+        return(use_utc)
+    }
+    warning(.common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME)
+    return(TRUE)
 }

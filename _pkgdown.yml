@@ -1,14 +1,13 @@
 url: http://labgis.ibot.cas.cz/myclim/index.html
 
 reference:
-  - title: Package
+  - title: myClim structure
     desc: Description of package with definition of data structure
     contents:
       - myClim-package
 
   - title: Classes
     contents:
-      - ends_with("myClimList")
       - ends_with("-class")
 
   - title: Data
@@ -60,7 +59,13 @@ reference:
 
   - title: Other functions
     contents:
+      - ends_with("myClimList")
       - starts_with("mc_filter")
       - starts_with("mc_save")
       - starts_with("mc_load")
       - starts_with("mc_calib")
+
+  - title: Constants
+    contents:
+      - starts_with("mc_const")
+

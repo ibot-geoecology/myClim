@@ -9,7 +9,7 @@ airHumid$date <- as.POSIXct(ymd(airHumid$date, tz="UTC"))
 airTmin$date <- as.POSIXct(ymd(airTmin$date, tz="UTC"))
 airTmax$date <- as.POSIXct(ymd(airTmax$date, tz="UTC"))
 data_items <- list()
-data_items$humidity <- mc_read_wide(airHumid, sensor_id = "RH_perc", "humidity")
+data_items$humidity <- mc_read_wide(airHumid, sensor_id = "RH", "humidity")
 data_items$tmin <- mc_read_wide(airTmin, sensor_id = "T_C", "T_min")
 data_items$tmax <- mc_read_wide(airTmax, sensor_id = "T_C", "T_max")
 

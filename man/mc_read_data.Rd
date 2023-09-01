@@ -12,7 +12,8 @@ mc_read_data(
 )
 }
 \arguments{
-\item{files_table}{path to csv file or data.frame object with 3 required columns and few optional:
+\item{files_table}{path to csv file or data.frame object see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv)
+with 3 required columns and few optional:
 required columns:
 \itemize{
 \item path - path to files
@@ -24,8 +25,8 @@ optional columns:
 \itemize{
 \item serial_number - logger serial number. If is NA, than myClim tries to detect serial number from file name (for TOMST) or header (for HOBO)
 \item logger_type - type of logger. This defines individual sensors attributes (measurement heights and physical units) of the logger. Important when combining the data from multiple loggers on the locality.
-If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendrometer, ThermoDatalogger and TMS), but automatic detection of TMS_L45 is not possible.
-Pre-defined logger types are: ("Dendrometer", "HOBO", "ThermoDatalogger", "TMS", "TMS_L45")
+If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendro, Thermo and TMS), but automatic detection of TMS_L45 is not possible.
+Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 Default heights of sensor based on logger types are defined in table \link{mc_data_heights}
 \item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S");
 Ignored for TOMST data format
@@ -38,14 +39,25 @@ Ignored for Tomst TMS data format (they are always in UTC)
 instead of automatic step detection.
 }}
 
-\item{localities_table}{path to csv file or data.frame. Localities table is optional (default NULL).
-object containing 5 columns:
+\item{localities_table}{path to csv file ("c:/user/localities.table.csv") or R data.frame \href{https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv}{ see example}.
+Localities table is optional (default NULL).
+The \code{locality_id} is the only required column. Other columns are optional. Column names corresponding
+with the myclim pre-defined locality metadata (elevation, lon_wgs84, lat_wgs84, tz_offset)
+are associted withthose pre-defined metadata slots, other columns are  written into
+\code{metadata@user_data} \link{myClim-package}.
+
+required columns:
 \itemize{
 \item locality_id - unique locality id
+}
+
+optional columns:
+\itemize{
 \item elevation - elevation (in m)
 \item lon_wgs84 - longitude (in decimal degrees)
 \item lat_wgs84 - latitude (in decimal degrees)
-\item tz_offset - locality time zone offset from UTC, applicable for converting timeseries from UTC to local time.
+\item tz_offset - locality time zone offset from UTC, applicable for converting time-series from UTC to local time.
+\item ... - any other columns are imported to \code{metadata@user_data}
 }}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}

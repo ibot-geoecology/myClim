@@ -6,15 +6,15 @@
 \usage{
 mc_calc_tomst_dendro(
   data,
-  dendro_sensor = .model_const_SENSOR_DEND_TOMSTdendro,
-  output_sensor = .model_const_SENSOR_dendro_l_um,
+  dendro_sensor = mc_const_SENSOR_Dendro_raw,
+  output_sensor = mc_const_SENSOR_dendro_l_um,
   localities = NULL
 )
 }
 \arguments{
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
-\item{dendro_sensor}{name of change in stem size sensor to be converted from raw to micrometers (default "DEND_TOMSTdendro") see \code{names(mc_data_sensors)}}
+\item{dendro_sensor}{name of change in stem size sensor to be converted from raw to micrometers (default "Dendro_raw") see \code{names(mc_data_sensors)}}
 
 \item{output_sensor}{name of new change in stem size sensor (default "dendro_l_um")}
 

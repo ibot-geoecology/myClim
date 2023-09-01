@@ -16,10 +16,10 @@ myClim object has metadata and covers time period from 2020-10 to 2021-02.
 
 Data includes time-series from 4 loggers:
 \itemize{
-\item Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_TMSmoisture")
-\item Tomst Thermologger with 1 sensor ("TS_T)
-\item Tomst Point Dendrometer with 2 sensors ("DEND_T", "DEND_TOMSTdendro")
-\item HOBO U23 with 2 sensors ("HOBO_T_C", "HOBO_RH")
+\item Tomst TMS4 with 4 sensors ("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist")
+\item Tomst Thermologger with 1 sensor ("Thermo_T)
+\item Tomst Point Dendrometer with 2 sensors ("Dendro_T", "Dendro_raw")
+\item HOBO U23 with 2 sensors ("HOBO_T", "HOBO_RH")
 }
 }
 \keyword{datasets}

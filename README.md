@@ -27,8 +27,8 @@ remotes::install_github('environmentalinformatics-marburg/tubedb/rTubeDB')
 install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)
 ```
 # Documentation & user manual
-* [functions documentation](http://labgis.ibot.cas.cz/myclim/reference/index.html)   
-* [vignette: user manual](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html)
+* [manual - functions documentation](http://labgis.ibot.cas.cz/myclim/reference/index.html)   
+* [tutorial - vignette](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html)
 
 # Source code of package
 * [GitHub repository](https://github.com/ibot-geoecology/myClim)   

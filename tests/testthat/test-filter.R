@@ -72,7 +72,7 @@ test_that("mc_filter calc format", {
 test_that("mc_filter reverse calc format", {
     cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
     agg_data <- mc_agg(cleaned_data)
-    filtered <- mc_filter(agg_data, "A6W79", "TS_T", reverse=T)
+    filtered <- mc_filter(agg_data, "A6W79", "Thermo_T", reverse=T)
     test_agg_data_format(filtered)
     expect_equal(length(filtered$localities), 2)
     expect_equal(length(filtered$localities$A2E32$sensors), 4)
