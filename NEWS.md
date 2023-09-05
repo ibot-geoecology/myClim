@@ -1,3 +1,9 @@
+# myClim 1.0.9
+* The citation of the package has been changed to the article **myClim: Microclimate data handling and standardised
+  analyses in R**.
+* The reading of CSV data files is now processed by the `vroom` package, which provides a faster and more efficient way
+  to read CSV data.
+
 # myClim 1.0.8
 * The calibration constants for the `mc_calc_vwc()` function are now visible to the user under new names:
   `mc_const_CALIB_MOIST_REF_T`, `mc_const_CALIB_MOIST_ACOR_T`, and `mc_const_CALIB_MOIST_WCOR_T`.

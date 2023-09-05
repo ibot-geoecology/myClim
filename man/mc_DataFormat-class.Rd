@@ -15,7 +15,7 @@ parameters.
 The logger definitions are stored in R environment object
 \code{./data/mc_data_formats.rda}. And thus it easy to add the ability of
 reading new, unsupported logger just by defining its Class parameters.
-Below see e.g. the Class defining Tomst file format.
+Below see e.g. the Class defining TOMST file format.
 
 \preformatted{
 An object of class "mc_TOMSTDataFormat"
@@ -25,6 +25,7 @@ attr(,"date_column"): 2
 attr(,"date_format"): NA
 attr(,"na_strings"): "-200"
 attr(,"columns"): list()
+attr(,"col_types"): "icinnniin"
 attr(,"filename_serial_number_pattern"): "data_(\\d+)_\\d+\\.csv$"
 attr(,"data_row_pattern"): "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
 attr(,"logger_type"): character(0)
@@ -47,7 +48,7 @@ attr(,"logger_type"): character(0)
 
 \item{\code{columns}}{list with names and indexes of value columns (default list())}
 
-\item{\code{col_types}}{parameter for \code{\link[vroom:vroom]{vroom::vroom()}} (default NULL)}
+\item{\code{col_types}}{parameter for \code{\link[vroom:vroom]{vroom::vroom()}} (default NA)}
 
 \item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from file name (default NA)}
 

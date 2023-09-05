@@ -13,7 +13,7 @@ mc_const_SENSOR_Dendro_raw
 \description{
 This constant is used in the function \link{mc_calc_tomst_dendro}
 as default sensor for converting the change in stem size from raw
-Tomst units to micrometers.
+TOMST units to micrometers.
 mc_const_SENSOR_Dendro_raw = "Dendro_raw"
 }
 \keyword{datasets}

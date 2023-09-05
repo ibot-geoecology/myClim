@@ -4,7 +4,7 @@
 \name{mc_TOMSTDataFormat-class}
 \alias{mc_TOMSTDataFormat-class}
 \alias{mc_TOMSTDataFormat}
-\title{Class for reading Tomst logger files}
+\title{Class for reading TOMST logger files}
 \description{
 Provides the key for the column in source files. Where is the date,
 in what format is the date, in which columns are records of which sensors.
