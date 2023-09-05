@@ -566,6 +566,7 @@ setMethod(
 #' attr(,"date_format"): NA
 #' attr(,"na_strings"): "-200"
 #' attr(,"columns"): list()
+#' attr(,"col_types"): "icinnniin"
 #' attr(,"filename_serial_number_pattern"): "data_(\\d+)_\\d+\\.csv$"
 #' attr(,"data_row_pattern"): "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
 #' attr(,"logger_type"): character(0)
@@ -578,7 +579,7 @@ setMethod(
 #' @slot na_strings strings for NA values (default NA)
 #' @slot error_value value means error of sensor (default NA)
 #' @slot columns list with names and indexes of value columns (default list())
-#' @slot col_types parameter for [vroom::vroom()] (default NULL)
+#' @slot col_types parameter for [vroom::vroom()] (default NA)
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from file name (default NA)
 #' @slot data_row_pattern character pattern for detecting right file format (default NA)
 #'
