@@ -229,10 +229,10 @@ Authors:
 \itemize{
   \item Matěj Man \email{Matej.Man@ibot.cas.cz}
   \item Martin Macek \email{Martin.Macek@ibot.cas.cz}
-  \item Jan Wild \email{Jan.Wild@ibot.cas.cz}
-  \item Martin Kopecký \email{Martin.Kopecky@ibot.cas.cz}
   \item Josef Brůna \email{Josef.Bruna@ibot.cas.cz}
   \item Lucia Hederová \email{Lucia.Hederova@ibot.cas.cz}
+  \item Jan Wild \email{Jan.Wild@ibot.cas.cz}
+  \item Martin Kopecký \email{Martin.Kopecky@ibot.cas.cz}
 }
 
 Other contributors:

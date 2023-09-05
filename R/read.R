@@ -338,16 +338,16 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step)
 }
 
-.read_get_data_from_file <- function(filename, data_format, nrows=-1) {
-    read.table(filename,
-               sep = data_format@separator,
-               skip = data_format@skip,
-               stringsAsFactors = FALSE,
-               na.strings = data_format@na_strings,
-               fill = TRUE,
-               nrows = nrows,
-               comment.char = "",
-               encoding = "UTF-8")
+.read_get_data_from_file <- function(filename, data_format, nrows=Inf) {
+    result <- vroom::vroom(filename,
+                           col_names = FALSE,
+                           col_types = data_format@col_types,
+                           delim = data_format@separator,
+                           skip = data_format@skip,
+                           na = data_format@na_strings,
+                           n_max = nrows,
+                           show_col_types = FALSE)
+    return(result)
 }
 
 .read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {
