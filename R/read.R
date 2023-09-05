@@ -339,13 +339,15 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_get_data_from_file <- function(filename, data_format, nrows=Inf) {
-    vroom::vroom(filename,
-                 col_names = FALSE,
-                 delim = data_format@separator,
-                 skip = data_format@skip,
-                 na = data_format@na_strings,
-                 n_max = nrows,
-                 show_col_types = FALSE)
+    result <- vroom::vroom(filename,
+                           col_names = FALSE,
+                           col_types = data_format@col_types,
+                           delim = data_format@separator,
+                           skip = data_format@skip,
+                           na = data_format@na_strings,
+                           n_max = nrows,
+                           show_col_types = FALSE)
+    return(result)
 }
 
 .read_fix_decimal_separator_if_need <- function(filename, data_format, data_table) {

@@ -578,6 +578,7 @@ setMethod(
 #' @slot na_strings strings for NA values (default NA)
 #' @slot error_value value means error of sensor (default NA)
 #' @slot columns list with names and indexes of value columns (default list())
+#' @slot col_types parameter for [vroom::vroom()] (default NULL)
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from file name (default NA)
 #' @slot data_row_pattern character pattern for detecting right file format (default NA)
 #'
@@ -594,6 +595,7 @@ mc_DataFormat <- setClass("mc_DataFormat",
                                     na_strings = "character",
                                     error_value = "numeric",
                                     columns = "list",
+                                    col_types = "character",
                                     filename_serial_number_pattern = "character",
                                     data_row_pattern = "character",
                                     logger_type = "character",
@@ -609,6 +611,7 @@ setMethod("initialize",
               .Object@na_strings <- NA_character_
               .Object@error_value <- NA_integer_
               .Object@columns <- list()
+              .Object@col_types <- NA_character_
               .Object@filename_serial_number_pattern <- NA_character_
               .Object@data_row_pattern <- NA_character_
               .Object@logger_type <- NA_character_
@@ -819,10 +822,10 @@ setMethod(
         if(is.na(object@separator)) {
             return(NULL)
         }
+        object <- .model_hobo_set_skip(object, lines)
         data <- .read_get_data_from_file(path, object, nrows = count_lines)
-        data[1, 1] <- stringr::str_trim(data[1, 1])
-        object <- .model_hobo_set_skip(object, data)
-        has_numbers_column <- data[[1]][[object@skip]] == "#"
+        object@skip <- object@skip + 1
+        has_numbers_column <- data[[1]][[1]] == "#"
         object <- .model_hobo_set_date_column(object, data, has_numbers_column)
         if(is.na(object@date_column)) {
             return(NULL)
@@ -860,18 +863,18 @@ setMethod(
     return(NA_character_)
 }
 
-.model_hobo_set_skip <- function(object, data) {
-    if(stringr::str_starts(data[[1]][[1]], "Plot Title:")) {
-        object@skip <- 2
-    } else {
+.model_hobo_set_skip <- function(object, lines) {
+    if(stringr::str_starts(lines[[1]], '"?Plot Title:')) {
         object@skip <- 1
+    } else {
+        object@skip <- 0
     }
     object
 }
 
 .model_hobo_set_date_column <- function (object, data, has_numbers_column) {
     date_column <- if(has_numbers_column) 2 else 1
-    if(data[[date_column]][[object@skip]] == "Date") {
+    if(data[[date_column]][[1]] == "Date") {
         warning(.model_const_MESSAGE_SEPARATED_TIME)
         return(object)
     }
@@ -883,11 +886,11 @@ setMethod(
     if(!is.na(object@tz_offset)) {
         return(object)
     }
-    if(data[[object@date_column]][[object@skip]] == "Date Time") {
+    if(data[[object@date_column]][[1]] == "Date Time") {
         object@tz_offset <- 0
         return(object)
     }
-    parts <- stringr::str_match(data[[object@date_column]][[object@skip]], "Date Time, GMT([+-])(\\d{2}):(\\d{2})")
+    parts <- stringr::str_match(data[[object@date_column]][[1]], "Date Time, GMT([+-])(\\d{2}):(\\d{2})")
     if(is.na(parts[[1, 1]])) {
         warning(.model_const_MESSAGE_DATE_TIME_HEADER)
         object@tz_offset <- NA_integer_
@@ -898,10 +901,11 @@ setMethod(
 }
 
 .model_hobo_set_columns <- function(object, data, has_numbers_column) {
+    col_types <- rep("c", ncol(data))
     add_count_columns <- if(has_numbers_column) 1 else 0
     temp_column <- 2 + add_count_columns
     rh_column <- 3 + add_count_columns
-    parts <- stringr::str_match(data[[temp_column]][[object@skip]], "Temp,? \\(?(.[CF])\\)?")
+    parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?(.[CF])\\)?")
     if(is.na(parts[[1, 2]])) {
         warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
         return(object)
@@ -912,17 +916,22 @@ setMethod(
     }
     columns <- list()
     columns[[temp_sensor_id]] <- temp_column
+    col_types[[temp_column]] <- "d"
     if(ncol(data) < rh_column){
         object@columns <- columns
+        object@col_types <- paste0(col_types, collapse="")
         return(object)
     }
-    parts <- stringr::str_match(data[[rh_column]][[object@skip]], "RH,? \\(?%\\)?")
+    parts <- stringr::str_match(data[[rh_column]][[1]], "RH,? \\(?%\\)?")
     if(is.na(parts[[1, 1]])) {
         object@columns <- columns
+        object@col_types <- paste0(col_types, collapse="")
         return(object)
     }
     columns[[mc_const_SENSOR_HOBO_RH]] <- rh_column
+    col_types[[rh_column]] <- "d"
     object@columns <- columns
+    object@col_types <- paste0(col_types, collapse="")
     object
 }
 
@@ -965,7 +974,8 @@ setMethod(
     function(object, path) {
         changed_object <- object
         changed_object@skip <- object@skip - 1
-        data <- .read_get_data_from_file(path, changed_object, nrows = 1)
+        changed_object@col_types <- paste0(rep("c", nchar(object@col_types)), collapse="")
+        data <- .read_get_data_from_file(path, changed_object, nrows=1)
         temp_column <- changed_object@columns[[1]]
         parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?\u00b0[CF]\\)? \\(?LGR S\\/N: (\\d+),")
         if(is.na(parts[[1, 2]])) {

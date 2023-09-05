@@ -15,8 +15,8 @@ install.packages("myClim")
 Or install the latest development version with dependencies:
 ```R
 requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr",
-                        "ggplot2", "ggforce", "viridis", "runner",
-                        "rmarkdown", "knitr", "kableExtra", "tidyr", "plotly", "zoo")
+                        "ggplot2", "ggforce", "viridis", "runner", "rmarkdown",
+                        "knitr", "kableExtra", "tidyr", "plotly", "zoo", "vroom")
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
 

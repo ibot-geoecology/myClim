@@ -47,6 +47,8 @@ attr(,"logger_type"): character(0)
 
 \item{\code{columns}}{list with names and indexes of value columns (default list())}
 
+\item{\code{col_types}}{parameter for \code{\link[vroom:vroom]{vroom::vroom()}} (default NULL)}
+
 \item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from file name (default NA)}
 
 \item{\code{data_row_pattern}}{character pattern for detecting right file format (default NA)
