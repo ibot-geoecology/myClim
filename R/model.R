@@ -53,7 +53,7 @@ mc_const_SENSOR_Dendro_T <- "Dendro_T"
 #' @description
 #' This constant is used in the function [myClim::mc_calc_tomst_dendro]
 #' as default sensor for converting the change in stem size from raw
-#' Tomst units to micrometers.
+#' TOMST units to micrometers.
 #' mc_const_SENSOR_Dendro_raw = "`r mc_const_SENSOR_Dendro_raw`"
 #' @export
 mc_const_SENSOR_Dendro_raw <- "Dendro_raw"
@@ -556,7 +556,7 @@ setMethod(
 #' @details The logger definitions are stored in R environment object
 #' `./data/mc_data_formats.rda`. And thus it easy to add the ability of
 #' reading new, unsupported logger just by defining its Class parameters.
-#' Below see e.g. the Class defining Tomst file format.
+#' Below see e.g. the Class defining TOMST file format.
 #'  
 #' \preformatted{
 #' An object of class "mc_TOMSTDataFormat"
@@ -620,7 +620,7 @@ setMethod("initialize",
               return(.Object)
           })
 
-#' Class for reading Tomst logger files
+#' Class for reading TOMST logger files
 #' 
 #' Provides the key for the column in source files. Where is the date, 
 #' in what format is the date, in which columns are records of which sensors.
@@ -637,7 +637,7 @@ mc_TOMSTDataFormat <- setClass("mc_TOMSTDataFormat",
 #' in what format is the date, in which columns are records of which sensors.
 #' The code defining the class is in section methods ./R/model.R
 #' 
-#' TMS join file format is the output of IBOT internal post-processing of Tomst logger files.
+#' TMS join file format is the output of IBOT internal post-processing of TOMST logger files.
 #' @seealso [myClim::mc_DataFormat],[mc_data_formats],[mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class]
 #' @exportClass mc_TOMSTJoinDataFormat
 mc_TOMSTJoinDataFormat <- setClass("mc_TOMSTJoinDataFormat", contains = "mc_DataFormat")
