@@ -96,15 +96,16 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     return(data_period > max_period)
 }
 
-.calc_snow_values_function <- function(locality, sensor_name, range, tmax, days) {
-    per <- 3600*24*days
-    day_max_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x), na_pad=TRUE)
-    day_range_temp_prev <- runner::runner(locality$sensors[[sensor_name]]$values, k=per, idx=locality$datetime, f=function(x) if(length(x) == 0) NA else max(x) - min(x), na_pad=TRUE)
-    snow_prev <- (day_range_temp_prev < range) & (day_max_temp_prev < tmax)
-    snow <- runner::runner(snow_prev, k=per, lag = -per+1, idx=locality$datetime, f=function(x) if(length(x[is.finite(x)]) == 0) NA else any(x,na.rm = T), na_pad=F)
 
+.calc_snow_values_function <- function(locality, sensor_name, range, tmax, days) {
+    per <- 3600*24*days / locality$clean_info@step
+    day_max_temp <- data.table::frollapply(locality$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x), n = per, align = "left", fill = NA )
+    day_range_temp <- data.table::frollapply(locality$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x) - min(x), n = per, align = "left", fill = NA )
+    snow_next <- (day_range_temp < range) & (day_max_temp < tmax)
+    snow <- data.table::frollmean(snow_next, n = c(1:min(per,length(snow_next)), rep(per, max(length(snow_next) - per, 0))), fill = NA, na.rm = T, adaptive = T) > 0
     return(snow)
 }
+
 
 .calc_add_sensor_to_item <- function(item, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
     if(!.calc_check_sensor_in_item(item, sensor_name)){
@@ -145,8 +146,8 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' Summary of TRUE/FALSE snow sensor
 #'
 #' @description
-#' This function works with the virtual snow sensor of TRUE/FALSE 
-#' which is the output of [myClim::mc_calc_snow()]. So, before calling 
+#' This function works with the virtual snow sensor of TRUE/FALSE
+#' which is the output of [myClim::mc_calc_snow()]. So, before calling
 #' `mc_calc_snow_agg` you need to calculate or import `mc_read_`
 #'  TRUE/FALSE snow sensor.
 #' `mc_calc_snow_agg` returns the summary table of snow sensor
@@ -157,7 +158,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #'
 #' @details
 #' Primary designed for virtual snow sensor calculated by [myClim::mc_calc_snow()],
-#' but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor` 
+#' but accepts any sensor with TRUE/FLAST snow event detection. If `snow_sensor`
 #' on the locality is missing, then locality is skipped.
 #'
 #' @param data cleaned myClim object see [myClim-package] with TRUE/FALSE snow sensor see [myClim::mc_calc_snow()]
@@ -165,15 +166,15 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' @param localities optional subset of localities where to run the function (list of locality_ids); if NULL then return all localities (default NULL)
 #' @param period number of days defining the continual snow cover period of interest (default 3 days)
 #' @param use_utc if set FALSE then time is shifted based on offset provided in locality metadata `tz_offset`, see e.g. [myClim::mc_prep_solar_tz()], [myClim::mc_prep_meta_locality()]; (default FALSE)
-#' @return 
+#' @return
 #' Returns data.frame with columns:
 #' * locality - locality id
 #' * snow_days - number of days with snow cover
 #' * first_day - first day with snow
-#' * last_day - last day with snow 
+#' * last_day - last day with snow
 #' * first_day_period - first day of period with continual snow cover based on `period` parameter
 #' * last_day_period - last day of period with continual snow cover based on `period` parameter
-#' 
+#'
 #' @export
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="TMS_T2_snow",
@@ -263,19 +264,19 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' actual soil temperature using TMS_T1 soil temperature sensor records.
 #' As the calibration curves were derived for several soil types,
 #' in case user know specific soil type, where the logger was measuring,
-#' then it is possible to chose the closest¨existing calibration curve for specific soil 
-#' type instead of default "universal". Available soil types are: sand, loamy sand A, 
+#' then it is possible to chose the closest¨existing calibration curve for specific soil
+#' type instead of default "universal". Available soil types are: sand, loamy sand A,
 #' loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
 #' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
 #' For full table of function parameters see [mc_data_vwc_parameters]
-#' 
-#' It is also possible to use custom parameters `a`, `b` and `c`. These can be 
+#'
+#' It is also possible to use custom parameters `a`, `b` and `c`. These can be
 #' derived from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
-#' 
+#'
 #' **Warning:** TOMST TMS Calibr utility was developed for TMS3 series of TOMST sensor which are
-#' different from commonly used.newer TMS4 series. Therefore we rather recommend to use 
+#' different from commonly used.newer TMS4 series. Therefore we rather recommend to use
 #' pre-defined `universal` calibration according to (Kopecký et al. 2021).
-#' 
+#'
 #' The function by default replace the moisture records in frozen soils with NA (param *frozen2NA*),
 #' because the soil moisture sensor was not designed to measure in
 #' frozen soils and the returned records are thus not comparable
@@ -288,7 +289,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
 #' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
 #' @param output_sensor name of new virtual sensor with VWC values (default "VWC_moisture")
-#' @param soiltype either character corresponding to one of `soiltype` from [mc_data_vwc_parameters] 
+#' @param soiltype either character corresponding to one of `soiltype` from [mc_data_vwc_parameters]
 #' (default `"universal"`). Or a list with parameters `a`, `b` and `c` manually filled in
 #' by user i.e.,`list(a=Value_1, b=Value_2, c=Value_3)`.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
@@ -306,10 +307,10 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:
 #' A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
 #' https://doi.org/10.1016/j.agrformet.2018.12.018
-#' 
+#'
 #' Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil
 #' moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
-#' 
+#'
 #' @examples
 #' data1 <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
 #' data2 <- mc_calc_vwc(mc_data_example_agg, localities="A2E32",
@@ -430,7 +431,7 @@ mc_calc_vwc <- function(data, moist_sensor=mc_const_SENSOR_TMS_moist,
 #' with values of GDD (Growing Degree Days) in degees Celsius . days, using original time step. see details
 #'
 #' @details
-#' Function calculates growing degree days as follows:  GDD = max(0;(T - Tbase)) . period(days) 
+#' Function calculates growing degree days as follows:  GDD = max(0;(T - Tbase)) . period(days)
 #' The allowed time step length for GDD calculation is day and shorter.
 #' Function creates new virtual sensor with the same time step as input data.
 #' For shorter time steps than the day, the GDD value is the contribution
