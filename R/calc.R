@@ -47,10 +47,10 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
         .prep_check_datetime_step_unprocessed(data, stop)
     }
 
-    call_snow <- function(item) {
+    call_snow <- function(item, step) {
         .calc_add_sensor_to_item(item, sensor, mc_const_SENSOR_snow_bool, output_sensor,
                                  .model_const_PHYSICAL_T_C,
-                                 .calc_snow_values_function, range=range, tmax=tmax, days=days)
+                                 .calc_snow_values_function, range=range, tmax=tmax, days=days, step=step)
     }
 
     logger_function <- function(logger) {
@@ -58,7 +58,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
         {
             return(logger)
         }
-        call_snow(logger)
+        call_snow(logger, logger$clean_info@step)
     }
 
     locality_function <- function(locality) {
@@ -66,7 +66,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
             return(locality)
         }
         if(is_agg) {
-            return(call_snow(locality))
+            return(call_snow(locality, data$metadata@step))
         }
 
         locality$loggers <- purrr::map(locality$loggers, logger_function)
@@ -97,10 +97,10 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 }
 
 
-.calc_snow_values_function <- function(locality, sensor_name, range, tmax, days) {
-    per <- 3600*24*days / locality$clean_info@step
-    day_max_temp <- data.table::frollapply(locality$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x), n = per, align = "left", fill = NA )
-    day_range_temp <- data.table::frollapply(locality$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x) - min(x), n = per, align = "left", fill = NA )
+.calc_snow_values_function <- function(item, sensor_name, range, tmax, days, step) {
+    per <- 3600*24*days / step
+    day_max_temp <- data.table::frollapply(item$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x), n = per, align = "left", fill = NA )
+    day_range_temp <- data.table::frollapply(item$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x) - min(x), n = per, align = "left", fill = NA )
     snow_next <- (day_range_temp < range) & (day_max_temp < tmax)
     snow <- data.table::frollmean(snow_next, n = c(1:min(per,length(snow_next)), rep(per, max(length(snow_next) - per, 0))), fill = NA, na.rm = T, adaptive = T) > 0
     return(snow)
