@@ -225,7 +225,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
         result$first_day <- as.Date(snow_days_table$day[min(which(snow_days_table$x == 1))])
         result$last_day <- as.Date(snow_days_table$day[max(which(snow_days_table$x == 1))])
     }
-    snow_by_period <- runner::runner(snow_days_table$x, k=period, idx=as.Date(snow_days_table$day), f=function(x) if(length(x) == 0) NA else min(x), na_pad=TRUE)
+    snow_by_period <- data.table::frollapply(snow_days_table$x, FUN=function(x) if(length(x) == 0) NA else min(x), n=period, align="right", fill=NA)
     snow_by_period_index <- which(snow_by_period == 1)
     if(length(snow_by_period_index) > 0) {
         result$first_day_period <- snow_days_table$day[min(snow_by_period_index) - period + 1]
