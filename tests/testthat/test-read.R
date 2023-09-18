@@ -195,3 +195,26 @@ test_that("mc_read_files TOMST serial_number", {
     expect_equal(names(data$localities), "201911_93164272")
 })
 
+test_that("mc_read_files user_data_formats", {
+    user_data_formats <- list(HOBO=new("mc_DataFormat"))
+    expect_error(my_data <- mc_read_files("../data/user_data_formats/21498648.csv", "HOBO", clean=FALSE,
+                          user_data_formats=user_data_formats))
+    user_data_formats <- list(myHOBO=new("mc_DataFormat"))
+    user_data_formats$myHOBO@skip <- 1
+    user_data_formats$myHOBO@separator <- ","
+    user_data_formats$myHOBO@date_column <- 2
+    user_data_formats$myHOBO@date_format <- "%m/%d/%Y %H:%M:%S"
+    user_data_formats$myHOBO@separator <- ","
+    user_data_formats$myHOBO@tz_offset <- 2 * 60
+    user_data_formats$myHOBO@columns[[mc_const_SENSOR_T_C]] <- 3
+    user_data_formats$myHOBO@columns[[mc_const_SENSOR_RH]] <- 4
+    my_data <- mc_read_files("../data/user_data_formats/21498648.csv", "myHOBO", clean=FALSE,
+                             user_data_formats=user_data_formats)
+    test_raw_data_format(my_data)
+    expect_equal(length(my_data$localities$`21498648`$loggers[[1]]$sensors), 2)
+    expect_equal(names(my_data$localities), "21498648")
+    cleaned_data <- mc_prep_clean(my_data, silent = TRUE)
+    expect_equal(dplyr::last(cleaned_data$localities$`21498648`$loggers[[1]]$sensors$T_C$values), 13)
+    expect_equal(dplyr::last(cleaned_data$localities$`21498648`$loggers[[1]]$sensors$RH$values), 53)
+})
+

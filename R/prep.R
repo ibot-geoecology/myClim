@@ -134,8 +134,12 @@ mc_prep_clean <- function(data, silent=FALSE) {
 .prep_clean_write_info <- function(logger, rounded) {
     diff_datetime <- diff(as.numeric(logger$datetime))
     logger$clean_info@count_disordered <- length(purrr::keep(diff_datetime, function(x) x < 0))
-    sorted_datetime <- sort(as.numeric(logger$datetime))
-    diff_datetime <- diff(sorted_datetime)
+    sorted_datetime <- as.numeric(logger$datetime)
+    if(logger$clean_info@count_disordered > 0)
+    {
+        sorted_datetime <- sort(sorted_datetime)
+        diff_datetime <- diff(sorted_datetime)
+    }
     logger$clean_info@count_duplicities <- length(purrr::keep(diff_datetime, function(x) x == 0))
     right_count_datetime <- diff(c(sorted_datetime[[1]], tail(sorted_datetime, n=1))) %/% logger$clean_info@step + 1
     logger$clean_info@count_missing <- right_count_datetime - (length(logger$datetime) - logger$clean_info@count_duplicities)
@@ -148,13 +152,18 @@ mc_prep_clean <- function(data, silent=FALSE) {
         return(logger)
     }
     table <- .common_sensor_values_as_tibble(logger)
-    table <- dplyr::arrange(table, .data$datetime)
-    unique_rows <- !duplicated(table$datetime)
-    table_noduplicits <- table[unique_rows, ]
-    datetime_range <- range(table_noduplicits$datetime)
+    datetime_range <- range(table$datetime)
     datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$clean_info@step} sec")))
     colnames(datetime_seq) <- "datetime"
-    output_table <- dplyr::left_join(datetime_seq, table_noduplicits, by="datetime")
+    get_sorted_unique_values <- function(sensor_name) {
+        sensor_table <- table[c("datetime", sensor_name)]
+        sensor_table <- sensor_table[!is.na(sensor_table[sensor_name]),]
+        sensor_table <- dplyr::arrange(sensor_table, .data$datetime)
+        unique_datetime <- !duplicated(sensor_table$datetime)
+        return(sensor_table[unique_datetime, ])
+    }
+    sensor_tables <- purrr::map(colnames(table)[-1], get_sorted_unique_values)
+    output_table <- purrr::reduce(c(list(datetime_seq), sensor_tables), ~ dplyr::left_join(.x, .y, by="datetime"))
     logger$datetime <- output_table$datetime
     sensor_names <- purrr::set_names(names(logger$sensors))
     logger$sensors <- purrr::map(sensor_names, function(x) {

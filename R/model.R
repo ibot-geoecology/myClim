@@ -573,10 +573,10 @@ setMethod(
 #' }
 #' 
 #' @slot skip number of lines before data - header etc. (default 0)
-#' @slot separator columns separator (default NA)
+#' @slot separator columns separator (default ",")
 #' @slot date_column index of date column (default NA)
 #' @slot date_format format of date (default NA)
-#' @slot na_strings strings for NA values (default NA)
+#' @slot na_strings strings for NA values (default "")
 #' @slot error_value value means error of sensor (default NA)
 #' @slot columns list with names and indexes of value columns (default list())
 #' @slot col_types parameter for [vroom::vroom()] (default NA)
@@ -585,7 +585,9 @@ setMethod(
 #'
 #' If data_row_pattern is NA, then file format is not validated.
 #' @slot logger_type type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA)
-#' @slot tz_offset timezone offset in minutes from UTC in source data (default 0)
+#' @slot tz_offset timezone offset in minutes from UTC in source data (default NA)
+#'
+#' It is required set tz_offset value.
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
@@ -606,10 +608,10 @@ setMethod("initialize",
           "mc_DataFormat",
           function(.Object) {
               .Object@skip <- 0
-              .Object@separator <- NA_character_
+              .Object@separator <- ","
               .Object@date_column <- NA_integer_
               .Object@date_format <- NA_character_
-              .Object@na_strings <- NA_character_
+              .Object@na_strings <- ""
               .Object@error_value <- NA_integer_
               .Object@columns <- list()
               .Object@col_types <- NA_character_
@@ -954,16 +956,18 @@ setMethod(
     ".model_get_serial_number_from_file",
     signature("mc_DataFormat"),
     function(object, path) {
-        if(is.null(object@filename_serial_number_pattern)) {
-          stop(stringr::str_glue("It is not possible identify serial_number from file. Pattern is missed in data_format."))
+        result <- NA_character_
+        if(!is.na(object@filename_serial_number_pattern)) {
+            result <- stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
         }
-        result <- stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
         if(is.na(result)) {
             result <- stringr::str_match(basename(path), "(.+)\\.[^.]+")[1, 2]
             if(is.na(result)) {
                 result <- basename(path)
             }
-            warning(stringr::str_glue("It is not possible identify serial_number from file. Name {result} is used."))
+            if(!is.na(object@filename_serial_number_pattern)) {
+                warning(stringr::str_glue("It is not possible identify serial_number from file. Name {result} is used."))
+            }
         }
         result
     }
