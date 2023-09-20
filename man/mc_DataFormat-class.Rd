@@ -36,29 +36,49 @@ attr(,"logger_type"): character(0)
 \describe{
 \item{\code{skip}}{number of lines before data - header etc. (default 0)}
 
-\item{\code{separator}}{columns separator (default NA)}
+\item{\code{separator}}{columns separator (default ",")}
 
-\item{\code{date_column}}{index of date column (default NA)}
+\item{\code{date_column}}{index of date column - required (default NA)}
 
-\item{\code{date_format}}{format of date (default NA)}
+\item{\code{date_format}}{format of date (default NA)
 
-\item{\code{na_strings}}{strings for NA values (default NA)}
+For description of date_format parameter see \code{\link[=strptime]{strptime()}}. If the format is in ISO8601
+and the function \code{\link[vroom:vroom]{vroom::vroom()}} automatically detects datetime values, the date_format parameter can be NA.}
 
-\item{\code{error_value}}{value means error of sensor (default NA)}
+\item{\code{na_strings}}{strings for NA values (default "")}
 
-\item{\code{columns}}{list with names and indexes of value columns (default list())}
+\item{\code{error_value}}{value means error of sensor (default NA)
 
-\item{\code{col_types}}{parameter for \code{\link[vroom:vroom]{vroom::vroom()}} (default NA)}
+The error_value is replaced by NA and intervals of error are saved to \code{sensor$states} see \link{myClim-package}.}
 
-\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from file name (default NA)}
+\item{\code{columns}}{list with names and indexes of value columns - required (default list())
+
+As names are used values from \code{names(mc_data_sensors)}. Names are dafined as constatnts \verb{mc_const_SENSOR_*}.
+For example if third column is temperature, you can define it as \code{columns[[mc_const_SENSOR_T_C]] <- 3}.
+There are universal sensors for arbitraty values type \code{mc_const_SENSOR_real}, \code{mc_const_SENSOR_integer}
+and \code{mc_const_SENSOR_logical}.}
+
+\item{\code{col_types}}{parameter for \code{\link[vroom:vroom]{vroom::vroom()}} (default NA)
+
+For prevent some errors can be defined types of columns.}
+
+\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from file name (default NA)
+
+Value is regular expression with brackets around serial number.
+For example pattern for old TOMST files is \code{"data_(\\\\d+)_\\\\d+\\\\.csv$"}.}
 
 \item{\code{data_row_pattern}}{character pattern for detecting right file format (default NA)
 
-If data_row_pattern is NA, then file format is not validated.}
+The data_row_pattern parameter is regular expression. If data_row_pattern is NA, then file format is not validated.}
 
 \item{\code{logger_type}}{type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA)}
 
-\item{\code{tz_offset}}{timezone offset in minutes from UTC in source data (default 0)}
+\item{\code{tz_offset}}{timezone offset in minutes from UTC in source data - required (default NA)
+
+If the value of the tz_offset parameter is 0 then datetime values are in UTC.
+If the time zone offset is defined in value e.g. \code{"2020-10-06 09:00:00+0100"}
+and \code{date_format} is \code{"\%Y-\%m-\%d \%H:\%M:\%S\%z"} value is automatically converted to UTC
+and \code{tz_offset} parameter shoul be 0.}
 }}
 
 \seealso{

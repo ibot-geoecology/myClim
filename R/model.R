@@ -26,7 +26,7 @@
 .model_const_VALUE_TYPE_INTEGER <- "integer"
 .model_const_VALUE_TYPE_LOGICAL <- "logical"
 
-# logger sensors
+### logger sensors
 #' Default sensor for TOMST TMS soil temperature
 #' @description 
 #' This constant is used in the function [myClim::mc_calc_vwc] to account for soil temperature effect
@@ -34,9 +34,11 @@
 #' mc_const_SENSOR_TMS_T1 = "`r mc_const_SENSOR_TMS_T1`"
 #' @export
 mc_const_SENSOR_TMS_T1 <- "TMS_T1"
-# Default sensor for TOMST TMS temperature of soil surface
+#' Default sensor for TOMST TMS temperature of soil surface
+#' @export
 mc_const_SENSOR_TMS_T2 <- "TMS_T2"
-# Default sensor for TOMST TMS air temperature
+#' Default sensor for TOMST TMS air temperature
+#' @export
 mc_const_SENSOR_TMS_T3 <- "TMS_T3"
 #' Default sensor for TOMST TMS raw soil moisture
 #' @description 
@@ -45,9 +47,11 @@ mc_const_SENSOR_TMS_T3 <- "TMS_T3"
 #' mc_const_SENSOR_TMS_moist = "`r mc_const_SENSOR_TMS_moist`"
 #' @export
 mc_const_SENSOR_TMS_moist <- "TMS_moist"
-# Default sensor for TOMST Thermologger temperature
+#' Default sensor for TOMST Thermologger temperature
+#' @export
 mc_const_SENSOR_Thermo_T <- "Thermo_T"
-# Default sensor for TOMST Dendrometer temperature
+#' Default sensor for TOMST Dendrometer temperature
+#' @export
 mc_const_SENSOR_Dendro_T <- "Dendro_T"
 #' Default sensor for TOMST Dendrometer radius difference
 #' @description
@@ -57,51 +61,71 @@ mc_const_SENSOR_Dendro_T <- "Dendro_T"
 #' mc_const_SENSOR_Dendro_raw = "`r mc_const_SENSOR_Dendro_raw`"
 #' @export
 mc_const_SENSOR_Dendro_raw <- "Dendro_raw"
-# Onset HOBO temperature sensor id
+#' Onset HOBO temperature sensor id
+#' @export
 mc_const_SENSOR_HOBO_T <- "HOBO_T"
-# Onset HOBO humidity sensor id
+#' Onset HOBO humidity sensor id
+#' @export
 mc_const_SENSOR_HOBO_RH <- "HOBO_RH"
 
 .model_const_WRONG_CALIBRATION_SENSOR_ID <- mc_const_SENSOR_TMS_moist
 
 ### universal sensors
-# Count sensor id see [myClim::mc_agg()]
+#' Count sensor id see [myClim::mc_agg()]
+#' @export
 mc_const_SENSOR_count <- "count"
-# Coverage sensor id see [myClim::mc_agg()]
+#' Coverage sensor id see [myClim::mc_agg()]
+#' @export
 mc_const_SENSOR_coverage <- "coverage"
-# Freezing Degree Days sensor id see [myClim::mc_calc_fdd()]
+#' Freezing Degree Days sensor id see [myClim::mc_calc_fdd()]
+#' @export
 mc_const_SENSOR_FDD <- "FDD"
-# Growing Degree Days sensor id see [myClim::mc_calc_gdd()]
+#' Growing Degree Days sensor id see [myClim::mc_calc_gdd()]
+#' @export
 mc_const_SENSOR_GDD <- "GDD"
-# Precipitation sensor id
+#' Precipitation sensor id
+#' @export
 mc_const_SENSOR_precipitation <- "precipitation"
-# Radius difference sensor id
+#' Radius difference sensor id
+#' @export
 mc_const_SENSOR_dendro_l_um <- "dendro_l_um"
-# Snow existence sensor id see [myClim::mc_calc_snow()]
+#' Snow existence sensor id see [myClim::mc_calc_snow()]
+#' @export
 mc_const_SENSOR_snow_bool <- "snow_bool"
-# Height of newly fallen snow sensor id
+#' Height of newly fallen snow sensor id
+#' @export
 mc_const_SENSOR_snow_fresh <- "snow_fresh"
-# Height snow sensor id
+#' Height snow sensor id
+#' @export
 mc_const_SENSOR_snow_total <- "snow_total"
-# Time of sun shine sensor id
+#' Time of sun shine sensor id
+#' @export
 mc_const_SENSOR_sun_shine <- "sun_shine"
-# Vapor Pressure Deficit sensor id see [myClim::mc_calc_vpd()]
+#' Vapor Pressure Deficit sensor id see [myClim::mc_calc_vpd()]
+#' @export
 mc_const_SENSOR_VPD <- "VPD"
-# Speed of wind sensor id
+#' Speed of wind sensor id
+#' @export
 mc_const_SENSOR_wind_speed <- "wind_speed"
 
-# Volumetric soil moisture sensor id see [myClim::mc_calc_vwc()]
+#' Volumetric soil moisture sensor id see [myClim::mc_calc_vwc()]
+#' @export
 mc_const_SENSOR_VWC <- .model_const_PHYSICAL_VWC
-# Relative humidity sensor id
+#' Relative humidity sensor id
+#' @export
 mc_const_SENSOR_RH <- .model_const_PHYSICAL_RH
-# Temperature sensor id
+#' Temperature sensor id
+#' @export
 mc_const_SENSOR_T_C <- .model_const_PHYSICAL_T_C
 
-# General real sensor id
+#' General real sensor id
+#' @export
 mc_const_SENSOR_real <- .model_const_VALUE_TYPE_REAL
-# General integer sensor id
+#' General integer sensor id
+#' @export
 mc_const_SENSOR_integer <- .model_const_VALUE_TYPE_INTEGER
-# General logical sensor id
+#' General logical sensor id
+#' @export
 mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_LOGGER_TOMST_TMS <- "TMS"
@@ -131,6 +155,8 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_MESSAGE_COLUMNS_PROBLEM <- "It is not possible to detect columns from header."
 .model_const_MESSAGE_HOBO_DATE_FORMAT_PROBLEM <- "HOBO data format required filled in parameter date_format."
 .model_const_MESSAGE_HOBO_CONVERT_FAHRENHEIT <- "Temperature data in \u00b0F is converted to \u00b0C."
+.model_const_MESSAGE_ERROR_DATA_FORMAT <- "The {parameter_name} parameter is required."
+.model_const_MESSAGE_ERROR_DATA_FORMAT_COLUMNS <- "The column list cannot be empty."
 
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
@@ -574,20 +600,38 @@ setMethod(
 #' 
 #' @slot skip number of lines before data - header etc. (default 0)
 #' @slot separator columns separator (default ",")
-#' @slot date_column index of date column (default NA)
+#' @slot date_column index of date column - required (default NA)
 #' @slot date_format format of date (default NA)
+#'
+#' For description of date_format parameter see [strptime()]. If the format is in ISO8601
+#' and the function [vroom::vroom()] automatically detects datetime values, the date_format parameter can be NA.
 #' @slot na_strings strings for NA values (default "")
 #' @slot error_value value means error of sensor (default NA)
-#' @slot columns list with names and indexes of value columns (default list())
+#'
+#' The error_value is replaced by NA and intervals of error are saved to `sensor$states` see [myClim-package].
+#' @slot columns list with names and indexes of value columns - required (default list())
+#'
+#' As names are used values from `names(mc_data_sensors)`. Names are dafined as constatnts `mc_const_SENSOR_*`.
+#' For example if third column is temperature, you can define it as `columns[[mc_const_SENSOR_T_C]] <- 3`.
+#' There are universal sensors for arbitraty values type `mc_const_SENSOR_real`, `mc_const_SENSOR_integer`
+#' and `mc_const_SENSOR_logical`.
 #' @slot col_types parameter for [vroom::vroom()] (default NA)
+#'
+#' For prevent some errors can be defined types of columns.
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from file name (default NA)
+#'
+#' Value is regular expression with brackets around serial number.
+#' For example pattern for old TOMST files is `"data_(\\d+)_\\d+\\.csv$"`.
 #' @slot data_row_pattern character pattern for detecting right file format (default NA)
 #'
-#' If data_row_pattern is NA, then file format is not validated.
+#' The data_row_pattern parameter is regular expression. If data_row_pattern is NA, then file format is not validated.
 #' @slot logger_type type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA)
-#' @slot tz_offset timezone offset in minutes from UTC in source data (default NA)
+#' @slot tz_offset timezone offset in minutes from UTC in source data - required (default NA)
 #'
-#' It is required set tz_offset value.
+#' If the value of the tz_offset parameter is 0 then datetime values are in UTC.
+#' If the time zone offset is defined in value e.g. `"2020-10-06 09:00:00+0100"`
+#' and `date_format` is `"%Y-%m-%d %H:%M:%S%z"` value is automatically converted to UTC
+#' and `tz_offset` parameter shoul be 0.
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
@@ -685,6 +729,13 @@ setGeneric(
     ".model_edit_data",
     function(object, data_table){
         standardGeneric(".model_edit_data")
+    }
+)
+
+setGeneric(
+    ".model_check_format",
+    function(object){
+        standardGeneric(".model_check_format")
     }
 )
 
@@ -1016,6 +1067,22 @@ setMethod(
         logged_values <- purrr::map((last_value_column+1):ncol(data_table), ~ data_table[[.x]] == "Logged")
         logged_values <- purrr::reduce(logged_values, `|`)
         data_table[!(na_values & logged_values),]
+    }
+)
+
+setMethod(
+    ".model_check_format",
+    "mc_DataFormat",
+    function(object) {
+        required_parameters <- c("date_column", "tz_offset")
+        for(parameter_name in required_parameters) {
+            if(is.na(slot(object, parameter_name))){
+                stop(stringr::str_glue(.model_const_MESSAGE_ERROR_DATA_FORMAT))
+            }
+        }
+        if(length(object@columns) == 0) {
+            stop(.model_const_MESSAGE_ERROR_DATA_FORMAT_COLUMNS)
+        }
     }
 )
 

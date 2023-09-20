@@ -8,7 +8,8 @@ mc_read_data(
   files_table,
   localities_table = NULL,
   clean = TRUE,
-  silent = FALSE
+  silent = FALSE,
+  user_data_formats = NULL
 )
 }
 \arguments{
@@ -63,6 +64,10 @@ optional columns:
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
 \item{silent}{if TRUE, then any information is not printed in console (default FALSE)}
+
+\item{user_data_formats}{sutom data formats - list(key=mc_DataFormat) \linkS4class{mc_DataFormat} (default NULL)
+
+If custom data format is defined the key can be used in data_format parameter in \code{\link[=mc_read_files]{mc_read_files()}} and \code{\link[=mc_read_data]{mc_read_data()}}.}
 }
 \value{
 myClim object in Raw-format see \link{myClim-package}

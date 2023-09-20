@@ -8,7 +8,6 @@
 .read_const_MESSAGE_UNSUPPOERTED_FORMAT <- "{data_format} is not a supported data format. File is skipped."
 .read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not applicable format to {path}. File is skipped."
 .read_const_MESSAGE_USER_DATA_FORMAT_KEY <- "The key in user_data_format must not be the same as the key in mc_data_formats."
-.read_const_MESSAGE_ERROR_TZ_OFFSET <- "The tz_offset parameter is required."
 
 #' Reading files or directories
 #'
@@ -40,13 +39,25 @@
 #' @param step time step of microclimatic time-series in seconds. When provided, then is used in
 #' [mc_prep_clean] instead of automatic step detection.
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
-
+#' @template params_read_common
 #' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
 #' files <- c(system.file("extdata", "data_91184101_0.csv", package = "myClim"),
 #'            system.file("extdata", "data_94184102_0.csv", package = "myClim"))
 #' tomst_data <- mc_read_files(files, "TOMST")
+#' # user_data_formats
+#' files <- system.file("extdata", "TMS94184102.csv", package = "myClim")
+#' user_data_formats <- list(myTMS=new("mc_DataFormat"))
+#' user_data_formats$myTMS@date_column <- 2
+#' user_data_formats$myTMS@date_format <- "%Y-%m-%d %H:%M:%S"
+#' user_data_formats$myTMS@tz_offset <- 0
+#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T1]] <- 3
+#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T2]] <- 4
+#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T3]] <- 5
+#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_moist]] <- 6
+#' user_data_formats$myTMS@logger_type <- "TMS"
+#' my_data <- mc_read_files(files, "myTMS", silent=TRUE, user_data_formats=user_data_formats)
 mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, recursive=TRUE, date_format=NA_character_,
                           tz_offset=NA_integer_, step=NA_integer_, clean=TRUE, silent=FALSE, user_data_formats=NULL) {
     if(all(dir.exists(paths))) {
@@ -336,15 +347,16 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_logger <- function(filename, data_format, serial_number, step) {
     data_table <- .read_get_data_from_file(filename, data_format)
+    .model_check_format(data_format)
     data_table <- .model_edit_data(data_format, data_table)
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
-    datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
+    datetime <- data_table[[data_format@date_column]]
+    if(!lubridate::is.POSIXct(datetime)) {
+        datetime <- as.POSIXct(strptime(datetime, data_format@date_format, "UTC"))
+    }
     if(any(is.na(datetime))) {
         warning(stringr::str_glue(.read_const_MESSAGE_WRONG_DATETIME))
         return(NULL)
-    }
-    if(is.na(data_format@tz_offset)){
-        stop(.read_const_MESSAGE_ERROR_TZ_OFFSET)
     }
     if(data_format@tz_offset != 0) {
         datetime <- datetime - data_format@tz_offset * 60

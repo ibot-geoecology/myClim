@@ -13,7 +13,8 @@ mc_read_files(
   tz_offset = NA_integer_,
   step = NA_integer_,
   clean = TRUE,
-  silent = FALSE
+  silent = FALSE,
+  user_data_formats = NULL
 )
 }
 \arguments{
@@ -38,7 +39,11 @@ If not provided (NA), is automatically detected in \link{mc_prep_clean}. (defaul
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
 
-\item{silent}{if TRUE, then any information is printed in console (default FALSE)}
+\item{silent}{if TRUE, then any information is not printed in console (default FALSE)}
+
+\item{user_data_formats}{sutom data formats - list(key=mc_DataFormat) \linkS4class{mc_DataFormat} (default NULL)
+
+If custom data format is defined the key can be used in data_format parameter in \code{\link[=mc_read_files]{mc_read_files()}} and \code{\link[=mc_read_data]{mc_read_data()}}.}
 }
 \value{
 myClim object in Raw-format see \link{myClim-package}
@@ -62,6 +67,18 @@ holes in time-series, duplicated records or records in wrong order.
 files <- c(system.file("extdata", "data_91184101_0.csv", package = "myClim"),
            system.file("extdata", "data_94184102_0.csv", package = "myClim"))
 tomst_data <- mc_read_files(files, "TOMST")
+# user_data_formats
+files <- system.file("extdata", "TMS94184102.csv", package = "myClim")
+user_data_formats <- list(myTMS=new("mc_DataFormat"))
+user_data_formats$myTMS@date_column <- 2
+user_data_formats$myTMS@date_format <- "\%Y-\%m-\%d \%H:\%M:\%S"
+user_data_formats$myTMS@tz_offset <- 0
+user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T1]] <- 3
+user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T2]] <- 4
+user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T3]] <- 5
+user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_moist]] <- 6
+user_data_formats$myTMS@logger_type <- "TMS"
+my_data <- mc_read_files(files, "myTMS", silent=TRUE, user_data_formats=user_data_formats)
 }
 \seealso{
 \link{mc_DataFormat}, \code{\link[=mc_prep_clean]{mc_prep_clean()}}
