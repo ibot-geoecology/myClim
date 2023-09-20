@@ -621,7 +621,8 @@ setMethod(
 #' @slot filename_serial_number_pattern character pattern for detecting serial_number from file name (default NA)
 #'
 #' Value is regular expression with brackets around serial number.
-#' For example pattern for old TOMST files is `"data_(\\d+)_\\d+\\.csv$"`.
+#' For example pattern for old TOMST files is `"data_(\\d+)_\\d+\\.csv$"`. If the value is NA name of file is used
+#' as serial_number.
 #' @slot data_row_pattern character pattern for detecting right file format (default NA)
 #'
 #' The data_row_pattern parameter is regular expression. If data_row_pattern is NA, then file format is not validated.
