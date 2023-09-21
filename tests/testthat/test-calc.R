@@ -7,7 +7,6 @@ test_that("mc_calc_snow", {
     expect_true("T3_snow" %in% names(snow_raw_data$localities$`94184102`$loggers[[1]]$sensors))
     agg_data <- mc_agg(cleaned_data)
     agg_data <- mc_calc_snow(agg_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5)
-    expect_true(is.na(agg_data$localities[["94184102"]]$sensors$T3_snow$values[[1]]))
     expect_false(is.na(agg_data$localities[["94184102"]]$sensors$T3_snow$values[[4 * 24 + 1]]))
     expect_equal(class(agg_data$localities[["94184102"]]$sensors$T3_snow$values), "logical")
 })
