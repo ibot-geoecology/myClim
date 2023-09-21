@@ -11,7 +11,7 @@
 
 #' Reading files or directories
 #'
-#' This function read one or more csv files or directories of identical, 
+#' This function read one or more CSV/TXT files or directories of identical, 
 #' pre-defined logger type (format) see [mc_DataFormat] and [mc_data_formats]. 
 #' This function does not support loading locality or sensor metadata while reading.
 #' Metadata can be loaded through [myClim::mc_read_data()] or
@@ -19,16 +19,17 @@
 #' 
 #' @details 
 #' If file is not in expected format, then file is skipped and warning printed in console. 
-#' CSV files (loggers raw data) are in resulting myClim object placed to separate
+#' CSV/TXT files (loggers raw data) are in resulting myClim object placed to separate
 #' localities with empty metadata. Localities are named after serial_number of logger.
 #' Pre-defined logger types are ("Dendro","HOBO","Thermo","TMS","TMS_L45")
-#' By default data are cleaned with function [myClim::mc_prep_clean()]. See function description. It detects
-#' holes in time-series, duplicated records or records in wrong order.
+#' By default data are cleaned with function [myClim::mc_prep_clean()]. 
+#' See function description. It detects holes in time-series, 
+#' duplicated records or records in wrong order.
 #'
 #' @seealso [myClim::mc_DataFormat], [myClim::mc_prep_clean()]
 #'
 #' @param paths vector of paths to files or directories
-#' @param dataformat_name data format of logger one of `names(mc_data_formats)`
+#' @param dataformat_name data format of logger; one of `names(mc_data_formats)`
 #' @param recursive recursive search in sub-directories (default TRUE)
 #' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA).
 #' Required for HOBO files. For TMS files ignored, there is known, stable date format. see [mc_data_formats]
