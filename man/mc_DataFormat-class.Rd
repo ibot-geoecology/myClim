@@ -65,7 +65,8 @@ For prevent some errors can be defined types of columns.}
 \item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from file name (default NA)
 
 Value is regular expression with brackets around serial number.
-For example pattern for old TOMST files is \code{"data_(\\\\d+)_\\\\d+\\\\.csv$"}.}
+For example pattern for old TOMST files is \code{"data_(\\\\d+)_\\\\d+\\\\.csv$"}. If the value is NA name of file is used
+as serial_number.}
 
 \item{\code{data_row_pattern}}{character pattern for detecting right file format (default NA)
 

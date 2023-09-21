@@ -17,6 +17,8 @@
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
 .prep_const_MESSAGE_CROP_DATETIME_LENGTH <- paste0("Start and end datetime can be NULL, ",
                                                    "single value or vector with same length as localities.")
+.prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
+.prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 
 #' Cleaning datetime series
 #'
@@ -96,7 +98,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
         logger$clean_info@step <- logger$metadata@step
     }
     if(is.na(logger$clean_info@step)) {
-        warning(stringr::str_glue("step cannot be detected for logger {logger$metadata@serial_number} - skip"))
+        warning(stringr::str_glue(.prep_const_MESSAGE_STEP_PROBLEM))
         return(logger)
     }
     new_datetime <- .prep_get_rounded_datetime(logger)
@@ -159,8 +161,13 @@ mc_prep_clean <- function(data, silent=FALSE) {
         sensor_table <- table[c("datetime", sensor_name)]
         sensor_table <- sensor_table[!is.na(sensor_table[sensor_name]),]
         sensor_table <- dplyr::arrange(sensor_table, .data$datetime)
-        unique_datetime <- !duplicated(sensor_table$datetime)
-        return(sensor_table[unique_datetime, ])
+        duplicated_datetime <- duplicated(sensor_table$datetime)
+        if(any(duplicated_datetime))
+        {
+            .prep_check_different_values_in_duplicated(sensor_table, logger$metadata@serial_number)
+            return(sensor_table[!duplicated_datetime, ])
+        }
+        return(sensor_table)
     }
     sensor_tables <- purrr::map(colnames(table)[-1], get_sorted_unique_values)
     output_table <- purrr::reduce(c(list(datetime_seq), sensor_tables), ~ dplyr::left_join(.x, .y, by="datetime"))
@@ -171,6 +178,21 @@ mc_prep_clean <- function(data, silent=FALSE) {
         logger$sensors[[x]]
     })
     logger
+}
+
+.prep_check_different_values_in_duplicated <- function(sensor_table, serial_number){
+    duplicated_datetimes <- unique(sensor_table$datetime[duplicated(sensor_table$datetime)])
+    duplicated_rows <- dplyr::filter(sensor_table, .data$datetime %in% duplicated_datetimes)
+    groupped_duplicated <- dplyr::group_by(duplicated_rows, .data$datetime)
+    is_different_function <- function(.x, .y) {
+        result <- !all(diff(.x[[1]]) == 0)
+        return(result)
+    }
+    is_different <- as.logical(dplyr::group_map(groupped_duplicated, is_different_function))
+    if(any(is_different)) {
+        sensor_name <- names(sensor_table)[[2]]
+        warning(stringr::str_glue(.prep_const_MESSAGE_VALUES_SAME_TIME))
+    }
 }
 
 .prep_is_logger_cleaned <- function(logger) {
