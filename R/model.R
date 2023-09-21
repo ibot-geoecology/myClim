@@ -573,66 +573,57 @@ setMethod(
     }
 )
 
-#' Class for logger file data format
+#' Class for Logger File Data Format
 #'
-#' The Class used for parsing source data files. Typically the txt/csv files
-#' downloaded from microclimatic loggers. Each supported logger has established
-#' their own specific object of class `mc_{logger}DataFormat` defining the 
-#' parameters.
-#' @details The logger definitions are stored in R environment object
-#' `./data/mc_data_formats.rda`. And thus it easy to add the ability of
-#' reading new, unsupported logger just by defining its Class parameters.
-#' Below see e.g. the Class defining TOMST file format.
-#'  
-#' \preformatted{
-#' An object of class "mc_TOMSTDataFormat"
-#' attr(,"skip"): 0
-#' attr(,"separator"): ";"
-#' attr(,"date_column"): 2
-#' attr(,"date_format"): NA
-#' attr(,"na_strings"): "-200"
-#' attr(,"columns"): list()
-#' attr(,"col_types"): "icinnniin"
-#' attr(,"filename_serial_number_pattern"): "data_(\\d+)_\\d+\\.csv$"
-#' attr(,"data_row_pattern"): "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
-#' attr(,"logger_type"): character(0)
-#' }
+#' This class is used for parsing source TXT/CSV files downloaded from microclimatic
+#' loggers.
+#'
+#' @details myClim offers several pre-defined
+#' logger file data formats, such as TOMST TMS or HOBO. Users can also define custom
+#' readings for their own loggers. Pre-defined and custom loggers in myClim each have
+#' their own specific object of class `mc_{logger}DataFormat`, which defines the
+#' parameters for handling logger files.
+#' The pre-defined logger definitions are stored in the R environment object
+#' `./data/mc_data_formats.rda`.
 #' 
-#' @slot skip number of lines before data - header etc. (default 0)
-#' @slot separator columns separator (default ",")
-#' @slot date_column index of date column - required (default NA)
-#' @slot date_format format of date (default NA)
+#' @slot skip The number of rows to skip before the first row containing microclimatic records.
+#' For example, to skip the header (default 0).
+#' @slot separator: The column separator (default is a comma ",").
+#' @slot date_column: The index of the date column - required (default NA).
+#' @slot date_format: The format of the date (default NA).
 #'
-#' For description of date_format parameter see [strptime()]. If the format is in ISO8601
-#' and the function [vroom::vroom()] automatically detects datetime values, the date_format parameter can be NA.
-#' @slot na_strings strings for NA values (default "")
-#' @slot error_value value means error of sensor (default NA)
+#' For a description of the date_format parameter, see [strptime()]. If the format is in ISO8601
+#' and the function [vroom::vroom()] automatically detects datetime values,
+#' the date_format parameter can be NA.
+#' @slot na_strings: Strings for representing NA values, e.g., "-100", "9999" (default "").
+#' @slot error_value: The value that represents an error of the sensor, e.g., 404, 9999 (default NA).
 #'
-#' The error_value is replaced by NA and intervals of error are saved to `sensor$states` see [myClim-package].
-#' @slot columns list with names and indexes of value columns - required (default list())
+#' The error_value is replaced by NA, and intervals of errors are flagged in `sensor$states`
+#' (see [myClim-package]).
+#' @slot columns: A list with names and indexes of value columns - required (default list()).
 #'
-#' As names are used values from `names(mc_data_sensors)`. Names are dafined as constatnts `mc_const_SENSOR_*`.
-#' For example if third column is temperature, you can define it as `columns[[mc_const_SENSOR_T_C]] <- 3`.
-#' There are universal sensors for arbitraty values type `mc_const_SENSOR_real`, `mc_const_SENSOR_integer`
+#' Names come from names(mc_data_sensors). Names are defined as constants `mc_const_SENSOR_*`.
+#' For example, if the third column is temperature, you can define it as columns[[mc_const_SENSOR_T_C]] <- 3.
+#' There are universal sensors for arbitrary value types:`mc_const_SENSOR_real`, `mc_const_SENSOR_integer`
 #' and `mc_const_SENSOR_logical`.
-#' @slot col_types parameter for [vroom::vroom()] (default NA)
+#' @slot col_types: Parameter for [vroom::vroom()] (default NA).
 #'
-#' For prevent some errors can be defined types of columns.
-#' @slot filename_serial_number_pattern character pattern for detecting serial_number from file name (default NA)
+#' To ensure the correct reading of values, you have the possibility to strictly define the types of columns.
+#' @slot filename_serial_number_pattern: A character pattern for detecting the serial number from the file name (default NA).
 #'
-#' Value is regular expression with brackets around serial number.
-#' For example pattern for old TOMST files is `"data_(\\d+)_\\d+\\.csv$"`. If the value is NA name of file is used
-#' as serial_number.
-#' @slot data_row_pattern character pattern for detecting right file format (default NA)
+#' The regular expression with brackets around the serial number.
+#' For example, the pattern for old TOMST files is `"data_(\\d+)_\\d+\\.csv$"`. If the value is NA, the name of the file is used
+#' as the serial number.
+#' @slot data_row_pattern: A character pattern for detecting the correct file format (default NA).
 #'
-#' The data_row_pattern parameter is regular expression. If data_row_pattern is NA, then file format is not validated.
-#' @slot logger_type type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA)
-#' @slot tz_offset timezone offset in minutes from UTC in source data - required (default NA)
+#' The regular expression. If data_row_pattern is NA, then the file format is not checked.
+
+#' @slot logger_type: The type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA).
+#' @slot tz_offset: The timezone offset in minutes from UTC - required (default NA).
 #'
-#' If the value of the tz_offset parameter is 0 then datetime values are in UTC.
-#' If the time zone offset is defined in value e.g. `"2020-10-06 09:00:00+0100"`
-#' and `date_format` is `"%Y-%m-%d %H:%M:%S%z"` value is automatically converted to UTC
-#' and `tz_offset` parameter shoul be 0.
+#' If the value of the tz_offset parameter is 0, then datetime values are in UTC.
+#' If the time zone offset is defined in the value, e.g., `"2020-10-06 09:00:00+0100"`,
+#' and `date_format` is `"%Y-%m-%d %H:%M:%S%z"`, the value is automatically converted to UTC.
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
