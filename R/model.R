@@ -297,7 +297,7 @@ setMethod(f="initialize",
 #' Slot "name": "T_C"
 #' Slot "description": "Temperature °C"
 #' Slot "units": "°C"
-#' Slot "viridis_color_map": "C"
+#' Slot "viridis_color_map": "C" 
 #' Slot "scale_coeff": 0.03333333
 #' }
 #' @slot name of physical
