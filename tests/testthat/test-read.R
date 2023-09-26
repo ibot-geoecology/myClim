@@ -220,17 +220,14 @@ test_that("mc_read_files user_data_formats", {
 
 test_that("mc_read_files user_data_formats auto datetime", {
     files <- c("../data/user_data_formats/TMS94184102.csv", "../data/user_data_formats/TMS94184102_CET.csv")
-    user_data_formats <- list(myTMS=new("mc_DataFormat"))
-    user_data_formats$myTMS@date_column <- 2
-    user_data_formats$myTMS@tz_offset <- 0
-    user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T1]] <- 3
-    user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T2]] <- 4
-    user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T3]] <- 5
-    user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_moist]] <- 6
-    user_data_formats$myTMS@logger_type <- .model_const_LOGGER_TOMST_TMS
-    my_data <- mc_read_files(files, "myTMS", silent=TRUE, user_data_formats=user_data_formats)
+    user_data_formats <- list(my_logger=new("mc_DataFormat"))
+    user_data_formats$my_logger@date_column <- 2
+    user_data_formats$my_logger@tz_offset <- 0
+    user_data_formats$my_logger@columns[[mc_const_SENSOR_T_C]] <- c(3, 4, 5)
+    user_data_formats$my_logger@columns[[mc_const_SENSOR_real]] <- 6
+    my_data <- mc_read_files(files, "my_logger", silent=TRUE, user_data_formats=user_data_formats)
     test_raw_data_format(my_data)
     expect_equal(length(my_data$localities$TMS94184102$loggers[[1]]$sensors), 4)
-    expect_equal(my_data$localities$TMS94184102$loggers[[1]]$metadata@type, "TMS")
+    expect_equal(names(my_data$localities$TMS94184102$loggers[[1]]$sensors), c("T_C1", "T_C2", "T_C3", "real"))
 })
 

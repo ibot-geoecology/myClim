@@ -588,38 +588,39 @@ setMethod(
 #' 
 #' @slot skip The number of rows to skip before the first row containing microclimatic records.
 #' For example, to skip the header (default 0).
-#' @slot separator: The column separator (default is a comma ",").
-#' @slot date_column: The index of the date column - required (default NA).
-#' @slot date_format: The format of the date (default NA).
+#' @slot separator The column separator (default is a comma ",").
+#' @slot date_column The index of the date column - required (default NA).
+#' @slot date_format The format of the date (default NA).
 #'
 #' For a description of the date_format parameter, see [strptime()]. If the format is in ISO8601
 #' and the function [vroom::vroom()] automatically detects datetime values,
 #' the date_format parameter can be NA.
-#' @slot na_strings: Strings for representing NA values, e.g., "-100", "9999" (default "").
-#' @slot error_value: The value that represents an error of the sensor, e.g., 404, 9999 (default NA).
+#' @slot na_strings Strings for representing NA values, e.g., "-100", "9999" (default "").
+#' @slot error_value The value that represents an error of the sensor, e.g., 404, 9999 (default NA).
 #'
 #' The error_value is replaced by NA, and intervals of errors are flagged in `sensor$states`
 #' (see [myClim-package]).
-#' @slot columns: A list with names and indexes of value columns - required (default list()).
+#' @slot columns A list with names and indexes of value columns - required (default list()).
 #'
 #' Names come from names(mc_data_sensors). Names are defined as constants `mc_const_SENSOR_*`.
-#' For example, if the third column is temperature, you can define it as columns[[mc_const_SENSOR_T_C]] <- 3.
-#' There are universal sensors for arbitrary value types:`mc_const_SENSOR_real`, `mc_const_SENSOR_integer`
-#' and `mc_const_SENSOR_logical`.
-#' @slot col_types: Parameter for [vroom::vroom()] (default NA).
+#' For example, if the third column is temperature, you can define it as `columns[[mc_const_SENSOR_T_C]] <- 3`.
+#' There are universal sensors for arbitrary value types: `mc_const_SENSOR_real`, `mc_const_SENSOR_integer`
+#' and `mc_const_SENSOR_logical`. Multiple columns with same sensor type can be defined
+#' as `columns[[mc_const_SENSOR_real]] <- c(2, 3, 4)`. The names in this example will be `real1`, `real2` and `real3`.
+#' @slot col_types Parameter for [vroom::vroom()] (default NA).
 #'
 #' To ensure the correct reading of values, you have the possibility to strictly define the types of columns.
-#' @slot filename_serial_number_pattern: A character pattern for detecting the serial number from the file name (default NA).
+#' @slot filename_serial_number_pattern A character pattern for detecting the serial number from the file name (default NA).
 #'
 #' The regular expression with brackets around the serial number.
 #' For example, the pattern for old TOMST files is `"data_(\\d+)_\\d+\\.csv$"`. If the value is NA, the name of the file is used
 #' as the serial number.
-#' @slot data_row_pattern: A character pattern for detecting the correct file format (default NA).
+#' @slot data_row_pattern A character pattern for detecting the correct file format (default NA).
 #'
 #' The regular expression. If data_row_pattern is NA, then the file format is not checked.
 
-#' @slot logger_type: The type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA).
-#' @slot tz_offset: The timezone offset in minutes from UTC - required (default NA).
+#' @slot logger_type The type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA).
+#' @slot tz_offset The timezone offset in minutes from UTC - required (default NA).
 #'
 #' If the value of the tz_offset parameter is 0, then datetime values are in UTC.
 #' If the time zone offset is defined in the value, e.g., `"2020-10-06 09:00:00+0100"`,

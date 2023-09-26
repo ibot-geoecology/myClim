@@ -65,9 +65,11 @@ optional columns:
 
 \item{silent}{if TRUE, then any information is not printed in console (default FALSE)}
 
-\item{user_data_formats}{sutom data formats - list(key=mc_DataFormat) \linkS4class{mc_DataFormat} (default NULL)
+\item{user_data_formats}{custom data formats; use in case you have your own logger
+files not pre-defined in myClim  - list(key=mc_DataFormat) \linkS4class{mc_DataFormat} (default NULL)
 
-If custom data format is defined the key can be used in data_format parameter in \code{\link[=mc_read_files]{mc_read_files()}} and \code{\link[=mc_read_data]{mc_read_data()}}.}
+If custom data format is defined the key can be used in data_format parameter in \code{\link[=mc_read_files]{mc_read_files()}}
+and \code{\link[=mc_read_data]{mc_read_data()}}. Custom data format must be defined first, and then an be used for reading.}
 }
 \value{
 myClim object in Raw-format see \link{myClim-package}

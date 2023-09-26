@@ -4,82 +4,72 @@
 \name{mc_DataFormat-class}
 \alias{mc_DataFormat-class}
 \alias{mc_DataFormat}
-\title{Class for logger file data format}
+\title{Class for Logger File Data Format}
 \description{
-The Class used for parsing source data files. Typically the txt/csv files
-downloaded from microclimatic loggers. Each supported logger has established
-their own specific object of class \verb{mc_\{logger\}DataFormat} defining the
-parameters.
+This class is used for parsing source TXT/CSV files downloaded from microclimatic
+loggers.
 }
 \details{
-The logger definitions are stored in R environment object
-\code{./data/mc_data_formats.rda}. And thus it easy to add the ability of
-reading new, unsupported logger just by defining its Class parameters.
-Below see e.g. the Class defining TOMST file format.
-
-\preformatted{
-An object of class "mc_TOMSTDataFormat"
-attr(,"skip"): 0
-attr(,"separator"): ";"
-attr(,"date_column"): 2
-attr(,"date_format"): NA
-attr(,"na_strings"): "-200"
-attr(,"columns"): list()
-attr(,"col_types"): "icinnniin"
-attr(,"filename_serial_number_pattern"): "data_(\\d+)_\\d+\\.csv$"
-attr(,"data_row_pattern"): "^\\d+;[\\d.: ]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
-attr(,"logger_type"): character(0)
-}
+myClim offers several pre-defined
+logger file data formats, such as TOMST TMS or HOBO. Users can also define custom
+readings for their own loggers. Pre-defined and custom loggers in myClim each have
+their own specific object of class \verb{mc_\{logger\}DataFormat}, which defines the
+parameters for handling logger files.
+The pre-defined logger definitions are stored in the R environment object
+\code{./data/mc_data_formats.rda}.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{skip}}{number of lines before data - header etc. (default 0)}
+\item{\code{skip}}{The number of rows to skip before the first row containing microclimatic records.
+For example, to skip the header (default 0).}
 
-\item{\code{separator}}{columns separator (default ",")}
+\item{\code{separator}}{The column separator (default is a comma ",").}
 
-\item{\code{date_column}}{index of date column - required (default NA)}
+\item{\code{date_column}}{The index of the date column - required (default NA).}
 
-\item{\code{date_format}}{format of date (default NA)
+\item{\code{date_format}}{The format of the date (default NA).
 
-For description of date_format parameter see \code{\link[=strptime]{strptime()}}. If the format is in ISO8601
-and the function \code{\link[vroom:vroom]{vroom::vroom()}} automatically detects datetime values, the date_format parameter can be NA.}
+For a description of the date_format parameter, see \code{\link[=strptime]{strptime()}}. If the format is in ISO8601
+and the function \code{\link[vroom:vroom]{vroom::vroom()}} automatically detects datetime values,
+the date_format parameter can be NA.}
 
-\item{\code{na_strings}}{strings for NA values (default "")}
+\item{\code{na_strings}}{Strings for representing NA values, e.g., "-100", "9999" (default "").}
 
-\item{\code{error_value}}{value means error of sensor (default NA)
+\item{\code{error_value}}{The value that represents an error of the sensor, e.g., 404, 9999 (default NA).
 
-The error_value is replaced by NA and intervals of error are saved to \code{sensor$states} see \link{myClim-package}.}
+The error_value is replaced by NA, and intervals of errors are flagged in \code{sensor$states}
+(see \link{myClim-package}).}
 
-\item{\code{columns}}{list with names and indexes of value columns - required (default list())
+\item{\code{columns}}{A list with names and indexes of value columns - required (default list()).
 
-As names are used values from \code{names(mc_data_sensors)}. Names are dafined as constatnts \verb{mc_const_SENSOR_*}.
-For example if third column is temperature, you can define it as \code{columns[[mc_const_SENSOR_T_C]] <- 3}.
-There are universal sensors for arbitraty values type \code{mc_const_SENSOR_real}, \code{mc_const_SENSOR_integer}
-and \code{mc_const_SENSOR_logical}.}
+Names come from names(mc_data_sensors). Names are defined as constants \verb{mc_const_SENSOR_*}.
+For example, if the third column is temperature, you can define it as \code{columns[[mc_const_SENSOR_T_C]] <- 3}.
+There are universal sensors for arbitrary value types: \code{mc_const_SENSOR_real}, \code{mc_const_SENSOR_integer}
+and \code{mc_const_SENSOR_logical}. Multiple columns with same sensor type can be defined
+as \code{columns[[mc_const_SENSOR_real]] <- c(2, 3, 4)}. The names in this example will be \code{real1}, \code{real2} and \code{real3}.}
 
-\item{\code{col_types}}{parameter for \code{\link[vroom:vroom]{vroom::vroom()}} (default NA)
+\item{\code{col_types}}{Parameter for \code{\link[vroom:vroom]{vroom::vroom()}} (default NA).
 
-For prevent some errors can be defined types of columns.}
+To ensure the correct reading of values, you have the possibility to strictly define the types of columns.}
 
-\item{\code{filename_serial_number_pattern}}{character pattern for detecting serial_number from file name (default NA)
+\item{\code{filename_serial_number_pattern}}{A character pattern for detecting the serial number from the file name (default NA).
 
-Value is regular expression with brackets around serial number.
-For example pattern for old TOMST files is \code{"data_(\\\\d+)_\\\\d+\\\\.csv$"}. If the value is NA name of file is used
-as serial_number.}
+The regular expression with brackets around the serial number.
+For example, the pattern for old TOMST files is \code{"data_(\\\\d+)_\\\\d+\\\\.csv$"}. If the value is NA, the name of the file is used
+as the serial number.}
 
-\item{\code{data_row_pattern}}{character pattern for detecting right file format (default NA)
+\item{\code{data_row_pattern}}{A character pattern for detecting the correct file format (default NA).
 
-The data_row_pattern parameter is regular expression. If data_row_pattern is NA, then file format is not validated.}
+The regular expression. If data_row_pattern is NA, then the file format is not checked.}
 
-\item{\code{logger_type}}{type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA)}
+\item{\code{logger_type}}{The type of logger: TMS, TMS_L45, Thermo, Dendro, HOBO, ... (default NA).}
 
-\item{\code{tz_offset}}{timezone offset in minutes from UTC in source data - required (default NA)
+\item{\code{tz_offset}}{The timezone offset in minutes from UTC - required (default NA).
 
-If the value of the tz_offset parameter is 0 then datetime values are in UTC.
-If the time zone offset is defined in value e.g. \code{"2020-10-06 09:00:00+0100"}
-and \code{date_format} is \code{"\%Y-\%m-\%d \%H:\%M:\%S\%z"} value is automatically converted to UTC
-and \code{tz_offset} parameter shoul be 0.}
+If the value of the tz_offset parameter is 0, then datetime values are in UTC.
+If the time zone offset is defined in the value, e.g., \code{"2020-10-06 09:00:00+0100"},
+and \code{date_format} is \code{"\%Y-\%m-\%d \%H:\%M:\%S\%z"}, the value is automatically converted to UTC.}
 }}
 
 \seealso{

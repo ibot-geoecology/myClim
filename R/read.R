@@ -49,16 +49,13 @@
 #' tomst_data <- mc_read_files(files, "TOMST")
 #' # user_data_formats
 #' files <- system.file("extdata", "TMS94184102.csv", package = "myClim")
-#' user_data_formats <- list(myTMS=new("mc_DataFormat"))
-#' user_data_formats$myTMS@date_column <- 2
-#' user_data_formats$myTMS@date_format <- "%Y-%m-%d %H:%M:%S"
-#' user_data_formats$myTMS@tz_offset <- 0
-#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T1]] <- 3
-#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T2]] <- 4
-#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_T3]] <- 5
-#' user_data_formats$myTMS@columns[[mc_const_SENSOR_TMS_moist]] <- 6
-#' user_data_formats$myTMS@logger_type <- "TMS"
-#' my_data <- mc_read_files(files, "myTMS", silent=TRUE, user_data_formats=user_data_formats)
+#' user_data_formats <- list(my_logger=new("mc_DataFormat"))
+#' user_data_formats$my_logger@date_column <- 2
+#' user_data_formats$my_logger@date_format <- "%Y-%m-%d %H:%M:%S"
+#' user_data_formats$my_logger@tz_offset <- 0
+#' user_data_formats$my_logger@columns[[mc_const_SENSOR_T_C]] <- c(3, 4, 5)
+#' user_data_formats$my_logger@columns[[mc_const_SENSOR_real]] <- 6
+#' my_data <- mc_read_files(files, "my_logger", silent=TRUE, user_data_formats=user_data_formats)
 mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, recursive=TRUE, date_format=NA_character_,
                           tz_offset=NA_integer_, step=NA_integer_, clean=TRUE, silent=FALSE, user_data_formats=NULL) {
     if(all(dir.exists(paths))) {
@@ -410,7 +407,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_get_sensors_from_data_format <- function(data_table, data_format, datetime, states){
     heights_dataframe <- dplyr::filter(myClim::mc_data_heights, .data$logger_type == data_format@logger_type)
-    sensor_function <- function(column, sensor_id) {
+    sensor_def_function <- function(column, sensor_id){
         height <- NA_character_
         suffix <- NA_character_
         sensor_filter <- heights_dataframe$sensor_name == sensor_id
@@ -419,12 +416,24 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
             suffix <- heights_dataframe$suffix[sensor_filter]
         }
         sensor_name <- if(is.na(suffix)) sensor_id else paste0(sensor_id, suffix)
+        count <- length(column)
+        result <- tibble::tibble(column=column,
+                                 sensor_id=rep(sensor_id, count),
+                                 sensor_name=rep(sensor_name, count),
+                                 height=rep(height, count))
+        if(count > 1) {
+            result$sensor_name <- paste0(result$sensor_name, 1:count)
+        }
+        return(result)
+    }
+    sensor_table <- purrr::imap_dfr(data_format@columns, sensor_def_function)
+    sensor_function <- function(column, sensor_id, sensor_name, height) {
         values <- data_table[[column]]
         sensor <- .common_get_new_sensor(sensor_id, sensor_name, values=values, height=height, states=states)
         sensor <- .read_set_errors_in_sensor(sensor, data_format@error_value, datetime)
         return(sensor)
     }
-    result <- purrr::imap(data_format@columns, sensor_function)
+    result <- purrr::pmap(sensor_table, sensor_function)
     names(result) <- purrr::map_chr(result, ~ .x$metadata@name)
     result
 }
