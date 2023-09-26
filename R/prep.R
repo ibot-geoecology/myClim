@@ -844,7 +844,7 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
 #' length of the gap is 5 missing records and longer gaps are not filled
 #' Only linear method is implemented from [zoo::na.approx] function.
 #'
-#' @template param_myClim_object
+#' @template param_myClim_object_cleaned
 #' @template param_localities_sensors
 #' @param maxgap maximum number of consecutively NA values to fill (default 5)
 #' @param method used for approximation. It is implemented now only "linear". (default "linear")
@@ -887,4 +887,108 @@ mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method
 
     data$localities <- purrr::map(data$localities, locality_function)
     return(data)
+}
+
+#' TMS Logger Data Anomaly Detection
+#'
+#' @description
+#' This function creates new virtual sensor labelling anomalies in TMS logger caused by displacement from soil.
+#'
+#' @details
+#' TMS loggers, when correctly installed in the soil, exhibit certain temperature and soil moisture signal characteristics.
+#' Temperature varies most significantly at the soil interface, and temperature fluctuations in the soil are minimized.
+#' The moisture signal from a sensor that has lost direct contact with the soil is reduced.
+#' The following criteria are used for detecting faulty measurements: the ratio of the standard deviation of the soil
+#' sensor to the above-ground sensor is greater than the defined threshold (default 0.76085), and simultaneously, the minimum soil moisture is less than 721.5.
+#' The calculation of variables used for classification is performed in a centered floating window with a width of one day.
+#' Optionally, the prediction results can be smoothed using a floating window.
+#' Selection and parametrization of criteria was done using a recursive partitioning (rpart::rpart)
+#' on the set of 154 TMS timeseries from different environmental settings (total 7.8M records, measurements from temperate forest, tropical rainforest, alpine zone)
+#' with manually labelled erroneos records.  Note that sensitivity (true positive rate) on this training dataset was 95.1% and specificity (true negative rate) 99.4%.
+#' Smoothing with 10 day floating window increased sensitivity to 96.8% while retaining specifity at the same level.
+#'
+#' @template param_myClim_object_cleaned
+#' @template param_localities
+#' @param soil_sensor character, soil temperature sensor (default "TMS_T1")
+#' @param air_sensor character, air temperature sensor (default "TMS_T2")
+#' @param moist_sensor character, soil moisture sensor (default "TMS_moist")
+#' @param smooth logical, smooth out isolated faulty/correct records using floating window
+#' @param smooth_window integer, smooth floating window width (in days)
+#' @param smooth_threshold numeric, floating window threshold for detection of faulty records. Defaults to "0.5")
+#' @param sd_threshold numeric, threshold value for the ratio of the standard deviation of the soil sensor to the above-ground sensor temperatures
+#' @param minmoist_threshold numeric, threshold value for the minimum soil moisture
+#'
+#' @return
+#' @export numeric vector (0 = correct measurement, 1 = faulty measurement) stored as virtual sensor in myClim object
+#'
+#' @examples
+mc_prep_tmsout <- function(data,
+                           localities=NULL,
+                           soil_sensor = mc_const_SENSOR_TMS_T1,
+                           air_sensor = mc_const_SENSOR_TMS_T2,
+                           moist_sensor = mc_const_SENSOR_TMS_moist,
+                           smooth = FALSE,
+                           smooth_window = 10,
+                           smooth_threshold = 0.5,
+                           sd_threshold = 0.76085,
+                           minmoist_threshold = 721.5){
+    is_agg <- .common_is_agg_format(data)
+    if(!is_agg)
+    {
+        .prep_check_datetime_step_unprocessed(data, stop)
+    }
+
+    logger_function <- function (logger) {
+        .prep_item_add_tmsout_sensor(logger, logger$clean_info@step, soil_sensor, air_sensor, moist_sensor,
+                                     smooth, smooth_window, smooth_threshold, sd_threshold, minmoist_threshold)
+    }
+
+    locality_function <- function (locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        if(is_agg) {
+            return(.prep_item_add_tmsout_sensor(locality, data$metadata@step, soil_sensor, air_sensor, moist_sensor,
+                                                smooth, smooth_window, smooth_threshold, sd_threshold, minmoist_threshold))
+        }
+
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        return(locality)
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
+}
+
+.prep_item_add_tmsout_sensor <- function(item, step, soil_sensor, air_sensor, moist_sensor, smooth, smooth_window,
+                                         smooth_threshold, sd_threshold, minmoist_threshold){
+    count_values_per_day <- 3600 * 24 / step
+    t1_sd <- .prep_apply_function_to_window(item$sensors[[soil_sensor]]$values, count_values_per_day + 1, sd, fill_na = True)
+    t2_sd <- .prep_apply_function_to_window(item$sensors[[air_sensor]]$values, count_values_per_day + 1, sd, fill_na = True)
+    sdt12 <- t1_sd / t2_sd
+    moist <- item$sensors[[moist_sensor]]$values
+    minmoist  <- .prep_apply_function_to_window(moist, count_values_per_day + 1, min, na.rm = TRUE)
+    tmsout <- ifelse(sdt12 < sd_threshold, 0, ifelse(minmoist >= minmoist_threshold, 0, 1))
+    if(smooth) {
+        return(myRoll(tmsout, smooth_window*count_values_per_day + 1, thr = smooth_threshold, na.rm = T))
+    }  else    {
+        return(tmsout)
+    }
+}
+
+#' Fast rolling window
+#'
+#' @details Aplly custom function to rolling window.
+#'
+#' @param values numeric vector
+#' @param window_width integer, rolling window width
+#' @param FUN custom function to be applied in rolling windows
+#' @param na.rm na.rm argument passed to custom function
+#' @param fill_na logical, fill_na = TRUE fills vector edges with NA, fill_na fills vector edges with first/last value
+.prep_apply_function_to_window <- function(values, window_width, FUN, na.rm = TRUE, fill_na = FALSE){
+    begin <- rep(ifelse(fill_na, NA, first(values)), window_width)
+    end <- rep(ifelse(fill_na, NA, last(values)), window_width )
+    frollapply_values <- c(begin, values,  end)
+    result <- frollapply(frollapply_values, n=window_width, FUN=FUN, na.rm=na.rm, align="center", fill=NA)
+    return(as.numeric(result[(window_width + 1):(length(values) + window_width)]))
 }
