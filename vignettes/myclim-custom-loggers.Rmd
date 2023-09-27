@@ -53,7 +53,7 @@ mc_plot_line(my_data_clean,scale_coeff = 0.1)
 **artificial example **  
 **logger with 4 sensors**  
 **soil moisture sensor and 3 temperature sensors**  
-```{r eval=TRUE,warning=FALSE}
+```{r eval=TRUE,warning=FALSE,message=FALSE}
 # Define a vector of file names
 files <- c("TMS94184102.csv", "TMS94184102_CET.csv")
 
@@ -69,4 +69,24 @@ my_data <- mc_read_files(files, "my_logger", silent=TRUE, user_data_formats=user
 # Plot the data with a scale coefficient of 0.01
 mc_plot_line(my_data,scale_coeff = 0.01) 
 
+## Rename sensors if necessary
+# existing names
+levels(factor(mc_info(my_data)[["sensor_name"]])) 
+# new names
+my_data <- mc_prep_meta_sensor(my_data,
+                               list(real = "soil moisture", 
+                                    T_C1 = "soil T",
+                                    T_C2 = "ground T",
+                                    T_C3 = "air T"),
+                               param_name="name")
+
+levels(factor(mc_info(my_data)[["sensor_name"]]))
+
+p <- mc_plot_line(my_data,scale_coeff = 0.01) 
+p <- p+ggplot2::scale_color_manual(values=c("hotpink",
+                                            "pink", 
+                                            "darkblue",
+                                            "green"),
+                                   name=NULL)
+plot(p)
 ```
