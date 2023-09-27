@@ -909,38 +909,47 @@ mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method
 #'
 #' @template param_myClim_object_cleaned
 #' @template param_localities
-#' @param soil_sensor character, soil temperature sensor (default "TMS_T1")
-#' @param air_sensor character, air temperature sensor (default "TMS_T2")
-#' @param moist_sensor character, soil moisture sensor (default "TMS_moist")
-#' @param smooth logical, smooth out isolated faulty/correct records using floating window
-#' @param smooth_window integer, smooth floating window width (in days)
+#' @param soil_sensor character, soil temperature sensor (default `mc_const_SENSOR_TMS_T1`)
+#' @param air_sensor character, air temperature sensor (default mc_const_SENSOR_TMS_T2)
+#' @param moist_sensor character, soil moisture sensor (default mc_const_SENSOR_TMS_moist)
+#' @param output_sensor (default "off_soil")
+#' @param smooth logical, smooth out isolated faulty/correct records using floating window (default FALSE)
+#' @param smooth_window integer, smooth floating window width (in days) (default 10)
 #' @param smooth_threshold numeric, floating window threshold for detection of faulty records. Defaults to "0.5")
-#' @param sd_threshold numeric, threshold value for the ratio of the standard deviation of the soil sensor to the above-ground sensor temperatures
-#' @param minmoist_threshold numeric, threshold value for the minimum soil moisture
+#' @param sd_threshold numeric, threshold value for the ratio of the standard deviation of the soil sensor
+#' to the above-ground sensor temperatures (default 0.76085)
+#' @param minmoist_threshold numeric, threshold value for the minimum soil moisture (default 721.5)
 #'
 #' @return
 #' @export numeric vector (0 = correct measurement, 1 = faulty measurement) stored as virtual sensor in myClim object
 #'
 #' @examples
-mc_prep_tmsout <- function(data,
-                           localities=NULL,
-                           soil_sensor = mc_const_SENSOR_TMS_T1,
-                           air_sensor = mc_const_SENSOR_TMS_T2,
-                           moist_sensor = mc_const_SENSOR_TMS_moist,
-                           smooth = FALSE,
-                           smooth_window = 10,
-                           smooth_threshold = 0.5,
-                           sd_threshold = 0.76085,
-                           minmoist_threshold = 721.5){
+mc_prep_TMSoffsoil <- function(data,
+                               localities=NULL,
+                               soil_sensor = mc_const_SENSOR_TMS_T1,
+                               air_sensor = mc_const_SENSOR_TMS_T2,
+                               moist_sensor = mc_const_SENSOR_TMS_moist,
+                               output_sensor = "off_soil",
+                               smooth = FALSE,
+                               smooth_window = 10,
+                               smooth_threshold = 0.5,
+                               sd_threshold = 0.76085,
+                               minmoist_threshold = 721.5){
     is_agg <- .common_is_agg_format(data)
-    if(!is_agg)
-    {
+    if(!is_agg) {
         .prep_check_datetime_step_unprocessed(data, stop)
+    } else {
+        .calc_check_maximal_day_step(data)
     }
 
     logger_function <- function (logger) {
-        .prep_item_add_tmsout_sensor(logger, logger$clean_info@step, soil_sensor, air_sensor, moist_sensor,
-                                     smooth, smooth_window, smooth_threshold, sd_threshold, minmoist_threshold)
+        if(.calc_check_maximal_day_step_in_logger_get_skip(logger))
+        {
+            return(logger)
+        }
+        .prep_item_add_tmsoffsoil_sensor(logger, logger$clean_info@step, soil_sensor, air_sensor, moist_sensor,
+                                         output_sensor, smooth, smooth_window, smooth_threshold, sd_threshold,
+                                         minmoist_threshold)
     }
 
     locality_function <- function (locality) {
@@ -948,8 +957,9 @@ mc_prep_tmsout <- function(data,
             return(locality)
         }
         if(is_agg) {
-            return(.prep_item_add_tmsout_sensor(locality, data$metadata@step, soil_sensor, air_sensor, moist_sensor,
-                                                smooth, smooth_window, smooth_threshold, sd_threshold, minmoist_threshold))
+            return(.prep_item_add_tmsoffsoil_sensor(locality, data$metadata@step, soil_sensor, air_sensor, moist_sensor,
+                                                    output_sensor, smooth, smooth_window, smooth_threshold,
+                                                    sd_threshold, minmoist_threshold))
         }
 
         locality$loggers <- purrr::map(locality$loggers, logger_function)
@@ -960,20 +970,26 @@ mc_prep_tmsout <- function(data,
     return(data)
 }
 
-.prep_item_add_tmsout_sensor <- function(item, step, soil_sensor, air_sensor, moist_sensor, smooth, smooth_window,
-                                         smooth_threshold, sd_threshold, minmoist_threshold){
+.prep_item_add_tmsoffsoil_sensor <- function(item, step, soil_sensor, air_sensor, moist_sensor, smooth, smooth_window,
+                                             output_sensor, smooth_threshold, sd_threshold, minmoist_threshold){
+    skip <- .prep_TMSofsoil_check_sensors_get_skip(item, soil_sensor, air_sensor, moist_sensor, output_sensor)
+    if(skip) {
+        return(item)
+    }
     count_values_per_day <- 3600 * 24 / step
-    t1_sd <- .prep_apply_function_to_window(item$sensors[[soil_sensor]]$values, count_values_per_day + 1, sd, fill_na = True)
-    t2_sd <- .prep_apply_function_to_window(item$sensors[[air_sensor]]$values, count_values_per_day + 1, sd, fill_na = True)
+    t1_sd <- .prep_apply_function_to_window(item$sensors[[soil_sensor]]$values, count_values_per_day + 1, sd, fillNA = TRUE)
+    t2_sd <- .prep_apply_function_to_window(item$sensors[[air_sensor]]$values, count_values_per_day + 1, sd, fillNA = TRUE)
     sdt12 <- t1_sd / t2_sd
     moist <- item$sensors[[moist_sensor]]$values
     minmoist  <- .prep_apply_function_to_window(moist, count_values_per_day + 1, min, na.rm = TRUE)
-    tmsout <- ifelse(sdt12 < sd_threshold, 0, ifelse(minmoist >= minmoist_threshold, 0, 1))
+    result_values <- ifelse(sdt12 < sd_threshold, 0, ifelse(minmoist >= minmoist_threshold, 0, 1))
     if(smooth) {
-        return(myRoll(tmsout, smooth_window*count_values_per_day + 1, thr = smooth_threshold, na.rm = T))
-    }  else    {
-        return(tmsout)
+        result_values <- .prep_smoothing_rolling_mean(result_values, smooth_window * count_values_per_day + 1,
+                                                      threshold = smooth_threshold, na.rm = TRUE)
     }
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_logical, output_sensor,
+                                                            values=result_values)
+    return(item)
 }
 
 #' Fast rolling window
@@ -984,11 +1000,46 @@ mc_prep_tmsout <- function(data,
 #' @param window_width integer, rolling window width
 #' @param FUN custom function to be applied in rolling windows
 #' @param na.rm na.rm argument passed to custom function
-#' @param fill_na logical, fill_na = TRUE fills vector edges with NA, fill_na fills vector edges with first/last value
-.prep_apply_function_to_window <- function(values, window_width, FUN, na.rm = TRUE, fill_na = FALSE){
-    begin <- rep(ifelse(fill_na, NA, first(values)), window_width)
-    end <- rep(ifelse(fill_na, NA, last(values)), window_width )
+#' @param fillNA logical, fill_na = TRUE fills vector edges with NA, fill_na fills vector edges with first/last value
+.prep_apply_function_to_window <- function(values, window_width, FUN, na.rm = TRUE, fillNA = FALSE){
+    begin <- rep(ifelse(fillNA, NA, first(values)), window_width)
+    end <- rep(ifelse(fillNA, NA, last(values)), window_width )
     frollapply_values <- c(begin, values,  end)
     result <- frollapply(frollapply_values, n=window_width, FUN=FUN, na.rm=na.rm, align="center", fill=NA)
     return(as.numeric(result[(window_width + 1):(length(values) + window_width)]))
+}
+
+#' Smoothing 0/1 timeseries using fast rolling mean
+#'
+#' @param values numeric vector
+#' @param window_width integer, rolling window width
+#' @param threshold integer, threshold for classification of smoothed values back to 0/1
+#' @param na.rm logical
+.prep_smoothing_rolling_mean <- function(values, window_width, threshold=0.5, na.rm=TRUE){
+    frollmean_values <- c(rep(first(values), window_width), values, rep(last(values), window_width))
+    result <- data.table::frollmean(frollmean_values, n =  window_width, align = "center", fill = NA, na.rm = na.rm)
+    return(as.numeric(result[(window_width+1):(length(values)+window_width)] >= threshold))
+}
+
+.prep_TMSofsoil_check_sensors_get_skip <- function(item, soil_sensor, air_sensor, moist_sensor, output_sensor){
+    if(!.calc_check_sensor_in_item(item, soil_sensor)){
+        return(TRUE)
+    }
+    if(!.model_is_physical_T_C(item$sensors[[soil_sensor]]$metadata)){
+        .calc_wrong_physical_error_function(soil_sensor, .model_const_PHYSICAL_T_C)
+    }
+    if(!.calc_check_sensor_in_item(item, air_sensor)){
+        return(TRUE)
+    }
+    if(!.model_is_physical_T_C(item$sensors[[air_sensor]]$metadata)){
+        .calc_wrong_physical_error_function(air_sensor, .model_const_PHYSICAL_T_C)
+    }
+    if(!.calc_check_sensor_in_item(item, moist_sensor)){
+        return(TRUE)
+    }
+    if(!.model_is_physical(item$sensors[[moist_sensor]]$metadata, .model_const_PHYSICAL_moisture_raw)){
+        .calc_wrong_physical_error_function(moist_sensor, .model_const_PHYSICAL_moisture_raw)
+    }
+    .calc_warn_if_overwriting(item, output_sensor)
+    return(FALSE)
 }
