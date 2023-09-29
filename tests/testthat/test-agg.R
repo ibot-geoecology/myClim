@@ -147,9 +147,9 @@ test_that("mc_agg logical sensor", {
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_percentile20$values, c(NA, F, F, F, F))
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_sum$metadata@sensor_id, mc_const_SENSOR_integer)
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_sum$values, c(NA, 378, 0, 0, 0))
-    expect_equal(week_agg_data$localities$`94184102`$sensors$snow_count$values, c(287, 672, 672, 672, 672))
+    expect_equal(week_agg_data$localities$`94184102`$sensors$snow_count$values, c(288, 672, 672, 672, 672))
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_count$metadata@sensor_id, "count")
-    expect_equal(week_agg_data$localities$`94184102`$sensors$snow_coverage$values, c(287/672, 1, 1, 1, 1))
+    expect_equal(week_agg_data$localities$`94184102`$sensors$snow_coverage$values, c(288/672, 1, 1, 1, 1))
     expect_equal(week_agg_data$localities$`94184102`$sensors$snow_coverage$metadata@sensor_id, "coverage")
 })
 
