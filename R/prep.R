@@ -9,7 +9,7 @@
 .prep_const_MESSAGE_SENSOR_METADATA_WRONG_SLOT <- "Sensor metadata doesn't cointain slot {param_name}."
 .prep_const_MESSAGE_UNIQUE_SENSOR_NAMES <- "Sensor names must be unique."
 .prep_const_MESSAGE_UNIQUE_LOCALITY_IDS <- "Locality_ids must be unique."
-.prep_const_MESSAGE_UNCLEANED_DATA<- "Data aren't cleaned."
+.prep_const_MESSAGE_UNCLEANED_DATA<- "Data is not cleaned."
 .prep_const_MESSAGE_NA_APPROX_METHOD_NOT_IMPLEMENTED <- "Method is not implemented."
 .prep_const_MESSAGE_CLEAN_AGG <- "It isn't possible to clean myClim object in Agg-format."
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
@@ -919,11 +919,10 @@ mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method
 #' @param sd_threshold numeric, threshold value for the ratio of the standard deviation of the soil sensor
 #' to the above-ground sensor temperatures (default 0.76085)
 #' @param minmoist_threshold numeric, threshold value for the minimum soil moisture (default 721.5)
-#'
-#' @return
-#' @export numeric vector (0 = correct measurement, 1 = faulty measurement) stored as virtual sensor in myClim object
-#'
+#' @return numeric vector (0 = correct measurement, 1 = faulty measurement) stored as virtual sensor in myClim object
+#' @export
 #' @examples
+#' data <- mc_prep_TMSoffsoil(mc_data_example_clean)
 mc_prep_TMSoffsoil <- function(data,
                                localities=NULL,
                                soil_sensor = mc_const_SENSOR_TMS_T1,
@@ -970,8 +969,8 @@ mc_prep_TMSoffsoil <- function(data,
     return(data)
 }
 
-.prep_item_add_tmsoffsoil_sensor <- function(item, step, soil_sensor, air_sensor, moist_sensor, smooth, smooth_window,
-                                             output_sensor, smooth_threshold, sd_threshold, minmoist_threshold){
+.prep_item_add_tmsoffsoil_sensor <- function(item, step, soil_sensor, air_sensor, moist_sensor, output_sensor,
+                                             smooth, smooth_window, smooth_threshold, sd_threshold, minmoist_threshold){
     skip <- .prep_TMSofsoil_check_sensors_get_skip(item, soil_sensor, air_sensor, moist_sensor, output_sensor)
     if(skip) {
         return(item)
@@ -992,31 +991,31 @@ mc_prep_TMSoffsoil <- function(data,
     return(item)
 }
 
-#' Fast rolling window
-#'
-#' @details Aplly custom function to rolling window.
-#'
-#' @param values numeric vector
-#' @param window_width integer, rolling window width
-#' @param FUN custom function to be applied in rolling windows
-#' @param na.rm na.rm argument passed to custom function
-#' @param fillNA logical, fill_na = TRUE fills vector edges with NA, fill_na fills vector edges with first/last value
+# Fast rolling window
+#
+# @details Aplly custom function to rolling window.
+#
+# @param values numeric vector
+# @param window_width integer, rolling window width
+# @param FUN custom function to be applied in rolling windows
+# @param na.rm na.rm argument passed to custom function
+# @param fillNA logical, fill_na = TRUE fills vector edges with NA, fill_na fills vector edges with first/last value
 .prep_apply_function_to_window <- function(values, window_width, FUN, na.rm = TRUE, fillNA = FALSE){
-    begin <- rep(ifelse(fillNA, NA, first(values)), window_width)
-    end <- rep(ifelse(fillNA, NA, last(values)), window_width )
+    begin <- rep(ifelse(fillNA, NA, dplyr::first(values)), window_width)
+    end <- rep(ifelse(fillNA, NA, dplyr::last(values)), window_width )
     frollapply_values <- c(begin, values,  end)
-    result <- frollapply(frollapply_values, n=window_width, FUN=FUN, na.rm=na.rm, align="center", fill=NA)
+    result <- data.table::frollapply(frollapply_values, n=window_width, FUN=FUN, na.rm=na.rm, align="center", fill=NA)
     return(as.numeric(result[(window_width + 1):(length(values) + window_width)]))
 }
 
-#' Smoothing 0/1 timeseries using fast rolling mean
-#'
-#' @param values numeric vector
-#' @param window_width integer, rolling window width
-#' @param threshold integer, threshold for classification of smoothed values back to 0/1
-#' @param na.rm logical
+# Smoothing 0/1 timeseries using fast rolling mean
+#
+# @param values numeric vector
+# @param window_width integer, rolling window width
+# @param threshold integer, threshold for classification of smoothed values back to 0/1
+# @param na.rm logical
 .prep_smoothing_rolling_mean <- function(values, window_width, threshold=0.5, na.rm=TRUE){
-    frollmean_values <- c(rep(first(values), window_width), values, rep(last(values), window_width))
+    frollmean_values <- c(rep(dplyr::first(values), window_width), values, rep(dplyr::last(values), window_width))
     result <- data.table::frollmean(frollmean_values, n =  window_width, align = "center", fill = NA, na.rm = na.rm)
     return(as.numeric(result[(window_width+1):(length(values)+window_width)] >= threshold))
 }

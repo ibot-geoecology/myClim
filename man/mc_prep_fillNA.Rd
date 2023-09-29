@@ -13,7 +13,7 @@ mc_prep_fillNA(
 )
 }
 \arguments{
-\item{data}{myClim object see \link{myClim-package}}
+\item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
