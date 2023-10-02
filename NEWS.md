@@ -1,3 +1,11 @@
+# myClim 1.0.10
+* Dependency on the package `runner` is removed and `data.table` is added as a new dependency.
+* In the functions `mc_read_files()` and `mc_read_data()`, a new parameter `user_data_formats` is added
+  for custom source file data formats.
+* A new vignette for user data formats is added.
+* A check for duplicate values in same time is added to the function `mc_prep_clean()`.
+* A new function `mc_prep_TMSoffsoil()` is added for detecting when TMS is out of soil.
+
 # myClim 1.0.9
 * The citation of the package has been changed to the article **myClim: Microclimate data handling and standardised
   analyses in R**.
