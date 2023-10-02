@@ -355,6 +355,7 @@ test_that("mc_prep_calib_load wrong type", {
     ))
     expect_error(mc_prep_calib_load(data, calib_table))
 })
+
 test_that("mc_prep_fillNA", {
     data <- mc_read_files("../data/agg", "TOMST", clean=F)
     expect_error(mc_prep_fillNA(data))
@@ -379,3 +380,21 @@ test_that("mc_prep_fillNA", {
     expect_true(is.na(approx_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$values[[50]]))
 })
 
+test_that("mc_prep_TMSoffsoil", {
+    data <- mc_read_files("../data/TMSoffsoil/data_93142760_201904.csv", "TOMST", clean=F)
+    expect_error(mc_prep_TMSoffsoil(data))
+    data <- mc_prep_clean(data, silent=T)
+    data_offsoil <- mc_prep_TMSoffsoil(data, smooth=F)
+    test_raw_data_format(data_offsoil)
+    sel0 <- data_offsoil$localities$`93142760`$loggers[[1]]$datetime <= lubridate::ymd_hm("2018-12-05 8:45")
+    sel0 <- sel0 | data_offsoil$localities$`93142760`$loggers[[1]]$datetime > lubridate::ymd_hm("2018-12-09 12:30")
+    expect_true(all(data_offsoil$localities$`93142760`$loggers[[1]]$sensors$off_soil$values[sel0] == 0))
+    sel1 <- data_offsoil$localities$`93142760`$loggers[[1]]$datetime > lubridate::ymd_hm("2018-12-05 8:45")
+    sel1 <- sel1 & data_offsoil$localities$`93142760`$loggers[[1]]$datetime <= lubridate::ymd_hm("2018-12-09 12:30")
+    expect_true(all(data_offsoil$localities$`93142760`$loggers[[1]]$sensors$off_soil$values[sel1] == 1))
+    data_offsoil <- mc_prep_TMSoffsoil(data, smooth=T)
+    expect_true(all(data_offsoil$localities$`93142760`$loggers[[1]]$sensors$off_soil$values == 0))
+    agg_data <- mc_agg(data)
+    agg_data_offsoil <- mc_prep_TMSoffsoil(agg_data, smooth=F)
+    test_agg_data_format(agg_data_offsoil)
+})

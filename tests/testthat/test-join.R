@@ -2,7 +2,7 @@ source("libtest.R")
 
 test_that("mc_join", {
     data <- mc_read_files("../data/join", "TOMST", clean=FALSE)
-    expect_error(joined_data <- mc_join(data), "Data aren't cleaned.")
+    expect_error(joined_data <- mc_join(data), .prep_const_MESSAGE_UNCLEANED_DATA)
     cleaned_data <- mc_prep_clean(data, silent=T)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,

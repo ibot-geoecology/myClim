@@ -756,7 +756,7 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
         return(TRUE)
     }
     if(!.model_is_physical(item$sensors[[rh_sensor]]$metadata, .model_const_PHYSICAL_RH)){
-        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_RH)
+        .calc_wrong_physical_error_function(rh_sensor, .model_const_PHYSICAL_RH)
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
