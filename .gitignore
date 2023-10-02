@@ -4,7 +4,6 @@
 microclim.Rproj
 myClim.Rproj
 *.swp
-
 .Rproj.user
 .idea
 docs
@@ -14,3 +13,4 @@ inst/doc
 /doc/
 /Meta/
 /vignettes/*.pdf
+myClim_latest.tar.gz

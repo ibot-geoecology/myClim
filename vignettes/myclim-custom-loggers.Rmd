@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In case you are NOT using one of the predefined microclimatic loggers listed in r `names(myClim::mc_data_formats)` , you can create a user-defined *myClim* class using [mc_data_formats](http://labgis.ibot.cas.cz/myclim/reference/mc_DataFormat-class.html). By doing this, you teach *myClim* how to parse your files into a *myClim* object.
+In case you are NOT using one of the predefined microclimatic loggers listed in r `names(myClim::mc_data_formats)`, you can create a user-defined *myClim* class using [mc_data_formats](http://labgis.ibot.cas.cz/myclim/reference/mc_DataFormat-class.html). By doing this, you teach *myClim* how to parse your files into a *myClim* object.
   
 [Example files are available on GitHub.](https://github.com/ibot-geoecology/myClim/tree/main/vignettes)  
   
@@ -22,7 +22,7 @@ In case you are NOT using one of the predefined microclimatic loggers listed in 
 
 **HOBO MX2301A bluetooth-enabled series**   
 **collected using the HOBOconnect software** 
-```{r eval=TRUE,warning=FALSE}
+```{r eval=TRUE,warning=FALSE,out.width="600px",fig.width = 8}
 # Load the 'myClim' library
 library(myClim)
 # Create a list to define a custom data format for 'myHOBO'
@@ -51,9 +51,8 @@ mc_plot_line(my_data_clean,scale_coeff = 0.1)
 ===============================================================
 
 **artificial example **  
-**logger with 4 sensors**  
-**soil moisture sensor and 3 temperature sensors**  
-```{r eval=TRUE,warning=FALSE,message=FALSE}
+**logger with soil moisture sensor and 3 temperature sensors**  
+```{r eval=TRUE,warning=FALSE,out.width="600px",fig.width = 8,fig.height = 6}
 # Define a vector of file names
 files <- c("TMS94184102.csv", "TMS94184102_CET.csv")
 
@@ -68,21 +67,29 @@ user_data_formats$my_logger@columns[[mc_const_SENSOR_real]] <- 6 # Map real sens
 my_data <- mc_read_files(files, "my_logger", silent=TRUE, user_data_formats=user_data_formats)
 # Plot the data with a scale coefficient of 0.01
 mc_plot_line(my_data,scale_coeff = 0.01) 
+```
 
-## Rename sensors if necessary
-# existing names
+===============================================================
+
+**Rename sensors if necessary**
+```{r eval=TRUE,warning=FALSE,out.width="600px",fig.width = 8,fig.height = 6}
+
+# Existing names
 levels(factor(mc_info(my_data)[["sensor_name"]])) 
-# new names
+
+# Define the new names
 my_data <- mc_prep_meta_sensor(my_data,
                                list(real = "soil moisture", 
                                     T_C1 = "soil T",
                                     T_C2 = "ground T",
                                     T_C3 = "air T"),
                                param_name="name")
-
+# Check the new names
 levels(factor(mc_info(my_data)[["sensor_name"]]))
 
+# Plot the data with a scale coefficient of 0.01
 p <- mc_plot_line(my_data,scale_coeff = 0.01) 
+# Modify default colors. 
 p <- p+ggplot2::scale_color_manual(values=c("hotpink",
                                             "pink", 
                                             "darkblue",
