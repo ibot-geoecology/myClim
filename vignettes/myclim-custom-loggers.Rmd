@@ -1,0 +1,99 @@
+---
+title: "myClim: reading user-defined loggers"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{myClim: reading user-defined loggers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE,purl=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In case you are NOT using one of the predefined microclimatic loggers listed in r `names(myClim::mc_data_formats)`, you can create a user-defined *myClim* class using [mc_data_formats](http://labgis.ibot.cas.cz/myclim/reference/mc_DataFormat-class.html). By doing this, you teach *myClim* how to parse your files into a *myClim* object.
+  
+[Example files are available on GitHub.](https://github.com/ibot-geoecology/myClim/tree/main/vignettes)  
+  
+============================================================
+
+**HOBO MX2301A bluetooth-enabled series**   
+**collected using the HOBOconnect software** 
+```{r eval=TRUE,warning=FALSE,out.width="600px",fig.width = 8}
+# Load the 'myClim' library
+library(myClim)
+# Create a list to define a custom data format for 'myHOBO'
+user_data_formats <- list(myHOBO=new("mc_DataFormat"))
+
+# Set various properties for the 'myHOBO' data format
+user_data_formats$myHOBO@skip <- 1 # Skip the first row
+user_data_formats$myHOBO@separator <- "," # Define the separator as a comma
+user_data_formats$myHOBO@date_column <- 2 # Specify the column containing dates
+user_data_formats$myHOBO@date_format <- "%m/%d/%Y %H:%M:%S" # Define the date format
+user_data_formats$myHOBO@tz_offset <- 2 * 60 # Set the time zone offset in minutes
+user_data_formats$myHOBO@columns[[mc_const_SENSOR_T_C]] <- 3 # Map temperature to column 3
+user_data_formats$myHOBO@columns[[mc_const_SENSOR_RH]] <- 4 # Map humidity to column 4
+
+# Read data from a CSV file using the 'myHOBO' format, without cleaning
+my_data <- mc_read_files("./21498648.csv", "myHOBO", clean=FALSE,
+                             user_data_formats=user_data_formats)
+# Clean data in myClim object
+my_data_clean<-mc_prep_clean(my_data)
+# Plot the cleaned data with a scale coefficient of 0.1
+mc_plot_line(my_data_clean,scale_coeff = 0.1)  
+
+
+```
+
+===============================================================
+
+**artificial example **  
+**logger with soil moisture sensor and 3 temperature sensors**  
+```{r eval=TRUE,warning=FALSE,out.width="600px",fig.width = 8,fig.height = 6}
+# Define a vector of file names
+files <- c("TMS94184102.csv", "TMS94184102_CET.csv")
+
+# Create a list to define a custom data format for 'my_logger'
+user_data_formats <- list(my_logger=new("mc_DataFormat"))
+user_data_formats$my_logger@date_column <- 2 # Specify the column containing dates
+user_data_formats$my_logger@tz_offset <- 0 # Set the time zone offset to 0 (UTC)
+user_data_formats$my_logger@columns[[mc_const_SENSOR_T_C]] <- c(3, 4, 5) # Map multiple temperature columns
+user_data_formats$my_logger@columns[[mc_const_SENSOR_real]] <- 6 # Map real sensor data to column 6
+
+# Read data from the specified files using the 'my_logger' format, with data cleaning, silently (no console output)
+my_data <- mc_read_files(files, "my_logger", silent=TRUE, user_data_formats=user_data_formats)
+# Plot the data with a scale coefficient of 0.01
+mc_plot_line(my_data,scale_coeff = 0.01) 
+```
+
+===============================================================
+
+**Rename sensors if necessary**
+```{r eval=TRUE,warning=FALSE,out.width="600px",fig.width = 8,fig.height = 6}
+
+# Existing names
+levels(factor(mc_info(my_data)[["sensor_name"]])) 
+
+# Define the new names
+my_data <- mc_prep_meta_sensor(my_data,
+                               list(real = "soil moisture", 
+                                    T_C1 = "soil T",
+                                    T_C2 = "ground T",
+                                    T_C3 = "air T"),
+                               param_name="name")
+# Check the new names
+levels(factor(mc_info(my_data)[["sensor_name"]]))
+
+# Plot the data with a scale coefficient of 0.01
+p <- mc_plot_line(my_data,scale_coeff = 0.01) 
+# Modify default colors. 
+p <- p+ggplot2::scale_color_manual(values=c("hotpink",
+                                            "pink", 
+                                            "darkblue",
+                                            "green"),
+                                   name=NULL)
+plot(p)
+```

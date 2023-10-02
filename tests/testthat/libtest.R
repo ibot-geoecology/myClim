@@ -2,6 +2,10 @@ not_applicable_format_warning <- function(x) {
     expect_warning(x, regexp = ".* is not applicable format to .*\\. File is skipped.")
 }
 
+differnt_values_warning <- function(x) {
+    expect_warning(x, regexp = "In logger .* are different values of .* in same time\\.")
+}
+
 test_raw_data_format <- function(data) {
     test_myClimList(data)
     purrr::walk(data$localities, test_raw_locality)

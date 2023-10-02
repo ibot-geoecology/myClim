@@ -7,10 +7,11 @@
 .read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL <- "Plot or region must be set."
 .read_const_MESSAGE_UNSUPPOERTED_FORMAT <- "{data_format} is not a supported data format. File is skipped."
 .read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not applicable format to {path}. File is skipped."
+.read_const_MESSAGE_USER_DATA_FORMAT_KEY <- "The key in user_data_format must not be the same as the key in mc_data_formats."
 
 #' Reading files or directories
 #'
-#' This function read one or more csv files or directories of identical, 
+#' This function read one or more CSV/TXT files or directories of identical, 
 #' pre-defined logger type (format) see [mc_DataFormat] and [mc_data_formats]. 
 #' This function does not support loading locality or sensor metadata while reading.
 #' Metadata can be loaded through [myClim::mc_read_data()] or
@@ -18,16 +19,17 @@
 #' 
 #' @details 
 #' If file is not in expected format, then file is skipped and warning printed in console. 
-#' CSV files (loggers raw data) are in resulting myClim object placed to separate
+#' CSV/TXT files (loggers raw data) are in resulting myClim object placed to separate
 #' localities with empty metadata. Localities are named after serial_number of logger.
 #' Pre-defined logger types are ("Dendro","HOBO","Thermo","TMS","TMS_L45")
-#' By default data are cleaned with function [myClim::mc_prep_clean()]. See function description. It detects
-#' holes in time-series, duplicated records or records in wrong order.
+#' By default data are cleaned with function [myClim::mc_prep_clean()]. 
+#' See function description. It detects holes in time-series, 
+#' duplicated records or records in wrong order.
 #'
 #' @seealso [myClim::mc_DataFormat], [myClim::mc_prep_clean()]
 #'
 #' @param paths vector of paths to files or directories
-#' @param dataformat_name data format of logger one of `names(mc_data_formats)`
+#' @param dataformat_name data format of logger; one of `names(mc_data_formats)`
 #' @param recursive recursive search in sub-directories (default TRUE)
 #' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA).
 #' Required for HOBO files. For TMS files ignored, there is known, stable date format. see [mc_data_formats]
@@ -38,16 +40,24 @@
 #' @param step time step of microclimatic time-series in seconds. When provided, then is used in
 #' [mc_prep_clean] instead of automatic step detection.
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
-#' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
-#' @param silent if TRUE, then any information is printed in console (default FALSE)
+#' @template params_read_common
 #' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
 #' files <- c(system.file("extdata", "data_91184101_0.csv", package = "myClim"),
 #'            system.file("extdata", "data_94184102_0.csv", package = "myClim"))
 #' tomst_data <- mc_read_files(files, "TOMST")
+#' # user_data_formats
+#' files <- system.file("extdata", "TMS94184102.csv", package = "myClim")
+#' user_data_formats <- list(my_logger=new("mc_DataFormat"))
+#' user_data_formats$my_logger@date_column <- 2
+#' user_data_formats$my_logger@date_format <- "%Y-%m-%d %H:%M:%S"
+#' user_data_formats$my_logger@tz_offset <- 0
+#' user_data_formats$my_logger@columns[[mc_const_SENSOR_T_C]] <- c(3, 4, 5)
+#' user_data_formats$my_logger@columns[[mc_const_SENSOR_real]] <- 6
+#' my_data <- mc_read_files(files, "my_logger", silent=TRUE, user_data_formats=user_data_formats)
 mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, recursive=TRUE, date_format=NA_character_,
-                          tz_offset=NA_integer_, step=NA_integer_, clean=TRUE, silent=FALSE) {
+                          tz_offset=NA_integer_, step=NA_integer_, clean=TRUE, silent=FALSE, user_data_formats=NULL) {
     if(all(dir.exists(paths))) {
         files <- .read_get_csv_files_from_directory(paths, recursive)
     } else if(any(dir.exists(paths))) {
@@ -58,7 +68,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name,
                               serial_number=NA_character_, logger_type=logger_type, date_format=date_format, tz_offset=tz_offset,
                               step=step)
-    mc_read_data(files_table, clean=clean, silent=silent)
+    mc_read_data(files_table, clean=clean, silent=silent, user_data_formats=user_data_formats)
 }
 
 .read_get_csv_files_from_directory <- function(paths, recursive) {
@@ -123,15 +133,14 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' * lat_wgs84 - latitude (in decimal degrees)
 #' * tz_offset - locality time zone offset from UTC, applicable for converting time-series from UTC to local time.
 #' * ... - any other columns are imported to `metadata@user_data`
-#' @param clean if TRUE, then [mc_prep_clean] is called automatically while reading (default TRUE)
-#' @param silent if TRUE, then any information is not printed in console (default FALSE)
+#' @template params_read_common
 #' @return myClim object in Raw-format see [myClim-package]
 #' @export
 #' @examples
 #' files_csv <- system.file("extdata", "files_table.csv", package = "myClim")
 #' localities_csv <- system.file("extdata", "localities_table.csv", package = "myClim")
 #' tomst_data <- mc_read_data(files_csv, localities_csv)
-mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=FALSE) {
+mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=FALSE, user_data_formats=NULL) {
     if(is.character(files_table)) {
         source_csv_file <- files_table
         files_table <- .read_get_table_from_csv(files_table)
@@ -151,8 +160,8 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         localities_table <- .common_convert_factors_in_dataframe(localities_table)
         localities <- .read_init_localities_from_table(localities_table)
     }
-
-    data_formats <- .read_get_data_formats(files_table)
+    .read_check_data_formats(user_data_formats)
+    data_formats <- .read_get_data_formats(files_table, user_data_formats)
     condition <- purrr::map_lgl(data_formats, ~ !is.null(.x))
     files_table <- files_table[condition, ]
     data_formats <- data_formats[condition]
@@ -196,13 +205,26 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     result
 }
 
-.read_get_data_formats <- function(files_table) {
+.read_check_data_formats <- function(user_data_formats) {
+    if(is.null(user_data_formats))
+        return()
+    same_keys <- intersect(names(myClim::mc_data_formats), names(user_data_formats))
+    if(length(same_keys) > 0)
+        stop(.read_const_MESSAGE_USER_DATA_FORMAT_KEY)
+}
+
+.read_get_data_formats <- function(files_table, user_data_formats) {
     file_function <- function (path, data_format, logger_type, date_format, tz_offset) {
-        if(!(data_format %in% names(myClim::mc_data_formats))){
+        if(data_format %in% names(myClim::mc_data_formats)) {
+            data_format_object <- myClim::mc_data_formats[[data_format]]
+        }
+        else if(data_format %in% names(user_data_formats)) {
+            data_format_object <- user_data_formats[[data_format]]
+        }
+        else {
             warning(stringr::str_glue(.read_const_MESSAGE_UNSUPPOERTED_FORMAT))
             return(NULL)
         }
-        data_format_object <- myClim::mc_data_formats[[data_format]]
         if(is.na(data_format_object@date_format) && !is.na(date_format)) {
             data_format_object@date_format <- date_format
         }
@@ -323,9 +345,13 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_logger <- function(filename, data_format, serial_number, step) {
     data_table <- .read_get_data_from_file(filename, data_format)
+    .model_check_format(data_format)
     data_table <- .model_edit_data(data_format, data_table)
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
-    datetime <- as.POSIXct(strptime(data_table[[data_format@date_column]], data_format@date_format, "UTC"))
+    datetime <- data_table[[data_format@date_column]]
+    if(!lubridate::is.POSIXct(datetime)) {
+        datetime <- as.POSIXct(strptime(datetime, data_format@date_format, "UTC"))
+    }
     if(any(is.na(datetime))) {
         warning(stringr::str_glue(.read_const_MESSAGE_WRONG_DATETIME))
         return(NULL)
@@ -362,7 +388,10 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         }
         stop(stringr::str_glue("It isn't possible to load sensor data from {column_index} column in file {filename}."))
     }
-    as.data.frame(purrr::map(seq(ncol(data_table)), values_function))
+    original_names <- colnames(data_table)
+    result <- as.data.frame(purrr::map(seq(ncol(data_table)), values_function))
+    colnames(result) <- original_names
+    result
 }
 
 .read_get_new_logger <- function(datetime, sensors, serial_number=NA_character_, logger_type=NA_character_, step=NA_integer_) {
@@ -378,7 +407,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_get_sensors_from_data_format <- function(data_table, data_format, datetime, states){
     heights_dataframe <- dplyr::filter(myClim::mc_data_heights, .data$logger_type == data_format@logger_type)
-    sensor_function <- function(column, sensor_id) {
+    sensor_def_function <- function(column, sensor_id){
         height <- NA_character_
         suffix <- NA_character_
         sensor_filter <- heights_dataframe$sensor_name == sensor_id
@@ -387,12 +416,24 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
             suffix <- heights_dataframe$suffix[sensor_filter]
         }
         sensor_name <- if(is.na(suffix)) sensor_id else paste0(sensor_id, suffix)
+        count <- length(column)
+        result <- tibble::tibble(column=column,
+                                 sensor_id=rep(sensor_id, count),
+                                 sensor_name=rep(sensor_name, count),
+                                 height=rep(height, count))
+        if(count > 1) {
+            result$sensor_name <- paste0(result$sensor_name, 1:count)
+        }
+        return(result)
+    }
+    sensor_table <- purrr::imap_dfr(data_format@columns, sensor_def_function)
+    sensor_function <- function(column, sensor_id, sensor_name, height) {
         values <- data_table[[column]]
         sensor <- .common_get_new_sensor(sensor_id, sensor_name, values=values, height=height, states=states)
         sensor <- .read_set_errors_in_sensor(sensor, data_format@error_value, datetime)
         return(sensor)
     }
-    result <- purrr::imap(data_format@columns, sensor_function)
+    result <- purrr::pmap(sensor_table, sensor_function)
     names(result) <- purrr::map_chr(result, ~ .x$metadata@name)
     result
 }

@@ -29,13 +29,13 @@ install.packages("http://labgis.ibot.cas.cz/myclim/myClim_latest.tar.gz", repos=
 ```
 
 ## Reading Microclimatic Data
-myClim natively supports the import of several file formats, which can be viewed by running the command `r names(myClim::mc_data_formats)` in R. To specify the data format when reading in files, set the dataformat_name parameter. Alternatively, myClim can read in records from any wide or long data frame in R.
+myClim natively supports the import of several pre-defined loggers. You can view the list of pre-defined loggers using `names(myClim::mc_data_formats)`. To specify the data format when reading files, set the `dataformat_name` parameter. There is also the possibility to read user-defined loggers by defining the `user_data_formats` parameter. For examples of how to read custom loggers in myClim, please refer to a separate vignette. Alternatively, myClim can read records from any wide or long data frame in R.
 
 **The mc_read_files(), mc_read_wide(), and mc_read_long()** functions can be used for reading in data without metadata. These functions are user-friendly, fast, and allow for exploratory data analysis. myClim automatically organizes data into artificial localities, and metadata can be updated at a later stage. To organize records into real localities and provide metadata, use the **mc_read_data()** function along with two tables:1. A table that specifies logger file paths, data format name, logger type, and locality. 2. A table that provides locality metadata, such as coordinates, elevation, time offset to UTC, and so on.
 
 ```{r eval=TRUE,warning=FALSE}
 library(myClim)
-## Read without metadata
+## Read pre-defined loggers without metadata
 # read from Tomst files
 tms.f <- mc_read_files(c("data_91184101_0.csv", "data_94184102_0.csv",
                          "data_94184103_0.csv"),
@@ -55,7 +55,7 @@ meteo.table <- readRDS("airTmax_meteo.rds") # wide format data frame
 meteo <- mc_read_wide(meteo.table, sensor_id = "T_C", 
                       sensor_name = "airTmax", silent = T)
 
-## Read with metadata
+## Read pre-defined logger with metadata
 # provide two tables. Can be csv files or R data.frame
 ft <- read.table("files_table.csv", sep=",", header = T)
 lt <- read.table("localities_table.csv", sep=",", header = T)

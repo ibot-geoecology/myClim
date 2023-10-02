@@ -1,7 +1,7 @@
 source("libtest.R")
 
 test_that("mc_prep_clean", {
-    cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", silent=T)
+    differnt_values_warning(cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", silent=T))
     expect_warning(mc_prep_clean(cleaned_data, silent=T))
     test_raw_data_format(cleaned_data)
     expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@count_duplicities, 1)
@@ -24,7 +24,8 @@ test_that("mc_prep_clean", {
 })
 
 test_that("mc_prep_clean defined step", {
-    cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", step=30*60, silent=T)
+    differnt_values_warning(cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", step=30*60, silent=T)) %>%
+        suppressWarnings()
     expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@step, 30*60)
     expect_equal(length(cleaned_data$localities[["94184102"]]$loggers[[1]]$datetime), 25)
 })
