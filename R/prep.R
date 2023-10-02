@@ -941,8 +941,8 @@ mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method
 #' @template param_myClim_object_cleaned
 #' @template param_localities
 #' @param soil_sensor character, soil temperature sensor (default `mc_const_SENSOR_TMS_T1`)
-#' @param air_sensor character, air temperature sensor (default mc_const_SENSOR_TMS_T2)
-#' @param moist_sensor character, soil moisture sensor (default mc_const_SENSOR_TMS_moist)
+#' @param air_sensor character, air temperature sensor (default `mc_const_SENSOR_TMS_T2`)
+#' @param moist_sensor character, soil moisture sensor (default `mc_const_SENSOR_TMS_moist`)
 #' @param output_sensor (default "off_soil")
 #' @param smooth logical, smooth out isolated faulty/correct records using floating window (default FALSE)
 #' @param smooth_window integer, smooth floating window width (in days) (default 10)
