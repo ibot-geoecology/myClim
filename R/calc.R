@@ -12,7 +12,7 @@
 #' Snow detection from temperature
 #'
 #' @description
-#' This function creates a new virtual sensor on locality within myClim data object.
+#' This function creates a new virtual sensor on locality within the myClim data object.
 #' Virtual sensor hosts values of snow cover presence/absence detected from temperature time-series.
 #'
 #' @details
@@ -249,49 +249,42 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' to volumetric water content (VWC).
 #'
 #' @details
-#' This function is suitable for TOMST TMS loggers measuring soil moisture in raw TDT
-#' units (TMS units). Raw TDT units represents inverted and scaled (1-4095)
-#' number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz)
-#' sent through a ca 30 cm long circuit within a 640-microsecond time window.
-#' For more details see (Wild et al. 2019). Pulse count is directly related to
-#' the soil moisture content. Therefore, based on experimental calibration
-#' curves, it is possible to directly convert TMS units to standardized
-#' volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
+#' This function is suitable for TOMST TMS loggers measuring soil moisture in raw TMS units. 
+#' These raw TMS units represents inverted and numerically rescaled (1-4095) electromagnetic signal from the patented sensor working #' on Time Domain Transmission principle (see Wild et al. 2019). The typical values for TMS4 logger range from cca 115 in dry air to #' 3635 in distilled water - see [mc_calib_moisture].
+#' Raw TMS units can be converted to the soil volumetric water content with calibration curves.The function currently provides 
+#' several experimentally derived calibration curves which were developped at reference temperature. Therefore, during the 
+#' conversion, the reference temperature is corrected with the actual soil temperature values from TMS_T1 soil temperature sensor.
 #'
-#' The function uses experimentally derived calibration curves under
-#' reference temperatures for several soil types. For the volumetric
-#' water content conversion the reference temperature is corrected with the
-#' actual soil temperature using TMS_T1 soil temperature sensor records.
-#' As the calibration curves were derived for several soil types,
-#' in case user know specific soil type, where the logger was measuring,
-#' then it is possible to chose the closest¨existing calibration curve for specific soil
-#' type instead of default "universal". Available soil types are: sand, loamy sand A,
+#' The default calibration curve is "universal", which was designed for mineral soils (see Kopecký et al. 2021). 
+#' Specific calibration curves were developed for several soil types (see Wild et al. 2019) and the user can choose one of these 
+#' or can define its own calibration - see [mc_data_vwc_parameters]
+#' 
+#' Currently available calibration curves are: sand, loamy sand A,
 #' loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
-#' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
-#' For full table of function parameters see [mc_data_vwc_parameters]
+#' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. 
+#' For details see [mc_data_vwc_parameters].
 #'
-#' It is also possible to use custom parameters `a`, `b` and `c`. These can be
-#' derived from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
+#' It is also possible to define new calibarion function with custom parameters `a`, `b` and `c`. These can be
+#' derived e.g. from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
 #'
-#' **Warning:** TOMST TMS Calibr utility was developed for TMS3 series of TOMST sensor which are
-#' different from commonly used.newer TMS4 series. Therefore we rather recommend to use
-#' pre-defined `universal` calibration according to (Kopecký et al. 2021).
+#' **Warning:** TOMST TMS Calibr utility was developed for TMS3 series of TMS loggers, which have 
+#' different range of raw soil moisture values than TMS4 series. 
 #'
 #' The function by default replace the moisture records in frozen soils with NA (param *frozen2NA*),
 #' because the soil moisture sensor was not designed to measure in
-#' frozen soils and the returned records are thus not comparable
+#' frozen soils and the returned values are thus not comparable
 #' with values from non-frozen soil.
 #'
 #' @template param_myClim_object_cleaned
 #' @param moist_sensor name of soil moisture sensor to be converted from TMS
-#' units to volumetric (default "TMS_moist") see `names(mc_data_sensors)`.
+#' units to volumetric water content (default "TMS_moist") see `names(mc_data_sensors)`.
 #' Soil moisture sensor must be in moisture_raw physical see `names(mc_data_physical)`.
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
 #' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
 #' @param output_sensor name of new virtual sensor with VWC values (default "VWC_moisture")
 #' @param soiltype either character corresponding to one of `soiltype` from [mc_data_vwc_parameters]
-#' (default `"universal"`). Or a list with parameters `a`, `b` and `c` manually filled in
-#' by user i.e.,`list(a=Value_1, b=Value_2, c=Value_3)`.
+#' (default `"universal"`). Or a list with parameters `a`, `b` and `c` provided 
+#' by the user - i.e.,`list(a=Value_1, b=Value_2, c=Value_3)`.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @param ref_t (default `r mc_const_CALIB_MOIST_REF_T`)
 #' @param acor_t (default `r sprintf("%.14f", mc_const_CALIB_MOIST_ACOR_T)`) correction parameter for temperature drift
@@ -305,11 +298,11 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @seealso [mc_data_vwc_parameters]
 #' @references
 #' Wild, J., Kopecký, M., Macek, M., Šanda, M., Jankovec, J., Haase, T. (2019) Climate at ecologically relevant scales:
-#' A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
+#' A new temperature and soil moisture logger for long-term microclimate measurement. Agriculture and Forest Meteorology 268, 40-47.
 #' https://doi.org/10.1016/j.agrformet.2018.12.018
 #'
 #' Kopecký, M., Macek, M., Wild, J. (2021) Topographic Wetness Index calculation guidelines based on measured soil
-#' moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
+#' moisture and plant species composition. Science of the Total Environment 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 #'
 #' @examples
 #' data1 <- mc_calc_vwc(mc_data_example_agg, soiltype="sand", localities="A2E32")
@@ -555,7 +548,7 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' If value type of sensor is logical, then output type is integer. (TRUE, TRUE, FALSE -> 2)
 #'
 #' @template param_myClim_object_cleaned
-#' @param sernsors names of sensors on which to calculate cumulative sum
+#' @param sensors names of sensors on which to calculate cumulative sum
 #' @param output_suffix name suffix for virtual sensor names (default "_cumsum") e.g. TMS_T3_cumsum
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return The same myClim object as input but with added cumsum sensors.
