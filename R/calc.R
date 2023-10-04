@@ -12,7 +12,7 @@
 #' Snow detection from temperature
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object.
+#' This function creates a new virtual sensor on locality within myClim data object.
 #' Virtual sensor hosts values of snow cover presence/absence detected from temperature time-series.
 #'
 #' @details
@@ -21,7 +21,7 @@
 #' does not exceed specific `tmax` threshold value (default 1.25°C) and the temperature range remain below specified
 #' `range` threshold (default 1°C). This function rely on insulating effect of a of snow layer,
 #' significantly reducing diurnal temperature variation and restricting the maximal temperature near the ground
-#' close to freezing point. Temperature sensor near the ground (`TMS_T2`) is default choice for snow-cover detection from Tomst TMS4 loggers.
+#' close to freezing point. Temperature sensor near the ground (`TMS_T2`) is default choice for snow-cover detection from Tomst TMS loggers.
 #' Snow detection with default values accurately detects snow of depth > 15cm (unpublished data).
 #' For detection of thin snow, range parameter should be set to 3-4 °C.
 #' The function returns vector of snow cover (TRUE/FLASE) with same time-step as input data. To get number of days with snow cover
@@ -244,7 +244,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' Conversion of raw TMS soil moisture values to volumetric water content (VWC)
 #'
 #' @description
-#' This function creates new virtual sensor on the locality within myClim data object.
+#' This function creates a new virtual sensor on the locality within the myClim data object.
 #' Function converts the raw TMS soil moisture (scaled TDT signal)
 #' to volumetric water content (VWC).
 #'
@@ -304,11 +304,11 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @export
 #' @seealso [mc_data_vwc_parameters]
 #' @references
-#' Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:
+#' Wild, J., Kopecký, M., Macek, M., Šanda, M., Jankovec, J., Haase, T. (2019) Climate at ecologically relevant scales:
 #' A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
 #' https://doi.org/10.1016/j.agrformet.2018.12.018
 #'
-#' Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil
+#' Kopecký, M., Macek, M., Wild, J. (2021) Topographic Wetness Index calculation guidelines based on measured soil
 #' moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 #'
 #' @examples
@@ -437,8 +437,8 @@ mc_calc_vwc <- function(data, moist_sensor=mc_const_SENSOR_TMS_moist,
 #' For shorter time steps than the day, the GDD value is the contribution
 #' of the interval to the growing degree day, supposing constant temperature over this period.
 #' Be careful while aggregating growing degree days to longer periods
-#' see [myClim::mc_agg()] only meaningful aggregation function is `sum`,
-#' but myClim let you apply anything.
+#' - only meaningful aggregation function is `sum`,
+#' but myClim let you apply anything see [myClim::mc_agg()].
 #'
 #' @template param_myClim_object_cleaned
 #' @param sensor name of temperature sensor used for GDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
@@ -508,18 +508,18 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #' Freezing Degree Days
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object.
+#' This function creates a new virtual sensor on locality within the myClim data object.
 #' The virtual sensor hosts FDD Freezing Degree Days.
 #'
 #' @details
 #' The allowed step length for FDD calculation is day and shorter.
-#' Function creates new virtual sensor with the same time step as input data.
-#' For shorter time steps than the day (which is not intuitive for FDD)
+#' Function creates a new virtual sensor with the same time step as input data.
+#' For shorter time steps than the day (which is however not intuitive for FDD)
 #' the FDD value is the contribution of the time step to the freezing degree day.
-#' Be careful while aggregating freezing degree days to longer periods see [myClim::mc_agg()]
-#' only meaningful aggregation function is `sum`, but myClim allow you to apply anything.
+#' Be careful while aggregating freezing degree days to longer periods 
+#' only meaningful aggregation function is `sum`, but myClim allows you to apply anything see [myClim::mc_agg()].
 #'
-#' Note that  FDD is always positive number, despite summing freezing events. When you set
+#' Note that FDD is always positive number, despite summing freezing events. When you set
 #' `t_base=-1` you get the sum of degree days below -1 °C but expressed in positive number
 #' if you set `t_base=1` you get also positive number. Therefore pay attention to
 #' name of output variable which contains `t_base` value. FDD1_TMS_T3, t_base=1 vs FDDminus1_TMS_T3, t_base=-1
@@ -547,15 +547,15 @@ mc_calc_fdd <- function(data, sensor, output_prefix="FDD", t_base=0, localities=
 #' Cumulative sum
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object.
-#'  The virtual sensor hosts the cumulative sum of the values on the input sensor.
+#' This function creates a new virtual sensor on locality within the myClim data object.
+#'  The virtual sensor represents the cumulative sum of the values on the input sensor.
 #' Names of new sensors are original sensor name + `outpus_suffix`.
 #'
 #' @details
 #' If value type of sensor is logical, then output type is integer. (TRUE, TRUE, FALSE -> 2)
 #'
 #' @template param_myClim_object_cleaned
-#' @param sensors names of sensors where to calculate cumulative sum
+#' @param sernsors names of sensors on which to calculate cumulative sum
 #' @param output_suffix name suffix for virtual sensor names (default "_cumsum") e.g. TMS_T3_cumsum
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
 #' @return The same myClim object as input but with added cumsum sensors.
@@ -614,10 +614,10 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
 #' Calibrating Tomst dendrometer values to micrometers
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object.
+#' This function creates a new virtual sensor on locality within the myClim data object.
 #' The virtual sensor hosts the values of the change in stem size converted from raw
-#' Tomst units to micrometers. Note that newer versions of Tomst Lolly downloading
-#' software can converts raw Tomst units to micrometers.
+#' Tomst units to micrometers. Note that newer versions of Tomst Lolly 
+#' software can directly convert raw Tomst units to micrometers.
 #'
 #' @template param_myClim_object_cleaned
 #' @param dendro_sensor name of change in stem size sensor to be converted from raw to micrometers (default "Dendro_raw") see `names(mc_data_sensors)`
@@ -665,12 +665,12 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=mc_const_SENSOR_Dendro_raw,
 #' Calculate vapor pressure deficit (in kPa)
 #'
 #' @description
-#' This function creates new virtual sensor on locality within myClim data object.
-#' The virtual sensor hosts the vapor pressure deficit (in kPa) calculated
+#' This function creates a new virtual sensor on locality within the myClim data object.
+#' The virtual sensor represents the vapor pressure deficit (in kPa) calculated
 #' from temperature and relative air humidity.
 #'
 #' @details
-#' Equation comes from the CR-5 Users Manual 2009–12 from Buck Research modified from Buck (1981)
+#' Equation are from the CR-5 Users Manual 2009–12 from Buck Research. These equations have been modified from Buck (1981)
 #' and adapted by Jones, 2013 (eq. 5.15)
 #' Elevation to pressure conversion function uses eq. 3.7 from Campbell G.S. & Norman J.M. (1998).
 #'
@@ -684,8 +684,8 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=mc_const_SENSOR_Dendro_raw,
 #' @return myClim object same as input but with added VPD sensor
 #' @export
 #' @references
-#' Jones H.G. (2014) Plants and Microclimate, Third Edit. Cambridge University Press, Cambridge Buck A.L. (1981)
-#' New equations for computing vapor pressure and enhancment factor. Journal of Applied Meteorology 20: 1527–1532.
+#' Jones H.G. (2014) Plants and Microclimate, Third Edit. Cambridge University Press, Cambridge 
+#' Buck A.L. (1981) New equations for computing vapor pressure and enhancment factor. Journal of Applied Meteorology 20: 1527–1532.
 #' Campbell G.S. & Norman J.M. (1998). An Introduction to Environmental Biophysics, Springer New York, New York, NY
 #'
 #' @examples
