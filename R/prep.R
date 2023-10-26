@@ -24,9 +24,9 @@
 #'
 #' @description
 #' By default `mc_prep_clean` runs automatically when [myClim::mc_read_files()],
-#' [myClim::mc_read_data()] are called. `mc_prep_clean` check time-series in
+#' [myClim::mc_read_data()] are called. `mc_prep_clean` checks time-series in
 #' myClim object in Raw-format for missing, duplicated, and disordered records
-#' and regularize microclimatic time-series to constant time-step.
+#' and regularizes microclimatic time-series to constant time-step.
 #' Duplicated records are removed and missing values are filled with NA.
 #'
 #' See details.
@@ -35,29 +35,29 @@
 #' Processing the data with `mc_prep_clean` is a mandatory step
 #' required for further data handling in `myClim` library.
 #'
-#' This function guarantee that all time series are in chronological order
-#' and have regular time-step, without duplicated records.
-#' Function `mc_prep_clean` use time-step provided by user on import `mc_read`
-#' (is stored in metadata of logger [myClim::mc_LoggerMetadata].
-#' If time step is not provided by user on import (NA),than myClim automatically
-#' detects the time step from input time series based on the last 100 records.
+#' This function guarantee that all time series are in chronological order,
+#' have regular time-step and no duplicated records.
+#' Function `mc_prep_clean` use time-step provided by user during data import with `mc_read`
+#' (used time-step is permanently stored in logger metadata [myClim::mc_LoggerMetadata].
+#' If time-step is not provided by the user (NA),than myClim automatically
+#' detects the time-step from input time series based on the last 100 records.
 #' In case of irregular time series, function returns warning and skip the series.
 #'
-#' In case the time step is regular, but is not nicely rounded, function round
-#' the time series to the closest nice time and shift original data.
+#' In case the time-step is regular, but is not nicely rounded, function rounds
+#' the time series to the closest nice time and shifts original data.
 #' E.g., original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28)
-#' are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30)
-#' microclimatic records are not modified but only shifted.
-#' Maximal allowed shift of time series is 30 minutes. I.e. when the time step
-#' is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30).
+#' are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30).
+#' Note that microclimatic records are not modified but only shifted.
+#' Maximum allowed shift of time series is 30 minutes. For example, when the time-step
+#' is 2h (e.g. 13:33, 15:33, 17:33), the measurement times are shifted to (13:30, 15:30, 17:30).
 #' When you have 2h time step and wish to round to the whole hour
-#' (13:33 -> 14:00, 15:33 -> 16:00) than after clening use `mc_agg(period="2 hours")`
+#' (13:33 -> 14:00, 15:33 -> 16:00) than use `mc_agg(period="2 hours")` command after data cleaning.
 #'
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @return
 #' * cleaned myClim object in Raw-format
-#' * cleaning log is by default printed in console, and can be called ex post by [myClim::mc_info_clean()]
+#' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
 #' @export
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_raw)
@@ -254,19 +254,17 @@ mc_prep_clean <- function(data, silent=FALSE) {
 #' You can import metadata from named list or from data frame. See details.
 #'
 #' @details
-#' Locality metadata is especially useful for handling time zones, considering temporal cycling.
-#' E.g. while providing coordinates, and in case you are sure, the loggers recorded in UTC,
-#' you can harmonize all data to the solar time (midday) with [myClim::mc_prep_solar_tz()]
-#' calculating offset to the UTC based on coordinates. Or you can directly provide
-#' the offset in minutes yourself for individual localities. This is useful e.g.
-#' for heterogeneous data sets containing loggers recording in local time
-#' and you wish to unify them by setting individual offset e.g. back to UTC.
-#' If tz_offset is set manually, than tz_type is set to `user defined`.
+#' Locality metadata is critical e.g. for correctly handling time zones.
+#' By providing geographic coordinates in locality metadata, the user can later harmonize all data to the local solar time (midday) #' with [myClim::mc_prep_solar_tz()] or calculate temporal offset to the UTC base on local time-zone. 
+#' Alternatively, the user can directly provide the offset (in minutes) for individual localities. This can be useful especially
+#' for heterogeneous data sets containing various localities with loggers recording in local time. By providing temporal offset for #' each locality separately, you can unify the whole dataset to UTC.
+#' Note that when tz_offset is set manually, than tz_type is set to `user defined`.
 #'
 #' For minor metadata modification it is practical to use named list in combination
 #' with `param_name` specification. E.g. when you wish to modify only time zone offset,
 #' then set `param_name="tz_offset"` and provide named list with locality name and
-#' offset value `list(A1E05=60)`. Similarly for other metadata slots [mc_LocalityMetadata].
+#' offset value `list(A1E05=60)`. 
+#' Similarly, you can modify other metadata slots [mc_LocalityMetadata].
 #'
 #' For batch or generally more complex metadata modification you can provide data.frame
 #' with columns specifying `locality_id` and one of `new_locality_id, elevation, lat_wgs84, lon_wgs84, tz_offset`.
