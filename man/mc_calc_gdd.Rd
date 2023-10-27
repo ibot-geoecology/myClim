@@ -32,8 +32,10 @@ Function creates new virtual sensor with the same time step as input data.
 For shorter time steps than the day, the GDD value is the contribution
 of the interval to the growing degree day, supposing constant temperature over this period.
 Be careful while aggregating growing degree days to longer periods
-see \code{\link[=mc_agg]{mc_agg()}} only meaningful aggregation function is \code{sum},
-but myClim let you apply anything.
+\itemize{
+\item only meaningful aggregation function is \code{sum},
+but myClim let you apply anything see \code{\link[=mc_agg]{mc_agg()}}.
+}
 }
 \examples{
 gdd_data <- mc_calc_gdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))

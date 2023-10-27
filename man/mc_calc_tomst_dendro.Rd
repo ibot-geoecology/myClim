@@ -24,10 +24,10 @@ mc_calc_tomst_dendro(
 myClim object same as input but with added dendro_l_um sensor
 }
 \description{
-This function creates new virtual sensor on locality within myClim data object.
+This function creates a new virtual sensor on locality within the myClim data object.
 The virtual sensor hosts the values of the change in stem size converted from raw
-Tomst units to micrometers. Note that newer versions of Tomst Lolly downloading
-software can converts raw Tomst units to micrometers.
+Tomst units to micrometers. Note that newer versions of Tomst Lolly
+software can directly convert raw Tomst units to micrometers.
 }
 \examples{
 agg_data <- mc_calc_tomst_dendro(mc_data_example_agg, localities="A1E05")

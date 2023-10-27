@@ -1,4 +1,4 @@
-.PHONY: install-no-vignete, install, build, build-dev remove, generate, generate-source, generate-documentation, generate-html, test, check, check-dev
+.PHONY: install-no-vignete, install, build, build-dev, remove, generate, generate-source, generate-documentation, generate-html, test, check, check-dev
 
 install-no-vignette:
 	R -e 'install.packages(".", repos = NULL)'

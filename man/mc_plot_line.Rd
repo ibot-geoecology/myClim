@@ -13,7 +13,9 @@ mc_plot_line(
   png_height = 1900,
   start_crop = NULL,
   end_crop = NULL,
-  use_utc = TRUE
+  use_utc = TRUE,
+  localities = NULL,
+  facets = TRUE
 )
 }
 \arguments{
@@ -23,7 +25,7 @@ mc_plot_line(
 
 If NULL then the plot is displayed and can be returned into r environment but is not saved to file.}
 
-\item{sensors}{select the names of sensors to be plotted (max 2) see \code{names(mc_data_sensors)}}
+\item{sensors}{names of sensors; if NULL then all (default NULL) see \code{names(mc_data_sensors)}}
 
 \item{scale_coeff}{scale coefficient for secondary axis (default NULL)}
 
@@ -44,6 +46,10 @@ shifting daily, weekly, monthly... data (shift midnight) does not make sense in 
 But when user need more flexibility, then myClim Raw-format
 can be used, In Raw-format \code{use_utc} is not limited, user can shift an data without the restrictions.
 See \link{myClim-package}}
+
+\item{localities}{names of localities; if NULL then all (default NULL)}
+
+\item{facets}{if TRUE facets are used for localities (default TRUE)}
 }
 \value{
 ggplot2 object

@@ -11,7 +11,8 @@
 #'
 #' @template param_myClim_object_raw
 #' @param directory path to output directory
-#' @template param_localities_sensors
+#' @template param_localities
+#' @template param_sensors
 #' @param crop datetime range for plot, not cropping if NA (default c(NA, NA))
 #' @export
 #' @return PNG files created in the output directory
@@ -151,7 +152,8 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
 #' @template param_myClim_object
 #' @param filename output file name (file path)
 #' @param title of plot; default is empty
-#' @template param_localities_sensors
+#' @template param_localities
+#' @template param_sensors
 #' @param height of image; default = 1900
 #' @param left_margin width of space for sensor_labels; default = 12
 #' @template param_use_utc
@@ -258,7 +260,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
     if(!is.null(filename)) {
         file_parts <- .plot_get_file_parts(filename)
         if(file_parts[[2]] == "pdf"){
-            .plot_print_pdf(filename, plots, locality_id ~ sensor_name, 40)
+            .plot_print_pdf(filename, plots, locality_id ~ sensor_name, 40, TRUE)
         } else if(file_parts[[2]] == "png") {
             .plot_print_raster_pngs(file_parts[[1]], plots, dplyr::group_keys(sensors_table)$physical, png_width, png_height)
         } else {
@@ -354,15 +356,21 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
     match[2:3]
 }
 
-.plot_print_pdf <- function(filename, plots, facets, nrow) {
+.plot_print_pdf <- function(filename, plots, facets, nrow, do_facet) {
     facet_function <- function(page, drop) {
         ggforce::facet_grid_paginate(facets, ncol = 1, nrow = nrow, page = page, drop = drop, byrow = FALSE)
     }
-    plots <- purrr::map(plots, ~ .x + facet_function(1, FALSE))
+    if(do_facet) {
+        plots <- purrr::map(plots, ~ .x + facet_function(1, FALSE))
+    }
 
     print_plot <- function(plot) {
-        n_pages <- sum(ggforce::n_pages(plot))
-        purrr::walk(seq(1:n_pages), function (x) print(plot + facet_function(x, TRUE)))
+        if(do_facet) {
+            n_pages <- sum(ggforce::n_pages(plot))
+            purrr::walk(seq(1:n_pages), function (x) print(plot + facet_function(x, TRUE)))
+        } else {
+            print(plot)
+        }
     }
 
     pdf(filename, family="ArialMT", paper="a4", width=210/25.4, height=297/25.4)
@@ -373,13 +381,15 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 .plot_print_raster_pngs <- function(filename_prefix, plots, physicals, width, height) {
     print_function <- function(plot, physical) {
         filename <- stringr::str_glue("{filename_prefix}_{physical}.png")
-        .plot_print_png(filename, plot, width, height, locality_id ~ sensor_name)
+        .plot_print_png(filename, plot, width, height, locality_id ~ sensor_name, TRUE)
     }
     purrr::walk2(plots, physicals, print_function)
 }
 
-.plot_print_png <- function(filename, plot, width, height, facets) {
-    plot <- plot + ggforce::facet_grid_paginate(facets, ncol = 1, byrow = FALSE)
+.plot_print_png <- function(filename, plot, width, height, facets, do_facet) {
+    if(do_facet){
+        plot <- plot + ggforce::facet_grid_paginate(facets, ncol = 1, byrow = FALSE)
+    }
     png(filename, width=width, height=height, res=200)
     print(plot)
     dev.off()
@@ -408,14 +418,16 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @param filename output file name/path with the extension - supported formats are .pdf and .png (default NULL)
 #'
 #' If NULL then the plot is displayed and can be returned into r environment but is not saved to file.
-#' @param sensors select the names of sensors to be plotted (max 2) see `names(mc_data_sensors)`
+#' @template param_sensors
 #' @param scale_coeff scale coefficient for secondary axis (default NULL)
 #' @param png_width width for png output (default 1900)
 #' @param png_height height for png output (default 1900)
 #' @param start_crop POSIXct datetime in UTC for crop data (default NULL)
 #' @param end_crop POSIXct datetime in UTC for crop data (default NULL)
 #' @template param_use_utc
+#' @template param_localities
 #' @return ggplot2 object
+#' @param facets if TRUE facets are used for localities (default TRUE)
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
 #' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_moist"))
@@ -426,38 +438,41 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          scale_coeff=NULL,
                          png_width=1900, png_height=1900,
-                         start_crop=NULL, end_crop=NULL, use_utc=TRUE) {
-    data <- mc_filter(data, sensors=sensors)
+                         start_crop=NULL, end_crop=NULL, use_utc=TRUE,
+                         localities=NULL,
+                         facets=TRUE) {
+    data <- mc_filter(data, localities=localities, sensors=sensors)
     if(!is.null(start_crop) || !is.null(end_crop)) {
         data <- mc_prep_crop(data, start_crop, end_crop)
     }
     sensors_table <- .plot_get_sensors_table(data)
     sensors_table <- .plot_add_coeff_to_sensors_table(sensors_table, scale_coeff)
     data_table <- mc_reshape_long(data, use_utc=use_utc)
-    plot <- ggplot2::ggplot()
+    change_colors <- !facets && length(data$localities) > 1
+    data_table <- .plot_line_edit_data_table(data_table, sensors_table, change_colors)
 
-    line_function <- function(sensor, color, coeff) {
-        data_plot <- dplyr::filter(data_table, sensor == .data$sensor_name)
-        ggplot2::geom_line(data_plot, mapping = ggplot2::aes(x=.data$datetime, y=.data$value*coeff, group=sensor, color=sensor))
+    plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff, group=.data$series_name)) +
+            ggplot2::geom_line(ggplot2::aes(color=.data$series_name))
+    if(!change_colors) {
+        plot <- plot + ggplot2::scale_color_manual(values=sensors_table$color)
     }
-
-    plots <- purrr::pmap(dplyr::select(sensors_table, "sensor", "color", "coeff"), line_function)
-    plot <- purrr::reduce(plots, `+`, .init=plot)
-    plot <- plot + ggplot2::scale_color_manual(values=sensors_table$color)
     plot <- plot + .plot_set_ggplot_line_theme()
     plot <- plot + .plot_line_set_y_axes(sensors_table)
 
     if(!is.null(filename)) {
         file_parts <- .plot_get_file_parts(filename)
         if(file_parts[[2]] == "pdf"){
-            .plot_print_pdf(filename, list(plot), ggplot2::vars(.data$locality_id), 8)
+            .plot_print_pdf(filename, list(plot), ggplot2::vars(.data$locality_id), 8, facets)
         } else if(file_parts[[2]] == "png") {
-            .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(.data$locality_id))
+            .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(.data$locality_id), facets)
         } else {
             stop(stringr::str_glue("Format of {filename} isn't supported."))
         }
     }
-    plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(.data$locality_id))
+    if(facets)
+    {
+        plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(.data$locality_id))
+    }
     return(plot)
 }
 
@@ -531,6 +546,19 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 
     sensors_table$coeff <- purrr::map_dbl(sensors_table$main_axis, ~ if(.x) 1 else scale_coeff)
     sensors_table
+}
+
+.plot_line_edit_data_table <- function(data_table, sensors_table, change_colors) {
+    if(change_colors) {
+        data_table$series_name <- paste(data_table$locality_id, data_table$sensor_name)
+    } else {
+        data_table$series_name <- data_table$sensor_name
+    }
+    coeff_list <- as.list(sensors_table$coeff)
+    names(coeff_list) <- sensors_table$sensor
+    coeff_env <- list2env(coeff_list)
+    data_table$value_coeff <- purrr::map2_dbl(data_table$sensor, data_table$value, ~ .y * coeff_env[[.x]])
+    return(data_table)
 }
 
 .plot_line_set_y_axes <- function(sensors_table) {

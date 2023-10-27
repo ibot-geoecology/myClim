@@ -28,19 +28,17 @@ locality names. See \link{mc_LocalityMetadata}.
 You can import metadata from named list or from data frame. See details.
 }
 \details{
-Locality metadata is especially useful for handling time zones, considering temporal cycling.
-E.g. while providing coordinates, and in case you are sure, the loggers recorded in UTC,
-you can harmonize all data to the solar time (midday) with \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}}
-calculating offset to the UTC based on coordinates. Or you can directly provide
-the offset in minutes yourself for individual localities. This is useful e.g.
-for heterogeneous data sets containing loggers recording in local time
-and you wish to unify them by setting individual offset e.g. back to UTC.
-If tz_offset is set manually, than tz_type is set to \verb{user defined}.
+Locality metadata is critical e.g. for correctly handling time zones.
+By providing geographic coordinates in locality metadata, the user can later harmonize all data to the local solar time (midday) #' with \code{\link[=mc_prep_solar_tz]{mc_prep_solar_tz()}} or calculate temporal offset to the UTC base on local time-zone.
+Alternatively, the user can directly provide the offset (in minutes) for individual localities. This can be useful especially
+for heterogeneous data sets containing various localities with loggers recording in local time. By providing temporal offset for #' each locality separately, you can unify the whole dataset to UTC.
+Note that when tz_offset is set manually, than tz_type is set to \verb{user defined}.
 
 For minor metadata modification it is practical to use named list in combination
 with \code{param_name} specification. E.g. when you wish to modify only time zone offset,
 then set \code{param_name="tz_offset"} and provide named list with locality name and
-offset value \code{list(A1E05=60)}. Similarly for other metadata slots \link{mc_LocalityMetadata}.
+offset value \code{list(A1E05=60)}.
+Similarly, you can modify other metadata slots \link{mc_LocalityMetadata}.
 
 For batch or generally more complex metadata modification you can provide data.frame
 with columns specifying \code{locality_id} and one of \verb{new_locality_id, elevation, lat_wgs84, lon_wgs84, tz_offset}.

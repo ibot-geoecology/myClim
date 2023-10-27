@@ -21,7 +21,7 @@ mc_calc_vwc(
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{moist_sensor}{name of soil moisture sensor to be converted from TMS
-units to volumetric (default "TMS_moist") see \code{names(mc_data_sensors)}.
+units to volumetric water content (default "TMS_moist") see \code{names(mc_data_sensors)}.
 Soil moisture sensor must be in moisture_raw physical see \code{names(mc_data_physical)}.}
 
 \item{temp_sensor}{name of soil temperature sensor (default "TMS_T1")
@@ -30,8 +30,8 @@ see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical.}
 \item{output_sensor}{name of new virtual sensor with VWC values (default "VWC_moisture")}
 
 \item{soiltype}{either character corresponding to one of \code{soiltype} from \link{mc_data_vwc_parameters}
-(default \code{"universal"}). Or a list with parameters \code{a}, \code{b} and \code{c} manually filled in
-by user i.e.,\code{list(a=Value_1, b=Value_2, c=Value_3)}.}
+(default \code{"universal"}). Or a list with parameters \code{a}, \code{b} and \code{c} provided
+by the user - i.e.,\code{list(a=Value_1, b=Value_2, c=Value_3)}.}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
 
@@ -50,42 +50,35 @@ NA when soil temperature is below 0 (default TRUE)}
 myClim object same as input but with added virtual VWC moisture sensor
 }
 \description{
-This function creates new virtual sensor on the locality within myClim data object.
+This function creates a new virtual sensor on the locality within the myClim data object.
 Function converts the raw TMS soil moisture (scaled TDT signal)
 to volumetric water content (VWC).
 }
 \details{
-This function is suitable for TOMST TMS loggers measuring soil moisture in raw TDT
-units (TMS units). Raw TDT units represents inverted and scaled (1-4095)
-number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz)
-sent through a ca 30 cm long circuit within a 640-microsecond time window.
-For more details see (Wild et al. 2019). Pulse count is directly related to
-the soil moisture content. Therefore, based on experimental calibration
-curves, it is possible to directly convert TMS units to standardized
-volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
+This function is suitable for TOMST TMS loggers measuring soil moisture in raw TMS units.
+These raw TMS units represents inverted and numerically rescaled (1-4095) electromagnetic signal from the patented sensor working #' on Time Domain Transmission principle (see Wild et al. 2019). The typical values for TMS4 logger range from cca 115 in dry air to #' 3635 in distilled water - see \link{mc_calib_moisture}.
+Raw TMS units can be converted to the soil volumetric water content with calibration curves.The function currently provides
+several experimentally derived calibration curves which were developped at reference temperature. Therefore, during the
+conversion, the reference temperature is corrected with the actual soil temperature values from TMS_T1 soil temperature sensor.
 
-The function uses experimentally derived calibration curves under
-reference temperatures for several soil types. For the volumetric
-water content conversion the reference temperature is corrected with the
-actual soil temperature using TMS_T1 soil temperature sensor records.
-As the calibration curves were derived for several soil types,
-in case user know specific soil type, where the logger was measuring,
-then it is possible to chose the closest¨existing calibration curve for specific soil
-type instead of default "universal". Available soil types are: sand, loamy sand A,
+The default calibration curve is "universal", which was designed for mineral soils (see Kopecký et al. 2021).
+Specific calibration curves were developed for several soil types (see Wild et al. 2019) and the user can choose one of these
+or can define its own calibration - see \link{mc_data_vwc_parameters}
+
+Currently available calibration curves are: sand, loamy sand A,
 loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
-universal, sand TMS1, loamy sand TMS1, silt loam TMS1. For more details see (Wild et al. 2019).
-For full table of function parameters see \link{mc_data_vwc_parameters}
+universal, sand TMS1, loamy sand TMS1, silt loam TMS1.
+For details see \link{mc_data_vwc_parameters}.
 
-It is also possible to use custom parameters \code{a}, \code{b} and \code{c}. These can be
-derived from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
+It is also possible to define new calibarion function with custom parameters \code{a}, \code{b} and \code{c}. These can be
+derived e.g. from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
 
-\strong{Warning:} TOMST TMS Calibr utility was developed for TMS3 series of TOMST sensor which are
-different from commonly used.newer TMS4 series. Therefore we rather recommend to use
-pre-defined \code{universal} calibration according to (Kopecký et al. 2021).
+\strong{Warning:} TOMST TMS Calibr utility was developed for TMS3 series of TMS loggers, which have
+different range of raw soil moisture values than TMS4 series.
 
 The function by default replace the moisture records in frozen soils with NA (param \emph{frozen2NA}),
 because the soil moisture sensor was not designed to measure in
-frozen soils and the returned records are thus not comparable
+frozen soils and the returned values are thus not comparable
 with values from non-frozen soil.
 }
 \examples{
@@ -94,12 +87,12 @@ data2 <- mc_calc_vwc(mc_data_example_agg, localities="A2E32",
                      soiltype=list(a=-3.00e-09, b=0.000161192, c=-0.109956505))
 }
 \references{
-Wild, J., Kopecky, M., Macek, M., Sanda, M., Jankovec, J., Haase, T., 2019. Climate at ecologically relevant scales:
-A new temperature and soil moisture logger for long-term microclimate measurement. Agric. For. Meteorol. 268, 40-47.
+Wild, J., Kopecký, M., Macek, M., Šanda, M., Jankovec, J., Haase, T. (2019) Climate at ecologically relevant scales:
+A new temperature and soil moisture logger for long-term microclimate measurement. Agriculture and Forest Meteorology 268, 40-47.
 https://doi.org/10.1016/j.agrformet.2018.12.018
 
-Kopecky, M., Macek, M., Wild, J., 2021. Topographic Wetness Index calculation guidelines based on measured soil
-moisture and plant species composition. Sci. Total Environ. 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
+Kopecký, M., Macek, M., Wild, J. (2021) Topographic Wetness Index calculation guidelines based on measured soil
+moisture and plant species composition. Science of the Total Environment 757, 143785. https://doi.org/10.1016/j.scitotenv.2020.143785
 }
 \seealso{
 \link{mc_data_vwc_parameters}

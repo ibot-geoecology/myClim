@@ -874,7 +874,8 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
 #' Only linear method is implemented from [zoo::na.approx] function.
 #'
 #' @template param_myClim_object_cleaned
-#' @template param_localities_sensors
+#' @template param_localities
+#' @template param_sensors
 #' @param maxgap maximum number of consecutively NA values to fill (default 5)
 #' @param method used for approximation. It is implemented now only "linear". (default "linear")
 #' @return myClim object with filled NA values

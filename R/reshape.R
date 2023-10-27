@@ -12,7 +12,8 @@
 #' The less complex wide table is returned when exporting single sensor ascross localities. 
 #'
 #' @template param_myClim_object
-#' @template param_localities_sensors
+#' @template param_localities
+#' @template param_sensors
 #' @template param_use_utc
 #' @return data.frame with columns:
 #' * datetime 
@@ -90,7 +91,8 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
 #' This function converts myClim object to long R data.frame.
 #'
 #' @template param_myClim_object
-#' @template param_localities_sensors
+#' @template param_localities
+#' @template param_sensors
 #' @template param_use_utc
 #' @return data.frame
 #'

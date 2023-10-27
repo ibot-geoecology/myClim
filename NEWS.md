@@ -3,7 +3,7 @@
 * In the functions `mc_read_files()` and `mc_read_data()`, a new parameter `user_data_formats` is added
   for custom source file data formats.
 * A new vignette for user data formats is added.
-* A check for duplicate values in same time is added to the function `mc_prep_clean()`.
+* A check for different values in same time is added to the function `mc_prep_clean()`.
 * A new function `mc_prep_TMSoffsoil()` is added for detecting when TMS is out of soil.
 
 # myClim 1.0.9
