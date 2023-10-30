@@ -25,9 +25,9 @@ mc_prep_TMSoffsoil(
 
 \item{soil_sensor}{character, soil temperature sensor (default \code{mc_const_SENSOR_TMS_T1})}
 
-\item{air_sensor}{character, air temperature sensor (default mc_const_SENSOR_TMS_T2)}
+\item{air_sensor}{character, air temperature sensor (default \code{mc_const_SENSOR_TMS_T2})}
 
-\item{moist_sensor}{character, soil moisture sensor (default mc_const_SENSOR_TMS_moist)}
+\item{moist_sensor}{character, soil moisture sensor (default \code{mc_const_SENSOR_TMS_moist})}
 
 \item{output_sensor}{(default "off_soil")}
 
