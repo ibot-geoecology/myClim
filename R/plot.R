@@ -403,9 +403,11 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #'
 #' @details
 #' Saving as the PDF file is recommended, because the plot is optimized
-#' to be paginate PDF (facet raster plot is distributed to pages), which is especially useful
-#' for bigger data. Maximal number of physical units (elements) of sensors to be plotted in one
-#' plot is two with main and secondary y axis. In case, there are multiple sensors with
+#' to be paginate PDF (facet line plot is distributed to pages), each locality is 
+#' represented by separate plot, which is especially useful
+#' for bigger data. When facet = FALSE then single plot is returned showing all localities together. 
+#' Maximal number of physical units (elements) of sensors to be plotted in one
+#' plot is two with primary and secondary y axis. In case, there are multiple sensors with
 #' identical physical on one locality, they are plotted together. E.g., when you have
 #' TMS_T1, TMS_T2, TMS_T3, Thermo_T, and VWC you get plot with 5 lines of different colors and
 #' two y axes. Secondary y axes are scaled with calculation `values * scale_coeff`.
@@ -427,7 +429,9 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @template param_use_utc
 #' @template param_localities
 #' @return ggplot2 object
-#' @param facets if TRUE facets are used for localities (default TRUE)
+#' @param facets if TRUE each locality is plotted in separate plot in R and separate row
+#' in PDF if filename.pdf is provided. When false, all localities are plotted in single 
+#' plot (default TRUE)
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
 #' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_moist"))
