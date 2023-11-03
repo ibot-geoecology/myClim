@@ -250,10 +250,14 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #'
 #' @details
 #' This function is suitable for TOMST TMS loggers measuring soil moisture in raw TMS units. 
-#' These raw TMS units represents inverted and numerically rescaled (1-4095) electromagnetic signal from the patented sensor working #' on Time Domain Transmission principle (see Wild et al. 2019). The typical values for TMS4 logger range from cca 115 in dry air to #' 3635 in distilled water - see [mc_calib_moisture].
-#' Raw TMS units can be converted to the soil volumetric water content with calibration curves.The function currently provides 
-#' several experimentally derived calibration curves which were developped at reference temperature. Therefore, during the 
-#' conversion, the reference temperature is corrected with the actual soil temperature values from TMS_T1 soil temperature sensor.
+#' The raw TMS units represents inverted and numerically rescaled (1-4095) electromagnetic signal from the moisture sensor working
+#' on Time Domain Transmission principle (Wild et al. 2019). For TMS4 logger, the typical raw TMS moisture values range from cca    
+#' 115 units in dry air to cca 3635 units in distilled water - see [mc_calib_moisture].
+#'
+#' Raw TMS moisture values can be converted to the soil volumetric water content with calibration curves. The function provides 
+#' several experimentally derived calibration curves which were developped at reference temperature. To account for the difference 
+#' between reference and actual temperature, the function use actual soil temperature values measured by TMS_T1 soil temperature 
+#' sensor.
 #'
 #' The default calibration curve is "universal", which was designed for mineral soils (see Kopecký et al. 2021). 
 #' Specific calibration curves were developed for several soil types (see Wild et al. 2019) and the user can choose one of these 
@@ -271,28 +275,26 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' different range of raw soil moisture values than TMS4 series. 
 #'
 #' The function by default replace the moisture records in frozen soils with NA (param *frozen2NA*),
-#' because the soil moisture sensor was not designed to measure in
-#' frozen soils and the returned values are thus not comparable
+#' because the TMS soil moisture sensor was not designed to measure in frozen soils and the returned values are thus not comparable
 #' with values from non-frozen soil.
 #'
 #' @template param_myClim_object_cleaned
 #' @param moist_sensor name of soil moisture sensor to be converted from TMS
-#' units to volumetric water content (default "TMS_moist") see `names(mc_data_sensors)`.
-#' Soil moisture sensor must be in moisture_raw physical see `names(mc_data_physical)`.
+#' moisture values to volumetric water content (default "TMS_moist") see `names(mc_data_sensors)`.
+#' Soil moisture sensor must be in moisture_raw physical units see `names(mc_data_physical)`.
 #' @param temp_sensor name of soil temperature sensor (default "TMS_T1")
-#' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical.
+#' see `names(mc_data_sensors)`. Temperature sensor must be in T_C physical units.
 #' @param output_sensor name of new virtual sensor with VWC values (default "VWC_moisture")
-#' @param soiltype either character corresponding to one of `soiltype` from [mc_data_vwc_parameters]
-#' (default `"universal"`). Or a list with parameters `a`, `b` and `c` provided 
+#' @param soiltype Either character corresponding to one of `soiltype` from [mc_data_vwc_parameters]
+#' (default `"universal"`), or a list with parameters `a`, `b` and `c` provided 
 #' by the user - i.e.,`list(a=Value_1, b=Value_2, c=Value_3)`.
-#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @param localities list of locality_ids used for calculation; if NULL then all localities are used (default NULL)
 #' @param ref_t (default `r mc_const_CALIB_MOIST_REF_T`)
 #' @param acor_t (default `r sprintf("%.14f", mc_const_CALIB_MOIST_ACOR_T)`) correction parameter for temperature drift
 #' in the air, see [myClim::mc_calib_moisture()]
 #' @param wcor_t (default `r mc_const_CALIB_MOIST_WCOR_T`) correction parameter for temperature drift
 #' in the water, see [myClim::mc_calib_moisture()]
-#' @param frozen2NA if TRUE then those moisture records are set to
-#' NA when soil temperature is below 0 (default TRUE)
+#' @param frozen2NA if TRUE then VWC values are set to NA when the soil temperature is below 0 °C (default TRUE)
 #' @return myClim object same as input but with added virtual VWC moisture sensor
 #' @export
 #' @seealso [mc_data_vwc_parameters]
