@@ -41,7 +41,7 @@ list with slope and intercept parameters
 \description{
 Specialized function for calibration of TOMST TMS moisture sensor.
 Function calculate correction parameters for individual logger (slope and intercept)
-from TMS moisture measurements in pure water and air.
+from TMS moisture measurements in demineralized water and dry air.
 }
 \details{
 This is highly specialized service function designed to derive correction

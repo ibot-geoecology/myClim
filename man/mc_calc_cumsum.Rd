@@ -9,7 +9,7 @@ mc_calc_cumsum(data, sensors, output_suffix = "_cumsum", localities = NULL)
 \arguments{
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
-\item{sensors}{names of sensors where to calculate cumulative sum}
+\item{sensors}{names of sensors on which to calculate cumulative sum}
 
 \item{output_suffix}{name suffix for virtual sensor names (default "_cumsum") e.g. TMS_T3_cumsum}
 
@@ -19,8 +19,8 @@ mc_calc_cumsum(data, sensors, output_suffix = "_cumsum", localities = NULL)
 The same myClim object as input but with added cumsum sensors.
 }
 \description{
-This function creates new virtual sensor on locality within myClim data object.
-The virtual sensor hosts the cumulative sum of the values on the input sensor.
+This function creates a new virtual sensor on locality within the myClim data object.
+The virtual sensor represents the cumulative sum of the values on the input sensor.
 Names of new sensors are original sensor name + \code{outpus_suffix}.
 }
 \details{

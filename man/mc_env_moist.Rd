@@ -30,16 +30,16 @@ mc_env_moist(
 table in long format with standardised myClim variables
 }
 \description{
-The wrapper function returning 4 standardised ecologically relevant myClim variables
-derived from soil moisture. The mc_env_moist function needs time-series of
+The wrapper function returning 4 standardised and ecologically relevant myClim variables
+derived from soil moisture measurements. The mc_env_moist function needs time-series of
 volumetric water content (VWC) measurements as input. Therefore, non-VWC soil
 moisture measurements must be first converted to VWC.
-For Tomst loggers see \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
+For TMS loggers see \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
 }
 \details{
 This function was designed for time-series of step shorter than one
 day and will not work with coarser data. In contrast with other myClim functions
-returning myClim objects this wrapper function return long table.
+returning myClim objects, this wrapper function returns long table.
 Variables are named based on sensor name, height, and function e.g.,
 (VWC.soil_0_15_cm.5p, VWC.soil_0_15_cm.mean)
 
