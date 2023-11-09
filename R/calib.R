@@ -45,9 +45,11 @@ mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #' @return list with correction factor and correction slope
 #' @export
 #' @examples
-#' tomst_data <- mc_filter(mc_data_example_clean, localities="A6W79")
+#' # load example data
+#' files <- c(system.file("extdata", "data_94184102_0.csv", package = "myClim"))
+#' tomst_data <- mc_read_files(files, "TOMST")
 #'
-#' #vwc without calibration
+#' # vwc without calibration
 #' tomst_data <- mc_calc_vwc(tomst_data, soiltype = "universal", output_sensor = "VWC_universal")
 #'
 #' # load calibration

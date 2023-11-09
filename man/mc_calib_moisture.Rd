@@ -54,9 +54,11 @@ Correction parameters for TMS4 loggers therefore can be expected in the range of
 cor_factor = (-150; -450) and cor_slope = (100, 450)
 }
 \examples{
-tomst_data <- mc_filter(mc_data_example_clean, localities="A6W79")
+# load example data
+files <- c(system.file("extdata", "data_94184102_0.csv", package = "myClim"))
+tomst_data <- mc_read_files(files, "TOMST")
 
-#vwc without calibration
+# vwc without calibration
 tomst_data <- mc_calc_vwc(tomst_data, soiltype = "universal", output_sensor = "VWC_universal")
 
 # load calibration
