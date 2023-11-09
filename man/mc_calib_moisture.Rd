@@ -25,18 +25,18 @@ mc_calib_moisture(
 
 \item{t_water}{temperature of water (default 24)}
 
-\item{ref_air}{(default 114.534)}
+\item{ref_air}{raw air signal of reference logger used to derive soil calibration parameters (default 114.534)}
 
-\item{ref_water}{(default 3634.723)}
+\item{ref_water}{raw air signal of reference logger used to derive soil calibration parameters (default 3634.723)}
 
-\item{ref_t}{(default 24)}
+\item{ref_t}{reference logger temperature (default 24)}
 
-\item{acor_t}{temperature drift correction parameter in the air (default 1.91132689118083)}
+\item{acor_t}{temperature drift correction parameter in the air (default 1.911)}
 
-\item{wcor_t}{temperature drift correction parameter in the water (default 0.64108)}
+\item{wcor_t}{temperature drift correction parameter in the water (default 0.641)}
 }
 \value{
-list with slope and intercept parameters
+list with correction factor and correction slope
 }
 \description{
 Specialized function for calibration of TOMST TMS moisture sensor.
@@ -44,15 +44,32 @@ Function calculate correction parameters for individual logger (slope and interc
 from TMS moisture measurements in demineralized water and dry air.
 }
 \details{
-This is highly specialized service function designed to derive correction
-parameters \code{slope} and \code{intercept} for soil moisture sensor of TMS loggers
-measuring on the air and in the water. Slope and intercept calculated in this
-function could be used as sensor-specific alternative in \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}
-function instead of defaults. User is not allowed to modify slope and
-intercept parameters when calling \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}.
-But this must be done in code of the function. It is possible, but advanced,
-and typically not necessary, the default values should be working well.
+This function calculate calibration parameters \code{cor_factor} and \code{cor_intercept}
+accounting for individual differencies in TMS moisture sensor signal in air and in water against reference
+loggers which were used for estimation of parameters of soil VWC conversion curves.
+These parameters must be loaded into myClim object \code{\link[=mc_prep_calib_load]{mc_prep_calib_load()}}
+prior to calling \code{\link[=mc_calc_vwc]{mc_calc_vwc()}}.
+Parameters for soils available in my_Clim were derived for TMS3 logger version, with slightly different typical air and water signal.
+Correction parameters for TMS4 loggers therefore can be expected in the range of values:
+cor_factor = (-150; -450) and cor_slope = (100, 450)
 }
 \examples{
-mc_calib_moisture(120, 3650)
+tomst_data <- mc_filter(mc_data_example_clean, localities="A6W79")
+
+#vwc without calibration
+tomst_data <- mc_calc_vwc(tomst_data, soiltype = "universal", output_sensor = "VWC_universal")
+
+# load calibration
+my_cor <- mc_calib_moisture(raw_air = 394, raw_water = 3728, t_air = 21, t_water = 20)
+my_calib_tb <- data.frame(serial_number = c("94184102"), sensor_id = "TMS_moist",
+                          datetime = as.POSIXct("2020-01-01 00:00"),
+                          cor_factor = my_cor$cor_factor, cor_slope = my_cor$cor_slope)
+tomst_data_cal <- mc_prep_calib_load(tomst_data, my_calib_tb)
+# vwc using calibration
+tomst_data_cal <- mc_calc_vwc(tomst_data_cal, soiltype = "universal",
+                              output_sensor = "VWC_universal_calib")
+# plot results
+sensors <- mc_info(tomst_data_cal)$sensor_name
+plot <- (mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")]))
+     + ggplot2::scale_color_viridis_d(begin = 0.2, end = 0.8))
 }

@@ -26,7 +26,7 @@ mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #' This function calculate calibration parameters `cor_factor` and `cor_intercept`
 #' accounting for individual differencies in TMS moisture sensor signal in air and in water against reference
 #' loggers which were used for estimation of parameters of soil VWC conversion curves.
-#' These parameters must be loaded into myClim object [mcClim::mc_prep_calib_load()]
+#' These parameters must be loaded into myClim object [myClim::mc_prep_calib_load()]
 #' prior to calling [myClim::mc_calc_vwc()].
 #' Parameters for soils available in my_Clim were derived for TMS3 logger version, with slightly different typical air and water signal.
 #' Correction parameters for TMS4 loggers therefore can be expected in the range of values:
@@ -45,22 +45,24 @@ mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #' @return list with correction factor and correction slope
 #' @export
 #' @examples
-#' #load example data
-#' files <- c(system.file("extdata", "data_94184102_0.csv", package = "myClim"))
-#'tomst_data <- mc_read_files(files, "TOMST")
+#' tomst_data <- mc_filter(mc_data_example_clean, localities="A6W79")
 #'
 #' #vwc without calibration
 #' tomst_data <- mc_calc_vwc(tomst_data, soiltype = "universal", output_sensor = "VWC_universal")
 #'
 #' # load calibration
 #' my_cor <- mc_calib_moisture(raw_air = 394, raw_water = 3728, t_air = 21, t_water = 20)
-#' my_calib_tb = data.frame(serial_number = c("94184102"), sensor_id = "TMS_moist", datetime = as.POSIXct("2020-01-01 00:00"), cor_factor = my_cor$intercept, cor_slope = my_cor$slope)
+#' my_calib_tb <- data.frame(serial_number = c("94184102"), sensor_id = "TMS_moist",
+#'                           datetime = as.POSIXct("2020-01-01 00:00"),
+#'                           cor_factor = my_cor$cor_factor, cor_slope = my_cor$cor_slope)
 #' tomst_data_cal <- mc_prep_calib_load(tomst_data, my_calib_tb)
 #' # vwc using calibration
-#' tomst_data_cal <- mc_calc_vwc(tomst_data_cal, soiltype = "universal", output_sensor = "VWC_universal_calib")
-#' #plot results
+#' tomst_data_cal <- mc_calc_vwc(tomst_data_cal, soiltype = "universal",
+#'                               output_sensor = "VWC_universal_calib")
+#' # plot results
 #' sensors <- mc_info(tomst_data_cal)$sensor_name
-#' mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")] ) ) + ggplot2::scale_color_viridis_d(begin = 0.2, end = 0.8)
+#' plot <- (mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")]))
+#'      + ggplot2::scale_color_viridis_d(begin = 0.2, end = 0.8))
 
 mc_calib_moisture <- function(raw_air, raw_water,
                               t_air=24, t_water=24,
