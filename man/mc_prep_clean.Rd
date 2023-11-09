@@ -14,14 +14,14 @@ mc_prep_clean(data, silent = FALSE)
 \value{
 \itemize{
 \item cleaned myClim object in Raw-format
-\item cleaning log is by default printed in console, and can be called ex post by \code{\link[=mc_info_clean]{mc_info_clean()}}
+\item cleaning log is by default printed in console, but can be called also later by \code{\link[=mc_info_clean]{mc_info_clean()}}
 }
 }
 \description{
 By default \code{mc_prep_clean} runs automatically when \code{\link[=mc_read_files]{mc_read_files()}},
-\code{\link[=mc_read_data]{mc_read_data()}} are called. \code{mc_prep_clean} check time-series in
+\code{\link[=mc_read_data]{mc_read_data()}} are called. \code{mc_prep_clean} checks time-series in
 myClim object in Raw-format for missing, duplicated, and disordered records
-and regularize microclimatic time-series to constant time-step.
+and regularizes microclimatic time-series to constant time-step.
 Duplicated records are removed and missing values are filled with NA.
 
 See details.
@@ -30,23 +30,23 @@ See details.
 Processing the data with \code{mc_prep_clean} is a mandatory step
 required for further data handling in \code{myClim} library.
 
-This function guarantee that all time series are in chronological order
-and have regular time-step, without duplicated records.
-Function \code{mc_prep_clean} use time-step provided by user on import \code{mc_read}
-(is stored in metadata of logger \link{mc_LoggerMetadata}.
-If time step is not provided by user on import (NA),than myClim automatically
-detects the time step from input time series based on the last 100 records.
+This function guarantee that all time series are in chronological order,
+have regular time-step and no duplicated records.
+Function \code{mc_prep_clean} use time-step provided by user during data import with \code{mc_read}
+(used time-step is permanently stored in logger metadata \link{mc_LoggerMetadata}.
+If time-step is not provided by the user (NA),than myClim automatically
+detects the time-step from input time series based on the last 100 records.
 In case of irregular time series, function returns warning and skip the series.
 
-In case the time step is regular, but is not nicely rounded, function round
-the time series to the closest nice time and shift original data.
+In case the time-step is regular, but is not nicely rounded, function rounds
+the time series to the closest nice time and shifts original data.
 E.g., original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28)
-are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30)
-microclimatic records are not modified but only shifted.
-Maximal allowed shift of time series is 30 minutes. I.e. when the time step
-is 2h and goes like (13:33, 15:33, 17:33) then shifted to (13:30, 15:30, 17:30).
+are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30).
+Note that microclimatic records are not modified but only shifted.
+Maximum allowed shift of time series is 30 minutes. For example, when the time-step
+is 2h (e.g. 13:33, 15:33, 17:33), the measurement times are shifted to (13:30, 15:30, 17:30).
 When you have 2h time step and wish to round to the whole hour
-(13:33 -> 14:00, 15:33 -> 16:00) than after clening use \code{mc_agg(period="2 hours")}
+(13:33 -> 14:00, 15:33 -> 16:00) than use \code{mc_agg(period="2 hours")} command after data cleaning.
 }
 \examples{
 cleaned_data <- mc_prep_clean(mc_data_example_raw)

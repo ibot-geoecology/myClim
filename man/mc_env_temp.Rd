@@ -36,15 +36,15 @@ mc_env_temp(
 table in long format with standardised myClim variables
 }
 \description{
-The wrapper function returning 7 standardised ecologically relevant myClim variables
-derived from temperature.
+The wrapper function returning 7 standardised and ecologically relevant myClim variables
+derived from temperature measurements.
 }
 \details{
 This function was designed for time-series of step shorter than one
 day and will not work with coarser data. It automatically use all
 available sensors in myClim object and returns all possible variables based
 on sensor type and measurement height/depth. In contrast with other myClim functions
-returning myClim objects this wrapper function return long table.
+returning myClim objects, this wrapper function returns long table.
 The mc_env_temp function first aggregates time-series to daily time-step
 and then aggregates to the final time-step set in \code{period} parameter.
 Because freezing and growing degree days are always aggregated with sum function,
@@ -57,9 +57,9 @@ Standardised myClim temperature variables:
 \item min5p: Minimum temperature = 5th percentile of daily minimum temperatures
 \item mean: Mean temperature = mean of daily mean temperatures
 \item max95p: Maximum temperature = 95th percentile of daily maximum temperatures
-\item drange: Temperature range = mean of daily temperature range (i.e., difference of daily minima and maxima)
+\item drange: Temperature range = mean of daily temperature range (i.e., difference between daily minima and maxima)
 \item GDD{5}: Growing degree days = sum of growing degree days above defined base temperature (default 5°C) \code{gdd_t_base}
-\item FDD{0}: Freezing degree days = sum of freezing degree days below defined base temperature (default 0°C) \code{fdd_t_base}
+\item FDD{0}: Freezing degree days = sum of freezing degree days bellow defined base temperature (default 0°C) \code{fdd_t_base}
 \item frostdays: Frost days = number of days with frost (daily minimum < 0°C) \code{fdd_t_base}
 }
 }

@@ -30,10 +30,10 @@ mc_env_vpd(
 table in long format with standardised myClim variables
 }
 \description{
-The wrapper function returning 2 standardised ecologically relevant myClim variables
+The wrapper function returning 2 standardised and ecologically relevant myClim variables
 derived from vapor pressure deficit. The mc_env_vpd function needs time-series of
 vapor pressure deficit measurements as input. Therefore, VPD must be first calculated
-from temperature and air humidity sensors see \code{\link[=mc_calc_vpd]{mc_calc_vpd()}}
+from temperature and air humidity measurements - see \code{\link[=mc_calc_vpd]{mc_calc_vpd()}}
 }
 \details{
 This function was designed for time-series of step shorter than one
@@ -41,7 +41,7 @@ day and will not work with coarser data. The mc_env_vpd function
 first aggregates time-series to daily time-step
 and then aggregates to the final time-step set in \code{period} parameter.
 In contrast with other myClim functions
-returning myClim objects this wrapper function return long table.
+returning myClim objects, this wrapper function returns long table.
 Variables are named based on sensor name, height, and function e.g.,
 (VPD.air_150_cm.mean, VPD.air_150_cm.max95p)
 

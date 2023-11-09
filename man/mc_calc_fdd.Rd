@@ -23,18 +23,18 @@ name of output sensor consists of output_prefix and value t_base (FDD0_TMS_T3)}
 The same myClim object as input but with added virtual FDD sensor
 }
 \description{
-This function creates new virtual sensor on locality within myClim data object.
+This function creates a new virtual sensor on locality within the myClim data object.
 The virtual sensor hosts FDD Freezing Degree Days.
 }
 \details{
 The allowed step length for FDD calculation is day and shorter.
-Function creates new virtual sensor with the same time step as input data.
-For shorter time steps than the day (which is not intuitive for FDD)
+Function creates a new virtual sensor with the same time step as input data.
+For shorter time steps than the day (which is however not intuitive for FDD)
 the FDD value is the contribution of the time step to the freezing degree day.
-Be careful while aggregating freezing degree days to longer periods see \code{\link[=mc_agg]{mc_agg()}}
-only meaningful aggregation function is \code{sum}, but myClim allow you to apply anything.
+Be careful while aggregating freezing degree days to longer periods
+only meaningful aggregation function is \code{sum}, but myClim allows you to apply anything see \code{\link[=mc_agg]{mc_agg()}}.
 
-Note that  FDD is always positive number, despite summing freezing events. When you set
+Note that FDD is always positive number, despite summing freezing events. When you set
 \code{t_base=-1} you get the sum of degree days below -1 °C but expressed in positive number
 if you set \code{t_base=1} you get also positive number. Therefore pay attention to
 name of output variable which contains \code{t_base} value. FDD1_TMS_T3, t_base=1 vs FDDminus1_TMS_T3, t_base=-1

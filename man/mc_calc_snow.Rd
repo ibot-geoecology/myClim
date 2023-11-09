@@ -33,7 +33,7 @@ mc_calc_snow(
 myClim object with added virtual sensor 'snow' (logical) indicating snow presence/absence (TRUE/FALSE).
 }
 \description{
-This function creates new virtual sensor on locality within myClim data object.
+This function creates a new virtual sensor on locality within the myClim data object.
 Virtual sensor hosts values of snow cover presence/absence detected from temperature time-series.
 }
 \details{
@@ -42,7 +42,7 @@ when the maximal temperature in the preceding or subsequent time-window (specifi
 does not exceed specific \code{tmax} threshold value (default 1.25°C) and the temperature range remain below specified
 \code{range} threshold (default 1°C). This function rely on insulating effect of a of snow layer,
 significantly reducing diurnal temperature variation and restricting the maximal temperature near the ground
-close to freezing point. Temperature sensor near the ground (\code{TMS_T2}) is default choice for snow-cover detection from Tomst TMS4 loggers.
+close to freezing point. Temperature sensor near the ground (\code{TMS_T2}) is default choice for snow-cover detection from Tomst TMS loggers.
 Snow detection with default values accurately detects snow of depth > 15cm (unpublished data).
 For detection of thin snow, range parameter should be set to 3-4 °C.
 The function returns vector of snow cover (TRUE/FLASE) with same time-step as input data. To get number of days with snow cover
