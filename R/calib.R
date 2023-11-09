@@ -61,7 +61,7 @@ mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #'                               output_sensor = "VWC_universal_calib")
 #' # plot results
 #' sensors <- mc_info(tomst_data_cal)$sensor_name
-#' plot <- (mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")]))
+#' (mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")]))
 #'      + ggplot2::scale_color_viridis_d(begin = 0.2, end = 0.8))
 
 mc_calib_moisture <- function(raw_air, raw_water,
