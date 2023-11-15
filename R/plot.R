@@ -358,9 +358,9 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
     match[2:3]
 }
 
-.plot_print_pdf <- function(filename, plots, facets, nrow, do_facet) {
+.plot_print_pdf <- function(filename, plots, facets, nrow, do_facet, scales="fixed") {
     facet_function <- function(page, drop) {
-        ggforce::facet_grid_paginate(facets, ncol = 1, nrow = nrow, page = page, drop = drop, byrow = FALSE)
+        ggforce::facet_grid_paginate(facets, ncol=1, nrow=nrow, page=page, drop=drop, byrow=FALSE, scales=scales)
     }
     if(do_facet) {
         plots <- purrr::map(plots, ~ .x + facet_function(1, FALSE))
@@ -388,9 +388,9 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
     purrr::walk2(plots, physicals, print_function)
 }
 
-.plot_print_png <- function(filename, plot, width, height, facets, do_facet) {
+.plot_print_png <- function(filename, plot, width, height, facets, do_facet, scales="fixed") {
     if(do_facet){
-        plot <- plot + ggforce::facet_grid_paginate(facets, ncol = 1, byrow = FALSE)
+        plot <- plot + ggforce::facet_grid_paginate(facets, ncol = 1, byrow = FALSE, scales=scales)
     }
     png(filename, width=width, height=height, res=200)
     print(plot)
@@ -481,9 +481,9 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     if(!is.null(filename)) {
         file_parts <- .plot_get_file_parts(filename)
         if(file_parts[[2]] == "pdf"){
-            .plot_print_pdf(filename, list(plot), ggplot_vars, 8, facets)
+            .plot_print_pdf(filename, list(plot), ggplot_vars, 8, !is.null(facet), scales=scales)
         } else if(file_parts[[2]] == "png") {
-            .plot_print_png(filename, plot, png_width, png_height, ggplot_vars, facets)
+            .plot_print_png(filename, plot, png_width, png_height, ggplot_vars, !is.null(facet), scales=scales)
         } else {
             stop(stringr::str_glue("Format of {filename} isn't supported."))
         }

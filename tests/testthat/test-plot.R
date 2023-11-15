@@ -33,8 +33,8 @@ test_that("all plots", {
     mc_plot_line(data_agg, file.path(plot_dir, "line.png"), png_height = 500)
     mc_plot_line(data_agg, file.path(plot_dir, "line.png"), png_height = 500, use_utc=FALSE)
     mc_plot_line(data_agg, facet=NULL)
-    mc_plot_line(mc_data_example_clean, sensors=(c(mc_const_SENSOR_TMS_moist, mc_const_SENSOR_HOBO_RH)), facet=NULL)
-    mc_plot_line(mc_data_example_clean, facet="physical")
+    mc_plot_line(mc_data_example_clean, file.path(plot_dir, "facet_NULL.pdf"), sensors=(c(mc_const_SENSOR_TMS_moist, mc_const_SENSOR_HOBO_RH)), facet=NULL)
+    mc_plot_line(mc_data_example_clean, file.path(plot_dir, "facet_physical.pdf"), facet="physical")
     data_agg <- mc_calc_snow(data_agg, sensor=mc_const_SENSOR_TMS_T2)
     mc_plot_line(data_agg, sensors="snow")
 
