@@ -238,7 +238,7 @@ You can create a raster plot using `mc_plot_raster()` or a line time series plot
 ## lines
 tms.plot <- mc_filter(tms, localities = "A6W79")
 
-p <- mc_plot_line(tms.plot, sensors = c("TMS_T3", "TMS_T1", "TMS_TMSmoisture"))
+p <- mc_plot_line(tms.plot, sensors = c("TMS_T3", "TMS_T1", "TMS_moist"))
 p <- p+ggplot2::scale_x_datetime(date_breaks = "1 week", date_labels = "%W")
 p <- p+ggplot2::xlab("week")
 p <- p+ggplot2::aes(size = sensor_name)
@@ -323,10 +323,10 @@ Microclimatic records from myClim objects can be converted to a wide or long dat
 ```{r, eval=TRUE}
 
 ## wide table of air temperature and soil moisture
-tms.wide <- mc_reshape_wide(tms.calc, sensors = c("TMS_T3", "vwc_moisture"))
+tms.wide <- mc_reshape_wide(tms.calc, sensors = c("TMS_T3", "vwc"))
 
 ## long table of air temperature and soil moisture
-tms.long <- mc_reshape_long(tms.calc, sensors = c("TMS_T3", "vwc_moisture"))
+tms.long <- mc_reshape_long(tms.calc, sensors = c("TMS_T3", "vwc"))
 
 tms.long.all <- mc_reshape_long(tms.all)
 
