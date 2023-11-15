@@ -592,17 +592,10 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 
 .plot_line_set_y_axes <- function(sensors_table) {
     physical_table <- dplyr::distinct(dplyr::select(sensors_table, "physical", "main_axis", "coeff"))
-    sec.axis <- ggplot2::waiver()
-    if(!all(physical_table$main_axis)) {
-        physical <- physical_table$physical[!physical_table$main_axis]
-        coeff <- physical_table$coeff[!physical_table$main_axis]
-        description <- physical
-        if(physical %in% names(myClim::mc_data_physical)) {
-            description <- myClim::mc_data_physical[[physical]]@description
-        }
-        sec.axis <- ggplot2::sec_axis(~./coeff, name=description)
-    }
+    sec_axis <- .plot_line_get_sec_y_axis(physical_table)
     main_description <- "Values"
+    breaks <- ggplot2::waiver()
+    labels <- ggplot2::waiver()
     if(length(physical_table$physical[physical_table$main_axis]) == 1)
     {
         main_physical <- physical_table$physical[physical_table$main_axis]
@@ -610,8 +603,32 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         if(main_physical %in% names(myClim::mc_data_physical)) {
             main_description <- myClim::mc_data_physical[[main_physical]]@description
         }
+        if(main_physical == .model_const_VALUE_TYPE_LOGICAL){
+            breaks <- c(0, 1)
+            labels <- c("FALSE", "TRUE")
+        }
     }
-    return(ggplot2::scale_y_continuous(name=main_description, sec.axis=sec.axis))
+    return(ggplot2::scale_y_continuous(name=main_description, breaks=breaks, labels=labels, sec.axis=sec_axis))
+}
+
+.plot_line_get_sec_y_axis <- function(physical_table) {
+    result <- ggplot2::waiver()
+    if(!all(physical_table$main_axis)) {
+        breaks <- ggplot2::waiver()
+        labels <- ggplot2::waiver()
+        physical <- physical_table$physical[!physical_table$main_axis]
+        coeff <- physical_table$coeff[!physical_table$main_axis]
+        description <- physical
+        if(physical %in% names(myClim::mc_data_physical)) {
+            description <- myClim::mc_data_physical[[physical]]@description
+        }
+        if(physical == .model_const_VALUE_TYPE_LOGICAL){
+            breaks <- c(0, 1)
+            labels <- c("FALSE", "TRUE")
+        }
+        result <- ggplot2::sec_axis(~./coeff, name=description, breaks=breaks, labels=labels)
+    }
+    return(result)
 }
 
 .plot_set_ggplot_line_theme <- function() {
