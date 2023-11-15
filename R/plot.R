@@ -1,6 +1,8 @@
 .plot_const_MOISTURE_PHYSICAL <- c(.model_const_PHYSICAL_moisture_raw,
                                    .model_const_PHYSICAL_VWC)
 .plot_const_MESSAGE_DUPLICATED_SENSOR <- "Sensor {duplicated_sensors} contains multiple physicals. It is not allowed."
+.plot_const_FACET_LOCALITY <- "locality"
+.plot_const_FACET_PHYSICAL <- "physical"
 
 #' Plot data from loggers
 #'
@@ -427,7 +429,12 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @template param_use_utc
 #' @template param_localities
 #' @return ggplot2 object
-#' @param facets if TRUE facets are used for localities (default TRUE)
+#' @param facet change facet in output plot (default "locality")
+#'
+#' Possible values:
+#' * `NULL` - No facet
+#' * `locality` - Facet by locality
+#' * `physical` - Facet by physicals of sensors
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
 #' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_moist"))
@@ -440,16 +447,16 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          png_width=1900, png_height=1900,
                          start_crop=NULL, end_crop=NULL, use_utc=TRUE,
                          localities=NULL,
-                         facets=TRUE) {
+                         facet="locality") {
     data <- mc_filter(data, localities=localities, sensors=sensors)
     if(!is.null(start_crop) || !is.null(end_crop)) {
         data <- mc_prep_crop(data, start_crop, end_crop)
     }
-    sensors_table <- .plot_get_sensors_table(data)
-    sensors_table <- .plot_add_coeff_to_sensors_table(sensors_table, scale_coeff)
+    sensors_table <- .plot_get_sensors_table(data, facet)
+    sensors_table <- .plot_add_coeff_to_sensors_table(sensors_table, scale_coeff, facet)
     data_table <- mc_reshape_long(data, use_utc=use_utc)
-    change_colors <- !facets && length(data$localities) > 1
-    data_table <- .plot_line_edit_data_table(data_table, sensors_table, change_colors)
+    change_colors <- (is.null(facet) || facet != .plot_const_FACET_LOCALITY) && length(data$localities) > 1
+    data_table <- .plot_line_edit_data_table(data_table, sensors_table, change_colors, facet)
 
     plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff, group=.data$series_name)) +
             ggplot2::geom_line(ggplot2::aes(color=.data$series_name))
@@ -459,24 +466,36 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     plot <- plot + .plot_set_ggplot_line_theme()
     plot <- plot + .plot_line_set_y_axes(sensors_table)
 
+    ggplot_vars <- NULL
+    scales <- "fixed"
+    if(!is.null(facet)) {
+        if(facet == .plot_const_FACET_LOCALITY)
+        {
+            ggplot_vars <- ggplot2::vars(.data$locality_id)
+        } else if(facet == .plot_const_FACET_PHYSICAL) {
+            ggplot_vars <- ggplot2::vars(.data$physical)
+            scales <- "free"
+        }
+    }
+
     if(!is.null(filename)) {
         file_parts <- .plot_get_file_parts(filename)
         if(file_parts[[2]] == "pdf"){
-            .plot_print_pdf(filename, list(plot), ggplot2::vars(.data$locality_id), 8, facets)
+            .plot_print_pdf(filename, list(plot), ggplot_vars, 8, facets)
         } else if(file_parts[[2]] == "png") {
-            .plot_print_png(filename, plot, png_width, png_height, ggplot2::vars(.data$locality_id), facets)
+            .plot_print_png(filename, plot, png_width, png_height, ggplot_vars, facets)
         } else {
             stop(stringr::str_glue("Format of {filename} isn't supported."))
         }
     }
-    if(facets)
+    if(!is.null(facet))
     {
-        plot <- plot + ggplot2::facet_grid(rows = ggplot2::vars(.data$locality_id))
+        plot <- plot + ggplot2::facet_grid(rows = ggplot_vars, scales=scales)
     }
     return(plot)
 }
 
-.plot_get_sensors_table <- function(data) {
+.plot_get_sensors_table <- function(data, facet) {
     is_raw_format <- .common_is_raw_format(data)
 
     sensors_item_function <- function(item) {
@@ -515,6 +534,10 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         table <- purrr::map_dfr(data$localities, sensors_item_function)
     }
     table <- dplyr::distinct(table)
+    if(!is.null(facet) && facet == .plot_const_FACET_PHYSICAL) {
+        table$main_axis <- TRUE
+        return(table)
+    }
     physicals <- unique(table$physical)
     if(length(physicals) > 2) {
         stop("There are more then two physical units.")
@@ -524,10 +547,10 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         main_physical <- .model_const_PHYSICAL_T_C
     }
     table$main_axis <- (table$physical == main_physical)
-    table
+    return(table)
 }
 
-.plot_add_coeff_to_sensors_table <- function(sensors_table, scale_coeff) {
+.plot_add_coeff_to_sensors_table <- function(sensors_table, scale_coeff, facet) {
     physical_table <- dplyr::distinct(dplyr::select(sensors_table, "physical", "main_axis"))
 
     get_scale_coeff <- function(selector) {
@@ -538,7 +561,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         1
     }
 
-    if(is.null(scale_coeff) && nrow(physical_table) > 1) {
+    if((is.null(facet) || facet != .plot_const_FACET_PHYSICAL) && is.null(scale_coeff) && nrow(physical_table) > 1) {
         main_scale_coeff <- get_scale_coeff(physical_table$main_axis)
         secondary_scale_coeff <- get_scale_coeff(!physical_table$main_axis)
         scale_coeff <- 1 / main_scale_coeff * secondary_scale_coeff
@@ -548,7 +571,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     sensors_table
 }
 
-.plot_line_edit_data_table <- function(data_table, sensors_table, change_colors) {
+.plot_line_edit_data_table <- function(data_table, sensors_table, change_colors, facet) {
     if(change_colors) {
         data_table$series_name <- paste(data_table$locality_id, data_table$sensor_name)
     } else {
@@ -558,13 +581,19 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     names(coeff_list) <- sensors_table$sensor
     coeff_env <- list2env(coeff_list)
     data_table$value_coeff <- purrr::map2_dbl(data_table$sensor, data_table$value, ~ .y * coeff_env[[.x]])
+    if(!is.null(facet) && facet == .plot_const_FACET_PHYSICAL)
+    {
+        join_table <- dplyr::select(sensors_table, "sensor", "physical")
+        names(join_table) <- c("sensor_name", "physical")
+        data_table <- dplyr::left_join(data_table, join_table)
+    }
     return(data_table)
 }
 
 .plot_line_set_y_axes <- function(sensors_table) {
     physical_table <- dplyr::distinct(dplyr::select(sensors_table, "physical", "main_axis", "coeff"))
     sec.axis <- ggplot2::waiver()
-    if(nrow(physical_table) == 2) {
+    if(!all(physical_table$main_axis)) {
         physical <- physical_table$physical[!physical_table$main_axis]
         coeff <- physical_table$coeff[!physical_table$main_axis]
         description <- physical
@@ -573,12 +602,16 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         }
         sec.axis <- ggplot2::sec_axis(~./coeff, name=description)
     }
-    main_physical <- physical_table$physical[physical_table$main_axis]
-    main_description <- main_physical
-    if(main_physical %in% names(myClim::mc_data_physical)) {
-        main_description <- myClim::mc_data_physical[[main_physical]]@description
+    main_description <- "Values"
+    if(length(physical_table$physical[physical_table$main_axis]) == 1)
+    {
+        main_physical <- physical_table$physical[physical_table$main_axis]
+        main_description <- main_physical
+        if(main_physical %in% names(myClim::mc_data_physical)) {
+            main_description <- myClim::mc_data_physical[[main_physical]]@description
+        }
     }
-    ggplot2::scale_y_continuous(name=main_description, sec.axis=sec.axis)
+    return(ggplot2::scale_y_continuous(name=main_description, sec.axis=sec.axis))
 }
 
 .plot_set_ggplot_line_theme <- function() {

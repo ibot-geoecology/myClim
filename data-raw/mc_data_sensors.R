@@ -57,7 +57,7 @@ mc_data_sensors[[mc_const_SENSOR_Dendro_T]]@logger <- .model_const_LOGGER_TOMST_
 mc_data_sensors[[mc_const_SENSOR_Dendro_T]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[mc_const_SENSOR_Dendro_T]]@min_value <- -40
 mc_data_sensors[[mc_const_SENSOR_Dendro_T]]@max_value <- 60
-mc_data_sensors[[mc_const_SENSOR_Dendro_T]]@plot_color <- "#2000EEB0"
+mc_data_sensors[[mc_const_SENSOR_Dendro_T]]@plot_color <- "orange"
 mc_data_sensors[[mc_const_SENSOR_Dendro_T]]@plot_line_width <- 2
 
 mc_data_sensors[[mc_const_SENSOR_Dendro_raw]] <- new("mc_Sensor")
@@ -67,6 +67,7 @@ mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@physical <- .model_const_PHYSICAL_
 mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@min_value <- 1279
 mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@max_value <- 34000
 mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@value_type <- .model_const_VALUE_TYPE_INTEGER
+mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@plot_color <- "brown"
 
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@sensor_id <- mc_const_SENSOR_HOBO_T
@@ -74,6 +75,7 @@ mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@logger <- .model_const_LOGGER_HOBO
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@min_value <- -40
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@max_value <- 70
+mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@plot_color <- "salmon"
 
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@sensor_id <- mc_const_SENSOR_HOBO_RH
@@ -81,6 +83,7 @@ mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@logger <- .model_const_LOGGER_HOBO
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@physical <- .model_const_PHYSICAL_RH
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@min_value <- 0
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@max_value <- 100
+mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@plot_color <- "skyblue"
 
 # universal sensors ================================================================================
 
@@ -98,6 +101,7 @@ mc_data_sensors[[mc_const_SENSOR_snow_bool]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_snow_bool]]@sensor_id <- mc_const_SENSOR_snow_bool
 mc_data_sensors[[mc_const_SENSOR_snow_bool]]@value_type <- .model_const_VALUE_TYPE_LOGICAL
 mc_data_sensors[[mc_const_SENSOR_snow_bool]]@description <- "Sensor detects snow"
+mc_data_sensors[[mc_const_SENSOR_snow_bool]]@plot_color <- "lightskyblue"
 
 mc_data_sensors[[mc_const_SENSOR_snow_fresh]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_snow_fresh]]@sensor_id <- mc_const_SENSOR_snow_fresh

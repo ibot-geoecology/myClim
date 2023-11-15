@@ -15,7 +15,7 @@ mc_plot_line(
   end_crop = NULL,
   use_utc = TRUE,
   localities = NULL,
-  facets = TRUE
+  facet = "locality"
 )
 }
 \arguments{
@@ -49,7 +49,14 @@ See \link{myClim-package}}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
-\item{facets}{if TRUE facets are used for localities (default TRUE)}
+\item{facet}{change facet in output plot (default "locality")
+
+Possible values:
+\itemize{
+\item \code{NULL} - No facet
+\item \code{locality} - Facet by locality
+\item \code{physical} - Facet by physicals of sensors
+}}
 }
 \value{
 ggplot2 object

@@ -32,6 +32,11 @@ test_that("all plots", {
     mc_plot_line(data_agg, file.path(plot_dir, "line_T1.png"), png_height = 500, sensors="TMS_T1")
     mc_plot_line(data_agg, file.path(plot_dir, "line.png"), png_height = 500)
     mc_plot_line(data_agg, file.path(plot_dir, "line.png"), png_height = 500, use_utc=FALSE)
+    mc_plot_line(data_agg, facet=NULL)
+    mc_plot_line(mc_data_example_clean, sensors=(c(mc_const_SENSOR_TMS_moist, mc_const_SENSOR_HOBO_RH)), facet=NULL)
+    mc_plot_line(mc_data_example_clean, facet="physical")
+    data_agg <- mc_calc_snow(data_agg, sensor=mc_const_SENSOR_TMS_T2)
+    mc_plot_line(data_agg, sensors="snow")
 
     unlink(plot_dir, recursive=TRUE)
 

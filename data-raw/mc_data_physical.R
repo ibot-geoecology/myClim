@@ -42,7 +42,7 @@ mc_data_physical[[.model_const_PHYSICAL_RH]]@name <- .model_const_PHYSICAL_RH
 mc_data_physical[[.model_const_PHYSICAL_RH]]@description <- "Relative humidity %"
 mc_data_physical[[.model_const_PHYSICAL_RH]]@units <- "%"
 mc_data_physical[[.model_const_PHYSICAL_RH]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_RH]]@scale_coeff <- 1
+mc_data_physical[[.model_const_PHYSICAL_RH]]@scale_coeff <- 1/100
 
 mc_data_physical[[.model_const_PHYSICAL_T_C]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_T_C]]@name <- .model_const_PHYSICAL_T_C
