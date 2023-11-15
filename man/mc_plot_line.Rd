@@ -49,14 +49,10 @@ See \link{myClim-package}}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
-\item{facet}{change facet in output plot (default "locality")
-
-Possible values:
-\itemize{
-\item \code{NULL} - No facet
-\item \code{locality} - Facet by locality
-\item \code{physical} - Facet by physicals of sensors
-}}
+\item{facet}{possible values (\code{NULL}, \code{"locality"}, \code{"physical"}) if \code{"locality"} each locality is plotted
+in separate plot in R and separate row in PDF if filename.pdf is provided. When \code{"physical"}, sensors with
+same physical (see \link{mc_data_physical}) are separated. When \code{NULL}, all localities are plotted
+in single plot (default "locality")}
 }
 \value{
 ggplot2 object
@@ -68,9 +64,11 @@ plotting ggplot object into R environment. See details.
 }
 \details{
 Saving as the PDF file is recommended, because the plot is optimized
-to be paginate PDF (facet raster plot is distributed to pages), which is especially useful
-for bigger data. Maximal number of physical units (elements) of sensors to be plotted in one
-plot is two with main and secondary y axis. In case, there are multiple sensors with
+to be paginate PDF (facet line plot is distributed to pages), each locality is
+represented by separate plot, which is especially useful
+for bigger data. When facet = FALSE then single plot is returned showing all localities together.
+Maximal number of physical units (elements) of sensors to be plotted in one
+plot is two with primary and secondary y axis. In case, there are multiple sensors with
 identical physical on one locality, they are plotted together. E.g., when you have
 TMS_T1, TMS_T2, TMS_T3, Thermo_T, and VWC you get plot with 5 lines of different colors and
 two y axes. Secondary y axes are scaled with calculation \code{values * scale_coeff}.
