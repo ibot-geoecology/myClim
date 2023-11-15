@@ -953,8 +953,9 @@ mc_prep_fillNA <- function(data, localities=NULL, sensors=NULL, maxgap=5, method
 #' @return numeric vector (0 = correct measurement, 1 = faulty measurement) stored as virtual sensor in myClim object
 #' @export
 #' @examples
-#' data <- mc_prep_TMSoffsoil(mc_data_example_clean)
-#' mc_plot_line(data,sensors = c("off_soil","TMS_T1", "TMS_T2","TMS_T3"))
+#' data <- mc_read_files(system.file("extdata", "data_93142760_201904.csv", package = "myClim"), "TOMST")
+#' data <- mc_prep_TMSoffsoil(data)
+#' mc_plot_line(data, sensors = c("off_soil","TMS_T1", "TMS_T2","TMS_T3"))
 mc_prep_TMSoffsoil <- function(data,
                                localities=NULL,
                                soil_sensor = mc_const_SENSOR_TMS_T1,
