@@ -25,33 +25,67 @@
 #' Joining time-series from repeated downloads
 #'
 #' @description
-#' Function join time-series from repeated download on the same locality. 
-#' If time-series overlaps and values are identical or first and last 
-#' records fit, then automatically joined without any user action. 
-#' If values are different on overlap, then user interactively selects 
-#' which source logger to use. 
-#' Description of conflict and interactive line plots with conflict intervals 
-#' are shown during joining of each logger one-by-one. 
+#' The function is designed to merge time-series data obtained through 
+#' repeated downloads in the same location. Within a specific locality, 
+#' the function performs the merging based on logger type, 
+#' physical element, and sensor height
 #'
 #' @details
-#' Joining is semi-automatic pairwise process. 
-#' In case the end of older and start of the newer time-series fits 
-#' myClim is sequentially adding the newer time-series to the older without
-#' any user action. In case the time series overlap and values on the 
-#' overlap are not identical, user interactively selects which 
-#' time series to use or type in the specific datetime where to trim 
-#' older time-series and continue newer. To support joining interactive lines
-#' and text description of conflict time-series are shown. 
-#' User can zoom in/out the plot and with mouse identify
-#' specific datetime where to trim older series and continue newer.    
+#' Joining is restricted to the myClim Raw-format (refer to [myClim-package]). 
+#' Loggers need to be organized within localities. The simplest method is to use [mc_read_data], 
+#' providing both `files_table` and `localities_table`. When using [mc_read_files] 
+#' without metadata, a bit more coding is needed. In this case, you can create 
+#' multiple myClim objects and specify correct locality names afterwards, 
+#' then merge these objects using [mc_prep_merge], which groups loggers 
+#' based on identical locality names.
 #' 
-#' Loggers with multiple sensors are joined base on one or more selected sensors. 
-#' See parameter `comp_sensors`. 
-#'   
-#' Name of resulting joined sensor is used from logger with the oldest data. If `serial_number` 
-#' is not equal while joining loggers, then the resulting `serial_number` is `NA`. 
-#' Clean info is changed to `NA` except step. In case you are joining not calibrated 
-#' sensor with calibrated one, then calibration information must be empty in not calibrated sensor.
+#' The joining function operates seamlessly without user intervention
+#' in two scenarios: 
+#' 
+#' 1) when the start of a newer time series aligns with the end of an older one, and 
+#' 2) when the two time-series share identical values during the overlap. 
+#' 
+#' However, if values differ during the overlap, the user is prompted to 
+#' interactively choose which time-series to retain and which to discard. 
+#' myClim provides information about differing time-series in the console, 
+#' including locality ID, problematic interval (start-end), 
+#' older logger ID and its time series start-end, and newer logger ID and 
+#' its time series start-end. Additionally, an interactive graphical 
+#' window (plotly) displays conflicting time series, allowing the user to 
+#' zoom in and explore values. In case of multiple conflicts, myClim 
+#' sequentially asks the user for decisions. 
+#' 
+#' Users have six options for handling overlap conflicts, five of which are pre-defined. 
+#' The sixth option allows the user to specify the exact time 
+#' to trim the older time-series and use the newer one. The options include:
+#' 
+#' * 1: using the older logger (to resolve this conflict), 
+#' * 2: using the newer logger (to resolve this conflict), 
+#' * 3: always using the older logger (to resolve this and all other conflicts),
+#' * 4: always using the newer logger (to resolve this and all other conflicts)
+#' * 5: exit joining process. 
+#' 
+#' Users must press the number key, hit Return/Enter, 
+#' or write in console the exact date in the format `YYYY-MM-DD hh:mm` 
+#' to trim the older series and continue with the newer series. 
+#' 
+#' Loggers with multiple sensors are joined based on one or 
+#' more selected sensors (see parameter comp_sensors).  
+#' The name of the resulting joined sensor is taken from the logger with 
+#' the oldest data. If serial_number is not equal during logger joining, 
+#' the resulting serial_number is NA. Clean info is changed to NA except 
+#' for the step. When joining a non-calibrated sensor with a calibrated one, 
+#' the calibration information must be empty in the non-calibrated sensor.
+#' 
+#' For example of joining see [myClim vignette](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html). 
+#' 
+#' **WARNING**
+#' 
+#' `mc_join` expects a maximum of one logger of a certain type 
+#' and height measuring certain elements in one locality. 
+#' In other words, if you use multiple logger of identical type 
+#' at identical heights in one locality, you cannot use 
+#' `mc_join` directly; you have to split your locality into sub-localities.
 #'
 #' @template param_myClim_object_raw
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
