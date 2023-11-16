@@ -49,33 +49,40 @@ See \link{myClim-package}}
 
 \item{localities}{names of localities; if NULL then all (default NULL)}
 
-\item{facet}{possible values (\code{NULL}, \code{"locality"}, \code{"physical"}) if \code{"locality"} each locality is plotted
-in separate plot in R and separate row in PDF if filename.pdf is provided. When \code{"physical"}, sensors with
-same physical (see \link{mc_data_physical}) are separated. When \code{NULL}, all localities are plotted
-in single plot (default "locality")}
+\item{facet}{possible values (\code{NULL}, \code{"locality"}, \code{"physical"})
+\itemize{
+\item \code{facet = "locality"} each locality is plotted (default)
+in separate plot in R and separate row in PDF if filename.pdf is provided.
+\item \code{facet = "physical"} sensors with  identical physical (see \link{mc_data_physical}) are grouped together across localities.
+\item \code{facet = NULL}, all localities and sensors (max 2 physicals, see details) are plotted
+in single plot
+}}
 }
 \value{
 ggplot2 object
 }
 \description{
 Function plots data with ggplot2 geom_line. Plot is returned as ggplot faced grid and
-is primary designed to be saved as PDF file. PNG is also possible, the same as
-plotting ggplot object into R environment. See details.
+is optimized for saving as facet, paginated PDF file.
 }
 \details{
 Saving as the PDF file is recommended, because the plot is optimized
-to be paginate PDF (facet line plot is distributed to pages), each locality is
-represented by separate plot, which is especially useful
-for bigger data. When facet = FALSE then single plot is returned showing all localities together.
+to be paginate PDF (facet line plot is distributed to pages), each locality can be
+represented by separate plot (\code{facet = "locality"}) default, which is especially useful
+for bigger data. When \code{facet = NULL} then single plot is returned showing all localities together.
+When \code{facet = physical} sensors with identical physical units are grouped together across localities.
 Maximal number of physical units (elements) of sensors to be plotted in one
-plot is two with primary and secondary y axis. In case, there are multiple sensors with
-identical physical on one locality, they are plotted together. E.g., when you have
+plot is two. First element is related to primary and second to secondary y axis.
+In case, there are multiple sensors with identical physical on one locality,
+they are plotted together for \code{facet = "locality"} e.g., when you have
 TMS_T1, TMS_T2, TMS_T3, Thermo_T, and VWC you get plot with 5 lines of different colors and
 two y axes. Secondary y axes are scaled with calculation \code{values * scale_coeff}.
-If coefficient is NULL than function try detects scale coefficient from
+If scaling coefficient is NULL than function try to detects scale coefficient from
 physical unit of sensors see \linkS4class{mc_Physical}. Scaling is useful when
-plotting together e.g. temperature and moisture. For TMS and HOBO scaling coefficients
-are estimated automatically, correctly. For other data it is better to set it by hand.
+plotting together e.g. temperature and moisture. For native myClim loggers
+(TOMST, HOBO U-23) scaling coefficients are pre-defined.
+For other cases when plotting two physicals together,
+it is better to set scaling coefficients by hand.
 }
 \examples{
 tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
