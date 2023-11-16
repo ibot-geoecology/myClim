@@ -21,17 +21,17 @@ mc_calc_vwc(
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
 \item{moist_sensor}{name of soil moisture sensor to be converted from TMS
-moisture values to volumetric water content (default "TMS_moist") see \code{names(mc_data_sensors)}.
-Soil moisture sensor must be in moisture_raw physical units see \code{names(mc_data_physical)}.}
+units to volumetric (default "TMS_moist") see \code{names(mc_data_sensors)}.
+Soil moisture sensor must be in moisture_raw physical see \code{names(mc_data_physical)}.}
 
 \item{temp_sensor}{name of soil temperature sensor (default "TMS_T1")
 see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical units.}
 
 \item{output_sensor}{name of new virtual sensor with VWC values (default "VWC_moisture")}
 
-\item{soiltype}{Either character corresponding to one of \code{soiltype} from \link{mc_data_vwc_parameters}
-(default \code{"universal"}), or a list with parameters \code{a}, \code{b} and \code{c} provided
-by the user - i.e.,\code{list(a=Value_1, b=Value_2, c=Value_3)}.}
+\item{soiltype}{either character corresponding to one of \code{soiltype} from \link{mc_data_vwc_parameters}
+(default \code{"universal"}). Or a list with parameters \code{a}, \code{b} and \code{c} manually filled in
+by user i.e.,\code{list(a=Value_1, b=Value_2, c=Value_3)}.}
 
 \item{localities}{list of locality_ids used for calculation; if NULL then all localities are used (default NULL)}
 
@@ -54,15 +54,14 @@ Function converts the raw TMS soil moisture (scaled TDT signal)
 to volumetric water content (VWC).
 }
 \details{
-This function is suitable for TOMST TMS loggers measuring soil moisture in raw TMS units.
-The raw TMS units represents inverted and numerically rescaled (1-4095) electromagnetic signal from the moisture sensor working
-on Time Domain Transmission principle (Wild et al. 2019). For TMS4 logger, the typical raw TMS moisture values range from cca
-115 units in dry air to cca 3635 units in distilled water - see \link{mc_calib_moisture}.
-
-Raw TMS moisture values can be converted to the soil volumetric water content with calibration curves. The function provides
-several experimentally derived calibration curves which were developped at reference temperature. To account for the difference
-between reference and actual temperature, the function use actual soil temperature values measured by TMS_T1 soil temperature
-sensor.
+This function is suitable for TOMST TMS loggers measuring soil moisture in raw TDT
+units (TMS units). Raw TDT units represents inverted and scaled (1-4095)
+number of high frequency-shaped electromagnetic pulses (ca 2.5 GHz)
+sent through a ca 30 cm long circuit within a 640-microsecond time window.
+For more details see (Wild et al. 2019). Pulse count is directly related to
+the soil moisture content. Therefore, based on experimental calibration
+curves, it is possible to directly convert TMS units to standardized
+volumetric water content in cubic meters. For more details see (Kopecky et al. 2021).
 
 The default calibration curve is "universal", which was designed for mineral soils (see Kopecký et al. 2021).
 Specific calibration curves were developed for several soil types (see Wild et al. 2019) and the user can choose one of these
@@ -80,7 +79,8 @@ derived e.g. from TOMST TMS Calibr utility after entering custom ratio of clay, 
 different range of raw soil moisture values than TMS4 series.
 
 The function by default replace the moisture records in frozen soils with NA (param \emph{frozen2NA}),
-because the TMS soil moisture sensor was not designed to measure in frozen soils and the returned values are thus not comparable
+because the soil moisture sensor was not designed to measure in
+frozen soils and the returned records are thus not comparable
 with values from non-frozen soil.
 }
 \examples{
