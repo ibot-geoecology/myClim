@@ -64,6 +64,7 @@ Smoothing with 10 day floating window increased sensitivity to 96.8\% while reta
 Decreasing 'smooth_threshold' below 0.5 will extend periods flagged as faulty measurement.
 }
 \examples{
-data <- mc_prep_TMSoffsoil(mc_data_example_clean)
-mc_plot_line(data,sensors = c("off_soil","TMS_T1", "TMS_T2","TMS_T3"))
+data <- mc_read_files(system.file("extdata", "data_93142760_201904.csv", package = "myClim"), "TOMST")
+data <- mc_prep_TMSoffsoil(data)
+mc_plot_line(data, sensors = c("off_soil","TMS_T1", "TMS_T2","TMS_T3"))
 }

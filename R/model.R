@@ -775,7 +775,9 @@ setMethod(
         }
         data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
         object@date_format <- .get_tomst_datetime_format(data, object@date_column)
-        .change_tomst_columns_and_logger_type(object, data)
+        object <- .model_change_tomst_columns_and_logger_type(object, data)
+        object <- .model_tomst_change_col_type(object, data)
+        return(object)
     }
 )
 
@@ -791,7 +793,7 @@ setMethod(
     return(NA_character_)
 }
 
-.change_tomst_columns_and_logger_type <- function(object, data){
+.model_change_tomst_columns_and_logger_type <- function(object, data){
     tm_columns <- list(4)
     names(tm_columns) <- mc_const_SENSOR_Thermo_T
     dendro_columns <- list(4, 7)
@@ -817,6 +819,14 @@ setMethod(
     object
 }
 
+.model_tomst_change_col_type <- function(object, data) {
+    has_comma <- purrr::map_lgl(object@columns, ~ any(stringr::str_detect(data[[.x]], ","), na.rm=TRUE))
+    if(!any(has_comma)) {
+        object@col_types <- "icinnniin"
+    }
+    return(object)
+}
+
 setMethod(
     ".model_load_data_format_params_from_file",
     "mc_TOMSTJoinDataFormat",
@@ -825,11 +835,11 @@ setMethod(
             return(NULL)
         }
         data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
-        .change_tomst_join_columns_and_logger_type(object, data)
+        .model_change_tomst_join_columns_and_logger_type(object, data)
     }
 )
 
-.change_tomst_join_columns_and_logger_type <- function(object, data){
+.model_change_tomst_join_columns_and_logger_type <- function(object, data){
     tmj_columns <- list(5)
     names(tmj_columns) <- mc_const_SENSOR_Thermo_T
     tmsj_columns <- list(5, 6, 7, 8, 9)

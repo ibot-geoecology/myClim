@@ -1,3 +1,7 @@
+# myClim 1.0.11
+* The reading of TOMST data with a comma decimal separator was incorrect in the 1.0.9 and 1.0.10 versions.
+  This error has been fixed.
+
 # myClim 1.0.10
 * Dependency on the package `runner` is removed and `data.table` is added as a new dependency.
 * In the functions `mc_read_files()` and `mc_read_data()`, a new parameter `user_data_formats` is added

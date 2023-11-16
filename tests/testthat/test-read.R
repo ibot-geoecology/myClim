@@ -129,6 +129,8 @@ test_that("mc_read_files error", {
 test_that("mc_read_files TOMST comma in number", {
     data <- mc_read_files(c("../data/comma_TOMST/data_91212414_0.csv",
                             "../data/comma_TOMST/data_94214606_0.csv"), "TOMST", clean=FALSE)
+    expect_true(all(data$localities$`91212414`$loggers[[1]]$sensors$Thermo_T$values < 100))
+    expect_true(is.numeric(data$localities$`91212414`$loggers[[1]]$sensors$Thermo_T$values))
     test_raw_data_format(data)
 })
 
