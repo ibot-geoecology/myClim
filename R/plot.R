@@ -400,23 +400,26 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' Plot data - ggplot2 geom_line
 #'
 #' Function plots data with ggplot2 geom_line. Plot is returned as ggplot faced grid and
-#' is primary designed to be saved as PDF file. PNG is also possible, the same as
-#' plotting ggplot object into R environment. See details.
+#' is optimized for saving as facet, paginated PDF file.
 #'
 #' @details
 #' Saving as the PDF file is recommended, because the plot is optimized
-#' to be paginate PDF (facet line plot is distributed to pages), each locality is
-#' represented by separate plot, which is especially useful
-#' for bigger data. When facet = FALSE then single plot is returned showing all localities together.
+#' to be paginate PDF (facet line plot is distributed to pages), each locality can be 
+#' represented by separate plot (`facet = "locality"`) default, which is especially useful
+#' for bigger data. When `facet = NULL` then single plot is returned showing all localities together.
+#' When `facet = physical` sensors with identical physical units are grouped together across localities.
 #' Maximal number of physical units (elements) of sensors to be plotted in one
-#' plot is two with primary and secondary y axis. In case, there are multiple sensors with
-#' identical physical on one locality, they are plotted together. E.g., when you have
+#' plot is two. First element is related to primary and second to secondary y axis. 
+#' In case, there are multiple sensors with identical physical on one locality, 
+#' they are plotted together for `facet = "locality"` e.g., when you have
 #' TMS_T1, TMS_T2, TMS_T3, Thermo_T, and VWC you get plot with 5 lines of different colors and
 #' two y axes. Secondary y axes are scaled with calculation `values * scale_coeff`.
-#' If coefficient is NULL than function try detects scale coefficient from
+#' If scaling coefficient is NULL than function try to detects scale coefficient from
 #' physical unit of sensors see [mc_Physical-class]. Scaling is useful when
-#' plotting together e.g. temperature and moisture. For TMS and HOBO scaling coefficients
-#' are estimated automatically, correctly. For other data it is better to set it by hand.
+#' plotting together e.g. temperature and moisture. For native myClim loggers 
+#' (TOMST, HOBO U-23) scaling coefficients are pre-defined. 
+#' For other cases when plotting two physicals together, 
+#' it is better to set scaling coefficients by hand.
 #'
 #' @template param_myClim_object
 #' @param filename output file name/path with the extension - supported formats are .pdf and .png (default NULL)
@@ -431,10 +434,13 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' @template param_use_utc
 #' @template param_localities
 #' @return ggplot2 object
-#' @param facet possible values (`NULL`, `"locality"`, `"physical"`) if `"locality"` each locality is plotted
-#' in separate plot in R and separate row in PDF if filename.pdf is provided. When `"physical"`, sensors with
-#' same physical (see [mc_data_physical]) are separated. When `NULL`, all localities are plotted
-#' in single plot (default "locality")
+#' @param facet possible values (`NULL`, `"locality"`, `"physical"`) 
+#' 
+#' * `facet = "locality"` each locality is plotted (default)
+#' in separate plot in R and separate row in PDF if filename.pdf is provided. 
+#' * `facet = "physical"` sensors with  identical physical (see [mc_data_physical]) are grouped together across localities. 
+#' * `facet = NULL`, all localities and sensors (max 2 physicals, see details) are plotted
+#' in single plot
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
 #' p <- mc_plot_line(tms.plot,sensors = c("TMS_T3","TMS_T1","TMS_moist"))
