@@ -1,3 +1,10 @@
+# myClim 1.0.12
+* A new `facet` parameter has been added to the `mc_plot_line()` function to provide more flexibility 
+  in data visualization.
+* The y-axis labels for Boolean sensors in the `mc_plot_line()` function have been updated to `TRUE` and `FALSE`.
+* The function `mc_calib_moisture()` now produces renamed results to enhance consistency.
+* The manual and vignettes have been enhanced to provide more comprehensive and user-friendly documentation.
+
 # myClim 1.0.11
 * The reading of TOMST data with a comma decimal separator was incorrect in the 1.0.9 and 1.0.10 versions.
   This error has been fixed.
