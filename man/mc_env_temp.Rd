@@ -58,8 +58,8 @@ Standardised myClim temperature variables:
 \item mean: Mean temperature = mean of daily mean temperatures
 \item max95p: Maximum temperature = 95th percentile of daily maximum temperatures
 \item drange: Temperature range = mean of daily temperature range (i.e., difference between daily minima and maxima)
-\item GDD{5}: Growing degree days = sum of growing degree days above defined base temperature (default 5°C) \code{gdd_t_base}
-\item FDD{0}: Freezing degree days = sum of freezing degree days bellow defined base temperature (default 0°C) \code{fdd_t_base}
+\item GDD5: Growing degree days = sum of growing degree days above defined base temperature (default 5°C) \code{gdd_t_base}
+\item FDD0: Freezing degree days = sum of freezing degree days bellow defined base temperature (default 0°C) \code{fdd_t_base}
 \item frostdays: Frost days = number of days with frost (daily minimum < 0°C) \code{fdd_t_base}
 }
 }

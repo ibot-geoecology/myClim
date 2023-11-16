@@ -35,8 +35,8 @@
 #'   - mean: Mean temperature = mean of daily mean temperatures
 #'   - max95p: Maximum temperature = 95th percentile of daily maximum temperatures
 #'   - drange: Temperature range = mean of daily temperature range (i.e., difference between daily minima and maxima)
-#'   - GDD{5}: Growing degree days = sum of growing degree days above defined base temperature (default 5°C) `gdd_t_base`
-#'   - FDD{0}: Freezing degree days = sum of freezing degree days bellow defined base temperature (default 0°C) `fdd_t_base`
+#'   - GDD5: Growing degree days = sum of growing degree days above defined base temperature (default 5°C) `gdd_t_base`
+#'   - FDD0: Freezing degree days = sum of freezing degree days bellow defined base temperature (default 0°C) `fdd_t_base`
 #'   - frostdays: Frost days = number of days with frost (daily minimum < 0°C) `fdd_t_base`
 #'   
 #' @template param_myClim_object_cleaned
