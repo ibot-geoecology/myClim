@@ -256,7 +256,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #'
 #' Raw TMS moisture values can be converted to the soil volumetric water content with calibration curves. The function provides 
 #' several experimentally derived calibration curves which were developped at reference temperature. To account for the difference 
-#' between reference and actual temperature, the function use actual soil temperature values measured by TMS_T1 soil temperature 
+#' between reference and actual temperature, the function uses actual soil temperature values measured by TMS_T1 soil temperature 
 #' sensor.
 #'
 #' The default calibration curve is "universal", which was designed for mineral soils (see Kopecký et al. 2021). 
@@ -268,7 +268,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' universal, sand TMS1, loamy sand TMS1, silt loam TMS1. 
 #' For details see [mc_data_vwc_parameters].
 #'
-#' It is also possible to define new calibarion function with custom parameters `a`, `b` and `c`. These can be
+#' It is also possible to define a new calibarion function with custom parameters `a`, `b` and `c`. These can be
 #' derived e.g. from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
 #'
 #' **Warning:** TOMST TMS Calibr utility was developed for TMS3 series of TMS loggers, which have 
@@ -287,7 +287,7 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' @param output_sensor name of new virtual sensor with VWC values (default "VWC_moisture")
 #' @param soiltype Either character corresponding to one of `soiltype` from [mc_data_vwc_parameters]
 #' (default `"universal"`), or a list with parameters `a`, `b` and `c` provided 
-#' by the user - i.e.,`list(a=Value_1, b=Value_2, c=Value_3)`.
+#' by the user as a `list(a=Value_1, b=Value_2, c=Value_3)`.
 #' @param localities list of locality_ids used for calculation; if NULL then all localities are used (default NULL)
 #' @param ref_t (default `r mc_const_CALIB_MOIST_REF_T`)
 #' @param acor_t (default `r sprintf("%.14f", mc_const_CALIB_MOIST_ACOR_T)`) correction parameter for temperature drift
@@ -422,18 +422,17 @@ mc_calc_vwc <- function(data, moist_sensor=mc_const_SENSOR_TMS_moist,
 #' Growing Degree Days
 #'
 #' @description
-#' This function creates new virtual sensor on the locality within myClim data object. The virtual sensor
-#' with values of GDD (Growing Degree Days) in degees Celsius . days, using original time step. see details
+#' This function creates a new virtual sensor for each locality within myClim data object. The new virtual sensor
+#' provides values of GDD (Growing Degree Days) in degees Celsius for each time step in the original timeseries.
 #'
 #' @details
 #' Function calculates growing degree days as follows:  GDD = max(0;(T - Tbase)) . period(days)
-#' The allowed time step length for GDD calculation is day and shorter.
-#' Function creates new virtual sensor with the same time step as input data.
-#' For shorter time steps than the day, the GDD value is the contribution
-#' of the interval to the growing degree day, supposing constant temperature over this period.
-#' Be careful while aggregating growing degree days to longer periods
-#' - only meaningful aggregation function is `sum`,
-#' but myClim let you apply anything see [myClim::mc_agg()].
+#' The maximum allowed time step length for GDD calculation is one day.
+#' Function creates a new virtual sensor with the same time step as input data.
+#' For shorter time steps than one day, the GDD value is the contribution
+#' of the interval to the growing degree day, assuming constant temperature over this period.
+#' Be careful while aggregating growing degree days to longer periods, because only meaningful aggregation function here is `sum`,
+#' but myClim let you apply any aggregation function see [myClim::mc_agg()].
 #'
 #' @template param_myClim_object_cleaned
 #' @param sensor name of temperature sensor used for GDD calculation e.g. TMS_T3 see `names(mc_data_sensors)`
@@ -504,7 +503,7 @@ mc_calc_gdd <- function(data, sensor, output_prefix="GDD", t_base=5, localities=
 #'
 #' @description
 #' This function creates a new virtual sensor on locality within the myClim data object.
-#' The virtual sensor hosts FDD Freezing Degree Days.
+#' The new virtual sensor provides FDD Freezing Degree Days.
 #'
 #' @details
 #' The allowed step length for FDD calculation is day and shorter.
@@ -606,11 +605,11 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
     return(data)
 }
 
-#' Calibrating Tomst dendrometer values to micrometers
+#' Converting Tomst dendrometer values to micrometers
 #'
 #' @description
 #' This function creates a new virtual sensor on locality within the myClim data object.
-#' The virtual sensor hosts the values of the change in stem size converted from raw
+#' The virtual sensor provides the values of the change in stem size converted from raw
 #' Tomst units to micrometers. Note that newer versions of Tomst Lolly 
 #' software can directly convert raw Tomst units to micrometers.
 #'
