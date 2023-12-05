@@ -1,3 +1,6 @@
+# myClim 1.0.13
+* The issue of NA values at the beginning of TOMST_join format data files has been resolved.
+
 # myClim 1.0.12
 * A new `facet` parameter has been added to the `mc_plot_line()` function to provide more flexibility 
   in data visualization.

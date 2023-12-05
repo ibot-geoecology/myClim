@@ -8,6 +8,7 @@
 .read_const_MESSAGE_UNSUPPOERTED_FORMAT <- "{data_format} is not a supported data format. File is skipped."
 .read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not applicable format to {path}. File is skipped."
 .read_const_MESSAGE_USER_DATA_FORMAT_KEY <- "The key in user_data_format must not be the same as the key in mc_data_formats."
+.read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {filename}"
 
 #' Reading files or directories
 #'
@@ -368,11 +369,17 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     result <- vroom::vroom(filename,
                            col_names = FALSE,
                            col_types = data_format@col_types,
+                           col_select = if(is.na(data_format@col_types)) vroom::everything() else 1:stringr::str_length(data_format@col_types),
                            delim = data_format@separator,
                            skip = data_format@skip,
                            na = data_format@na_strings,
                            n_max = nrows,
                            show_col_types = FALSE)
+    problems <- vroom::problems(result)
+    if(nrow(problems) > 0)
+    {
+        warning(stringr::str_glue(.read_const_MESSAGE_VROOM_WARNING))
+    }
     return(result)
 }
 
