@@ -24,7 +24,7 @@ The same myClim object as input but with added virtual FDD sensor
 }
 \description{
 This function creates a new virtual sensor on locality within the myClim data object.
-The virtual sensor hosts FDD Freezing Degree Days.
+The new virtual sensor provides FDD Freezing Degree Days.
 }
 \details{
 The allowed step length for FDD calculation is day and shorter.

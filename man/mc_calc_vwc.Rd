@@ -31,7 +31,7 @@ see \code{names(mc_data_sensors)}. Temperature sensor must be in T_C physical un
 
 \item{soiltype}{Either character corresponding to one of \code{soiltype} from \link{mc_data_vwc_parameters}
 (default \code{"universal"}), or a list with parameters \code{a}, \code{b} and \code{c} provided
-by the user - i.e.,\code{list(a=Value_1, b=Value_2, c=Value_3)}.}
+by the user as a \code{list(a=Value_1, b=Value_2, c=Value_3)}.}
 
 \item{localities}{list of locality_ids used for calculation; if NULL then all localities are used (default NULL)}
 
@@ -61,7 +61,7 @@ on Time Domain Transmission principle (Wild et al. 2019). For TMS4 logger, the t
 
 Raw TMS moisture values can be converted to the soil volumetric water content with calibration curves. The function provides
 several experimentally derived calibration curves which were developped at reference temperature. To account for the difference
-between reference and actual temperature, the function use actual soil temperature values measured by TMS_T1 soil temperature
+between reference and actual temperature, the function uses actual soil temperature values measured by TMS_T1 soil temperature
 sensor.
 
 The default calibration curve is "universal", which was designed for mineral soils (see Kopecký et al. 2021).
@@ -73,7 +73,7 @@ loamy sand B, sandy loam A, sandy loam B, loam, silt loam, peat, water,
 universal, sand TMS1, loamy sand TMS1, silt loam TMS1.
 For details see \link{mc_data_vwc_parameters}.
 
-It is also possible to define new calibarion function with custom parameters \code{a}, \code{b} and \code{c}. These can be
+It is also possible to define a new calibarion function with custom parameters \code{a}, \code{b} and \code{c}. These can be
 derived e.g. from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
 
 \strong{Warning:} TOMST TMS Calibr utility was developed for TMS3 series of TMS loggers, which have

@@ -22,20 +22,17 @@ name of output sensor consists of output_prefix and value t_base e.g. GDD5}
 The same myClim object as input but with added virtual GDD sensor
 }
 \description{
-This function creates new virtual sensor on the locality within myClim data object. The virtual sensor
-with values of GDD (Growing Degree Days) in degees Celsius . days, using original time step. see details
+This function creates a new virtual sensor for each locality within myClim data object. The new virtual sensor
+provides values of GDD (Growing Degree Days) in degees Celsius for each time step in the original timeseries.
 }
 \details{
 Function calculates growing degree days as follows:  GDD = max(0;(T - Tbase)) . period(days)
-The allowed time step length for GDD calculation is day and shorter.
-Function creates new virtual sensor with the same time step as input data.
-For shorter time steps than the day, the GDD value is the contribution
-of the interval to the growing degree day, supposing constant temperature over this period.
-Be careful while aggregating growing degree days to longer periods
-\itemize{
-\item only meaningful aggregation function is \code{sum},
-but myClim let you apply anything see \code{\link[=mc_agg]{mc_agg()}}.
-}
+The maximum allowed time step length for GDD calculation is one day.
+Function creates a new virtual sensor with the same time step as input data.
+For shorter time steps than one day, the GDD value is the contribution
+of the interval to the growing degree day, assuming constant temperature over this period.
+Be careful while aggregating growing degree days to longer periods, because only meaningful aggregation function here is \code{sum},
+but myClim let you apply any aggregation function see \code{\link[=mc_agg]{mc_agg()}}.
 }
 \examples{
 gdd_data <- mc_calc_gdd(mc_data_example_agg, "TMS_T3", localities = c("A2E32", "A6W79"))

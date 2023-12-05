@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.R
 \name{mc_calc_tomst_dendro}
 \alias{mc_calc_tomst_dendro}
-\title{Calibrating Tomst dendrometer values to micrometers}
+\title{Converting Tomst dendrometer values to micrometers}
 \usage{
 mc_calc_tomst_dendro(
   data,
@@ -25,7 +25,7 @@ myClim object same as input but with added dendro_l_um sensor
 }
 \description{
 This function creates a new virtual sensor on locality within the myClim data object.
-The virtual sensor hosts the values of the change in stem size converted from raw
+The virtual sensor provides the values of the change in stem size converted from raw
 Tomst units to micrometers. Note that newer versions of Tomst Lolly
 software can directly convert raw Tomst units to micrometers.
 }

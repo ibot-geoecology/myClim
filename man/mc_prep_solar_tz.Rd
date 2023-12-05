@@ -13,15 +13,17 @@ mc_prep_solar_tz(data)
 myClim object in the same format as input, with \code{tz_offset} filled in locality metadata
 }
 \description{
-This function calculates the offset against UTC on the locality to get the solar time.
-This is based on coordinates (longitude). If longitude is not provided, then not working.
+This function calculates the temporal offset between local solar time and UTC time zone.
+Calculation is based on geographic coordinates of each locality.
+Therefore, the function does not work when longitude coordinate is not provided.
 }
 \details{
-myClim library presumes the data in UTC by default. This function requires longitude to be provided in locality
-metadata slot \code{lon_wgs84} (in decimal degrees). Coordinates of locality can be provided
-during data reading, see \code{\link[=mc_read_data]{mc_read_data()}}, or ex post with \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}} function.
+myClim assumes that the data are in UTC. To calculate temporal offset based on local solar time, this function requires
+geographic coordinates (at least longitude) to be provided in locality metadata slot \code{lon_wgs84} (in decimal degrees).
+Geographic coordinates for each locality can be provided already during data reading, see \code{\link[=mc_read_data]{mc_read_data()}}, or added
+later  with \code{\link[=mc_prep_meta_locality]{mc_prep_meta_locality()}} function.
 
-TZ offset in minutes is calculated as \code{longitude / 180 * 12 * 60}.
+TZ offset (in minutes) is calculated as \code{longitude / 180 * 12 * 60}.
 }
 \examples{
 data_solar <- mc_prep_solar_tz(mc_data_example_clean)
