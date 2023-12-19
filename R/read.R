@@ -9,6 +9,7 @@
 .read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not applicable format to {path}. File is skipped."
 .read_const_MESSAGE_USER_DATA_FORMAT_KEY <- "The key in user_data_format must not be the same as the key in mc_data_formats."
 .read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {filename}"
+.read_const_MESSAGE_FILE_SKIP <- "File {.x} does not exist - skipping."
 
 #' Reading files or directories
 #'
@@ -148,6 +149,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         files_table <- .read_edit_data_file_paths(files_table, source_csv_file)
     }
     files_table <- .common_convert_factors_in_dataframe(files_table)
+    files_table <- .read_check_data_file_paths(files_table)
     if(nrow(files_table) == 0)
     {
         return(list())
@@ -198,6 +200,15 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     }
     files_table$path <- purrr::map(files_table$path, path_function)
     return(files_table)
+}
+
+.read_check_data_file_paths <- function(files_table) {
+    file_exists <- file.exists(as.character(files_table$path))
+    if(all(file_exists)) {
+        return(files_table)
+    }
+    purrr::walk(files_table$path[!file_exists], ~ warning(stringr::str_glue(.read_const_MESSAGE_FILE_SKIP)))
+    return(files_table[file_exists, ])
 }
 
 .read_init_localities_from_table <- function(localities_table) {

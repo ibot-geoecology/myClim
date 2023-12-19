@@ -216,6 +216,19 @@ print.myClimList <- function(x, ...) {
     return(x)
 }
 
+#' Length function for myClim object
+#'
+#' Function return number of localities.
+#'
+#' @param x myClim object see [myClim-package]
+#' @param ... other parameters from function length
+#' @export
+#' @examples
+#' length(mc_data_example_agg)
+length.myClimList <- function(x, ...) {
+    length(x$localities)
+}
+
 # classes ================================================================================
 
 mc_Serializable <- setClass("mc_Serializable")

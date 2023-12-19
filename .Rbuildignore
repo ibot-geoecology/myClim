@@ -10,5 +10,6 @@
 ^LICENSE\.md$
 ^examples$
 ^makefile$
+^tasks.py$
 ^man-roxygen$
 ^graphics$

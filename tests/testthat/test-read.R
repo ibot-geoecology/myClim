@@ -28,6 +28,15 @@ test_that("mc_read_data csv without localities", {
     expect_equal(data$localities$A1E05$loggers[[2]]$metadata@serial_number, "94230002")
 })
 
+test_that("mc_read_data missed file", {
+    table <- read.csv("../data/TOMST/files_table2.csv")
+    expect_warning(data <- mc_read_data(table, clean=FALSE), "File data_94184103_0.csv does not exist - skipping.") %>%
+        expect_warning("File data_91184101_0.csv does not exist - skipping.") %>%
+        expect_warning("File data_94230002_2022_06_10_0.csv does not exist - skipping.")
+    test_raw_data_format(data)
+    expect_equal(length(data), 1)
+})
+
 test_that("mc_read_data TOMST format datetime", {
     table <- data.frame(path= "../data/format/201911_93164272.csv", locality_id="AAA",
                         data_format="TOMST", serial_number="93164272")
