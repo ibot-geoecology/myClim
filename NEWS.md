@@ -1,3 +1,8 @@
+# myClim 1.0.14
+* The function `mc_read_data()` now skips non-existent files.
+* The `length()` function now returns the number of localities for `myClim` object.
+* Detection of `TOMST_join` format is now fixed for negative values of moisture.
+
 # myClim 1.0.13
 * The issue of NA values at the beginning of TOMST_join format data files has been resolved.
 
