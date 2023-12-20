@@ -3,7 +3,7 @@ source("libtest.R")
 test_that("mc_agg UTC", {
     data <- mc_read_files("../data/clean-datetime_step", "TOMST", clean=FALSE)
     expect_error(hour_data <- mc_agg(data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), min_coverage = 0))
-    cleaned_data <- mc_prep_clean(data, silent=T)
+    expect_warning(cleaned_data <- mc_prep_clean(data, silent=T))
     hour_data <- mc_agg(cleaned_data, "percentile", "hour", use_utc = TRUE, percentiles = c(10, 50, 90), min_coverage = 0)
     test_agg_data_format(hour_data)
     expect_equal(length(hour_data$localities[["94184102"]]$sensors), 12)

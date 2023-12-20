@@ -591,7 +591,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     {
         join_table <- dplyr::select(sensors_table, "sensor", "physical")
         names(join_table) <- c("sensor_name", "physical")
-        data_table <- dplyr::left_join(data_table, join_table)
+        data_table <- dplyr::left_join(data_table, join_table, by=dplyr::join_by("sensor_name"))
     }
     return(data_table)
 }

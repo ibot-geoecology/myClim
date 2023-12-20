@@ -3,6 +3,10 @@ from invoke import task
 
 
 @task
+def build_dev(c):
+    c.run("""cd .. && RD CMD build myClim""")
+
+@task
 def generate(c):
     """
     Generate source and documentation
@@ -11,6 +15,14 @@ def generate(c):
         c.run(f"Rscript {str(data_file)}")
     Path("NAMESPACE").unlink(missing_ok=True)
     c.run(f"R -e 'devtools::document()'")
+
+@task
+def check(c):
+    c.run("""R --vanilla --no-multiarch -e 'devtools::check()'""", pty=True)
+
+@task
+def check_dev(c):
+    c.run("""cd .. && RD CMD check --as-cran myClim_*.*.*.tar.gz""", pty=True)
 
 @task
 def install(c, vignette=True):
@@ -25,6 +37,6 @@ def install(c, vignette=True):
         c.run("""R - e 'install.packages(".", repos = NULL)'""")
 
 @task
-def check(c):
-    c.run("""R --vanilla --no-multiarch -e 'devtools::check()'""")
+def test(c):
+    c.run("""R --vanilla --no-multiarch -e 'devtools::test()'""", pty=True)
 
