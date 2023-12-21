@@ -45,3 +45,15 @@ test_that("mc_info_meta", {
     expect_equal(agg_meta_info, meta_info)
 })
 
+test_that("mc_info_logger", {
+    data <- mc_read_files("../data/join", "TOMST", clean=FALSE)
+    info_data <- mc_info_logger(data)
+    expect_equal(colnames(info_data), c("locality_id", "index", "serial_number", "logger_type", "start_date", "end_date", "step_seconds"))
+    expect_equal(nrow(info_data), 8)
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    info_cleaned_data <- mc_info_logger(cleaned_data)
+    expect_equal(nrow(info_cleaned_data), 8)
+    expect_true(all(!is.na(info_cleaned_data$step_seconds)))
+    agg_data <- mc_agg(mc_join(cleaned_data))
+    expect_error(mc_info_logger(agg_data))
+})

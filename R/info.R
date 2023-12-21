@@ -76,7 +76,7 @@ mc_info_clean <- function(data) {
 #' * serial_number - serial number of logger when provided or automatically detected from file name or header
 #' * sensor_id - original sensor id (e.g.,"GDD", "HOBO_T" ,"TMS_T1", "TMS_T2")
 #' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
-#' * start_date - the oldest record on the sensor  
+#' * start_date - the oldest record on the sensor
 #' * end_date - the newest record on the sensor
 #' * step_seconds - time step of records series (seconds)
 #' * period - time step of records series (text)
@@ -168,5 +168,50 @@ mc_info_meta <- function(data) {
     }
 
     result <- purrr::map_dfr(localities, locality_function)
+    as.data.frame(result)
+}
+
+#' Get loggers info table
+#'
+#' This function return data.frame with info about loggers
+#'
+#' @template param_myClim_object_raw
+#' @return data.frame with columns:
+#' * locality_id - when provided by user then locality ID, when not provided identical with serial number
+#' * index - logger index in locality
+#' * serial_number - serial number of logger when provided or automatically detected from file name or header
+#' * logger_type - loger type
+#' * start_date - the oldest record on the sensor
+#' * end_date - the newest record on the sensor
+#' * step_seconds - time step of records series (seconds)
+#' @export
+#' @examples
+#' mc_info_logger(mc_data_example_raw)
+mc_info_logger <- function(data) {
+    .common_stop_if_not_raw_format(data)
+
+    logger_function <- function(locality_id, logger_index, logger) {
+        step <- as.integer(logger$clean_info@step)
+
+        return(
+             list(locality_id=locality_id,
+                  index=logger_index,
+                  serial_number=logger$metadata@serial_number,
+                  logger_type=logger$metadata@type,
+                  start_date=min(logger$datetime),
+                  end_date=max(logger$datetime),
+                  step_seconds=step))
+    }
+
+    locality_function <- function(locality) {
+        purrr::pmap_dfr(list(
+                        locality_id = locality$metadata@locality_id,
+                        logger_index = seq_along(locality$loggers),
+                        logger = locality$loggers),
+                        logger_function)
+    }
+
+    result <- purrr::map_dfr(data$localities, locality_function)
+
     as.data.frame(result)
 }
