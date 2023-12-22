@@ -165,7 +165,7 @@ test_that("mc_read_files TOMST with error in data", {
 test_that("mc_read_files joined TOMST direcory", {
     data <- mc_read_files("../data/joined_TOMST", "TOMST_join", clean=FALSE, recursive=FALSE)
     test_raw_data_format(data)
-    expect_equal(names(data$localities), c("202004_94199113", "A1E01_TS", "A1W14_TMS", "A4E53_TMS", "CKras_Loc_2_15",
+    expect_equal(names(data$localities), c("202004_94199113", "202010_91183101", "A1E01_TS", "A1W14_TMS", "A4E53_TMS", "CKras_Loc_2_15",
                                            "CZ2_HRADEC_TMS", "CZ2_HRADEC_TS", "DP_0595"))
     expect_equal(names(data$localities$A1W14_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist"))
     expect_equal(names(data$localities$CZ2_HRADEC_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist", "VWC"))

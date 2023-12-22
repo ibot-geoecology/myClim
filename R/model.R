@@ -879,6 +879,7 @@ setMethod(
         object@columns <- tmsj_columns[names(tmsj_columns) != mc_const_SENSOR_VWC]
         return(object)
     }
+    object@col_types <- "icccdddid"
     object@columns <- tmsj_columns
     object
 }
