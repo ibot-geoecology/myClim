@@ -59,3 +59,14 @@ test_that("mc_join missed sensor", {
     test_raw_data_format(joined_data)
     expect_equal(length(joined_data$localities$`94184102`$loggers[[1]]$sensors), 5)
 })
+
+test_that("mc_join NA values", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path,                                 ~locality_id, ~data_format,
+        "../data/join_na/201804_93141375.csv",   "ABC",      "TOMST_join",
+        "../data/join_na/201804_93141375_2.csv", "ABC",      "TOMST_join",
+    ))
+    data <- mc_read_data(files_table, clean=TRUE, silent=TRUE)
+    joined_data <- mc_join(data, comp_sensors = c("TMS_T1", "TMS_T2", "TMS_T3"))
+    expect_equal(length(joined_data$localities$ABC$loggers), 1)
+})

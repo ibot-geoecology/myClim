@@ -230,7 +230,18 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_get_equal_data <- function(data_table, columns) {
-    is_equal <- purrr::map2(columns$l1, columns$l2, ~ dplyr::near(data_table[[.x]], data_table[[.y]]))
+    compare_function <- function(x, y) {
+        x_is_na <- is.na(data_table[[x]])
+        y_is_na <- is.na(data_table[[y]])
+        is_both_na <- x_is_na & y_is_na
+        is_one_na <- (x_is_na & !y_is_na) | (!x_is_na & y_is_na)
+        result <- dplyr::near(data_table[[x]], data_table[[y]])
+        result[is_both_na] <- TRUE
+        result[is_one_na] <- FALSE
+        return(result)
+    }
+
+    is_equal <- purrr::map2(columns$l1, columns$l2, compare_function)
     result <- purrr::reduce(is_equal, `&`)
     result[is.na(result)] <- FALSE
     result
