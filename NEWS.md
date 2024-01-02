@@ -1,3 +1,11 @@
+# myClim 1.0.15
+* The `mc_read_data()` function now uses the `Thermo` value of the `logger_type` parameter in `TOMST_join` format
+  and does not detect the type of the logger from the data.
+* A new function, `mc_info_logger()`, has been added. This function returns an overview table of loggers.
+* The issue with NA values in the `mc_join()` function has been fixed.
+* The `TRUE` value in `TOMST_join` is now correctly detected.
+* The `mc_join()` function does not fail if a wrong logger type is defined.
+
 # myClim 1.0.14
 * The function `mc_read_data()` now skips non-existent files.
 * The `length()` function now returns the number of localities for `myClim` object.
