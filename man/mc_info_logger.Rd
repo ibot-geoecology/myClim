@@ -10,19 +10,25 @@ mc_info_logger(data)
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
 }
 \value{
-data.frame with columns:
+A data.frame with the following columns:
 \itemize{
-\item locality_id - when provided by user then locality ID, when not provided identical with serial number
-\item index - logger index in locality
-\item serial_number - serial number of logger when provided or automatically detected from file name or header
-\item logger_type - loger type
-\item start_date - the oldest record on the sensor
-\item end_date - the newest record on the sensor
-\item step_seconds - time step of records series (seconds)
+\item locality_id - If provided by the user, it represents the locality ID; if not provided, it is identical to the logger's serial number.
+\item index - Logger index at the locality.
+\item serial_number - Serial number of the logger, either provided by the user or automatically detected from the file name or header.
+\item logger_type - Logger type.
+\item start_date - The oldest record on the logger.
+\item end_date - The newest record on the logger.
+\item step_seconds - Time step of the record series (in seconds).
 }
 }
 \description{
-This function return data.frame with info about loggers
+This function returns a data.frame with information about loggers.
+}
+\details{
+This function is designed to work only with
+myClim objects in \strong{Raw-format}, where the loggers are organized at localities.
+In \strong{Agg-format}, myClim objects do not support loggers; sensors are directly connected to the locality.
+See \link{myClim-package}. \code{mc_info_logger} does not work in Agg-format.
 }
 \examples{
 mc_info_logger(mc_data_example_raw)

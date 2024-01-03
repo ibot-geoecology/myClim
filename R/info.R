@@ -172,18 +172,23 @@ mc_info_meta <- function(data) {
 }
 
 #' Get loggers info table
-#'
-#' This function return data.frame with info about loggers
+#' 
+#' This function returns a data.frame with information about loggers. 
+#' 
+#' This function is designed to work only with
+#' myClim objects in **Raw-format**, where the loggers are organized at localities.
+#' In **Agg-format**, myClim objects do not support loggers; sensors are directly connected to the locality.
+#' See [myClim-package]. `mc_info_logger` does not work in Agg-format.
 #'
 #' @template param_myClim_object_raw
-#' @return data.frame with columns:
-#' * locality_id - when provided by user then locality ID, when not provided identical with serial number
-#' * index - logger index in locality
-#' * serial_number - serial number of logger when provided or automatically detected from file name or header
-#' * logger_type - loger type
-#' * start_date - the oldest record on the sensor
-#' * end_date - the newest record on the sensor
-#' * step_seconds - time step of records series (seconds)
+#' @return A data.frame with the following columns:
+#' * locality_id - If provided by the user, it represents the locality ID; if not provided, it is identical to the logger's serial number.
+#' * index - Logger index at the locality.
+#' * serial_number - Serial number of the logger, either provided by the user or automatically detected from the file name or header.
+#' * logger_type - Logger type.
+#' * start_date - The oldest record on the logger.
+#' * end_date - The newest record on the logger.
+#' * step_seconds - Time step of the record series (in seconds).
 #' @export
 #' @examples
 #' mc_info_logger(mc_data_example_raw)
