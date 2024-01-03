@@ -2,7 +2,7 @@
 .join_const_MESSAGE_INCONSISTENT_CALIBRATION <- "Calibration in sensors is inconsistent."
 .join_const_MESSAGE_SENSORS_NOT_FOUND <- "Selected sensors not found - {sensor_name} used."
 .join_const_MESSAGE_JOINING_EXIT <- "Joining canceled by user."
-.join_const_MESSAGE_DIFFERENT_LOGGER_SENSORS <- "There aren't same sensors in loggers."
+.join_const_MESSAGE_DIFFERENT_LOGGER_SENSORS <- "locality {locality_id}: different sensors in {logger_type} loggers -> skip joining"
 
 .join_const_MENU_TITLE <- "Loggers are different. They cannot be joined automatically."
 .join_const_MENU_INFO <- "Type choice number or type the start datetime of newer logger to be used in format YYYY-MM-DD hh:mm."
@@ -94,6 +94,8 @@
 mc_join <- function(data, comp_sensors=NULL) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
+    e_choice <- new.env()
+    e_choice$choice <- NA_integer_
     locality_function <- function(locality) {
         types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
         unique_types <- unique(types)
@@ -102,7 +104,8 @@ mc_join <- function(data, comp_sensors=NULL) {
             if(length(indexes) == 1) {
                 return(locality$loggers[indexes])
             }
-            .join_loggers_same_type(locality$loggers[indexes], comp_sensors, locality$metadata@locality_id)
+            .join_loggers_same_type(locality$loggers[indexes], comp_sensors,
+                                    locality$metadata@locality_id, logger_type, e_choice)
         }
         locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
         locality
@@ -111,25 +114,33 @@ mc_join <- function(data, comp_sensors=NULL) {
     return(data)
 }
 
-.join_loggers_same_type <- function(loggers, comp_sensors, locality_id) {
+.join_loggers_same_type <- function(loggers, comp_sensors, locality_id, logger_type, e_choice) {
     steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
     shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
     table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts)
     table <- dplyr::group_by(table, .data$steps, .data$shifts)
-    e_choice <- new.env()
-    e_choice$choice <- NA_integer_
-    group_function <- function(group, .y) {
-        .join_loggers(loggers[group$logger_id], comp_sensors, e_choice, locality_id)
+    group_function <- function(group_table, .y) {
+        is_ok <- .join_check_logger_sensors(loggers, group_table, locality_id, logger_type)
+        if(!is_ok) {
+            return(loggers[group_table$logger_id])
+        }
+        return(list(.join_loggers(loggers[group_table$logger_id], comp_sensors, e_choice, locality_id)))
     }
-    dplyr::group_map(table, group_function)
+    return(purrr::flatten(dplyr::group_map(table, group_function)))
 }
 
-.join_get_heights <- function(loggers) {
-    logger_function <- function(logger) {
-        stringr::str_c(sort(purrr::map_chr(logger$sensors, ~ .x$metadata@height)), collapse=",")
+.join_check_logger_sensors <- function(loggers, group_table, locality_id, logger_type) {
+    selected_loggers <- loggers[group_table$logger_id]
+    all_sensors <- as.character(unique(purrr::flatten(purrr::map(selected_loggers, ~ names(.x$sensors)))))
+    sensor_function <- function(sensor) {
+        result <- all(purrr::map_lgl(selected_loggers, ~ sensor %in% names(.x$sensors)))
+        return(result)
     }
-
-    purrr::map_chr(loggers, logger_function)
+    any_sensor_in_all <- any(purrr::map_lgl(all_sensors, sensor_function))
+    if(!any_sensor_in_all){
+        warning(stringr::str_glue(.join_const_MESSAGE_DIFFERENT_LOGGER_SENSORS))
+    }
+    return(any_sensor_in_all)
 }
 
 .join_loggers <- function(loggers, comp_sensors, e_choice, locality_id) {
@@ -208,10 +219,6 @@ mc_join <- function(data, comp_sensors=NULL) {
 
 .join_get_compare_columns <- function(names_table, comp_sensors) {
     not_na_sensors <- !(is.na(names_table$l1_new_name) | is.na(names_table$l2_new_name))
-    if(!any(not_na_sensors))
-    {
-        stop(.join_const_MESSAGE_DIFFERENT_LOGGER_SENSORS)
-    }
     l1_columns <- dplyr::first(names_table$l1_new_name[not_na_sensors])
     l2_columns <- dplyr::first(names_table$l2_new_name[not_na_sensors])
     orig <- dplyr::first(names_table$name)
@@ -230,7 +237,18 @@ mc_join <- function(data, comp_sensors=NULL) {
 }
 
 .join_get_equal_data <- function(data_table, columns) {
-    is_equal <- purrr::map2(columns$l1, columns$l2, ~ dplyr::near(data_table[[.x]], data_table[[.y]]))
+    compare_function <- function(x, y) {
+        x_is_na <- is.na(data_table[[x]])
+        y_is_na <- is.na(data_table[[y]])
+        is_both_na <- x_is_na & y_is_na
+        is_one_na <- (x_is_na & !y_is_na) | (!x_is_na & y_is_na)
+        result <- dplyr::near(data_table[[x]], data_table[[y]])
+        result[is_both_na] <- TRUE
+        result[is_one_na] <- FALSE
+        return(result)
+    }
+
+    is_equal <- purrr::map2(columns$l1, columns$l2, compare_function)
     result <- purrr::reduce(is_equal, `&`)
     result[is.na(result)] <- FALSE
     result

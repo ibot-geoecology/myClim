@@ -20,10 +20,10 @@ mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@separator <- ";"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@date_column <- 4
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@date_format <- "%d.%m.%Y %H:%M"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@na_strings <- c("NA", "")
-mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@col_types <- "icccdddid"
+mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@col_types <- "icccdddic"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@filename_serial_number_pattern <- "(.+)\\.csv$"
-#                                                                                ;  ;  ;datetime ;T1                   ;T2                   ;T3                   ;mois       ;mois          ;
-mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@data_row_pattern <- "^\\d+;.+;.+;[\\d.: ]+;(?:-?\\d*\\.?\\d*|NA);(?:-?\\d*\\.?\\d*|NA);(?:-?\\d*\\.?\\d*|NA);(?:\\d*|NA);-?\\d*\\.?\\d*;.*$"
+#                                                                                ;  ;  ;datetime ;T1                   ;T2                   ;T3                   ;mois       ;
+mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@data_row_pattern <- "^\\d+;.+;.+;[\\d.: ]+;(?:-?\\d*\\.?\\d*|NA);(?:-?\\d*\\.?\\d*|NA);(?:-?\\d*\\.?\\d*|NA);(?:\\d*|NA);.*$"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@tz_offset <- 0
 
 mc_data_formats[[.model_const_DATA_FORMAT_HOBO]] <- new("mc_HOBODataFormat")

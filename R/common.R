@@ -1,5 +1,6 @@
 .common_const_MESSAGE_UNKNOWN_SENSOR_ID <- "Sensor_id {sensor_id} is unknown."
 .common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME <- "It isn't possible change time zone for period longer than day. Apply tz_offset in mc_agg function (parameter use_utc)."
+.common_const_MESSAGE_NO_RAW <- "Format of input data isn't correct. Use non-aggregated data."
 
 .common_convert_factors_in_dataframe <- function(dataframe) {
     factor_columns <- sapply(dataframe, is.factor)
@@ -37,7 +38,7 @@
 
 .common_stop_if_not_raw_format <- function(data) {
     if(!.common_is_raw_format(data)) {
-        stop("Format of input data isn't correct for preparing. Use non-aggregated data.")
+        stop(.common_const_MESSAGE_NO_RAW)
     }
 }
 

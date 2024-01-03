@@ -853,18 +853,19 @@ setMethod(
 )
 
 .model_change_tomst_join_columns_and_logger_type <- function(object, data){
-    tmj_columns <- list(5)
-    names(tmj_columns) <- mc_const_SENSOR_Thermo_T
+    thermoj_columns <- list(5)
+    names(thermoj_columns) <- mc_const_SENSOR_Thermo_T
     tmsj_columns <- list(5, 6, 7, 8, 9)
-    names(tmsj_columns) <- c(mc_const_SENSOR_TMS_T1, mc_const_SENSOR_TMS_T2,mc_const_SENSOR_TMS_T3,
-                             mc_const_SENSOR_TMS_moist, mc_const_SENSOR_VWC)
+    names(tmsj_columns) <- c(mc_const_SENSOR_TMS_T1, mc_const_SENSOR_TMS_T2, mc_const_SENSOR_TMS_T3,
+                            mc_const_SENSOR_TMS_moist, mc_const_SENSOR_VWC)
     is_T1_NA <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]]))
     is_NA_T2_T3 <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]])) &&
         all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
     is_T1_T2_T3_equals <- (all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]]) &&
         all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
-    if(!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals)) {
-        object@columns <- tmj_columns
+    if((!is.na(object@logger_type) && object@logger_type == .model_const_LOGGER_TOMST_THERMODATALOGGER) ||
+        (!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals))) {
+        object@columns <- thermoj_columns
         if(is.na(object@logger_type)) {
             object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
         }
@@ -878,6 +879,7 @@ setMethod(
         object@columns <- tmsj_columns[names(tmsj_columns) != mc_const_SENSOR_VWC]
         return(object)
     }
+    object@col_types <- "icccdddid"
     object@columns <- tmsj_columns
     object
 }

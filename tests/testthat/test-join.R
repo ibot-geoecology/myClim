@@ -49,3 +49,38 @@ test_that("mc_join same height", {
     expect_equal(length(joined_data$localities$`94184103`$loggers[[1]]$sensors), 5)
     expect_true(is.na(dplyr::last(joined_data$localities$`94184103`$loggers[[1]]$sensors$VWC_moisture$values)))
 })
+
+test_that("mc_join missed sensor", {
+    data <- mc_read_files("../data/join", "TOMST", clean=TRUE, silent=TRUE)
+    data <- mc_filter(data, localities = "94184102")
+    data <- mc_calc_vwc(data)
+    data$localities$`94184102`$loggers[[1]]$sensors$VWC_moisture <- NULL
+    joined_data <- mc_join(data)
+    test_raw_data_format(joined_data)
+    expect_equal(length(joined_data$localities$`94184102`$loggers[[1]]$sensors), 5)
+})
+
+test_that("mc_join NA values", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path,                                 ~locality_id, ~data_format,
+        "../data/join_na/201804_93141375.csv",   "ABC",      "TOMST_join",
+        "../data/join_na/201804_93141375_2.csv", "ABC",      "TOMST_join",
+    ))
+    data <- mc_read_data(files_table, clean=TRUE, silent=TRUE)
+    joined_data <- mc_join(data, comp_sensors = c("TMS_T1", "TMS_T2", "TMS_T3"))
+    test_raw_data_format(joined_data)
+    expect_equal(length(joined_data$localities$ABC$loggers), 1)
+})
+
+test_that("mc_join not error", {
+    data <- mc_read_files("../data/join", "TOMST", clean=TRUE, silent=TRUE)
+    data1 <- mc_filter(data, localities = "91184101")
+    data2 <- mc_filter(data, localities = "94184103")
+    data1 <- mc_prep_meta_locality(data1, values=list(`91184101`="ABC"), param_name="locality_id")
+    data2 <- mc_prep_meta_locality(data2, values=list(`94184103`="ABC"), param_name="locality_id")
+    merged_data <- mc_prep_merge(list(data1, data2))
+    merged_data$localities$ABC$loggers[[1]]$metadata@type <- "TMS"
+    expect_warning(joined_data <- mc_join(merged_data))
+    test_raw_data_format(joined_data)
+})
+
