@@ -1,7 +1,10 @@
 # myClim 1.0.15
-* when reading `TOMST_join` format (internal TOMST data format used by IBOT researchers) the `mc_read_data()` function now uses the `Thermo` value of the `logger_type` parameter when reading TOMST Termo Logger and does not detect the type of the logger from the data.
+* when reading `TOMST_join` format (internal TOMST data format used by IBOT researchers) the `mc_read_data()`
+  function now uses the `Thermo` value of the `logger_type` parameter when reading TOMST Termo Logger
+  and does not detect the type of the logger from the data.
 * A new function, `mc_info_logger()`, has been added. This function returns an overview table of loggers in myClim Raw-format.
 * The issue with NA values in the `mc_join()` function has been fixed.
+* The issue with always choices in the `mc_join()` function has been fixed.
 * The `TRUE` value in `TOMST_join` is now correctly detected.
 * The `mc_join()` function does not fail if a wrong logger type is defined.
 

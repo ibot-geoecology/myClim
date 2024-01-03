@@ -94,6 +94,8 @@
 mc_join <- function(data, comp_sensors=NULL) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
+    e_choice <- new.env()
+    e_choice$choice <- NA_integer_
     locality_function <- function(locality) {
         types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
         unique_types <- unique(types)
@@ -103,7 +105,7 @@ mc_join <- function(data, comp_sensors=NULL) {
                 return(locality$loggers[indexes])
             }
             .join_loggers_same_type(locality$loggers[indexes], comp_sensors,
-                                    locality$metadata@locality_id, logger_type)
+                                    locality$metadata@locality_id, logger_type, e_choice)
         }
         locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
         locality
@@ -112,13 +114,11 @@ mc_join <- function(data, comp_sensors=NULL) {
     return(data)
 }
 
-.join_loggers_same_type <- function(loggers, comp_sensors, locality_id, logger_type) {
+.join_loggers_same_type <- function(loggers, comp_sensors, locality_id, logger_type, e_choice) {
     steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
     shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
     table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts)
     table <- dplyr::group_by(table, .data$steps, .data$shifts)
-    e_choice <- new.env()
-    e_choice$choice <- NA_integer_
     group_function <- function(group_table, .y) {
         is_ok <- .join_check_logger_sensors(loggers, group_table, locality_id, logger_type)
         if(!is_ok) {
