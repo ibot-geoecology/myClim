@@ -57,3 +57,24 @@ test_that("mc_info_logger", {
     agg_data <- mc_agg(mc_join(cleaned_data))
     expect_error(mc_info_logger(agg_data))
 })
+
+test_that("mc_info_join", {
+    data <- mc_read_files("../data/join", "TOMST", clean=TRUE, silent=TRUE)
+    data$localities$`94184103`$loggers[[1]]$sensors$TMS_T1$values <- data$localities$`94184103`$loggers[[1]]$sensors$TMS_T1$values + 1
+    table <- mc_info_join(data)
+    expect_equal(colnames(table), c("locality_id", "count_loggers", "count_joined_loggers", "count_data_conflicts", "count_errors"))
+    expect_equal(nrow(table), 4)
+    expect_true(is.integer(table$count_loggers))
+    expect_true(is.integer(table$count_joined_loggers))
+    expect_true(is.integer(table$count_data_conflicts))
+    expect_true(is.integer(table$count_errors))
+    expect_equal(table$count_data_conflicts[table$locality_id == "94184103"], 1)
+    data1 <- mc_filter(data, localities = "91184101")
+    data2 <- mc_filter(data, localities = "94184103")
+    data1 <- mc_prep_meta_locality(data1, values=list(`91184101`="ABC"), param_name="locality_id")
+    data2 <- mc_prep_meta_locality(data2, values=list(`94184103`="ABC"), param_name="locality_id")
+    merged_data <- mc_prep_merge(list(data1, data2))
+    merged_data$localities$ABC$loggers[[1]]$metadata@type <- "TMS"
+    expect_warning(table2 <- mc_info_join(merged_data))
+    expect_equal(table2$count_errors, 1)
+})

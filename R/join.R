@@ -92,10 +92,15 @@
 #' @return myClim object with joined loggers.
 #' @export
 mc_join <- function(data, comp_sensors=NULL) {
+    return(.join_main(data, comp_sensors, FALSE))
+}
+
+.join_main <- function(data, comp_sensors, get_overview) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
-    e_choice <- new.env()
-    e_choice$choice <- NA_integer_
+    e_state <- new.env()
+    e_state$choice <- if(get_overview) .join_const_MENU_CHOICE_OLDER_ALWAYS else NA_integer_
+    e_state$localities <- .join_prepare_env_localities(data)
     locality_function <- function(locality) {
         types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
         unique_types <- unique(types)
@@ -105,28 +110,47 @@ mc_join <- function(data, comp_sensors=NULL) {
                 return(locality$loggers[indexes])
             }
             .join_loggers_same_type(locality$loggers[indexes], comp_sensors,
-                                    locality$metadata@locality_id, logger_type, e_choice)
+                                    locality$metadata@locality_id, logger_type, e_state)
         }
         locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
+        e_state$localities[[locality$metadata@locality_id]]$count_joined_loggers <- length(locality$loggers)
         locality
     }
     data$localities <- purrr::map(data$localities, locality_function)
+    if(get_overview) {
+        return(e_state$localities)
+    }
     return(data)
 }
 
-.join_loggers_same_type <- function(loggers, comp_sensors, locality_id, logger_type, e_choice) {
-    steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
-    shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
-    table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts)
-    table <- dplyr::group_by(table, .data$steps, .data$shifts)
+.join_prepare_env_localities <- function (data) {
+    result <- purrr::map(data$localities, ~ list(
+        count_loggers=length(.x$loggers),
+        count_joined_loggers=NA_integer_,
+        count_data_conflicts=0,
+        count_errors=0))
+    names(result) <- names(data$localities)
+    return(as.environment(result))
+}
+
+.join_loggers_same_type <- function(loggers, comp_sensors, locality_id, logger_type, e_state) {
+    table <- .join_get_grouped_loggers_by_steps(loggers)
     group_function <- function(group_table, .y) {
         is_ok <- .join_check_logger_sensors(loggers, group_table, locality_id, logger_type)
         if(!is_ok) {
+            e_state$localities[[locality_id]]$count_errors <- e_state$localities[[locality_id]]$count_errors + 1
             return(loggers[group_table$logger_id])
         }
-        return(list(.join_loggers(loggers[group_table$logger_id], comp_sensors, e_choice, locality_id)))
+        return(list(.join_loggers(loggers[group_table$logger_id], comp_sensors, e_state, locality_id)))
     }
     return(purrr::flatten(dplyr::group_map(table, group_function)))
+}
+
+.join_get_grouped_loggers_by_steps <- function(loggers) {
+    steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
+    shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
+    table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts)
+    return(dplyr::group_by(table, .data$steps, .data$shifts))
 }
 
 .join_check_logger_sensors <- function(loggers, group_table, locality_id, logger_type) {
@@ -143,7 +167,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     return(any_sensor_in_all)
 }
 
-.join_loggers <- function(loggers, comp_sensors, e_choice, locality_id) {
+.join_loggers <- function(loggers, comp_sensors, e_state, locality_id) {
     reduce_function <- function(logger1, logger2) {
         if(logger2$datetime[[1]] < logger1$datetime[[1]]) {
             temp <- logger1
@@ -160,7 +184,7 @@ mc_join <- function(data, comp_sensors=NULL) {
         l2_table <- .common_sensor_values_as_tibble(logger2)
         colnames(l2_table) <- .join_get_logger_table_column_names(colnames(l2_table), names_table, FALSE)
         data_table <- dplyr::left_join(data_table, l2_table, by="datetime")
-        data_table <- .join_add_select_column(logger1, logger2, data_table, names_table, comp_sensors, e_choice, locality_id)
+        data_table <- .join_add_select_column(logger1, logger2, data_table, names_table, comp_sensors, e_state, locality_id)
         .join_get_joined_logger(logger1, logger2, data_table, names_table)
     }
     purrr::reduce(loggers, reduce_function)
@@ -190,7 +214,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     purrr::map_chr(old_names, new_name_function)
 }
 
-.join_add_select_column <- function(logger1, logger2, data_table, names_table, comp_sensors, e_choice, locality_id) {
+.join_add_select_column <- function(logger1, logger2, data_table, names_table, comp_sensors, e_state, locality_id) {
     columns <- .join_get_compare_columns(names_table, comp_sensors)
     equal_data <- .join_get_equal_data(data_table, columns)
     data_l1 <- purrr::reduce(purrr::map(columns$l2, ~ is.na(data_table[[.x]])), `&`) | equal_data
@@ -198,13 +222,14 @@ mc_join <- function(data, comp_sensors=NULL) {
     data_table$use_l1 <- data_l1
     problems <- !(data_l1 | data_l2)
     if(any(problems)) {
-        if(is.na(e_choice$choice)) {
+        e_state$localities[[locality_id]]$count_data_conflicts <- e_state$localities[[locality_id]]$count_data_conflicts + 1
+        if(is.na(e_state$choice)) {
             choice <- .join_ask_user_choice(logger1, logger2, data_table, problems, columns, locality_id)
             if(choice %in% c(.join_const_MENU_CHOICE_OLDER_ALWAYS, .join_const_MENU_CHOICE_NEWER_ALWAYS)) {
-                e_choice$choice <- choice
+                e_state$choice <- choice
             }
         } else {
-            choice <- e_choice$choice
+            choice <- e_state$choice
         }
         if(lubridate::is.POSIXct(choice)) {
             data_table$use_l1[problems] <- TRUE
