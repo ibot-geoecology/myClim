@@ -46,15 +46,16 @@ window (plotly) displays conflicting time series, allowing the user to
 zoom in and explore values. In case of multiple conflicts, myClim
 sequentially asks the user for decisions.
 
-Users have six options for handling overlap conflicts, five of which are pre-defined.
-The sixth option allows the user to specify the exact time
+Users have seven options for handling overlap conflicts, six of which are pre-defined.
+The seventh option allows the user to specify the exact time
 to trim the older time-series and use the newer one. The options include:
 \itemize{
 \item 1: using the older logger (to resolve this conflict),
 \item 2: using the newer logger (to resolve this conflict),
-\item 3: always using the older logger (to resolve this and all other conflicts),
-\item 4: always using the newer logger (to resolve this and all other conflicts)
-\item 5: exit joining process.
+\item 3: skip this join (same type loggers in locality aren't joined),
+\item 4: always using the older logger (to resolve this and all other conflicts),
+\item 5: always using the newer logger (to resolve this and all other conflicts)
+\item 6: exit joining process.
 }
 
 Users must press the number key, hit Return/Enter,

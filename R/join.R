@@ -9,11 +9,13 @@
 .join_const_MENU_WRONG <- "Your choice is not valid!"
 .join_const_MENU_CHOICE_OLDER <- 1
 .join_const_MENU_CHOICE_NEWER <- 2
-.join_const_MENU_CHOICE_OLDER_ALWAYS <- 3
-.join_const_MENU_CHOICE_NEWER_ALWAYS <- 4
-.join_const_MENU_EXIT_CHOICE <- "5"
+.join_const_MENU_CHOICE_SKIP <- 3
+.join_const_MENU_CHOICE_OLDER_ALWAYS <- 4
+.join_const_MENU_CHOICE_NEWER_ALWAYS <- 5
+.join_const_MENU_EXIT_CHOICE <- "6"
 .join_const_MENU_CHOICES <- c("use older logger",
                               "use newer logger",
+                              "skip this join",
                               "use always older logger",
                               "use always newer logger",
                               "exit")
@@ -55,15 +57,16 @@
 #' zoom in and explore values. In case of multiple conflicts, myClim 
 #' sequentially asks the user for decisions. 
 #' 
-#' Users have six options for handling overlap conflicts, five of which are pre-defined. 
-#' The sixth option allows the user to specify the exact time 
+#' Users have seven options for handling overlap conflicts, six of which are pre-defined.
+#' The seventh option allows the user to specify the exact time
 #' to trim the older time-series and use the newer one. The options include:
 #' 
 #' * 1: using the older logger (to resolve this conflict), 
 #' * 2: using the newer logger (to resolve this conflict), 
-#' * 3: always using the older logger (to resolve this and all other conflicts),
-#' * 4: always using the newer logger (to resolve this and all other conflicts)
-#' * 5: exit joining process. 
+#' * 3: skip this join (same type loggers in locality aren't joined),
+#' * 4: always using the older logger (to resolve this and all other conflicts),
+#' * 5: always using the newer logger (to resolve this and all other conflicts)
+#' * 6: exit joining process.
 #' 
 #' Users must press the number key, hit Return/Enter, 
 #' or write in console the exact date in the format `YYYY-MM-DD hh:mm` 
@@ -137,11 +140,16 @@ mc_join <- function(data, comp_sensors=NULL) {
     table <- .join_get_grouped_loggers_by_steps(loggers)
     group_function <- function(group_table, .y) {
         is_ok <- .join_check_logger_sensors(loggers, group_table, locality_id, logger_type)
+        selected_loggers <- loggers[group_table$logger_id]
         if(!is_ok) {
             e_state$localities[[locality_id]]$count_errors <- e_state$localities[[locality_id]]$count_errors + 1
-            return(loggers[group_table$logger_id])
+            return(selected_loggers)
         }
-        return(list(.join_loggers(loggers[group_table$logger_id], comp_sensors, e_state, locality_id)))
+        joined_logger <- .join_loggers(selected_loggers, comp_sensors, e_state, locality_id)
+        if(is.null(joined_logger)) {
+            return(selected_loggers)
+        }
+        return(list(joined_logger))
     }
     return(purrr::flatten(dplyr::group_map(table, group_function)))
 }
@@ -169,6 +177,9 @@ mc_join <- function(data, comp_sensors=NULL) {
 
 .join_loggers <- function(loggers, comp_sensors, e_state, locality_id) {
     reduce_function <- function(logger1, logger2) {
+        if(is.null(logger1)) {
+            return(NULL)
+        }
         if(logger2$datetime[[1]] < logger1$datetime[[1]]) {
             temp <- logger1
             logger1 <- logger2
@@ -185,9 +196,13 @@ mc_join <- function(data, comp_sensors=NULL) {
         colnames(l2_table) <- .join_get_logger_table_column_names(colnames(l2_table), names_table, FALSE)
         data_table <- dplyr::left_join(data_table, l2_table, by="datetime")
         data_table <- .join_add_select_column(logger1, logger2, data_table, names_table, comp_sensors, e_state, locality_id)
-        .join_get_joined_logger(logger1, logger2, data_table, names_table)
+        if(is.null(data_table)) {
+            return(NULL)
+        }
+        return(.join_get_joined_logger(logger1, logger2, data_table, names_table))
     }
-    purrr::reduce(loggers, reduce_function)
+    result <- purrr::reduce(loggers, reduce_function)
+    return(result)
 }
 
 .join_get_names_table <- function(logger1, logger2){
@@ -234,12 +249,14 @@ mc_join <- function(data, comp_sensors=NULL) {
         if(lubridate::is.POSIXct(choice)) {
             data_table$use_l1[problems] <- TRUE
             data_table$use_l1[problems & data_table$datetime >= choice] <- FALSE
+        } else if (choice == .join_const_MENU_CHOICE_SKIP) {
+            return(NULL)
         } else {
             use_l1 <- choice %in% c(.join_const_MENU_CHOICE_OLDER, .join_const_MENU_CHOICE_OLDER_ALWAYS)
             data_table$use_l1[problems] <- use_l1
         }
     }
-    data_table
+    return(data_table)
 }
 
 .join_get_compare_columns <- function(names_table, comp_sensors) {
@@ -308,7 +325,7 @@ mc_join <- function(data, comp_sensors=NULL) {
 
 .join_print_info_logger <- function(logger, sensor_name) {
     source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, .data$tag == .model_const_SENSOR_STATE_SOURCE)
-    message(source_states)
+    print(tibble::tibble(source_states))
 }
 
 .join_get_plot_data <- function(data_table, columns, plot_interval) {
