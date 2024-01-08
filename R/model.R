@@ -833,11 +833,15 @@ setMethod(
 }
 
 .model_tomst_change_col_type <- function(object, data) {
-    has_comma <- purrr::map_lgl(object@columns, ~ any(stringr::str_detect(data[[.x]], ","), na.rm=TRUE))
+    has_comma <- .model_is_comma_in_data(object, data)
     if(!any(has_comma)) {
         object@col_types <- "icinnniin"
     }
     return(object)
+}
+
+.model_is_comma_in_data <- function(object, data) {
+    return(purrr::map_lgl(object@columns, ~ any(stringr::str_detect(data[[.x]], ","), na.rm=TRUE)))
 }
 
 setMethod(
@@ -895,7 +899,7 @@ setMethod(
             return(NULL)
         }
         object <- .model_hobo_set_skip(object, lines)
-        data <- .read_get_data_from_file(path, object, nrows = count_lines)
+        data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
         object@skip <- object@skip + 1
         has_numbers_column <- data[[1]][[1]] == "#"
         object <- .model_hobo_set_date_column(object, data, has_numbers_column)
@@ -904,6 +908,8 @@ setMethod(
         }
         object <- .model_hobo_set_tz_offset(object, data)
         object <- .model_hobo_set_columns(object, data, has_numbers_column)
+        object <- .model_hobo_change_col_type(object, data)
+
         if(!.model_is_hobo_format_ok(object)) {
             return(NULL)
         }
@@ -1005,6 +1011,18 @@ setMethod(
     object@columns <- columns
     object@col_types <- paste0(col_types, collapse="")
     object
+}
+
+.model_hobo_change_col_type <- function(object, data) {
+    has_comma <- .model_is_comma_in_data(object, data[-1, ])
+    if(any(has_comma)) {
+        col_types <- strsplit(object@col_types, split="")[[1]]
+        for(i in object@columns) {
+            col_types[[i]] <- "c"
+        }
+        object@col_types <- paste0(col_types, collapse="")
+    }
+    return(object)
 }
 
 .model_is_hobo_format_ok <- function(object) {
