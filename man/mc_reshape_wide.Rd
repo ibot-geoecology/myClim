@@ -40,7 +40,7 @@ This function converts myClim object to the R data.frame with values of sensor i
 First column of the output data.frame is datetime followed by the
 columns for every sensor. Name of the column is in format:
 \itemize{
-\item localityid_serialnumber_sensorname for Raw-format
+\item localityid_loggerid_serialnumber_sensorname for Raw-format
 \item localityid_sensorname for Agg-format
 }
 

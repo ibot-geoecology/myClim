@@ -1,7 +1,7 @@
 test_that("wideformat-filter", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     table <- mc_reshape_wide(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2"))
-    expect_true("A6W79_94184102_TMS_T1" %in% colnames(table))
+    expect_true("A6W79_1_94184102_TMS_T1" %in% colnames(table))
     expect_equal(ncol(table), 5)
     expect_equal(nrow(table), 100)
     cleaned_data <- mc_prep_clean(data, silent=T)
@@ -36,6 +36,14 @@ test_that("wideformat-all local time", {
     expect_equal(table_utc, table)
     agg_data <- mc_agg(cleaned_data, fun="coverage", period="day")
     expect_warning(table <- mc_reshape_wide(agg_data, use_utc=FALSE))
+})
+
+test_that("wideformat index no serial_number", {
+    data <- mc_read_files("../data/join", "TOMST", clean=TRUE, silent=TRUE)
+    data$localities$`91184101`$loggers[[3]]$metadata@serial_number <- NA_character_
+    table <- mc_reshape_wide(data)
+    expect_true("91184101_2_91184101_Thermo_T" %in% colnames(table))
+    expect_true("91184101_3_Thermo_T" %in% colnames(table))
 })
 
 test_that("reshape long", {

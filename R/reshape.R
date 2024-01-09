@@ -6,7 +6,7 @@
 #'
 #' @details First column of the output data.frame is datetime followed by the
 #' columns for every sensor. Name of the column is in format:
-#' * localityid_serialnumber_sensorname for Raw-format
+#' * localityid_loggerid_serialnumber_sensorname for Raw-format
 #' * localityid_sensorname for Agg-format
 #' 
 #' The less complex wide table is returned when exporting single sensor ascross localities. 
@@ -74,7 +74,15 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
     }
 
     raw_locality_function <- function(locality) {
-        prefixes <- purrr::map_chr(locality$loggers, function(x) stringr::str_glue("{locality$metadata@locality_id}_{x$metadata@serial_number}"))
+        name_function <- function(logger, i) {
+            parts <- c(locality$metadata@locality_id, as.character(i))
+            if(!is.na(logger$metadata@serial_number)) {
+                parts <- c(parts, logger$metadata@serial_number)
+            }
+            paste0(parts, collapse="_")
+        }
+
+        prefixes <- purrr::imap_chr(locality$loggers, name_function)
         items <- list(
             item=locality$loggers,
             name_prefix=prefixes,
