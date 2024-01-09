@@ -11,6 +11,8 @@
 .read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {filename}"
 .read_const_MESSAGE_FILE_SKIP <- "File {.x} does not exist - skipping."
 
+.read_state <- new.env()
+
 #' Reading files or directories
 #'
 #' This function read one or more CSV/TXT files or directories of identical, 
@@ -150,6 +152,14 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     }
     files_table <- .common_convert_factors_in_dataframe(files_table)
     files_table <- .read_check_data_file_paths(files_table)
+    .read_state$check_bar <- NULL
+    .read_state$read_bar <- NULL
+    if(!silent) {
+        .read_state$check_bar <- progress::progress_bar$new(format = "check [:bar] :current/:total files",
+                                                              total=nrow(files_table))
+        .read_state$read_bar <- progress::progress_bar$new(format = "read [:bar] :current/:total files",
+                                                              total=nrow(files_table))
+    }
     if(nrow(files_table) == 0)
     {
         return(list())
@@ -235,6 +245,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         }
         else {
             warning(stringr::str_glue(.read_const_MESSAGE_UNSUPPOERTED_FORMAT))
+            if(!is.null(.read_state$check_bar)) .read_state$check_bar$tick()
             return(NULL)
         }
         if(is.na(data_format_object@date_format) && !is.na(date_format)) {
@@ -249,8 +260,10 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         data_format_object <- .model_load_data_format_params_from_file(data_format_object, path)
         if(is.null(data_format_object)) {
             warning(stringr::str_glue(.read_const_MESSAGE_UNAPLICABLE_FORMAT))
+            if(!is.null(.read_state$check_bar)) .read_state$check_bar$tick()
             return(NULL)
         }
+        if(!is.null(.read_state$check_bar)) .read_state$check_bar$tick()
         return(data_format_object)
     }
 
@@ -311,7 +324,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_get_output_data <- function(files_table, localities, data_formats) {
-    files_table$index <- 1:nrow(files_table)
+    files_table$index <- seq_len(nrow(files_table))
     groupped_files <- dplyr::group_by(files_table, .data$locality_id)
     locality_function <- function(.x, .y) {
         if(.y$locality_id %in% names(localities)) {
@@ -366,6 +379,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     }
     if(any(is.na(datetime))) {
         warning(stringr::str_glue(.read_const_MESSAGE_WRONG_DATETIME))
+        if(!is.null(.read_state$read_bar)) .read_state$read_bar$tick()
         return(NULL)
     }
     if(data_format@tz_offset != 0) {
@@ -373,7 +387,9 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     }
     states <- .read_create_source_states(filename, datetime)
     sensors <- .read_get_sensors_from_data_format(data_table, data_format, datetime, states)
-    .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step)
+    result <- .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step)
+    if(!is.null(.read_state$read_bar)) .read_state$read_bar$tick()
+    return(result)
 }
 
 .read_get_data_from_file <- function(filename, data_format, nrows=Inf) {

@@ -39,7 +39,8 @@ Imports:
     plotly,
     zoo,
     methods,
-    vroom
+    vroom,
+    progress
 Roxygen: list(markdown = TRUE)
 Additional_repositories: https://ibot-geoecology.github.io/drat
 Suggests:

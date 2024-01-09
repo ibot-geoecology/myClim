@@ -96,6 +96,8 @@ mc_join <- function(data, comp_sensors=NULL) {
     .prep_check_datetime_step_unprocessed(data, stop)
     e_choice <- new.env()
     e_choice$choice <- NA_integer_
+    join_bar <- progress::progress_bar$new(format = "join [:bar] :current/:total localities",
+                                           total=length(data$localities))
     locality_function <- function(locality) {
         types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
         unique_types <- unique(types)
@@ -108,6 +110,7 @@ mc_join <- function(data, comp_sensors=NULL) {
                                     locality$metadata@locality_id, logger_type, e_choice)
         }
         locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
+        join_bar$tick()
         locality
     }
     data$localities <- purrr::map(data$localities, locality_function)

@@ -16,7 +16,7 @@ Or install the latest development version with dependencies:
 ```R
 requiered_packages <- c("stringr", "lubridate", "tibble", "dplyr", "purrr",
                         "ggplot2", "ggforce", "viridis", "data.table", "rmarkdown",
-                        "knitr", "kableExtra", "tidyr", "plotly", "zoo", "vroom")
+                        "knitr", "kableExtra", "tidyr", "plotly", "zoo", "vroom", "progress")
 missing_packages <- requiered_packages[!(requiered_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) install.packages(missing_packages)
 

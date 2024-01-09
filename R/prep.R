@@ -20,6 +20,8 @@
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 
+.prep_state <- new.env()
+
 #' Cleaning datetime series
 #'
 #' @description
@@ -54,7 +56,7 @@
 #' (13:33 -> 14:00, 15:33 -> 16:00) than use `mc_agg(period="2 hours")` command after data cleaning.
 #'
 #' @template param_myClim_object_raw
-#' @param silent if true, then cleaning log table is not printed in console (default FALSE), see [myClim::mc_info_clean()]
+#' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @return
 #' * cleaned myClim object in Raw-format
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
@@ -67,6 +69,12 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
     if(.prep_is_datetime_step_processed_in_object(data)) {
         warning(.prep_const_MESSAGE_RECLEAN)
+    }
+    count_table <- mc_info_count(data)
+    .prep_state$clean_bar <- NULL
+    if(!silent) {
+        .prep_state$clean_bar <- progress::progress_bar$new(format = "clean [:bar] :current/:total loggers",
+                                                            total=count_table$count[count_table$item == "loggers"])
     }
     locality_function <- function(locality) {
         locality$loggers <- purrr::map(locality$loggers, .prep_clean_logger)
@@ -99,6 +107,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
     if(is.na(logger$clean_info@step)) {
         warning(stringr::str_glue(.prep_const_MESSAGE_STEP_PROBLEM))
+        if(!is.null(.prep_state$clean_bar)) .prep_state$clean_bar$tick()
         return(logger)
     }
     new_datetime <- .prep_get_rounded_datetime(logger)
@@ -107,6 +116,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger <- .prep_clean_write_info(logger, rounded)
     logger <- .prep_clean_edit_series(logger)
     logger <- .prep_clean_edit_source_state(logger)
+    if(!is.null(.prep_state$clean_bar)) .prep_state$clean_bar$tick()
     logger
 }
 
