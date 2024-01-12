@@ -1,3 +1,14 @@
+# myClim 1.0.16
+* A new function, `mc_info_join()`, has been added. This function attempts to join myClim objects
+  and returns an overview of the operation.
+* The skip option has been added to the `mc_join()` function.
+* The `mc_read_data()` function can now read HOBO files which use a comma as the decimal separator.
+* The logger index has now been added to the column name in the `mc_reshape_wide()` function.
+* Progress bars have been added to the `mc_read_data()`, `mc_prep_clean()`, `mc_join()`, and `mc_agg()` functions.
+* When new sensors are created from a custom function in the `mc_agg()` function, they now inherit the `sensor_id`
+  from the parent sensors.
+* If a wrong physical unit is input into the calc functions, it will now result in a warning instead of an error.
+
 # myClim 1.0.15
 * when reading `TOMST_join` format (internal TOMST data format used by IBOT researchers) the `mc_read_data()`
   function now uses the `Thermo` value of the `logger_type` parameter when reading TOMST Termo Logger

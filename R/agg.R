@@ -118,13 +118,17 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     use_utc <- .agg_get_use_utc(data, use_utc)
     original_period <- .agg_check_steps_and_get_original_text(data, fun, period_object)
     is_raw <- .common_is_raw_format(data)
+    agg_bar <- progress::progress_bar$new(format = "agg [:bar] :current/:total localities",
+                                          total=length(data$localities))
     locality_function <- function (locality) {
         tz_offset <- if(use_utc) 0 else locality$metadata@tz_offset
         if(is_raw) {
-            return(.agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, min_coverage, tz_offset, custom_functions))
+            result <- .agg_aggregate_prep_locality(locality, fun, period, use_intervals, percentiles, min_coverage, tz_offset, custom_functions)
         } else {
-            return(.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, min_coverage, tz_offset, original_period, custom_functions))
+            result <-.agg_aggregate_item(locality, fun, period, use_intervals, percentiles, min_coverage, tz_offset, original_period, custom_functions)
         }
+        agg_bar$tick()
+        return(result)
     }
     new_localities <- purrr::map(data$localities, locality_function)
     new_localities <- purrr::keep(new_localities, function (x) !is.null(x))
