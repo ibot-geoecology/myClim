@@ -3,7 +3,7 @@
 .calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@period} in data is too long. Maximal allowed step is day."
 .calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY <- "Step in logger {logger$metadata@serial_number} is too long. Maximal allowed step is day. It is skipped."
 .calc_const_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
-.calc_const_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {locality$metadata@locality_id}. It will be overwritten."
+.calc_const_MESSAGE_OVERWRITE_SENSOR <- "Sensor {output_sensor} exists in locality {item$metadata@locality_id}. It will be overwritten."
 .calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
 .calc_const_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
 .calc_const_MESSAGE_WRONG_SOILTYPE <- "Soiltype doesn't contain all a, b, c parameters."
@@ -112,7 +112,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
         return(item)
     }
     if(!is.null(sensor_physical) && !.model_is_physical(item$sensors[[sensor_name]]$metadata, sensor_physical)){
-        .calc_wrong_physical_error_function(sensor_name, sensor_physical)
+        .calc_wrong_physical_warning_function(sensor_name, sensor_physical)
     }
     .calc_warn_if_overwriting(item, output_sensor_name)
     height <- item$sensors[[sensor_name]]$metadata@height
@@ -133,8 +133,8 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     result
 }
 
-.calc_wrong_physical_error_function <- function(sensor_name, unit_name) {
-    stop(stringr::str_glue(.calc_const_MESSAGE_WRONG_PHYSICAL_UNIT))
+.calc_wrong_physical_warning_function <- function(sensor_name, unit_name) {
+    warning(stringr::str_glue(.calc_const_MESSAGE_WRONG_PHYSICAL_UNIT))
 }
 
 .calc_warn_if_overwriting <- function(item, output_sensor) {
@@ -394,13 +394,13 @@ mc_calc_vwc <- function(data, moist_sensor=mc_const_SENSOR_TMS_moist,
         return(TRUE)
     }
     if(!.model_is_physical_moisture_raw(item$sensors[[moist_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(moist_sensor, .model_const_PHYSICAL_moisture_raw)
+        .calc_wrong_physical_warning_function(moist_sensor, .model_const_PHYSICAL_moisture_raw)
     }
     if(!.calc_check_sensor_in_item(item, temp_sensor)){
         return(TRUE)
     }
     if(!.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_T_C)
+        .calc_wrong_physical_warning_function(temp_sensor, .model_const_PHYSICAL_T_C)
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
@@ -744,13 +744,13 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
         return(TRUE)
     }
     if(!.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(temp_sensor, .model_const_PHYSICAL_T_C)
+        .calc_wrong_physical_warning_function(temp_sensor, .model_const_PHYSICAL_T_C)
     }
     if(!.calc_check_sensor_in_item(item, rh_sensor)){
         return(TRUE)
     }
     if(!.model_is_physical(item$sensors[[rh_sensor]]$metadata, .model_const_PHYSICAL_RH)){
-        .calc_wrong_physical_error_function(rh_sensor, .model_const_PHYSICAL_RH)
+        .calc_wrong_physical_warning_function(rh_sensor, .model_const_PHYSICAL_RH)
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)

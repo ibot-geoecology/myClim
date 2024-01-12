@@ -98,10 +98,10 @@ test_that("mc_calc_vwc frozen2NA", {
 test_that("mc_calc_vwc wrong", {
     cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent = T)
     agg_data <- mc_agg(cleaned_data)
-    expect_error(agg_data <- mc_calc_vwc(agg_data, temp_sensor="TMS_moist", localities="A2E32"))
-    expect_error(agg_data <- mc_calc_vwc(agg_data, moist_sensor="TMS_T1", localities="A2E32"))
-    expect_error(agg_data <- mc_calc_vwc(agg_data, soiltype="none"))
-    expect_error(agg_data <- mc_calc_vwc(agg_data, soiltype=list(aa=1, bb=2, c=3)))
+    expect_warning(agg_data1 <- mc_calc_vwc(agg_data, temp_sensor="TMS_moist", localities="A2E32"))
+    expect_warning(agg_data1 <- mc_calc_vwc(agg_data, moist_sensor="TMS_T1", localities="A2E32"))
+    expect_error(agg_data1 <- mc_calc_vwc(agg_data, soiltype="none"))
+    expect_error(agg_data1 <- mc_calc_vwc(agg_data, soiltype=list(aa=1, bb=2, c=3)))
 })
 
 test_that("mc_calc_gdd", {

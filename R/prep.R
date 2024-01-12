@@ -1072,19 +1072,19 @@ mc_prep_TMSoffsoil <- function(data,
         return(TRUE)
     }
     if(!.model_is_physical_T_C(item$sensors[[soil_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(soil_sensor, .model_const_PHYSICAL_T_C)
+        .calc_wrong_physical_warning_function(soil_sensor, .model_const_PHYSICAL_T_C)
     }
     if(!.calc_check_sensor_in_item(item, air_sensor)){
         return(TRUE)
     }
     if(!.model_is_physical_T_C(item$sensors[[air_sensor]]$metadata)){
-        .calc_wrong_physical_error_function(air_sensor, .model_const_PHYSICAL_T_C)
+        .calc_wrong_physical_warning_function(air_sensor, .model_const_PHYSICAL_T_C)
     }
     if(!.calc_check_sensor_in_item(item, moist_sensor)){
         return(TRUE)
     }
     if(!.model_is_physical(item$sensors[[moist_sensor]]$metadata, .model_const_PHYSICAL_moisture_raw)){
-        .calc_wrong_physical_error_function(moist_sensor, .model_const_PHYSICAL_moisture_raw)
+        .calc_wrong_physical_warning_function(moist_sensor, .model_const_PHYSICAL_moisture_raw)
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
