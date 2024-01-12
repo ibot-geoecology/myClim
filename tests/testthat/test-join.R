@@ -83,4 +83,3 @@ test_that("mc_join not error", {
     expect_warning(joined_data <- mc_join(merged_data))
     test_raw_data_format(joined_data)
 })
-
