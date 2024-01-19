@@ -70,8 +70,9 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
         files <- paths
     }
     files_table <- data.frame(path=files, locality_id=NA_character_, data_format=dataformat_name,
-                              serial_number=NA_character_, logger_type=logger_type, date_format=date_format, tz_offset=tz_offset,
-                              step=step)
+                              serial_number=NA_character_, logger_type=logger_type,
+                              tz_offset=tz_offset, step=step)
+    files_table$date_format <- rep(list(date_format), nrow(files_table))
     mc_read_data(files_table, clean=clean, silent=silent, user_data_formats=user_data_formats)
 }
 
@@ -110,8 +111,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendro, Thermo and TMS), but automatic detection of TMS_L45 is not possible.
 #' Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
-#' * date_format - for reading HOBO format of date in strptime function (e.g. "%d.%m.%y %H:%M:%S");
-#' Ignored for TOMST data format
+#' * date_format A character vector specifying the custom date format(s) for the [lubridate::parse_date_time()] function
+#' (e.g., "%d.%m.%y %H:%M:%S"). Multiple formats can be defined. The first matching format will be selected for parsing.
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files.
 #' If timezone can't be detected, then UTC is supposed.
@@ -248,7 +249,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
             if(!is.null(.read_state$check_bar)) .read_state$check_bar$tick()
             return(NULL)
         }
-        if(is.na(data_format_object@date_format) && !is.na(date_format)) {
+        if(any(!is.na(date_format))) {
             data_format_object@date_format <- date_format
         }
         if(!is.na(tz_offset)) {
@@ -375,7 +376,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- data_table[[data_format@date_column]]
     if(!lubridate::is.POSIXct(datetime)) {
-        datetime <- as.POSIXct(strptime(datetime, data_format@date_format, "UTC"))
+        datetime <- lubridate::parse_date_time(datetime, data_format@date_format, tz="UTC")
     }
     if(any(is.na(datetime))) {
         warning(stringr::str_glue(.read_const_MESSAGE_WRONG_DATETIME))

@@ -1,3 +1,6 @@
+# myClim 1.0.17
+* Multiple custom date formats can be defined for TOMST data format.
+
 # myClim 1.0.16
 * A new function, `mc_info_join()`, has been added. This function attempts to join myClim objects
   and returns an overview of the operation.

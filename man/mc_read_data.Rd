@@ -29,8 +29,8 @@ optional columns:
 If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendro, Thermo and TMS), but automatic detection of TMS_L45 is not possible.
 Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 Default heights of sensor based on logger types are defined in table \link{mc_data_heights}
-\item date_format - for reading HOBO format of date in strptime function (e.g. "\%d.\%m.\%y \%H:\%M:\%S");
-Ignored for TOMST data format
+\item date_format A character vector specifying the custom date format(s) for the \code{\link[lubridate:parse_date_time]{lubridate::parse_date_time()}} function
+(e.g., "\%d.\%m.\%y \%H:\%M:\%S"). Multiple formats can be defined. The first matching format will be selected for parsing.
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column have the highest priority. If NA then auto detection of timezone in files.
 If timezone can't be detected, then UTC is supposed.

@@ -129,7 +129,8 @@ test_that("mc_read_data HOBO skip wrong datetime", {
         "../data/HOBO/20024354.txt", "A", "HOBO", NA_character_, "%d.%m.%Y %H:%M:%S", NA_integer_,
         "../data/HOBO/20024354_comma.csv", "B", "HOBO", NA_character_, "%m.%d.%Y %H:%M:%S", NA_integer_
     ))
-    expect_warning(data <- mc_read_data(files_table, clean=FALSE))
+    expect_warning(data <- mc_read_data(files_table, clean=FALSE)) %>%
+        expect_warning()
     test_raw_data_format(data)
     expect_equal(length(data$localities), 1)
 })
@@ -252,5 +253,12 @@ test_that("mc_read_files user_data_formats auto datetime", {
     test_raw_data_format(my_data)
     expect_equal(length(my_data$localities$TMS94184102$loggers[[1]]$sensors), 4)
     expect_equal(names(my_data$localities$TMS94184102$loggers[[1]]$sensors), c("T_C1", "T_C2", "T_C3", "real"))
+})
+
+test_that("mc_read_files TOMST custom date time format", {
+    expect_error(expect_warning(expect_warning(data <- mc_read_files("../data/TOMST-date", "TOMST"))))
+    data <- mc_read_files("../data/TOMST-date", "TOMST", date_format=c("%d.%m.%Y %H:%M:%S", "%d.%m.%Y"),
+                          silent=TRUE)
+    test_raw_data_format(data)
 })
 

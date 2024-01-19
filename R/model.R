@@ -787,24 +787,11 @@ setMethod(
             return(NULL)
         }
         data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
-        object@date_format <- .get_tomst_datetime_format(data, object@date_column)
         object <- .model_change_tomst_columns_and_logger_type(object, data)
         object <- .model_tomst_change_col_type(object, data)
         return(object)
     }
 )
-
-.get_tomst_datetime_format <- function(data, date_column){
-    if(stringr::str_detect(data[1, date_column], "\\d{4}\\.\\d{1,2}\\.\\d{1,2} \\d{1,2}:\\d{2}"))
-    {
-        return("%Y.%m.%d %H:%M")
-    }
-    if(stringr::str_detect(data[1, date_column], "\\d{1,2}\\.\\d{1,2}\\.\\d{4} \\d{1,2}:\\d{2}"))
-    {
-        return("%d.%m.%Y %H:%M")
-    }
-    return(NA_character_)
-}
 
 .model_change_tomst_columns_and_logger_type <- function(object, data){
     tm_columns <- list(4)
