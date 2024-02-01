@@ -112,7 +112,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format A character vector specifying the custom date format(s) for the [lubridate::parse_date_time()] function
-#' (e.g., "%d.%m.%y %H:%M:%S"). Multiple formats can be defined. The first matching format will be selected for parsing.
+#' (e.g., "%d.%m.%Y %H:%M:%S"). Multiple formats can be defined. The first matching format will be selected for parsing.
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files.
 #' If timezone can't be detected, then UTC is supposed.
