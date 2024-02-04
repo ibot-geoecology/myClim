@@ -410,7 +410,7 @@ mc_calc_vwc <- function(data, moist_sensor=mc_const_SENSOR_TMS_moist,
                                  a, b, c, ref_t, acor_t, wcor_t, frozen2NA) {
     vwc <- a * raw_values^2 + b * raw_values + c
     dcor_t <- wcor_t - acor_t
-    tcor <- ifelse(is.na(temp_values), raw_values, raw_values + (temp_values - ref_t) * (acor_t + dcor_t * vwc))
+    tcor <- ifelse(is.na(temp_values), raw_values, raw_values + (ref_t - temp_values) * (acor_t + dcor_t * vwc))
     vwc_cor <- a * (tcor + cal_cor_factor + cal_cor_slope * vwc)^2 + b * (tcor + cal_cor_factor + cal_cor_slope * vwc) + c
     result <- pmin(pmax(vwc_cor, 0), 1)
     if(frozen2NA) {
