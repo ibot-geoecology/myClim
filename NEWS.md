@@ -1,3 +1,9 @@
+# myClim 1.0.18
+* Fixed temperature drift correction in the `mc_calc_vwc()` function.
+* Resolved the issue where the `vroom::problems()` function did not function properly when tidyverse was imported.
+  This is now handled in the read functions.
+* Disabled progress bar for the `vroom::vroom()` function.
+
 # myClim 1.0.17
 * Multiple custom date formats can be defined for TOMST data format.
 

@@ -402,10 +402,13 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
                            skip = data_format@skip,
                            na = data_format@na_strings,
                            n_max = nrows,
-                           show_col_types = FALSE)
-    problems <- vroom::problems(result)
-    if(nrow(problems) > 0)
-    {
+                           show_col_types = FALSE,
+                           progress = FALSE)
+    problems <- data.frame()
+    if("spec_tbl_df" %in% class(result)){
+        problems <- vroom::problems(result)
+    }
+    if(nrow(problems) > 0) {
         warning(stringr::str_glue(.read_const_MESSAGE_VROOM_WARNING))
     }
     return(result)
