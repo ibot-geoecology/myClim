@@ -159,3 +159,23 @@
     warning(.common_const_MESSAGE_LONG_PERIOD_LOCAL_TIME)
     return(TRUE)
 }
+
+.common_duplicated_abreast <- function(x) {
+    compare_function <- function(item, i) {
+        if(i == 1) {
+            return(FALSE)
+        }
+        if(is.na(item))
+        {
+            return(is.na(x[i - 1]))
+        }
+        if(is.na(x[i - 1]))
+        {
+            return(FALSE)
+        }
+        return(item == x[i - 1])
+    }
+
+    result <- purrr::imap_dbl(x, compare_function)
+    return(result)
+}

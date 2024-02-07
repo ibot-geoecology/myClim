@@ -1,3 +1,7 @@
+# myClim 1.0.19
+* Fixed an issue that affected the calibration table after calling the `mc_join()` function.
+* Added a file counter to the `mc_plot_loggers()` function.
+
 # myClim 1.0.18
 * Fixed temperature drift correction in the `mc_calc_vwc()` function.
 * Resolved the issue where the `vroom::problems()` function did not function properly when tidyverse was imported.

@@ -13,10 +13,15 @@ test_that(".plot_get_logger_sensors_by_physical", {
 test_that("all plots", {
     data <- mc_read_files("../data/eco-snow", dataformat_name = "TOMST", silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`94184102`=30, `94184103`=90), param_name="tz_offset")
+    logger <- data$localities$`94184102`$loggers[[1]]
+    plot_data <- data
+    plot_data$localities$`94184102`$loggers <- list(logger, logger)
     data_agg <- mc_agg(data)
     tmp_dir <- tempdir()
     plot_dir <- file.path(tmp_dir, "plot")
-    mc_plot_loggers(data, plot_dir)
+    mc_plot_loggers(plot_data, plot_dir)
+    expect_true(file.exists(file.path(plot_dir, "94184102_1.png")))
+    expect_true(file.exists(file.path(plot_dir, "94184102_2.png")))
 
     image_path <- file.path(plot_dir, "image.png")
     mc_plot_image(data, image_path, "T1 sensors", sensors="TMS_T1")

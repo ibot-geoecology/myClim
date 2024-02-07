@@ -31,7 +31,14 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
     loggers <- .common_get_loggers(data)
     dir.create(directory, showWarnings = F)
     for(logger in loggers) {
-        filename <- file.path(directory, paste0(logger$metadata@serial_number, ".png"))
+        i <- 1
+        repeat {
+            filename <- file.path(directory, stringr::str_glue("{logger$metadata@serial_number}_{i}.png"))
+            if(!file.exists(filename)) {
+                break
+            }
+            i <- i + 1
+        }
         .plot_logger(logger, filename, crop)
     }
 }

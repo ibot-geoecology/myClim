@@ -83,3 +83,74 @@ test_that("mc_join not error", {
     expect_warning(joined_data <- mc_join(merged_data))
     test_raw_data_format(joined_data)
 })
+
+test_that("mc_join calibration later", {
+    cleaned_data <- mc_read_files("../data/join", "TOMST", clean=TRUE, silent=TRUE)
+    cleaned_data <- mc_filter(cleaned_data, localities = "91184101")
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2021-01-01 00"),         0.1,
+    ))
+    cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
+    joined_data <- mc_join(cleaned_data)
+    test_raw_data_format(joined_data)
+    expect_equal(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration$datetime[[1]], lubridate::ymd_hm("2020-10-28 8:45"))
+    expect_equal(nrow(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration), 1)
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2020-10-28 09"),         0.2,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2021-01-01 00"),         0.1,
+    ))
+    cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
+    joined_data <- mc_join(cleaned_data)
+    test_raw_data_format(joined_data)
+    expect_equal(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration$cor_factor[[1]], 0.2)
+    expect_equal(nrow(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration), 1)
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2020-10-27 00"),         0.2,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2020-10-28 09"),         0.3,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2021-01-01 00"),         0.4,
+    ))
+    cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
+    joined_data <- mc_join(cleaned_data)
+    test_raw_data_format(joined_data)
+    expect_equal(nrow(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration), 2)
+    expect_equal(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration$cor_factor, c(0.2, 0.3))
+    expect_equal(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration$datetime[[1]],
+                 lubridate::ymd_hm("2020-10-28 8:45"))
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2020-10-26 00"),         0.1,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2020-10-27 00"),         0.2,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2020-10-28 09"),         0.3,
+        "91184101",     "Thermo_T", lubridate::ymd_h("2021-01-01 00"),         0.4,
+    ))
+    cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
+    joined_data <- mc_join(cleaned_data)
+    test_raw_data_format(joined_data)
+    expect_equal(nrow(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration), 2)
+    expect_equal(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration$cor_factor, c(0.2, 0.3))
+    expect_equal(joined_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$calibration$datetime[[1]],
+                 lubridate::ymd_hm("2020-10-28 8:45"))
+})
+
+test_that("mc_join calibration", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path, ~locality_id, ~data_format,
+        "../data/join_calib/data_91184101_0.csv", "A", "TOMST",
+        "../data/join_calib/data_91184102_0.csv", "A", "TOMST",
+    ))
+    data <- mc_read_data(files_table, silent=TRUE)
+    test_raw_data_format(data)
+    calib_table <- as.data.frame(tibble::tribble(
+        ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,
+        "91184102",     "Thermo_T", lubridate::ymd_h("2020-10-27 00"),         0.1,
+    ))
+    data <- mc_prep_calib_load(data, calib_table)
+    joined_data <- mc_join(data)
+    test_raw_data_format(joined_data)
+    expect_equal(nrow(joined_data$localities$A$loggers[[1]]$sensors$Thermo_T$calibration), 4)
+    expect_equal(joined_data$localities$A$loggers[[1]]$sensors$Thermo_T$calibration$cor_factor, c(NA_real_, 0.1, NA_real_, 0.1))
+})
+

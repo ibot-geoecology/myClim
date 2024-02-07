@@ -480,11 +480,8 @@ mc_join <- function(data, comp_sensors=NULL) {
     l1_calibration <- .join_get_sensor_calibration(l1_sensor, l1_origin_interval, l1_intervals)
     l2_calibration <- .join_get_sensor_calibration(l2_sensor, l2_origin_interval, l2_intervals)
     calibration <- dplyr::arrange(dplyr::bind_rows(l1_calibration, l2_calibration), .data$datetime)
-    na_calibration <- is.na(calibration$cor_factor) & is.na(calibration$cor_slope)
-    rle_na <- rle(na_calibration)
-    if(rle_na$values[[1]]) {
-        calibration <- dplyr::filter(calibration, dplyr::row_number() > rle_na$lengths[[1]])
-    }
+    duplicated_rows <- .common_duplicated_abreast(calibration$cor_factor) & .common_duplicated_abreast(calibration$cor_slope)
+    calibration <- calibration[!duplicated_rows, ]
     as.data.frame(calibration)
 }
 
@@ -492,31 +489,36 @@ mc_join <- function(data, comp_sensors=NULL) {
     calibration_function <- function(start, end, cor_factor, cor_slope) {
         calib_interval <- lubridate::interval(start, end)
         result_intervals <- lubridate::intersect(calib_interval, intervals)
+        result_intervals <- purrr::discard(result_intervals, ~ is.na(.x))
         if(length(result_intervals) == 0) {
             return(tibble::tibble())
         }
-        tibble::tibble(datetime=lubridate::int_start(result_intervals), cor_factor=cor_factor, cor_slope=cor_slope)
+        result <- tibble::tibble(datetime=lubridate::int_start(result_intervals), cor_factor=cor_factor, cor_slope=cor_slope)
+        return(result)
     }
 
     if(nrow(sensor$calibration) == 0) {
         return(tibble::tibble(datetime=lubridate::int_start(intervals), cor_factor=NA_real_, cor_slope=NA_real_))
     }
 
-    starts <- sensor$calibration$datetime
-    ends <- c(sensor$calibration$datetime[-1], lubridate::int_end(origin_data_interval))
-    cor_factor <- sensor$calibration$cor_factor
-    cor_slope <- sensor$calibration$cor_slope
-    if(starts[[1]] > lubridate::int_start(origin_data_interval)) {
-        starts <- c(lubridate::int_start(origin_data_interval), starts)
-        ends <- c(starts[2], ends)
-        cor_factor <- c(NA_real_, sensor$calibration$cor_factor)
-        cor_slope <- c(NA_real_, sensor$calibration$cor_slope)
+    calibration <- sensor$calibration
+
+    if(calibration$datetime[[1]] > lubridate::int_start(origin_data_interval)) {
+        calibration$datetime[[1]] <- lubridate::int_start(origin_data_interval)
     }
+
+    later_calibrations_selector <- calibration$datetime <= lubridate::int_end(origin_data_interval)
+    calibration <- calibration[later_calibrations_selector, ]
+
+    starts <- calibration$datetime
+    ends <- c(calibration$datetime[-1], lubridate::int_end(origin_data_interval))
+    cor_factor <- calibration$cor_factor
+    cor_slope <- calibration$cor_slope
 
     return(purrr::pmap_dfr(list(start=starts,
                                 end=ends,
-                                cor_factor=sensor$calibration$cor_factor,
-                                cor_slope=sensor$calibration$cor_slope), calibration_function))
+                                cor_factor=calibration$cor_factor,
+                                cor_slope=calibration$cor_slope), calibration_function))
 }
 
 .join_get_sensors_states <- function(l1_sensor, l2_sensor, l1_intervals, l2_intervals) {
