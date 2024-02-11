@@ -78,14 +78,15 @@ In case \code{mc_agg()} is used only for conversion from Raw-format to Agg-forma
 records are not modified. Equal step in all sensors is required for conversion from Raw-format to Agg-format, otherwise
 period must be specified.
 
-When fun and period are specified, microclimatic records are aggregated based on function into new period.
+When fun and period are specified, microclimatic records are aggregated based on a selected function into a specified period.
+The name of the aggregated variable will contain also the name of the function used for the aggregation (e.g. TMS_T1_mean).
 Aggregated time step is named after the first time step of selected period i.e. day = c(2022-12-29 00:00, 2022-12-30 00:00...);
 week = c(2022-12-19 00:00, 2022-12-28 00:00...); month = c(2022-11-01 00:00, 2022-12-01 00:00...);
 year = c(2021-01-01 00:00, 2022-01-01 00:00...).
 When first or last period is incomplete in original data, the incomplete part is extended with NA values to match specified period.
-I.e. when you want to aggregate to monthly mean, but your time-series starts on January 15 ending December 20,
-myClim will extend the time.series
-to start January 1, ending December 31. Then you can decide what to do with the NAs, see parameter \code{min_coverage}.
+For example, when you want to aggregate time-series to monthly mean, but your time-series starts on January 15 ending December 20,
+myClim will extend the time-series to start on January 1 and end on December 31.
+If you want to still use the data from the aggregation periods with not complete data coverage, you can adjust the parameter \code{min_coverage}.
 
 Empty sensors with no records are excluded. \code{mc_agg()} return NA for empty vector except from \code{fun=count} which returns 0.
 When aggregation functions are provided as vector or list e.g. c(mean, min, max), than they are all applied to all the sensors
