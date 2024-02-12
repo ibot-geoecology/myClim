@@ -11,6 +11,8 @@ mc_data_heights <- as.data.frame(tibble::tribble(
     .model_const_LOGGER_TOMST_DENDROMETER, mc_const_SENSOR_Dendro_raw, "air 130 cm", NA,
     .model_const_LOGGER_HOBO_U23_001A, mc_const_SENSOR_HOBO_T, "air 150 cm", NA,
     .model_const_LOGGER_HOBO_U23_001A, mc_const_SENSOR_HOBO_RH, "air 150 cm", NA,
+    .model_const_LOGGER_HOBO_U23_004, mc_const_SENSOR_HOBO_T, "air 2 cm", NA,
+    .model_const_LOGGER_HOBO_U23_004, mc_const_SENSOR_HOBO_EXTT, "soil 8 cm", NA,
     .model_const_LOGGER_TOMST_TMS_L45, mc_const_SENSOR_TMS_T1, "soil 40 cm", "_L45",
     .model_const_LOGGER_TOMST_TMS_L45, mc_const_SENSOR_TMS_T2, "soil 30 cm", "_L45",
     .model_const_LOGGER_TOMST_TMS_L45, mc_const_SENSOR_TMS_T3, "air 15 cm", "_L45",

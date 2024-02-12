@@ -40,7 +40,7 @@ test_that("load objects version 1.0.6", {
     test_raw_data_format(raw_data)
 })
 
-test_that("load objects version 1.0.20", {
+test_that("load objects version 1.1.0", {
     raw_data <- mc_load("../data/serialize/raw_data_1.0.19.rds")
     test_raw_data_format(raw_data)
     expect_equal(raw_data$localities$A2E32$loggers[[2]]$metadata@type, .model_const_LOGGER_HOBO_U23_001A)

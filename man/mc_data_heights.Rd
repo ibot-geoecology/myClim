@@ -5,7 +5,7 @@
 \alias{mc_data_heights}
 \title{Default heights of sensors}
 \format{
-An object of class \code{data.frame} with 13 rows and 4 columns.
+An object of class \code{data.frame} with 15 rows and 4 columns.
 }
 \usage{
 mc_data_heights

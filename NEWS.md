@@ -1,3 +1,8 @@
+# myClim 1.1.0
+* Fixed an issue with the read progress bar when some files were skipped.
+* Changed the logger type `HOBO` to `HOBO_U23-001A`.
+* Added support for the logger type `HOBO_U23-004`.
+
 # myClim 1.0.19
 * Fixed an issue that affected the calibration table after calling the `mc_join()` function.
 * Added a file counter to the `mc_plot_loggers()` function.

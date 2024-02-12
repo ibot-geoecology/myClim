@@ -67,6 +67,9 @@ mc_const_SENSOR_HOBO_T <- "HOBO_T"
 #' Onset HOBO humidity sensor id
 #' @export
 mc_const_SENSOR_HOBO_RH <- "HOBO_RH"
+#' Onset HOBO external temperature sensor id
+#' @export
+mc_const_SENSOR_HOBO_EXTT <- "HOBO_extT"
 
 .model_const_WRONG_CALIBRATION_SENSOR_ID <- mc_const_SENSOR_TMS_moist
 
@@ -162,6 +165,9 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
+
+.model_const_HOBO_LOGGER_TYPE_SECONDARY_TITLES <- list("RH,? \\(?%\\)?", "Temp,? \\(?(.[CF])\\)?")
+names(.model_const_HOBO_LOGGER_TYPE_SECONDARY_TITLES) <- c(.model_const_LOGGER_HOBO_U23_001A, .model_const_LOGGER_HOBO_U23_004)
 
 #' Custom list for myClim object
 #'
@@ -896,7 +902,7 @@ setMethod(
             return(NULL)
         }
         object <- .model_hobo_set_tz_offset(object, data)
-        object <- .model_hobo_set_columns(object, data, has_numbers_column)
+        object <- .model_hobo_set_columns_and_logger_type(object, data, has_numbers_column)
         object <- .model_hobo_change_col_type(object, data)
 
         if(!.model_is_hobo_format_ok(object)) {
@@ -967,11 +973,11 @@ setMethod(
     object
 }
 
-.model_hobo_set_columns <- function(object, data, has_numbers_column) {
+.model_hobo_set_columns_and_logger_type <- function(object, data, has_numbers_column) {
     col_types <- rep("c", ncol(data))
     add_count_columns <- if(has_numbers_column) 1 else 0
     temp_column <- 2 + add_count_columns
-    rh_column <- 3 + add_count_columns
+    secondary_column <- 3 + add_count_columns
     parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?(.[CF])\\)?")
     if(is.na(parts[[1, 2]])) {
         warning(.model_const_MESSAGE_COLUMNS_PROBLEM)
@@ -984,22 +990,35 @@ setMethod(
     columns <- list()
     columns[[temp_sensor_id]] <- temp_column
     col_types[[temp_column]] <- "d"
-    if(ncol(data) < rh_column){
-        object@columns <- columns
-        object@col_types <- paste0(col_types, collapse="")
-        return(object)
-    }
-    parts <- stringr::str_match(data[[rh_column]][[1]], "RH,? \\(?%\\)?")
-    if(is.na(parts[[1, 1]])) {
-        object@columns <- columns
-        object@col_types <- paste0(col_types, collapse="")
-        return(object)
-    }
-    columns[[mc_const_SENSOR_HOBO_RH]] <- rh_column
-    col_types[[rh_column]] <- "d"
     object@columns <- columns
     object@col_types <- paste0(col_types, collapse="")
-    object
+    if(ncol(data) < secondary_column){
+        return(object)
+    }
+
+    if(.model_is_logger_type_hobo(object, data, secondary_column, .model_const_LOGGER_HOBO_U23_001A)) {
+        columns[[mc_const_SENSOR_HOBO_RH]] <- secondary_column
+        col_types[[secondary_column]] <- "d"
+        object@logger_type  <- .model_const_LOGGER_HOBO_U23_001A
+    }
+    if(.model_is_logger_type_hobo(object, data, secondary_column, .model_const_LOGGER_HOBO_U23_004)) {
+        columns[[mc_const_SENSOR_HOBO_EXTT]] <- secondary_column
+        col_types[[secondary_column]] <- "d"
+        object@logger_type  <- .model_const_LOGGER_HOBO_U23_004
+    }
+
+    object@columns <- columns
+    object@col_types <- paste0(col_types, collapse="")
+    return(object)
+}
+
+.model_is_logger_type_hobo <- function(object, data, secondary_column, logger_type) {
+    if(!is.na(object@logger_type)) {
+        return(FALSE)
+    }
+    column_pattern <- .model_const_HOBO_LOGGER_TYPE_SECONDARY_TITLES[[logger_type]]
+    parts <- stringr::str_match(data[[secondary_column]][[1]], column_pattern)
+    return(!is.na(parts[[1, 1]]))
 }
 
 .model_hobo_change_col_type <- function(object, data) {

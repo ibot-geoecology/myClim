@@ -96,6 +96,7 @@ test_that("mc_read_data HOBO", {
         "../data/HOBO/20024354_tab.txt", "CH", "HOBO", NA_character_, "%y.%m.%d %H:%M:%S", NA_integer_,
         "../data/HOBO/6265.csv", "I", "HOBO", NA_character_, "%m/%d/%y %I:%M:%S %p", NA_integer_,
         "../data/HOBO/20024370.txt", "J", "HOBO", NA_character_, "%d.%m.%Y %H:%M:%S", NA_integer_,
+        "../data/HOBO/2015_10382557.txt", "K", "HOBO", NA_character_, "%d.%m.%Y %H:%M:%S", NA_integer_,
     ))
     not_applicable_format_warning(data <- mc_read_data(files_table, clean=FALSE)) %>%
         not_applicable_format_warning() %>%
@@ -103,7 +104,7 @@ test_that("mc_read_data HOBO", {
         expect_warning("Temperature data in °F is converted to °C.") %>%
         expect_warning("Separated time in source data isn't supported.")
     test_raw_data_format(data)
-    expect_equal(sort(names(data$localities)), sort(c("A", "B", "C", "D", "E", "F", "CH", "I", "J")))
+    expect_equal(sort(names(data$localities)), sort(c("A", "B", "C", "D", "E", "F", "CH", "I", "J", "K")))
     expect_true(var(c(data$localities$A$loggers[[1]]$datetime[[1]],
                       data$localities$B$loggers[[1]]$datetime[[1]],
                       data$localities$C$loggers[[1]]$datetime[[1]],
@@ -121,6 +122,19 @@ test_that("mc_read_data HOBO", {
     expect_true(all(clean_info$count_missing == 0))
     expect_true(dplyr::near(data$localities$J$loggers[[1]]$sensors$HOBO_T$values[[1]], 7.87))
     expect_true(dplyr::near(data$localities$J$loggers[[1]]$sensors$HOBO_RH$values[[1]], 100.0))
+    expect_true(all(c(data$localities$A$loggers[[1]]$metadata@type,
+                   data$localities$B$loggers[[1]]$metadata@type,
+                   data$localities$C$loggers[[1]]$metadata@type,
+                   data$localities$D$loggers[[1]]$metadata@type,
+                   data$localities$E$loggers[[1]]$metadata@type,
+                   data$localities$F$loggers[[1]]$metadata@type,
+                   data$localities$CH$loggers[[1]]$metadata@type,
+                   data$localities$J$loggers[[1]]$metadata@type) == .model_const_LOGGER_HOBO_U23_001A))
+    expect_true(is.na(data$localities$I$loggers[[1]]$metadata@type))
+    expect_true(data$localities$K$loggers[[1]]$metadata@type == .model_const_LOGGER_HOBO_U23_004)
+    expect_equal(length(data$localities$K$loggers[[1]]$sensors), 2)
+    expect_true(mc_const_SENSOR_HOBO_EXTT %in% names(data$localities$K$loggers[[1]]$sensors))
+    expect_true(data$localities$K$loggers[[1]]$sensors$HOBO_T$metadata@height == "air 2 cm")
 })
 
 test_that("mc_read_data HOBO skip wrong datetime", {
