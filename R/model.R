@@ -132,14 +132,16 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_LOGGER_TOMST_TMS_L45 <- "TMS_L45"
 .model_const_LOGGER_TOMST_THERMODATALOGGER <- "Thermo"
 .model_const_LOGGER_TOMST_DENDROMETER <- "Dendro"
-.model_const_LOGGER_HOBO <- "HOBO"
+.model_const_LOGGER_HOBO_U23_001A <- "HOBO_U23-001A"
+.model_const_LOGGER_HOBO_U23_004 <- "HOBO_U23-004"
 
 .model_logger_types <- list(
     .model_const_LOGGER_TOMST_TMS,
     .model_const_LOGGER_TOMST_TMS_L45,
     .model_const_LOGGER_TOMST_THERMODATALOGGER,
     .model_const_LOGGER_TOMST_DENDROMETER,
-    .model_const_LOGGER_HOBO
+    .model_const_LOGGER_HOBO_U23_001A,
+    .model_const_LOGGER_HOBO_U23_004
 )
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"

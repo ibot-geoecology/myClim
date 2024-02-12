@@ -71,7 +71,7 @@ mc_data_sensors[[mc_const_SENSOR_Dendro_raw]]@plot_color <- "brown"
 
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@sensor_id <- mc_const_SENSOR_HOBO_T
-mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@logger <- .model_const_LOGGER_HOBO
+mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@logger <- .model_const_LOGGER_HOBO_U23_001A
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@min_value <- -40
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@max_value <- 70
@@ -79,7 +79,7 @@ mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@plot_color <- "salmon"
 
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@sensor_id <- mc_const_SENSOR_HOBO_RH
-mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@logger <- .model_const_LOGGER_HOBO
+mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@logger <- .model_const_LOGGER_HOBO_U23_001A
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@physical <- .model_const_PHYSICAL_RH
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@min_value <- 0
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@max_value <- 100
