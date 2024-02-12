@@ -104,9 +104,13 @@
 #' * TMS_T3 = air 15 cm
 #' * TMS_moist = soil 30-44 cm
 #' 
-#' HOBO - HOBO
+#' HOBO - HOBO_U23-001A
 #' * HOBO_T = air 150 cm
 #' * HOBO_RH = air 150 cm
+#'
+#' HOBO - HOBO_U23-004
+#' * HOBO_T = air 2 cm
+#' * HOBO_extT = soil 8 cm
 #'
 #' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]
 "mc_data_heights"
@@ -126,8 +130,9 @@
 #' * dendro_l_um - change in stem size (um) [myClim::mc_calc_tomst_dendro()]
 #' * FDD - result of function [myClim::mc_calc_fdd()]
 #' * GDD - result of function [myClim::mc_calc_gdd()]
-#' * HOBO_RH - relative humidity in HOBO logger (%)
-#' * HOBO_T - temperature in HOBO logger (°C)
+#' * HOBO_RH - relative humidity in HOBO U23-001A logger (%)
+#' * HOBO_T - temperature in HOBO U23 logger (°C)
+#' * HOBO_extT - external temperature in HOBO U23-004 logger (°C)
 #' * integer - universal sensor with integer values
 #' * logical - universal sensor with logical values
 #' * VWC - volumetric water content in soil (m3/m3)

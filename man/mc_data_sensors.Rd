@@ -26,8 +26,9 @@ Currently supported sensors:
 \item dendro_l_um - change in stem size (um) \code{\link[=mc_calc_tomst_dendro]{mc_calc_tomst_dendro()}}
 \item FDD - result of function \code{\link[=mc_calc_fdd]{mc_calc_fdd()}}
 \item GDD - result of function \code{\link[=mc_calc_gdd]{mc_calc_gdd()}}
-\item HOBO_RH - relative humidity in HOBO logger (\%)
-\item HOBO_T - temperature in HOBO logger (°C)
+\item HOBO_RH - relative humidity in HOBO U23-001A logger (\%)
+\item HOBO_T - temperature in HOBO U23 logger (°C)
+\item HOBO_extT - external temperature in HOBO U23-004 logger (°C)
 \item integer - universal sensor with integer values
 \item logical - universal sensor with logical values
 \item VWC - volumetric water content in soil (m3/m3)
