@@ -158,8 +158,6 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     if(!silent) {
         .read_state$check_bar <- progress::progress_bar$new(format = "check [:bar] :current/:total files",
                                                               total=nrow(files_table))
-        .read_state$read_bar <- progress::progress_bar$new(format = "read [:bar] :current/:total files",
-                                                              total=nrow(files_table))
     }
     if(nrow(files_table) == 0)
     {
@@ -181,6 +179,10 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     data_formats <- data_formats[condition]
     if(nrow(files_table) == 0) {
         stop(.read_const_MESSAGE_ANY_FILE)
+    }
+    if(!silent) {
+        .read_state$read_bar <- progress::progress_bar$new(format = "read [:bar] :current/:total files",
+                                                           total=nrow(files_table))
     }
     files_table$serial_number <- .read_get_edited_serial_numbers(files_table, data_formats)
     files_table$locality_id <- .read_get_edited_locality_ids(files_table)
