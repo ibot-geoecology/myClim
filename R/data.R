@@ -173,7 +173,9 @@
 #' Data frame hosting the coefficients for the conversion of TMS raw moisture units to
 #' volumetric warer content. The coefficients come from laboratory calibration for several
 #' soil types. For the best performance you should specify the soil type in case you know it
-#' and in case it could be approximated to the available calibration e.g sand, loam, loamy sand....
+#' and in case it could be approximated to the available calibration. The available calibrated
+#' presets are: "sand", "loamy sand A", "loamy sand B", "sandy loam A", "sandy loam B", "loam",
+#' "silt loam", "peat", "water", "universal", "sand TMS1", "loamy sand TMS1" and "silt loam TMS1"
 #' See [myClim::mc_calc_vwc()]
 #'
 #' data.frame with columns:
