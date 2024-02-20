@@ -254,7 +254,7 @@ mc_info_join <- function(data, comp_sensors=NULL) {
 
 #' Get states info table
 #'
-#' This function return data.frame with info about sensor states
+#' This function return data.frame with info about sensor states see [myClim-package]
 #'
 #' @template param_myClim_object
 #' @return data.frame with columns:
