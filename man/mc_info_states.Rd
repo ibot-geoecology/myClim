@@ -14,6 +14,7 @@ data.frame with columns:
 \itemize{
 \item locality_id - when provided by user then locality ID, when not provided identical with serial number
 \item logger_index - index of logger in locality
+\item logger_type - type of logger
 \item sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
 \item tag - category of state
 \item start - start datetime
@@ -22,7 +23,7 @@ data.frame with columns:
 }
 }
 \description{
-This function return data.frame with info about sensor states
+This function return data.frame with info about sensor states see \link{myClim-package}
 }
 \examples{
 mc_info_states(mc_data_example_raw)

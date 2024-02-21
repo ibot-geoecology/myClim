@@ -79,14 +79,16 @@ test_that("mc_info_join", {
     expect_equal(table2$count_errors, 1)
 })
 
-test_that("mc_info_join", {
+test_that("mc_info_states", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE)
     states <- mc_info_states(data)
-    expect_equal(colnames(states), c("locality_id", "logger_index", "sensor_name", "tag", "start", "end", "value"))
+    expect_equal(colnames(states), c("locality_id", "logger_index", "logger_type", "sensor_name",
+                                     "tag", "start", "end", "value"))
     expect_equal(nrow(states), 9)
     agg_data <- mc_agg(data, "max", period="hour")
     states <- mc_info_states(agg_data)
-    expect_equal(colnames(states), c("locality_id", "logger_index", "sensor_name", "tag", "start", "end", "value"))
+    expect_equal(colnames(states), c("locality_id", "logger_index", "logger_type", "sensor_name",
+                                     "tag", "start", "end", "value"))
     expect_equal(nrow(states), 9)
     expect_true(all(is.na(states$logger_index)))
 })

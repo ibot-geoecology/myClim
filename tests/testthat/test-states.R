@@ -2,12 +2,19 @@ source("libtest.R")
 
 test_that("mc_states_insert", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE, clean=FALSE)
+    states <- data.frame()
+    expect_error(mc_states_insert(data, states))
+    data <- mc_prep_clean(data, silent=TRUE)
+    expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
         ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
         "AA1E05"    ,            NA,   NA        ,      NA,     NA,   NA,            NA,
     ))
     expect_error(mc_states_insert(data, states))
-    data <- mc_prep_clean(data, silent=TRUE)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
+        "AA1E05"    ,             2,   NA        ,      NA,     NA,   NA,            NA,
+    ))
     expect_warning(states_data <- mc_states_insert(data, states), "Locality AA1E05 does not exist in the data.")
     states <- as.data.frame(tibble::tribble(
         ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
@@ -35,10 +42,18 @@ test_that("mc_states_insert", {
     expect_true(is.na(states_table$value[[2]]))
     expect_equal(nrow(mc_info_states(data)) + 1, nrow(mc_info_states(states_data)))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id,  ~sensor_name,      ~tag,                               ~start,                                 ~end,
-        "A1E05"    ,     "Thermo_T",      "ok", lubridate::ymd_hm("2020-01-02 0:00"), lubridate::ymd_hm("2020-12-31 23:59"),
-        "A1E05"    ,     "Thermo_T",   "error", lubridate::ymd_hm("2020-01-01 0:00"), lubridate::ymd_hm("2020-01-01 23:59"),
-        "A1E05"    ,     "Thermo_T",    "test", lubridate::ymd_hm("2020-10-28 9:03"), lubridate::ymd_hm("2020-10-28 10:14"),
+        ~locality_id, ~logger_index,    ~tag,
+        ~start,                                 ~end,
+        "A2E32"     ,             1, "error",
+        lubridate::ymd_hm("2020-10-16 9:00"), lubridate::ymd_hm("2020-10-16 9:30"),
+    ))
+    states_data <- mc_states_insert(data, states)
+    expect_equal(nrow(mc_info_states(data)) + 4, nrow(mc_info_states(states_data)))
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index,      ~tag,                               ~start,                                 ~end,
+        "A1E05"    ,              1,      "ok", lubridate::ymd_hm("2020-01-02 0:00"), lubridate::ymd_hm("2020-12-31 23:59"),
+        "A1E05"    ,              1,   "error", lubridate::ymd_hm("2020-01-01 0:00"), lubridate::ymd_hm("2020-01-01 23:59"),
+        "A1E05"    ,              1,    "test", lubridate::ymd_hm("2020-10-28 9:03"), lubridate::ymd_hm("2020-10-28 10:14"),
     ))
     states_data <- mc_states_insert(data, states)
     test_raw_data_format(states_data)
@@ -50,6 +65,7 @@ test_that("mc_states_insert", {
     expect_equal(states_table$start[[3]], lubridate::ymd_hm("2020-10-28 9:00"))
     expect_equal(states_table$end[[3]], lubridate::ymd_hm("2020-10-28 10:00"))
     agg_data <- mc_agg(data)
+    states$logger_index <- NULL
     states_data <- mc_states_insert(agg_data, states)
     test_agg_data_format(states_data)
     expect_equal(nrow(states_table), 3)
@@ -69,8 +85,10 @@ test_that("mc_states_insert", {
 test_that("mc_states_insert multiple loggers", {
     data <- mc_read_files("../data/join", "TOMST", silent=TRUE)
     states <- as.data.frame(tibble::tribble(
-        ~locality_id,  ~sensor_name,      ~tag,                               ~start,                                 ~end,
-        "91184101"  ,     "Thermo_T",      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
+        ~locality_id,  ~logger_index,      ~tag,                               ~start,                                 ~end,
+        "91184101"  ,              1,      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
+        "91184101"  ,              2,      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
+        "91184101"  ,              3,      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
     ))
     states_data <- mc_states_insert(data, states)
     test_raw_data_format(states_data)

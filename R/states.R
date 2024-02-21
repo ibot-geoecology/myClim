@@ -1,8 +1,10 @@
 .states_const_MESSAGE_NOT_EXISTS_LOCALITY <- "Locality {.y$locality_id} does not exist in the data."
 .states_const_MESSAGE_NOT_EXISTS_LOGGER <- "Locality {locality_id} does not contain logger with index {.y$logger_index}."
-.states_const_MESSAGE_NOT_EXISTS_LOGGER_SENSOR <- "Logger {.y$logger_index} in locality {locality_id} does not contain sensor {sensor_name}."
+.states_const_MESSAGE_NOT_EXISTS_LOGGER_SENSOR <- "Logger {logger_index} in locality {locality_id} does not contain sensor {sensor_name}."
 .states_const_MESSAGE_NOT_EXISTS_AGG_SENSOR <- "Locality {locality_id} does not contain sensor {sensor_name}."
 .states_const_MESSAGE_LOGGERS_IN_AGG <- "You can not use logger_index in agg format."
+.states_const_MESSAGE_MISSED_LOGGER_INDEX <- "All values logger_index must be set."
+.states_const_MESSAGE_MISSED_COLUMN <- "Columns {columns_text} are required."
 
 #' Insert states of sensors
 #'
@@ -10,10 +12,17 @@
 #' This function insert new states to sensor see [myClim-package]
 #'
 #' @template param_myClim_object_cleaned
-#' @param states_table table in same format as return [mc_info_states()]
+#' @param states_table data.frame with columns:
+#' * locality_id
+#' * logger_index - index of logger in locality
+#' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
+#' * tag - category of state
+#' * start - start datetime
+#' * end - end datetime
+#' * value - value of state
 #'
-#' The logger_index and value columns are optional. When logger_index is NA, states are inserted to all loggers with
-#' right interval.
+#' As input can be used result of [mc_info_states()]. The sensor_name and value columns are optional.
+#' When sensor_name is NA, states are inserted to all sensors.
 #' @return myClim object in the same format as input, with inserted sensor states
 #' @export
 #' @examples
@@ -41,6 +50,9 @@ mc_states_insert <- function(data, states_table) {
             }
         } else {
             sensors_item <- data$localities[[locality_id]]$loggers[[logger_index]]
+            if(!(sensor_name %in% names(sensors_item$sensors))) {
+                warning(stringr::str_glue(.states_const_MESSAGE_NOT_EXISTS_LOGGER_SENSOR))
+            }
         }
         if(!(sensor_name %in% names(sensors_item$sensors))) {
             return()
@@ -49,32 +61,37 @@ mc_states_insert <- function(data, states_table) {
         .states_insert(data_env, locality_id, logger_index, sensor_name, states_table)
     }
 
+    sensor_prep_function <- function(.x, .y) {
+        sensor_name <- .y$sensor_name
+        locality_id <- dplyr::first(.x$locality_id)
+        logger_index <- dplyr::first(.x$logger_index)
+        if(!is.na(sensor_name)) {
+            sensor_function(.x, .y)
+            return()
+        }
+
+        if(is_agg) {
+            sensors_item <- data$localities[[locality_id]]
+        } else {
+            sensors_item <- data$localities[[locality_id]]$loggers[[logger_index]]
+        }
+
+        sensor_names_table <- tibble::tibble(logger_index=logger_index, sensor_name=names(sensors_item$sensors))
+        .x$sensor_name <- NULL
+        .x <- dplyr::left_join(.x, sensor_names_table, by="logger_index")
+        groupped_sensors <- dplyr::group_by(.x, .data$sensor_name)
+        dplyr::group_walk(groupped_sensors, sensor_function, .keep=TRUE)
+    }
+
     logger_function <- function(.x, .y) {
         locality_id <- dplyr::first(.x$locality_id)
-        locality <- data$localities[[locality_id]]
-        table <- .x
         if(!is.na(.y$logger_index) && .y$logger_index > length(data$localities[[locality_id]]$loggers)) {
             warning(stringr::str_glue(.states_const_MESSAGE_NOT_EXISTS_LOGGER))
             return()
         }
-        if(!is.na(.y$logger_index)) {
-            logger <- locality$loggers[[.y$logger_index]]
-            sensor_names <- unique(table$sensor_name)
-            missing_sensors <- !(sensor_names %in% names(logger$sensors))
-            for(sensor_name in sensor_names[missing_sensors]) {
-                warning(stringr::str_glue(.states_const_MESSAGE_NOT_EXISTS_LOGGER_SENSOR))
-            }
-        } else {
-            logger_index_table <- tibble::tibble(locality_id=locality_id, logger_index=seq_along(locality$loggers))
-            table$logger_index <- NULL
-            table <- dplyr::left_join(table, logger_index_table, by="locality_id")
-        }
 
-        for(current_index in unique(table$logger_index)) {
-            filtered_table <- dplyr::filter(table, .data$logger_index == current_index)
-            groupped_sensors <- dplyr::group_by(filtered_table, .data$sensor_name)
-            dplyr::group_walk(groupped_sensors, sensor_function, .keep=TRUE)
-        }
+        groupped_sensors <- dplyr::group_by(.x, .data$sensor_name)
+        dplyr::group_walk(groupped_sensors, sensor_prep_function, .keep=TRUE)
     }
 
     locality_function <- function(.x, .y) {
@@ -87,7 +104,7 @@ mc_states_insert <- function(data, states_table) {
             dplyr::group_walk(groupped_loggers, logger_function, .keep=TRUE)
         } else {
             groupped_sensors <- dplyr::group_by(.x, .data$sensor_name)
-            dplyr::group_walk(groupped_sensors, sensor_function, .keep=TRUE)
+            dplyr::group_walk(groupped_sensors, sensor_prep_function, .keep=TRUE)
         }
     }
 
@@ -100,11 +117,25 @@ mc_states_insert <- function(data, states_table) {
     if(is_agg && !all(is.na(states_table$logger_index))) {
         stop(.states_const_MESSAGE_LOGGERS_IN_AGG)
     }
+    if(!is_agg && any(is.na(states_table$logger_index))) {
+        stop(.states_const_MESSAGE_MISSED_LOGGER_INDEX)
+    }
+    required_columns <- c("locality_id", "logger_index", "tag", "start", "end")
+    if(is_agg){
+        required_columns <- required_columns[-2]
+    }
+    if(!all(required_columns %in% names(states_table))) {
+        columns_text <- paste(required_columns, collapse=", ")
+        stop(stringr::str_glue(.states_const_MESSAGE_MISSED_COLUMN))
+    }
 }
 
 .states_fix_table <- function(states_table) {
     if(!("logger_index" %in% names(states_table))) {
         states_table$logger_index <- NA_integer_
+    }
+    if(!("sensor_name" %in% names(states_table))) {
+        states_table$sensor_name <- NA_character_
     }
     if(!("value" %in% names(states_table))) {
         states_table$value <- NA_character_

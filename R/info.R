@@ -260,6 +260,7 @@ mc_info_join <- function(data, comp_sensors=NULL) {
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
 #' * logger_index - index of logger in locality
+#' * logger_type - type of logger
 #' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
 #' * tag - category of state
 #' * start - start datetime
@@ -271,13 +272,14 @@ mc_info_join <- function(data, comp_sensors=NULL) {
 mc_info_states <- function(data) {
     is_raw_format <- .common_is_raw_format(data)
 
-    sensor_function <- function(locality_id, logger_index, sensor) {
+    sensor_function <- function(locality_id, logger_index, logger_type, sensor) {
         count <- nrow(sensor$states)
         if(count == 0) {
             return(tibble::tibble())
         }
         result <- tibble::tibble(locality_id=rep(locality_id, count),
                                  logger_index=rep(logger_index, count),
+                                 logger_type=rep(logger_type, count),
                                  sensor_name=rep(sensor$metadata@name),
                                  tag=sensor$states$tag,
                                  start=sensor$states$start,
@@ -286,17 +288,20 @@ mc_info_states <- function(data) {
         return(result)
     }
 
-    sensors_item_function <- function(locality_id, logger_index, item) {
+    sensors_item_function <- function(locality_id, logger_index, logger_type, item) {
         count <- length(item$sensors)
         purrr::pmap_dfr(list(locality_id=rep(locality_id, count),
                              logger_index=rep(logger_index, count),
+                             logger_type=rep(logger_type, count),
                              sensor=item$sensors),
                         sensor_function)
     }
 
     prep_locality_function <- function(locality) {
+        logger_types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
         purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
                              logger_index=seq_along(locality$loggers),
+                             logger_type=logger_types,
                              item=locality$loggers),
                         sensors_item_function)
     }
@@ -306,6 +311,7 @@ mc_info_states <- function(data) {
     } else {
         result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
                                        logger_index=NA_integer_,
+                                       logger_type=NA_character_,
                                        item=data$localities),
                                   sensors_item_function)
     }
