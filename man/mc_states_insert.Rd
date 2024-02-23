@@ -28,6 +28,8 @@ myClim object in the same format as input, with inserted sensor states
 }
 \description{
 This function insert new states to sensor see \link{myClim-package}
+
+The date times start and end are cropped by logger/locality datetime range and are rounded by step.
 }
 \examples{
 states <- data.frame(locality_id="A1E05", sensor_name="Thermo_T", tag="error",
