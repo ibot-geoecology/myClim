@@ -189,10 +189,6 @@
     }
 
     step <- data$localities[[locality_id]]$loggers[[logger_index]]$clean_info@step
-    if(step %% 60 != 0) {
-        return(lubridate::period(step, unit="seconds"))
-    }
-
-    return(lubridate::period(step / 60, unit="minutes"))
+    return(lubridate::seconds_to_period(step))
 }
 

@@ -310,7 +310,7 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
     }
 
     sensors_item_function <- function(item) {
-        item$sensors <- map(item$sensors, sensor_function)
+        item$sensors <- purrr::map(item$sensors, sensor_function)
         return(item)
     }
 

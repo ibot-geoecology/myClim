@@ -102,6 +102,8 @@ output is  \code{integer} i.e. number of \code{TRUE} values.
 
 Sensors created with functions \code{count} has sensor_id \code{count} and value_type \code{integer},
 function  \code{coverage} has sensor_id \code{coverage} and value_type \code{real}
+
+The columns start and end in new sensor states are rounded by period.
 }
 \examples{
 \donttest{hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"),

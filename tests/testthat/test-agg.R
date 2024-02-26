@@ -9,6 +9,8 @@ test_that("mc_agg UTC", {
     expect_equal(length(hour_data$localities[["94184102"]]$sensors), 12)
     expect_equal(hour_data$metadata@step, 60*60)
     expect_equal(hour_data$metadata@period, "hour")
+    expect_equal(hour_data$localities$`91184133`$sensors$Thermo_T_percentile10$states$start, lubridate::ymd_h("2018-09-12 10"))
+    expect_equal(hour_data$localities$`91184133`$sensors$Thermo_T_percentile10$states$end, lubridate::ymd_h("2018-09-15 13"))
     agg_data <- mc_agg(cleaned_data)
     test_agg_data_format(agg_data)
     expect_equal(length(agg_data$localities[["94184102"]]$sensors), 4)
@@ -125,6 +127,8 @@ test_that("mc_agg all period", {
     expect_equal(length(all_data$localities$`94184103`$datetime), 1)
     expect_false(is.na(all_data$localities$`94184102`$sensors$TMS_T1_mean$values[[1]]))
     expect_true(is.na(all_data$localities$`94184103`$sensors$TMS_T1_mean$values[[1]]))
+    expect_equal(all_data$localities$`94184102`$sensors$TMS_T1_mean$states$start, lubridate::ymd_h("2021-01-01 00"))
+    expect_equal(all_data$localities$`94184102`$sensors$TMS_T1_mean$states$end, lubridate::ymd_h("2021-01-01 00"))
     all_data <- mc_agg(data, "mean", "all", min_coverage=0)
     expect_false(is.na(all_data$localities$`94184102`$sensors$TMS_T1_mean$values[[1]]))
     expect_false(is.na(all_data$localities$`94184103`$sensors$TMS_T1_mean$values[[1]]))
@@ -280,5 +284,28 @@ test_that("mc_agg min_coverage", {
     expect_false(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[5]]))
     agg_data <- mc_agg(data, c("min", "coverage"), "12 hours", min_coverage = 0)
     expect_false(is.na(agg_data$localities$ABC$sensors$Thermo_T_min$values[[1]]))
+})
+
+test_that("mc_agg custom - states", {
+    table <- readRDS("../data/agg-custom/air_humidity.rds")
+    data <- mc_read_wide(table, sensor_id = "RH", "humidity", silent=T)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~start, ~end,
+        "B1BOJK01"  ,             1,           NA,  "test",
+        lubridate::ymd_hm("2019-06-01 0:00"), lubridate::ymd_hm("2020-06-01 0:00"),
+        "B1BOJK01"  ,             1,           NA,  "test",
+        lubridate::ymd_hm("2019-01-01 0:00"), lubridate::ymd_hm("2019-06-01 0:00"),
+        "B1BOJK01"  ,             1,           NA,  "test",
+        lubridate::ymd_hm("2019-01-01 0:00"), lubridate::ymd_hm("2019-02-01 0:00"),
+    ))
+    data <- mc_states_insert(data, states)
+    agg_data <- mc_agg(data, "mean", period = "custom", custom_start = "05-01", custom_end = "10-01")
+    test_agg_data_format(agg_data)
+    expect_equal(nrow(agg_data$localities$B1BOJK01$sensors$humidity_mean$states), 2)
+    expect_equal(agg_data$localities$B1BOJK01$sensors$humidity_mean$states$start,
+                 c(lubridate::ymd_h("2019-05-01 0"), lubridate::ymd_h("2019-05-01 0")))
+    expect_equal(agg_data$localities$B1BOJK01$sensors$humidity_mean$states$end,
+                 c(lubridate::ymd_h("2020-05-01 0"), lubridate::ymd_h("2019-05-01 0")))
 })
 
