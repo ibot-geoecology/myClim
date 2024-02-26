@@ -32,7 +32,7 @@ This function insert new states to sensor see \link{myClim-package}
 The date times start and end are cropped by logger/locality datetime range and are rounded by step.
 }
 \examples{
-states <- data.frame(locality_id="A1E05", sensor_name="Thermo_T", tag="error",
+states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
                      start=lubridate::ymd_hm("2020-10-28 9:00"),
                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 data <- mc_states_insert(mc_data_example_clean, states)
