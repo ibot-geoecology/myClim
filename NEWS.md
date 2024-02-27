@@ -1,3 +1,7 @@
+# myClim 1.1.1
+* New functions `mc_info_states`, `mc_states_insert`, `mc_states_update`, and `mc_states_delete` have been added.
+* The `mc_agg` function now rounds states by period.
+
 # myClim 1.1.0
 * Fixed an issue with the read progress bar when some files were skipped.
 * Changed the logger type `HOBO` to `HOBO_U23-001A`.

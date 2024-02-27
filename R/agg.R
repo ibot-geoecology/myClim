@@ -65,6 +65,8 @@
 #' Sensors created with functions `count` has sensor_id `count` and value_type `integer`,
 #' function  `coverage` has sensor_id `coverage` and value_type `real`
 #' 
+#' If the myClim object contains any states (tags) table, such as error tags or quality tags,
+#' the datetime defining the start and end of the tag will be rounded according to the aggregation period parameter.
 #'
 #' @param data cleaned myClim object in Raw-format: output of [myClim::mc_prep_clean()] or Agg-format as it is allowed to aggregate data multiple times.
 #' @param fun aggregation function; one of (`"min"`, `"max"`, `"mean"`, `"percentile"`, `"sum"`, `"range"`, `"count"`, `"coverage"`)
@@ -395,7 +397,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     by_aggregate <- list(step=as.factor(start_datetimes))
     sensor_function <- function(sensor) {
         functions <- .agg_get_functions(sensor, fun, percentiles, min_coverage, custom_functions)
-        .agg_agregate_sensor(sensor, functions, by_aggregate, custom_functions)
+        .agg_agregate_sensor(sensor, functions, by_aggregate, custom_functions, period, use_intervals)
     }
     item$sensors <- purrr::flatten(purrr::map(item$sensors, sensor_function))
     item
@@ -666,7 +668,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     stringr::str_glue("{.agg_const_FUNCTION_PERCENTILE}{value}")
 }
 
-.agg_agregate_sensor <- function(sensor, functions, by_aggregate, custom_functions) {
+.agg_agregate_sensor <- function(sensor, functions, by_aggregate, custom_functions, period, use_intervals) {
     sensor_function <- function(.x, .y) {
         sensor_info <- myClim::mc_data_sensors[[sensor$metadata@sensor_id]]
         new_sensor <- sensor
@@ -677,6 +679,7 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
             .y == .agg_const_FUNCTION_SUM) {
             new_sensor$metadata@sensor_id <- mc_const_SENSOR_integer
         }
+        new_sensor <- .agg_floor_states(new_sensor, period, use_intervals)
         new_sensor$metadata@name <- .agg_get_aggregated_sensor_name(new_sensor$metadata@name, .y)
         new_sensor$values <- aggregate(new_sensor$values, by_aggregate, .x)$x
         if(.y %in% names(custom_functions)) {
@@ -701,6 +704,35 @@ mc_agg <- function(data, fun=NULL, period=NULL, use_utc=TRUE, percentiles=NULL, 
     result <- purrr::imap(functions, sensor_function)
     names(result) <- purrr::map_chr(result, function(x) x$metadata@name)
     result
+}
+
+.agg_floor_states <- function(sensor, period, use_intervals) {
+    if(nrow(sensor$states) == 0) {
+        return(sensor)
+    }
+    if(is.null(use_intervals)) {
+        sensor$states$start <- lubridate::floor_date(sensor$states$start, period)
+        sensor$states$end <- lubridate::floor_date(sensor$states$end, period)
+    } else {
+        sensor <- .agg_floor_states_by_intervals(sensor, use_intervals)
+    }
+    return(sensor)
+}
+
+.agg_floor_states_by_intervals <- function(sensor, use_intervals) {
+    state_function <- function(start, end) {
+        state_interval <- lubridate::interval(start, end)
+        overlaps <- lubridate::int_overlaps(state_interval, use_intervals)
+        result_intervals <- use_intervals[overlaps]
+        result_start <- lubridate::int_start(dplyr::first(result_intervals))
+        result_end <- lubridate::int_start(dplyr::last(result_intervals))
+        return(list(start=result_start, end=result_end))
+    }
+    table <- purrr::pmap_dfr(dplyr::select(sensor$states, "start", "end"), state_function)
+    sensor$states$start <- table$start
+    sensor$states$end <- table$end
+    sensor$states <- dplyr::filter(sensor$states, !is.na(.data$start) & !is.na(.data$end))
+    return(sensor)
 }
 
 .agg_get_aggregated_sensor_name <- function(name, function_name) {

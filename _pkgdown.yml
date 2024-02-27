@@ -34,6 +34,11 @@ reference:
     contents:
       - starts_with("mc_prep")
 
+  - title: States functions
+    desc: Functions are used to manage sensor states.
+    contents:
+      - starts_with("mc_states")
+
   - title: Joining functions
     desc: Functions are used to join loggers from one locality.
     contents:

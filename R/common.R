@@ -179,3 +179,16 @@
     result <- purrr::imap_dbl(x, compare_function)
     return(result)
 }
+
+.common_get_period_from_data <- function(data, locality_id, logger_index) {
+    if(.common_is_agg_format(data)) {
+        if(data$metadata@period %in% .agg_const_INTERVAL_PERIODS) {
+            return(lubridate::as.period(data$metadata@intervals))
+        }
+        return(data$metadata@period)
+    }
+
+    step <- data$localities[[locality_id]]$loggers[[logger_index]]$clean_info@step
+    return(lubridate::seconds_to_period(step))
+}
+

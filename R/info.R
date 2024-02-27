@@ -251,3 +251,74 @@ mc_info_join <- function(data, comp_sensors=NULL) {
     }
     return(result)
 }
+
+#' Get states (tags) info table
+#'
+#' This function return data.frame with information about sensor states (tags) see [myClim-package]
+#'
+#' This function is useful not only for inspecting actual states (tags) but also as 
+#' a template for manually manipulating states (tags) in a table editor such as Excel. 
+#' The output of `mc_info_states()` can be saved as a table, adjusted outside R (adding/removing/modifying rows),
+#' and then read back into R to be used as input for [mc_states_insert] or [mc_states_update].
+#'
+#' @template param_myClim_object
+#' @return data.frame with columns:
+#' * locality_id - when provided by user then locality ID, when not provided identical with serial number
+#' * logger_index - index of logger in myClim object at the locality
+#' * logger_type - type of logger
+#' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
+#' * tag - category of state (e.g., "error", "source", "quality")  
+#' * start - start datetime
+#' * end - end datetime
+#' * value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
+#' @export
+#' @examples
+#' mc_info_states(mc_data_example_raw)
+mc_info_states <- function(data) {
+    is_raw_format <- .common_is_raw_format(data)
+
+    sensor_function <- function(locality_id, logger_index, logger_type, sensor) {
+        count <- nrow(sensor$states)
+        if(count == 0) {
+            return(tibble::tibble())
+        }
+        result <- tibble::tibble(locality_id=rep(locality_id, count),
+                                 logger_index=rep(logger_index, count),
+                                 logger_type=rep(logger_type, count),
+                                 sensor_name=rep(sensor$metadata@name),
+                                 tag=sensor$states$tag,
+                                 start=sensor$states$start,
+                                 end=sensor$states$end,
+                                 value=sensor$states$value)
+        return(result)
+    }
+
+    sensors_item_function <- function(locality_id, logger_index, logger_type, item) {
+        count <- length(item$sensors)
+        purrr::pmap_dfr(list(locality_id=rep(locality_id, count),
+                             logger_index=rep(logger_index, count),
+                             logger_type=rep(logger_type, count),
+                             sensor=item$sensors),
+                        sensor_function)
+    }
+
+    prep_locality_function <- function(locality) {
+        logger_types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
+        purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
+                             logger_index=seq_along(locality$loggers),
+                             logger_type=logger_types,
+                             item=locality$loggers),
+                        sensors_item_function)
+    }
+
+    if(is_raw_format) {
+        result <- purrr::map_dfr(data$localities, prep_locality_function)
+    } else {
+        result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
+                                       logger_index=NA_integer_,
+                                       logger_type=NA_character_,
+                                       item=data$localities),
+                                  sensors_item_function)
+    }
+    as.data.frame(result)
+}

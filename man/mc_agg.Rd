@@ -102,6 +102,9 @@ output is  \code{integer} i.e. number of \code{TRUE} values.
 
 Sensors created with functions \code{count} has sensor_id \code{count} and value_type \code{integer},
 function  \code{coverage} has sensor_id \code{coverage} and value_type \code{real}
+
+If the myClim object contains any states (tags) table, such as error tags or quality tags,
+the datetime defining the start and end of the tag will be rounded according to the aggregation period parameter.
 }
 \examples{
 \donttest{hour_data <- mc_agg(mc_data_example_clean, c("min", "max", "percentile"),
