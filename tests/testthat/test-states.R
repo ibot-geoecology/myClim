@@ -8,27 +8,57 @@ test_that("mc_states_insert", {
     expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
         ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        "AA1E05"    ,            NA,   NA        ,      NA,     NA,   NA,            NA,
+        NA,             1,   NA        ,      NA,     NA,   NA,            NA,
     ))
     expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
         ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        "AA1E05"    ,             2,   NA        ,      NA,     NA,   NA,            NA,
+        "A1E05"     ,             1,   NA        ,      NA,     NA,   NA,            NA,
+    ))
+    expect_error(mc_states_insert(data, states))
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
+        "A1E05"     ,             1,   NA        , "error",     NA,   NA,            NA,
+    ))
+    expect_error(mc_states_insert(data, states))
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,              1,   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 9:30"), lubridate::ymd_hm("2020-10-28 9:00"), NA_character_,
+    ))
+    expect_error(states_data <- mc_states_insert(data, states))
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,             NA,   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
+    ))
+    expect_error(mc_states_insert(data, states))
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "AA1E05"    ,              1,   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
     expect_warning(states_data <- mc_states_insert(data, states), "Locality AA1E05 does not exist in the data.")
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        "A1E05"    ,              2,   NA        ,      NA,     NA,   NA,            NA,
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,              2,   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
     expect_warning(states_data <- mc_states_insert(data, states), "Locality A1E05 does not contain logger with index 2.")
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        "A1E05"    ,              1,     "TMS_T1",      NA,     NA,   NA,            NA,
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,              1,     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
     expect_warning(states_data <- mc_states_insert(data, states), "Logger 1 in locality A1E05 does not contain sensor TMS_T1.")
     states <- as.data.frame(tibble::tribble(
         ~locality_id, ~logger_index, ~sensor_name,    ~tag,
-                                      ~start,                                 ~end,        ~value,
+        ~start,                                 ~end,        ~value,
         "A1E05"    ,              1,   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
@@ -76,8 +106,9 @@ test_that("mc_states_insert", {
     expect_equal(states_table$start[[3]], lubridate::ymd_hm("2020-10-28 9:00"))
     expect_equal(states_table$end[[3]], lubridate::ymd_hm("2020-10-28 10:00"))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        "A1E05"     ,     "TMS_T1",      NA,     NA,   NA,            NA,
+        ~locality_id, ~sensor_name,    ~tag, ~start, ~end, ~value,
+        "A1E05"     ,     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 9:00"), lubridate::ymd_hm("2020-10-16 9:30"), NA,
     ))
     expect_warning(states_data <- mc_states_insert(agg_data, states), "Locality A1E05 does not contain sensor TMS_T1.")
 })

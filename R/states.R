@@ -4,8 +4,9 @@
 .states_const_MESSAGE_NOT_EXISTS_AGG_SENSOR <- "Locality {locality_id} does not contain sensor {sensor_name}."
 .states_const_MESSAGE_LOGGERS_IN_AGG <- "You can not use logger_index in agg format."
 .states_const_MESSAGE_MISSED_LOGGER_INDEX <- "All values logger_index must be set."
-.states_const_MESSAGE_MISSED_SENSOR_NAME <- "All values sensor_name must be set."
 .states_const_MESSAGE_MISSED_COLUMN <- "Columns {columns_text} are required."
+.states_const_MESSAGE_NA_VALUE <- "All values of {column_name} must be set."
+.states_const_MESSAGE_START_GREATER <- "The start date and time must be earlier than or identical to the end date and time."
 
 .states_const_COLUMN_LOCALITY_ID <- "locality_id"
 .states_const_COLUMN_LOGGER_INDEX <- "logger_index"
@@ -203,6 +204,14 @@ mc_states_update <- function(data, states_table) {
 }
 
 .states_check_table <- function(data, states_table, is_strict) {
+    .states_check_columns(data, states_table, is_strict)
+    .states_check_na(data, states_table, is_strict)
+    if(any(states_table$start > states_table$end)) {
+        stop(.states_const_MESSAGE_START_GREATER)
+    }
+}
+
+.states_check_columns <- function(data, states_table, is_strict) {
     is_agg <-.common_is_agg_format(data)
     required_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_LOGGER_INDEX,
                           .states_const_COLUMN_SENSOR_NAME, .states_const_COLUMN_TAG,
@@ -219,14 +228,26 @@ mc_states_update <- function(data, states_table) {
         columns_text <- paste(required_columns, collapse=", ")
         stop(stringr::str_glue(.states_const_MESSAGE_MISSED_COLUMN))
     }
+}
+
+.states_check_na <- function(data, states_table, is_strict) {
+    is_agg <-.common_is_agg_format(data)
+    not_na_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_TAG,
+                        .states_const_COLUMN_START, .states_const_COLUMN_END)
+    if(is_strict) {
+        not_na_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_TAG, .states_const_COLUMN_SENSOR_NAME,
+                            .states_const_COLUMN_START, .states_const_COLUMN_END)
+    }
+    for(column_name in not_na_columns) {
+        if(any(is.na(states_table[[column_name]]))) {
+            stop(stringr::str_glue(.states_const_MESSAGE_NA_VALUE))
+        }
+    }
     if(is_agg && !all(is.na(states_table$logger_index))) {
         stop(.states_const_MESSAGE_LOGGERS_IN_AGG)
     }
     if(!is_agg && any(is.na(states_table$logger_index))) {
         stop(.states_const_MESSAGE_MISSED_LOGGER_INDEX)
-    }
-    if(is_strict && any(is.na(states_table$sensor_name))) {
-        stop(.states_const_MESSAGE_MISSED_SENSOR_NAME)
     }
 }
 

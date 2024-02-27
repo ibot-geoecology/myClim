@@ -259,7 +259,7 @@ mc_info_join <- function(data, comp_sensors=NULL) {
 #' This function is useful not only for inspecting actual states (tags) but also as 
 #' a template for manually manipulating states (tags) in a table editor such as Excel. 
 #' The output of `mc_info_states()` can be saved as a table, adjusted outside R (adding/removing/modifying rows),
-#' and then read back into R to be used as input for [mc_state_insert] or [mc_state_update].
+#' and then read back into R to be used as input for [mc_states_insert] or [mc_states_update].
 #'
 #' @template param_myClim_object
 #' @return data.frame with columns:

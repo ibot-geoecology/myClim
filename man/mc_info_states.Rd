@@ -29,7 +29,7 @@ This function return data.frame with information about sensor states (tags) see 
 This function is useful not only for inspecting actual states (tags) but also as
 a template for manually manipulating states (tags) in a table editor such as Excel.
 The output of \code{mc_info_states()} can be saved as a table, adjusted outside R (adding/removing/modifying rows),
-and then read back into R to be used as input for \link{mc_state_insert} or \link{mc_state_update}.
+and then read back into R to be used as input for \link{mc_states_insert} or \link{mc_states_update}.
 }
 \examples{
 mc_info_states(mc_data_example_raw)
