@@ -15,24 +15,42 @@
 .states_const_COLUMN_END <- "end"
 .states_const_COLUMN_VALUE <- "value"
 
-#' Insert states of sensors
+#' Insert new sensor states (tags)
 #'
 #' @description
-#' This function insert new states to sensor see [myClim-package]
-#'
-#' The date times start and end are cropped by logger/locality datetime range and are rounded by step.
+#' This function inserts new states (tags) into the selected part of the sensor 
+#' time-series. For more information about the structure of states (tags), 
+#' see [myClim-package]. `mc_states_insert()` does not affect 
+#' existing rows in the states (tags) table but only inserts new rows even if
+#' the new ones are identical with existing (resulting in duplicated states). 
+#' 
+#' @details
+#' As a template for inserting states (tags), it is recommended to use 
+#' the output of [mc_info_states()], which will return the table with all necessary 
+#' columns correctly named. The `sensor_name` and `value` columns are optional and do not 
+#' need to be filled in. 
+#' 
+#' When `locality_id` is provided but `sensor_name` is NA in the states (tags) table, 
+#' states are inserted for all sensors within the locality.
+#' 
+#' The states (tags) are associated with the sensor time-series, specifically to 
+#' the defined part of the time-series identified by start and end date times. A 
+#' single time series can contain multiple states (tags) of identical or different types, and these 
+#' states (tags) can overlap. Start and end date times are adjusted to fit within 
+#' the range of logger/locality datetime and are rounded according to the logger's step. For instance, 
+#' if a user attempts to insert a tag beyond the sensor time-series range, `mc_states_insert` 
+#' will adjust the start and end times to fit the available measurements. If a user defines a start time as 
+#' '2020-01-01 10:23:00' on a logger with a 15-minute step, it will be rounded to '2020-01-01 10:30:00'. 
 #' @template param_myClim_object_cleaned
-#' @param states_table data.frame with columns:
-#' * locality_id
-#' * logger_index - index of logger in locality
-#' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
-#' * tag - category of state
+#' @param states_table Output of [mc_info_states()] can be used as template for input data.frame. 
+#' data.frame with columns:
+#' * locality_id - the name of locality (in some cases identical to logger id, see [mc_read_files])
+#' * logger_index - index of logger in myClim object at the locality. See [mc_info_logger].   
+#' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01") 
+#' * tag - category of state (e.g., "error", "source", "quality")  
 #' * start - start datetime
 #' * end - end datetime
-#' * value - value of state
-#'
-#' As input can be used result of [mc_info_states()]. The sensor_name and value columns are optional.
-#' When sensor_name is NA, states are inserted to all sensors.
+#' * value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
 #' @return myClim object in the same format as input, with inserted sensor states
 #' @export
 #' @examples
@@ -45,23 +63,47 @@ mc_states_insert <- function(data, states_table) {
     return(.states_run(data, states_table, .states_insert))
 }
 
-#' Update states of sensors
+#' Update senosr states (tags)
 #'
 #' @description
-#' This function update states table in sensors see [myClim-package]. Previous states are replaced by states from table.
-#'
-#' The date times start and end are cropped by logger/locality datetime range andthey are rounded by step.
+#' This function updates (replaces) existing states (tags). For more information about 
+#' the structure of states (tags), see [myClim-package]. 
+#' In contrast with [mc_states_insert], which does not affect existing states (tags),
+#' [mc_states_update] deletes all old states and replaces them with new ones, 
+#' even if the new states table contains fewer states than original object.
+#' 
+#' @details
+#' As a template for updating states (tags), it is recommended to use 
+#' the output of [mc_info_states()], which will return the table with all necessary 
+#' columns correctly named. The `sensor_name` and `value` columns are optional and do not 
+#' need to be filled in. 
+#' 
+#' The states (tags) are associated with the sensor time-series, specifically to 
+#' the defined part of the time-series identified by start and end date times. A 
+#' single time series can contain multiple states (tags) of identical or different types, and these 
+#' states (tags) can overlap. Start and end date times are adjusted to fit within 
+#' the range of logger/locality datetime and are rounded according to the logger's step. For instance, 
+#' if a user attempts to insert a tag beyond the sensor time-series range, `mc_states_insert` 
+#' will adjust the start and end times to fit the available measurements. If a user defines a start time as 
+#' '2020-01-01 10:23:00' on a logger with a 15-minute step, it will be rounded to '2020-01-01 10:30:00'.
+#' 
+#' In contrast with [mc_states_insert], the automatic filling of states when `locality_id` 
+#' is provided but `sensor_name` is NA is not implemented in [mc_states_update]. When a user needs to update 
+#' states (tags) for all sensors within the locality, each state (tag) needs to have a separate row in 
+#' the input table. 
+#' 
 #' @template param_myClim_object_cleaned
-#' @param states_table data.frame with columns:
-#' * locality_id
-#' * logger_index - index of logger in locality
-#' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
-#' * tag - category of state
+#' @param states_table Output of [mc_info_states()] can be used as template for input data.frame. 
+#' 
+#' data.frame with columns:
+#' * locality_id - the name of locality (in some cases identical to logger id, see details of [mc_read_files])
+#' * logger_index - index of logger in myClim object at the locality. See [mc_info_logger].
+#' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01") 
+#' * tag - category of state (e.g., "error", "source", "quality")  
 #' * start - start datetime
 #' * end - end datetime
-#' * value - value of state
+#' * value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
 #'
-#' As input can be used result of [mc_info_states()]. All columns are required.
 #' @return myClim object in the same format as input, with updated sensor states
 #' @export
 #' @examples
@@ -279,15 +321,16 @@ mc_states_update <- function(data, states_table) {
     }
 }
 
-#' Delete states of sensors
+#' Delete sensor states (tags)
 #'
 #' @description
-#' This function states states by tag.
+#' This function removes states (tags) defined by locality ID, sensor name, or tag value,
+#' or any combination of these three.
 #'
 #' @template param_myClim_object_cleaned
-#' @param localities locality ids where delete states. If NULL then all. (default NULL)
-#' @param sensors sensor names where delete states. If NULL then all. (default NULL)
-#' @param tags which states delete. If NULL then all. (default NULL)
+#' @param localities locality ids where delete states (tags). If NULL then all. (default NULL)
+#' @param sensors sensor names where delete states (tags). If NULL then all. (default NULL)
+#' @param tags specific tag to be deleted. If NULL then all. (default NULL)
 #' @return myClim object in the same format as input, with deleted sensor states
 #' @export
 #' @examples

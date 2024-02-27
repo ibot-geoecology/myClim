@@ -2,24 +2,25 @@
 % Please edit documentation in R/states.R
 \name{mc_states_delete}
 \alias{mc_states_delete}
-\title{Delete states of sensors}
+\title{Delete sensor states (tags)}
 \usage{
 mc_states_delete(data, localities = NULL, sensors = NULL, tags = NULL)
 }
 \arguments{
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
-\item{localities}{locality ids where delete states. If NULL then all. (default NULL)}
+\item{localities}{locality ids where delete states (tags). If NULL then all. (default NULL)}
 
-\item{sensors}{sensor names where delete states. If NULL then all. (default NULL)}
+\item{sensors}{sensor names where delete states (tags). If NULL then all. (default NULL)}
 
-\item{tags}{which states delete. If NULL then all. (default NULL)}
+\item{tags}{specific tag to be deleted. If NULL then all. (default NULL)}
 }
 \value{
 myClim object in the same format as input, with deleted sensor states
 }
 \description{
-This function states states by tag.
+This function removes states (tags) defined by locality ID, sensor name, or tag value,
+or any combination of these three.
 }
 \examples{
 data <- mc_states_delete(mc_data_example_clean, localities="A1E05",

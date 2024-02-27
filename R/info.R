@@ -252,20 +252,25 @@ mc_info_join <- function(data, comp_sensors=NULL) {
     return(result)
 }
 
-#' Get states info table
+#' Get states (tags) info table
 #'
-#' This function return data.frame with info about sensor states see [myClim-package]
+#' This function return data.frame with information about sensor states (tags) see [myClim-package]
+#'
+#' This function is useful not only for inspecting actual states (tags) but also as 
+#' a template for manually manipulating states (tags) in a table editor such as Excel. 
+#' The output of `mc_info_states()` can be saved as a table, adjusted outside R (adding/removing/modifying rows),
+#' and then read back into R to be used as input for [mc_state_insert] or [mc_state_update].
 #'
 #' @template param_myClim_object
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
-#' * logger_index - index of logger in locality
+#' * logger_index - index of logger in myClim object at the locality
 #' * logger_type - type of logger
-#' * sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
-#' * tag - category of state
+#' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
+#' * tag - category of state (e.g., "error", "source", "quality")  
 #' * start - start datetime
 #' * end - end datetime
-#' * value - value of state
+#' * value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
 #' @export
 #' @examples
 #' mc_info_states(mc_data_example_raw)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/info.R
 \name{mc_info_states}
 \alias{mc_info_states}
-\title{Get states info table}
+\title{Get states (tags) info table}
 \usage{
 mc_info_states(data)
 }
@@ -13,17 +13,23 @@ mc_info_states(data)
 data.frame with columns:
 \itemize{
 \item locality_id - when provided by user then locality ID, when not provided identical with serial number
-\item logger_index - index of logger in locality
+\item logger_index - index of logger in myClim object at the locality
 \item logger_type - type of logger
-\item sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
-\item tag - category of state
+\item sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
+\item tag - category of state (e.g., "error", "source", "quality")
 \item start - start datetime
 \item end - end datetime
-\item value - value of state
+\item value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
 }
 }
 \description{
-This function return data.frame with info about sensor states see \link{myClim-package}
+This function return data.frame with information about sensor states (tags) see \link{myClim-package}
+}
+\details{
+This function is useful not only for inspecting actual states (tags) but also as
+a template for manually manipulating states (tags) in a table editor such as Excel.
+The output of \code{mc_info_states()} can be saved as a table, adjusted outside R (adding/removing/modifying rows),
+and then read back into R to be used as input for \link{mc_state_insert} or \link{mc_state_update}.
 }
 \examples{
 mc_info_states(mc_data_example_raw)

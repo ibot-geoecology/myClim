@@ -65,7 +65,8 @@
 #' Sensors created with functions `count` has sensor_id `count` and value_type `integer`,
 #' function  `coverage` has sensor_id `coverage` and value_type `real`
 #' 
-#' The columns start and end in new sensor states are rounded by period.
+#' If the myClim object contains any states (tags) table, such as error tags or quality tags,
+#' the datetime defining the start and end of the tag will be rounded according to the aggregation period parameter.
 #'
 #' @param data cleaned myClim object in Raw-format: output of [myClim::mc_prep_clean()] or Agg-format as it is allowed to aggregate data multiple times.
 #' @param fun aggregation function; one of (`"min"`, `"max"`, `"mean"`, `"percentile"`, `"sum"`, `"range"`, `"count"`, `"coverage"`)

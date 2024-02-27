@@ -2,33 +2,55 @@
 % Please edit documentation in R/states.R
 \name{mc_states_update}
 \alias{mc_states_update}
-\title{Update states of sensors}
+\title{Update senosr states (tags)}
 \usage{
 mc_states_update(data, states_table)
 }
 \arguments{
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
-\item{states_table}{data.frame with columns:
+\item{states_table}{Output of \code{\link[=mc_info_states]{mc_info_states()}} can be used as template for input data.frame.
+
+data.frame with columns:
 \itemize{
-\item locality_id
-\item logger_index - index of logger in locality
-\item sensor_name - original sensor id if not modified, if renamed then new name (e.g.,"GDD5", "HOBO_T_mean" ,"TMS_T1_max", "my_sensor01")
-\item tag - category of state
+\item locality_id - the name of locality (in some cases identical to logger id, see details of \link{mc_read_files})
+\item logger_index - index of logger in myClim object at the locality. See \link{mc_info_logger}.
+\item sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
+\item tag - category of state (e.g., "error", "source", "quality")
 \item start - start datetime
 \item end - end datetime
-\item value - value of state
-}
-
-As input can be used result of \code{\link[=mc_info_states]{mc_info_states()}}. All columns are required.}
+\item value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
+}}
 }
 \value{
 myClim object in the same format as input, with updated sensor states
 }
 \description{
-This function update states table in sensors see \link{myClim-package}. Previous states are replaced by states from table.
+This function updates (replaces) existing states (tags). For more information about
+the structure of states (tags), see \link{myClim-package}.
+In contrast with \link{mc_states_insert}, which does not affect existing states (tags),
+\link{mc_states_update} deletes all old states and replaces them with new ones,
+even if the new states table contains fewer states than original object.
+}
+\details{
+As a template for updating states (tags), it is recommended to use
+the output of \code{\link[=mc_info_states]{mc_info_states()}}, which will return the table with all necessary
+columns correctly named. The \code{sensor_name} and \code{value} columns are optional and do not
+need to be filled in.
 
-The date times start and end are cropped by logger/locality datetime range andthey are rounded by step.
+The states (tags) are associated with the sensor time-series, specifically to
+the defined part of the time-series identified by start and end date times. A
+single time series can contain multiple states (tags) of identical or different types, and these
+states (tags) can overlap. Start and end date times are adjusted to fit within
+the range of logger/locality datetime and are rounded according to the logger's step. For instance,
+if a user attempts to insert a tag beyond the sensor time-series range, \code{mc_states_insert}
+will adjust the start and end times to fit the available measurements. If a user defines a start time as
+'2020-01-01 10:23:00' on a logger with a 15-minute step, it will be rounded to '2020-01-01 10:30:00'.
+
+In contrast with \link{mc_states_insert}, the automatic filling of states when \code{locality_id}
+is provided but \code{sensor_name} is NA is not implemented in \link{mc_states_update}. When a user needs to update
+states (tags) for all sensors within the locality, each state (tag) needs to have a separate row in
+the input table.
 }
 \examples{
 states <- mc_info_states(mc_data_example_clean)
