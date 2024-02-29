@@ -44,6 +44,7 @@ test_that("all plots", {
     mc_plot_line(data_agg, sensors="snow")
 
     unlink(plot_dir, recursive=TRUE)
+    unlink("Rplots.pdf")
 
     expect_true(TRUE)
 })
@@ -63,5 +64,7 @@ test_that("mc_plot_raster snow", {
     data_agg <- mc_agg(data)
     data_agg <- mc_calc_snow(data_agg, "TMS_T2")
     plot <- mc_plot_raster(data_agg, sensors="snow")
+
+    unlink("Rplots.pdf")
     expect_true(TRUE)
 })

@@ -47,6 +47,8 @@ Maximum allowed shift of time series is 30 minutes. For example, when the time-s
 is 2h (e.g. 13:33, 15:33, 17:33), the measurement times are shifted to (13:30, 15:30, 17:30).
 When you have 2h time step and wish to round to the whole hour
 (13:33 -> 14:00, 15:33 -> 16:00) than use \code{mc_agg(period="2 hours")} command after data cleaning.
+Multiple values can be rounded to the same time. Rounded time is compared with original time
+and value with smallest difference is selected.
 }
 \examples{
 cleaned_data <- mc_prep_clean(mc_data_example_raw)

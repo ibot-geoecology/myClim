@@ -28,6 +28,7 @@ test_that("mc_prep_clean defined step", {
         suppressWarnings()
     expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@step, 30*60)
     expect_equal(length(cleaned_data$localities[["94184102"]]$loggers[[1]]$datetime), 25)
+    expect_equal(cleaned_data$localities$`91184133`$loggers[[1]]$sensors$Thermo_T$values[1:3], c(25.9375, 24.625, 24.625))
 })
 
 test_that("mc_prep_clean rounding", {

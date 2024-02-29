@@ -54,6 +54,8 @@
 #' is 2h (e.g. 13:33, 15:33, 17:33), the measurement times are shifted to (13:30, 15:30, 17:30).
 #' When you have 2h time step and wish to round to the whole hour
 #' (13:33 -> 14:00, 15:33 -> 16:00) than use `mc_agg(period="2 hours")` command after data cleaning.
+#' Multiple values can be rounded to the same time. Rounded time is compared with original time
+#' and value with smallest difference is selected.
 #'
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
@@ -110,11 +112,12 @@ mc_prep_clean <- function(data, silent=FALSE) {
         if(!is.null(.prep_state$clean_bar)) .prep_state$clean_bar$tick()
         return(logger)
     }
-    new_datetime <- .prep_get_rounded_datetime(logger)
-    rounded <- !all(new_datetime == logger$datetime)
-    logger$datetime <- new_datetime
+    rounded_datetime <- .prep_get_rounded_datetime(logger)
+    rounded <- !all(rounded_datetime == logger$datetime)
+    original_datetime <- logger$datetime
+    logger$datetime <- rounded_datetime
     logger <- .prep_clean_write_info(logger, rounded)
-    logger <- .prep_clean_edit_series(logger)
+    logger <- .prep_clean_edit_series(logger, original_datetime)
     logger <- .prep_clean_edit_source_state(logger)
     if(!is.null(.prep_state$clean_bar)) .prep_state$clean_bar$tick()
     logger
@@ -159,19 +162,22 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger
 }
 
-.prep_clean_edit_series <- function(logger) {
+.prep_clean_edit_series <- function(logger, original_datetime) {
     if(!.prep_clean_was_error_in_logger(logger)){
         return(logger)
     }
     table <- .common_sensor_values_as_tibble(logger)
+    table$original_diff <- abs(table$datetime - original_datetime)
+    table <- dplyr::relocate(table, "original_diff", .after="datetime")
     datetime_range <- range(table$datetime)
     datetime_seq <- tibble::as_tibble(seq(datetime_range[[1]], datetime_range[[2]], by=stringr::str_glue("{logger$clean_info@step} sec")))
     colnames(datetime_seq) <- "datetime"
     get_sorted_unique_values <- function(sensor_name) {
-        sensor_table <- table[c("datetime", sensor_name)]
+        sensor_table <- table[c("datetime", "original_diff", sensor_name)]
         sensor_table <- sensor_table[!is.na(sensor_table[sensor_name]),]
-        sensor_table <- dplyr::arrange(sensor_table, .data$datetime)
+        sensor_table <- dplyr::arrange(sensor_table, .data$datetime, .data$original_diff)
         duplicated_datetime <- duplicated(sensor_table$datetime)
+        sensor_table$original_diff <- NULL
         if(any(duplicated_datetime))
         {
             .prep_check_different_values_in_duplicated(sensor_table, logger$metadata@serial_number)
@@ -179,7 +185,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
         }
         return(sensor_table)
     }
-    sensor_tables <- purrr::map(colnames(table)[-1], get_sorted_unique_values)
+    sensor_tables <- purrr::map(colnames(table)[3:ncol(table)], get_sorted_unique_values)
     output_table <- purrr::reduce(c(list(datetime_seq), sensor_tables), ~ dplyr::left_join(.x, .y, by="datetime"))
     logger$datetime <- output_table$datetime
     sensor_names <- purrr::set_names(names(logger$sensors))
