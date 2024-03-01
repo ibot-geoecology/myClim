@@ -26,9 +26,17 @@
 #' CSV/TXT files (loggers raw data) are in resulting myClim object placed to separate
 #' localities with empty metadata. Localities are named after serial_number of logger.
 #' Pre-defined logger types are ("Dendro","HOBO","Thermo","TMS","TMS_L45")
-#' By default data are cleaned with function [myClim::mc_prep_clean()]. 
-#' See function description. It detects holes in time-series, 
-#' duplicated records or records in wrong order.
+#' 
+#' By default, data are cleaned with the function [mc_prep_clean] see function description. 
+#' [mc_prep_clean] detects gaps in time-series data, 
+#' duplicated records, or records in the wrong order. Importantly, [mc_prep_clean]
+#' also applies a **step parameter** if provided. The step parameter can be used either 
+#' instead of automatic step detection which can sometime failed, or to prune 
+#' microclimatic data. For example, if you have a 15-minute time series but you wish to 
+#' keep only one record per hour (without aggregating), you can use step parameter.
+#' However, if a step is provided and `clean = FALSE`, then the step is only stored in the 
+#' metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
+
 #'
 #' @seealso [myClim::mc_DataFormat], [myClim::mc_prep_clean()]
 #'
@@ -42,7 +50,7 @@
 #' @param tz_offset timezone offset in minutes; It is required only for non-UTC data
 #' (custom settings in HOBO). Not used in TMS (default NA)
 #' @param step time step of microclimatic time-series in seconds. When provided, then is used in
-#' [mc_prep_clean] instead of automatic step detection.
+#' [mc_prep_clean] instead of automatic step detection. See details. 
 #' If not provided (NA), is automatically detected in [mc_prep_clean]. (default NA)
 #' @template params_read_common
 #' @return myClim object in Raw-format see [myClim-package]
@@ -95,8 +103,16 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table`
 #' and `localities_table` from external CSV they must have header, column separator must be comma ",".
-#' By default data are cleaned with function [myClim::mc_prep_clean()]. See function description. It detects
-#' holes in time-series, duplicated records or records in wrong order.
+#' 
+#' By default, data are cleaned with the function [mc_prep_clean] see function description. 
+#' [mc_prep_clean] detects gaps in time-series data, 
+#' duplicated records, or records in the wrong order. Importantly, [mc_prep_clean]
+#' also applies a **step parameter** if provided. The step parameter can be used either 
+#' instead of automatic step detection which can sometime failed, or to prune 
+#' microclimatic data. For example, if you have a 15-minute time series but you wish to 
+#' keep only one record per hour (without aggregating), you can use step parameter.
+#' However, if a step is provided and `clean = FALSE`, then the step is only stored in the 
+#' metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
 #' @seealso [myClim::mc_DataFormat]
 #' @param files_table path to csv file or data.frame object see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv) 
 #' with 3 required columns and few optional:
@@ -119,7 +135,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
 #' Ignored for Tomst TMS data format (they are always in UTC)
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
-#' instead of automatic step detection.
+#' instead of automatic step detection. See details. 
 #'
 #' @param localities_table path to csv file ("c:/user/localities.table.csv") or R data.frame [
 #' see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv). 
