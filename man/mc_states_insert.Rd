@@ -15,7 +15,7 @@ data.frame with columns:
 \item locality_id - the name of locality (in some cases identical to logger id, see \link{mc_read_files})
 \item logger_index - index of logger in myClim object at the locality. See \link{mc_info_logger}.
 \item sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
-\item tag - category of state (e.g., "error", "source", "quality")
+\item tag - category of state (e.g., "conflict", "error", "source", "quality")
 \item start - start datetime
 \item end - end datetime
 \item value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")

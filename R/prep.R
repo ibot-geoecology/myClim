@@ -19,28 +19,36 @@
                                                    "single value or vector with same length as localities.")
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
-.prep_const_MESSAGE_CLEAN_CONFLICT <- "Object is not cleaned. The function return original object with added conflict states."
+.prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
 
 #' Cleaning datetime series
 #'
 #' @description
-#' By default `mc_prep_clean` runs automatically when [myClim::mc_read_files()],
-#' [myClim::mc_read_data()] are called. `mc_prep_clean` checks time-series in
-#' myClim object in Raw-format for missing, duplicated, and disordered records
-#' and regularizes microclimatic time-series to constant time-step.
-#' Duplicated records are removed and missing values are filled with NA.
-#'
-#' See details.
+#' By default, `mc_prep_clean` runs automatically when [myClim::mc_read_files()]
+#' or [myClim::mc_read_data()] are called. `mc_prep_clean` checks the time-series 
+#' in the myClim object in Raw-format for missing, duplicated, and disordered records. 
+#' The function can either directly regularize microclimatic 
+#' time-series to a constant time-step, remove duplicated records, and 
+#' fill missing values with NA (`resolve_conflicts=TRUE`); or it can only
+#' insert new states (tags) see [mc_states_insert] to highlight records with duplicated 
+#' datetime but different measurement values (`resolve_conflicts=FALSE`) 
+#' but not perform the cleaning itself. See details.
 #'
 #' @details
-#' Processing the data with `mc_prep_clean` is a mandatory step
-#' required for further data handling in `myClim` library.
+#' The function `mc_prep_clean` can be used in two different ways depending on 
+#' the parameter `resolve_conflicts`. When `resolve_conflicts=TRUE`, the function
+#' performs automatic cleaning and returns a cleaned myClim object. When `resolve_conflicts=FALSE`,
+#' the function returns the original, uncleaned object with tags (states) see [mc_states_insert]
+#' highlighting records with duplicated datetime but different measurement values.    
+#' 
+#' Processing the data with `mc_prep_clean` and resolving the conflicts is a mandatory step
+#' required for further data handling in the `myClim` library.
 #'
 #' This function guarantee that all time series are in chronological order,
 #' have regular time-step and no duplicated records.
-#' Function `mc_prep_clean` use time-step provided by user during data import with `mc_read`
-#' (used time-step is permanently stored in logger metadata [myClim::mc_LoggerMetadata].
-#' If time-step is not provided by the user (NA),than myClim automatically
+#' Function `mc_prep_clean` use either time-step provided by user during data import with `mc_read`
+#' (used time-step is permanently stored in logger metadata [myClim::mc_LoggerMetadata];
+#' or if time-step is not provided by the user (NA),than myClim automatically
 #' detects the time-step from input time series based on the last 100 records.
 #' In case of irregular time series, function returns warning and skip the series.
 #'
@@ -51,20 +59,31 @@
 #' Note that microclimatic records are not modified but only shifted.
 #' Maximum allowed shift of time series is 30 minutes. For example, when the time-step
 #' is 2h (e.g. 13:33, 15:33, 17:33), the measurement times are shifted to (13:30, 15:30, 17:30).
-#' When you have 2h time step and wish to round to the whole hour
-#' (13:33 -> 14:00, 15:33 -> 16:00) than use `mc_agg(period="2 hours")` command after data cleaning.
-#' Multiple values can be rounded to the same time. Rounded time is compared with original time
-#' and value with smallest difference is selected.
-#'
+#' When you have 2h time step and wish to go to the whole hour  
+#' (13:33 -> 14:00, 15:33 -> 16:00) the only way is aggregation - 
+#' use `mc_agg(period="2 hours")` command after data cleaning.
+#' 
+#' In cases when the user provides a time-step during data import in `mc_read` functions 
+#' instead of relying on automatic step detection, and the provided step does not correspond 
+#' with the actual records (i.e., the logger records data every 900 seconds but the user 
+#' provides a step of 3600 seconds), the myClim rounding routine consolidates multiple 
+#' records into an identical datetime. The resulting value corresponds to the one closest 
+#' to the provided step (i.e., in an original series like ...9:50, 10:05, 10:20, 10:35, 10:50, 11:05..., 
+#' the new record would be 10:00, and the value will be taken from the original record at 10:05). 
+#' This process generates numerous warnings in `resolve_conflicts=TRUE` or a multitude of tags 
+#' in `resolve_conflicts=FALSE`.
+#'  
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
-#' @param resolve_conflicts if then value with closest original time to rounded is selected. (default TRUE)
-#'
-#' Conflict data are duplicits with different values. If false,than data without conflicts are cleaned normaly.
-#' If conflicts exists, than result is uncleaned object with added state with tag "conflict".
+#' @param resolve_conflicts by default the object is automatically cleaned and conflict 
+#' measurements with closest original datetime to rounded datetime are selected, see details. (default TRUE)
+#' If FALSE the function returns the original, uncleaned object with tags (states) "conflict"
+#' highlighting records with duplicated datetime but different measurement values.
 #' @return
-#' * cleaned myClim object in Raw-format
+#' * cleaned myClim object in Raw-format (default) `resolve_conflicts=TRUE`
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
+#' * non cleaned myClim object in Raw-format with "conflict" tags `resolve_conflicts=FALSE`
+#' 
 #' @export
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_raw)

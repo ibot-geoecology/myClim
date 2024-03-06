@@ -48,7 +48,7 @@
 #' * locality_id - the name of locality (in some cases identical to logger id, see [mc_read_files])
 #' * logger_index - index of logger in myClim object at the locality. See [mc_info_logger].   
 #' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01") 
-#' * tag - category of state (e.g., "error", "source", "quality")  
+#' * tag - category of state (e.g., "conflict", "error", "source", "quality")  
 #' * start - start datetime
 #' * end - end datetime
 #' * value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
@@ -100,7 +100,7 @@ mc_states_insert <- function(data, states_table) {
 #' * locality_id - the name of locality (in some cases identical to logger id, see details of [mc_read_files])
 #' * logger_index - index of logger in myClim object at the locality. See [mc_info_logger].
 #' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01") 
-#' * tag - category of state (e.g., "error", "source", "quality")  
+#' * tag - category of state (e.g., "conflict", "error", "source", "quality")  
 #' * start - start datetime
 #' * end - end datetime
 #' * value - value of tag (e.g., "out of soil", "c:/users/John/tmsData/data_911235678.csv")
