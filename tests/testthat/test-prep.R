@@ -64,6 +64,15 @@ test_that("mc_prep_clean ok", {
     expect_false(.prep_clean_was_error_in_logger(cleaned_data$localities[[1]]$loggers[[1]]))
 })
 
+test_that("mc_prep_clean conflicts", {
+    data <- mc_read_files("../data/clean-datetime_step", "TOMST", clean=FALSE)
+    differnt_values_warning(data_conflicts <- mc_prep_clean(data, silent=T, resolve_conflicts=FALSE)) %>%
+        expect_warning("Object is not cleaned. The function return original object with added conflict states.")
+    expect_false(.prep_is_datetime_step_processed_in_object(data_conflicts))
+    states <- data_conflicts$localities$`91184133`$loggers[[1]]$sensors$Thermo_T$states
+    expect_true(length(states$tag[states$tag == .model_const_SENSOR_STATE_CONFLICT]) > 0)
+})
+
 test_that("mc_prep_solar_tz", {
     data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean = FALSE)
     data <- mc_prep_solar_tz(data)

@@ -4,12 +4,17 @@
 \alias{mc_prep_clean}
 \title{Cleaning datetime series}
 \usage{
-mc_prep_clean(data, silent = FALSE)
+mc_prep_clean(data, silent = FALSE, resolve_conflicts = TRUE)
 }
 \arguments{
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
 \item{silent}{if true, then cleaning log table and progress bar is not printed in console (default FALSE), see \code{\link[=mc_info_clean]{mc_info_clean()}}}
+
+\item{resolve_conflicts}{if then value with closest original time to rounded is selected. (default TRUE)
+
+Conflict data are duplicits with different values. If false,than data without conflicts are cleaned normaly.
+If conflicts exists, than result is uncleaned object with added state with tag "conflict".}
 }
 \value{
 \itemize{

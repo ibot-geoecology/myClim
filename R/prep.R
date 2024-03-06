@@ -19,8 +19,7 @@
                                                    "single value or vector with same length as localities.")
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
-
-.prep_state <- new.env()
+.prep_const_MESSAGE_CLEAN_CONFLICT <- "Object is not cleaned. The function return original object with added conflict states."
 
 #' Cleaning datetime series
 #'
@@ -59,49 +58,53 @@
 #'
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
+#' @param resolve_conflicts if then value with closest original time to rounded is selected. (default TRUE)
+#'
+#' Conflict data are duplicits with different values. If false,than data without conflicts are cleaned normaly.
+#' If conflicts exists, than result is uncleaned object with added state with tag "conflict".
 #' @return
 #' * cleaned myClim object in Raw-format
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
 #' @export
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_raw)
-mc_prep_clean <- function(data, silent=FALSE) {
+mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     if(.common_is_agg_format(data)) {
         stop(.prep_const_MESSAGE_CLEAN_AGG)
     }
     if(.prep_is_datetime_step_processed_in_object(data)) {
         warning(.prep_const_MESSAGE_RECLEAN)
     }
+    clean_env <- new.env()
+    clean_env$resolve_conflicts <- resolve_conflicts
+    clean_env$states <- tibble::tibble()
+    clean_env$clean_bar <- NULL
     count_table <- mc_info_count(data)
-    .prep_state$clean_bar <- NULL
     if(!silent) {
-        .prep_state$clean_bar <- progress::progress_bar$new(format = "clean [:bar] :current/:total loggers",
-                                                            total=count_table$count[count_table$item == "loggers"])
+        clean_env$clean_bar <- progress::progress_bar$new(format = "clean [:bar] :current/:total loggers",
+                                                          total=count_table$count[count_table$item == "loggers"])
     }
     locality_function <- function(locality) {
-        locality$loggers <- purrr::map(locality$loggers, .prep_clean_logger)
+        locality$loggers <- purrr::imap(locality$loggers, ~ .prep_clean_logger(locality$metadat@locality_id,
+                                                                               .x, .y, clean_env))
         locality
     }
-    data$localities <- purrr::map(data$localities, locality_function)
-    if(silent) {
+
+    cleaned_data <- data
+    cleaned_data$localities <- purrr::map(cleaned_data$localities, locality_function)
+    if(nrow(clean_env$states) > 0) {
+        data <- .states_run(data, clean_env$states, .states_insert, FALSE)
+        warning(.prep_const_MESSAGE_CLEAN_CONFLICT)
         return(data)
     }
-    info_table <- mc_info_clean(data)
-    count_loggers <- nrow(info_table)
-    message(stringr::str_glue("{count_loggers} loggers"))
-    start_date <- min(info_table$start_date)
-    end_date <- max(info_table$end_date)
-    message(stringr::str_glue("datetime range: {start_date} - {end_date}"))
-    step_repr_function <- function(step) {
-        return(stringr::str_glue("({step}s = {round(step/60, 2)}min)"))
+    if(silent) {
+        return(cleaned_data)
     }
-    steps <- paste(purrr::map(sort(unique(info_table$step)), step_repr_function), collapse = ", ")
-    message(stringr::str_glue("detected steps: {steps}"))
-    print.data.frame(info_table)
-    return(data)
+    .prep_print_clean_success_info(cleaned_data)
+    return(cleaned_data)
 }
 
-.prep_clean_logger <- function(logger) {
+.prep_clean_logger <- function(locality_id, logger, logger_index, clean_env) {
     if(is.na(logger$metadata@step)) {
         logger$clean_info@step <- .prep_detect_step_seconds(logger$datetime)
     } else {
@@ -109,7 +112,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     }
     if(is.na(logger$clean_info@step)) {
         warning(stringr::str_glue(.prep_const_MESSAGE_STEP_PROBLEM))
-        if(!is.null(.prep_state$clean_bar)) .prep_state$clean_bar$tick()
+        if(!is.null(clean_env$clean_bar)) clean_env$clean_bar$tick()
         return(logger)
     }
     rounded_datetime <- .prep_get_rounded_datetime(logger)
@@ -117,9 +120,9 @@ mc_prep_clean <- function(data, silent=FALSE) {
     original_datetime <- logger$datetime
     logger$datetime <- rounded_datetime
     logger <- .prep_clean_write_info(logger, rounded)
-    logger <- .prep_clean_edit_series(logger, original_datetime)
+    logger <- .prep_clean_edit_series(locality_id, logger, logger_index, original_datetime, clean_env)
     logger <- .prep_clean_edit_source_state(logger)
-    if(!is.null(.prep_state$clean_bar)) .prep_state$clean_bar$tick()
+    if(!is.null(clean_env$clean_bar)) clean_env$clean_bar$tick()
     logger
 }
 
@@ -162,7 +165,7 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger
 }
 
-.prep_clean_edit_series <- function(logger, original_datetime) {
+.prep_clean_edit_series <- function(locality_id, logger, logger_index, original_datetime, clean_env) {
     if(!.prep_clean_was_error_in_logger(logger)){
         return(logger)
     }
@@ -180,7 +183,8 @@ mc_prep_clean <- function(data, silent=FALSE) {
         sensor_table$original_diff <- NULL
         if(any(duplicated_datetime))
         {
-            .prep_check_different_values_in_duplicated(sensor_table, logger$metadata@serial_number)
+            .prep_clean_check_different_values_in_duplicated(locality_id, logger_index, sensor_table,
+                                                             logger$metadata@serial_number, clean_env)
             return(sensor_table[!duplicated_datetime, ])
         }
         return(sensor_table)
@@ -196,19 +200,36 @@ mc_prep_clean <- function(data, silent=FALSE) {
     logger
 }
 
-.prep_check_different_values_in_duplicated <- function(sensor_table, serial_number){
-    duplicated_datetimes <- unique(sensor_table$datetime[duplicated(sensor_table$datetime)])
-    duplicated_rows <- dplyr::filter(sensor_table, .data$datetime %in% duplicated_datetimes)
-    groupped_duplicated <- dplyr::group_by(duplicated_rows, .data$datetime)
+.prep_clean_check_different_values_in_duplicated <- function(locality_id, logger_index, sensor_table, serial_number, clean_env){
+    duplicated_rows <- duplicated(sensor_table$datetime) | duplicated(sensor_table$datetime, fromLast = TRUE)
+    duplicated_table <- dplyr::filter(sensor_table, duplicated_rows)
+    groupped_duplicated <- dplyr::group_by(duplicated_table, .data$datetime)
     is_different_function <- function(.x, .y) {
         result <- !all(diff(.x[[1]]) == 0)
-        return(result)
+        return(rep(result, nrow(.x)))
     }
-    is_different <- as.logical(dplyr::group_map(groupped_duplicated, is_different_function))
+    is_different <- as.logical(purrr::flatten(dplyr::group_map(groupped_duplicated, is_different_function)))
     if(any(is_different)) {
         sensor_name <- names(sensor_table)[[2]]
         warning(stringr::str_glue(.prep_const_MESSAGE_VALUES_SAME_TIME))
+        if(!clean_env$resolve_conflicts) {
+            .prep_add_conflict_states(locality_id, logger_index, sensor_name, sensor_table, is_different, clean_env)
+        }
     }
+}
+
+.prep_add_conflict_states <- function(locality_id, logger_index, sensor_name,
+                                      sensor_table, is_different, clean_env) {
+    diff_parts <- rle(is_different)
+    ends <- cumsum(diff_parts$lengths)
+    starts <- c(1, ends[-length(ends)] + 1)
+    ends <- ends[diff_parts$values]
+    starts <- starts[diff_parts$values]
+    states_table <- tibble::tibble(locality_id=locality_id, logger_index=logger_index,
+                                   sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CONFLICT,
+                                   start=sensor_table$datetime[starts], end=sensor_table$datetime[ends],
+                                   value=NA_character_)
+    clean_env$states <- dplyr::bind_rows(clean_env$states, states_table)
 }
 
 .prep_is_logger_cleaned <- function(logger) {
@@ -260,6 +281,21 @@ mc_prep_clean <- function(data, silent=FALSE) {
 .prep_is_datetime_step_processed_in_object <- function(data) {
     unprocessed_loggers <- .prep_get_uncleaned_loggers(data)
     return(length(unprocessed_loggers) == 0)
+}
+
+.prep_print_clean_success_info <- function(data) {
+    info_table <- mc_info_clean(data)
+    count_loggers <- nrow(info_table)
+    message(stringr::str_glue("{count_loggers} loggers"))
+    start_date <- min(info_table$start_date)
+    end_date <- max(info_table$end_date)
+    message(stringr::str_glue("datetime range: {start_date} - {end_date}"))
+    step_repr_function <- function(step) {
+        return(stringr::str_glue("({step}s = {round(step/60, 2)}min)"))
+    }
+    steps <- paste(purrr::map(sort(unique(info_table$step)), step_repr_function), collapse = ", ")
+    message(stringr::str_glue("detected steps: {steps}"))
+    print.data.frame(info_table)
 }
 
 #' Set metadata of localities

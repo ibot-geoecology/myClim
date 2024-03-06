@@ -124,7 +124,7 @@ mc_states_update <- function(data, states_table) {
     return(states_table)
 }
 
-.states_run <- function(data, states_table, action_function) {
+.states_run <- function(data, states_table, action_function, edit_datetimes=TRUE) {
     is_agg <-.common_is_agg_format(data)
     data_env <- new.env()
     data_env$data <- data
@@ -149,7 +149,7 @@ mc_states_update <- function(data, states_table) {
             return()
         }
         states_table <- dplyr::select(.x, "tag", "start", "end", "value")
-        action_function(data_env, locality_id, logger_index, sensor_name, states_table)
+        action_function(data_env, locality_id, logger_index, sensor_name, states_table, edit_datetimes)
     }
 
     sensor_prep_function <- function(.x, .y) {
@@ -264,8 +264,11 @@ mc_states_update <- function(data, states_table) {
     return(states_table)
 }
 
-.states_insert <- function(data_env, locality_id, logger_index, sensor_name, states_table) {
-    states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_index, states_table)
+.states_insert <- function(data_env, locality_id, logger_index, sensor_name, states_table, edit_datetimes) {
+    if(edit_datetimes) {
+        states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_index, states_table)
+    }
+    states_table <- as.data.frame(states_table)
     if(.common_is_agg_format(data_env$data)) {
         data_env$data$localities[[locality_id]]$sensors[[sensor_name]]$states <-
             dplyr::bind_rows(data_env$data$localities[[locality_id]]$sensors[[sensor_name]]$states,
@@ -277,8 +280,11 @@ mc_states_update <- function(data, states_table) {
     }
 }
 
-.states_update <- function(data_env, locality_id, logger_index, sensor_name, states_table) {
-    states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_index, states_table)
+.states_update <- function(data_env, locality_id, logger_index, sensor_name, states_table, edit_datetimes) {
+    if(edit_datetimes) {
+        states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_index, states_table)
+    }
+    states_table <- as.data.frame(states_table)
     if(.common_is_agg_format(data_env$data)) {
         data_env$data$localities[[locality_id]]$sensors[[sensor_name]]$states <- states_table
     } else {
@@ -312,34 +318,6 @@ mc_states_update <- function(data, states_table) {
         datetime <- data$localities[[locality_id]]$loggers[[logger_index]]$datetime
     }
     return(lubridate::interval(dplyr::first(datetime), dplyr::last(datetime)))
-}
-
-.states_update <- function(data_env, locality_id, logger_index, sensor_name, states_table) {
-    date_interval <- .states_get_item_range(data_env$data, locality_id, logger_index)
-    period <- .common_get_period_from_data(data_env$data, locality_id, logger_index)
-    row_function <- function(tag, start, end, value){
-        out_interval <- lubridate::intersect(lubridate::interval(start, end), date_interval)
-        if(is.na(out_interval)) {
-            return(list())
-        }
-        start <- lubridate::floor_date(lubridate::int_start(out_interval), period)
-        end <- lubridate::floor_date(lubridate::int_end(out_interval), period)
-        return(list(tag=tag,
-                    start=start,
-                    end=end,
-                    value=value))
-    }
-    states_table <- purrr::pmap_dfr(states_table, row_function)
-
-    if(.common_is_agg_format(data_env$data)) {
-        data_env$data$localities[[locality_id]]$sensors[[sensor_name]]$states <-
-            dplyr::bind_rows(data_env$data$localities[[locality_id]]$sensors[[sensor_name]]$states,
-                             states_table)
-    } else {
-        data_env$data$localities[[locality_id]]$loggers[[logger_index]]$sensors[[sensor_name]]$states <-
-            dplyr::bind_rows(data_env$data$localities[[locality_id]]$loggers[[logger_index]]$sensors[[sensor_name]]$states,
-                             states_table)
-    }
 }
 
 #' Delete sensor states (tags)
