@@ -293,15 +293,27 @@ mc_states_update <- function(data, states_table) {
 }
 
 .states_edit_datetimes <- function(data, locality_id, logger_index, states_table) {
+    period <- NULL
+    step <- NULL
+    is_agg <- .common_is_agg_format(data)
     date_interval <- .states_get_item_range(data, locality_id, logger_index)
-    period <- .common_get_period_from_data(data, locality_id, logger_index)
+    if(is_agg){
+        period <- .common_get_period_from_data(data, locality_id, logger_index)
+    } else {
+        step <- data$localities[[locality_id]]$loggers[[logger_index]]$clean_info@step
+    }
     row_function <- function(tag, start, end, value){
         out_interval <- lubridate::intersect(lubridate::interval(start, end), date_interval)
         if(is.na(out_interval)) {
             return(list())
         }
-        start <- lubridate::floor_date(lubridate::int_start(out_interval), period)
-        end <- lubridate::floor_date(lubridate::int_end(out_interval), period)
+        if(is_agg){
+            start <- lubridate::floor_date(lubridate::int_start(out_interval), period)
+            end <- lubridate::floor_date(lubridate::int_end(out_interval), period)
+        } else {
+            start <- .states_floor_datetime(lubridate::int_start(out_interval), lubridate::int_start(date_interval), step)
+            end <- .states_floor_datetime(lubridate::int_end(out_interval), lubridate::int_start(date_interval), step)
+        }
         return(list(tag=tag,
                     start=start,
                     end=end,
@@ -374,4 +386,22 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
     data$localities <- purrr::map(data$localities, locality_function)
 
     return(data)
+}
+
+.states_floor_sensor <- function(sensor, start_datetime, step) {
+    if(nrow(sensor$states) == 0) {
+        return(sensor)
+    }
+
+    sensor$states$start <- .states_floor_datetime(sensor$states$start, start_datetime, step)
+    sensor$states$end <- .states_floor_datetime(sensor$states$end, start_datetime, step)
+
+    return(sensor)
+}
+
+.states_floor_datetime <- function(datetime_values, start_datetime, step) {
+    start_seconds <- as.numeric(start_datetime)
+    datetime_seconds <- as.numeric(datetime_values) - start_seconds
+    result <- .common_as_utc_posixct(datetime_seconds %/% step * step + start_seconds)
+    return(result)
 }

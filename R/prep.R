@@ -140,7 +140,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     logger$datetime <- rounded_datetime
     logger <- .prep_clean_write_info(logger, rounded)
     logger <- .prep_clean_edit_series(locality_id, logger, logger_index, original_datetime, clean_env)
-    logger <- .prep_clean_edit_source_state(logger)
+    logger <- .prep_clean_round_states(logger)
     if(!is.null(clean_env$clean_bar)) clean_env$clean_bar$tick()
     logger
 }
@@ -263,19 +263,12 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     !all(is_ok)
 }
 
-.prep_clean_edit_source_state <- function(logger) {
-    if(!.prep_clean_was_error_in_logger(logger)){
-        return(logger)
-    }
+.prep_clean_round_states <- function(logger) {
+    step <- logger$clean_info@step
+    start_datetime <- dplyr::first(logger$datetime)
 
     sensor_function <- function(sensor) {
-        states_index <- which(sensor$states$tag == .model_const_SENSOR_STATE_SOURCE)
-        if(length(states_index) != 1) {
-            return(sensor)
-        }
-        sensor$states[[states_index, "start"]] <- dplyr::first(logger$datetime)
-        sensor$states[[states_index, "end"]] <- dplyr::last(logger$datetime)
-        sensor
+        return(.states_floor_sensor(sensor, start_datetime, step))
     }
 
     logger$sensors <- purrr::map(logger$sensors, sensor_function)
