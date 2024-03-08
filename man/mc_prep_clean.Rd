@@ -43,7 +43,7 @@ performs automatic cleaning and returns a cleaned myClim object. When \code{reso
 and myClim object contains conflicts, the function returns the original,
 uncleaned object with tags (states) see \link{mc_states_insert}
 highlighting records with duplicated datetime but different measurement values.
-When  there were no conflicts, cleaning is performed in both cases (\verb{resolve_conflicts=TRUE OR FALSE})
+When there were no conflicts, cleaning is performed in both cases (\verb{resolve_conflicts=TRUE OR FALSE})
 
 Processing the data with \code{mc_prep_clean} and resolving the conflicts is a mandatory step
 required for further data handling in the \code{myClim} library.
