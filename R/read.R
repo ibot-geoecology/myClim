@@ -518,8 +518,8 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_create_source_states <- function(path, datetime) {
     abspath <- normalizePath(path)
-    start <- dplyr::first(datetime)
-    end <- dplyr::last(datetime)
+    start <- min(datetime)
+    end <- max(datetime)
     result <- data.frame(tag=.model_const_SENSOR_STATE_SOURCE,
                          start=start, end=end, value=abspath)
     return(.common_convert_factors_in_dataframe(result))

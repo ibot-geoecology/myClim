@@ -12,8 +12,7 @@ test_that("mc_prep_clean", {
     expect_equal(diff_datetime, rep(15, 5))
     diff_datetime <- diff(as.numeric(cleaned_data$localities[["94184170"]]$loggers[[1]]$datetime)) %/% 60
     expect_equal(diff_datetime, rep(15, 5))
-    test_function <- if(exists(".prep_is_logger_cleaned")) .prep_is_logger_cleaned else .prep_is_logger_cleaned
-    expect_true(test_function(cleaned_data$localities[["94184102"]]$loggers[[1]]))
+    expect_true(.prep_is_logger_cleaned(cleaned_data$localities[["94184102"]]$loggers[[1]]))
     expect_true(.prep_clean_was_error_in_logger(cleaned_data$localities[["94184102"]]$loggers[[1]]))
     expect_equal(length(cleaned_data$localities[["94184102"]]$loggers[[1]]$datetime), 49)
     expect_true(is.na(cleaned_data$localities[["94184102"]]$loggers[[1]]$sensors$TMS_T1$values[[19]]))
@@ -28,6 +27,7 @@ test_that("mc_prep_clean defined step", {
         suppressWarnings()
     expect_equal(cleaned_data$localities[["94184102"]]$loggers[[1]]$clean_info@step, 30*60)
     expect_equal(length(cleaned_data$localities[["94184102"]]$loggers[[1]]$datetime), 25)
+    expect_equal(cleaned_data$localities$`91184133`$loggers[[1]]$sensors$Thermo_T$values[1:3], c(25.9375, 24.625, 24.625))
 })
 
 test_that("mc_prep_clean rounding", {
@@ -45,7 +45,10 @@ test_that("mc_prep_clean 1.5 hour step", {
     data <- mc_read_files("../data/HOBO/6265.csv", "HOBO", date_format = "%m/%d/%y %I:%M:%S %p", clean=FALSE, silent=TRUE)
     cleaned_data <- mc_prep_clean(data, silent=T)
     test_raw_data_format(cleaned_data)
-    expect_equal(data$`20396265`$loggers[[1]]$datetime, cleaned_data$`20396265`$loggers[[1]]$datetime)
+    cleaned_logger <- cleaned_data$localities$`20396265`$loggers[[1]]
+    expect_equal(data$localities$`20396265`$loggers[[1]]$datetime, cleaned_logger$datetime)
+    expect_equal(dplyr::first(cleaned_logger$datetime), cleaned_logger$sensors$HOBO_T$states$start)
+    expect_equal(dplyr::last(cleaned_logger$datetime), cleaned_logger$sensors$HOBO_T$states$end)
 })
 
 test_that("mc_prep_clean one record", {
@@ -59,8 +62,18 @@ test_that("mc_prep_clean one record", {
 
 test_that("mc_prep_clean ok", {
     cleaned_data <- mc_read_files("../data/TOMST/data_94184102_0.csv", "TOMST", silent=T)
-    expect_true(.prep_is_logger_cleaned(cleaned_data$localities[[1]]$loggers[[1]]))
-    expect_false(.prep_clean_was_error_in_logger(cleaned_data$localities[[1]]$loggers[[1]]))
+    logger <- cleaned_data$localities[[1]]$loggers[[1]]
+    expect_true(.prep_is_logger_cleaned(logger))
+    expect_false(.prep_clean_was_error_in_logger(logger))
+})
+
+test_that("mc_prep_clean conflicts", {
+    data <- mc_read_files("../data/clean-datetime_step", "TOMST", clean=FALSE)
+    differnt_values_warning(data_conflicts <- mc_prep_clean(data, silent=T, resolve_conflicts=FALSE)) %>%
+        expect_warning("Object not cleaned. The function only tagged \\(states\\) measurements with cleaning conflicts.")
+    expect_false(.prep_is_datetime_step_processed_in_object(data_conflicts))
+    states <- data_conflicts$localities$`91184133`$loggers[[1]]$sensors$Thermo_T$states
+    expect_true(length(states$tag[states$tag == .model_const_SENSOR_STATE_CONFLICT]) > 0)
 })
 
 test_that("mc_prep_solar_tz", {

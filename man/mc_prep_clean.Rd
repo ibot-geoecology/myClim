@@ -4,37 +4,55 @@
 \alias{mc_prep_clean}
 \title{Cleaning datetime series}
 \usage{
-mc_prep_clean(data, silent = FALSE)
+mc_prep_clean(data, silent = FALSE, resolve_conflicts = TRUE)
 }
 \arguments{
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
 \item{silent}{if true, then cleaning log table and progress bar is not printed in console (default FALSE), see \code{\link[=mc_info_clean]{mc_info_clean()}}}
+
+\item{resolve_conflicts}{by default the object is automatically cleaned and conflict
+measurements with closest original datetime to rounded datetime are selected, see details. (default TRUE)
+If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
+highlighting records with duplicated datetime but different measurement values.When conflict records
+does not exist, object is cleaned in both TRUE and FALSE cases.}
 }
 \value{
 \itemize{
-\item cleaned myClim object in Raw-format
+\item cleaned myClim object in Raw-format (default) \code{resolve_conflicts=TRUE} or \code{resolve_conflicts=FALSE} but no conflicts exist
 \item cleaning log is by default printed in console, but can be called also later by \code{\link[=mc_info_clean]{mc_info_clean()}}
+\item non cleaned myClim object in Raw-format with "conflict" tags \code{resolve_conflicts=FALSE} and conflicts exist
 }
 }
 \description{
-By default \code{mc_prep_clean} runs automatically when \code{\link[=mc_read_files]{mc_read_files()}},
-\code{\link[=mc_read_data]{mc_read_data()}} are called. \code{mc_prep_clean} checks time-series in
-myClim object in Raw-format for missing, duplicated, and disordered records
-and regularizes microclimatic time-series to constant time-step.
-Duplicated records are removed and missing values are filled with NA.
-
-See details.
+By default, \code{mc_prep_clean} runs automatically when \code{\link[=mc_read_files]{mc_read_files()}}
+or \code{\link[=mc_read_data]{mc_read_data()}} are called. \code{mc_prep_clean} checks the time-series
+in the myClim object in Raw-format for missing, duplicated, and disordered records.
+The function can either directly regularize microclimatic
+time-series to a constant time-step, remove duplicated records, and
+fill missing values with NA (\code{resolve_conflicts=TRUE}); or it can
+insert new states (tags) see \link{mc_states_insert} to highlight records with conflicts
+i.e. duplicated datetime but different measurement values (\code{resolve_conflicts=FALSE})
+but not perform the cleaning itself. When  there were no conflicts,
+cleaning is performed in both cases (\verb{resolve_conflicts=TRUE or FALSE}) See details.
 }
 \details{
-Processing the data with \code{mc_prep_clean} is a mandatory step
-required for further data handling in \code{myClim} library.
+The function \code{mc_prep_clean} can be used in two different ways depending on
+the parameter \code{resolve_conflicts}. When \code{resolve_conflicts=TRUE}, the function
+performs automatic cleaning and returns a cleaned myClim object. When \code{resolve_conflicts=FALSE},
+and myClim object contains conflicts, the function returns the original,
+uncleaned object with tags (states) see \link{mc_states_insert}
+highlighting records with duplicated datetime but different measurement values.
+When there were no conflicts, cleaning is performed in both cases (\verb{resolve_conflicts=TRUE OR FALSE})
+
+Processing the data with \code{mc_prep_clean} and resolving the conflicts is a mandatory step
+required for further data handling in the \code{myClim} library.
 
 This function guarantee that all time series are in chronological order,
 have regular time-step and no duplicated records.
-Function \code{mc_prep_clean} use time-step provided by user during data import with \code{mc_read}
-(used time-step is permanently stored in logger metadata \link{mc_LoggerMetadata}.
-If time-step is not provided by the user (NA),than myClim automatically
+Function \code{mc_prep_clean} use either time-step provided by user during data import with \code{mc_read}
+(used time-step is permanently stored in logger metadata \link{mc_LoggerMetadata};
+or if time-step is not provided by the user (NA),than myClim automatically
 detects the time-step from input time series based on the last 100 records.
 In case of irregular time series, function returns warning and skip the series.
 
@@ -45,8 +63,19 @@ are shifted to newly generated nice sequence c(12:00, 12:10, 12:20, 12:30).
 Note that microclimatic records are not modified but only shifted.
 Maximum allowed shift of time series is 30 minutes. For example, when the time-step
 is 2h (e.g. 13:33, 15:33, 17:33), the measurement times are shifted to (13:30, 15:30, 17:30).
-When you have 2h time step and wish to round to the whole hour
-(13:33 -> 14:00, 15:33 -> 16:00) than use \code{mc_agg(period="2 hours")} command after data cleaning.
+When you have 2h time step and wish to go to the whole hour
+(13:33 -> 14:00, 15:33 -> 16:00) the only way is aggregation -
+use \code{mc_agg(period="2 hours")} command after data cleaning.
+
+In cases when the user provides a time-step during data import in \code{mc_read} functions
+instead of relying on automatic step detection, and the provided step does not correspond
+with the actual records (i.e., the logger records data every 900 seconds but the user
+provides a step of 3600 seconds), the myClim rounding routine consolidates multiple
+records into an identical datetime. The resulting value corresponds to the one closest
+to the provided step (i.e., in an original series like ...9:50, 10:05, 10:20, 10:35, 10:50, 11:05...,
+the new record would be 10:00, and the value will be taken from the original record at 10:05).
+This process generates numerous warnings in \code{resolve_conflicts=TRUE} and a multitude of tags
+in \code{resolve_conflicts=FALSE}.
 }
 \examples{
 cleaned_data <- mc_prep_clean(mc_data_example_raw)

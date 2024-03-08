@@ -1,3 +1,8 @@
+# myClim 1.1.2
+* The `mc_prep_clean` function now selects a conflicted value based on the best match with the new rounded date and time.
+* A new parameter, `resolve_conflicts`, has been added to the `mc_prep_clean` function to allow checking uncleaned data.
+* Fixed the round-off issue of datetimes in states when an unconventional step is used.
+ 
 # myClim 1.1.1
 * New functions `mc_info_states`, `mc_states_insert`, `mc_states_update`, and `mc_states_delete` have been added.
 * The `mc_agg` function now rounds states by period.

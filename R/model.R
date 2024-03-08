@@ -153,6 +153,7 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_SENSOR_STATE_SOURCE <- "source"
 .model_const_SENSOR_STATE_ERROR <- "error"
+.model_const_SENSOR_STATE_CONFLICT <- "conflict"
 
 .model_const_MESSAGE_NO_DATA <- "There aren't any data in source file."
 .model_const_MESSAGE_SEPARATED_TIME <- "Separated time in source data isn't supported."
