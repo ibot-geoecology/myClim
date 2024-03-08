@@ -29,17 +29,20 @@
 #' in the myClim object in Raw-format for missing, duplicated, and disordered records. 
 #' The function can either directly regularize microclimatic 
 #' time-series to a constant time-step, remove duplicated records, and 
-#' fill missing values with NA (`resolve_conflicts=TRUE`); or it can only
-#' insert new states (tags) see [mc_states_insert] to highlight records with duplicated 
-#' datetime but different measurement values (`resolve_conflicts=FALSE`) 
-#' but not perform the cleaning itself. See details.
+#' fill missing values with NA (`resolve_conflicts=TRUE`); or it can
+#' insert new states (tags) see [mc_states_insert] to highlight records with conflicts
+#' i.e. duplicated datetime but different measurement values (`resolve_conflicts=FALSE`) 
+#' but not perform the cleaning itself. When  there were no conflicts, 
+#' cleaning is performed in both cases (`resolve_conflicts=TRUE or FALSE`) See details.
 #'
 #' @details
 #' The function `mc_prep_clean` can be used in two different ways depending on 
 #' the parameter `resolve_conflicts`. When `resolve_conflicts=TRUE`, the function
 #' performs automatic cleaning and returns a cleaned myClim object. When `resolve_conflicts=FALSE`,
-#' the function returns the original, uncleaned object with tags (states) see [mc_states_insert]
-#' highlighting records with duplicated datetime but different measurement values.    
+#' and myClim object contains conflicts, the function returns the original, 
+#' uncleaned object with tags (states) see [mc_states_insert]
+#' highlighting records with duplicated datetime but different measurement values.
+#' When  there were no conflicts, cleaning is performed in both cases (`resolve_conflicts=TRUE OR FALSE`)    
 #' 
 #' Processing the data with `mc_prep_clean` and resolving the conflicts is a mandatory step
 #' required for further data handling in the `myClim` library.
@@ -70,19 +73,20 @@
 #' records into an identical datetime. The resulting value corresponds to the one closest 
 #' to the provided step (i.e., in an original series like ...9:50, 10:05, 10:20, 10:35, 10:50, 11:05..., 
 #' the new record would be 10:00, and the value will be taken from the original record at 10:05). 
-#' This process generates numerous warnings in `resolve_conflicts=TRUE` or a multitude of tags 
+#' This process generates numerous warnings in `resolve_conflicts=TRUE` and a multitude of tags 
 #' in `resolve_conflicts=FALSE`.
 #'  
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @param resolve_conflicts by default the object is automatically cleaned and conflict 
 #' measurements with closest original datetime to rounded datetime are selected, see details. (default TRUE)
-#' If FALSE the function returns the original, uncleaned object with tags (states) "conflict"
-#' highlighting records with duplicated datetime but different measurement values.
+#' If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
+#' highlighting records with duplicated datetime but different measurement values.When conflict records 
+#' does not exist, object is cleaned in both TRUE and FALSE cases. 
 #' @return
-#' * cleaned myClim object in Raw-format (default) `resolve_conflicts=TRUE`
+#' * cleaned myClim object in Raw-format (default) `resolve_conflicts=TRUE` or `resolve_conflicts=FALSE` but no conflicts exist 
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
-#' * non cleaned myClim object in Raw-format with "conflict" tags `resolve_conflicts=FALSE`
+#' * non cleaned myClim object in Raw-format with "conflict" tags `resolve_conflicts=FALSE` and conflicts exist
 #' 
 #' @export
 #' @examples
