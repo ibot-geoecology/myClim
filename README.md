@@ -1,3 +1,5 @@
+# myClim <a href="http://labgis.ibot.cas.cz/myclim/index.html"><img src="man/figures/logo.png" align="right" height="138" /></a>
+
 <!-- badges: start -->
 [![CRAN Status](https://www.r-pkg.org/badges/version/myClim)](https://cran.r-project.org/package=myClim)
 [![](http://cranlogs.r-pkg.org/badges/grand-total/myClim)](https://cran.r-project.org/package=myClim)
