@@ -37,7 +37,7 @@ If timezone can't be detected, then UTC is supposed.
 Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
 Ignored for Tomst TMS data format (they are always in UTC)
 \item step - Time step of microclimatic time-series in seconds. When provided, then used in \link{mc_prep_clean}
-instead of automatic step detection.
+instead of automatic step detection. See details.
 }}
 
 \item{localities_table}{path to csv file ("c:/user/localities.table.csv") or R data.frame \href{https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/localities_table.csv}{ see example}.
@@ -85,8 +85,16 @@ csv logger files, specification of \emph{data format} (logger type) and \emph{lo
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table}
 and \code{localities_table} from external CSV they must have header, column separator must be comma ",".
-By default data are cleaned with function \code{\link[=mc_prep_clean]{mc_prep_clean()}}. See function description. It detects
-holes in time-series, duplicated records or records in wrong order.
+
+By default, data are cleaned with the function \link{mc_prep_clean} see function description.
+\link{mc_prep_clean} detects gaps in time-series data,
+duplicated records, or records in the wrong order. Importantly, \link{mc_prep_clean}
+also applies a \strong{step parameter} if provided. The step parameter can be used either
+instead of automatic step detection which can sometime failed, or to prune
+microclimatic data. For example, if you have a 15-minute time series but you wish to
+keep only one record per hour (without aggregating), you can use step parameter.
+However, if a step is provided and \code{clean = FALSE}, then the step is only stored in the
+metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
 }
 \examples{
 files_csv <- system.file("extdata", "files_table.csv", package = "myClim")

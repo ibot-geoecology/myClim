@@ -33,6 +33,7 @@ test_that("all plots", {
     mc_plot_raster(data, file.path(plot_dir, "raster.pdf"), use_utc=FALSE)
     mc_plot_raster(data_agg, file.path(plot_dir, "raster.png"), png_height = 500)
 
+    mc_plot_line(data, facet="physical")
     mc_plot_line(data, file.path(plot_dir, "line.pdf"))
     mc_plot_line(data_agg, file.path(plot_dir, "line_T1.png"), png_height = 500, sensors="TMS_T1")
     mc_plot_line(data_agg, file.path(plot_dir, "line.png"), png_height = 500)
