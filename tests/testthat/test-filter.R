@@ -78,3 +78,20 @@ test_that("mc_filter reverse calc format", {
     expect_equal(length(filtered$localities$A2E32$sensors), 4)
 })
 
+test_that("mc_filter logger_types", {
+    cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
+    agg_data <- mc_agg(cleaned_data)
+    expect_error(filtered <- mc_filter(agg_data, logger_types="TMS"))
+    filtered <- mc_filter(cleaned_data, logger_types="TMS")
+    expect_equal(names(filtered$localities), c("A2E32", "A6W79"))
+    filtered <- mc_filter(cleaned_data, logger_types="TMS", reverse=TRUE)
+    expect_equal(names(filtered$localities), c("A1E05"))
+    filtered <- mc_filter(cleaned_data, sensors="TMS_T1", logger_types="TMS")
+    expect_equal(length(filtered$localities), 2)
+    expect_equal(names(filtered$localities$A2E32$loggers[[1]]$sensors), "TMS_T1")
+    expect_error(filtered <- mc_filter(cleaned_data, sensors="TMS_T1", logger_types="Thermo", reverse = TRUE))
+    expect_error(filtered <- mc_filter(cleaned_data, localities="A1E05", logger_types="TMS"))
+    filtered <- mc_filter(cleaned_data, localities="A1E05", logger_types="TMS", reverse = TRUE)
+    expect_equal(length(filtered$localities), 3)
+})
+

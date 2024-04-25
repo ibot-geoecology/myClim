@@ -1,4 +1,5 @@
 .filter_const_MESSAGE_FILTERED_ALL <- "All data are removed by filter."
+.filter_const_MESSAGE_LOGGER_TYP_AGG <- "Logger types can be used only for raw format."
 
 #' Filter data from myClim object
 #' @description 
@@ -49,10 +50,24 @@
 #' filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
 #'                            sensors=c("TMS_T1", "TMS_T2"), reverse=TRUE)
 
-mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
+mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE, logger_types=NULL) {
     is_agg_format <- .common_is_agg_format(data)
+    if(is_agg_format && !is.null(logger_types)){
+        stop(.filter_const_MESSAGE_LOGGER_TYP_AGG)
+    }
 
     sensors_item_function <- function(item) {
+        is_in <- is.null(logger_types) || item$metadata@type %in% logger_types
+        if(is.null(sensors)) {
+            return(if(is_in == reverse) NULL else item)
+        }
+        if(!reverse && !is_in) {
+            return(NULL)
+        }
+        not_empty_intersection <- length(intersect(sensors, names(item$sensors))) > 0
+        if(reverse && is_in != not_empty_intersection) {
+            return(NULL)
+        }
         filter_function <- if(reverse) purrr::discard else purrr::keep
         item$sensors <- filter_function(item$sensors, function(.x) .x$metadata@name %in% sensors)
         if(length(item$sensors) == 0) {
@@ -64,7 +79,7 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_i
     locality_function <- function(locality) {
         is_in <- is.null(localities) || locality$metadata@locality_id %in% localities
 
-        if(is.null(sensors)) {
+        if(is.null(sensors) && is.null(logger_types)) {
             return(if(is_in == reverse) NULL else locality)
         }
 
@@ -84,10 +99,10 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_i
         return(locality)
     }
 
-    if(is.null(localities) && is.null(sensors) && !reverse) {
+    if(is.null(localities) && is.null(sensors) && is.null(logger_types) && !reverse) {
         return(data)
     }
-    if(is.null(localities) && is.null(sensors) && reverse) {
+    if(is.null(localities) && is.null(sensors) && is.null(logger_types) && reverse) {
         data$localities <- list()
     } else {
         out_localities <- purrr::map(data$localities, locality_function)
