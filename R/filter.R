@@ -56,45 +56,42 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_i
         stop(.filter_const_MESSAGE_LOGGER_TYP_AGG)
     }
 
-    sensors_item_function <- function(item) {
-        is_in <- is.null(logger_types) || item$metadata@type %in% logger_types
-        if(is.null(sensors)) {
-            return(if(is_in == reverse) NULL else item)
-        }
-        if(!reverse && !is_in) {
-            return(NULL)
-        }
-        not_empty_intersection <- length(intersect(sensors, names(item$sensors))) > 0
-        if(reverse && is_in != not_empty_intersection) {
-            return(NULL)
+    sensors_item_function <- function(item, value) {
+        if(length(value) == 1) {
+            value <- if(reverse) !value else value
+            if(value) {
+                return(item)
+            } else {
+                return(NULL)
+            }
         }
         filter_function <- if(reverse) purrr::discard else purrr::keep
-        item$sensors <- filter_function(item$sensors, function(.x) .x$metadata@name %in% sensors)
+        item$sensors <- filter_function(item$sensors, function(.x) value[[.x$metadata@name]])
         if(length(item$sensors) == 0) {
             return(NULL)
         }
         return(item)
     }
 
-    locality_function <- function(locality) {
-        is_in <- is.null(localities) || locality$metadata@locality_id %in% localities
-
-        if(is.null(sensors) && is.null(logger_types)) {
-            return(if(is_in == reverse) NULL else locality)
+    locality_function <- function(value, locality_id) {
+        locality <- data$localities[[locality_id]]
+        if(is.logical(value) && length(value) == 1) {
+            value <- if(reverse) !value else value
+            if(value) {
+                return(locality)
+            } else {
+                return(NULL)
+            }
         }
-
-        if(!reverse && !is_in) {
-            return(NULL)
-        }
-
         if (!is_agg_format) {
-            loggers <- purrr::map(locality$loggers, sensors_item_function)
+            loggers <- purrr::pmap(list(item = locality$loggers,
+                                        value = value), sensors_item_function)
             locality$loggers <- purrr::discard(loggers, is.null)
             if(length(locality$loggers) == 0) {
                 return(NULL)
             }
         } else {
-            locality <- sensors_item_function(locality)
+            locality <- sensors_item_function(locality, value)
         }
         return(locality)
     }
@@ -105,7 +102,8 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_i
     if(is.null(localities) && is.null(sensors) && is.null(logger_types) && reverse) {
         data$localities <- list()
     } else {
-        out_localities <- purrr::map(data$localities, locality_function)
+        prepared_filter <- .filter_get_prepared_filter(data, localities, sensors, logger_types, is_agg_format)
+        out_localities <- purrr::imap(prepared_filter, locality_function)
         data$localities <- purrr::discard(out_localities, is.null)
     }
 
@@ -113,4 +111,51 @@ mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_i
         stop(.filter_const_MESSAGE_FILTERED_ALL)
     }
     data
+}
+
+.filter_get_prepared_filter <- function(data, localities, sensors, logger_types, is_agg_format) {
+    sensors_item_function <- function(item) {
+        is_in <- is.null(logger_types) || item$metadata@type %in% logger_types
+        if(!is_in) {
+            return(FALSE)
+        }
+
+        if(is.null(sensors)) {
+            return(TRUE)
+        }
+
+        sensors <- purrr::map_lgl(item$sensors, ~ .x$metadata@name %in% sensors)
+        if(all(sensors)) {
+            return(TRUE)
+        }
+        if(all(!sensors)) {
+            return(FALSE)
+        }
+        return(sensors)
+    }
+
+    locality_function <- function(locality) {
+        is_in <- is.null(localities) || locality$metadata@locality_id %in% localities
+
+        if(!is_in) {
+            return(FALSE)
+        }
+
+        if (!is_agg_format) {
+            loggers <- purrr::map(locality$loggers, sensors_item_function)
+            has_all_one_value <- all(purrr::map_lgl(loggers, ~ length(.x) == 0))
+            if(has_all_one_value && all(loggers)){
+                return(TRUE)
+            }
+            if(has_all_one_value && all(!loggers)){
+                return(FALSE)
+            }
+            return(loggers)
+        } else {
+            return(sensors_item_function(locality))
+        }
+    }
+
+    result <- purrr::map(data$localities, locality_function)
+    return(result)
 }

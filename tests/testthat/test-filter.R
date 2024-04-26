@@ -57,7 +57,7 @@ test_that("mc_filter reverse prep format", {
     expect_equal(length(filtered$localities$A2E32$loggers[[1]]$sensors), 3)
 })
 
-test_that("mc_filter calc format", {
+test_that("mc_filter agg format", {
     cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
     agg_data <- mc_agg(cleaned_data)
     filtered <- mc_filter(agg_data, c("A6W79", "A2E32", "A1E05"), "TMS_T2")
@@ -69,7 +69,7 @@ test_that("mc_filter calc format", {
     expect_true("TMS_T2" %in% names(filtered$localities$A6W79$sensors))
 })
 
-test_that("mc_filter reverse calc format", {
+test_that("mc_filter reverse agg format", {
     cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
     agg_data <- mc_agg(cleaned_data)
     filtered <- mc_filter(agg_data, "A6W79", "Thermo_T", reverse=T)
