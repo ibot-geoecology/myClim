@@ -1,6 +1,7 @@
 # myClim 1.1.3
 * Fixed the issue with the joined series of loggers in the `mc_plot_line` function.
 * Added a new parameter `color_by_logger` to the `mc_plot_line` function.
+* Added a new parameter `logger_types` to the `mc_filter` function.
 
 # myClim 1.1.2
 * The `mc_prep_clean` function now selects a conflicted value based on the best match with the new rounded date and time.

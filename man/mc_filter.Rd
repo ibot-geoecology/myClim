@@ -9,19 +9,24 @@ mc_filter(
   localities = NULL,
   sensors = NULL,
   reverse = FALSE,
-  stop_if_empty = TRUE
+  stop_if_empty = TRUE,
+  logger_types = NULL
 )
 }
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{localities}{locality_ids for filtering data; if NULL then do nothing}
+\item{localities}{locality_ids for filtering data; if NULL then do nothing (default NULL)}
 
-\item{sensors}{sensor_names for filtering data; if NULL then do nothing see \code{names(mc_data_sensors)}}
+\item{sensors}{sensor_names for filtering data; if NULL then do nothing see \code{names(mc_data_sensors)} (default NULL)}
 
 \item{reverse}{if TRUE then input localities and/or sensors are excluded (default FALSE)}
 
 \item{stop_if_empty}{if TRUE then error for empty output (default TRUE)}
+
+\item{logger_types}{types of logger for filtering data; if NULL then do nothing (default NULL)
+
+The logger_types parameter can by used only for raw data format see \link{myClim-package}.}
 }
 \value{
 filtered myClim object
@@ -33,16 +38,19 @@ This function filter data by localities and sensors.
 In default settings it returns the object containing input sensors / localities.
 When you provide vector of localities e.g. \code{localities=c("A6W79", "A2E32")}
 selected localities are filtered with all sensors on those localities.
-The same as When you provide vector of sensors \code{sensors=c("TMS_T1", "TMS_T2")},
+The same as When you provide vector of logger_types \code{logger_types=c("TMS", "TMS_L45")}
+selected loggers by type are filtered through all localities and
+the sensors parameter \code{sensors=c("TMS_T1", "TMS_T2")},
 selected sensors are filtered through all localities.
-When you combine localities and sensors, then filtering return
-selected sensors on selected localities.
+When you combine localities, logger_types and sensors, then filtering return
+selected sensors in selected loggers on selected localities.
 
 When \code{reverse = TRUE} and using only localities parameter then
 the listed localities are removed. Similarly \code{reverse = TRUE} with proving only
-sensors parameter, then the listed sensors are removed from all localities. When
-using \code{reverse = TRUE} and combining sensors and localities parameters then
-selected sensors are removed from selected localities.
+logger_types parameter, then the listed loggers by type are removed from all localities
+and \code{reverse = TRUE} with proving only sensors parameter, then the listed sensors are removed from all localities.
+The parameter \code{reverse = TRUE} and combining more then one parameters from localities,
+logger_types or sensors is disabled.
 }
 \examples{
 ## keep only "A6W79", "A2E32" localities with all their sensors
@@ -60,9 +68,6 @@ filtered_data <- mc_filter(mc_data_example_raw, sensors=c("TMS_T1", "TMS_T2"),re
 ## keep only "TMS_T1", and "TMS_T2" sensors on "A6W79", "A2E32" localities
 filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
                            sensors=c("TMS_T1", "TMS_T2"))
-
-## remove "TMS_T1", and "TMS_T2" sensors from "A6W79", "A2E32" localities
-## and keep all other sensors and localities
-filtered_data <- mc_filter(mc_data_example_raw, localities=c("A6W79", "A2E32"),
-                           sensors=c("TMS_T1", "TMS_T2"), reverse=TRUE)
+## Remove "Dendro" loggers on all localities
+filtered_data <- mc_filter(mc_data_example_raw, logger_types="Dendro", reverse=TRUE)
 }
