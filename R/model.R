@@ -811,7 +811,8 @@ setMethod(
     names(tms_columns) <- c(mc_const_SENSOR_TMS_T1, mc_const_SENSOR_TMS_T2, mc_const_SENSOR_TMS_T3,
                             mc_const_SENSOR_TMS_moist)
     if(all(is.na(data[[tms_columns[[mc_const_SENSOR_TMS_T2]]]]))) {
-        if(all(data[[dendro_columns[[mc_const_SENSOR_Dendro_raw]]]] == .model_const_TOMST_THERMODATALOGGER_VALUE)) {
+        if(all(is.na(data[[dendro_columns[[mc_const_SENSOR_Dendro_raw]]]])) ||
+           all(data[[dendro_columns[[mc_const_SENSOR_Dendro_raw]]]] == .model_const_TOMST_THERMODATALOGGER_VALUE)) {
             object@columns <- tm_columns
             logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
         } else {

@@ -10,8 +10,8 @@ mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@date_format <- c("%Y.%m.%d %H:
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@na_strings <- c("-200", "")
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@error_value <- -100
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@filename_serial_number_pattern <- "data_(\\d+)_(?:\\d{4}_\\d{2}_\\d{2}_)?\\d+\\.csv$"
-#                                                                           ;datetime   ;    ;T1             ;T2             ;T3             ;mois;    ;
-mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@data_row_pattern <- "^\\d+;[\\d.: -/]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;\\d+;\\d+;\\d+.*$"
+#                                                                           ;datetime   ;    ;T1             ;T2             ;T3             ;mois  ;    ;
+mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@data_row_pattern <- "^\\d+;[\\d.: -/]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+;\\d+;\\d+.*$"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@col_types <- "iciccciin"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@tz_offset <- 0
 

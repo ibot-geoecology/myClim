@@ -76,6 +76,11 @@ test_that("mc_read_files TOMST directory", {
     expect_equal(length(data$localities$`92192250`$loggers[[1]]$sensors), 2)
 })
 
+test_that("mc_read_data TOMST 2024 format changes", {
+    data <- mc_read_files("../data/TOMST-2024", dataformat_name="TOMST", clean=FALSE)
+    test_raw_data_format(data)
+})
+
 test_that("mc_read_files HOBO", {
     data <- mc_read_files(c("../data/HOBO/20024354_comma.csv", "../data/HOBO/20024354_semicolon.txt", "../data/HOBO/20024354_tab.txt"),
                           "HOBO",  date_format = "%y.%m.%d %H:%M:%S", tz_offset = 120, clean=FALSE)

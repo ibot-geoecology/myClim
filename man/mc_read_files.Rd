@@ -34,7 +34,7 @@ Required for HOBO files. For TMS files ignored, there is known, stable date form
 (custom settings in HOBO). Not used in TMS (default NA)}
 
 \item{step}{time step of microclimatic time-series in seconds. When provided, then is used in
-\link{mc_prep_clean} instead of automatic step detection.
+\link{mc_prep_clean} instead of automatic step detection. See details.
 If not provided (NA), is automatically detected in \link{mc_prep_clean}. (default NA)}
 
 \item{clean}{if TRUE, then \link{mc_prep_clean} is called automatically while reading (default TRUE)}
@@ -62,9 +62,16 @@ If file is not in expected format, then file is skipped and warning printed in c
 CSV/TXT files (loggers raw data) are in resulting myClim object placed to separate
 localities with empty metadata. Localities are named after serial_number of logger.
 Pre-defined logger types are ("Dendro","HOBO","Thermo","TMS","TMS_L45")
-By default data are cleaned with function \code{\link[=mc_prep_clean]{mc_prep_clean()}}.
-See function description. It detects holes in time-series,
-duplicated records or records in wrong order.
+
+By default, data are cleaned with the function \link{mc_prep_clean} see function description.
+\link{mc_prep_clean} detects gaps in time-series data,
+duplicated records, or records in the wrong order. Importantly, \link{mc_prep_clean}
+also applies a \strong{step parameter} if provided. The step parameter can be used either
+instead of automatic step detection which can sometime failed, or to prune
+microclimatic data. For example, if you have a 15-minute time series but you wish to
+keep only one record per hour (without aggregating), you can use step parameter.
+However, if a step is provided and \code{clean = FALSE}, then the step is only stored in the
+metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
 }
 \examples{
 files <- c(system.file("extdata", "data_91184101_0.csv", package = "myClim"),

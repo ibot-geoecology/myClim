@@ -1,3 +1,6 @@
+# myClim 1.1.3
+* Fixed reading of TOMST Thermologger data CSV. The data format has changed in the new version of Lolly.
+
 # myClim 1.1.2
 * The `mc_prep_clean` function now selects a conflicted value based on the best match with the new rounded date and time.
 * A new parameter, `resolve_conflicts`, has been added to the `mc_prep_clean` function to allow checking uncleaned data.
