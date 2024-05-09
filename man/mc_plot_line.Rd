@@ -58,8 +58,8 @@ in separate plot in R and separate row in PDF if filename.pdf is provided.
 \item \code{facet = NULL}, all localities and sensors (max 2 physicals, see details) are plotted in single plot
 }}
 
-\item{color_by_logger}{A logical value. If TRUE, each logger will be assigned a unique random color
-for differentiation. (default FALSE)}
+\item{color_by_logger}{If TRUE, the color is assigned by logger to differentiate individual loggers (random colors)
+if false, the color is assigned by physical. (default FALSE)}
 }
 \value{
 ggplot2 object

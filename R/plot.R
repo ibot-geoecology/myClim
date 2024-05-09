@@ -446,8 +446,8 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' in separate plot in R and separate row in PDF if filename.pdf is provided. 
 #' * `facet = "physical"` sensors with  identical physical (see [mc_data_physical]) are grouped together across localities. 
 #' * `facet = NULL`, all localities and sensors (max 2 physicals, see details) are plotted in single plot
-#' @param color_by_logger A logical value. If TRUE, each logger will be assigned a unique random color
-#' for differentiation. (default FALSE)
+#' @param color_by_logger If TRUE, the color is assigned by logger to differentiate individual loggers (random colors)
+#' if false, the color is assigned by physical. (default FALSE)
 #' @return ggplot2 object
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
