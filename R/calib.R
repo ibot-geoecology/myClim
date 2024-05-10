@@ -62,9 +62,9 @@ mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #' tomst_data_cal <- mc_calc_vwc(tomst_data_cal, soiltype = "universal",
 #'                               output_sensor = "VWC_universal_calib")
 #' # plot results
-#' sensors <- mc_info(tomst_data_cal)$sensor_name
-#' (mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")]))
-#'      + ggplot2::scale_color_viridis_d(begin = 0.2, end = 0.8))
+#' # sensors <- mc_info(tomst_data_cal)$sensor_name
+#' # (mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")]))
+#' #     + ggplot2::scale_color_viridis_d(begin = 0.2, end = 0.8))}
 
 mc_calib_moisture <- function(raw_air, raw_water,
                               t_air=24, t_water=24,
