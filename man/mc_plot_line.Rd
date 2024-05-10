@@ -15,7 +15,8 @@ mc_plot_line(
   end_crop = NULL,
   use_utc = TRUE,
   localities = NULL,
-  facet = "locality"
+  facet = "locality",
+  color_by_logger = FALSE
 )
 }
 \arguments{
@@ -54,9 +55,11 @@ See \link{myClim-package}}
 \item \code{facet = "locality"} each locality is plotted (default)
 in separate plot in R and separate row in PDF if filename.pdf is provided.
 \item \code{facet = "physical"} sensors with  identical physical (see \link{mc_data_physical}) are grouped together across localities.
-\item \code{facet = NULL}, all localities and sensors (max 2 physicals, see details) are plotted
-in single plot
+\item \code{facet = NULL}, all localities and sensors (max 2 physicals, see details) are plotted in single plot
 }}
+
+\item{color_by_logger}{If TRUE, the color is assigned by logger to differentiate individual loggers (random colors)
+if false, the color is assigned by physical. (default FALSE)}
 }
 \value{
 ggplot2 object
