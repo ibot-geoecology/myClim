@@ -1,3 +1,6 @@
+# myClim 1.1.5
+* Updated the color palette of `mc_plot_line` for greater differentiation between values.
+
 # myClim 1.1.4
 * Fixed the issue with the joined series of loggers in the `mc_plot_line` function.
 * Added a new parameter `color_by_logger` to the `mc_plot_line` function.

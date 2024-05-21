@@ -4,6 +4,10 @@
 .plot_const_FACET_LOCALITY <- "locality"
 .plot_const_FACET_PHYSICAL <- "physical"
 
+.plot_const_PALETTE <- c(RColorBrewer::brewer.pal(9, "Set1"),
+                         RColorBrewer::brewer.pal(12, "Set3"),
+                         RColorBrewer::brewer.pal(8, "Set2"))
+
 #' Plot data from loggers
 #'
 #' Function save separate files (*.png) per the loggers to the directory.
@@ -477,6 +481,8 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
             ggplot2::geom_line(ggplot2::aes(color=.data$series_name))
     if(!change_colors) {
         plot <- plot + ggplot2::scale_color_manual(values=sensors_table$color)
+    } else {
+        plot <- plot + ggplot2::scale_color_manual(values=.plot_const_PALETTE)
     }
     plot <- plot + .plot_set_ggplot_line_theme()
     plot <- plot + .plot_line_set_y_axes(sensors_table)
