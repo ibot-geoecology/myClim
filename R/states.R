@@ -405,3 +405,47 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
     result <- .common_as_utc_posixct(datetime_seconds %/% step * step + start_seconds)
     return(result)
 }
+
+#' Replace values by states with tag
+#'
+#' @description
+#' This function replace values of sensors by states with tag.
+#'
+#' @template param_myClim_object
+#' @param tags specific tag to be replaced.
+#' @param replace_value (default NA).
+#' @return myClim object in the same format as input, with replaced values
+#' @export
+#' @examples
+#' states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
+#'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
+#'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
+#' data <- mc_states_insert(mc_data_example_clean, states)
+#' data <- mc_states_replace(data, "error")
+mc_states_replace <- function(data, tags, replace_value=NA) {
+    is_agg_format <- .common_is_agg_format(data)
+    
+    states_table <- mc_info_states(data)
+    states_table <- dplyr::filter(states_table, .data$tag %in% tags)
+    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_index, .data$sensor_name)
+    
+    result <- new.env()
+    result$data <- data
+    
+    group_function <- function(data_table, group) {
+        intervals <- lubridate::interval(data_table$start, data_table$end)
+        if(is_agg_format) {
+            datetime <- result$data$localities[[group$locality_id]]$datetime
+        } else {
+            datetime <- result$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$datetime
+        }
+        condition <- purrr::map_lgl(datetime, ~ any(lubridate::`%within%`(.x, intervals)))
+        if(is_agg_format) {
+            result$data$localities[[group$locality_id]]$sensors[[group$sensor_name]]$values[condition] <- replace_value
+        } else {
+            result$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$sensors[[group$sensor_name]]$values[condition] <- replace_value
+        }
+    }
+    dplyr::group_walk(states_table, group_function)
+    return(result$data)
+}

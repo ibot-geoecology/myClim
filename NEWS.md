@@ -1,3 +1,6 @@
+# myClim 1.1.6
+* New function `mc_states_replace` has been added.
+
 # myClim 1.1.5
 * Updated the color palette of `mc_plot_line` for greater differentiation between values.
 
