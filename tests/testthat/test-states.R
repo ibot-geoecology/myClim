@@ -196,15 +196,17 @@ test_that("mc_states_replace", {
         ~start,                                 ~end,        ~value,
         "A1E05"    ,              1,   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
+        "A1E05"    ,              1,   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 10:15"), lubridate::ymd_hm("2020-10-28 10:15"), NA_character_,
         "A2E32"    ,              1,     "TMS_T1", "error",
         lubridate::ymd_hm("2020-10-16 8:00"), lubridate::ymd_hm("2020-10-16 9:00"), NA_character_,
     ))
     states_data <- mc_states_insert(data, states)
     replaced_data <- mc_states_replace(states_data, "error")
     test_raw_data_format(replaced_data)
-    expect_true(all(is.na(replaced_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[2:4])))
-    expect_equal(replaced_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(1, 5:11)],
-                 data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(1, 5:11)])
+    expect_true(all(is.na(replaced_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(2:4, 7)])))
+    expect_equal(replaced_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(1, 5, 6, 8:11)],
+                 data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(1, 5, 6, 8:11)])
     data_agg <- mc_agg(states_data)
     replaced_data_agg <- mc_states_replace(data_agg, "error", -200)
     test_agg_data_format(replaced_data_agg)

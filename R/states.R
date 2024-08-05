@@ -439,7 +439,8 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
         } else {
             datetime <- result$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$datetime
         }
-        condition <- purrr::map_lgl(datetime, ~ any(lubridate::`%within%`(.x, intervals)))
+        conditions <- purrr::map(intervals, ~ lubridate::`%within%`(datetime, .x))
+        condition <- purrr::reduce(conditions, `|`)
         if(is_agg_format) {
             result$data$localities[[group$locality_id]]$sensors[[group$sensor_name]]$values[condition] <- replace_value
         } else {
