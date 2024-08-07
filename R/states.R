@@ -64,7 +64,7 @@ mc_states_insert <- function(data, states_table) {
     return(.states_run(data, states_table, .states_insert))
 }
 
-#' Update senosr states (tags)
+#' Update sensor states (tags)
 #'
 #' @description
 #' This function updates (replaces) existing states (tags). For more information about 
