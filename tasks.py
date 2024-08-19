@@ -46,7 +46,7 @@ def install(c, vignette=True):
     """
     if vignette:
         build(c)
-        c.run("""R -e 'install.packages("../myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)'""")
+        c.run("""R -e 'install.packages("../myClim_latest.tar.gz", lib=Sys.getenv("R_LIBS_USER"), repos=NULL, build_vignettes=TRUE)'""")
     else:
         c.run("""R - e 'install.packages(".", repos = NULL)'""")
 
