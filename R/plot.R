@@ -6,7 +6,16 @@
 
 .plot_const_PALETTE <- c(RColorBrewer::brewer.pal(9, "Set1"),
                          RColorBrewer::brewer.pal(12, "Set3"),
-                         RColorBrewer::brewer.pal(8, "Set2"))
+                         RColorBrewer::brewer.pal(8, "Set2"),
+                         RColorBrewer::brewer.pal(12, "Paired"),
+                         RColorBrewer::brewer.pal(8, "Dark2"),
+                         RColorBrewer::brewer.pal(8, "Accent"),
+                         RColorBrewer::brewer.pal(9, "Set1"),
+                         RColorBrewer::brewer.pal(12, "Set3"),
+                         RColorBrewer::brewer.pal(8, "Set2"),
+                         RColorBrewer::brewer.pal(12, "Paired"),
+                         RColorBrewer::brewer.pal(8, "Dark2"),
+                         RColorBrewer::brewer.pal(8, "Accent"))
 
 #' Plot data from loggers
 #'

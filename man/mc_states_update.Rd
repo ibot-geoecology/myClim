@@ -2,7 +2,7 @@
 % Please edit documentation in R/states.R
 \name{mc_states_update}
 \alias{mc_states_update}
-\title{Update senosr states (tags)}
+\title{Update sensor states (tags)}
 \usage{
 mc_states_update(data, states_table)
 }
