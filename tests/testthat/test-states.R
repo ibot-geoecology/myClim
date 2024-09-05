@@ -214,3 +214,28 @@ test_that("mc_states_replace", {
     expect_equal(replaced_data_agg$localities$A2E32$sensors$TMS_T1$values[c(1:7, 13:75)],
                  data_agg$localities$A2E32$sensors$TMS_T1$values[c(1:7, 13:75)])
 })
+
+test_that("mc_states_from_sensor", {
+    cleaned_data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
+    snow_raw_data <- mc_calc_snow(cleaned_data, "TMS_T2", output_sensor="T2_snow")
+    expect_error(data_with_states <- mc_states_from_sensor(snow_raw_data, "TMS_T2", "snow", "TMS_T2", "test value"))
+    data_with_states <- mc_states_from_sensor(snow_raw_data, "T2_snow", "snow", "TMS_T2", "test value")
+    test_raw_data_format(data_with_states)
+    states_table <- mc_info_states(data_with_states)
+    states_table <- dplyr::filter(states_table, .data$tag == "snow")
+    expect_equal(nrow(states_table), 4)
+    expect_true(all(states_table$value == "test value"))
+    snow_agg_data <- mc_agg(snow_raw_data, fun=list(TMS_T2="max", T2_snow="max"), period="day")
+    agg_data_with_states <- mc_states_from_sensor(snow_agg_data, "T2_snow_max", "snow", "TMS_T2_max", inverse = 2)
+    test_agg_data_format(agg_data_with_states)
+    states_table <- mc_info_states(agg_data_with_states)
+    states_table <- dplyr::filter(states_table, .data$tag == "snow")
+    expect_equal(nrow(states_table), 3)
+    expect_equal(states_table$start[[1]], agg_data_with_states$localities[["94184102"]]$datetime[[1]])
+    snow_agg_data$localities[["94184102"]]$sensors$T2_snow_max$values[10:12] <- NA
+    agg_data_with_states <- mc_states_from_sensor(snow_agg_data, "T2_snow_max", "snow", "TMS_T2_max")
+    test_agg_data_format(agg_data_with_states)
+    states_table <- mc_info_states(agg_data_with_states)
+    states_table <- dplyr::filter(states_table, .data$tag == "snow")
+    expect_equal(nrow(states_table), 3)
+})
