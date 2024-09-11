@@ -8,6 +8,7 @@
 .states_const_MESSAGE_NA_VALUE <- "All values of {column_name} must be set."
 .states_const_MESSAGE_START_GREATER <- "The start date and time must be earlier than or identical to the end date and time."
 .states_const_MESSAGE_NOT_LOGICAL_TYPE <- "The source_sensor must be of logical type."
+.states_const_MESSAGE_SNSORS_LENGTH <- "If multiple to_sensor the lenght of source_sensor must be the same."
 
 .states_const_COLUMN_LOCALITY_ID <- "locality_id"
 .states_const_COLUMN_LOGGER_INDEX <- "logger_index"
@@ -460,7 +461,7 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
 #' @template param_myClim_object
 #' @param source_sensor logical sensor for convert to states.
 #' @param tag tag of new states.
-#' @param to_sensor sensor where states are stored.
+#' @param to_sensor vector of sensor names where states are stored.
 #' @param value value of new states (default NA)
 #' @param inverse if FALSE states are created for TRUE periods of `source_sensor` (default FALSE)
 #' @return myClim object in the same format as input, with added states
@@ -469,17 +470,25 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
 #' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="snow")
 #' data <- mc_states_from_sensor(data, source_sensor="snow", tag="snow", to_sensor="TMS_T2")
 mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA, inverse=FALSE) {
+    .prep_check_datetime_step_unprocessed(data, stop)
     is_agg_format <- .common_is_agg_format(data)
     
     sensors_item_function <- function(item) {
         if(!(source_sensor %in% names(item$sensors))) {
             return(item)
         }
-        if(!(to_sensor %in% names(item$sensors))) {
+        if(!any(to_sensor %in% names(item$sensors))) {
             return(item)
         }
-        item$sensors[[to_sensor]] <- .states_create_states_from_logical_sensor(item$sensors[[source_sensor]], item$sensors[[to_sensor]],
-                                                                               item$datetime, tag, value, inverse)
+        new_states_table <- .states_get_states_table_from_logical_sensor(item$sensors[[source_sensor]], item$datetime, tag, value, inverse)
+        if(nrow(new_states_table) == 0) {
+            return(item)
+        }
+        for(to_sensor_name in to_sensor) {
+            to_sensor_item <- item$sensors[[to_sensor_name]]
+            states_table <- dplyr::union(to_sensor_item$states, new_states_table)
+            item$sensors[[to_sensor_name]]$states <- states_table
+        }
         return(item)
     }
 
@@ -497,8 +506,8 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
     return(data)
 }
 
-.states_create_states_from_logical_sensor <- function(source_sensor_item, to_sensor_item, datetime, tag, value, inverse) {
-    sensor_type <- mc_data_sensors[[source_sensor_item$metadata@sensor_id]]
+.states_get_states_table_from_logical_sensor <- function(source_sensor_item, datetime, tag, value, inverse) {
+    sensor_type <- myClim::mc_data_sensors[[source_sensor_item$metadata@sensor_id]]
     if(sensor_type@value_type != .model_const_VALUE_TYPE_LOGICAL) {
         stop(.states_const_MESSAGE_NOT_LOGICAL_TYPE)           
     }
@@ -514,14 +523,94 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
     }
     start_states <- datetime[start_values[condition]]
     if(length(start_states) == 0) {
-        return(to_sensor_item)
+        return(data.frame())
     }
     end_states <- datetime[end_values[condition]]
     new_states <- data.frame(tag=tag,
                              start=start_states,
                              end=end_states,
                              value=value)
-    states_table <- dplyr::union(to_sensor_item$states, new_states)
-    to_sensor_item$states <- states_table
-    return(to_sensor_item)
+    return(new_states)
+}
+
+#' Convert states to logical sensor
+#'
+#' @description
+#' This function create logical sensor from states.
+#'
+#' @template param_myClim_object
+#' @param tag tag of states.
+#' @param to_sensor output vector of sensor names.
+#'      
+#'      If `to_sensor` is a single sensor name, then the logical sensor is created
+#'      from union of states of all sensors with the same tag. If `to_sensor` is multiple sensor names,
+#'      the length of the vector must be the same as length of `source_sensor`.
+#' @param source_sensor sensors with states. If NULL, states from all sensors are used. (default NULL)
+#' @param inverse if TRUE the value of sensor is FALSE for state intervals (default FALSE)
+#' @return myClim object in the same format as input, with added sensors
+#' @export
+#' @examples
+#' states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
+#'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
+#'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
+#' data <- mc_states_insert(mc_data_example_clean, states)
+#' data <- mc_states_to_sensor(data, tag="error", to_sensor="error_sensor")
+mc_states_to_sensor <- function(data, tag, to_sensor, source_sensor=NULL, inverse=FALSE) {
+    .prep_check_datetime_step_unprocessed(data, stop)
+    if(length(to_sensor) > 1 && (is.null(source_sensor) || length(source_sensor) != length(to_sensor))) {
+        stop(.states_const_MESSAGE_SNSORS_LENGTH)
+    }
+    
+    tag_value <- tag
+    states_table <- dplyr::filter(mc_info_states(data), .data$tag == tag_value)
+    states_table <- dplyr::select(states_table, "locality_id", "logger_index", "sensor_name", "start", "end")
+    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_index)
+    
+    data_env <- new.env()
+    data_env$data <- data
+    state_function <- function(states_table, group) {
+        if(length(to_sensor) == 1) {
+            if(!is.null(source_sensor)) {
+                states_table <- dplyr::filter(states_table, .data$sensor_name %in% source_sensor)
+            }
+            .states_add_logical_sensors(data_env, states_table, group, to_sensor, inverse)
+        } else {
+            purrr::walk2(to_sensor, source_sensor, function(.x, .y){
+                states_table <- dplyr::filter(states_table, .data$sensor_name == .y)
+                .states_add_logical_sensors(data_env, states_table, group, .x, inverse)  
+            }) 
+        }
+    }
+    
+    dplyr::group_walk(states_table, .f=state_function)
+    
+    return(data_env$data)
+}
+
+.states_add_logical_sensors <- function(data_env, states_table, group, to_sensor, inverse) {
+    sensor_values <- .states_get_values_from_states(data_env, states_table, group, inverse)
+    new_sensor <- .common_get_new_sensor(mc_const_SENSOR_logical, to_sensor, values=sensor_values)
+    if(.common_is_agg_format(data_env$data)) {
+        data_env$data$localities[[group$locality_id]]$sensors[[to_sensor]] <- new_sensor
+    } else {
+        data_env$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$sensors[[to_sensor]] <- new_sensor
+    }
+}
+
+.states_get_values_from_states <- function(data_env, states_table, group, inverse) {
+    intervals <- lubridate::interval(states_table$start, states_table$end)
+    if(.common_is_agg_format(data_env$data)) {
+        datetime <- data_env$data$localities[[group$locality_id]]$datetime
+    } else {
+        datetime <- data_env$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$datetime
+    }
+    if(length(intervals) == 0) {
+        return(rep(inverse, length(datetime)))
+    }
+    interval_values <- purrr::map(intervals, ~ lubridate::`%within%`(datetime, .x))
+    result <- purrr::reduce(interval_values, `|`)
+    if(inverse) {
+        result <- !result
+    }
+    return(result)
 }

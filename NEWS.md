@@ -1,3 +1,6 @@
+# myClim 1.2.1
+* The new functions `mc_states_from_sensor` and `mc_states_to_sensor` have been added.
+
 # myClim 1.2.0
 * The color palette of `mc_plot_line` function has been extended.
 

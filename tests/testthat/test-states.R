@@ -217,14 +217,16 @@ test_that("mc_states_replace", {
 
 test_that("mc_states_from_sensor", {
     cleaned_data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
+    # raw data
     snow_raw_data <- mc_calc_snow(cleaned_data, "TMS_T2", output_sensor="T2_snow")
     expect_error(data_with_states <- mc_states_from_sensor(snow_raw_data, "TMS_T2", "snow", "TMS_T2", "test value"))
-    data_with_states <- mc_states_from_sensor(snow_raw_data, "T2_snow", "snow", "TMS_T2", "test value")
+    data_with_states <- mc_states_from_sensor(snow_raw_data, "T2_snow", "snow", c("TMS_T2", "TMS_moist"), "test value")
     test_raw_data_format(data_with_states)
     states_table <- mc_info_states(data_with_states)
     states_table <- dplyr::filter(states_table, .data$tag == "snow")
-    expect_equal(nrow(states_table), 4)
+    expect_equal(nrow(states_table), 8)
     expect_true(all(states_table$value == "test value"))
+    # agg data
     snow_agg_data <- mc_agg(snow_raw_data, fun=list(TMS_T2="max", T2_snow="max"), period="day")
     agg_data_with_states <- mc_states_from_sensor(snow_agg_data, "T2_snow_max", "snow", "TMS_T2_max", inverse = 2)
     test_agg_data_format(agg_data_with_states)
@@ -238,4 +240,36 @@ test_that("mc_states_from_sensor", {
     states_table <- mc_info_states(agg_data_with_states)
     states_table <- dplyr::filter(states_table, .data$tag == "snow")
     expect_equal(nrow(states_table), 3)
+})
+
+test_that("mc_states_to_sensor", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~start,                                 ~end,
+        "A2E32"     ,              1,    "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 7:00"), lubridate::ymd_hm("2020-10-16 8:00"),
+        "A2E32"     ,              1,    "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 9:00"), lubridate::ymd_hm("2020-10-16 10:00"),
+        "A2E32"     ,              1,    "TMS_T2", "error",
+        lubridate::ymd_hm("2020-10-16 7:30"), lubridate::ymd_hm("2020-10-16 8:30"),
+    ))
+    states_data <- mc_states_insert(data, states)
+    data_new_sensor <- mc_states_to_sensor(states_data, "error", "TMS_T1_error", "TMS_T1")
+    test_raw_data_format(data_new_sensor)
+    t1_error_expected_values <- c(rep(FALSE, 3), rep(TRUE, 5), rep(FALSE, 3), rep(TRUE, 5), rep(FALSE, 75-16))
+    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_T1_error$values, t1_error_expected_values)
+    expect_error(data_new_sensor <- mc_states_to_sensor(states_data, "error", c("TMS_T1_error", "TMS_T2_error"), "TMS_T1"))
+    data_new_sensor <- mc_states_to_sensor(states_data, "error", c("TMS_T1_error", "TMS_T2_error"), c("TMS_T1", "TMS_T2"))
+    test_raw_data_format(data_new_sensor)
+    t2_error_expected_values <- c(rep(FALSE, 5), rep(TRUE, 5), rep(FALSE, 75-10))
+    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_T1_error$values, t1_error_expected_values)
+    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_T2_error$values, t2_error_expected_values)
+    data_new_sensor <- mc_states_to_sensor(states_data, "error", "TMS_error", inverse = TRUE)
+    test_raw_data_format(data_new_sensor)
+    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_error$values, !(t1_error_expected_values | t2_error_expected_values))
+    agg_states_data <- mc_agg(states_data)
+    agg_data_new_sensor <- mc_states_to_sensor(agg_states_data, "error", "TMS_T1_error", "TMS_T1")
+    test_agg_data_format(agg_data_new_sensor)
+    expect_equal(agg_data_new_sensor$localities$A2E32$sensors$TMS_T1_error$values, t1_error_expected_values)
 })

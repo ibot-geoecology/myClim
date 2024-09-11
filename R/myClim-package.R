@@ -217,7 +217,7 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #' @importFrom graphics abline axis axis.POSIXct box grconvertX grconvertY grid image layout legend lines mtext par plot
 #' @importFrom methods callNextMethod is new slot<- slotNames as slot
 #' @importFrom stats aggregate end quantile sd start var
-#' @importFrom utils packageVersion read.table tail
+#' @importFrom utils packageVersion read.table tail head
 #' @keywords internal
 "_PACKAGE"
 
