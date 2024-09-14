@@ -453,18 +453,29 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
     return(result$data)
 }
 
-#' Convert sensor to state
+#' Convert a sensor to a state
 #'
 #' @description
-#' This function create state from source sensor.
+#' This function creates a new state from an existing logical (TRUE/FALSE) sensor 
+#' and assigns this new state to selected existing sensors.
+#'
+#' @details
+#' The function is applicable only for logical (TRUE/FALSE) sensors. It allows 
+#' you to convert such sensors into a state, represented as a tag. For example, 
+#' you might calculate the estimation of snow cover using [mc_calc_snow] (TRUE/FALSE) 
+#' and then want to remove temperature records when the logger was covered by snow. 
+#' In this case, you can convert the snow sensor to a state, and then replace the 
+#' values with NA for that state using [mc_state_replace]. In opposite case 
+#' when you wish to keep e.g. only the moisture records when sensor was covered by 
+#' snow, use `inverse = TRUE`. 
 #'
 #' @template param_myClim_object
-#' @param source_sensor logical sensor for convert to states.
-#' @param tag tag of new states.
-#' @param to_sensor vector of sensor names where states are stored.
-#' @param value value of new states (default NA)
-#' @param inverse if FALSE states are created for TRUE periods of `source_sensor` (default FALSE)
-#' @return myClim object in the same format as input, with added states
+#' @param source_sensor A logical sensor to be converted to states.
+#' @param tag A tag for the new states, e.g., "snow".
+#' @param to_sensor A vector of sensor names to which the new states should be attributed.
+#' @param value The value of the new states (default is NA)
+#' @param inverse A logical value. If FALSE, states are created for periods when `source_sensor` is TRUE (default is FALSE).
+#' @return Returns a myClim object in the same format as the input, with added states.
 #' @export
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="snow")
@@ -533,21 +544,37 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
     return(new_states)
 }
 
-#' Convert states to logical sensor
+#' Convert states to logical (TRUE/FALSE) sensor
 #'
 #' @description
-#' This function create logical sensor from states.
+#' This function creates a logical (TRUE/FALSE) sensor from specified states.
+#'
+#' @details
+#' The function allows you to create a TRUE/FALSE sensor based on a tag. By default, 
+#' it generates a new sensor by combining all tags specified in the `tag` parameter 
+#' from all available sensors at a particular logger or locality. If you specify a 
+#' `source_sensor`, the function converts only the tags from that specific sensor. 
+#' You can also create multiple new sensors from multiple tags by specifying more 
+#' values in `to_sensor` and providing exactly the same number of corresponding values 
+#' in `source_sensor`. For example, you can create one TRUE/FALSE sensor from states 
+#' on a temperature sensor and another from tags on a moisture sensor.
+#' 
+#' If you use parameter `inverse = TRUE` you get FALSE for each record where tag is assigned to and
+#' FALSE for the records where tag is absent. By default you get TRUE for all the records
+#' where tag is assigned.   
 #'
 #' @template param_myClim_object
-#' @param tag tag of states.
-#' @param to_sensor output vector of sensor names.
+#' @param tag The tag of states to be converted into a sensor.
+#' @param to_sensor A vector of names for the output sensors.
 #'      
-#'      If `to_sensor` is a single sensor name, then the logical sensor is created
-#'      from union of states of all sensors with the same tag. If `to_sensor` is multiple sensor names,
-#'      the length of the vector must be the same as length of `source_sensor`.
-#' @param source_sensor sensors with states. If NULL, states from all sensors are used. (default NULL)
-#' @param inverse if TRUE the value of sensor is FALSE for state intervals (default FALSE)
-#' @return myClim object in the same format as input, with added sensors
+#'      If `to_sensor` is a single sensor name, the logical sensor is created 
+#'      from the union of states across all sensors with the same tag. If `to_sensor` 
+#'      contains multiple sensor names, the length of the vector must match the length 
+#'      of `source_sensor`.
+#' @param source_sensor A vector of sensors containing the states to be converted into a new sensor. 
+#' If NULL, states from all sensors are used. (default is NULL)
+#' @param inverse A logical value. If TRUE, the sensor value is FALSE for state intervals (default is FALSE).
+#' @return Returns a myClim object in the same format as the input, with added sensors.
 #' @export
 #' @examples
 #' states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
