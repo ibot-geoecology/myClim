@@ -53,3 +53,26 @@ Parameters for soils available in my_Clim were derived for TMS3 logger version, 
 Correction parameters for TMS4 loggers therefore can be expected in the range of values:
 cor_factor = (-150; -450) and cor_slope = (100, 450)
 }
+\examples{
+# load example data
+files <- c(system.file("extdata", "data_94184102_0.csv", package = "myClim"))
+tomst_data <- mc_read_files(files, "TOMST")
+
+# vwc without calibration
+tomst_data <- mc_calc_vwc(tomst_data, soiltype = "universal", output_sensor = "VWC_universal")
+
+# load calibration
+my_cor <- mc_calib_moisture(raw_air = 394, raw_water = 3728, t_air = 21, t_water = 20)
+my_calib_tb <- data.frame(serial_number = c("94184102"), sensor_id = "TMS_moist",
+                          datetime = as.POSIXct("2020-01-01 00:00"),
+                          cor_factor = my_cor$cor_factor, cor_slope = my_cor$cor_slope)
+tomst_data_cal <- mc_prep_calib_load(tomst_data, my_calib_tb)
+# vwc using calibration
+tomst_data_cal <- mc_calc_vwc(tomst_data_cal, soiltype = "universal",
+                              output_sensor = "VWC_universal_calib")
+# plot results
+\dontrun{
+sensors <- mc_info(tomst_data_cal)$sensor_name
+mc_plot_line(tomst_data_cal, sensors = c(sensors[startsWith(sensors,"VWC")])
+     + ggplot2::scale_color_viridis_d(begin = 0.2, end = 0.8))}
+}

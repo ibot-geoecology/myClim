@@ -28,3 +28,7 @@ remotes::install_github('environmentalinformatics-marburg/tubedb/rTubeDB')
 
 # Source code of package
 * [GitHub repository](https://github.com/ibot-geoecology/myClim)   
+
+# myClimGui - package for visualisation data and editing states
+* [myClimGui documentation](https://labgis.ibot.cas.cz/myclim/gui/)
+
