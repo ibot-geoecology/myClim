@@ -1,3 +1,6 @@
+# myClim 1.2.2
+* The issue in the `mc_join` function with the `use always newer logger` option has been fixed.
+
 # myClim 1.2.1
 * The new functions `mc_states_from_sensor` and `mc_states_to_sensor` have been added.
 

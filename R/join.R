@@ -388,7 +388,7 @@ mc_join <- function(data, comp_sensors=NULL) {
     while(TRUE) {
         text <- readline(stringr::str_glue("CHOICE>"))
 
-        if(stringr::str_detect(text, "^[1234]$")) {
+        if(stringr::str_detect(text, "^[12345]$")) {
             return(as.integer(text))
         }
         if(text == .join_const_MENU_EXIT_CHOICE) {

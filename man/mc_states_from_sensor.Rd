@@ -2,7 +2,7 @@
 % Please edit documentation in R/states.R
 \name{mc_states_from_sensor}
 \alias{mc_states_from_sensor}
-\title{Convert sensor to state}
+\title{Convert a sensor to a state}
 \usage{
 mc_states_from_sensor(
   data,
@@ -16,21 +16,32 @@ mc_states_from_sensor(
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{source_sensor}{logical sensor for convert to states.}
+\item{source_sensor}{A logical sensor to be converted to states.}
 
-\item{tag}{tag of new states.}
+\item{tag}{A tag for the new states, e.g., "snow".}
 
-\item{to_sensor}{vector of sensor names where states are stored.}
+\item{to_sensor}{A vector of sensor names to which the new states should be attributed.}
 
-\item{value}{value of new states (default NA)}
+\item{value}{The value of the new states (default is NA)}
 
-\item{inverse}{if FALSE states are created for TRUE periods of \code{source_sensor} (default FALSE)}
+\item{inverse}{A logical value. If FALSE, states are created for periods when \code{source_sensor} is TRUE (default is FALSE).}
 }
 \value{
-myClim object in the same format as input, with added states
+Returns a myClim object in the same format as the input, with added states.
 }
 \description{
-This function create state from source sensor.
+This function creates a new state from an existing logical (TRUE/FALSE) sensor
+and assigns this new state to selected existing sensors.
+}
+\details{
+The function is applicable only for logical (TRUE/FALSE) sensors. It allows
+you to convert such sensors into a state, represented as a tag. For example,
+you might calculate the estimation of snow cover using \link{mc_calc_snow} (TRUE/FALSE)
+and then want to remove temperature records when the logger was covered by snow.
+In this case, you can convert the snow sensor to a state, and then replace the
+values with NA for that state using \link{mc_state_replace}. In opposite case
+when you wish to keep e.g. only the moisture records when sensor was covered by
+snow, use \code{inverse = TRUE}.
 }
 \examples{
 data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="snow")
