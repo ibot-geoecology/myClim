@@ -1,0 +1,2 @@
+path,locality_id,data_format,date_format
+../data/TOMST-date/data_91171153_2023_11_14_0.csv,ABC,TOMST,%d.%m.%Y %H:%M:%S@%d.%m.%Y

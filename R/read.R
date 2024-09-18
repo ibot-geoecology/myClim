@@ -128,7 +128,8 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format A character vector specifying the custom date format(s) for the [lubridate::parse_date_time()] function
-#' (e.g., "%d.%m.%Y %H:%M:%S"). Multiple formats can be defined. The first matching format will be selected for parsing.
+#' (e.g., "%d.%m.%Y %H:%M:%S"). Multiple formats can be defined using `@` character as separator (e.g., "%d.%m.%Y %H:%M:%S@%Y.%m.%d %H:%M:%S").
+#' The first matching format will be selected for parsing.
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files.
 #' If timezone can't be detected, then UTC is supposed.
@@ -168,6 +169,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         files_table <- .read_edit_data_file_paths(files_table, source_csv_file)
     }
     files_table <- .common_convert_factors_in_dataframe(files_table)
+    files_table <- .read_parse_date_format(files_table)
     files_table <- .read_check_data_file_paths(files_table)
     .read_state$check_bar <- NULL
     .read_state$read_bar <- NULL
@@ -228,6 +230,18 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         return(path)
     }
     files_table$path <- purrr::map(files_table$path, path_function)
+    return(files_table)
+}
+
+.read_parse_date_format <- function(files_table) {
+    if(is.null(files_table$date_format) || !is.character(files_table$date_format)) {
+        return(files_table)
+    }
+    contains_at <- !is.na(files_table$date_format) & stringr::str_detect(files_table$date_format, "@")
+    if(!any(contains_at)) {
+        return(files_table)
+    }
+    files_table$date_format <- stringr::str_split(files_table$date_format, "@")
     return(files_table)
 }
 
