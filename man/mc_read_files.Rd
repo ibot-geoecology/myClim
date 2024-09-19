@@ -78,7 +78,7 @@ keep only one record per hour (without aggregating), you can use step parameter.
 However, if a step is provided and \code{clean = FALSE}, then the step is only stored in the
 metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
 
-It is good to specify \code{date_format}as this can often be the reason why reading was failed
+It is good to specify \code{date_format}as this can often be the reason why reading have failed
 (see warnings after reading).
 }
 \examples{

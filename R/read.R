@@ -37,7 +37,7 @@
 #' However, if a step is provided and `clean = FALSE`, then the step is only stored in the 
 #' metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
 #' 
-#' It is good to specify `date_format`as this can often be the reason why reading was failed 
+#' It is good to specify `date_format`as this can often be the reason why reading have failed 
 #' (see warnings after reading). 
 
 #'
@@ -143,10 +143,9 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format A character vector specifying the custom date format(s) for the [lubridate::parse_date_time()] function
-#' (e.g., "%d.%m.%Y %H:%M:%S"). Multiple formats can be defined 
-#' in CSV using `@` character as separator (e.g., "%d.%m.%Y %H:%M:%S@%Y.%m.%d %H:%M:%S").
-#' in R data frame as vector of formats c("%d.%m.%Y %H:%M:%S","%Y.%m.%d %H:%M:%S").
-#' The first matching format will be selected for parsing, multiple formats are aplicable to single file.
+#' (e.g., "%d.%m.%Y %H:%M:%S"). Multiple formats can be defined either in 
+#' in CSV or in R data.frame using `@` character as separator (e.g., "%d.%m.%Y %H:%M:%S@%Y.%m.%d %H:%M:%S").
+#' The first matching format will be selected for parsing, multiple formats are applicable to single file.
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files.
 #' If timezone can't be detected, then UTC is supposed.
