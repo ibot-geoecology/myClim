@@ -6,6 +6,7 @@ myClim.Rproj
 *.swp
 .Rproj.user
 .idea
+.vscode
 docs
 examples/plots
 /tests/temp

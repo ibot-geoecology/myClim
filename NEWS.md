@@ -1,3 +1,6 @@
+# myClim 1.2.3
+* It is possible to define multiple custom date formats in the `mc_read_data` function.
+
 # myClim 1.2.2
 * The issue in the `mc_join` function with the `use always newer logger` option has been fixed.
 

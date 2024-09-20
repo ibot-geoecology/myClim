@@ -13,16 +13,17 @@ mc_read_data(
 )
 }
 \arguments{
-\item{files_table}{path to csv file or data.frame object see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv)
+\item{files_table}{path to csv file or data.frame object see \href{https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv}{example}
 with 3 required columns and few optional:
-required columns:
+
+\strong{required columns:}
 \itemize{
 \item path - path to files
 \item locality_id - unique locality id
 \item data_format see \link{mc_data_formats}, \code{names(mc_data_formats)}
 }
 
-optional columns:
+\strong{optional columns:}
 \itemize{
 \item serial_number - logger serial number. If is NA, than myClim tries to detect serial number from file name (for TOMST) or header (for HOBO)
 \item logger_type - type of logger. This defines individual sensors attributes (measurement heights and physical units) of the logger. Important when combining the data from multiple loggers on the locality.
@@ -30,12 +31,14 @@ If not provided, myClim tries to detect loger_type from the source data file str
 Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 Default heights of sensor based on logger types are defined in table \link{mc_data_heights}
 \item date_format A character vector specifying the custom date format(s) for the \code{\link[lubridate:parse_date_time]{lubridate::parse_date_time()}} function
-(e.g., "\%d.\%m.\%Y \%H:\%M:\%S"). Multiple formats can be defined. The first matching format will be selected for parsing.
+(e.g., "\%d.\%m.\%Y \%H:\%M:\%S"). Multiple formats can be defined either in
+in CSV or in R data.frame using \code{@} character as separator (e.g., "\%d.\%m.\%Y \%H:\%M:\%S@\%Y.\%m.\%d \%H:\%M:\%S").
+The first matching format will be selected for parsing, multiple formats are applicable to single file.
 \item tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 Value in this column have the highest priority. If NA then auto detection of timezone in files.
 If timezone can't be detected, then UTC is supposed.
 Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
-Ignored for Tomst TMS data format (they are always in UTC)
+Ignored for TOMST TMS data format (they are always in UTC)
 \item step - Time step of microclimatic time-series in seconds. When provided, then used in \link{mc_prep_clean}
 instead of automatic step detection. See details.
 }}
@@ -47,12 +50,12 @@ with the myclim pre-defined locality metadata (elevation, lon_wgs84, lat_wgs84, 
 are associted withthose pre-defined metadata slots, other columns are  written into
 \code{metadata@user_data} \link{myClim-package}.
 
-required columns:
+\strong{required columns:}
 \itemize{
 \item locality_id - unique locality id
 }
 
-optional columns:
+\strong{optional columns:}
 \itemize{
 \item elevation - elevation (in m)
 \item lon_wgs84 - longitude (in decimal degrees)
@@ -77,14 +80,16 @@ myClim object in Raw-format see \link{myClim-package}
 \description{
 This function has two tables as the parameters.
 
-(i) \code{files_table} with \emph{paths} pointing to raw
+(i) \code{files_table} is required parameter,  it ust contain \emph{paths} pointing to raw
 csv logger files, specification of \emph{data format} (logger type) and \emph{locality name}.
 
-(ii) \code{localities_table} with \emph{locality id} and metadata e.g. longitude, latitude, elevation...
+(ii) \code{localities_table} is optional, containing  \emph{locality id} and metadata e.g. longitude, latitude, elevation...
 }
 \details{
 The input tables could be R data.frames or csv files. When loading \code{files_table}
 and \code{localities_table} from external CSV they must have header, column separator must be comma ",".
+If you only need to place loggers to correct localities, \code{files_table} is enough.
+If you wish to provide localities additional metadata, you need also \code{localities_table}
 
 By default, data are cleaned with the function \link{mc_prep_clean} see function description.
 \link{mc_prep_clean} detects gaps in time-series data,

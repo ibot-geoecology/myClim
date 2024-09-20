@@ -36,6 +36,9 @@
 #' keep only one record per hour (without aggregating), you can use step parameter.
 #' However, if a step is provided and `clean = FALSE`, then the step is only stored in the 
 #' metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
+#' 
+#' It is good to specify `date_format`as this can often be the reason why reading have failed 
+#' (see warnings after reading). 
 
 #'
 #' @seealso [myClim::mc_DataFormat], [myClim::mc_prep_clean()]
@@ -44,7 +47,12 @@
 #' @param dataformat_name data format of logger; one of `names(mc_data_formats)`
 #' @param recursive recursive search in sub-directories (default TRUE)
 #' @param date_format format of date in your hobo files e.g. "%d.%m.%y %H:%M:%S" (default NA).
-#' Required for HOBO files. For TMS files ignored, there is known, stable date format. see [mc_data_formats]
+#' TOMST TMS files used to have stable date format, therefore this parameter may 
+#' be omitted for TMS files because myClim will try to detect one of formerly 
+#' stable formats, but nowadays user can adjust any date format also for TMS. 
+#' For other loggers this parameter is required. 
+#' You can provide multiple formats to by tried, multiple formats can be combined for
+#' reading single file. e.g. c("%d.%m.%Y %H:%M:%S", "%Y.%m.%d %H:%M", "%d.%m.%Y")
 #' @param logger_type type of logger (default NA), can be one of
 #' pre-defined see [myClim::mc_read_data()] or any custom string
 #' @param tz_offset timezone offset in minutes; It is required only for non-UTC data
@@ -58,7 +66,11 @@
 #' @examples
 #' files <- c(system.file("extdata", "data_91184101_0.csv", package = "myClim"),
 #'            system.file("extdata", "data_94184102_0.csv", package = "myClim"))
-#' tomst_data <- mc_read_files(files, "TOMST")
+#' tomst_data <- mc_read_files(files, "TOMST", 
+#'                             date_format = c("%d.%m.%Y %H:%M:%S", 
+#'                                             "%Y.%m.%d %H:%M", 
+#'                                             "%d.%m.%Y"))
+#' 
 #' # user_data_formats
 #' files <- system.file("extdata", "TMS94184102.csv", package = "myClim")
 #' user_data_formats <- list(my_logger=new("mc_DataFormat"))
@@ -93,16 +105,18 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 
 #' Reading files with locality metadata
 #' @description
-#' This function has two tables as the parameters.
+#' This function has two tables as the parameters.  
 #'
-#' (i) `files_table` with *paths* pointing to raw
+#' (i) `files_table` is required parameter,  it ust contain *paths* pointing to raw
 #' csv logger files, specification of *data format* (logger type) and *locality name*.
 #'
-#' (ii) `localities_table` with *locality id* and metadata e.g. longitude, latitude, elevation...
+#' (ii) `localities_table` is optional, containing  *locality id* and metadata e.g. longitude, latitude, elevation...
 #' 
 #' @details 
 #' The input tables could be R data.frames or csv files. When loading `files_table`
 #' and `localities_table` from external CSV they must have header, column separator must be comma ",".
+#' If you only need to place loggers to correct localities, `files_table` is enough. 
+#' If you wish to provide localities additional metadata, you need also `localities_table` 
 #' 
 #' By default, data are cleaned with the function [mc_prep_clean] see function description. 
 #' [mc_prep_clean] detects gaps in time-series data, 
@@ -114,26 +128,29 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' However, if a step is provided and `clean = FALSE`, then the step is only stored in the 
 #' metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
 #' @seealso [myClim::mc_DataFormat]
-#' @param files_table path to csv file or data.frame object see example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv) 
+#' @param files_table path to csv file or data.frame object see [example](https://github.com/ibot-geoecology/myClim/blob/main/examples/data/TOMST/files_table.csv) 
 #' with 3 required columns and few optional:
-#' required columns:
+#' 
+#' **required columns:**
 #' * path - path to files
 #' * locality_id - unique locality id
 #' * data_format see [mc_data_formats], `names(mc_data_formats)`
 #'
-#' optional columns:
+#' **optional columns:**
 #' * serial_number - logger serial number. If is NA, than myClim tries to detect serial number from file name (for TOMST) or header (for HOBO)
 #' * logger_type - type of logger. This defines individual sensors attributes (measurement heights and physical units) of the logger. Important when combining the data from multiple loggers on the locality.
 #' If not provided, myClim tries to detect loger_type from the source data file structure (applicable for HOBO, Dendro, Thermo and TMS), but automatic detection of TMS_L45 is not possible.
 #' Pre-defined logger types are: ("Dendro", "HOBO", "Thermo", "TMS", "TMS_L45")
 #' Default heights of sensor based on logger types are defined in table [mc_data_heights]
 #' * date_format A character vector specifying the custom date format(s) for the [lubridate::parse_date_time()] function
-#' (e.g., "%d.%m.%Y %H:%M:%S"). Multiple formats can be defined. The first matching format will be selected for parsing.
+#' (e.g., "%d.%m.%Y %H:%M:%S"). Multiple formats can be defined either in 
+#' in CSV or in R data.frame using `@` character as separator (e.g., "%d.%m.%Y %H:%M:%S@%Y.%m.%d %H:%M:%S").
+#' The first matching format will be selected for parsing, multiple formats are applicable to single file.
 #' * tz_offset - If source datetimes aren't in UTC, then is possible define offset from UTC in minutes.
 #' Value in this column have the highest priority. If NA then auto detection of timezone in files.
 #' If timezone can't be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
-#' Ignored for Tomst TMS data format (they are always in UTC)
+#' Ignored for TOMST TMS data format (they are always in UTC)
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection. See details. 
 #'
@@ -145,10 +162,10 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' are associted withthose pre-defined metadata slots, other columns are  written into 
 #' `metadata@user_data` [myClim-package].
 #' 
-#'required columns:
+#' **required columns:**
 #' * locality_id - unique locality id
 #' 
-#' optional columns:
+#' **optional columns:**
 #' * elevation - elevation (in m)
 #' * lon_wgs84 - longitude (in decimal degrees)
 #' * lat_wgs84 - latitude (in decimal degrees)
@@ -168,6 +185,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         files_table <- .read_edit_data_file_paths(files_table, source_csv_file)
     }
     files_table <- .common_convert_factors_in_dataframe(files_table)
+    files_table <- .read_parse_date_format(files_table)
     files_table <- .read_check_data_file_paths(files_table)
     .read_state$check_bar <- NULL
     .read_state$read_bar <- NULL
@@ -228,6 +246,18 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         return(path)
     }
     files_table$path <- purrr::map(files_table$path, path_function)
+    return(files_table)
+}
+
+.read_parse_date_format <- function(files_table) {
+    if(is.null(files_table$date_format) || !is.character(files_table$date_format)) {
+        return(files_table)
+    }
+    contains_at <- !is.na(files_table$date_format) & stringr::str_detect(files_table$date_format, "@")
+    if(!any(contains_at)) {
+        return(files_table)
+    }
+    files_table$date_format <- stringr::str_split(files_table$date_format, "@")
     return(files_table)
 }
 

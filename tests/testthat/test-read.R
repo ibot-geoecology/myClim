@@ -275,9 +275,14 @@ test_that("mc_read_files user_data_formats auto datetime", {
 })
 
 test_that("mc_read_files TOMST custom date time format", {
-    expect_error(expect_warning(expect_warning(data <- mc_read_files("../data/TOMST-date", "TOMST"))))
-    data <- mc_read_files("../data/TOMST-date", "TOMST", date_format=c("%d.%m.%Y %H:%M:%S", "%d.%m.%Y"),
+    expect_error(expect_warning(expect_warning(data <- mc_read_files("../data/TOMST-date/data_91171153_2023_11_14_0.csv", "TOMST"))))
+    data <- mc_read_files("../data/TOMST-date/data_91171153_2023_11_14_0.csv", "TOMST", date_format=c("%d.%m.%Y %H:%M:%S", "%d.%m.%Y"),
                           silent=TRUE)
+    test_raw_data_format(data)
+    data <- mc_read_data("../data/TOMST-date/files_table.csv", clean=FALSE)
+    test_raw_data_format(data)
+    files_table <- read.table("../data/TOMST-date/files_table.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
+    data <- mc_read_data(files_table, clean=FALSE)
     test_raw_data_format(data)
 })
 

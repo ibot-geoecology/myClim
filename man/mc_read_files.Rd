@@ -28,7 +28,12 @@ pre-defined see \code{\link[=mc_read_data]{mc_read_data()}} or any custom string
 \item{recursive}{recursive search in sub-directories (default TRUE)}
 
 \item{date_format}{format of date in your hobo files e.g. "\%d.\%m.\%y \%H:\%M:\%S" (default NA).
-Required for HOBO files. For TMS files ignored, there is known, stable date format. see \link{mc_data_formats}}
+TOMST TMS files used to have stable date format, therefore this parameter may
+be omitted for TMS files because myClim will try to detect one of formerly
+stable formats, but nowadays user can adjust any date format also for TMS.
+For other loggers this parameter is required.
+You can provide multiple formats to by tried, multiple formats can be combined for
+reading single file. e.g. c("\%d.\%m.\%Y \%H:\%M:\%S", "\%Y.\%m.\%d \%H:\%M", "\%d.\%m.\%Y")}
 
 \item{tz_offset}{timezone offset in minutes; It is required only for non-UTC data
 (custom settings in HOBO). Not used in TMS (default NA)}
@@ -72,11 +77,18 @@ microclimatic data. For example, if you have a 15-minute time series but you wis
 keep only one record per hour (without aggregating), you can use step parameter.
 However, if a step is provided and \code{clean = FALSE}, then the step is only stored in the
 metadata of myClim, and the time-series data is not cleaned, and the step is not applied.
+
+It is good to specify \code{date_format}as this can often be the reason why reading have failed
+(see warnings after reading).
 }
 \examples{
 files <- c(system.file("extdata", "data_91184101_0.csv", package = "myClim"),
            system.file("extdata", "data_94184102_0.csv", package = "myClim"))
-tomst_data <- mc_read_files(files, "TOMST")
+tomst_data <- mc_read_files(files, "TOMST", 
+                            date_format = c("\%d.\%m.\%Y \%H:\%M:\%S", 
+                                            "\%Y.\%m.\%d \%H:\%M", 
+                                            "\%d.\%m.\%Y"))
+
 # user_data_formats
 files <- system.file("extdata", "TMS94184102.csv", package = "myClim")
 user_data_formats <- list(my_logger=new("mc_DataFormat"))
