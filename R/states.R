@@ -465,7 +465,7 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
 #' you might calculate the estimation of snow cover using [mc_calc_snow] (TRUE/FALSE) 
 #' and then want to remove temperature records when the logger was covered by snow. 
 #' In this case, you can convert the snow sensor to a state, and then replace the 
-#' values with NA for that state using [mc_state_replace]. In opposite case 
+#' values with NA for that state using [mc_states_replace]. In opposite case 
 #' when you wish to keep e.g. only the moisture records when sensor was covered by 
 #' snow, use `inverse = TRUE`. 
 #'
