@@ -282,7 +282,7 @@ setMethod(
 #' @slot value_type type of values (real, integer, logical) (default real)
 #' @slot min_value minimal value (default NA)
 #' @slot max_value maximal value (default NA)
-#' @slot plot_color color in pot (default "")
+#' @slot plot_color color in plot (default "")
 #' @slot plot_line_width width of line in plot (default 1)
 #' @exportClass mc_Sensor
 #' @seealso [mc_data_sensors]
