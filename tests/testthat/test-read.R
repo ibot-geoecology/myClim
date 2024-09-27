@@ -85,6 +85,9 @@ test_that("mc_read_files HOBO", {
     data <- mc_read_files(c("../data/HOBO/20024354_comma.csv", "../data/HOBO/20024354_semicolon.txt", "../data/HOBO/20024354_tab.txt"),
                           "HOBO",  date_format = "%y.%m.%d %H:%M:%S", tz_offset = 120, clean=FALSE)
     test_raw_data_format(data)
+    data <- mc_read_files(c("../data/HOBO/20024354_comma.csv", "../data/HOBO/20024354_semicolon.txt", "../data/HOBO/20024354_tab.txt"),
+                          "HOBO",  date_format = "%y.%m.%d %H:%M:%S@%y.%m.%d", tz_offset = 120, clean=FALSE)
+    test_raw_data_format(data)
 })
 
 test_that("mc_read_data HOBO", {

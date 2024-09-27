@@ -250,14 +250,11 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_parse_date_format <- function(files_table) {
-    if(is.null(files_table$date_format) || !is.character(files_table$date_format)) {
+    if(is.null(files_table$date_format)) {
         return(files_table)
     }
-    contains_at <- !is.na(files_table$date_format) & stringr::str_detect(files_table$date_format, "@")
-    if(!any(contains_at)) {
-        return(files_table)
-    }
-    files_table$date_format <- stringr::str_split(files_table$date_format, "@")
+    condition <- purrr::map_lgl(files_table$date_format, ~ all(!is.na(.x)) && length(.x) == 1 && is.character(.x)) 
+    files_table$date_format[condition] <- stringr::str_split(files_table$date_format[condition], "@")
     return(files_table)
 }
 

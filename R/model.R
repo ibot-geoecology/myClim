@@ -1042,7 +1042,7 @@ setMethod(
     if(length(object@columns) == 0) {
         return(FALSE)
     }
-    if(is.na(object@date_format)) {
+    if(all(is.na(object@date_format))) {
         warning(.model_const_MESSAGE_HOBO_DATE_FORMAT_PROBLEM)
         return(FALSE)
     }
