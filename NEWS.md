@@ -1,3 +1,6 @@
+# myClim 1.2.5
+* The issue with the HOBO `logger_type` in the `mc_read_data` function has been fixed.
+
 # myClim 1.2.4
 * The multiple custom date formats issue for HOBO logger in the `mc_read_data` function has been fixed.
 

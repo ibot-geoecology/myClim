@@ -25,7 +25,7 @@ Sensor definitions are stored in \link{mc_data_sensors}.
 
 \item{\code{max_value}}{maximal value (default NA)}
 
-\item{\code{plot_color}}{color in pot (default "")}
+\item{\code{plot_color}}{color in plot (default "")}
 
 \item{\code{plot_line_width}}{width of line in plot (default 1)}
 }}

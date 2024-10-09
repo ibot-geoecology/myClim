@@ -1016,7 +1016,7 @@ setMethod(
 
 .model_is_logger_type_hobo <- function(object, data, secondary_column, logger_type) {
     if(!is.na(object@logger_type)) {
-        return(FALSE)
+        return(object@logger_type == logger_type)
     }
     column_pattern <- .model_const_HOBO_LOGGER_TYPE_SECONDARY_TITLES[[logger_type]]
     parts <- stringr::str_match(data[[secondary_column]][[1]], column_pattern)

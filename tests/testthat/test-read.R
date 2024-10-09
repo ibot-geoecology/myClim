@@ -289,3 +289,14 @@ test_that("mc_read_files TOMST custom date time format", {
     test_raw_data_format(data)
 })
 
+test_that("mc_read_files HOBO logger_format", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path, ~locality_id, ~data_format, ~date_format, ~logger_type,
+             "../data/HOBO/20024354.txt", "A", "HOBO", "%d.%m.%Y %H:%M:%S", "HOBO_U23-001A",
+        "../data/HOBO/2015_10382557.txt", "A", "HOBO", "%d.%m.%Y %H:%M:%S", "HOBO_U23-004",
+    ))
+    data <- mc_read_data(files_table, clean=FALSE)
+    test_raw_data_format(data)
+    expect_equal(names(data$localities$A$loggers[[1]]$sensors), c("HOBO_T", "HOBO_RH"))
+    expect_equal(names(data$localities$A$loggers[[2]]$sensors), c("HOBO_T", "HOBO_extT"))
+})
