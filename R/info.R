@@ -322,3 +322,70 @@ mc_info_states <- function(data) {
     }
     as.data.frame(result)
 }
+
+#' Get table with measuring range
+#'
+#' This function return data.frame with min value, max value and possible jumps
+#'
+#' This function is useful for prepare parameter for [mc_states_outlier()] function.
+#' The range values are used from `mc_data_sensors`.
+#'
+#' @template param_myClim_object
+#' @return data.frame with columns:
+#' * sensor_name - name of sensor (e.g., TMS_T1, TMS_moist, HOBO_T) see [mc_data_sensors]
+#' * min_value - minimal value
+#' * max_value - maximal value
+#' * max_positive_jump - Maximal difference between two consecutive values. Next value is higher than previous.
+#' * max_negateve_jump - Maximal difference between two consecutive values. Next value is lower than previous.
+#' @export
+#' @examples
+#' mc_info_range(mc_data_example_raw)
+mc_info_range <- function(data) {
+    is_raw_format <- .common_is_raw_format(data)
+
+    sensor_types <- new.env()
+
+    sensor_function <- function(sensor) {
+        if(exists(sensor$metadata@sensor_id, sensor_types)) {
+            return()
+        }
+        if(exists(sensor$metadata@sensor_id, myClim::mc_data_sensors)) {
+            sensor_types[[sensor$metadata@name]] <- myClim::mc_data_sensors[[sensor$metadata@sensor_id]]
+        }
+    }
+
+    sensors_item_function <- function(item) {
+        purrr::walk(item$sensors, sensor_function)
+    }
+
+    locality_function <- function(locality) {
+        purrr::walk(locality$loggers, sensors_item_function)
+    }
+
+    if(is_raw_format) {
+        purrr::walk(data$localities, locality_function)
+    } else {
+        purrr::walk(data$localities, sensors_item_function)
+    }
+
+    row_function <- function(sensor_name) {
+        result <- list(
+            sensor_name = sensor_name,
+            min_value = NA,
+            max_value = NA,
+            max_positive_jump = NA,
+            max_negateve_jump = NA)
+        if(is.null(sensor_types[[sensor_name]])) {
+            return(result)
+        }
+        sensor_id <- sensor_types[[sensor_name]]@sensor_id
+        sensor <- myClim::mc_data_sensors[[sensor_id]]
+
+        result$min_value <- sensor@min_value
+        result$max_value <- sensor@max_value
+        return(result)
+    }
+    result <- purrr::map_dfr(names(sensor_types), row_function)
+
+    as.data.frame(result)
+}
