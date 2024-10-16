@@ -335,8 +335,8 @@ mc_info_states <- function(data) {
 #' * sensor_name - name of sensor (e.g., TMS_T1, TMS_moist, HOBO_T) see [mc_data_sensors]
 #' * min_value - minimal value
 #' * max_value - maximal value
-#' * max_positive_jump - Maximal difference between two consecutive values. Next value is higher than previous.
-#' * max_negateve_jump - Maximal difference between two consecutive values. Next value is lower than previous.
+#' * positive_jump - Maximal difference between two consecutive values. Next value is higher than previous.
+#' * negative_jump - Maximal difference between two consecutive values. Next value is lower than previous.
 #' @export
 #' @examples
 #' mc_info_range(mc_data_example_raw)
@@ -369,20 +369,20 @@ mc_info_range <- function(data) {
     }
 
     row_function <- function(sensor_name) {
-        result <- list(
-            sensor_name = sensor_name,
-            min_value = NA,
-            max_value = NA,
-            max_positive_jump = NA,
-            max_negateve_jump = NA)
+        result <- list()
+        result[[.states_const_COLUMN_SENSOR_NAME]] <- sensor_name
+        result[[.states_const_COLUMN_MIN_VALUE]] <- NA
+        result[[.states_const_COLUMN_MAX_VALUE]] <- NA
+        result[[.states_const_COLUMN_POSITIVE_JUMP]] <- NA
+        result[[.states_const_COLUMN_NEGATIVE_JUMP]] <- NA
         if(is.null(sensor_types[[sensor_name]])) {
             return(result)
         }
         sensor_id <- sensor_types[[sensor_name]]@sensor_id
         sensor <- myClim::mc_data_sensors[[sensor_id]]
 
-        result$min_value <- sensor@min_value
-        result$max_value <- sensor@max_value
+        result[[.states_const_COLUMN_MIN_VALUE]] <- sensor@min_value
+        result[[.states_const_COLUMN_MAX_VALUE]] <- sensor@max_value
         return(result)
     }
     result <- purrr::map_dfr(names(sensor_types), row_function)

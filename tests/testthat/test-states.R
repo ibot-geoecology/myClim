@@ -273,3 +273,47 @@ test_that("mc_states_to_sensor", {
     test_agg_data_format(agg_data_new_sensor)
     expect_equal(agg_data_new_sensor$localities$A2E32$sensors$TMS_T1_error$values, t1_error_expected_values)
 })
+
+test_that("mc_states_outlier", {
+    data <- mc_read_files("../data/TMSoffsoil/data_93142760_201904.csv", "TOMST", clean=F)
+    range_table <- mc_info_range(data)
+    range_table$min_value <- -3.5
+    range_table$negative_jump[range_table$sensor_name == "TMS_moist"] <- 500
+    expect_error(states_data <- mc_states_outlier(data, range_table))
+    data <- mc_prep_clean(data, silent=TRUE)
+    states_data <- mc_states_outlier(data, range_table)
+    test_raw_data_format(states_data)
+    states_table <- mc_info_states(states_data)
+    states_table <- dplyr::filter(states_table, .data$tag != "source")
+    expect_equal(nrow(states_table), 3)
+    expect_true("range" %in% states_table$tag)
+    expect_true("jump" %in% states_table$tag)
+    range_table$negative_jump[range_table$sensor_name == "TMS_moist"] <- 2000
+    range_table$positive_jump[range_table$sensor_name == "TMS_moist"] <- 1200
+    states_data <- mc_states_outlier(data, range_table, period="1 hour", range_tag="too_cold", jump_tag="my_jump")
+    test_raw_data_format(states_data)
+    states_table <- mc_info_states(states_data)
+    states_table <- dplyr::filter(states_table, .data$tag != "source")
+    expect_equal(nrow(states_table), 9)
+    expect_equal(nrow(dplyr::filter(states_table, tag == "my_jump")), 7)
+    expect_true("too_cold" %in% states_table$tag)
+    range_table <- mc_info_range(data)
+    range_table$positive_jump[range_table$sensor_name == "TMS_moist"] <- 300
+    states_data <- mc_states_outlier(data, range_table, jump_tag="rainy")
+    test_raw_data_format(states_data)
+    states_table <- mc_info_states(states_data)
+    states_table <- dplyr::filter(states_table, .data$tag != "source")
+    expect_equal(nrow(states_table), 6)
+    expect_true(all("rainy" == states_table$tag))
+    agg_data <- mc_agg(data, fun="mean", period="1 hour")
+    range_table <- mc_info_range(agg_data)
+    range_table$min_value <- -3.5
+    range_table$negative_jump[range_table$sensor_name == "TMS_moist_mean"] <- 500
+    states_agg_data <- mc_states_outlier(agg_data, range_table)
+    test_agg_data_format(states_agg_data)
+    states_agg_table <- mc_info_states(states_agg_data)
+    states_agg_table <- dplyr::filter(states_agg_table, .data$tag != "source")
+    expect_equal(nrow(states_agg_table), 3)
+    expect_true("range" %in% states_agg_table$tag)
+    expect_true("jump" %in% states_agg_table$tag)
+})
