@@ -323,20 +323,21 @@ mc_info_states <- function(data) {
     as.data.frame(result)
 }
 
-#' Get table with measuring range
+#' Get table of sensors range
 #'
-#' This function return data.frame with min value, max value and possible jumps
+#' This function return data.frame with sensors range (min value, max value) and possible jumps.
 #'
-#' This function is useful for prepare parameter for [mc_states_outlier()] function.
-#' The range values are used from `mc_data_sensors`.
+#' This function is mainly useful to prepare input parameter for [mc_states_outlier()] function.
+#' The range values are taken from `mc_data_sensors`. Those are manually defined 
+#' ranges based on logger/sensor technical limits and biologically meaningful values.
 #'
 #' @template param_myClim_object
 #' @return data.frame with columns:
 #' * sensor_name - name of sensor (e.g., TMS_T1, TMS_moist, HOBO_T) see [mc_data_sensors]
 #' * min_value - minimal value
 #' * max_value - maximal value
-#' * positive_jump - Maximal difference between two consecutive values. Next value is higher than previous.
-#' * negative_jump - Maximal difference between two consecutive values. Next value is lower than previous.
+#' * positive_jump - Maximal difference between two consecutive values. Next value is higher than previous. (Positive number)
+#' * negative_jump - Maximal difference between two consecutive values. Next value is lower than previous. (Positive number)
 #' @export
 #' @examples
 #' mc_info_range(mc_data_example_raw)

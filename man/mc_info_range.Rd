@@ -2,7 +2,7 @@
 % Please edit documentation in R/info.R
 \name{mc_info_range}
 \alias{mc_info_range}
-\title{Get table with measuring range}
+\title{Get table of sensors range}
 \usage{
 mc_info_range(data)
 }
@@ -15,16 +15,17 @@ data.frame with columns:
 \item sensor_name - name of sensor (e.g., TMS_T1, TMS_moist, HOBO_T) see \link{mc_data_sensors}
 \item min_value - minimal value
 \item max_value - maximal value
-\item positive_jump - Maximal difference between two consecutive values. Next value is higher than previous.
-\item negative_jump - Maximal difference between two consecutive values. Next value is lower than previous.
+\item positive_jump - Maximal difference between two consecutive values. Next value is higher than previous. (Positive number)
+\item negative_jump - Maximal difference between two consecutive values. Next value is lower than previous. (Positive number)
 }
 }
 \description{
-This function return data.frame with min value, max value and possible jumps
+This function return data.frame with sensors range (min value, max value) and possible jumps.
 }
 \details{
-This function is useful for prepare parameter for \code{\link[=mc_states_outlier]{mc_states_outlier()}} function.
-The range values are used from \code{mc_data_sensors}.
+This function is mainly useful to prepare input parameter for \code{\link[=mc_states_outlier]{mc_states_outlier()}} function.
+The range values are taken from \code{mc_data_sensors}. Those are manually defined
+ranges based on logger/sensor technical limits and biologically meaningful values.
 }
 \examples{
 mc_info_range(mc_data_example_raw)

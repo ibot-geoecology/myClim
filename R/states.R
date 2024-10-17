@@ -651,22 +651,45 @@ mc_states_to_sensor <- function(data, tag, to_sensor, source_sensor=NULL, invers
     }
     return(result)
 }
-
 #' Create states for outlying values
+#' 
+#' This function creates a state (tag) for all values that are either above 
+#' or below certain thresholds (`min_value`, `max_value`), or at break 
+#' points where consecutive values of microclimate time-series suddenly 
+#' jump down or up (`positive_jump`, `negative_jump`).
+#' 
+#' @details 
+#' The best way to use this function is to first generate a 
+#' table (data.frame) with pre-defined minimum, maximum, and jump thresholds 
+#' using the [mc_info_range] function. Then modify the thresholds as needed 
+#' and apply the function (see example). All values above `max_value` and below 
+#' `min_value` are tagged by default with the `range` tag. When consecutive 
+#' values suddenly decrease by more than `negative_jump` or increase 
+#' by more than `positive_jump`, such break points are tagged with the `jump` tag. 
+#' It is possible to use only the `range` case, only the `jump` case, or both.
+#' 
+#' When the `period` parameter is used, the jump values are modified; 
+#' range values are not affected. Depending on the logger step, the 
+#' value of jump is multiplied or divided. For example, when the loggers
+#' are recording with a step of 1 hour (3600 s) and the user sets 
+#' `period = "1 day"` together with `positive_jump = 10`, then consecutive 
+#' values differing by (10 * 24 = 240) would be tagged. In this example, 
+#' but with `period = "15 minutes"`, consecutive values differing 
+#' by (10 / 4 = 2.5) would be tagged.
+#'  
 #'
 #' @template param_myClim_object
-#' @param table The table with extreme values. Table is in the same format as output of [mc_info_range()].
-#' The columns of the table are:
-#' * sensor_name - name of sensor (e.g., TMS_T1, TMS_moist, HOBO_T) see [mc_data_sensors]
-#' * min_value - minimal value
-#' * max_value - maximal value
-#' * positive_jump - Maximal difference between two consecutive values. Next value is higher than previous.
-#' * negative_jump - Maximal difference between two consecutive values. Next value is lower than previous.
-#' @param period period for standardize value of jump. If NULL then the difference is not standardized. (default NULL)
+#' @param table The table with outlying values (thresholds). You can use the output of [mc_info_range()]. The columns of the table are:
+#' * `sensor_name` - Name of the sensor (e.g., TMS_T1, TMS_moist, HOBO_T); see [mc_data_sensors]
+#' * `min_value` - Minimal value (threshold; all below are tagged)
+#' * `max_value` - Maximal value 
+#' * `positive_jump` - Maximal acceptable increase between two consecutive values (next value is higher than the previous)
+#' * `negative_jump` - Maximal acceptable decrease between two consecutive values (next value is lower than the previous)
+#' @param period Period for standardizing the value of jump. If NULL, then the difference is not standardized (default NULL); see details.
 #' 
-#' It is character usable for [lubridate::period]. For example "1 hour", "30 minutes", "2 days".
-#' @param range_tag The tag for the states which implies that the value is out of range. (default "range")
-#' @param jump_tag The tag for the states which implies that the difference between two consecutive values is too high. (default "jump")
+#' It is a character string usable by [lubridate::period], for example, "1 hour", "30 minutes", "2 days".
+#' @param range_tag The tag for states indicating that the value is out of range (default "range").
+#' @param jump_tag The tag for states indicating that the difference between two consecutive values is too high (default "jump").
 #' @return Returns a myClim object in the same format as the input, with added states.
 #' @export
 #' @examples
