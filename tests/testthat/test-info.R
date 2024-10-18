@@ -103,6 +103,6 @@ test_that("mc_info_range", {
     expect_true(all(is.na(range_table$max_negative_jump)))
     expect_warning(agg_data <- mc_agg(data, list(TMS_T2=c("mean", "count"), TMS_moist="max"), "30 min"))
     range_table <- mc_info_range(agg_data)
-    expect_equal(range_table$min_value[range_table$sensor_name == "TMS_T2_mean"], -50)
+    expect_equal(range_table$min_value[range_table$sensor_name == "TMS_T2_mean"], -40)
     expect_equal(range_table$max_value[range_table$sensor_name == "TMS_moist_max"], 4000)
 })

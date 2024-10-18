@@ -9,6 +9,7 @@
 .states_const_MESSAGE_START_GREATER <- "The start date and time must be earlier than or identical to the end date and time."
 .states_const_MESSAGE_NOT_LOGICAL_TYPE <- "The source_sensor must be of logical type."
 .states_const_MESSAGE_SNSORS_LENGTH <- "If multiple to_sensor the lenght of source_sensor must be the same."
+.states_const_MESSAGE_NEGATIVE_JUMP <- "The jump value must be a non-negative number."
 
 .states_const_COLUMN_LOCALITY_ID <- "locality_id"
 .states_const_COLUMN_LOGGER_INDEX <- "logger_index"
@@ -671,11 +672,11 @@ mc_states_to_sensor <- function(data, tag, to_sensor, source_sensor=NULL, invers
 #' When the `period` parameter is used, the jump values are modified; 
 #' range values are not affected. Depending on the logger step, the 
 #' value of jump is multiplied or divided. For example, when the loggers
-#' are recording with a step of 1 hour (3600 s) and the user sets 
-#' `period = "1 day"` together with `positive_jump = 10`, then consecutive 
-#' values differing by (10 * 24 = 240) would be tagged. In this example, 
-#' but with `period = "15 minutes"`, consecutive values differing 
-#' by (10 / 4 = 2.5) would be tagged.
+#' are recording with a step of 15 minutes (900 s) and the user sets
+#' `period = "1 hour"` together with `positive_jump = 10`, then consecutive
+#' values differing by (10 * (15 / 60) = 2.5) would be tagged. In this example,
+#' but with recording step 2 hours (7200 s), consecutive values differing
+#' by (10 * (120 / 60) = 20) would be tagged.
 #'  
 #'
 #' @template param_myClim_object
@@ -778,10 +779,16 @@ mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_
         period_constant <- step_period / period_value
     }
     if(!is.na(positive_jump)) {
+        if(positive_jump < 0) {
+            stop(.states_const_MESSAGE_NEGATIVE_JUMP)
+        }
         outlier_positive <- diff_values > (positive_jump * period_constant)
         outlier_positive[is.na(outlier_positive)] <- FALSE
     }
     if(!is.na(negative_jump)) {
+        if(negative_jump < 0) {
+            stop(.states_const_MESSAGE_NEGATIVE_JUMP)
+        }
         outlier_negative <- diff_values < (-1 * negative_jump * period_constant)
         outlier_negative[is.na(outlier_negative)] <- FALSE
     }

@@ -278,9 +278,11 @@ test_that("mc_states_outlier", {
     data <- mc_read_files("../data/TMSoffsoil/data_93142760_201904.csv", "TOMST", clean=F)
     range_table <- mc_info_range(data)
     range_table$min_value <- -3.5
-    range_table$negative_jump[range_table$sensor_name == "TMS_moist"] <- 500
     expect_error(states_data <- mc_states_outlier(data, range_table))
     data <- mc_prep_clean(data, silent=TRUE)
+    range_table$negative_jump[range_table$sensor_name == "TMS_moist"] <- -500
+    expect_error(states_data <- mc_states_outlier(data, range_table))
+    range_table$negative_jump[range_table$sensor_name == "TMS_moist"] <- 500
     states_data <- mc_states_outlier(data, range_table)
     test_raw_data_format(states_data)
     states_table <- mc_info_states(states_data)

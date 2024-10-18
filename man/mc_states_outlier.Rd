@@ -54,11 +54,11 @@ It is possible to use only the \code{range} case, only the \code{jump} case, or 
 When the \code{period} parameter is used, the jump values are modified;
 range values are not affected. Depending on the logger step, the
 value of jump is multiplied or divided. For example, when the loggers
-are recording with a step of 1 hour (3600 s) and the user sets
-\code{period = "1 day"} together with \code{positive_jump = 10}, then consecutive
-values differing by (10 * 24 = 240) would be tagged. In this example,
-but with \code{period = "15 minutes"}, consecutive values differing
-by (10 / 4 = 2.5) would be tagged.
+are recording with a step of 15 minutes (900 s) and the user sets
+\code{period = "1 hour"} together with \code{positive_jump = 10}, then consecutive
+values differing by (10 * (15 / 60) = 2.5) would be tagged. In this example,
+but with recording step 2 hours (7200 s), consecutive values differing
+by (10 * (120 / 60) = 20) would be tagged.
 }
 \examples{
 range_table <- mc_info_range(mc_data_example_clean)
