@@ -1,3 +1,6 @@
+# myClim 1.2.6
+* New functions `mc_info_range` and `mc_states_outlier` have been added.
+
 # myClim 1.2.5
 * The issue with the HOBO `logger_type` in the `mc_read_data` function has been fixed.
 

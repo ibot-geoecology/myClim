@@ -9,6 +9,7 @@
 .states_const_MESSAGE_START_GREATER <- "The start date and time must be earlier than or identical to the end date and time."
 .states_const_MESSAGE_NOT_LOGICAL_TYPE <- "The source_sensor must be of logical type."
 .states_const_MESSAGE_SNSORS_LENGTH <- "If multiple to_sensor the lenght of source_sensor must be the same."
+.states_const_MESSAGE_NEGATIVE_JUMP <- "The jump value must be a non-negative number."
 
 .states_const_COLUMN_LOCALITY_ID <- "locality_id"
 .states_const_COLUMN_LOGGER_INDEX <- "logger_index"
@@ -17,6 +18,11 @@
 .states_const_COLUMN_START <- "start"
 .states_const_COLUMN_END <- "end"
 .states_const_COLUMN_VALUE <- "value"
+
+.states_const_COLUMN_MIN_VALUE <- "min_value"
+.states_const_COLUMN_MAX_VALUE <- "max_value"
+.states_const_COLUMN_POSITIVE_JUMP <- "positive_jump"
+.states_const_COLUMN_NEGATIVE_JUMP <- "negative_jump"
 
 #' Insert new sensor states (tags)
 #'
@@ -300,7 +306,7 @@ mc_states_update <- function(data, states_table) {
     is_agg <- .common_is_agg_format(data)
     date_interval <- .states_get_item_range(data, locality_id, logger_index)
     if(is_agg){
-        period <- .common_get_period_from_data(data, locality_id, logger_index)
+        period <- .common_get_period_from_agg_data(data)
     } else {
         step <- data$localities[[locality_id]]$loggers[[logger_index]]$clean_info@step
     }
@@ -522,7 +528,12 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
     if(sensor_type@value_type != .model_const_VALUE_TYPE_LOGICAL) {
         stop(.states_const_MESSAGE_NOT_LOGICAL_TYPE)           
     }
-    rle_values <- rle(source_sensor_item$values)
+
+    return(.states_get_states_table_from_logical_values(source_sensor_item$values, datetime, tag, value, inverse))
+}
+
+.states_get_states_table_from_logical_values <- function(log_values, datetime, tag, value=NA, inverse=FALSE) {
+    rle_values <- rle(log_values)
     end_values <- cumsum(rle_values$lengths)
     start_values <- c(1, head(end_values, -1) + 1)
     not_na_condition <- !is.na(rle_values$values)
@@ -640,4 +651,152 @@ mc_states_to_sensor <- function(data, tag, to_sensor, source_sensor=NULL, invers
         result <- !result
     }
     return(result)
+}
+#' Create states for outlying values
+#' 
+#' This function creates a state (tag) for all values that are either above 
+#' or below certain thresholds (`min_value`, `max_value`), or at break 
+#' points where consecutive values of microclimate time-series suddenly 
+#' jump down or up (`positive_jump`, `negative_jump`).
+#' 
+#' @details 
+#' The best way to use this function is to first generate a 
+#' table (data.frame) with pre-defined minimum, maximum, and jump thresholds 
+#' using the [mc_info_range] function. Then modify the thresholds as needed 
+#' and apply the function (see example). All values above `max_value` and below 
+#' `min_value` are tagged by default with the `range` tag. When consecutive 
+#' values suddenly decrease by more than `negative_jump` or increase 
+#' by more than `positive_jump`, such break points are tagged with the `jump` tag. 
+#' It is possible to use only the `range` case, only the `jump` case, or both.
+#' 
+#' When the `period` parameter is used, the jump values are modified; 
+#' range values are not affected. Depending on the logger step, the 
+#' value of jump is multiplied or divided. For example, when the loggers
+#' are recording with a step of 15 minutes (900 s) and the user sets
+#' `period = "1 hour"` together with `positive_jump = 10`, then consecutive
+#' values differing by (10 * (15 / 60) = 2.5) would be tagged. In this example,
+#' but with recording step 2 hours (7200 s), consecutive values differing
+#' by (10 * (120 / 60) = 20) would be tagged.
+#'  
+#'
+#' @template param_myClim_object
+#' @param table The table with outlying values (thresholds). You can use the output of [mc_info_range()]. The columns of the table are:
+#' * `sensor_name` - Name of the sensor (e.g., TMS_T1, TMS_moist, HOBO_T); see [mc_data_sensors]
+#' * `min_value` - Minimal value (threshold; all below are tagged)
+#' * `max_value` - Maximal value 
+#' * `positive_jump` - Maximal acceptable increase between two consecutive values (next value is higher than the previous)
+#' * `negative_jump` - Maximal acceptable decrease between two consecutive values (next value is lower than the previous)
+#' @param period Period for standardizing the value of jump. If NULL, then the difference is not standardized (default NULL); see details.
+#' 
+#' It is a character string usable by [lubridate::period], for example, "1 hour", "30 minutes", "2 days".
+#' @param range_tag The tag for states indicating that the value is out of range (default "range").
+#' @param jump_tag The tag for states indicating that the difference between two consecutive values is too high (default "jump").
+#' @return Returns a myClim object in the same format as the input, with added states.
+#' @export
+#' @examples
+#' range_table <- mc_info_range(mc_data_example_clean)
+#' range_table$negative_jump[range_table$sensor_name == "TMS_moist"] <- 500
+#' data <- mc_states_outlier(mc_data_example_clean, range_table)
+mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_tag="jump") {
+    .prep_check_datetime_step_unprocessed(data, stop)
+    is_agg_format <- .common_is_agg_format(data)
+    if(!is.null(period)) {
+        period <- lubridate::as.period(period)
+    }
+    step_period <- NULL
+    if(is_agg_format) {
+        step_period <- lubridate::as.period(.common_get_period_from_agg_data(data))
+    }
+
+    sensor_function <- function(sensor, datetime, step_period) {
+        if(!(sensor$metadata@name %in% table$sensor_name)) {
+            return(sensor)
+        }
+        condition <- table[[.states_const_COLUMN_SENSOR_NAME]] == sensor$metadata@name
+        min_value <- table[[.states_const_COLUMN_MIN_VALUE]][condition]
+        max_value <- table[[.states_const_COLUMN_MAX_VALUE]][condition]
+        positive_jump <- table[[.states_const_COLUMN_POSITIVE_JUMP]][condition]
+        negative_jump <- table[[.states_const_COLUMN_NEGATIVE_JUMP]][condition]
+        sensor <- .states_add_out_of_range_state(sensor, datetime, min_value, max_value, range_tag)
+        sensor <- .states_add_jump_state(sensor, datetime, step_period, period, positive_jump, negative_jump, jump_tag)
+        return(sensor)
+    }
+    
+    sensors_item_function <- function(item) {
+        if(is_agg_format) {
+            current_step_period <- step_period
+        } else {
+            current_step_period <- lubridate::seconds_to_period(item$clean_info@step)
+        }
+        item$sensors <- purrr::map(item$sensors, ~ sensor_function(.x, item$datetime, current_step_period))
+        
+        return(item)
+    }
+
+    locality_function <- function(locality) {
+        if (!is_agg_format) {
+            locality$loggers <- purrr::map(locality$loggers, sensors_item_function)
+        } else {
+            locality <- sensors_item_function(locality)
+        }
+        return(locality)
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+
+    return(data)
+}
+
+.states_add_out_of_range_state <- function(sensor, datetime, min_value, max_value, range_tag) {
+    outlier_min <- rep(FALSE, length(sensor$values))
+    outlier_max <- rep(FALSE, length(sensor$values))
+    if(!is.na(min_value)) {
+        outlier_min <- sensor$values < min_value
+        outlier_min[is.na(outlier_min)] <- FALSE
+    }
+    if(!is.na(max_value)) {
+        outlier_max <- sensor$values > max_value
+        outlier_max[is.na(outlier_max)] <- FALSE
+    }
+    outlier <- outlier_min | outlier_max
+    if(any(outlier)) {
+        new_states_table <- .states_get_states_table_from_logical_values(outlier, datetime, range_tag)
+        states_table <- dplyr::union(sensor$states, new_states_table)
+        sensor$states <- states_table
+    }
+    return(sensor)
+}
+
+.states_add_jump_state <- function(sensor, datetime, step_period, period_value, positive_jump, negative_jump, jump_tag) {
+    outlier_positive <- rep(FALSE, length(sensor$values))
+    outlier_negative <- rep(FALSE, length(sensor$values))
+    if(is.na(positive_jump) && is.na(negative_jump)) {
+        return(sensor)
+    }
+    diff_values <- c(NA, diff(sensor$values))
+    period_constant <- 1
+    if(!is.null(period_value)) {
+        period_constant <- step_period / period_value
+    }
+    if(!is.na(positive_jump)) {
+        if(positive_jump < 0) {
+            stop(.states_const_MESSAGE_NEGATIVE_JUMP)
+        }
+        outlier_positive <- diff_values > (positive_jump * period_constant)
+        outlier_positive[is.na(outlier_positive)] <- FALSE
+    }
+    if(!is.na(negative_jump)) {
+        if(negative_jump < 0) {
+            stop(.states_const_MESSAGE_NEGATIVE_JUMP)
+        }
+        outlier_negative <- diff_values < (-1 * negative_jump * period_constant)
+        outlier_negative[is.na(outlier_negative)] <- FALSE
+    }
+    outlier <- outlier_positive | outlier_negative
+    if(any(outlier)) {
+        new_states_table <- .states_get_states_table_from_logical_values(outlier, datetime, jump_tag)
+        states_table <- dplyr::union(sensor$states, new_states_table)
+        sensor$states <- states_table
+    }
+    return(sensor)
 }

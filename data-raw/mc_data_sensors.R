@@ -19,7 +19,7 @@ mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@sensor_id <- mc_const_SENSOR_TMS_T2
 mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@logger <- .model_const_LOGGER_TOMST_TMS
 mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@description <- "Temperature on surface of soil"
-mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@min_value <- -50
+mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@min_value <- -40
 mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@max_value <- 60
 mc_data_sensors[[mc_const_SENSOR_TMS_T2]]@plot_color <- "green4"
 

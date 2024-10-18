@@ -92,3 +92,17 @@ test_that("mc_info_states", {
     expect_equal(nrow(states), 9)
     expect_true(all(is.na(states$logger_index)))
 })
+
+test_that("mc_info_range", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE)
+    range_table <- mc_info_range(data)
+    expect_equal(colnames(range_table), c("sensor_name", "min_value", "max_value", "positive_jump", "negative_jump"))
+    expect_equal(range_table$min_value[range_table$sensor_name == "TMS_T1"], -40)
+    expect_equal(range_table$max_value[range_table$sensor_name == "TMS_moist"], 4000)
+    expect_true(all(is.na(range_table$max_positive_jump)))
+    expect_true(all(is.na(range_table$max_negative_jump)))
+    expect_warning(agg_data <- mc_agg(data, list(TMS_T2=c("mean", "count"), TMS_moist="max"), "30 min"))
+    range_table <- mc_info_range(agg_data)
+    expect_equal(range_table$min_value[range_table$sensor_name == "TMS_T2_mean"], -40)
+    expect_equal(range_table$max_value[range_table$sensor_name == "TMS_moist_max"], 4000)
+})
