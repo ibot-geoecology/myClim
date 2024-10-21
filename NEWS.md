@@ -1,3 +1,6 @@
+# myClim 1.3.0
+* Published on CRAN.
+
 # myClim 1.2.6
 * New functions `mc_info_range` and `mc_states_outlier` have been added.
 
