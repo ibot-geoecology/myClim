@@ -1,3 +1,6 @@
+# myClim 1.3.1
+* The conflict state issue in the `mc_prep_clean` function has been fixed.
+
 # myClim 1.3.0
 * Published on CRAN.
 

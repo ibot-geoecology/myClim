@@ -236,13 +236,13 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
         sensor_name <- names(sensor_table)[[2]]
         warning(stringr::str_glue(.prep_const_MESSAGE_VALUES_SAME_TIME))
         if(!clean_env$resolve_conflicts) {
-            .prep_add_conflict_states(locality_id, logger_index, sensor_name, sensor_table, is_different, clean_env)
+            .prep_add_conflict_states(locality_id, logger_index, sensor_name, duplicated_table, is_different, clean_env)
         }
     }
 }
 
 .prep_add_conflict_states <- function(locality_id, logger_index, sensor_name,
-                                      sensor_table, is_different, clean_env) {
+                                      duplicated_table, is_different, clean_env) {
     diff_parts <- rle(is_different)
     ends <- cumsum(diff_parts$lengths)
     starts <- c(1, ends[-length(ends)] + 1)
@@ -250,7 +250,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     starts <- starts[diff_parts$values]
     states_table <- tibble::tibble(locality_id=locality_id, logger_index=logger_index,
                                    sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CONFLICT,
-                                   start=sensor_table$datetime[starts], end=sensor_table$datetime[ends],
+                                   start=duplicated_table$datetime[starts], end=duplicated_table$datetime[ends],
                                    value=NA_character_)
     clean_env$states <- dplyr::bind_rows(clean_env$states, states_table)
 }
