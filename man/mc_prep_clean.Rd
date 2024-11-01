@@ -4,7 +4,7 @@
 \alias{mc_prep_clean}
 \title{Cleaning datetime series}
 \usage{
-mc_prep_clean(data, silent = FALSE, resolve_conflicts = TRUE)
+mc_prep_clean(data, silent = FALSE, resolve_conflicts = TRUE, tolerance = NULL)
 }
 \arguments{
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
@@ -16,6 +16,10 @@ measurements with closest original datetime to rounded datetime are selected, se
 If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
 highlighting records with duplicated datetime but different measurement values.When conflict records
 does not exist, object is cleaned in both TRUE and FALSE cases.}
+
+\item{tolerance}{list of tolerance values for each physical unit see \link{mc_data_physical}.
+Format is list(unit_name=tolerance_value). If maximal difference of conflict values is less or equal to tolerance,
+conflict is resolved withou warning. If NULL, then tolerance is not used (default NULL)}
 }
 \value{
 \itemize{

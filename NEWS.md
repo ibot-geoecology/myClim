@@ -1,3 +1,6 @@
+# myClim 1.3.2
+* The parameter `tolerance` has been added to the `mc_prep_clean` function.
+
 # myClim 1.3.1
 * The conflict state issue in the `mc_prep_clean` function has been fixed.
 

@@ -83,6 +83,9 @@
 #' If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
 #' highlighting records with duplicated datetime but different measurement values.When conflict records 
 #' does not exist, object is cleaned in both TRUE and FALSE cases. 
+#' @param tolerance list of tolerance values for each physical unit see [mc_data_physical].
+#' Format is list(unit_name=tolerance_value). If maximal difference of conflict values is less or equal to tolerance,
+#' conflict is resolved withou warning. If NULL, then tolerance is not used (default NULL)
 #' @return
 #' * cleaned myClim object in Raw-format (default) `resolve_conflicts=TRUE` or `resolve_conflicts=FALSE` but no conflicts exist 
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
@@ -91,7 +94,7 @@
 #' @export
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_raw)
-mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
+mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=NULL) {
     if(.common_is_agg_format(data)) {
         stop(.prep_const_MESSAGE_CLEAN_AGG)
     }
@@ -100,6 +103,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     }
     clean_env <- new.env()
     clean_env$resolve_conflicts <- resolve_conflicts
+    clean_env$tolerance <- tolerance
     clean_env$states <- tibble::tibble()
     clean_env$clean_bar <- NULL
     count_table <- mc_info_count(data)
@@ -206,8 +210,10 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
         sensor_table$original_diff <- NULL
         if(any(duplicated_datetime))
         {
+            sensor_id <- logger$sensors[[sensor_name]]$metadata@sensor_id
+            physical <- myClim::mc_data_sensors[[sensor_id]]@physical
             .prep_clean_check_different_values_in_duplicated(locality_id, logger_index, sensor_table,
-                                                             logger$metadata@serial_number, clean_env)
+                                                             logger$metadata@serial_number, clean_env, physical)
             return(sensor_table[!duplicated_datetime, ])
         }
         return(sensor_table)
@@ -223,12 +229,18 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     logger
 }
 
-.prep_clean_check_different_values_in_duplicated <- function(locality_id, logger_index, sensor_table, serial_number, clean_env){
+.prep_clean_check_different_values_in_duplicated <- function(locality_id, logger_index, sensor_table, serial_number, clean_env, physical){
     duplicated_rows <- duplicated(sensor_table$datetime) | duplicated(sensor_table$datetime, fromLast = TRUE)
     duplicated_table <- dplyr::filter(sensor_table, duplicated_rows)
     groupped_duplicated <- dplyr::group_by(duplicated_table, .data$datetime)
+    tolerance_value <- 0
+    if(!is.null(clean_env$tolerance) && physical %in% names(clean_env$tolerance)) {
+        tolerance_value <- clean_env$tolerance[[physical]]
+    }
     is_different_function <- function(.x, .y) {
-        result <- !all(diff(.x[[1]]) == 0)
+        min_value <- min(.x[[1]], na.rm=TRUE)
+        max_value <- max(.x[[1]], na.rm=TRUE)
+        result <- max_value - min_value > tolerance_value
         return(rep(result, nrow(.x)))
     }
     is_different <- as.logical(purrr::flatten(dplyr::group_map(groupped_duplicated, is_different_function)))
