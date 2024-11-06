@@ -489,7 +489,12 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff, group=.data$series_name)) +
             ggplot2::geom_line(ggplot2::aes(color=.data$series_name))
     if(!change_colors) {
-        plot <- plot + ggplot2::scale_color_manual(values=sensors_table$color)
+        series_table <- dplyr::distinct(data_table, .data$sensor_name, .data$series_name)
+        temp_color_table <- dplyr::select(sensors_table, "sensor", "color")
+        color_table <- dplyr::left_join(series_table, temp_color_table, by=c("sensor_name"="sensor"))
+        color_values <- color_table$color
+        names(color_values) <- color_table$series_name
+        plot <- plot + ggplot2::scale_color_manual(values=color_values)
     } else {
         plot <- plot + ggplot2::scale_color_manual(values=.plot_const_PALETTE)
     }

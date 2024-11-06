@@ -48,7 +48,7 @@ mc_data_sensors[[mc_const_SENSOR_Thermo_T]]@logger <- .model_const_LOGGER_TOMST_
 mc_data_sensors[[mc_const_SENSOR_Thermo_T]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[mc_const_SENSOR_Thermo_T]]@min_value <- -40
 mc_data_sensors[[mc_const_SENSOR_Thermo_T]]@max_value <- 60
-mc_data_sensors[[mc_const_SENSOR_Thermo_T]]@plot_color <- "#2000EEB0"
+mc_data_sensors[[mc_const_SENSOR_Thermo_T]]@plot_color <- "red1"
 mc_data_sensors[[mc_const_SENSOR_Thermo_T]]@plot_line_width <- 2
 
 mc_data_sensors[[mc_const_SENSOR_Dendro_T]] <- new("mc_Sensor")
@@ -75,7 +75,7 @@ mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@logger <- c(.model_const_LOGGER_HOBO_U
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@min_value <- -40
 mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@max_value <- 70
-mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@plot_color <- "salmon"
+mc_data_sensors[[mc_const_SENSOR_HOBO_T]]@plot_color <- "firebrick3"
 
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@sensor_id <- mc_const_SENSOR_HOBO_RH
@@ -83,7 +83,7 @@ mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@logger <- .model_const_LOGGER_HOBO_U2
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@physical <- .model_const_PHYSICAL_RH
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@min_value <- 0
 mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@max_value <- 100
-mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@plot_color <- "skyblue"
+mc_data_sensors[[mc_const_SENSOR_HOBO_RH]]@plot_color <- "grey50"
 
 mc_data_sensors[[mc_const_SENSOR_HOBO_EXTT]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_HOBO_EXTT]]@sensor_id <- mc_const_SENSOR_HOBO_EXTT

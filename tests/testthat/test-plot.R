@@ -60,6 +60,12 @@ test_that(".plot_get_data_sensors_by_physical", {
     expect_equal(stringr::str_sort(unique(table$physical)), c("moisture_raw", "T_C"))
 })
 
+test_that("mc_plot_line multiple loggers", {
+    data <- mc_read_data("../data/TOMST/files_table2.csv", silent=T)
+    mc_plot_line(data)
+    expect_true(TRUE)
+})
+
 test_that("mc_plot_raster snow", {
     data <- mc_read_files("../data/eco-snow", dataformat_name = "TOMST", silent=TRUE)
     data_agg <- mc_agg(data)
