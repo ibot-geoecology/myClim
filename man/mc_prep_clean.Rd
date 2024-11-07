@@ -18,8 +18,8 @@ highlighting records with duplicated datetime but different measurement values.W
 does not exist, object is cleaned in both TRUE and FALSE cases.}
 
 \item{tolerance}{list of tolerance values for each physical unit see \link{mc_data_physical}.
-Format is list(unit_name=tolerance_value). If maximal difference of conflict values is less or equal to tolerance,
-conflict is resolved withou warning. If NULL, then tolerance is not used (default NULL)}
+Format is list(unit_name=tolerance_value). If maximal difference of conflict values is lower or equal to tolerance,
+conflict is resolved without warning. If NULL, then tolerance is not applied (default NULL) see details.}
 }
 \value{
 \itemize{
@@ -44,9 +44,9 @@ cleaning is performed in both cases (\verb{resolve_conflicts=TRUE or FALSE}) See
 The function \code{mc_prep_clean} can be used in two different ways depending on
 the parameter \code{resolve_conflicts}. When \code{resolve_conflicts=TRUE}, the function
 performs automatic cleaning and returns a cleaned myClim object. When \code{resolve_conflicts=FALSE},
-and myClim object contains conflicts, the function returns the original,
-uncleaned object with tags (states) see \link{mc_states_insert}
-highlighting records with duplicated datetime but different measurement values.
+and myClim object contains conflicts (rows with identical time, but different measured value),
+the function returns the original, uncleaned object with tags (states) see \link{mc_states_insert}
+highlighting records with duplicated datetime but different measured values.
 When there were no conflicts, cleaning is performed in both cases (\verb{resolve_conflicts=TRUE OR FALSE})
 
 Processing the data with \code{mc_prep_clean} and resolving the conflicts is a mandatory step
@@ -58,7 +58,25 @@ Function \code{mc_prep_clean} use either time-step provided by user during data 
 (used time-step is permanently stored in logger metadata \link{mc_LoggerMetadata};
 or if time-step is not provided by the user (NA),than myClim automatically
 detects the time-step from input time series based on the last 100 records.
-In case of irregular time series, function returns warning and skip the series.
+In case of irregular time series, function returns warning and skip (does not read) the file.
+
+In cases when the user provides a time-step during data import in \code{mc_read} functions
+instead of relying on automatic step detection, and the provided step does not correspond
+with the actual records (i.e., the logger records data every 900 seconds but the user
+provides a step of 3600 seconds), the myClim rounding routine consolidates multiple
+records into an identical datetime. The resulting value corresponds to the one closest
+to the provided step (i.e., in an original series like ...9:50, 10:05, 10:20, 10:35, 10:50, 11:05...,
+the new record would be 10:00, and the value will be taken from the original record at 10:05).
+This process generates numerous warnings in \code{resolve_conflicts=TRUE} and a multitude of tags
+in \code{resolve_conflicts=FALSE}.
+
+The \code{tolerance} parameter is designed for situations where the logger does not perform optimally,
+but the user still needs to extract and analyze the data. In some cases, loggers may record
+multiple rows with identical timestamps but with slightly different microclimate values,
+due to the limitations of sensor resolution and precision.
+By using the \code{tolerance} parameter, myClim will automatically select one of these values
+and resolve the conflict without generating additional warnings. It is strongly recommended
+to set the \code{tolerance} value based on the sensor's resolution and precision.
 
 In case the time-step is regular, but is not nicely rounded, function rounds
 the time series to the closest nice time and shifts original data.
@@ -70,16 +88,6 @@ is 2h (e.g. 13:33, 15:33, 17:33), the measurement times are shifted to (13:30, 1
 When you have 2h time step and wish to go to the whole hour
 (13:33 -> 14:00, 15:33 -> 16:00) the only way is aggregation -
 use \code{mc_agg(period="2 hours")} command after data cleaning.
-
-In cases when the user provides a time-step during data import in \code{mc_read} functions
-instead of relying on automatic step detection, and the provided step does not correspond
-with the actual records (i.e., the logger records data every 900 seconds but the user
-provides a step of 3600 seconds), the myClim rounding routine consolidates multiple
-records into an identical datetime. The resulting value corresponds to the one closest
-to the provided step (i.e., in an original series like ...9:50, 10:05, 10:20, 10:35, 10:50, 11:05...,
-the new record would be 10:00, and the value will be taken from the original record at 10:05).
-This process generates numerous warnings in \code{resolve_conflicts=TRUE} and a multitude of tags
-in \code{resolve_conflicts=FALSE}.
 }
 \examples{
 cleaned_data <- mc_prep_clean(mc_data_example_raw)
