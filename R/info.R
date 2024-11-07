@@ -26,6 +26,7 @@ mc_info_count <- function(data) {
 #' @template param_myClim_object_raw
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
+#' * logger_index - Logger index at the locality.
 #' * serial_number - serial number of logger when provided or automatically detected from file name or header
 #' * start_date - date of the first record on the logger
 #' * end_date  - date of the last record on the logger
@@ -39,30 +40,27 @@ mc_info_count <- function(data) {
 mc_info_clean <- function(data) {
     .common_stop_if_not_raw_format(data)
 
-    logger_function <- function (logger) {
-        list(logger$metadata@serial_number,
-             min(logger$datetime),
-             max(logger$datetime),
-             logger$clean_info@step,
-             logger$clean_info@count_duplicities,
-             logger$clean_info@count_missing,
-             logger$clean_info@count_disordered,
-             logger$clean_info@rounded)
+    logger_function <- function (logger, logger_index) {
+        list(serial_number = logger$metadata@serial_number,
+             logger_index = logger_index,
+             start_date = min(logger$datetime),
+             end_date = max(logger$datetime),
+             step_seconds = logger$clean_info@step,
+             count_duplicities = logger$clean_info@count_duplicities,
+             count_missing = logger$clean_info@count_missing,
+             count_disordered = logger$clean_info@count_disordered,
+             rounded = logger$clean_info@rounded)
     }
 
     locality_function <- function(locality) {
-        items <- purrr::map(locality$loggers, logger_function)
-        purrr::map(items, ~ append(.x, locality$metadata@locality_id, after=0))
+        locality_table <- purrr::imap_dfr(locality$loggers, logger_function)
+        locality_table$locality_id <- locality$metadata@locality_id
+        locality_table <- dplyr::select(locality_table, "locality_id", dplyr::everything())
+        return(locality_table)
     }
 
-    rows <- purrr::flatten(purrr::map(data$localities, locality_function))
-    columns <- purrr::transpose(rows)
-    data.frame(locality_id=unlist(columns[[1]]), serial_number=unlist(columns[[2]]),
-               start_date=.common_as_utc_posixct(unlist(columns[[3]])),
-               end_date=.common_as_utc_posixct(unlist(columns[[4]])),
-               step_seconds=unlist(columns[[5]]), count_duplicities=unlist(columns[[6]]),
-               count_missing=unlist(columns[[7]]), count_disordered=unlist(columns[[8]]),
-               rounded=unlist(columns[[9]]))
+    result <- purrr::map_dfr(data$localities, locality_function)
+    return(result)
 }
 
 

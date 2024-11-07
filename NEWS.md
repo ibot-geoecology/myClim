@@ -1,4 +1,6 @@
 # myClim 1.3.2
+* The parameter `tolerance` has been added to the `mc_prep_clean` function.
+* The result table of the `mc_info_clean` function has been extended with the `logger_index` column.
 * The plot colors of sensors have been updated.
 * The colors issue in the `mc_plot_line` function has been fixed.
 
