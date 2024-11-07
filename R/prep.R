@@ -39,9 +39,9 @@
 #' The function `mc_prep_clean` can be used in two different ways depending on 
 #' the parameter `resolve_conflicts`. When `resolve_conflicts=TRUE`, the function
 #' performs automatic cleaning and returns a cleaned myClim object. When `resolve_conflicts=FALSE`,
-#' and myClim object contains conflicts, the function returns the original, 
-#' uncleaned object with tags (states) see [mc_states_insert]
-#' highlighting records with duplicated datetime but different measurement values.
+#' and myClim object contains conflicts (rows with identical time, but different measured value), 
+#' the function returns the original, uncleaned object with tags (states) see [mc_states_insert]
+#' highlighting records with duplicated datetime but different measured values.
 #' When there were no conflicts, cleaning is performed in both cases (`resolve_conflicts=TRUE OR FALSE`)
 #' 
 #' Processing the data with `mc_prep_clean` and resolving the conflicts is a mandatory step
@@ -53,8 +53,26 @@
 #' (used time-step is permanently stored in logger metadata [myClim::mc_LoggerMetadata];
 #' or if time-step is not provided by the user (NA),than myClim automatically
 #' detects the time-step from input time series based on the last 100 records.
-#' In case of irregular time series, function returns warning and skip the series.
+#' In case of irregular time series, function returns warning and skip (does not read) the file.
 #'
+#' In cases when the user provides a time-step during data import in `mc_read` functions 
+#' instead of relying on automatic step detection, and the provided step does not correspond 
+#' with the actual records (i.e., the logger records data every 900 seconds but the user 
+#' provides a step of 3600 seconds), the myClim rounding routine consolidates multiple 
+#' records into an identical datetime. The resulting value corresponds to the one closest 
+#' to the provided step (i.e., in an original series like ...9:50, 10:05, 10:20, 10:35, 10:50, 11:05..., 
+#' the new record would be 10:00, and the value will be taken from the original record at 10:05). 
+#' This process generates numerous warnings in `resolve_conflicts=TRUE` and a multitude of tags 
+#' in `resolve_conflicts=FALSE`.
+#' 
+#' The `tolerance` parameter is designed for situations where the logger does not perform optimally,
+#' but the user still needs to extract and analyze the data. In some cases, loggers may record 
+#' multiple rows with identical timestamps but with slightly different microclimate values, 
+#' due to the limitations of sensor resolution and precision.
+#' By using the `tolerance` parameter, myClim will automatically select one of these values 
+#' and resolve the conflict without generating additional warnings. It is strongly recommended 
+#' to set the `tolerance` value based on the sensor's resolution and precision.
+#' 
 #' In case the time-step is regular, but is not nicely rounded, function rounds
 #' the time series to the closest nice time and shifts original data.
 #' E.g., original records in 10 min regular step c(11:58, 12:08, 12:18, 12:28)
@@ -65,16 +83,6 @@
 #' When you have 2h time step and wish to go to the whole hour  
 #' (13:33 -> 14:00, 15:33 -> 16:00) the only way is aggregation - 
 #' use `mc_agg(period="2 hours")` command after data cleaning.
-#' 
-#' In cases when the user provides a time-step during data import in `mc_read` functions 
-#' instead of relying on automatic step detection, and the provided step does not correspond 
-#' with the actual records (i.e., the logger records data every 900 seconds but the user 
-#' provides a step of 3600 seconds), the myClim rounding routine consolidates multiple 
-#' records into an identical datetime. The resulting value corresponds to the one closest 
-#' to the provided step (i.e., in an original series like ...9:50, 10:05, 10:20, 10:35, 10:50, 11:05..., 
-#' the new record would be 10:00, and the value will be taken from the original record at 10:05). 
-#' This process generates numerous warnings in `resolve_conflicts=TRUE` and a multitude of tags 
-#' in `resolve_conflicts=FALSE`.
 #'  
 #' @template param_myClim_object_raw
 #' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
@@ -83,6 +91,9 @@
 #' If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
 #' highlighting records with duplicated datetime but different measurement values.When conflict records 
 #' does not exist, object is cleaned in both TRUE and FALSE cases. 
+#' @param tolerance list of tolerance values for each physical unit see [mc_data_physical].
+#' Format is list(unit_name=tolerance_value). If maximal difference of conflict values is lower or equal to tolerance,
+#' conflict is resolved without warning. If NULL, then tolerance is not applied (default NULL) see details. 
 #' @return
 #' * cleaned myClim object in Raw-format (default) `resolve_conflicts=TRUE` or `resolve_conflicts=FALSE` but no conflicts exist 
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
@@ -91,7 +102,7 @@
 #' @export
 #' @examples
 #' cleaned_data <- mc_prep_clean(mc_data_example_raw)
-mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
+mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=NULL) {
     if(.common_is_agg_format(data)) {
         stop(.prep_const_MESSAGE_CLEAN_AGG)
     }
@@ -100,6 +111,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     }
     clean_env <- new.env()
     clean_env$resolve_conflicts <- resolve_conflicts
+    clean_env$tolerance <- tolerance
     clean_env$states <- tibble::tibble()
     clean_env$clean_bar <- NULL
     count_table <- mc_info_count(data)
@@ -206,8 +218,10 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
         sensor_table$original_diff <- NULL
         if(any(duplicated_datetime))
         {
+            sensor_id <- logger$sensors[[sensor_name]]$metadata@sensor_id
+            physical <- myClim::mc_data_sensors[[sensor_id]]@physical
             .prep_clean_check_different_values_in_duplicated(locality_id, logger_index, sensor_table,
-                                                             logger$metadata@serial_number, clean_env)
+                                                             logger$metadata@serial_number, clean_env, physical)
             return(sensor_table[!duplicated_datetime, ])
         }
         return(sensor_table)
@@ -223,12 +237,18 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE) {
     logger
 }
 
-.prep_clean_check_different_values_in_duplicated <- function(locality_id, logger_index, sensor_table, serial_number, clean_env){
+.prep_clean_check_different_values_in_duplicated <- function(locality_id, logger_index, sensor_table, serial_number, clean_env, physical){
     duplicated_rows <- duplicated(sensor_table$datetime) | duplicated(sensor_table$datetime, fromLast = TRUE)
     duplicated_table <- dplyr::filter(sensor_table, duplicated_rows)
     groupped_duplicated <- dplyr::group_by(duplicated_table, .data$datetime)
+    tolerance_value <- 0
+    if(!is.null(clean_env$tolerance) && physical %in% names(clean_env$tolerance)) {
+        tolerance_value <- clean_env$tolerance[[physical]]
+    }
     is_different_function <- function(.x, .y) {
-        result <- !all(diff(.x[[1]]) == 0)
+        min_value <- min(.x[[1]], na.rm=TRUE)
+        max_value <- max(.x[[1]], na.rm=TRUE)
+        result <- max_value - min_value > tolerance_value
         return(rep(result, nrow(.x)))
     }
     is_different <- as.logical(purrr::flatten(dplyr::group_map(groupped_duplicated, is_different_function)))

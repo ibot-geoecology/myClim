@@ -13,6 +13,7 @@ mc_info_clean(data)
 data.frame with columns:
 \itemize{
 \item locality_id - when provided by user then locality ID, when not provided identical with serial number
+\item logger_index - Logger index at the locality.
 \item serial_number - serial number of logger when provided or automatically detected from file name or header
 \item start_date - date of the first record on the logger
 \item end_date  - date of the last record on the logger
