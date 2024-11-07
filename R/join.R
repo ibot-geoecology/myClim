@@ -92,83 +92,122 @@
 #'
 #' @template param_myClim_object_raw
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
+#' @param by_type if TRUE loggers are joined by logger `type`
+#' if FALSE loggers are joined by logger `serial_number` see [mc_LoggerMetadata] (default TRUE)
 #' @return myClim object with joined loggers.
 #' @export
-mc_join <- function(data, comp_sensors=NULL) {
-    return(.join_main(data, comp_sensors, FALSE))
-}
-
-.join_main <- function(data, comp_sensors, get_overview) {
+mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
     e_state <- new.env()
-    e_state$choice <- if(get_overview) .join_const_MENU_CHOICE_OLDER_ALWAYS else NA_integer_
-    e_state$localities <- .join_prepare_env_localities(data)
+    e_state$choice <- NA_integer_
     join_bar <- progress::progress_bar$new(format = "join [:bar] :current/:total localities",
                                            total=length(data$localities))
     locality_function <- function(locality) {
-        types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
-        unique_types <- unique(types)
-        type_function <- function(logger_type) {
-            indexes <- which(types == logger_type)
+        groups_table <- .join_get_logger_groups_table(locality, by_type)
+        group_function <- function(group_table, .y) {
+            indexes <- group_table$index
+            logger_type <- group_table$type[[1]]
             if(length(indexes) == 1) {
                 return(locality$loggers[indexes])
             }
-            .join_loggers_same_type(locality$loggers[indexes], comp_sensors,
+            .join_loggers_if_ok(locality$loggers[indexes], comp_sensors,
                                     locality$metadata@locality_id, logger_type, e_state)
         }
-        locality$loggers <- purrr::flatten(purrr::map(unique_types, type_function))
-        e_state$localities[[locality$metadata@locality_id]]$count_joined_loggers <- length(locality$loggers)
+        joined_loggers <- dplyr::group_map(groups_table, group_function)
+        locality$loggers <- purrr::flatten(joined_loggers)
         join_bar$tick()
         locality
     }
     data$localities <- purrr::map(data$localities, locality_function)
-    if(get_overview) {
-        return(e_state$localities)
-    }
     return(data)
 }
 
-.join_prepare_env_localities <- function (data) {
-    result <- purrr::map(data$localities, ~ list(
-        count_loggers=length(.x$loggers),
-        count_joined_loggers=NA_integer_,
-        count_data_conflicts=0,
-        count_errors=0))
-    names(result) <- names(data$localities)
-    return(as.environment(result))
-}
-
-.join_loggers_same_type <- function(loggers, comp_sensors, locality_id, logger_type, e_state) {
-    table <- .join_get_grouped_loggers_by_steps(loggers)
-    group_function <- function(group_table, .y) {
-        is_ok <- .join_check_logger_sensors(loggers, group_table, locality_id, logger_type)
-        selected_loggers <- loggers[group_table$logger_id]
-        if(!is_ok) {
-            e_state$localities[[locality_id]]$count_errors <- e_state$localities[[locality_id]]$count_errors + 1
-            return(selected_loggers)
-        }
-        joined_logger <- .join_loggers(selected_loggers, comp_sensors, e_state, locality_id)
-        if(is.null(joined_logger)) {
-            return(selected_loggers)
-        }
-        return(list(joined_logger))
-    }
-    return(purrr::flatten(dplyr::group_map(table, group_function)))
-}
-
-.join_get_grouped_loggers_by_steps <- function(loggers) {
+.join_get_logger_groups_table <- function(locality, by_type) {
+    types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
+    serial_numbers <- purrr::map_chr(locality$loggers, ~ .x$metadata@serial_number)
     steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
     shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
-    table <- tibble::tibble(logger_id=seq_along(loggers), steps=steps, shifts=shifts)
-    return(dplyr::group_by(table, .data$steps, .data$shifts))
+    table <- tibble::tibble(index=seq_along(types),
+                             serial_number=serial_numbers,
+                             type=types,
+                             step=steps,
+                             shift=shifts)
+    env_params <- new.env()
+    env_params$last_group <- 0
+    serial_groups <- NULL
+    if(!by_type) {
+        serial_groups <- .join_get_locality_serial_groups(locality)        
+    }
+
+    group_function <- function(group_table, .y) {
+        result <- tibble::tibble(index=group_table$index,
+                                 serial_number=group_table$serial_number,
+                                 type=.y$type,
+                                 step=.y$step,
+                                 shift=.y$shift)
+        if(by_type) {
+            env_params$last_group <- env_params$last_group + 1
+            result$group <- env_params$last_group
+            return(result)
+        }
+        result <- .join_add_groups_by_serial_numbers_to_locality(result, serial_groups, env_params)
+        return(result)
+    }   
+    group_table <- dplyr::group_by(table, .data$type, .data$steps, .data$shifts)
+    result_tables <- dplyr::group_map(group_table, group_function)
+    result <- dplyr::bind_rows(result_tables)
+    result <- dplyr::group_by(result, .data$group)
+    return(result)
 }
 
-.join_check_logger_sensors <- function(loggers, group_table, locality_id, logger_type) {
-    selected_loggers <- loggers[group_table$logger_id]
-    all_sensors <- as.character(unique(purrr::flatten(purrr::map(selected_loggers, ~ names(.x$sensors)))))
+.join_add_groups_by_serial_numbers_to_locality <- function(group_table, serial_groups, env_params)
+{
+    temp_groups_table <- tibble::tibble(serial_number=group_table$serial_number)
+    temp_groups_table <- dplyr::left_join(temp_groups_table, serial_groups, by="serial_number")
+    unique_groups <- unique(temp_groups_table$group)
+    new_groups <- seq_along(unique_groups) + env_params$last_group
+    env_params$last_group <- max(new_groups)
+    group_mapping <- tibble::tibble(group=unique_groups, new_group=new_groups)
+    temp_groups_table <- dplyr::left_join(temp_groups_table, group_mapping, by="group")
+    temp_groups_table <- dplyr::select(temp_groups_table, -"group")
+    temp_groups_table <- dplyr::rename(temp_groups_table, group=new_group)
+    result <- dplyr::left_join(group_table, temp_groups_table, by="serial_number")
+    return(result)
+}
+
+.join_get_locality_serial_groups <- function(locality) {
+    group_function <- function(serial_numbers, i) {
+        return(list(serial_number=serial_numbers,
+                    group=i))
+    }
+    group_table <- purrr::imap_dfr(locality$metadata@join_serial, group_function)
+    max_i <- if (nrow(result) == 0) 0 else max(group_table@serial_numbers)
+    serial_numbers <- purrr::map_chr(locality$loggers, ~ .x$metadata@serial_number)
+    result <- tibble::tibble(serial_number=serial_numbers)
+    result <- dplyr::left_join(result, group_table, by="serial_number")
+    na_group_items <- result$group[is.na(result$group)]
+    result$group[is.na(result$group)] <- seq_along(na_group_items) + max_i
+    return(result)
+}
+
+.join_loggers_if_ok <- function(loggers, comp_sensors, locality_id, logger_type, e_state) {
+    is_ok <- .join_check_logger_sensors(loggers, locality_id, logger_type)
+    if(!is_ok) {
+        return(loggers)
+    }
+    joined_logger <- .join_loggers(loggers, comp_sensors, e_state, locality_id)
+    if(is.null(joined_logger)) {
+        return(loggers)
+    }
+    return(joined_logger)
+}
+
+.join_check_logger_sensors <- function(loggers, locality_id, logger_type) {
+    loggers <- loggers[group_table$logger_id]
+    all_sensors <- as.character(unique(purrr::flatten(purrr::map(loggers, ~ names(.x$sensors)))))
     sensor_function <- function(sensor) {
-        result <- all(purrr::map_lgl(selected_loggers, ~ sensor %in% names(.x$sensors)))
+        result <- all(purrr::map_lgl(loggers, ~ sensor %in% names(.x$sensors)))
         return(result)
     }
     any_sensor_in_all <- any(purrr::map_lgl(all_sensors, sensor_function))
@@ -240,7 +279,6 @@ mc_join <- function(data, comp_sensors=NULL) {
     data_table$use_l1 <- data_l1
     problems <- !(data_l1 | data_l2)
     if(any(problems)) {
-        e_state$localities[[locality_id]]$count_data_conflicts <- e_state$localities[[locality_id]]$count_data_conflicts + 1
         if(is.na(e_state$choice)) {
             choice <- .join_ask_user_choice(logger1, logger2, data_table, problems, columns, locality_id)
             if(choice %in% c(.join_const_MENU_CHOICE_OLDER_ALWAYS, .join_const_MENU_CHOICE_NEWER_ALWAYS)) {
