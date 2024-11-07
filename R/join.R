@@ -111,6 +111,9 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
             if(length(indexes) == 1) {
                 return(locality$loggers[indexes])
             }
+            if(!by_type && all(is.na(group_table$serial_number))) {
+                return(locality$loggers[indexes])
+            }
             .join_loggers_if_ok(locality$loggers[indexes], comp_sensors,
                                 locality$metadata@locality_id, logger_type, e_state)
         }
@@ -163,7 +166,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
 
 .join_add_groups_by_serial_numbers_to_locality <- function(group_table, serial_groups, env_params)
 {
-    temp_groups_table <- tibble::tibble(serial_number=group_table$serial_number)
+    temp_groups_table <- tibble::tibble(serial_number=unique(group_table$serial_number))
     temp_groups_table <- dplyr::left_join(temp_groups_table, serial_groups, by="serial_number")
     unique_groups <- unique(temp_groups_table$group)
     new_groups <- seq_along(unique_groups) + env_params$last_group
@@ -182,12 +185,16 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
                     group=i))
     }
     group_table <- purrr::imap_dfr(locality$metadata@join_serial, group_function)
-    max_i <- if (nrow(result) == 0) 0 else max(group_table@serial_numbers)
+    max_group <- if (nrow(group_table) == 0) 0 else max(group_table$group)
     serial_numbers <- purrr::map_chr(locality$loggers, ~ .x$metadata@serial_number)
-    result <- tibble::tibble(serial_number=serial_numbers)
+    result <- tibble::tibble(serial_number=serial_numbers[!is.na(serial_numbers)])
     result <- dplyr::left_join(result, group_table, by="serial_number")
-    na_group_items <- result$group[is.na(result$group)]
-    result$group[is.na(result$group)] <- seq_along(na_group_items) + max_i
+    na_group_serial_numbers <- unique(result$serial_number[is.na(result$group)])
+    na_group_table <- tibble::tibble(serial_number=na_group_serial_numbers, group_na=seq_along(na_group_serial_numbers) + max_group)
+    result <- dplyr::left_join(result, na_group_table, by="serial_number")
+    result$group <- ifelse(is.na(result$group), result$group_na, result$group)
+    result <- dplyr::select(result, -"group_na")
+    result <- dplyr::distinct(result)
     return(result)
 }
 

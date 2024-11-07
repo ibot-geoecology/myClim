@@ -35,13 +35,15 @@ test_that("load objects version 0.2.1", {
     test_agg_data_format(agg_data)
 })
 
-test_that("load objects version 1.0.6", {
-    raw_data <- mc_load("../data/serialize/raw_data_1.0.5.rds")
-    test_raw_data_format(raw_data)
-})
-
 test_that("load objects version 1.1.0", {
     raw_data <- mc_load("../data/serialize/raw_data_1.0.19.rds")
     test_raw_data_format(raw_data)
     expect_equal(raw_data$localities$A2E32$loggers[[2]]$metadata@type, .model_const_LOGGER_HOBO_U23_001A)
+})
+
+test_that("load old versions of object", {
+    raw_data <- mc_load("../data/serialize/raw_data_1.0.5.rds")
+    test_raw_data_format(raw_data)
+    raw_data <- mc_load("../data/serialize/raw_data_1.3.2.rds")
+    test_raw_data_format(raw_data)
 })

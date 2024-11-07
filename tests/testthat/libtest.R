@@ -28,7 +28,7 @@ test_myClimList <- function(data) {
 test_raw_locality <- function(locality) {
     expect_equal(class(locality), "list")
     expect_equal(names(locality), c("metadata", "loggers"))
-    expect_true(is(locality$metadata, "mc_LocalityMetadata"))
+    test_locality_metadata(locality$metadata)
     expect_equal(class(locality$loggers), "list")
     purrr::walk(locality$loggers, test_logger)
 }
@@ -36,12 +36,24 @@ test_raw_locality <- function(locality) {
 test_agg_locality <- function(locality) {
     expect_equal(class(locality), "list")
     expect_equal(names(locality), c("metadata", "datetime", "sensors"))
-    expect_true(is(locality$metadata, "mc_LocalityMetadata"))
+    test_locality_metadata(locality$metadata)
     test_datetime(locality$datetime)
     expect_equal(class(locality$sensors), "list")
     test_data_length(locality)
     test_sensors(locality)
 }
+
+test_locality_metadata <- function(metadata) {
+    expect_true(is(metadata, "mc_LocalityMetadata"))
+    slot_names <- slotNames(metadata)
+    for (param in .model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS) {
+        expect_true(param %in% slot_names)
+    }
+    expect_true(is.list(metadata@join_serial))
+    for(serial in metadata@join_serial) {
+        expect_true(is.character(serial))
+    }
+}    
 
 test_logger <- function(logger) {
     expect_equal(class(logger), "list")
