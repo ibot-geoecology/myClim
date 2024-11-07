@@ -112,7 +112,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
                 return(locality$loggers[indexes])
             }
             .join_loggers_if_ok(locality$loggers[indexes], comp_sensors,
-                                    locality$metadata@locality_id, logger_type, e_state)
+                                locality$metadata@locality_id, logger_type, e_state)
         }
         joined_loggers <- dplyr::group_map(groups_table, group_function)
         locality$loggers <- purrr::flatten(joined_loggers)
@@ -126,8 +126,8 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
 .join_get_logger_groups_table <- function(locality, by_type) {
     types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
     serial_numbers <- purrr::map_chr(locality$loggers, ~ .x$metadata@serial_number)
-    steps <- purrr::map_int(loggers, ~ as.integer(.x$clean_info@step))
-    shifts <- purrr::map_int(loggers, ~ as.integer(.common_get_logger_shift(.x)))
+    steps <- purrr::map_int(locality$loggers, ~ as.integer(.x$clean_info@step))
+    shifts <- purrr::map_int(locality$loggers, ~ as.integer(.common_get_logger_shift(.x)))
     table <- tibble::tibble(index=seq_along(types),
                              serial_number=serial_numbers,
                              type=types,
@@ -154,7 +154,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
         result <- .join_add_groups_by_serial_numbers_to_locality(result, serial_groups, env_params)
         return(result)
     }   
-    group_table <- dplyr::group_by(table, .data$type, .data$steps, .data$shifts)
+    group_table <- dplyr::group_by(table, .data$type, .data$step, .data$shift)
     result_tables <- dplyr::group_map(group_table, group_function)
     result <- dplyr::bind_rows(result_tables)
     result <- dplyr::group_by(result, .data$group)
@@ -200,11 +200,10 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
     if(is.null(joined_logger)) {
         return(loggers)
     }
-    return(joined_logger)
+    return(list(joined_logger))
 }
 
 .join_check_logger_sensors <- function(loggers, locality_id, logger_type) {
-    loggers <- loggers[group_table$logger_id]
     all_sensors <- as.character(unique(purrr::flatten(purrr::map(loggers, ~ names(.x$sensors)))))
     sensor_function <- function(sensor) {
         result <- all(purrr::map_lgl(loggers, ~ sensor %in% names(.x$sensors)))
