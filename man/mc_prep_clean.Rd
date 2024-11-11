@@ -18,7 +18,7 @@ highlighting records with duplicated datetime but different measurement values.W
 does not exist, object is cleaned in both TRUE and FALSE cases.}
 
 \item{tolerance}{list of tolerance values for each physical unit see \link{mc_data_physical}.
-Format is list(unit_name=tolerance_value). If maximal difference of conflict values is lower or equal to tolerance,
+Format is list(unit_name=tolerance_value). If maximal difference of conflict values is lower then tolerance,
 conflict is resolved without warning. If NULL, then tolerance is not applied (default NULL) see details.}
 }
 \value{

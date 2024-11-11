@@ -4,12 +4,19 @@
 \alias{mc_join}
 \title{Joining time-series from repeated downloads}
 \usage{
-mc_join(data, comp_sensors = NULL)
+mc_join(data, comp_sensors = NULL, by_type = TRUE, tolerance = NULL)
 }
 \arguments{
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
 \item{comp_sensors}{senors for compare and select source logger; If NULL then first is used. (default NULL)}
+
+\item{by_type}{if TRUE loggers are joined by logger \code{type}
+if FALSE loggers are joined by logger \code{serial_number} see \link{mc_LoggerMetadata} (default TRUE)}
+
+\item{tolerance}{list of tolerance values for each physical unit see \link{mc_data_physical}.
+Format is list(unit_name=tolerance_value). If maximal difference of overlapping values is lower than tolerance,
+Older sensor is used.}
 }
 \value{
 myClim object with joined loggers.

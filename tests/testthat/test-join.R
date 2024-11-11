@@ -172,3 +172,11 @@ test_that("mc_join join_serial", {
     join_data <- mc_join(join_data, by_type = FALSE)
 })
 
+test_that("mc_join tolerance", {
+    data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
+    tolerance <- list(T_C=0.5)
+    join_data <- mc_join(data, tolerance = tolerance)
+    test_raw_data_format(join_data)
+    expect_equal(join_data$localities$`94184101`$loggers[[1]]$sensors$TMS_T1$values[17:19], c(9.525, 9.525, 9.525))
+})
+

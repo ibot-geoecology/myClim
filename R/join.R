@@ -94,13 +94,17 @@
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
 #' @param by_type if TRUE loggers are joined by logger `type`
 #' if FALSE loggers are joined by logger `serial_number` see [mc_LoggerMetadata] (default TRUE)
+#' @param tolerance list of tolerance values for each physical unit see [mc_data_physical].
+#' Format is list(unit_name=tolerance_value). If maximal difference of overlapping values is lower than tolerance,
+#' Older sensor is used. 
 #' @return myClim object with joined loggers.
 #' @export
-mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
+mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
     e_state <- new.env()
     e_state$choice <- NA_integer_
+    e_state$tolerance <- tolerance
     join_bar <- progress::progress_bar$new(format = "join [:bar] :current/:total localities",
                                            total=length(data$localities))
     locality_function <- function(locality) {
@@ -236,7 +240,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
         start <- logger1$datetime[[1]]
         end <- max(dplyr::last(logger1$datetime), dplyr::last(logger2$datetime))
         data_table <- tibble::tibble(datetime = seq(start, end, logger1$clean_info@step))
-        names_table <- .join_get_names_table(logger1, logger2)
+        names_table <- .join_get_names_table(logger1, logger2, e_state$tolerance)
         l1_table <- .common_sensor_values_as_tibble(logger1)
         colnames(l1_table) <- .join_get_logger_table_column_names(colnames(l1_table), names_table, TRUE)
         data_table <- dplyr::left_join(data_table, l1_table, by="datetime")
@@ -253,14 +257,23 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
     return(result)
 }
 
-.join_get_names_table <- function(logger1, logger2){
+.join_get_names_table <- function(logger1, logger2, tolerance){
     l1_names <- purrr::map_chr(logger1$sensors, ~ .x$metadata@name)
     l1_heights <- purrr::map_chr(logger1$sensors, ~ .x$metadata@height)
+    l1_sensor_ids <- purrr::map_chr(logger1$sensors, ~ .x$metadata@sensor_id)
+    l1_physical <- purrr::map_chr(l1_sensor_ids, ~ myClim::mc_data_sensors[[.x]]@physical)
     l2_names <- purrr::map_chr(logger2$sensors, ~ .x$metadata@name)
     l2_heights <- purrr::map_chr(logger2$sensors, ~ .x$metadata@height)
-    l1 <- tibble::tibble(height=l1_heights, name=l1_names, l1_new_name=paste0("l1_", l1_names))
-    l2 <- tibble::tibble(height=l2_heights, name=l2_names, l2_new_name=paste0("l2_", l2_names))
-    dplyr::full_join(l1, l2, by=c("height", "name"))
+    l2_sensor_ids <- purrr::map_chr(logger2$sensors, ~ .x$metadata@sensor_id)
+    l2_physical <- purrr::map_chr(l2_sensor_ids, ~ myClim::mc_data_sensors[[.x]]@physical)
+    l1 <- tibble::tibble(height=l1_heights, name=l1_names, physical=l1_physical, l1_new_name=paste0("l1_", l1_names))
+    l2 <- tibble::tibble(height=l2_heights, name=l2_names, physical=l2_physical, l2_new_name=paste0("l2_", l2_names))
+    result <- dplyr::full_join(l1, l2, by=c("height", "name", "physical"))
+    result$tolerance <- NA_real_
+    if(!is.null(tolerance)) {
+        result$tolerance <- purrr::map_dbl(result$physical, ~ {if (.x %in% names(tolerance)) tolerance[[.x]] else NA_real_})
+    }
+    return(result)
 }
 
 .join_get_logger_table_column_names <- function (old_names, names_table, is_l1) {
@@ -310,7 +323,8 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
     not_na_sensors <- !(is.na(names_table$l1_new_name) | is.na(names_table$l2_new_name))
     l1_columns <- dplyr::first(names_table$l1_new_name[not_na_sensors])
     l2_columns <- dplyr::first(names_table$l2_new_name[not_na_sensors])
-    orig <- dplyr::first(names_table$name)
+    orig <- dplyr::first(names_table$name[not_na_sensors])
+    tolerance <- dplyr::first(names_table$tolerance[not_na_sensors])
     if(!is.null(comp_sensors)) {
         sensors_select <- names_table$name %in% comp_sensors
         if(!any(sensors_select)) {
@@ -320,24 +334,29 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE) {
             l1_columns <- names_table$l1_new_name[sensors_select]
             l2_columns <- names_table$l2_new_name[sensors_select]
             orig <- names_table$name[sensors_select]
+            tolerance <- names_table$tolerance[sensors_select]
         }
     }
-    tibble::tibble(l1=l1_columns, l2=l2_columns, orig=orig)
+    tibble::tibble(l1=l1_columns, l2=l2_columns, orig=orig, tolerance=tolerance)
 }
 
 .join_get_equal_data <- function(data_table, columns) {
-    compare_function <- function(x, y) {
-        x_is_na <- is.na(data_table[[x]])
-        y_is_na <- is.na(data_table[[y]])
+    compare_function <- function(l1, l2, tolerance) {
+        x_is_na <- is.na(data_table[[l1]])
+        y_is_na <- is.na(data_table[[l2]])
         is_both_na <- x_is_na & y_is_na
         is_one_na <- (x_is_na & !y_is_na) | (!x_is_na & y_is_na)
-        result <- dplyr::near(data_table[[x]], data_table[[y]])
+        if(is.na(tolerance)) {
+            result <- dplyr::near(data_table[[l1]], data_table[[l2]])
+        } else {
+            result <- dplyr::near(data_table[[l1]], data_table[[l2]], tol=tolerance)
+        }
         result[is_both_na] <- TRUE
         result[is_one_na] <- FALSE
         return(result)
     }
 
-    is_equal <- purrr::map2(columns$l1, columns$l2, compare_function)
+    is_equal <- purrr::pmap(dplyr::select(columns, "l1", "l2", "tolerance"), compare_function)
     result <- purrr::reduce(is_equal, `&`)
     result[is.na(result)] <- FALSE
     result
