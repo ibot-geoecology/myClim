@@ -1,3 +1,9 @@
+# myClim 1.3.3
+* The parameters `tolerance` and `by_type` have been added to the `mc_join` function.
+* The class `mc_LocalityMetadata` has been extended with the `join_serial` slot.
+* The new function `mc_states_join` has been added.
+* The function `mc_info_join` has been deleted.
+
 # myClim 1.3.2
 * The parameter `tolerance` has been added to the `mc_prep_clean` function.
 * The result table of the `mc_info_clean` function has been extended with the `logger_index` column.

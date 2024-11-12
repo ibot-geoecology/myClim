@@ -319,3 +319,14 @@ test_that("mc_states_outlier", {
     expect_true("range" %in% states_agg_table$tag)
     expect_true("jump" %in% states_agg_table$tag)
 })
+
+test_that("mc_states_join", {
+    data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
+    states_data <- mc_states_join(data)
+    states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict")
+    expect_equal(nrow(states_table), 8)
+    tolerance <- list(T_C=0.5)
+    states_data <- mc_states_join(data, tolerance=tolerance)
+    states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict")
+    expect_equal(nrow(states_table), 2)
+})

@@ -13,7 +13,7 @@ mc_prep_clean(data, silent = FALSE, resolve_conflicts = TRUE, tolerance = NULL)
 
 \item{resolve_conflicts}{by default the object is automatically cleaned and conflict
 measurements with closest original datetime to rounded datetime are selected, see details. (default TRUE)
-If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
+If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "clean_conflict"
 highlighting records with duplicated datetime but different measurement values.When conflict records
 does not exist, object is cleaned in both TRUE and FALSE cases.}
 
@@ -25,7 +25,7 @@ conflict is resolved without warning. If NULL, then tolerance is not applied (de
 \itemize{
 \item cleaned myClim object in Raw-format (default) \code{resolve_conflicts=TRUE} or \code{resolve_conflicts=FALSE} but no conflicts exist
 \item cleaning log is by default printed in console, but can be called also later by \code{\link[=mc_info_clean]{mc_info_clean()}}
-\item non cleaned myClim object in Raw-format with "conflict" tags \code{resolve_conflicts=FALSE} and conflicts exist
+\item non cleaned myClim object in Raw-format with "clean_conflict" tags \code{resolve_conflicts=FALSE} and conflicts exist
 }
 }
 \description{

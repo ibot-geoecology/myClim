@@ -73,14 +73,14 @@ test_that("mc_prep_clean conflicts", {
         expect_warning("Object not cleaned. The function only tagged \\(states\\) measurements with cleaning conflicts.")
     expect_false(.prep_is_datetime_step_processed_in_object(data_conflicts))
     states <- data_conflicts$localities$`91184133`$loggers[[1]]$sensors$Thermo_T$states
-    expect_true(length(states$tag[states$tag == .model_const_SENSOR_STATE_CONFLICT]) > 0)
+    expect_true(length(states$tag[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT]) > 0)
     data <- mc_read_files("../data/clean-conflict", "TOMST", clean=FALSE)
     differnt_values_warning(data_conflicts <- mc_prep_clean(data, silent=T, resolve_conflicts=FALSE)) %>%
         differnt_values_warning() %>%
         expect_warning("Object not cleaned. The function only tagged \\(states\\) measurements with cleaning conflicts.")
     states <- data_conflicts$localities$`92201076`$loggers[[1]]$sensors$Dendro_T$states
-    expect_equal(states$start[states$tag == .model_const_SENSOR_STATE_CONFLICT], lubridate::ymd_hm("2023-01-13 23:00"))
-    expect_equal(states$end[states$tag == .model_const_SENSOR_STATE_CONFLICT], lubridate::ymd_hm("2023-01-13 23:00"))
+    expect_equal(states$start[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT], lubridate::ymd_hm("2023-01-13 23:00"))
+    expect_equal(states$end[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT], lubridate::ymd_hm("2023-01-13 23:00"))
     tolerance <- list()
     tolerance[[.model_const_PHYSICAL_T_C]] <- 0.5
     tolerance[[.model_const_PHYSICAL_radius_raw]] <- 10

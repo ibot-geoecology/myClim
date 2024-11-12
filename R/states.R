@@ -800,3 +800,85 @@ mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_
     }
     return(sensor)
 }
+
+#' Create states for join conflicts
+#' 
+#' This function creates a state (tag) for all values that are in conflict in joining process.
+#' 
+#' @template param_myClim_object_raw
+#' @param tag The tag name (default "join_conflict").
+#' @param by_type for [mc_join] function (default TRUE)
+#' @param tolerance for [mc_join] function (default NULL)
+#' @return Returns a myClim object with added states.
+#' @export
+mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NULL) {
+    .common_stop_if_not_raw_format(data)
+    .prep_check_datetime_step_unprocessed(data, stop)
+    states_env <- new.env()
+    states_env$new_states <- list()
+    states_env$tag <- tag
+    states_env$tolerance <- tolerance
+    join_bar <- progress::progress_bar$new(format = "join states [:bar] :current/:total localities",
+                                           total=length(data$localities))
+    locality_function <- function(locality) {
+        locality_id <- locality$metadata@locality_id
+        states_env$locality <- locality
+        groups_table <- .join_get_logger_groups_table(locality, by_type)
+        group_function <- function(group_table, .y) {
+            indexes <- group_table$index
+            logger_type <- group_table$type[[1]]
+            loggers <- locality$loggers[indexes]
+            can_join <- .join_can_be_joined(loggers, group_table, locality_id, logger_type, by_type)
+            if(!can_join) {
+                return()
+            }
+            .states_join_conflict_intervals(states_env, group_table)
+        }
+        dplyr::group_walk(groups_table, group_function)
+        join_bar$tick()
+    }
+
+    purrr::walk(data$localities, locality_function)
+
+    if(length(states_env$new_states) == 0) {
+        return(data)
+    }
+    new_states_table <- dplyr::bind_rows(states_env$new_states)
+    data <- mc_states_insert(data, new_states_table)
+    return(data)
+}
+
+.states_join_conflict_intervals <- function(states_env, group_table) {
+    logger_indexes <- group_table$index
+    loggers <- states_env$locality$loggers[logger_indexes]
+    int_table <- tibble::tibble(i=seq_along(loggers))
+    int_table$interval <- purrr::map_vec(loggers, ~ lubridate::interval(.x$datetime[[1]], dplyr::last(.x$datetime)))
+    intervals_function <- function(selected_i) {
+        other_rows <- dplyr::filter(int_table, .data$i != selected_i)
+        interval <- int_table$interval[selected_i]
+        other_rows$overlap <- lubridate::int_overlaps(interval, other_rows$interval)
+        purrr::walk(other_rows$i[other_rows$overlap],
+            ~ .states_join_compare_loggers(states_env, loggers[[selected_i]], loggers[[.x]], logger_indexes[[selected_i]], logger_indexes[[.x]]))        
+    }
+    purrr::walk(int_table$i, intervals_function)
+}
+
+.states_join_compare_loggers <- function(states_env, logger1, logger2, logger1_index, logger2_index){
+    sensor_names_table <- .join_get_sensor_names_table(logger1, logger2, states_env$tolerance)
+    data_table <- .join_get_loggers_data_table(sensor_names_table, logger1, logger2)
+    sensor_function <- function(sensor_name) {
+        columns <- .join_get_compare_columns(sensor_names_table, sensor_name)
+        data_table <- .join_add_select_columns(data_table, columns)
+        if(!any(data_table$conflict)) {
+            return()
+        }
+        serial_number <- {if (!is.na(logger2$metadata@serial_number)) paste0(" ", logger2$metadata@serial_number) else ""}
+        value <- paste0("[", logger2_index, "]", serial_number)
+        states_table <- .states_get_states_table_from_logical_values(data_table$conflict, data_table$datetime, states_env$tag, value=value)
+        states_table$locality_id <- states_env$locality$metadata@locality_id
+        states_table$logger_index <- logger1_index
+        states_table$sensor_name <- sensor_name
+        states_env$new_states <- c(states_env$new_states, list(states_table))
+    }
+    purrr::walk(sensor_names_table$name, sensor_function)
+}

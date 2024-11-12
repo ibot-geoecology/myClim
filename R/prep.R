@@ -88,7 +88,7 @@
 #' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @param resolve_conflicts by default the object is automatically cleaned and conflict 
 #' measurements with closest original datetime to rounded datetime are selected, see details. (default TRUE)
-#' If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
+#' If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "clean_conflict"
 #' highlighting records with duplicated datetime but different measurement values.When conflict records 
 #' does not exist, object is cleaned in both TRUE and FALSE cases. 
 #' @param tolerance list of tolerance values for each physical unit see [mc_data_physical].
@@ -97,7 +97,7 @@
 #' @return
 #' * cleaned myClim object in Raw-format (default) `resolve_conflicts=TRUE` or `resolve_conflicts=FALSE` but no conflicts exist 
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
-#' * non cleaned myClim object in Raw-format with "conflict" tags `resolve_conflicts=FALSE` and conflicts exist
+#' * non cleaned myClim object in Raw-format with "clean_conflict" tags `resolve_conflicts=FALSE` and conflicts exist
 #' 
 #' @export
 #' @examples
@@ -273,7 +273,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     ends <- ends[diff_parts$values]
     starts <- starts[diff_parts$values]
     states_table <- tibble::tibble(locality_id=locality_id, logger_index=logger_index,
-                                   sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CONFLICT,
+                                   sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CLEAN_CONFLICT,
                                    start=duplicated_table$datetime[starts], end=duplicated_table$datetime[ends],
                                    value=NA_character_)
     clean_env$states <- dplyr::bind_rows(clean_env$states, states_table)
