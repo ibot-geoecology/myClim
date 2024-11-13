@@ -101,16 +101,18 @@
 }
 
 .common_crop_states_table <- function(states_table, intervals) {
-    state_function <- function(tag, start, end, value) {
-        state_interval <- lubridate::interval(start, end)
-        new_state_intervals <- purrr::discard(lubridate::intersect(state_interval, intervals), ~ is.na(.x))
-        return(list(tag=tag,
-                    start=lubridate::int_start(new_state_intervals),
-                    end=lubridate::int_end(new_state_intervals),
-                    value=value))
+    states_table$interval <- lubridate::interval(states_table$start, states_table$end)
+    interval_function <- function(interval) {
+        result <- states_table
+        result$new_interval <- lubridate::intersect(interval, result$interval)
+        result <- dplyr::filter(result, !is.na(.data$new_interval))
+        return(list(tag=result$tag,
+                    start=lubridate::int_start(result$new_interval),
+                    end=lubridate::int_end(result$new_interval),
+                    value=result$value))
     }
 
-    as.data.frame(purrr::pmap_dfr(states_table, state_function))
+    return(as.data.frame(purrr::map_dfr(intervals, interval_function)))
 }
 
 .common_get_time_series_intervals <- function(datetime, filter) {

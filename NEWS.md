@@ -1,3 +1,6 @@
+# myClim 1.3.3
+* A performance issue in the `mc_prep_crop` function has been fixed.
+
 # myClim 1.3.2
 * The parameter `tolerance` has been added to the `mc_prep_clean` function.
 * The result table of the `mc_info_clean` function has been extended with the `logger_index` column.
