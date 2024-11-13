@@ -165,6 +165,8 @@ test_that("mc_join join_serial", {
         "../data/join_serial/data_94184105_0.csv", "A", "TOMST",
     ))
     data <- mc_read_data(files_table, silent=TRUE)
+    join_data <- mc_join(data, by_type = FALSE)
+    test_raw_data_format(data)
     data <- mc_prep_meta_locality(data, list(A=list(c("94184102", "94184103"), c("94184104", "94184105"))), param_name="join_serial")
     test_raw_data_format(data)
     join_data <- mc_join(data, by_type = FALSE)

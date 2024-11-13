@@ -815,11 +815,13 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
     states_env <- new.env()
-    states_env$new_states <- list()
+    states_env$new_states <- list(locality_id=character(), logger_index=integer(), sensor_name=character(),
+                                  tag=character(), start=as.POSIXct(character()), end=as.POSIXct(character()), value=character())
     states_env$tag <- tag
     states_env$tolerance <- tolerance
     join_bar <- progress::progress_bar$new(format = "join states [:bar] :current/:total localities",
                                            total=length(data$localities))
+    join_bar$tick(0)
     locality_function <- function(locality) {
         locality_id <- locality$metadata@locality_id
         states_env$locality <- locality
@@ -836,15 +838,10 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
         }
         dplyr::group_walk(groups_table, group_function)
         join_bar$tick()
+        return(states_env$locality)
     }
 
-    purrr::walk(data$localities, locality_function)
-
-    if(length(states_env$new_states) == 0) {
-        return(data)
-    }
-    new_states_table <- dplyr::bind_rows(states_env$new_states)
-    data <- mc_states_insert(data, new_states_table)
+    data$localities <- purrr::map(data$localities, locality_function)
     return(data)
 }
 
@@ -874,11 +871,9 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
         }
         serial_number <- {if (!is.na(logger2$metadata@serial_number)) paste0(" ", logger2$metadata@serial_number) else ""}
         value <- paste0("[", logger2_index, "]", serial_number)
-        states_table <- .states_get_states_table_from_logical_values(data_table$conflict, data_table$datetime, states_env$tag, value=value)
-        states_table$locality_id <- states_env$locality$metadata@locality_id
-        states_table$logger_index <- logger1_index
-        states_table$sensor_name <- sensor_name
-        states_env$new_states <- c(states_env$new_states, list(states_table))
+        new_states_table <- .states_get_states_table_from_logical_values(data_table$conflict, data_table$datetime, states_env$tag, value=value)
+        current_states_table <- logger1$sensors[[sensor_name]]$states
+        states_env$locality$loggers[[logger1_index]]$sensors[[sensor_name]]$states <- dplyr::union_all(current_states_table, new_states_table)
     }
     purrr::walk(sensor_names_table$name, sensor_function)
 }

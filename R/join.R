@@ -192,7 +192,11 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
     max_group <- if (nrow(group_table) == 0) 0 else max(group_table$group)
     serial_numbers <- purrr::map_chr(locality$loggers, ~ .x$metadata@serial_number)
     result <- tibble::tibble(serial_number=serial_numbers[!is.na(serial_numbers)])
-    result <- dplyr::left_join(result, group_table, by="serial_number")
+    if(nrow(group_table) == 0) {
+        result$group <- NA_integer_
+    } else {
+        result <- dplyr::left_join(result, group_table, by="serial_number")
+    }
     na_group_serial_numbers <- unique(result$serial_number[is.na(result$group)])
     na_group_table <- tibble::tibble(serial_number=na_group_serial_numbers, group_na=seq_along(na_group_serial_numbers) + max_group)
     result <- dplyr::left_join(result, na_group_table, by="serial_number")
