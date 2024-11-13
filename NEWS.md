@@ -1,4 +1,5 @@
 # myClim 1.3.3
+* A performance issue in the `mc_prep_crop` function has been fixed.
 * The parameters `tolerance` and `by_type` have been added to the `mc_join` function.
 * The class `mc_LocalityMetadata` has been extended with the `join_serial` slot.
 * The new function `mc_states_join` has been added.
