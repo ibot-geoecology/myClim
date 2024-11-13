@@ -46,7 +46,7 @@ test_agg_locality <- function(locality) {
 test_locality_metadata <- function(metadata) {
     expect_true(is(metadata, "mc_LocalityMetadata"))
     slot_names <- slotNames(metadata)
-    for (param in .model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS) {
+    for (param in myClim:::.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS) {
         expect_true(param %in% slot_names)
     }
     expect_true(is.list(metadata@join_serial))

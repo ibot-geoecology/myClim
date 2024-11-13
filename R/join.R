@@ -178,7 +178,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
     group_mapping <- tibble::tibble(group=unique_groups, new_group=new_groups)
     temp_groups_table <- dplyr::left_join(temp_groups_table, group_mapping, by="group")
     temp_groups_table <- dplyr::select(temp_groups_table, -"group")
-    temp_groups_table <- dplyr::rename(temp_groups_table, group=new_group)
+    temp_groups_table <- dplyr::rename(temp_groups_table, group="new_group")
     result <- dplyr::left_join(group_table, temp_groups_table, by="serial_number")
     return(result)
 }
