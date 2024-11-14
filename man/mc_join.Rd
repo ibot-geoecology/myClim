@@ -4,12 +4,18 @@
 \alias{mc_join}
 \title{Joining time-series from repeated downloads}
 \usage{
-mc_join(data, comp_sensors = NULL)
+mc_join(data, comp_sensors = NULL, by_type = TRUE, tolerance = NULL)
 }
 \arguments{
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
 
 \item{comp_sensors}{senors for compare and select source logger; If NULL then first is used. (default NULL)}
+
+\item{by_type}{if TRUE loggers are joined by logger type, height and physical element
+if FALSE loggers are joined by logger \code{serial_number} see \link{mc_LoggerMetadata} (default TRUE)}
+
+\item{tolerance}{list of tolerance values for each physical unit see \link{mc_data_physical}.
+e.g. list(T_C = 0.5). Values from  older time-series are used for overlaps below tolerance.}
 }
 \value{
 myClim object with joined loggers.
@@ -17,13 +23,14 @@ myClim object with joined loggers.
 \description{
 The function is designed to merge time-series data obtained through
 repeated downloads in the same location. Within a specific locality,
-the function performs the merging based on logger type,
-physical element, and sensor height
+the function performs the merging based on 1) logger type,
+physical element, and sensor height, or 2) based on the list of logger
+serial numbers to be joined, provided by user in locality metadata.
 }
 \details{
 Joining is restricted to the myClim Raw-format (refer to \link{myClim-package}).
 Loggers need to be organized within localities. The simplest method is to use \link{mc_read_data},
-providing both \code{files_table} and \code{localities_table}. When using \link{mc_read_files}
+providing \code{files_table} with locality IDs. When using \link{mc_read_files}
 without metadata, a bit more coding is needed. In this case, you can create
 multiple myClim objects and specify correct locality names afterwards,
 then merge these objects using \link{mc_prep_merge}, which groups loggers
@@ -62,6 +69,17 @@ Users must press the number key, hit Return/Enter,
 or write in console the exact date in the format \verb{YYYY-MM-DD hh:mm}
 to trim the older series and continue with the newer series.
 
+by_type = TRUE (default)
+Loggers are joined based on logger type, physical element,
+and sensor height. This is a good option for the localities,
+were are NOT more loggers of identical type and height recording simultaneously.
+
+by_type = FALSE
+Loggers are joined based on the list of logger_serial belonging to each locality.
+User must specify in locality metadata, which logger serials are joined together.
+This is a good option for the localities, with more loggers of identical type and
+height measuring simultaneously.
+
 Loggers with multiple sensors are joined based on one or
 more selected sensors (see parameter comp_sensors).
 The name of the resulting joined sensor is taken from the logger with
@@ -70,13 +88,9 @@ the resulting serial_number is NA. Clean info is changed to NA except
 for the step. When joining a non-calibrated sensor with a calibrated one,
 the calibration information must be empty in the non-calibrated sensor.
 
+The \code{tolerance} parameter can be used for cases, when joining multiple
+time-series which is "almost" identical, and the difference is caused
+e.g. by logger precision or resolution.
+
 For example of joining see \href{http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html}{myClim vignette}.
-
-\strong{WARNING}
-
-\code{mc_join} expects a maximum of one logger of a certain type
-and height measuring certain elements in one locality.
-In other words, if you use multiple logger of identical type
-at identical heights in one locality, you cannot use
-\code{mc_join} directly; you have to split your locality into sub-localities.
 }

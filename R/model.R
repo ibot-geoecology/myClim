@@ -5,7 +5,7 @@
 .model_const_TZ_USER_DEFINED <- "user defined"
 
 .model_const_COUNT_TEST_VALUES <- 100
-.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("locality_id", "elevation", "lat_wgs84", "lon_wgs84", "tz_offset")
+.model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("locality_id", "elevation", "lat_wgs84", "lon_wgs84", "tz_offset", "join_serial")
 .model_const_EDITABLE_SENSOR_METADATA_PARAMETERS <- c("name", "height")
 .model_const_TOMST_THERMODATALOGGER_VALUE <- 65336
 .model_const_TOMST_DENDROMETER_UM_RANGE <- 8890
@@ -153,7 +153,7 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 .model_const_SENSOR_STATE_SOURCE <- "source"
 .model_const_SENSOR_STATE_ERROR <- "error"
-.model_const_SENSOR_STATE_CONFLICT <- "conflict"
+.model_const_SENSOR_STATE_CLEAN_CONFLICT <- "clean_conflict"
 
 .model_const_MESSAGE_NO_DATA <- "There aren't any data in source file."
 .model_const_MESSAGE_SEPARATED_TIME <- "Separated time in source data isn't supported."
@@ -395,6 +395,7 @@ setMethod("initialize",
 #' @slot lon_wgs84 longitude of locality in WGS-84
 #' @slot tz_offset offset from UTC in minutes
 #' @slot tz_type type of time zone
+#' @slot join_serial list of serial numbers of loggers for join operation
 #' @slot user_data list for user data
 #' @exportClass mc_LocalityMetadata
 #' @seealso [myClim-package], [mc_LoggerMetadata], [mc_SensorMetadata]
@@ -405,6 +406,7 @@ mc_LocalityMetadata <- setClass("mc_LocalityMetadata",
                                           lon_wgs84 = "numeric",
                                           tz_offset = "numeric",
                                           tz_type = "character",
+                                          join_serial = "list",
                                           user_data = "list"),
                                 contains = "mc_Serializable")
 
@@ -416,6 +418,7 @@ setMethod("initialize",
               .Object@lon_wgs84 <- NA_real_
               .Object@tz_offset <- NA_integer_
               .Object@tz_type <- .model_const_TZ_UTC
+              .Object@join_serial <- list()
               .Object@user_data <- list()
               return(.Object)
           })

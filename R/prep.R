@@ -88,16 +88,16 @@
 #' @param silent if true, then cleaning log table and progress bar is not printed in console (default FALSE), see [myClim::mc_info_clean()]
 #' @param resolve_conflicts by default the object is automatically cleaned and conflict 
 #' measurements with closest original datetime to rounded datetime are selected, see details. (default TRUE)
-#' If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "conflict"
+#' If FALSE and conflict records exist the function returns the original, uncleaned object with tags (states) "clean_conflict"
 #' highlighting records with duplicated datetime but different measurement values.When conflict records 
 #' does not exist, object is cleaned in both TRUE and FALSE cases. 
 #' @param tolerance list of tolerance values for each physical unit see [mc_data_physical].
-#' Format is list(unit_name=tolerance_value). If maximal difference of conflict values is lower or equal to tolerance,
+#' Format is list(unit_name=tolerance_value). If maximal difference of conflict values is lower then tolerance,
 #' conflict is resolved without warning. If NULL, then tolerance is not applied (default NULL) see details. 
 #' @return
 #' * cleaned myClim object in Raw-format (default) `resolve_conflicts=TRUE` or `resolve_conflicts=FALSE` but no conflicts exist 
 #' * cleaning log is by default printed in console, but can be called also later by [myClim::mc_info_clean()]
-#' * non cleaned myClim object in Raw-format with "conflict" tags `resolve_conflicts=FALSE` and conflicts exist
+#' * non cleaned myClim object in Raw-format with "clean_conflict" tags `resolve_conflicts=FALSE` and conflicts exist
 #' 
 #' @export
 #' @examples
@@ -241,14 +241,18 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     duplicated_rows <- duplicated(sensor_table$datetime) | duplicated(sensor_table$datetime, fromLast = TRUE)
     duplicated_table <- dplyr::filter(sensor_table, duplicated_rows)
     groupped_duplicated <- dplyr::group_by(duplicated_table, .data$datetime)
-    tolerance_value <- 0
+    tolerance_value <- NA_real_
     if(!is.null(clean_env$tolerance) && physical %in% names(clean_env$tolerance)) {
         tolerance_value <- clean_env$tolerance[[physical]]
     }
     is_different_function <- function(.x, .y) {
         min_value <- min(.x[[1]], na.rm=TRUE)
         max_value <- max(.x[[1]], na.rm=TRUE)
-        result <- max_value - min_value > tolerance_value
+        if(is.na(tolerance_value)) {
+            result <- !dplyr::near(min_value, max_value)
+        } else {
+            result <- !dplyr::near(min_value, max_value, tol = tolerance_value)
+        }
         return(rep(result, nrow(.x)))
     }
     is_different <- as.logical(purrr::flatten(dplyr::group_map(groupped_duplicated, is_different_function)))
@@ -269,7 +273,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     ends <- ends[diff_parts$values]
     starts <- starts[diff_parts$values]
     states_table <- tibble::tibble(locality_id=locality_id, logger_index=logger_index,
-                                   sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CONFLICT,
+                                   sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CLEAN_CONFLICT,
                                    start=duplicated_table$datetime[starts], end=duplicated_table$datetime[ends],
                                    value=NA_character_)
     clean_env$states <- dplyr::bind_rows(clean_env$states, states_table)

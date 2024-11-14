@@ -154,3 +154,31 @@ test_that("mc_join calibration", {
     expect_equal(joined_data$localities$A$loggers[[1]]$sensors$Thermo_T$calibration$cor_factor, c(NA_real_, 0.1, NA_real_, 0.1))
 })
 
+test_that("mc_join join_serial", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path, ~locality_id, ~data_format,
+        "../data/join_serial/data_94184101_0.csv", "A", "TOMST",
+        "../data/join_serial/data_94184101_1.csv", "A", "TOMST",
+        "../data/join_serial/data_94184102_0.csv", "A", "TOMST",
+        "../data/join_serial/data_94184103_0.csv", "A", "TOMST",
+        "../data/join_serial/data_94184104_0.csv", "A", "TOMST",
+        "../data/join_serial/data_94184105_0.csv", "A", "TOMST",
+    ))
+    data <- mc_read_data(files_table, silent=TRUE)
+    join_data <- mc_join(data, by_type = FALSE)
+    test_raw_data_format(data)
+    data <- mc_prep_meta_locality(data, list(A=list(c("94184102", "94184103"), c("94184104", "94184105"))), param_name="join_serial")
+    test_raw_data_format(data)
+    join_data <- mc_join(data, by_type = FALSE)
+    test_raw_data_format(join_data)
+    join_data <- mc_join(join_data, by_type = FALSE)
+})
+
+test_that("mc_join tolerance", {
+    data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
+    tolerance <- list(T_C=0.5)
+    join_data <- mc_join(data, tolerance = tolerance)
+    test_raw_data_format(join_data)
+    expect_equal(join_data$localities$`94184101`$loggers[[1]]$sensors$TMS_T1$values[17:19], c(9.525, 9.525, 9.525))
+})
+

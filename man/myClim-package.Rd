@@ -80,6 +80,7 @@ $localities | locality[1]                                                       
             |           | @lon_wgs84                  |                                     |
             |           | @tz_offset                  |                                     |
             |           | @tz_type                    |                                     |
+            |           | @join_serial                |                                     |
             |           | @user_data                  |                                     |
             |           +-----------------------------+                                     |
             |           +------------------------------------------------------------------+|
@@ -175,6 +176,7 @@ $localities | locality[1]                                                     |
             |            | @lon_wgs84                  |                      |
             |            | @tz_offset                  |                      |
             |            | @tz_type                    |                      |
+            |            | @join_serial                |                      |
             |            | @user_data                  |                      |
             |            +-----------------------------+                      |
             | $datetime  POSIXct vector                                       |

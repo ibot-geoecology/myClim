@@ -219,37 +219,6 @@ mc_info_logger <- function(data) {
     as.data.frame(result)
 }
 
-#' Get joining info table
-#'
-#' This function returns a data.frame that contains information about the join operations.
-#' Although this function performs the join process, it only returns an overview table,
-#' not the actual joined data.
-#'
-#' This function is designed to work only with
-#' myClim objects in **Raw-format**, where the loggers are organized at localities.
-#' In **Agg-format**, myClim objects do not support loggers; sensors are directly connected to the locality.
-#' See [myClim-package]. `mc_info_join` does not work in Agg-format.
-#'
-#' @template param_myClim_object_raw
-#' @param comp_sensors parameter for [mc_join()] function (default NULL)
-#' @return A data.frame with the following columns:
-#' * locality_id - The ID of the locality.
-#' * count_loggers - Number of loggers before the join operation.
-#' * count_joined_loggers - Number of loggers after the join operation.
-#' * count_data_conflicts - Number of different values in overlapping sensors.
-#' * count_errors - Number of join-related errors. An error occurs when all sensors of the loggers have different names.
-#' @export
-mc_info_join <- function(data, comp_sensors=NULL) {
-    localities <- as.list(.join_main(data, comp_sensors, TRUE))
-    param_df <- purrr::map_dfr(localities, ~ .x)
-    result <- data.frame(locality_id=names(localities))
-    result[colnames(param_df)] <- param_df
-    for(colname in colnames(param_df)) {
-        result[[colname]] <- as.integer(result[[colname]])
-    }
-    return(result)
-}
-
 #' Get states (tags) info table
 #'
 #' This function return data.frame with information about sensor states (tags) see [myClim-package]

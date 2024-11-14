@@ -27,6 +27,8 @@ where the data come from, or after the sensor id where the data come form.
 
 \item{\code{tz_type}}{type of time zone}
 
+\item{\code{join_serial}}{list of serial numbers of loggers for join operation}
+
 \item{\code{user_data}}{list for user data}
 }}
 
