@@ -19,5 +19,10 @@ mc_states_join(data, tag = "join_conflict", by_type = TRUE, tolerance = NULL)
 Returns a myClim object with added states.
 }
 \description{
-This function creates a state (tag) for all values that are in conflict in joining process.
+This function creates a state (tag) when joining multiple overlapping
+time-series with different microclimate values.  State is created for
+all values that are in conflict in joining process.
+}
+\details{
+For more info see details of \link{mc_join} function.
 }

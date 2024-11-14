@@ -29,13 +29,14 @@
 #' @description
 #' The function is designed to merge time-series data obtained through 
 #' repeated downloads in the same location. Within a specific locality, 
-#' the function performs the merging based on logger type, 
-#' physical element, and sensor height
+#' the function performs the merging based on 1) logger type, 
+#' physical element, and sensor height, or 2) based on the list of logger 
+#' serial numbers to be joined, provided by user in locality metadata.  
 #'
 #' @details
 #' Joining is restricted to the myClim Raw-format (refer to [myClim-package]). 
 #' Loggers need to be organized within localities. The simplest method is to use [mc_read_data], 
-#' providing both `files_table` and `localities_table`. When using [mc_read_files] 
+#' providing `files_table` with locality IDs. When using [mc_read_files] 
 #' without metadata, a bit more coding is needed. In this case, you can create 
 #' multiple myClim objects and specify correct locality names afterwards, 
 #' then merge these objects using [mc_prep_merge], which groups loggers 
@@ -72,31 +73,37 @@
 #' or write in console the exact date in the format `YYYY-MM-DD hh:mm` 
 #' to trim the older series and continue with the newer series. 
 #' 
+#' by_type = TRUE (default)  
+#' Loggers are joined based on logger type, physical element, 
+#' and sensor height. This is a good option for the localities,
+#' were are NOT more loggers of identical type and height recording simultaneously.
+#' 
+#' by_type = FALSE    
+#' Loggers are joined based on the list of logger_serial belonging to each locality. 
+#' User must specify in locality metadata, which logger serials are joined together. 
+#' This is a good option for the localities, with more loggers of identical type and 
+#' height measuring simultaneously. 
+#' 
 #' Loggers with multiple sensors are joined based on one or 
-#' more selected sensors (see parameter comp_sensors).  
+#' more selected sensors (see parameter comp_sensors).
 #' The name of the resulting joined sensor is taken from the logger with 
 #' the oldest data. If serial_number is not equal during logger joining, 
 #' the resulting serial_number is NA. Clean info is changed to NA except 
 #' for the step. When joining a non-calibrated sensor with a calibrated one, 
 #' the calibration information must be empty in the non-calibrated sensor.
 #' 
+#' The `tolerance` parameter can be used for cases, when joining multiple 
+#' time-series which is "almost" identical, and the difference is caused 
+#' e.g. by logger precision or resolution.  
+#' 
 #' For example of joining see [myClim vignette](http://labgis.ibot.cas.cz/myclim/articles/myclim-demo.html). 
 #' 
-#' **WARNING**
-#' 
-#' `mc_join` expects a maximum of one logger of a certain type 
-#' and height measuring certain elements in one locality. 
-#' In other words, if you use multiple logger of identical type 
-#' at identical heights in one locality, you cannot use 
-#' `mc_join` directly; you have to split your locality into sub-localities.
-#'
 #' @template param_myClim_object_raw
 #' @param comp_sensors senors for compare and select source logger; If NULL then first is used. (default NULL)
-#' @param by_type if TRUE loggers are joined by logger `type`
+#' @param by_type if TRUE loggers are joined by logger type, height and physical element
 #' if FALSE loggers are joined by logger `serial_number` see [mc_LoggerMetadata] (default TRUE)
 #' @param tolerance list of tolerance values for each physical unit see [mc_data_physical].
-#' Format is list(unit_name=tolerance_value). If maximal difference of overlapping values is lower than tolerance,
-#' Older sensor is used. 
+#' e.g. list(T_C = 0.5). Values from  older time-series are used for overlaps below tolerance.
 #' @return myClim object with joined loggers.
 #' @export
 mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {

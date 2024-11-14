@@ -803,8 +803,13 @@ mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_
 
 #' Create states for join conflicts
 #' 
-#' This function creates a state (tag) for all values that are in conflict in joining process.
+#' This function creates a state (tag) when joining multiple overlapping 
+#' time-series with different microclimate values.  State is created for 
+#' all values that are in conflict in joining process.
 #' 
+#' @details
+#' For more info see details of [mc_join] function. 
+#'  
 #' @template param_myClim_object_raw
 #' @param tag The tag name (default "join_conflict").
 #' @param by_type for [mc_join] function (default TRUE)
