@@ -137,6 +137,7 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_LOGGER_TOMST_DENDROMETER <- "Dendro"
 .model_const_LOGGER_HOBO_U23_001A <- "HOBO_U23-001A"
 .model_const_LOGGER_HOBO_U23_004 <- "HOBO_U23-004"
+.model_const_LOGGER_NA_TYPE_NAME <- "Logger"
 
 .model_logger_types <- list(
     .model_const_LOGGER_TOMST_TMS,
@@ -424,7 +425,8 @@ setMethod("initialize",
           })
 
 #' Class for logger metadata
-#' @slot type of logger (TMS, Thermo, Dendro, HOBO)
+#' @slot type type of logger (TMS, Thermo, Dendro, HOBO)
+#' @slot name name of the logger - default in format {type}_{index}
 #' @slot serial_number serial number of the logger 
 #' @slot step time step of microclimatic time-seris in seconds.
 #' When provided by user, is used in [mc_prep_clean()] function instead of
@@ -432,6 +434,7 @@ setMethod("initialize",
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               slots = c(type = "character",
+                                        name = "character",
                                         serial_number = "character",
                                         step = "numeric"),
                               contains = "mc_Serializable")

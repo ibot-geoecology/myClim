@@ -181,7 +181,7 @@ mc_info_meta <- function(data) {
 #' @template param_myClim_object_raw
 #' @return A data.frame with the following columns:
 #' * locality_id - If provided by the user, it represents the locality ID; if not provided, it is identical to the logger's serial number.
-#' * index - Logger index at the locality.
+#' * logger_name - Logger name.
 #' * serial_number - Serial number of the logger, either provided by the user or automatically detected from the file name or header.
 #' * logger_type - Logger type.
 #' * start_date - The oldest record on the logger.
@@ -193,12 +193,12 @@ mc_info_meta <- function(data) {
 mc_info_logger <- function(data) {
     .common_stop_if_not_raw_format(data)
 
-    logger_function <- function(locality_id, logger_index, logger) {
+    logger_function <- function(locality_id, logger) {
         step <- as.integer(logger$clean_info@step)
 
         return(
              list(locality_id=locality_id,
-                  index=logger_index,
+                  logger_name=logger$metadata@name,
                   serial_number=logger$metadata@serial_number,
                   logger_type=logger$metadata@type,
                   start_date=min(logger$datetime),
@@ -207,10 +207,8 @@ mc_info_logger <- function(data) {
     }
 
     locality_function <- function(locality) {
-        purrr::pmap_dfr(list(
-                        locality_id = locality$metadata@locality_id,
-                        logger_index = seq_along(locality$loggers),
-                        logger = locality$loggers),
+        purrr::map2_dfr(locality$metadata@locality_id,
+                        locality$loggers,
                         logger_function)
     }
 

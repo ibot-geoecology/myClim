@@ -385,7 +385,8 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
                            step = step)
         locality$loggers <- purrr::pmap(parameters, .read_logger)
         locality$loggers <- purrr::discard(locality$loggers, ~ is.null(.x))
-        locality
+        locality <- .read_generate_logger_names(locality)
+        return(locality)
     }
     result_localities <- dplyr::group_map(groupped_files, locality_function)
     result_localities <- purrr::discard(result_localities, ~ length(.x$loggers) == 0)
@@ -407,6 +408,32 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     metadata@tz_type <- tz_type
     metadata@user_data <- list(...)
     list(metadata = metadata, loggers=list())
+}
+
+.read_generate_logger_names <- function(locality) {
+    logger_names <- .read_get_logger_names(locality)
+    locality$loggers <- purrr::map2(locality$loggers, logger_names, function (logger, name) {
+        logger$metadata@name <- name
+        return(logger)})
+    names(locality$loggers) <- logger_names
+    return(locality)
+}
+
+.read_get_logger_names <- function(locality) {
+    logger_types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
+    logger_types[is.na(logger_types)] <- .model_const_LOGGER_NA_TYPE_NAME
+    env_index <- new.env()
+    index_function <- function(logger_type) {
+        if(is.null(env_index[[logger_type]])) {
+            env_index[[logger_type]] <- 1
+        } else {
+            env_index[[logger_type]] <- env_index[[logger_type]] + 1
+        }
+        return(env_index[[logger_type]])
+    }
+    logger_ids <- purrr::map_int(logger_types, index_function)
+    logger_names <- purrr::map2_chr(logger_types, logger_ids, ~ stringr::str_glue("{.x}_{.y}"))
+    return(logger_names)
 }
 
 .read_get_data_raw_from_localities <- function(localities) {
@@ -596,7 +623,8 @@ mc_read_wide <- function(data_table, sensor_id=mc_const_SENSOR_real, sensor_name
         sensors <- list()
         sensors[[sensor_name]] <- .common_get_new_sensor(sensor_id, sensor_name, data_table[[locality$metadata@locality_id]])
         locality$loggers[[1]] <- .read_get_new_logger(data_table[[1]], sensors)
-        locality
+        locality <- .read_generate_logger_names(locality)
+        return(locality)
     }
     localities <- purrr::map(result, locality_function)
     data <- .read_get_data_raw_from_localities(localities)
@@ -676,7 +704,8 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
     sensors <- purrr::map(sensor_names, sensor_function)
     names(sensors) <- purrr::map_chr(sensors, ~ .x$metadata@name)
     result$loggers[[1]] <- .read_get_new_logger(table_values$datetime, sensors)
-    result
+    result <- .read_generate_logger_names(result)
+    return(result)
 }
 
 #' Reading data from TubeDB
