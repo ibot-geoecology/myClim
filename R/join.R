@@ -130,6 +130,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
         }
         joined_loggers <- dplyr::group_map(groups_table, group_function)
         locality$loggers <- purrr::flatten(joined_loggers)
+        locality <- .read_generate_logger_names(locality)
         join_bar$tick()
         return(locality)
     }

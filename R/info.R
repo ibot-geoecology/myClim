@@ -229,7 +229,7 @@ mc_info_logger <- function(data) {
 #' @template param_myClim_object
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
-#' * logger_index - index of logger in myClim object at the locality
+#' * logger_name - name of logger in myClim object at the locality
 #' * logger_type - type of logger
 #' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
 #' * tag - category of state (e.g., "error", "source", "quality")  
@@ -242,13 +242,13 @@ mc_info_logger <- function(data) {
 mc_info_states <- function(data) {
     is_raw_format <- .common_is_raw_format(data)
 
-    sensor_function <- function(locality_id, logger_index, logger_type, sensor) {
+    sensor_function <- function(locality_id, logger_name, logger_type, sensor) {
         count <- nrow(sensor$states)
         if(count == 0) {
             return(tibble::tibble())
         }
         result <- tibble::tibble(locality_id=rep(locality_id, count),
-                                 logger_index=rep(logger_index, count),
+                                 logger_name=rep(logger_name, count),
                                  logger_type=rep(logger_type, count),
                                  sensor_name=rep(sensor$metadata@name),
                                  tag=sensor$states$tag,
@@ -258,29 +258,29 @@ mc_info_states <- function(data) {
         return(result)
     }
 
-    sensors_item_function <- function(locality_id, logger_index, logger_type, item) {
+    sensors_item_function <- function(locality_id, logger_name, logger_type, item) {
         count <- length(item$sensors)
         purrr::pmap_dfr(list(locality_id=rep(locality_id, count),
-                             logger_index=rep(logger_index, count),
+                             logger_name=rep(logger_name, count),
                              logger_type=rep(logger_type, count),
                              sensor=item$sensors),
                         sensor_function)
     }
 
-    prep_locality_function <- function(locality) {
+    raw_locality_function <- function(locality) {
         logger_types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
         purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
-                             logger_index=seq_along(locality$loggers),
+                             logger_name=names(locality$loggers),
                              logger_type=logger_types,
                              item=locality$loggers),
                         sensors_item_function)
     }
 
     if(is_raw_format) {
-        result <- purrr::map_dfr(data$localities, prep_locality_function)
+        result <- purrr::map_dfr(data$localities, raw_locality_function)
     } else {
         result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
-                                       logger_index=NA_integer_,
+                                       logger_name=NA_character_,
                                        logger_type=NA_character_,
                                        item=data$localities),
                                   sensors_item_function)

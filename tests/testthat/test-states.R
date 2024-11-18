@@ -7,64 +7,64 @@ test_that("mc_states_insert", {
     data <- mc_prep_clean(data, silent=TRUE)
     expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        NA,             1,   NA        ,      NA,     NA,   NA,            NA,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag, ~start, ~end,        ~value,
+        NA,             "Thermo_1",   NA        ,      NA,     NA,   NA,            NA,
     ))
     expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        "A1E05"     ,             1,   NA        ,      NA,     NA,   NA,            NA,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag, ~start, ~end,        ~value,
+        "A1E05"     ,   "Thermo_1",   NA        ,      NA,     NA,   NA,            NA,
     ))
     expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag, ~start, ~end,        ~value,
-        "A1E05"     ,             1,   NA        , "error",     NA,   NA,            NA,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag, ~start, ~end,        ~value,
+        "A1E05"     ,   "Thermo_1",   NA        , "error",     NA,   NA,            NA,
     ))
     expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
-        "A1E05"    ,              1,   "Thermo_T", "error",
+        "A1E05"    ,   "Thermo_1",   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:30"), lubridate::ymd_hm("2020-10-28 9:00"), NA_character_,
     ))
     expect_error(states_data <- mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
         "A1E05"    ,             NA,   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
     expect_error(mc_states_insert(data, states))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
-        "AA1E05"    ,              1,   "Thermo_T", "error",
+        "AA1E05"    ,   "Thermo_1",   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
     expect_warning(states_data <- mc_states_insert(data, states), "Locality AA1E05 does not exist in the data.")
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
-        "A1E05"    ,              2,   "Thermo_T", "error",
+        "A1E05"    ,   "Thermo_2",   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
-    expect_warning(states_data <- mc_states_insert(data, states), "Locality A1E05 does not contain logger with index 2.")
+    expect_warning(states_data <- mc_states_insert(data, states), "Locality A1E05 does not contain logger with name Thermo_2.")
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
-        "A1E05"    ,              1,     "TMS_T1", "error",
+        "A1E05"    ,    "Thermo_1",     "TMS_T1", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
-    expect_warning(states_data <- mc_states_insert(data, states), "Logger 1 in locality A1E05 does not contain sensor TMS_T1.")
+    expect_warning(states_data <- mc_states_insert(data, states), "Logger Thermo_1 in locality A1E05 does not contain sensor TMS_T1.")
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
-        "A1E05"    ,              1,   "Thermo_T", "error",
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
     ))
     states_data <- mc_states_insert(data, states)
     test_raw_data_format(states_data)
-    states_table <- states_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states
+    states_table <- states_data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states
     expect_equal(nrow(states_table), 2)
     expect_equal(states_table$tag[[2]], "error")
     expect_equal(states_table$start[[2]], lubridate::ymd_hm("2020-10-28 9:00"))
@@ -72,22 +72,22 @@ test_that("mc_states_insert", {
     expect_true(is.na(states_table$value[[2]]))
     expect_equal(nrow(mc_info_states(data)) + 1, nrow(mc_info_states(states_data)))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index,    ~tag,
+        ~locality_id, ~logger_name,    ~tag,
         ~start,                                 ~end,
-        "A2E32"     ,             1, "error",
+        "A2E32"     ,      "TMS_1", "error",
         lubridate::ymd_hm("2020-10-16 9:00"), lubridate::ymd_hm("2020-10-16 9:30"),
     ))
     states_data <- mc_states_insert(data, states)
     expect_equal(nrow(mc_info_states(data)) + 4, nrow(mc_info_states(states_data)))
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index,      ~tag,                               ~start,                                 ~end,
-        "A1E05"    ,              1,      "ok", lubridate::ymd_hm("2020-01-02 0:00"), lubridate::ymd_hm("2020-12-31 23:59"),
-        "A1E05"    ,              1,   "error", lubridate::ymd_hm("2020-01-01 0:00"), lubridate::ymd_hm("2020-01-01 23:59"),
-        "A1E05"    ,              1,    "test", lubridate::ymd_hm("2020-10-28 9:03"), lubridate::ymd_hm("2020-10-28 10:14"),
+        ~locality_id, ~logger_name,      ~tag,                               ~start,                                 ~end,
+        "A1E05"     ,   "Thermo_1",      "ok", lubridate::ymd_hm("2020-01-02 0:00"), lubridate::ymd_hm("2020-12-31 23:59"),
+        "A1E05"     ,   "Thermo_1",   "error", lubridate::ymd_hm("2020-01-01 0:00"), lubridate::ymd_hm("2020-01-01 23:59"),
+        "A1E05"     ,   "Thermo_1",    "test", lubridate::ymd_hm("2020-10-28 9:03"), lubridate::ymd_hm("2020-10-28 10:14"),
     ))
     states_data <- mc_states_insert(data, states)
     test_raw_data_format(states_data)
-    states_table <- states_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states
+    states_table <- states_data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states
     expect_equal(nrow(states_table), 3)
     expect_equal(nrow(mc_info_states(data)) + 2, nrow(mc_info_states(states_data)))
     expect_equal(states_table$start[[2]], lubridate::ymd_hm("2020-10-28 8:45"))
@@ -95,7 +95,7 @@ test_that("mc_states_insert", {
     expect_equal(states_table$start[[3]], lubridate::ymd_hm("2020-10-28 9:00"))
     expect_equal(states_table$end[[3]], lubridate::ymd_hm("2020-10-28 10:00"))
     agg_data <- mc_agg(data)
-    states$logger_index <- NULL
+    states$logger_name <- NULL
     states_data <- mc_states_insert(agg_data, states)
     test_agg_data_format(states_data)
     expect_equal(nrow(states_table), 3)
@@ -116,20 +116,20 @@ test_that("mc_states_insert", {
 test_that("mc_states_insert multiple loggers", {
     data <- mc_read_files("../data/join", "TOMST", silent=TRUE)
     states <- as.data.frame(tibble::tribble(
-        ~locality_id,  ~logger_index,      ~tag,                               ~start,                                 ~end,
-        "91184101"  ,              1,      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
-        "91184101"  ,              2,      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
-        "91184101"  ,              3,      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
+        ~locality_id,  ~logger_name,      ~tag,                               ~start,                                 ~end,
+        "91184101"  ,    "Thermo_1",      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
+        "91184101"  ,    "Thermo_2",      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
+        "91184101"  ,    "Thermo_3",      "a", lubridate::ymd_hm("2020-10-28 9:15"), lubridate::ymd_hm("2020-10-28 10:00"),
     ))
     states_data <- mc_states_insert(data, states)
     test_raw_data_format(states_data)
-    thermo_states1 <- states_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$states
+    thermo_states1 <- states_data$localities$`91184101`$loggers[["Thermo_1"]]$sensors$Thermo_T$states
     expect_equal(thermo_states1$start[[2]], lubridate::ymd_hm("2020-10-28 9:15"))
     expect_equal(thermo_states1$end[[2]], lubridate::ymd_hm("2020-10-28 9:45"))
-    thermo_states2 <- states_data$localities$`91184101`$loggers[[2]]$sensors$Thermo_T$states
+    thermo_states2 <- states_data$localities$`91184101`$loggers[["Thermo_2"]]$sensors$Thermo_T$states
     expect_equal(thermo_states2$start[[2]], lubridate::ymd_hm("2020-10-28 9:15"))
     expect_equal(thermo_states2$end[[2]], lubridate::ymd_hm("2020-10-28 9:15"))
-    expect_equal(nrow(states_data$localities$`91184101`$loggers[[3]]$sensors$Thermo_T$states), 1)
+    expect_equal(nrow(states_data$localities$`91184101`$loggers[["Thermo_3"]]$sensors$Thermo_T$states), 1)
 })
 
 test_that("mc_states_update", {
@@ -162,8 +162,8 @@ test_that("mc_states_ update/delete", {
     new_states <- dplyr::filter(new_states, .data$sensor_name != mc_const_SENSOR_Thermo_T)
     new_states$tag <- "my_source"
     states_data <- mc_states_update(states_data, new_states)
-    expect_equal(nrow(states_data$localities$`91184101`$loggers[[1]]$sensors$Thermo_T$states), 0)
-    expect_true(all(states_data$localities$`94184102`$loggers[[1]]$sensors$TMS_T1$states$tag == "my_source"))
+    expect_equal(nrow(states_data$localities$`91184101`$loggers[["Thermo_1"]]$sensors$Thermo_T$states), 0)
+    expect_true(all(states_data$localities$`94184102`$loggers[["TMS_1"]]$sensors$TMS_T1$states$tag == "my_source"))
 })
 
 test_that("mc_states_delete", {
@@ -192,21 +192,21 @@ test_that("mc_states_delete", {
 test_that("mc_states_replace", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE, clean=TRUE)
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
-        "A1E05"    ,              1,   "Thermo_T", "error",
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
-        "A1E05"    ,              1,   "Thermo_T", "error",
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
         lubridate::ymd_hm("2020-10-28 10:15"), lubridate::ymd_hm("2020-10-28 10:15"), NA_character_,
-        "A2E32"    ,              1,     "TMS_T1", "error",
+        "A2E32"    ,       "TMS_1",     "TMS_T1", "error",
         lubridate::ymd_hm("2020-10-16 8:00"), lubridate::ymd_hm("2020-10-16 9:00"), NA_character_,
     ))
     states_data <- mc_states_insert(data, states)
     replaced_data <- mc_states_replace(states_data, "error")
     test_raw_data_format(replaced_data)
-    expect_true(all(is.na(replaced_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(2:4, 7)])))
-    expect_equal(replaced_data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(1, 5, 6, 8:11)],
-                 data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$values[c(1, 5, 6, 8:11)])
+    expect_true(all(is.na(replaced_data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$values[c(2:4, 7)])))
+    expect_equal(replaced_data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$values[c(1, 5, 6, 8:11)],
+                 data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$values[c(1, 5, 6, 8:11)])
     data_agg <- mc_agg(states_data)
     replaced_data_agg <- mc_states_replace(data_agg, "error", -200)
     test_agg_data_format(replaced_data_agg)
@@ -245,29 +245,29 @@ test_that("mc_states_from_sensor", {
 test_that("mc_states_to_sensor", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE)
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,
-        "A2E32"     ,              1,    "TMS_T1", "error",
+        "A2E32"     ,      "TMS_1",    "TMS_T1", "error",
         lubridate::ymd_hm("2020-10-16 7:00"), lubridate::ymd_hm("2020-10-16 8:00"),
-        "A2E32"     ,              1,    "TMS_T1", "error",
+        "A2E32"     ,      "TMS_1",    "TMS_T1", "error",
         lubridate::ymd_hm("2020-10-16 9:00"), lubridate::ymd_hm("2020-10-16 10:00"),
-        "A2E32"     ,              1,    "TMS_T2", "error",
+        "A2E32"     ,      "TMS_1",    "TMS_T2", "error",
         lubridate::ymd_hm("2020-10-16 7:30"), lubridate::ymd_hm("2020-10-16 8:30"),
     ))
     states_data <- mc_states_insert(data, states)
     data_new_sensor <- mc_states_to_sensor(states_data, "error", "TMS_T1_error", "TMS_T1")
     test_raw_data_format(data_new_sensor)
     t1_error_expected_values <- c(rep(FALSE, 3), rep(TRUE, 5), rep(FALSE, 3), rep(TRUE, 5), rep(FALSE, 75-16))
-    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_T1_error$values, t1_error_expected_values)
+    expect_equal(data_new_sensor$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T1_error$values, t1_error_expected_values)
     expect_error(data_new_sensor <- mc_states_to_sensor(states_data, "error", c("TMS_T1_error", "TMS_T2_error"), "TMS_T1"))
     data_new_sensor <- mc_states_to_sensor(states_data, "error", c("TMS_T1_error", "TMS_T2_error"), c("TMS_T1", "TMS_T2"))
     test_raw_data_format(data_new_sensor)
     t2_error_expected_values <- c(rep(FALSE, 5), rep(TRUE, 5), rep(FALSE, 75-10))
-    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_T1_error$values, t1_error_expected_values)
-    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_T2_error$values, t2_error_expected_values)
+    expect_equal(data_new_sensor$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T1_error$values, t1_error_expected_values)
+    expect_equal(data_new_sensor$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T2_error$values, t2_error_expected_values)
     data_new_sensor <- mc_states_to_sensor(states_data, "error", "TMS_error", inverse = TRUE)
     test_raw_data_format(data_new_sensor)
-    expect_equal(data_new_sensor$localities$A2E32$loggers[[1]]$sensors$TMS_error$values, !(t1_error_expected_values | t2_error_expected_values))
+    expect_equal(data_new_sensor$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_error$values, !(t1_error_expected_values | t2_error_expected_values))
     agg_states_data <- mc_agg(states_data)
     agg_data_new_sensor <- mc_states_to_sensor(agg_states_data, "error", "TMS_T1_error", "TMS_T1")
     test_agg_data_format(agg_data_new_sensor)

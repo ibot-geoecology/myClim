@@ -31,6 +31,7 @@ test_raw_locality <- function(locality) {
     test_locality_metadata(locality$metadata)
     expect_equal(class(locality$loggers), "list")
     expect_false(is.null(names(locality$loggers)))
+    expect_false(any(duplicated(names(locality$loggers))))
     expect_equal(names(locality$loggers), unname(purrr::map_chr(locality$loggers, ~ .x$metadata@name)))
     purrr::walk(locality$loggers, test_logger)
 }

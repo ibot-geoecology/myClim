@@ -1,9 +1,9 @@
 .states_const_MESSAGE_NOT_EXISTS_LOCALITY <- "Locality {.y$locality_id} does not exist in the data."
-.states_const_MESSAGE_NOT_EXISTS_LOGGER <- "Locality {locality_id} does not contain logger with index {.y$logger_index}."
-.states_const_MESSAGE_NOT_EXISTS_LOGGER_SENSOR <- "Logger {logger_index} in locality {locality_id} does not contain sensor {sensor_name}."
+.states_const_MESSAGE_NOT_EXISTS_LOGGER <- "Locality {locality_id} does not contain logger with name {.y$logger_name}."
+.states_const_MESSAGE_NOT_EXISTS_LOGGER_SENSOR <- "Logger {logger_name} in locality {locality_id} does not contain sensor {sensor_name}."
 .states_const_MESSAGE_NOT_EXISTS_AGG_SENSOR <- "Locality {locality_id} does not contain sensor {sensor_name}."
-.states_const_MESSAGE_LOGGERS_IN_AGG <- "You can not use logger_index in agg format."
-.states_const_MESSAGE_MISSED_LOGGER_INDEX <- "All values logger_index must be set."
+.states_const_MESSAGE_LOGGERS_IN_AGG <- "You can not use logger_name in agg format."
+.states_const_MESSAGE_MISSED_LOGGER_NAME <- "All values logger_name must be set."
 .states_const_MESSAGE_MISSED_COLUMN <- "Columns {columns_text} are required."
 .states_const_MESSAGE_NA_VALUE <- "All values of {column_name} must be set."
 .states_const_MESSAGE_START_GREATER <- "The start date and time must be earlier than or identical to the end date and time."
@@ -12,7 +12,7 @@
 .states_const_MESSAGE_NEGATIVE_JUMP <- "The jump value must be a non-negative number."
 
 .states_const_COLUMN_LOCALITY_ID <- "locality_id"
-.states_const_COLUMN_LOGGER_INDEX <- "logger_index"
+.states_const_COLUMN_LOGGER_NAME <- "logger_name"
 .states_const_COLUMN_SENSOR_NAME <- "sensor_name"
 .states_const_COLUMN_TAG <- "tag"
 .states_const_COLUMN_START <- "start"
@@ -54,7 +54,7 @@
 #' @param states_table Output of [mc_info_states()] can be used as template for input data.frame. 
 #' data.frame with columns:
 #' * locality_id - the name of locality (in some cases identical to logger id, see [mc_read_files])
-#' * logger_index - index of logger in myClim object at the locality. See [mc_info_logger].   
+#' * logger_name - name of logger in myClim object at the locality. See [mc_info_logger].   
 #' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01") 
 #' * tag - category of state (e.g., "conflict", "error", "source", "quality")  
 #' * start - start datetime
@@ -63,7 +63,7 @@
 #' @return myClim object in the same format as input, with inserted sensor states
 #' @export
 #' @examples
-#' states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
+#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1", sensor_name="Thermo_T", tag="error",
 #'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)
@@ -106,7 +106,7 @@ mc_states_insert <- function(data, states_table) {
 #' 
 #' data.frame with columns:
 #' * locality_id - the name of locality (in some cases identical to logger id, see details of [mc_read_files])
-#' * logger_index - index of logger in myClim object at the locality. See [mc_info_logger].
+#' * logger_name - name of logger in myClim object at the locality. See [mc_info_logger].
 #' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01") 
 #' * tag - category of state (e.g., "conflict", "error", "source", "quality")  
 #' * start - start datetime
@@ -141,14 +141,14 @@ mc_states_update <- function(data, states_table) {
     sensor_function <- function(.x, .y) {
         sensor_name <- .y$sensor_name
         locality_id <- dplyr::first(.x$locality_id)
-        logger_index <- dplyr::first(.x$logger_index)
+        logger_name <- dplyr::first(.x$logger_name)
         if(is_agg) {
             sensors_item <- data$localities[[locality_id]]
             if(!(sensor_name %in% names(sensors_item$sensors))) {
                 warning(stringr::str_glue(.states_const_MESSAGE_NOT_EXISTS_AGG_SENSOR))
             }
         } else {
-            sensors_item <- data$localities[[locality_id]]$loggers[[logger_index]]
+            sensors_item <- data$localities[[locality_id]]$loggers[[logger_name]]
             if(!(sensor_name %in% names(sensors_item$sensors))) {
                 warning(stringr::str_glue(.states_const_MESSAGE_NOT_EXISTS_LOGGER_SENSOR))
             }
@@ -157,13 +157,13 @@ mc_states_update <- function(data, states_table) {
             return()
         }
         states_table <- dplyr::select(.x, "tag", "start", "end", "value")
-        action_function(data_env, locality_id, logger_index, sensor_name, states_table, edit_datetimes)
+        action_function(data_env, locality_id, logger_name, sensor_name, states_table, edit_datetimes)
     }
 
     sensor_prep_function <- function(.x, .y) {
         sensor_name <- .y$sensor_name
         locality_id <- dplyr::first(.x$locality_id)
-        logger_index <- dplyr::first(.x$logger_index)
+        logger_name <- dplyr::first(.x$logger_name)
         if(!is.na(sensor_name)) {
             sensor_function(.x, .y)
             return()
@@ -172,19 +172,19 @@ mc_states_update <- function(data, states_table) {
         if(is_agg) {
             sensors_item <- data$localities[[locality_id]]
         } else {
-            sensors_item <- data$localities[[locality_id]]$loggers[[logger_index]]
+            sensors_item <- data$localities[[locality_id]]$loggers[[logger_name]]
         }
 
-        sensor_names_table <- tibble::tibble(logger_index=logger_index, sensor_name=names(sensors_item$sensors))
+        sensor_names_table <- tibble::tibble(logger_name=logger_name, sensor_name=names(sensors_item$sensors))
         .x$sensor_name <- NULL
-        .x <- dplyr::left_join(.x, sensor_names_table, by="logger_index")
+        .x <- dplyr::left_join(.x, sensor_names_table, by="logger_name")
         groupped_sensors <- dplyr::group_by(.x, .data$sensor_name)
         dplyr::group_walk(groupped_sensors, sensor_function, .keep=TRUE)
     }
 
     logger_function <- function(.x, .y) {
         locality_id <- dplyr::first(.x$locality_id)
-        if(!is.na(.y$logger_index) && .y$logger_index > length(data$localities[[locality_id]]$loggers)) {
+        if(!is.na(.y$logger_name) && !(.y$logger_name %in% names(data$localities[[locality_id]]$loggers))) {
             warning(stringr::str_glue(.states_const_MESSAGE_NOT_EXISTS_LOGGER))
             return()
         }
@@ -199,7 +199,7 @@ mc_states_update <- function(data, states_table) {
             return()
         }
         if(!is_agg) {
-            groupped_loggers <- dplyr::group_by(.x, .data$logger_index)
+            groupped_loggers <- dplyr::group_by(.x, .data$logger_name)
             dplyr::group_walk(groupped_loggers, logger_function, .keep=TRUE)
         } else {
             groupped_sensors <- dplyr::group_by(.x, .data$sensor_name)
@@ -221,12 +221,12 @@ mc_states_update <- function(data, states_table) {
 
 .states_check_columns <- function(data, states_table, is_strict) {
     is_agg <-.common_is_agg_format(data)
-    required_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_LOGGER_INDEX,
+    required_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_LOGGER_NAME,
                           .states_const_COLUMN_SENSOR_NAME, .states_const_COLUMN_TAG,
                           .states_const_COLUMN_START, .states_const_COLUMN_END,
                           .states_const_COLUMN_VALUE)
     if(!is_strict && !is_agg) {
-        required_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_LOGGER_INDEX,
+        required_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_LOGGER_NAME,
                               .states_const_COLUMN_TAG, .states_const_COLUMN_START, .states_const_COLUMN_END)
     } else if(!is_strict && is_agg){
         required_columns <- c(.states_const_COLUMN_LOCALITY_ID, .states_const_COLUMN_TAG,
@@ -251,17 +251,17 @@ mc_states_update <- function(data, states_table) {
             stop(stringr::str_glue(.states_const_MESSAGE_NA_VALUE))
         }
     }
-    if(is_agg && !all(is.na(states_table$logger_index))) {
+    if(is_agg && !all(is.na(states_table$logger_name))) {
         stop(.states_const_MESSAGE_LOGGERS_IN_AGG)
     }
-    if(!is_agg && any(is.na(states_table$logger_index))) {
-        stop(.states_const_MESSAGE_MISSED_LOGGER_INDEX)
+    if(!is_agg && any(is.na(states_table$logger_name))) {
+        stop(.states_const_MESSAGE_MISSED_LOGGER_NAME)
     }
 }
 
 .states_fix_table <- function(states_table) {
-    if(!("logger_index" %in% names(states_table))) {
-        states_table$logger_index <- NA_integer_
+    if(!("logger_name" %in% names(states_table))) {
+        states_table$logger_name <- NA_character_
     }
     if(!("sensor_name" %in% names(states_table))) {
         states_table$sensor_name <- NA_character_
@@ -272,9 +272,9 @@ mc_states_update <- function(data, states_table) {
     return(states_table)
 }
 
-.states_insert <- function(data_env, locality_id, logger_index, sensor_name, states_table, edit_datetimes) {
+.states_insert <- function(data_env, locality_id, logger_name, sensor_name, states_table, edit_datetimes) {
     if(edit_datetimes) {
-        states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_index, states_table)
+        states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_name, states_table)
     }
     states_table <- as.data.frame(states_table)
     if(.common_is_agg_format(data_env$data)) {
@@ -282,33 +282,33 @@ mc_states_update <- function(data, states_table) {
             dplyr::bind_rows(data_env$data$localities[[locality_id]]$sensors[[sensor_name]]$states,
                              states_table)
     } else {
-        data_env$data$localities[[locality_id]]$loggers[[logger_index]]$sensors[[sensor_name]]$states <-
-            dplyr::bind_rows(data_env$data$localities[[locality_id]]$loggers[[logger_index]]$sensors[[sensor_name]]$states,
+        data_env$data$localities[[locality_id]]$loggers[[logger_name]]$sensors[[sensor_name]]$states <-
+            dplyr::bind_rows(data_env$data$localities[[locality_id]]$loggers[[logger_name]]$sensors[[sensor_name]]$states,
                              states_table)
     }
 }
 
-.states_update <- function(data_env, locality_id, logger_index, sensor_name, states_table, edit_datetimes) {
+.states_update <- function(data_env, locality_id, logger_name, sensor_name, states_table, edit_datetimes) {
     if(edit_datetimes) {
-        states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_index, states_table)
+        states_table <- .states_edit_datetimes(data_env$data, locality_id, logger_name, states_table)
     }
     states_table <- as.data.frame(states_table)
     if(.common_is_agg_format(data_env$data)) {
         data_env$data$localities[[locality_id]]$sensors[[sensor_name]]$states <- states_table
     } else {
-        data_env$data$localities[[locality_id]]$loggers[[logger_index]]$sensors[[sensor_name]]$states <- states_table
+        data_env$data$localities[[locality_id]]$loggers[[logger_name]]$sensors[[sensor_name]]$states <- states_table
     }
 }
 
-.states_edit_datetimes <- function(data, locality_id, logger_index, states_table) {
+.states_edit_datetimes <- function(data, locality_id, logger_name, states_table) {
     period <- NULL
     step <- NULL
     is_agg <- .common_is_agg_format(data)
-    date_interval <- .states_get_item_range(data, locality_id, logger_index)
+    date_interval <- .states_get_item_range(data, locality_id, logger_name)
     if(is_agg){
         period <- .common_get_period_from_agg_data(data)
     } else {
-        step <- data$localities[[locality_id]]$loggers[[logger_index]]$clean_info@step
+        step <- data$localities[[locality_id]]$loggers[[logger_name]]$clean_info@step
     }
     row_function <- function(tag, start, end, value){
         out_interval <- lubridate::intersect(lubridate::interval(start, end), date_interval)
@@ -331,11 +331,11 @@ mc_states_update <- function(data, states_table) {
     return(states_table)
 }
 
-.states_get_item_range <- function(data, locality_id, logger_index) {
+.states_get_item_range <- function(data, locality_id, logger_name) {
     if(.common_is_agg_format(data)) {
         datetime <- data$localities[[locality_id]]$datetime
     } else {
-        datetime <- data$localities[[locality_id]]$loggers[[logger_index]]$datetime
+        datetime <- data$localities[[locality_id]]$loggers[[logger_name]]$datetime
     }
     return(lubridate::interval(dplyr::first(datetime), dplyr::last(datetime)))
 }
@@ -425,7 +425,7 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
 #' @return myClim object in the same format as input, with replaced values
 #' @export
 #' @examples
-#' states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
+#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1", sensor_name="Thermo_T", tag="error",
 #'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)
@@ -435,7 +435,7 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
     
     states_table <- mc_info_states(data)
     states_table <- dplyr::filter(states_table, .data$tag %in% tags)
-    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_index, .data$sensor_name)
+    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_name, .data$sensor_name)
     
     result <- new.env()
     result$data <- data
@@ -445,14 +445,14 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
         if(is_agg_format) {
             datetime <- result$data$localities[[group$locality_id]]$datetime
         } else {
-            datetime <- result$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$datetime
+            datetime <- result$data$localities[[group$locality_id]]$loggers[[group$logger_name]]$datetime
         }
         conditions <- purrr::map(intervals, ~ lubridate::`%within%`(datetime, .x))
         condition <- purrr::reduce(conditions, `|`)
         if(is_agg_format) {
             result$data$localities[[group$locality_id]]$sensors[[group$sensor_name]]$values[condition] <- replace_value
         } else {
-            result$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$sensors[[group$sensor_name]]$values[condition] <- replace_value
+            result$data$localities[[group$locality_id]]$loggers[[group$logger_name]]$sensors[[group$sensor_name]]$values[condition] <- replace_value
         }
     }
     dplyr::group_walk(states_table, group_function)
@@ -588,7 +588,7 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
 #' @return Returns a myClim object in the same format as the input, with added sensors.
 #' @export
 #' @examples
-#' states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
+#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1", sensor_name="Thermo_T", tag="error",
 #'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)
@@ -601,8 +601,8 @@ mc_states_to_sensor <- function(data, tag, to_sensor, source_sensor=NULL, invers
     
     tag_value <- tag
     states_table <- dplyr::filter(mc_info_states(data), .data$tag == tag_value)
-    states_table <- dplyr::select(states_table, "locality_id", "logger_index", "sensor_name", "start", "end")
-    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_index)
+    states_table <- dplyr::select(states_table, "locality_id", "logger_name", "sensor_name", "start", "end")
+    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_name)
     
     data_env <- new.env()
     data_env$data <- data
@@ -631,7 +631,7 @@ mc_states_to_sensor <- function(data, tag, to_sensor, source_sensor=NULL, invers
     if(.common_is_agg_format(data_env$data)) {
         data_env$data$localities[[group$locality_id]]$sensors[[to_sensor]] <- new_sensor
     } else {
-        data_env$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$sensors[[to_sensor]] <- new_sensor
+        data_env$data$localities[[group$locality_id]]$loggers[[group$logger_name]]$sensors[[to_sensor]] <- new_sensor
     }
 }
 
@@ -640,7 +640,7 @@ mc_states_to_sensor <- function(data, tag, to_sensor, source_sensor=NULL, invers
     if(.common_is_agg_format(data_env$data)) {
         datetime <- data_env$data$localities[[group$locality_id]]$datetime
     } else {
-        datetime <- data_env$data$localities[[group$locality_id]]$loggers[[group$logger_index]]$datetime
+        datetime <- data_env$data$localities[[group$locality_id]]$loggers[[group$logger_name]]$datetime
     }
     if(length(intervals) == 0) {
         return(rep(inverse, length(datetime)))
@@ -820,7 +820,7 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
     states_env <- new.env()
-    states_env$new_states <- list(locality_id=character(), logger_index=integer(), sensor_name=character(),
+    states_env$new_states <- list(locality_id=character(), logger_name=character(), sensor_name=character(),
                                   tag=character(), start=as.POSIXct(character()), end=as.POSIXct(character()), value=character())
     states_env$tag <- tag
     states_env$tolerance <- tolerance

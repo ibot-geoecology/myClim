@@ -234,10 +234,11 @@ test_that("mc_prep_crop errors", {
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
     data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
-    test_function <- if(exists(".prep_get_uncleaned_loggers")) .prep_get_uncleaned_loggers else .prep_get_uncleaned_loggers
-    expect_equal(test_function(data), c("91184101", "94184103", "94184102"))
+    uncleaned_loggers <- .prep_get_uncleaned_loggers(data)
+    expect_equal(uncleaned_loggers$locality_id, c("A1E05", "A2E32", "A6W79"))
+    expect_equal(uncleaned_loggers$logger_name, c("Thermo_1", "TMS_1", "TMS_1"))
     data_clean <- mc_prep_clean(data, silent=T)
-    expect_equal(length(test_function(data_clean)), 0)
+    expect_equal(nrow(.prep_get_uncleaned_loggers(data_clean)), 0)
 })
 
 test_that(".prep_get_utc_localities", {
@@ -302,6 +303,7 @@ test_that("mc_prep_merge raw-format same name", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     merged_data <- mc_prep_merge(list(data, data))
     test_raw_data_format(merged_data)
+    expect_equal(mc_info_logger(merged_data)$logger_name, c("Thermo_1", "Thermo_2", "TMS_1", "TMS_2", "TMS_1", "TMS_2"))
     expect_equal(names(merged_data$localities), c("A1E05", "A2E32", "A6W79"))
     expect_equal(length(merged_data$localities$A1E05$loggers), 2)
 })

@@ -82,7 +82,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
             paste0(parts, collapse="_")
         }
 
-        prefixes <- purrr::imap_chr(locality$loggers, name_function)
+        prefixes <- purrr::map2_chr(locality$loggers, seq_along(locality$loggers), name_function)
         items <- list(
             item=locality$loggers,
             name_prefix=prefixes,
