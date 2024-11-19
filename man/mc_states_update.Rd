@@ -14,7 +14,7 @@ mc_states_update(data, states_table)
 data.frame with columns:
 \itemize{
 \item locality_id - the name of locality (in some cases identical to logger id, see details of \link{mc_read_files})
-\item logger_index - index of logger in myClim object at the locality. See \link{mc_info_logger}.
+\item logger_name - name of logger in myClim object at the locality. See \link{mc_info_logger}.
 \item sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
 \item tag - category of state (e.g., "conflict", "error", "source", "quality")
 \item start - start datetime

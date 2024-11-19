@@ -11,7 +11,9 @@ Class for logger metadata
 \section{Slots}{
 
 \describe{
-\item{\code{type}}{of logger (TMS, Thermo, Dendro, HOBO)}
+\item{\code{type}}{type of logger (TMS, Thermo, Dendro, HOBO)}
+
+\item{\code{name}}{name of the logger - default in format \verb{(type)_(index)}}
 
 \item{\code{serial_number}}{serial number of the logger}
 

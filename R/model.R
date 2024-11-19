@@ -426,7 +426,7 @@ setMethod("initialize",
 
 #' Class for logger metadata
 #' @slot type type of logger (TMS, Thermo, Dendro, HOBO)
-#' @slot name name of the logger - default in format {type}_{index}
+#' @slot name name of the logger - default in format `(type)_(index)`
 #' @slot serial_number serial number of the logger 
 #' @slot step time step of microclimatic time-seris in seconds.
 #' When provided by user, is used in [mc_prep_clean()] function instead of

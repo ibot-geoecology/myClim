@@ -11,7 +11,7 @@ test_that("mc_info_count", {
 test_that("mc_info_clean", {
     expect_warning(cleaned_data <- mc_read_files("../data/clean-datetime_step", "TOMST", silent=T))
     info_table <- mc_info_clean(cleaned_data)
-    expect_equal(colnames(info_table), c("locality_id", "serial_number", "logger_index", "start_date", "end_date", "step_seconds", "count_duplicities", "count_missing", "count_disordered", "rounded"))
+    expect_equal(colnames(info_table), c("locality_id", "serial_number", "logger_name", "start_date", "end_date", "step_seconds", "count_duplicities", "count_missing", "count_disordered", "rounded"))
     expect_equal(nrow(info_table), 5)
 })
 
@@ -62,15 +62,15 @@ test_that("mc_info_logger", {
 test_that("mc_info_states", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE)
     states <- mc_info_states(data)
-    expect_equal(colnames(states), c("locality_id", "logger_name", "logger_type", "sensor_name",
+    expect_equal(colnames(states), c("locality_id", "logger_name", "sensor_name",
                                      "tag", "start", "end", "value"))
     expect_equal(nrow(states), 9)
     agg_data <- mc_agg(data, "max", period="hour")
     states <- mc_info_states(agg_data)
-    expect_equal(colnames(states), c("locality_id", "logger_name", "logger_type", "sensor_name",
+    expect_equal(colnames(states), c("locality_id", "logger_name", "sensor_name",
                                      "tag", "start", "end", "value"))
     expect_equal(nrow(states), 9)
-    expect_true(all(is.na(states$logger_index)))
+    expect_true(all(is.na(states$logger_name)))
 })
 
 test_that("mc_info_range", {

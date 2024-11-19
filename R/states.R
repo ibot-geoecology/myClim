@@ -63,7 +63,8 @@
 #' @return myClim object in the same format as input, with inserted sensor states
 #' @export
 #' @examples
-#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1", sensor_name="Thermo_T", tag="error",
+#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1",
+#'                      sensor_name="Thermo_T", tag="error",
 #'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)
@@ -425,7 +426,8 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
 #' @return myClim object in the same format as input, with replaced values
 #' @export
 #' @examples
-#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1", sensor_name="Thermo_T", tag="error",
+#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1",
+#'                      sensor_name="Thermo_T", tag="error",
 #'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)
@@ -588,7 +590,8 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
 #' @return Returns a myClim object in the same format as the input, with added sensors.
 #' @export
 #' @examples
-#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1", sensor_name="Thermo_T", tag="error",
+#' states <- data.frame(locality_id="A1E05", logger_name="Thermo_1",
+#'                      sensor_name="Thermo_T", tag="error",
 #'                      start=lubridate::ymd_hm("2020-10-28 9:00"),
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)

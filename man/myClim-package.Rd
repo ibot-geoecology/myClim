@@ -90,6 +90,7 @@ $localities | locality[1]                                                       
             |           | $metadata   | mc_LoggerMetadata - class |                        ||
             |           |             +---------------------------+                        ||
             |           |             | @type                     |                        ||
+            |           |             | @name                     |                        ||
             |           |             | @serial_number            |                        ||
             |           |             | @step                     |                        ||
             |           |             +---------------------------+                        ||

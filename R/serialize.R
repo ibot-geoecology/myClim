@@ -90,7 +90,9 @@ mc_load <- function(file) {
         metadata <- .model_list_to_object(item$metadata)
         if(is_raw) {
             loggers <- purrr::map(item$loggers, logger_function)
-            return(list(metadata=metadata, loggers=loggers))
+            result <- list(metadata=metadata, loggers=loggers)
+            result <- .serialize_edit_raw_locality_list_after_load(result, obj_list$metadata$version)
+            return(result)
         }
         sensors <- purrr::map(item$sensors, sensor_function)
         return(list(metadata=metadata, datetime=item$datetime, sensors=sensors))
@@ -108,6 +110,13 @@ mc_load <- function(file) {
     if(original_version < "0.2.6") {
         item$metadata$elevation <- item$metadata$altitude
         item$metadata <- item$metadata[names(item$metadata) != "altitude"]
+    }
+    return(item)
+}
+
+.serialize_edit_raw_locality_list_after_load <- function(item, original_version) {
+    if(original_version < "1.3.4") {
+        item <- .read_generate_logger_names(item)
     }
     return(item)
 }
