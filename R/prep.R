@@ -113,12 +113,9 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     clean_env$resolve_conflicts <- resolve_conflicts
     clean_env$tolerance <- tolerance
     clean_env$states <- tibble::tibble()
-    clean_env$clean_bar <- NULL
     count_table <- mc_info_count(data)
-    if(!silent) {
-        clean_env$clean_bar <- progress::progress_bar$new(format = "clean [:bar] :current/:total loggers",
-                                                          total=count_table$count[count_table$item == "loggers"])
-    }
+    clean_env$clean_bar <- progress::progress_bar$new(format = "clean [:bar] :current/:total loggers",
+                                                      total=count_table$count[count_table$item == "loggers"])
     locality_function <- function(locality) {
         locality$loggers <- purrr::map(locality$loggers, ~ .prep_clean_logger(locality$metadat@locality_id,
                                                                               .x, clean_env))
@@ -147,7 +144,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     }
     if(is.na(logger$clean_info@step)) {
         warning(stringr::str_glue(.prep_const_MESSAGE_STEP_PROBLEM))
-        if(!is.null(clean_env$clean_bar)) clean_env$clean_bar$tick()
+        clean_env$clean_bar$tick()
         return(logger)
     }
     rounded_datetime <- .prep_get_rounded_datetime(logger)
@@ -157,7 +154,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     logger <- .prep_clean_write_info(logger, rounded)
     logger <- .prep_clean_edit_series(locality_id, logger, original_datetime, clean_env)
     logger <- .prep_clean_round_states(logger)
-    if(!is.null(clean_env$clean_bar)) clean_env$clean_bar$tick()
+    clean_env$clean_bar$tick()
     logger
 }
 
@@ -614,6 +611,9 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
         all_table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
     }
 
+    crop_bar <- progress::progress_bar$new(format = "crop [:bar] :current/:total localities",
+                                           total=nrow(all_table))
+    crop_bar$tick(0)
     sensors_item_function <- function(item, start_datetime, end_datetime) {
         .prep_crop_data(item, start_datetime, end_datetime, end_included)
     }
@@ -626,6 +626,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
                                                  end_datetime=end_datetime),
                                             sensors_item_function)
         }
+        crop_bar$tick()
         return(locality)
     }
 
@@ -634,6 +635,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
         if(!is.na(start_datetime) || !is.na(end_datetime)) {
             locality <- sensors_item_function(locality, start_datetime, end_datetime)
         }
+        crop_bar$tick()
         return(locality)
     }
 

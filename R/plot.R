@@ -486,14 +486,14 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     plot_settings <- .plot_get_plot_line_settings(data, facet, color_by_logger)
     data_table <- .plot_line_edit_data_table(data_table, sensors_table, plot_settings, facet)
 
-    plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff, group=.data$series_name)) +
-            ggplot2::geom_line(ggplot2::aes(color=.data$series_name))
+    plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff, group=.data$series)) +
+            ggplot2::geom_line(ggplot2::aes(color=.data$series))
     if(!plot_settings$change_colors) {
-        series_table <- dplyr::distinct(data_table, .data$sensor_name, .data$series_name)
+        series_table <- dplyr::distinct(data_table, .data$sensor_name, .data$series)
         temp_color_table <- dplyr::select(sensors_table, "sensor", "color")
         color_table <- dplyr::left_join(series_table, temp_color_table, by=c("sensor_name"="sensor"))
         color_values <- color_table$color
-        names(color_values) <- color_table$series_name
+        names(color_values) <- color_table$series
         plot <- plot + ggplot2::scale_color_manual(values=color_values)
     } else {
         plot <- plot + ggplot2::scale_color_manual(values=.plot_const_PALETTE)
@@ -608,16 +608,16 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
 
 .plot_line_edit_data_table <- function(data_table, sensors_table, plot_settings, facet) {
     if (plot_settings$show_locality && plot_settings$show_logger) {
-        data_table$series_name <- paste(data_table$locality_id, data_table$logger_name, data_table$sensor_name)
+        data_table$series <- paste(data_table$locality_id, data_table$logger_name, data_table$sensor_name)
     }
     else if (plot_settings$show_locality) {
-        data_table$series_name <- paste(data_table$locality_id, data_table$sensor_name)
+        data_table$series <- paste(data_table$locality_id, data_table$sensor_name)
     }
     else if (plot_settings$show_logger) {
-        data_table$series_name <- paste(data_table$logger_name, data_table$sensor_name)
+        data_table$series <- paste(data_table$logger_name, data_table$sensor_name)
     }
     else {
-        data_table$series_name <- data_table$sensor_name
+        data_table$series <- data_table$sensor_name
     }
 
     coeff_list <- as.list(sensors_table$coeff)
@@ -743,8 +743,18 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     is_not_locality_facet <- is.null(facet) || facet != .plot_const_FACET_LOCALITY
     result <- list()
     result$show_locality <- is_not_locality_facet && length(data$localities) > 1
-    loggers <- purrr::flatten(purrr::map(data$localities, ~ names(.x$loggers)))
-    result$show_logger <- length(unique(loggers)) > 1
+    
+    locality_diff_logger_types <- function(locality) {
+        types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
+        return(any(duplicated(types)))
+    }
+
+    if(.common_is_agg_format(data)){
+        result$show_logger <- FALSE
+    } else {
+        result$show_logger <- any(purrr::map_lgl(data$localities, locality_diff_logger_types))
+    }
+
     result$change_colors <- color_by_logger && (result$show_locality || result$show_logger)
     return(result)
 }
