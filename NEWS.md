@@ -1,3 +1,11 @@
+# myClim 1.3.4
+* The `logger_name` is used in myClim object instead of the `logger_index`.
+* The `logger_name` is visible in `mc_plot_line`.
+* The `show_logger_name` parameter has been added to the `mc_reshape_wide` function.
+* The `serias_name` label changed to `series` in `mc_plot_line`.
+* The progress bar is added to `mc_prep_crop`.
+* The `mc_prep_clean` step warning is fixed.
+
 # myClim 1.3.3
 * A performance issue in the `mc_prep_crop` function has been fixed.
 * The parameters `tolerance` and `by_type` have been added to the `mc_join` function.

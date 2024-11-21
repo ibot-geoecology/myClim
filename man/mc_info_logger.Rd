@@ -13,7 +13,7 @@ mc_info_logger(data)
 A data.frame with the following columns:
 \itemize{
 \item locality_id - If provided by the user, it represents the locality ID; if not provided, it is identical to the logger's serial number.
-\item index - Logger index at the locality.
+\item logger_name - Logger name.
 \item serial_number - Serial number of the logger, either provided by the user or automatically detected from the file name or header.
 \item logger_type - Logger type.
 \item start_date - The oldest record on the logger.

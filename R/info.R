@@ -26,7 +26,7 @@ mc_info_count <- function(data) {
 #' @template param_myClim_object_raw
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
-#' * logger_index - Logger index at the locality.
+#' * logger_name - Logger name at the locality.
 #' * serial_number - serial number of logger when provided or automatically detected from file name or header
 #' * start_date - date of the first record on the logger
 #' * end_date  - date of the last record on the logger
@@ -40,9 +40,9 @@ mc_info_count <- function(data) {
 mc_info_clean <- function(data) {
     .common_stop_if_not_raw_format(data)
 
-    logger_function <- function (logger, logger_index) {
+    logger_function <- function (logger) {
         list(serial_number = logger$metadata@serial_number,
-             logger_index = logger_index,
+             logger_name = logger$metadata@name,
              start_date = min(logger$datetime),
              end_date = max(logger$datetime),
              step_seconds = logger$clean_info@step,
@@ -53,7 +53,7 @@ mc_info_clean <- function(data) {
     }
 
     locality_function <- function(locality) {
-        locality_table <- purrr::imap_dfr(locality$loggers, logger_function)
+        locality_table <- purrr::map_dfr(locality$loggers, logger_function)
         locality_table$locality_id <- locality$metadata@locality_id
         locality_table <- dplyr::select(locality_table, "locality_id", dplyr::everything())
         return(locality_table)
@@ -181,7 +181,7 @@ mc_info_meta <- function(data) {
 #' @template param_myClim_object_raw
 #' @return A data.frame with the following columns:
 #' * locality_id - If provided by the user, it represents the locality ID; if not provided, it is identical to the logger's serial number.
-#' * index - Logger index at the locality.
+#' * logger_name - Logger name.
 #' * serial_number - Serial number of the logger, either provided by the user or automatically detected from the file name or header.
 #' * logger_type - Logger type.
 #' * start_date - The oldest record on the logger.
@@ -193,12 +193,12 @@ mc_info_meta <- function(data) {
 mc_info_logger <- function(data) {
     .common_stop_if_not_raw_format(data)
 
-    logger_function <- function(locality_id, logger_index, logger) {
+    logger_function <- function(locality_id, logger) {
         step <- as.integer(logger$clean_info@step)
 
         return(
              list(locality_id=locality_id,
-                  index=logger_index,
+                  logger_name=logger$metadata@name,
                   serial_number=logger$metadata@serial_number,
                   logger_type=logger$metadata@type,
                   start_date=min(logger$datetime),
@@ -207,10 +207,8 @@ mc_info_logger <- function(data) {
     }
 
     locality_function <- function(locality) {
-        purrr::pmap_dfr(list(
-                        locality_id = locality$metadata@locality_id,
-                        logger_index = seq_along(locality$loggers),
-                        logger = locality$loggers),
+        purrr::map2_dfr(locality$metadata@locality_id,
+                        locality$loggers,
                         logger_function)
     }
 
@@ -231,8 +229,7 @@ mc_info_logger <- function(data) {
 #' @template param_myClim_object
 #' @return data.frame with columns:
 #' * locality_id - when provided by user then locality ID, when not provided identical with serial number
-#' * logger_index - index of logger in myClim object at the locality
-#' * logger_type - type of logger
+#' * logger_name - name of logger in myClim object at the locality (e.g., "Thermo_1", "TMS_2")
 #' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
 #' * tag - category of state (e.g., "error", "source", "quality")  
 #' * start - start datetime
@@ -244,14 +241,13 @@ mc_info_logger <- function(data) {
 mc_info_states <- function(data) {
     is_raw_format <- .common_is_raw_format(data)
 
-    sensor_function <- function(locality_id, logger_index, logger_type, sensor) {
+    sensor_function <- function(locality_id, logger_name, sensor) {
         count <- nrow(sensor$states)
         if(count == 0) {
             return(tibble::tibble())
         }
         result <- tibble::tibble(locality_id=rep(locality_id, count),
-                                 logger_index=rep(logger_index, count),
-                                 logger_type=rep(logger_type, count),
+                                 logger_name=rep(logger_name, count),
                                  sensor_name=rep(sensor$metadata@name),
                                  tag=sensor$states$tag,
                                  start=sensor$states$start,
@@ -260,30 +256,26 @@ mc_info_states <- function(data) {
         return(result)
     }
 
-    sensors_item_function <- function(locality_id, logger_index, logger_type, item) {
+    sensors_item_function <- function(locality_id, logger_name, item) {
         count <- length(item$sensors)
         purrr::pmap_dfr(list(locality_id=rep(locality_id, count),
-                             logger_index=rep(logger_index, count),
-                             logger_type=rep(logger_type, count),
+                             logger_name=rep(logger_name, count),
                              sensor=item$sensors),
                         sensor_function)
     }
 
-    prep_locality_function <- function(locality) {
-        logger_types <- purrr::map_chr(locality$loggers, ~ .x$metadata@type)
+    raw_locality_function <- function(locality) {
         purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
-                             logger_index=seq_along(locality$loggers),
-                             logger_type=logger_types,
+                             logger_name=names(locality$loggers),
                              item=locality$loggers),
                         sensors_item_function)
     }
 
     if(is_raw_format) {
-        result <- purrr::map_dfr(data$localities, prep_locality_function)
+        result <- purrr::map_dfr(data$localities, raw_locality_function)
     } else {
         result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
-                                       logger_index=NA_integer_,
-                                       logger_type=NA_character_,
+                                       logger_name=NA_character_,
                                        item=data$localities),
                                   sensors_item_function)
     }

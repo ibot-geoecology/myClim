@@ -290,13 +290,13 @@ test_that("mc_agg custom - states", {
     table <- readRDS("../data/agg-custom/air_humidity.rds")
     data <- mc_read_wide(table, sensor_id = "RH", "humidity", silent=T)
     states <- as.data.frame(tibble::tribble(
-        ~locality_id, ~logger_index, ~sensor_name,    ~tag,
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start, ~end,
-        "B1BOJK01"  ,             1,           NA,  "test",
+        "B1BOJK01"  ,   "Logger_1",           NA,  "test",
         lubridate::ymd_hm("2019-06-01 0:00"), lubridate::ymd_hm("2020-06-01 0:00"),
-        "B1BOJK01"  ,             1,           NA,  "test",
+        "B1BOJK01"  ,   "Logger_1",           NA,  "test",
         lubridate::ymd_hm("2019-01-01 0:00"), lubridate::ymd_hm("2019-06-01 0:00"),
-        "B1BOJK01"  ,             1,           NA,  "test",
+        "B1BOJK01"  ,   "Logger_1",           NA,  "test",
         lubridate::ymd_hm("2019-01-01 0:00"), lubridate::ymd_hm("2019-02-01 0:00"),
     ))
     data <- mc_states_insert(data, states)

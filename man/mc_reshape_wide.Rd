@@ -4,7 +4,13 @@
 \alias{mc_reshape_wide}
 \title{Export values to wide table}
 \usage{
-mc_reshape_wide(data, localities = NULL, sensors = NULL, use_utc = TRUE)
+mc_reshape_wide(
+  data,
+  localities = NULL,
+  sensors = NULL,
+  use_utc = TRUE,
+  show_logger_name = FALSE
+)
 }
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
@@ -22,6 +28,8 @@ shifting daily, weekly, monthly... data (shift midnight) does not make sense in 
 But when user need more flexibility, then myClim Raw-format
 can be used, In Raw-format \code{use_utc} is not limited, user can shift an data without the restrictions.
 See \link{myClim-package}}
+
+\item{show_logger_name}{if TRUE, the logger name is included in the column name (default FALSE)}
 }
 \value{
 data.frame with columns:
@@ -40,7 +48,8 @@ This function converts myClim object to the R data.frame with values of sensor i
 First column of the output data.frame is datetime followed by the
 columns for every sensor. Name of the column is in format:
 \itemize{
-\item localityid_loggerid_serialnumber_sensorname for Raw-format
+\item localityid_loggerid_serialnumber_sensorname for Raw-format and \code{show_logger_name=FALSE}
+\item localityid_loggername_sensorname for Raw-format and \code{show_logger_name=TRUE}
 \item localityid_sensorname for Agg-format
 }
 

@@ -13,7 +13,7 @@ mc_states_insert(data, states_table)
 data.frame with columns:
 \itemize{
 \item locality_id - the name of locality (in some cases identical to logger id, see \link{mc_read_files})
-\item logger_index - index of logger in myClim object at the locality. See \link{mc_info_logger}.
+\item logger_name - name of logger in myClim object at the locality. See \link{mc_info_logger}.
 \item sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
 \item tag - category of state (e.g., "conflict", "error", "source", "quality")
 \item start - start datetime
@@ -50,7 +50,8 @@ will adjust the start and end times to fit the available measurements. If a user
 '2020-01-01 10:23:00' on a logger with a 15-minute step, it will be rounded to '2020-01-01 10:30:00'.
 }
 \examples{
-states <- data.frame(locality_id="A1E05", logger_index=1, sensor_name="Thermo_T", tag="error",
+states <- data.frame(locality_id="A1E05", logger_name="Thermo_1",
+                     sensor_name="Thermo_T", tag="error",
                      start=lubridate::ymd_hm("2020-10-28 9:00"),
                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 data <- mc_states_insert(mc_data_example_clean, states)

@@ -86,6 +86,7 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #'             |           | $metadata   | mc_LoggerMetadata - class |                        ||
 #'             |           |             +---------------------------+                        ||
 #'             |           |             | @type                     |                        ||
+#'             |           |             | @name                     |                        ||
 #'             |           |             | @serial_number            |                        ||
 #'             |           |             | @step                     |                        ||
 #'             |           |             +---------------------------+                        ||

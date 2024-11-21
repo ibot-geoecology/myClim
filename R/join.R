@@ -130,6 +130,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
         }
         joined_loggers <- dplyr::group_map(groups_table, group_function)
         locality$loggers <- purrr::flatten(joined_loggers)
+        locality <- .read_generate_logger_names(locality)
         join_bar$tick()
         return(locality)
     }
@@ -143,10 +144,10 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
     steps <- purrr::map_int(locality$loggers, ~ as.integer(.x$clean_info@step))
     shifts <- purrr::map_int(locality$loggers, ~ as.integer(.common_get_logger_shift(.x)))
     table <- tibble::tibble(index=seq_along(types),
-                             serial_number=serial_numbers,
-                             type=types,
-                             step=steps,
-                             shift=shifts)
+                            serial_number=serial_numbers,
+                            type=types,
+                            step=steps,
+                            shift=shifts)
     env_params <- new.env()
     env_params$last_group <- 0
     serial_groups <- NULL

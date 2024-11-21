@@ -4,28 +4,28 @@ test_that("mc_read_data csv without localities", {
     data <- mc_read_data("../data/TOMST/files_table2.csv", clean=FALSE)
     test_raw_data_format(data)
     expect_equal(length(data$localities), 3)
-    expect_equal(length(data$localities$A6W79$loggers[[1]]$datetime), 49)
+    expect_equal(length(data$localities$A6W79$loggers[["TMS_L45_1"]]$datetime), 49)
     expect_equal(data$localities$A6W79$metadata@tz_type, myClim:::.model_const_TZ_UTC)
     expect_equal(length(data$localities$A6W79$loggers[[1]]$sensors), 4)
-    expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1$metadata@height,
+    expect_equal(data$localities$A6W79$loggers[["TMS_L45_1"]]$sensors$TMS_T1$metadata@height,
                  mc_data_heights$height[mc_data_heights$logger_type == .model_const_LOGGER_TOMST_TMS_L45 &
                                         mc_data_heights$sensor_name == mc_const_SENSOR_TMS_T1])
-    expect_equal(data$localities$A6W79$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
-    expect_equal(data$localities$A6W79$loggers[[1]]$metadata@serial_number, "94184102")
-    expect_equal(data$localities$A6W79$loggers[[1]]$metadata@step, 15)
-    expect_equal(data$localities$A2E32$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS)
-    expect_equal(length(data$localities$A2E32$loggers[[1]]$datetime), 75)
-    expect_equal(length(data$localities$A2E32$loggers[[1]]$sensors), 4)
-    expect_equal(length(data$localities$A2E32$loggers[[1]]$sensors$TMS_T1), 4)
-    expect_equal(length(data$localities$A1E05$loggers[[1]]$datetime), 11)
-    expect_equal(length(data$localities$A1E05$loggers[[1]]$sensors), 1)
-    expect_true(is.na(data$localities$A1E05$loggers[[1]]$metadata@step))
+    expect_equal(data$localities$A6W79$loggers[["TMS_L45_1"]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
+    expect_equal(data$localities$A6W79$loggers[["TMS_L45_1"]]$metadata@serial_number, "94184102")
+    expect_equal(data$localities$A6W79$loggers[["TMS_L45_1"]]$metadata@step, 15)
+    expect_equal(data$localities$A2E32$loggers[["TMS_1"]]$metadata@type, .model_const_LOGGER_TOMST_TMS)
+    expect_equal(length(data$localities$A2E32$loggers[["TMS_1"]]$datetime), 75)
+    expect_equal(length(data$localities$A2E32$loggers[["TMS_1"]]$sensors), 4)
+    expect_equal(length(data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T1), 4)
+    expect_equal(length(data$localities$A1E05$loggers[["Thermo_1"]]$datetime), 11)
+    expect_equal(length(data$localities$A1E05$loggers[["Thermo_1"]]$sensors), 1)
+    expect_true(is.na(data$localities$A1E05$loggers[["Thermo_1"]]$metadata@step))
     expect_true(is.na(data$localities$A1E05$metadata@elevation))
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$start, dplyr::first(data$localities$A1E05$loggers[[1]]$datetime))
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$end, dplyr::last(data$localities$A1E05$loggers[[1]]$datetime))
-    expect_equal(data$localities$A1E05$loggers[[1]]$sensors$Thermo_T$states$value, normalizePath("../data/TOMST/data_91184101_0.csv"))
-    expect_equal(data$localities$A1E05$loggers[[2]]$metadata@serial_number, "94230002")
+    expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
+    expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$start, dplyr::first(data$localities$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$end, dplyr::last(data$localities$A1E05$loggers[[1]]$datetime))
+    expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$value, normalizePath("../data/TOMST/data_91184101_0.csv"))
+    expect_equal(data$localities$A1E05$loggers[["TMS_1"]]$metadata@serial_number, "94230002")
 })
 
 test_that("mc_read_data missed file", {
@@ -49,8 +49,8 @@ test_that("mc_read_data csv with localities", {
     test_raw_data_format(data)
     expect_equal(data$localities$A1E05$metadata@elevation, 255)
     expect_equal(data$localities$A6W79$metadata@tz_type, myClim:::.model_const_TZ_USER_DEFINED)
-    expect_equal(data$localities$A6W79$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
-    expect_equal(data$localities$A6W79$loggers[[1]]$sensors$TMS_T1_L45$metadata@height,
+    expect_equal(data$localities$A6W79$loggers[["TMS_L45_1"]]$metadata@type, .model_const_LOGGER_TOMST_TMS_L45)
+    expect_equal(data$localities$A6W79$loggers[["TMS_L45_1"]]$sensors$TMS_T1_L45$metadata@height,
                  mc_data_heights$height[mc_data_heights$logger_type == .model_const_LOGGER_TOMST_TMS_L45 &
                                             mc_data_heights$sensor_name == mc_const_SENSOR_TMS_T1])
 })
@@ -72,8 +72,8 @@ test_that("mc_read_files TOMST directory", {
     expect_equal(data$localities[[1]]$metadata@tz_type, myClim:::.model_const_TZ_UTC)
     expect_equal(length(data$localities), 6)
     expect_equal(length(data$localities[[1]]$loggers), 1)
-    expect_equal(data$localities$`92192250`$loggers[[1]]$metadata@type, .model_const_LOGGER_TOMST_DENDROMETER)
-    expect_equal(length(data$localities$`92192250`$loggers[[1]]$sensors), 2)
+    expect_equal(data$localities$`92192250`$loggers[["Dendro_1"]]$metadata@type, .model_const_LOGGER_TOMST_DENDROMETER)
+    expect_equal(length(data$localities$`92192250`$loggers[["Dendro_1"]]$sensors), 2)
 })
 
 test_that("mc_read_data TOMST 2024 format changes", {
@@ -113,36 +113,36 @@ test_that("mc_read_data HOBO", {
         expect_warning("Separated time in source data isn't supported.")
     test_raw_data_format(data)
     expect_equal(sort(names(data$localities)), sort(c("A", "B", "C", "D", "E", "F", "CH", "I", "J", "K")))
-    expect_true(var(c(data$localities$A$loggers[[1]]$datetime[[1]],
-                      data$localities$B$loggers[[1]]$datetime[[1]],
-                      data$localities$C$loggers[[1]]$datetime[[1]],
-                      data$localities$D$loggers[[1]]$datetime[[1]],
-                      data$localities$E$loggers[[1]]$datetime[[1]],
-                      data$localities$F$loggers[[1]]$datetime[[1]],
-                      data$localities$CH$loggers[[1]]$datetime[[1]])) == 0)
-    expect_true(mc_const_SENSOR_HOBO_T %in% names(data$localities$C$loggers[[1]]$sensors))
-    expect_equal(data$localities$C$loggers[[1]]$sensors$HOBO_T$values[[1]], 5 * (65.788 - 32) / 9)
-    expect_equal(length(data$localities$A$loggers[[1]]$sensors), 2)
-    expect_equal(length(data$localities$I$loggers[[1]]$sensors), 1)
+    expect_true(var(c(data$localities$A$loggers[["HOBO_U23-001A_1"]]$datetime[[1]],
+                      data$localities$B$loggers[["HOBO_U23-001A_1"]]$datetime[[1]],
+                      data$localities$C$loggers[["HOBO_U23-001A_1"]]$datetime[[1]],
+                      data$localities$D$loggers[["HOBO_U23-001A_1"]]$datetime[[1]],
+                      data$localities$E$loggers[["HOBO_U23-001A_1"]]$datetime[[1]],
+                      data$localities$F$loggers[["HOBO_U23-001A_1"]]$datetime[[1]],
+                      data$localities$CH$loggers[["HOBO_U23-001A_1"]]$datetime[[1]])) == 0)
+    expect_true(mc_const_SENSOR_HOBO_T %in% names(data$localities$C$loggers[["HOBO_U23-001A_1"]]$sensors))
+    expect_equal(data$localities$C$loggers[["HOBO_U23-001A_1"]]$sensors$HOBO_T$values[[1]], 5 * (65.788 - 32) / 9)
+    expect_equal(length(data$localities$A$loggers[["HOBO_U23-001A_1"]]$sensors), 2)
+    expect_equal(length(data$localities$I$loggers[["Logger_1"]]$sensors), 1)
     cleaned_data <- mc_prep_clean(data, silent = T)
     clean_info <- mc_info_clean(cleaned_data)
     expect_true(all(clean_info$count_duplicities == 0))
     expect_true(all(clean_info$count_missing == 0))
-    expect_true(dplyr::near(data$localities$J$loggers[[1]]$sensors$HOBO_T$values[[1]], 7.87))
-    expect_true(dplyr::near(data$localities$J$loggers[[1]]$sensors$HOBO_RH$values[[1]], 100.0))
-    expect_true(all(c(data$localities$A$loggers[[1]]$metadata@type,
-                   data$localities$B$loggers[[1]]$metadata@type,
-                   data$localities$C$loggers[[1]]$metadata@type,
-                   data$localities$D$loggers[[1]]$metadata@type,
-                   data$localities$E$loggers[[1]]$metadata@type,
-                   data$localities$F$loggers[[1]]$metadata@type,
-                   data$localities$CH$loggers[[1]]$metadata@type,
-                   data$localities$J$loggers[[1]]$metadata@type) == .model_const_LOGGER_HOBO_U23_001A))
-    expect_true(is.na(data$localities$I$loggers[[1]]$metadata@type))
-    expect_true(data$localities$K$loggers[[1]]$metadata@type == .model_const_LOGGER_HOBO_U23_004)
-    expect_equal(length(data$localities$K$loggers[[1]]$sensors), 2)
-    expect_true(mc_const_SENSOR_HOBO_EXTT %in% names(data$localities$K$loggers[[1]]$sensors))
-    expect_true(data$localities$K$loggers[[1]]$sensors$HOBO_T$metadata@height == "air 2 cm")
+    expect_true(dplyr::near(data$localities$J$loggers[["HOBO_U23-001A_1"]]$sensors$HOBO_T$values[[1]], 7.87))
+    expect_true(dplyr::near(data$localities$J$loggers[["HOBO_U23-001A_1"]]$sensors$HOBO_RH$values[[1]], 100.0))
+    expect_true(all(c(data$localities$A$loggers[["HOBO_U23-001A_1"]]$metadata@type,
+                   data$localities$B$loggers[["HOBO_U23-001A_1"]]$metadata@type,
+                   data$localities$C$loggers[["HOBO_U23-001A_1"]]$metadata@type,
+                   data$localities$D$loggers[["HOBO_U23-001A_1"]]$metadata@type,
+                   data$localities$E$loggers[["HOBO_U23-001A_1"]]$metadata@type,
+                   data$localities$F$loggers[["HOBO_U23-001A_1"]]$metadata@type,
+                   data$localities$CH$loggers[["HOBO_U23-001A_1"]]$metadata@type,
+                   data$localities$J$loggers[["HOBO_U23-001A_1"]]$metadata@type) == .model_const_LOGGER_HOBO_U23_001A))
+    expect_true(is.na(data$localities$I$loggers[["Logger_1"]]$metadata@type))
+    expect_true(data$localities$K$loggers[["HOBO_U23-004_1"]]$metadata@type == .model_const_LOGGER_HOBO_U23_004)
+    expect_equal(length(data$localities$K$loggers[["HOBO_U23-004_1"]]$sensors), 2)
+    expect_true(mc_const_SENSOR_HOBO_EXTT %in% names(data$localities$K$loggers[["HOBO_U23-004_1"]]$sensors))
+    expect_true(data$localities$K$loggers[["HOBO_U23-004_1"]]$sensors$HOBO_T$metadata@height == "air 2 cm")
 })
 
 test_that("mc_read_data HOBO skip wrong datetime", {
@@ -164,15 +164,15 @@ test_that("mc_read_files error", {
 test_that("mc_read_files TOMST comma in number", {
     data <- mc_read_files(c("../data/comma_TOMST/data_91212414_0.csv",
                             "../data/comma_TOMST/data_94214606_0.csv"), "TOMST", clean=FALSE)
-    expect_true(all(data$localities$`91212414`$loggers[[1]]$sensors$Thermo_T$values < 100))
-    expect_true(is.numeric(data$localities$`91212414`$loggers[[1]]$sensors$Thermo_T$values))
+    expect_true(all(data$localities$`91212414`$loggers[["Thermo_1"]]$sensors$Thermo_T$values < 100))
+    expect_true(is.numeric(data$localities$`91212414`$loggers[["Thermo_1"]]$sensors$Thermo_T$values))
     test_raw_data_format(data)
 })
 
 test_that("mc_read_files TOMST with error in data", {
     expect_warning(data <- mc_read_files("../data/TOMST-error", "TOMST", clean=FALSE))
-    expect_true(is.na(data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$values[[7]]))
-    states <- dplyr::filter(data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$states, .data$tag == .model_const_SENSOR_STATE_ERROR)
+    expect_true(is.na(data$localities$data_93142777$loggers[["TMS_1"]]$sensors$TMS_T2$values[[7]]))
+    states <- dplyr::filter(data$localities$data_93142777$loggers[["TMS_1"]]$sensors$TMS_T2$states, .data$tag == .model_const_SENSOR_STATE_ERROR)
     expect_equal(nrow(states), 6)
     expect_equal(states$start, c(lubridate::ymd_hm("2022-02-24 06:00"),
                                  lubridate::ymd_hm("2022-02-24 07:15"),
@@ -193,17 +193,17 @@ test_that("mc_read_files joined TOMST direcory", {
     test_raw_data_format(data)
     expect_equal(names(data$localities), c("202004_94199113", "202010_91183101", "A1E01_TS", "A1W14_TMS", "A4E53_TMS", "CKras_Loc_2_15",
                                            "CZ2_HRADEC_TMS", "CZ2_HRADEC_TS", "DP_0595"))
-    expect_equal(names(data$localities$A1W14_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist"))
-    expect_equal(names(data$localities$CZ2_HRADEC_TMS$loggers[[1]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist", "VWC"))
-    expect_equal(names(data$localities$CZ2_HRADEC_TS$loggers[[1]]$sensors), "Thermo_T")
+    expect_equal(names(data$localities$A1W14_TMS$loggers[["TMS_1"]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist"))
+    expect_equal(names(data$localities$CZ2_HRADEC_TMS$loggers[["TMS_1"]]$sensors), c("TMS_T1", "TMS_T2", "TMS_T3", "TMS_moist", "VWC"))
+    expect_equal(names(data$localities$CZ2_HRADEC_TS$loggers[["Thermo_1"]]$sensors), "Thermo_T")
 })
 
 test_that("mc_read_files joined TOMST NA begin", {
     data <- mc_read_files("../data/joined_TOMST/problems/202110_91201320.csv", "TOMST_join",
                           logger_type="Thermo", silent=TRUE)
     test_raw_data_format(data)
-    expect_equal(data$localities$`202110_91201320`$loggers[[1]]$metadata@type, "Thermo")
-    expect_equal(names(data$localities$`202110_91201320`$loggers[[1]]$sensors), "Thermo_T")
+    expect_equal(data$localities$`202110_91201320`$loggers[["Thermo_1"]]$metadata@type, "Thermo")
+    expect_equal(names(data$localities$`202110_91201320`$loggers[["Thermo_1"]]$sensors), "Thermo_T")
 })
 
 test_that("mc_read_wide", {
@@ -216,8 +216,8 @@ test_that("mc_read_wide", {
     data <- mc_read_wide(data_table, mc_const_SENSOR_precipitation, clean=FALSE)
     test_raw_data_format(data)
     expect_equal(length(data$localities), 49)
-    expect_equal(names(data$localities$B1BLAT01$loggers[[1]]$sensors), mc_const_SENSOR_precipitation)
-    expect_equal(data$localities$B1BLAT01$loggers[[1]]$sensors[[1]]$values[[1]], 0.7)
+    expect_equal(names(data$localities$B1BLAT01$loggers[["Logger_1"]]$sensors), mc_const_SENSOR_precipitation)
+    expect_equal(data$localities$B1BLAT01$loggers[["Logger_1"]]$sensors[[1]]$values[[1]], 0.7)
 })
 
 test_that("mc_read_long", {
@@ -257,11 +257,11 @@ test_that("mc_read_files user_data_formats", {
     my_data <- mc_read_files("../data/user_data_formats/21498648.csv", "myHOBO", clean=FALSE,
                              user_data_formats=user_data_formats)
     test_raw_data_format(my_data)
-    expect_equal(length(my_data$localities$`21498648`$loggers[[1]]$sensors), 2)
+    expect_equal(length(my_data$localities$`21498648`$loggers[["Logger_1"]]$sensors), 2)
     expect_equal(names(my_data$localities), "21498648")
     cleaned_data <- mc_prep_clean(my_data, silent = TRUE)
-    expect_equal(dplyr::last(cleaned_data$localities$`21498648`$loggers[[1]]$sensors$T_C$values), 13)
-    expect_equal(dplyr::last(cleaned_data$localities$`21498648`$loggers[[1]]$sensors$RH$values), 53)
+    expect_equal(dplyr::last(cleaned_data$localities$`21498648`$loggers[["Logger_1"]]$sensors$T_C$values), 13)
+    expect_equal(dplyr::last(cleaned_data$localities$`21498648`$loggers[["Logger_1"]]$sensors$RH$values), 53)
 })
 
 test_that("mc_read_files user_data_formats auto datetime", {
@@ -273,8 +273,8 @@ test_that("mc_read_files user_data_formats auto datetime", {
     user_data_formats$my_logger@columns[[mc_const_SENSOR_real]] <- 6
     my_data <- mc_read_files(files, "my_logger", silent=TRUE, user_data_formats=user_data_formats)
     test_raw_data_format(my_data)
-    expect_equal(length(my_data$localities$TMS94184102$loggers[[1]]$sensors), 4)
-    expect_equal(names(my_data$localities$TMS94184102$loggers[[1]]$sensors), c("T_C1", "T_C2", "T_C3", "real"))
+    expect_equal(length(my_data$localities$TMS94184102$loggers[["Logger_1"]]$sensors), 4)
+    expect_equal(names(my_data$localities$TMS94184102$loggers[["Logger_1"]]$sensors), c("T_C1", "T_C2", "T_C3", "real"))
 })
 
 test_that("mc_read_files TOMST custom date time format", {
@@ -297,6 +297,6 @@ test_that("mc_read_files HOBO logger_format", {
     ))
     data <- mc_read_data(files_table, clean=FALSE)
     test_raw_data_format(data)
-    expect_equal(names(data$localities$A$loggers[[1]]$sensors), c("HOBO_T", "HOBO_RH"))
-    expect_equal(names(data$localities$A$loggers[[2]]$sensors), c("HOBO_T", "HOBO_extT"))
+    expect_equal(names(data$localities$A$loggers[["HOBO_U23-001A_1"]]$sensors), c("HOBO_T", "HOBO_RH"))
+    expect_equal(names(data$localities$A$loggers[["HOBO_U23-004_1"]]$sensors), c("HOBO_T", "HOBO_extT"))
 })

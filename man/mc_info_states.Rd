@@ -13,8 +13,7 @@ mc_info_states(data)
 data.frame with columns:
 \itemize{
 \item locality_id - when provided by user then locality ID, when not provided identical with serial number
-\item logger_index - index of logger in myClim object at the locality
-\item logger_type - type of logger
+\item logger_name - name of logger in myClim object at the locality (e.g., "Thermo_1", "TMS_2")
 \item sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
 \item tag - category of state (e.g., "error", "source", "quality")
 \item start - start datetime

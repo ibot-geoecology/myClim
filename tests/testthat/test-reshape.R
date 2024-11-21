@@ -46,6 +46,14 @@ test_that("wideformat index no serial_number", {
     expect_true("91184101_3_Thermo_T" %in% colnames(table))
 })
 
+test_that("wideformat show_logger_name", {
+    data <- mc_read_files("../data/join", "TOMST", clean=TRUE, silent=TRUE)
+    table <- mc_reshape_wide(data, show_logger_name=TRUE)
+    expect_true("91184101_Thermo_1_Thermo_T" %in% colnames(table))
+    expect_true("91184101_Thermo_3_Thermo_T" %in% colnames(table))
+    expect_true("94184102_TMS_2_TMS_T2" %in% colnames(table))
+})
+
 test_that("reshape long", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     expect_warning(table <- mc_reshape_long(data, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")),

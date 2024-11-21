@@ -1,11 +1,10 @@
 test_that(".plot_get_logger_sensors_by_physical", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
-    test_function <- if(exists(".plot_get_logger_sensors_by_physical")) .plot_get_logger_sensors_by_physical else .plot_get_logger_sensors_by_physical
-    physical <- test_function(data$localities$A6W79$loggers[[1]])
+    physical <- .plot_get_logger_sensors_by_physical(data$localities$A6W79$loggers[["TMS_1"]])
     expect_equal(length(physical), 2)
     expect_equal(physical$T_C, c("TMS_T1", "TMS_T2", "TMS_T3"))
     expect_equal(physical$moisture_raw, "TMS_moist")
-    physical <- test_function(data$localities$A1E05$loggers[[1]])
+    physical <- .plot_get_logger_sensors_by_physical(data$localities$A1E05$loggers[["Thermo_1"]])
     expect_equal(length(physical), 1)
     expect_equal(physical$T_C, "Thermo_T")
 })
@@ -13,7 +12,7 @@ test_that(".plot_get_logger_sensors_by_physical", {
 test_that("all plots", {
     data <- mc_read_files("../data/eco-snow", dataformat_name = "TOMST", silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`94184102`=30, `94184103`=90), param_name="tz_offset")
-    logger <- data$localities$`94184102`$loggers[[1]]
+    logger <- data$localities$`94184102`$loggers[["TMS_1"]]
     plot_data <- data
     plot_data$localities$`94184102`$loggers <- list(logger, logger)
     data_agg <- mc_agg(data)

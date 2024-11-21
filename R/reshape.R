@@ -6,7 +6,8 @@
 #'
 #' @details First column of the output data.frame is datetime followed by the
 #' columns for every sensor. Name of the column is in format:
-#' * localityid_loggerid_serialnumber_sensorname for Raw-format
+#' * localityid_loggerid_serialnumber_sensorname for Raw-format and `show_logger_name=FALSE`
+#' * localityid_loggername_sensorname for Raw-format and `show_logger_name=TRUE`
 #' * localityid_sensorname for Agg-format
 #' 
 #' The less complex wide table is returned when exporting single sensor ascross localities. 
@@ -15,6 +16,7 @@
 #' @template param_localities
 #' @template param_sensors
 #' @template param_use_utc
+#' @param show_logger_name if TRUE, the logger name is included in the column name (default FALSE)
 #' @return data.frame with columns:
 #' * datetime 
 #' * locality1_sensor1
@@ -26,13 +28,13 @@
 #' @examples
 #' example_tms_wideformat <- mc_reshape_wide(mc_data_example_raw, c("A6W79", "A2E32"),
 #'                                           c("TMS_T1", "TMS_T2"))
-mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
+mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE, show_logger_name=FALSE) {
     data <- mc_filter(data, localities, sensors)
     if(.common_is_agg_format(data)) {
         use_utc <- .common_check_agg_use_utc(use_utc, data$metadata@period)
     }
     datetimes <- .reshape_get_all_datetimes(data, use_utc)
-    tables <- c(tibble::tibble(datetimes), .reshape_get_sensor_tables(data, use_utc))
+    tables <- c(tibble::tibble(datetimes), .reshape_get_sensor_tables(data, use_utc, show_logger_name))
     tables[[1]] <- tibble::as_tibble(tables[[1]])
     colnames(tables[[1]]) <- "datetime"
     as.data.frame(purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime")))
@@ -56,7 +58,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
     .common_as_utc_posixct(datetimes)
 }
 
-.reshape_get_sensor_tables <- function(data, use_utc) {
+.reshape_get_sensor_tables <- function(data, use_utc, show_logger_name) {
     sensors_function <- function(item, name_prefix, tz_offset) {
         table <- .common_sensor_values_as_tibble(item)
         table$datetime <- .calc_get_datetimes_with_offset(table$datetime, tz_offset)
@@ -75,14 +77,19 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
 
     raw_locality_function <- function(locality) {
         name_function <- function(logger, i) {
-            parts <- c(locality$metadata@locality_id, as.character(i))
-            if(!is.na(logger$metadata@serial_number)) {
-                parts <- c(parts, logger$metadata@serial_number)
+            parts <- locality$metadata@locality_id
+            if(show_logger_name) {
+                parts <- c(parts, logger$metadata@name)
+            } else {
+                parts <- c(parts, as.character(i))
+                if(!is.na(logger$metadata@serial_number)) {
+                    parts <- c(parts, logger$metadata@serial_number)
+                }
             }
             paste0(parts, collapse="_")
         }
 
-        prefixes <- purrr::imap_chr(locality$loggers, name_function)
+        prefixes <- purrr::map2_chr(locality$loggers, seq_along(locality$loggers), name_function)
         items <- list(
             item=locality$loggers,
             name_prefix=prefixes,
