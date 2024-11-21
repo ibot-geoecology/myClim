@@ -320,6 +320,29 @@ test_that("mc_states_outlier", {
     expect_true("jump" %in% states_agg_table$tag)
 })
 
+test_that("mc_states_outlier NA", {
+    data <- mc_read_files("../data/TMSoffsoil/data_93142760_201904.csv", "TOMST", silent=TRUE)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,
+        "93142760"  ,      "TMS_1",     "TMS_T3",    "NA",
+        lubridate::ymd_hm("2018-12-01 0:00"), lubridate::ymd_hm("2018-12-01 23:45"),
+        "93142760"  ,      "TMS_1",  "TMS_moist",    "NA",
+        lubridate::ymd_hm("2018-12-01 0:00"), lubridate::ymd_hm("2018-12-01 23:45"),
+    ))
+    data <- mc_states_insert(data, states)
+    data <- mc_states_replace(data, "NA")
+    range_table <- mc_info_range(data)
+    range_table$min_value <- -3.5
+    range_table$negative_jump[range_table$sensor_name == "TMS_moist"] <- 500
+    states_data <- mc_states_outlier(data, range_table)
+    states_table <- mc_info_states(states_data)
+    states_table <- dplyr::filter(states_table, !(.data$tag %in% c("source", "NA")))
+    expect_equal(nrow(states_table), 3)
+    expect_true("range" %in% states_table$tag)
+    expect_true("jump" %in% states_table$tag)
+})
+
 test_that("mc_states_join", {
     data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
     states_data <- mc_states_join(data)

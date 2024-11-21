@@ -334,7 +334,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     step_repr_function <- function(step) {
         return(stringr::str_glue("({step}s = {round(step/60, 2)}min)"))
     }
-    steps <- paste(purrr::map(sort(unique(info_table$step)), step_repr_function), collapse = ", ")
+    steps <- paste(purrr::map(sort(unique(info_table$step_seconds)), step_repr_function), collapse = ", ")
     message(stringr::str_glue("detected steps: {steps}"))
     print.data.frame(info_table)
 }
