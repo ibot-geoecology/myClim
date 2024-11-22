@@ -863,12 +863,12 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
         interval <- int_table$interval[selected_i]
         other_rows$overlap <- lubridate::int_overlaps(interval, other_rows$interval)
         purrr::walk(other_rows$i[other_rows$overlap],
-            ~ .states_join_compare_loggers(states_env, loggers[[selected_i]], loggers[[.x]], logger_indexes[[selected_i]], logger_indexes[[.x]]))        
+            ~ .states_join_compare_loggers(states_env, loggers[[selected_i]], loggers[[.x]]))        
     }
     purrr::walk(int_table$i, intervals_function)
 }
 
-.states_join_compare_loggers <- function(states_env, logger1, logger2, logger1_index, logger2_index){
+.states_join_compare_loggers <- function(states_env, logger1, logger2){
     sensor_names_table <- .join_get_sensor_names_table(logger1, logger2, states_env$tolerance)
     data_table <- .join_get_loggers_data_table(sensor_names_table, logger1, logger2)
     sensor_function <- function(sensor_name) {
@@ -877,11 +877,14 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
         if(!any(data_table$conflict)) {
             return()
         }
-        serial_number <- {if (!is.na(logger2$metadata@serial_number)) paste0(" ", logger2$metadata@serial_number) else ""}
-        value <- paste0("[", logger2_index, "]", serial_number)
+        if (!is.na(logger2$metadata@serial_number)) {
+            value <- paste0(logger2$metadata@name, "(", logger2$metadata@serial_number, ")")
+        } else {
+            value <- logger2$metadata@name
+        }
         new_states_table <- .states_get_states_table_from_logical_values(data_table$conflict, data_table$datetime, states_env$tag, value=value)
         current_states_table <- logger1$sensors[[sensor_name]]$states
-        states_env$locality$loggers[[logger1_index]]$sensors[[sensor_name]]$states <- dplyr::union_all(current_states_table, new_states_table)
+        states_env$locality$loggers[[logger1$metadata@name]]$sensors[[sensor_name]]$states <- dplyr::union_all(current_states_table, new_states_table)
     }
     purrr::walk(sensor_names_table$name, sensor_function)
 }
