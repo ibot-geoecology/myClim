@@ -93,7 +93,16 @@ test_sensor <- function(sensor) {
     expect_equal(names(sensor), c("metadata", "values", "calibration", "states"))
     expect_true(is(sensor$metadata, "mc_SensorMetadata"))
     expect_true(sensor$metadata@sensor_id %in% names(mc_data_sensors))
-    expect_true(is.numeric(sensor$values) || is.logical(sensor$values) || all(is.na(sensor$values)))
+    all_is_na <- all(is.na(sensor$values))
+    expect_true(is.numeric(sensor$values) || is.logical(sensor$values) || all_is_na)
+    value_type <- mc_data_sensors[[sensor$metadata@sensor_id]]@value_type
+    if(value_type %in% c("real", "integer")) {
+        expect_true(is.numeric(sensor$values) || all_is_na)
+    } else if(value_type == "logical") {
+        expect_true(is.logical(sensor$values) || all_is_na)
+    } else {
+        stop("Unknown value type")
+    }
     test_calibration(sensor)
     test_states(sensor)
 }

@@ -531,7 +531,11 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
         stop(.states_const_MESSAGE_NOT_LOGICAL_TYPE)           
     }
 
-    return(.states_get_states_table_from_logical_values(source_sensor_item$values, datetime, tag, value, inverse))
+    values <- source_sensor_item$values
+    if(!is.logical(values)) {
+        values <- as.logical(values)
+    }
+    return(.states_get_states_table_from_logical_values(values, datetime, tag, value, inverse))
 }
 
 .states_get_states_table_from_logical_values <- function(log_values, datetime, tag, value=NA, inverse=FALSE) {

@@ -1123,7 +1123,7 @@ mc_prep_TMSoffsoil <- function(data,
                                                       threshold = smooth_threshold, na.rm = TRUE)
     }
     item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_logical, output_sensor,
-                                                            values=result_values)
+                                                            values=as.logical(result_values))
     return(item)
 }
 
