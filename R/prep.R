@@ -812,7 +812,7 @@ mc_prep_merge <- function(data_items) {
 #' it is not allowed to provide new calibration data, neither run calibration again.
 #'
 #' @template param_myClim_object_raw
-#' @param calib_table data.frame with columns (serial_number, sensor_id, datetime, slope, intercept)
+#' @param calib_table data.frame with columns (`serial_number`, `sensor_id`, `datetime`, `cor_factor`, `cor_slope`)
 #' @return myClim object with loaded calibration information in metadata.
 #' Microclimatic records are not calibrated, only ready for calibration.
 #' To calibrate records run [myClim::mc_prep_calib()]
