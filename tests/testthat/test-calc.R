@@ -22,9 +22,7 @@ test_that("mc_calc_snow_logger_without_sensor", {
         not_applicable_format_warning() %>%
         not_applicable_format_warning()
     agg_data <- mc_agg(cleaned_data)
-    expect_warning(agg_data <- mc_calc_snow(agg_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5),
-                   "Locality 91184101 doesn't contains any sensor TMS_T3. It is skipped.") %>%
-        expect_warning("Locality 92192250 doesn't contains any sensor TMS_T3. It is skipped.")
+    agg_data <- mc_calc_snow(agg_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5)
     expect_equal(length(agg_data$localities[["91184101"]]$sensors), 1)
 })
 
@@ -66,7 +64,7 @@ test_that("mc_calc_vwc", {
     ))
     cleaned_data <- mc_prep_calib_load(cleaned_data, calib_table)
     cleaned_data$localities$A2E32$loggers[[1]]$sensors$TMS_T1$values[[1]] <- NA_real_
-    expect_warning(raw_data <- mc_calc_vwc(cleaned_data, localities=c("A1E05", "A2E32")))
+    raw_data <- mc_calc_vwc(cleaned_data, localities=c("A1E05", "A2E32"))
     test_raw_data_format(raw_data)
     expect_true("VWC_moisture" %in% names(raw_data$localities$A2E32$loggers[[1]]$sensors))
     expect_false(is.na(raw_data$localities$A2E32$loggers[[1]]$sensors$VWC_moisture$values[[1]]))
@@ -78,7 +76,7 @@ test_that("mc_calc_vwc", {
     expect_equal(sand_data1$localities$A2E32$loggers[[1]]$sensors$VWC_moisture$values,
                  sand_data2$localities$A2E32$loggers[[1]]$sensors$VWC_moisture$values)
     agg_data <- mc_agg(cleaned_data)
-    expect_warning(agg_data <- mc_calc_vwc(agg_data, localities=c("A1E05", "A2E32")))
+    agg_data <- mc_calc_vwc(agg_data, localities=c("A1E05", "A2E32"))
     test_agg_data_format(agg_data)
     expect_false(agg_data$localities$A2E32$sensors$TMS_moist$metadata@calibrated)
     expect_true(agg_data$localities$A2E32$sensors$VWC_moisture$metadata@calibrated)
@@ -130,18 +128,12 @@ test_that("mc_calc_fdd", {
 
 test_that("mc_calc_cumsum", {
     cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
-    expect_warning(raw_data <- mc_calc_cumsum(cleaned_data, c("TMS_T1", "TMS_T2")),
-                   "Loger 91184101 doesn't contains any sensor TMS_T1. It is skipped.") %>%
-        expect_warning("Loger 91184101 doesn't contains any sensor TMS_T2. It is skipped.")
+    raw_data <- mc_calc_cumsum(cleaned_data, c("TMS_T1", "TMS_T2"))
     test_raw_data_format(raw_data)
     expect_true("TMS_T1_cumsum" %in% names(raw_data$localities$A2E32$loggers[[1]]$sensors))
     agg_data <- mc_agg(cleaned_data)
-    expect_warning(agg_data <- mc_calc_snow(agg_data, "TMS_T3", range=1.5, tmax=0.5),
-                   "Locality A1E05 doesn't contains any sensor TMS_T3. It is skipped.")
-    expect_warning(cumsum_data <- mc_calc_cumsum(agg_data, c("TMS_T1", "TMS_T2", "snow")),
-                   "Locality A1E05 doesn't contains any sensor TMS_T1. It is skipped.") %>%
-        expect_warning("Locality A1E05 doesn't contains any sensor TMS_T2. It is skipped.") %>%
-        expect_warning("Locality A1E05 doesn't contains any sensor snow. It is skipped.")
+    agg_data <- mc_calc_snow(agg_data, "TMS_T3", range=1.5, tmax=0.5)
+    cumsum_data <- mc_calc_cumsum(agg_data, c("TMS_T1", "TMS_T2", "snow"))
     test_agg_data_format(agg_data)
     expect_equal(cumsum(cumsum_data$localities$A2E32$sensors$TMS_T1$values), cumsum_data$localities$A2E32$sensors$TMS_T1_cumsum$values)
     expect_equal(cumsum_data$localities$A2E32$sensors$snow_cumsum$metadata@sensor_id, mc_const_SENSOR_integer)
@@ -151,21 +143,11 @@ test_that("mc_calc_tomst_dendro", {
     not_applicable_format_warning(cleaned_data <- mc_read_files("../data/TOMST", "TOMST", silent = T)) %>%
         not_applicable_format_warning() %>%
         not_applicable_format_warning()
-    expect_warning(raw_data <- mc_calc_tomst_dendro(cleaned_data),
-                   "Loger 91184101 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Loger 94184102 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Loger 94184103 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Loger 94230002 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Loger 94184104 doesn't contains any sensor Dendro_raw. It is skipped.")
+    raw_data <- mc_calc_tomst_dendro(cleaned_data)
     test_raw_data_format(raw_data)
     expect_true("dendro_l_um" %in% names(raw_data$localities$`92192250`$loggers[[1]]$sensors))
     agg_data <- mc_agg(cleaned_data)
-    expect_warning(agg_data <- mc_calc_tomst_dendro(agg_data),
-                   "Locality 91184101 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Locality 94184102 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Locality 94184103 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Locality 94230002 doesn't contains any sensor Dendro_raw. It is skipped.") %>%
-        expect_warning("Locality 94184104 doesn't contains any sensor Dendro_raw. It is skipped.")
+    agg_data <- mc_calc_tomst_dendro(agg_data)
     test_agg_data_format(agg_data)
     expect_equal(agg_data$localities$`92192250`$sensors$dendro_l_um$values[[1]],
                  (agg_data$localities$`92192250`$sensors$Dendro_raw$values[[1]] - 1279) * (8890 / (34000 - 1279)))

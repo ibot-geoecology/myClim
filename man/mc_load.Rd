@@ -7,7 +7,8 @@
 mc_load(file)
 }
 \arguments{
-\item{file}{path to input .rds file}
+\item{file}{path to input .rds file. If value is vector of files, myClim objects
+are merged with function \link{mc_prep_merge}. If path is directory, then all .rds files are used.}
 }
 \value{
 loaded myClim object

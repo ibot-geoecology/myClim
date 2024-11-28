@@ -26,7 +26,7 @@ test_that("mc_env_temp more sensors", {
 test_that("mc_env_moist", {
     cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent = T)
     expect_error(env_table <- mc_env_moist(cleaned_data, "all"))
-    expect_warning(raw_data <- mc_calc_vwc(cleaned_data))
+    raw_data <- mc_calc_vwc(cleaned_data)
     raw_data <- mc_filter(raw_data, localities = c("A2E32", "A6W79"))
     env_table <- mc_env_moist(raw_data, "all", min_coverage=0.7)
     expect_equal(stringr::str_sort(unique(env_table$sensor_name)),

@@ -1,5 +1,3 @@
-.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR <- "Locality {item$metadata@locality_id} doesn't contains any sensor {sensor}. It is skipped."
-.calc_const_MESSAGE_LOGGER_NOT_CONTAINS_SENSOR <- "Loger {item$metadata@serial_number} doesn't contains any sensor {sensor}. It is skipped."
 .calc_const_MESSAGE_STEP_LONGER_DAY <- "Step {data$metadata@period} in data is too long. Maximal allowed step is day."
 .calc_const_MESSAGE_LOGGER_STEP_LONGER_DAY <- "Step in logger {logger$metadata@serial_number} is too long. Maximal allowed step is day. It is skipped."
 .calc_const_MESSAGE_WRONG_PHYSICAL_UNIT <- "Physical unit of {sensor_name} isn't {unit_name}."
@@ -123,14 +121,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 
 .calc_check_sensor_in_item <- function(item, sensor) {
     result <- sensor %in% names(item$sensors)
-    if(!result){
-        if(is(item$metadata, "mc_LocalityMetadata")){
-            warning(stringr::str_glue(.calc_const_MESSAGE_LOCALITY_NOT_CONTAINS_SENSOR))
-        } else {
-            warning(stringr::str_glue(.calc_const_MESSAGE_LOGGER_NOT_CONTAINS_SENSOR))
-        }
-    }
-    result
+    return(result)
 }
 
 .calc_wrong_physical_warning_function <- function(sensor_name, unit_name) {

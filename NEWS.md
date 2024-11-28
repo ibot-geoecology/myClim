@@ -1,4 +1,10 @@
-# myclim 1.3.5
+# myClim 1.3.6
+* A new function `mc_save_localities` has been added.
+* The function `mc_load` can load multiple files.
+* The function `mc_load` can load all .RDS files in a directory.
+* The warnings about missing sensors have been removed.
+
+# myClim 1.3.5
 * The `logger_name` is used in the `mc_states_join` function instead of the `logger_index` as value in the states table.
 * The result of `mc_prep_TMSoffsoil` function has been changed to `TRUE`/`FALSE` instead of `1`/`0`.
 
