@@ -1,3 +1,5 @@
+.serialize_const_SKIP_MESSAGE <- "Data in file {file_item} is not myClim object and will be skipped."
+
 .serialize_MAP_1_0_6 <- new.env()
 .serialize_MAP_1_0_6$loggers <- new.env()
 .serialize_MAP_1_0_6$loggers$ThermoDatalogger <- "Thermo"
@@ -53,7 +55,8 @@ mc_save <- function(data, file) {
 #' The `mc_save` and `mc_load` functions secure that the myClim object is correctly 
 #' loaded across myClim versions.
 #'
-#' @param file path to input .rds file
+#' @param file path to input .rds file. If value is vector of files, myClim objects
+#' are merged with function [mc_prep_merge]. If path is directory, then all .rds files are used.
 #' @return loaded myClim object
 #' @examples
 #' tmp_dir <- tempdir()
@@ -63,8 +66,41 @@ mc_save <- function(data, file) {
 #' file.remove(tmp_file)
 #' @export
 mc_load <- function(file) {
-    obj_list <- readRDS(file=file)
-    return(.load_convert_lists_to_classes(obj_list))
+    expand_directory_function <- function(file_item) {
+        if(!file.info(file_item)$isdir) {
+            return(list(file_item))
+        }
+        rds_files <- list.files(file_item, pattern = "\\.rds$", full.names = TRUE)
+        return(rds_files)
+    }
+
+    file_items <- purrr::flatten(purrr::map(file, expand_directory_function))
+
+    load_bar <- progress::progress_bar$new(format = "load [:bar] :current/:total files",
+                                           total=length(file_items))
+    load_bar$tick(0)
+    file_function <- function(file_item) {
+        obj_list <- readRDS(file=file_item)
+        if(!.can_be_myClim_object(obj_list)) {
+            warning(stringr::str_glue(.serialize_const_SKIP_MESSAGE))
+            load_bar$tick()
+            return(NULL)
+        }
+        result_object <- .load_convert_lists_to_classes(obj_list)
+        load_bar$tick()
+        return(result_object)
+    }
+
+    data_items <- purrr::map(file_items, file_function)
+    data_items <- purrr::discard(data_items, is.null)
+    return(mc_prep_merge(data_items))
+}
+
+.can_be_myClim_object <- function(obj_list) {
+    two_items <- length(obj_list) == 2
+    has_metadata <- "metadata" %in% names(obj_list)    
+    has_localities <- "localities" %in% names(obj_list)
+    return(two_items && has_metadata && has_localities)
 }
 
 .load_convert_lists_to_classes <- function(obj_list) {
@@ -142,4 +178,30 @@ mc_load <- function(file) {
         }
     }
     return(item)
+}
+
+#' Save myClim object separated by localities
+#'
+#' This function was designed for saving the myClim data object to multiple
+#' .rds files, which every contains data of one locality. Every file is named by `locality_id`.
+#'
+#' @template param_myClim_object
+#' @param directory path to output directory
+#' @return RDS files saved at the output path destination
+#' @examples
+#' tmp_dir <- tempdir()
+#' mc_save_localities(mc_data_example_agg, tmp_dir)
+#' unlink(tmp_dir, recursive = TRUE)
+#' @export
+mc_save_localities <- function(data, directory) {
+    save_bar <- progress::progress_bar$new(format = "save [:bar] :current/:total localities",
+                                           total=length(data$localities))
+    save_bar$tick(0)
+    locality_function <- function(locality_id) {
+        locality_data <- mc_filter(data, localities=locality_id)
+        locality_file <- file.path(directory, paste0(locality_id, ".rds"))
+        mc_save(locality_data, locality_file)
+        save_bar$tick()
+    }
+    purrr::walk(names(data$localities), locality_function)
 }
