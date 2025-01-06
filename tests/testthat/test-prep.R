@@ -232,6 +232,27 @@ test_that("mc_prep_crop errors", {
                                lubridate::ymd_hm("2022-02-24 10:30")))
 })
 
+test_that("mc_prep_crop crop_table", {
+    data <- mc_read_data("../data/TOMST/files_table2.csv", clean=TRUE, silent=TRUE)
+    crop_table <- as.data.frame(tibble::tribble(
+        ~locality_id,  ~logger_name, ~start, ~end,
+        "A1E05"     ,       "TMS_1", lubridate::ymd_h("2022-04-07 08"), lubridate::ymd_h("2022-04-07 10"),
+        "A2E32"     , NA_character_, lubridate::ymd_h("2020-10-16 08"),                                NA,
+        "A6W79"     ,   "TMS_L45_1",                                NA, lubridate::ymd_h("2020-10-16 10"),
+    ))
+    cropped_data <- mc_prep_crop(data, crop_table=crop_table)
+    test_raw_data_format(cropped_data)
+    loggers <- mc_info_logger(cropped_data)
+    expect_equal(loggers$start_date, c(lubridate::ymd_hm("2020-10-28 08:45"),
+                                       lubridate::ymd_h("2022-04-07 08"),
+                                       lubridate::ymd_h("2020-10-16 08"),
+                                       lubridate::ymd_h("2020-10-16 00")))
+    expect_equal(loggers$end_date, c(lubridate::ymd_hm("2020-10-28 11:15"),
+                                     lubridate::ymd_h("2022-04-07 10"),
+                                     lubridate::ymd_hm("2020-10-17 00:45"),
+                                     lubridate::ymd_h("2020-10-16 10")))
+})
+
 test_that(".prep_get_loggers_datetime_step_unprocessed", {
     data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
     uncleaned_loggers <- .prep_get_uncleaned_loggers(data)

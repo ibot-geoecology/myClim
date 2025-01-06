@@ -20,6 +20,7 @@
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
+.prep_const_MESSAGE_CROP_TABLE_PARAMS <- "Cropping must be defined either as a parameter or as a table."
 
 #' Cleaning datetime series
 #'
@@ -290,10 +291,10 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
 
 .prep_clean_round_states <- function(logger) {
     step <- logger$clean_info@step
-    start_datetime <- dplyr::first(logger$datetime)
+    start <- dplyr::first(logger$datetime)
 
     sensor_function <- function(sensor) {
-        return(.states_floor_sensor(sensor, start_datetime, step))
+        return(.states_floor_sensor(sensor, start, step))
     }
 
     logger$sensors <- purrr::map(logger$sensors, sensor_function)
@@ -572,6 +573,11 @@ mc_prep_solar_tz <- function(data) {
 #' However, if `start` and `end` are vectors of POSIXct values with the same length as the localities vector,
 #' each locality is cropped by its own time window (irregular crop).
 #'
+#' Data can be cropped by `crop_table` which is a table with columns `locality_id`, `logger_name`, `start`, `end`.
+#' If `logger_name` is NA, then all loggers in the locality are cropped. The column `logger_name`
+#' is ignored in agg format. The `start` or `end` can be NA, then the data is not cropped on this side.
+#' If the `crop_table` is specified, then `start`, `end` and `localities` must be NULL.
+#'
 #' The `end_included` parameter is used for selecting, whether to return data which contains `end`
 #' time or not. For example when cropping the data to rounded days, typically users use midnight.
 #' 2023-06-15 00:00:00 UTC. But midnight is the last date of ending day and the same
@@ -584,11 +590,12 @@ mc_prep_solar_tz <- function(data) {
 #' @param end optional, POSIXct datetime **in UTC**; single value or vector (default NULL)
 #' @param localities vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)
 #' @param end_included if TRUE then end datetime is included (default TRUE), see details
+#' @param crop_table table for advanced cropping; see details
 #' @return cropped data in the same myClim format as input.
 #' @export
 #' @examples
 #' cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))
-mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_included=TRUE) {
+mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_included=TRUE, crop_table=NULL) {
     if(!is.null(start) && any(format(start, format="%Z") != "UTC")) {
         warning(stringr::str_glue("start datetime is not in UTC"))
     }
@@ -599,41 +606,52 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
         !.prep_crop_is_datetime_correct(end, localities)) {
         stop(.prep_const_MESSAGE_CROP_DATETIME_LENGTH)
     }
+    .prep_check_parameters_for_crop(start, end, localities, crop_table)
     all_table <- tibble::tibble(locality_id=names(data$localities))
     if(!is.null(localities)) {
         table <- tibble::tibble(locality_id=localities)
-        table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
-        table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
+        table$start <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        table$end <- if(is.null(end)) lubridate::NA_POSIXct_ else end
         all_table <- dplyr::left_join(all_table, table, by="locality_id")
+    } else if(!is.null(crop_table)) {
+        all_table <- dplyr::left_join(all_table, crop_table, by="locality_id")
     }
     else {
-        all_table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
-        all_table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
+        all_table$start <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        all_table$end <- if(is.null(end)) lubridate::NA_POSIXct_ else end
+    }
+    if(!("logger_name" %in% colnames(all_table))){
+        all_table$logger_name <- NA_character_
     }
 
     crop_bar <- progress::progress_bar$new(format = "crop [:bar] :current/:total localities",
                                            total=nrow(all_table))
     crop_bar$tick(0)
-    sensors_item_function <- function(item, start_datetime, end_datetime) {
-        .prep_crop_data(item, start_datetime, end_datetime, end_included)
+    sensors_item_function <- function(item, start, end) {
+        .prep_crop_data(item, start, end, end_included)
     }
 
-    raw_locality_function <- function(locality_id, start_datetime, end_datetime) {
+    raw_locality_function <- function(locality_id, logger_name, start, end) {
         locality <- data$localities[[locality_id]]
-        if(!is.na(start_datetime) || !is.na(end_datetime)) {
-            locality$loggers <- purrr::pmap(list(item=locality$loggers,
-                                                 start_datetime=start_datetime,
-                                                 end_datetime=end_datetime),
-                                            sensors_item_function)
+        if(!is.na(start) || !is.na(end)) {
+            if(is.na(logger_name)) {
+                locality$loggers <- purrr::pmap(list(item=locality$loggers,
+                                                     start=start,
+                                                     end=end),
+                                                sensors_item_function)
+            } else {
+                logger <- locality$loggers[[logger_name]]
+                locality$loggers[[logger_name]] <- sensors_item_function(logger, start, end)
+            }
         }
         crop_bar$tick()
         return(locality)
     }
 
-    agg_locality_function <- function(locality_id, start_datetime, end_datetime) {
+    agg_locality_function <- function(locality_id, logger_name, start, end) {
         locality <- data$localities[[locality_id]]
-        if(!is.na(start_datetime) || !is.na(end_datetime)) {
-            locality <- sensors_item_function(locality, start_datetime, end_datetime)
+        if(!is.na(start) || !is.na(end)) {
+            locality <- sensors_item_function(locality, start, end)
         }
         crop_bar$tick()
         return(locality)
@@ -700,6 +718,12 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
 
     item$sensors <- purrr::map(item$sensors, sensor_function)
     item
+}
+
+.prep_check_parameters_for_crop <- function(start, end, localities, crop_table) {
+    if(!is.null(crop_table) && (!is.null(start) || !is.null(end) || !is.null(localities))) {
+        stop(.prep_const_MESSAGE_CROP_TABLE_PARAMS)
+    }
 }
 
 #' Merge myClim objects

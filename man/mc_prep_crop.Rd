@@ -9,7 +9,8 @@ mc_prep_crop(
   start = NULL,
   end = NULL,
   localities = NULL,
-  end_included = TRUE
+  end_included = TRUE,
+  crop_table = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ mc_prep_crop(
 \item{localities}{vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)}
 
 \item{end_included}{if TRUE then end datetime is included (default TRUE), see details}
+
+\item{crop_table}{table for advanced cropping; see details}
 }
 \value{
 cropped data in the same myClim format as input.
@@ -37,6 +40,11 @@ the beginning of the tim-series and vice versa with end.
 If \code{start} or \code{end} is a single POSIXct value, it is used for all or selected localities (regular crop).
 However, if \code{start} and \code{end} are vectors of POSIXct values with the same length as the localities vector,
 each locality is cropped by its own time window (irregular crop).
+
+Data can be cropped by \code{crop_table} which is a table with columns \code{locality_id}, \code{logger_name}, \code{start}, \code{end}.
+If \code{logger_name} is NA, then all loggers in the locality are cropped. The column \code{logger_name}
+is ignored in agg format. The \code{start} or \code{end} can be NA, then the data is not cropped on this side.
+If the \code{crop_table} is specified, then \code{start}, \code{end} and \code{localities} must be NULL.
 
 The \code{end_included} parameter is used for selecting, whether to return data which contains \code{end}
 time or not. For example when cropping the data to rounded days, typically users use midnight.

@@ -250,7 +250,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_parse_date_format <- function(files_table) {
-    if(is.null(files_table$date_format)) {
+    if(!("date_format" %in% colnames(files_table))) {
         return(files_table)
     }
     condition <- purrr::map_lgl(files_table$date_format, ~ all(!is.na(.x)) && length(.x) == 1 && is.character(.x)) 

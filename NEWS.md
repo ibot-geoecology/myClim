@@ -1,3 +1,6 @@
+# myClim 1.3.7
+* The uninitialsed date_format warning in the `mc_read_data` function has been fixed. 
+
 # myClim 1.3.6
 * A new function `mc_save_localities` has been added.
 * The function `mc_load` can load multiple files.

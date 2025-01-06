@@ -206,6 +206,16 @@ test_that("mc_read_files joined TOMST NA begin", {
     expect_equal(names(data$localities$`202110_91201320`$loggers[["Thermo_1"]]$sensors), "Thermo_T")
 })
 
+test_that("mc_read_data joined TOMST", {
+    files_table <- tibble::tribble(
+        ~path, ~locality_id, ~logger_type, ~data_format,
+        "../data/joined_TOMST/CZ2_HRADEC_TMS.csv", "CZ2_HRADEC",    "TMS", "TOMST_join",
+        "../data/joined_TOMST/CZ2_HRADEC_TS.csv" , "CZ2_HRADEC", "Thermo", "TOMST_join",
+    )
+    data <- mc_read_data(files_table, silent=TRUE)
+    test_raw_data_format(data)
+})
+
 test_that("mc_read_wide", {
     data_table <- readRDS("../data/read_table/precip.Rds")
     expect_error(data <- mc_read_wide(data_table, mc_const_SENSOR_precipitation, clean=FALSE))
