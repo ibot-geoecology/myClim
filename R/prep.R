@@ -15,7 +15,7 @@
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
 .prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
-.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start and end datetime can be NULL or single value. For advance cropping use crop_table."
+.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start and end datetime can be NULL or single value. For advance cropping use crop_table parameter."
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
