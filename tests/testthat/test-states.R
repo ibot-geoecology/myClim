@@ -215,6 +215,77 @@ test_that("mc_states_replace", {
                  data_agg$localities$A2E32$sensors$TMS_T1$values[c(1:7, 13:75)])
 })
 
+test_that("mc_states_replace crop_margins_NA", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE, clean=TRUE)
+    data_loggers <- mc_info_logger(data)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 8:45"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 10:15"), lubridate::ymd_hm("2020-10-28 11:15"), NA_character_,
+        "A2E32"    ,       "TMS_1",     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 6:15"), lubridate::ymd_hm("2020-10-16 9:00"), NA_character_,
+        "A2E32"    ,       "TMS_1",     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-17 0:00"), lubridate::ymd_hm("2020-10-17 00:45"), NA_character_,
+        "A6W79"    ,       "TMS_1",     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 0:00"), lubridate::ymd_hm("2020-10-16 1:00"), NA_character_,
+        "A6W79"    ,       "TMS_1",     "TMS_T2", "error",
+        lubridate::ymd_hm("2020-10-16 0:00"), lubridate::ymd_hm("2020-10-16 1:00"), NA_character_,
+        "A6W79"    ,       "TMS_1",     "TMS_T3", "error",
+        lubridate::ymd_hm("2020-10-16 0:00"), lubridate::ymd_hm("2020-10-16 1:00"), NA_character_,
+        "A6W79"    ,       "TMS_1",     "TMS_moist", "error",
+        lubridate::ymd_hm("2020-10-16 0:00"), lubridate::ymd_hm("2020-10-16 1:00"), NA_character_,
+    ))
+    states_data <- mc_states_insert(data, states)
+    replaced_data <- mc_states_replace(states_data, "error", crop_margins_NA=TRUE)
+    test_raw_data_format(replaced_data)
+    loggers <- mc_info_logger(replaced_data)
+    expect_equal(loggers$start_date, c(lubridate::ymd_hm("2020-10-28 09:45"),
+                                       lubridate::ymd_hm("2020-10-16 06:15"),
+                                       lubridate::ymd_hm("2020-10-16 01:15")))
+    expect_equal(loggers$end_date, c(lubridate::ymd_hm("2020-10-28 10:00"),
+                                     lubridate::ymd_hm("2020-10-17 00:45"),
+                                     lubridate::ymd_hm("2020-10-16 12:00")))
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 8:45"), lubridate::ymd_hm("2020-10-28 11:15"), NA_character_,
+    ))
+    states_data <- mc_states_insert(data, states)
+    replaced_data <- mc_states_replace(states_data, "error", crop_margins_NA=TRUE)
+    test_raw_data_format(replaced_data)
+    expect_equal(length(replaced_data$localities$A1E05$loggers[["Thermo_1"]]$datetime), 0)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 11:00"), NA_character_,
+    ))
+    states_data <- mc_states_insert(data, states)
+    replaced_data <- mc_states_replace(states_data, "error", crop_margins_NA=TRUE)
+    test_raw_data_format(replaced_data)
+    loggers <- mc_info_logger(replaced_data)
+    expect_equal(data_loggers$start_date, loggers$start_date)
+    expect_equal(data_loggers$end_date, loggers$end_date)
+    agg_data <- mc_agg(data)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,            NA,   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 8:45"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
+        "A1E05"    ,            NA,   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 10:15"), lubridate::ymd_hm("2020-10-28 11:15"), NA_character_,
+    ))
+    states_data <- mc_states_insert(agg_data, states)
+    replaced_data <- mc_states_replace(states_data, "error", crop_margins_NA=TRUE)
+    test_agg_data_format(replaced_data)
+    expect_equal(replaced_data$localities$A1E05$datetime, c(lubridate::ymd_hm("2020-10-28 09:45"),
+                                                            lubridate::ymd_hm("2020-10-28 10:00")))
+})
+
 test_that("mc_states_from_sensor", {
     cleaned_data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
     # raw data

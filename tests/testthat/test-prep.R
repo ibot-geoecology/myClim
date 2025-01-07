@@ -157,6 +157,7 @@ test_that("mc_prep_crop", {
     expect_equal(length(cropped_data$localities$A2E32$loggers[[1]]$datetime), 8)
     expect_equal(length(cropped_data$localities$A2E32$loggers[[1]]$sensors$TMS_T1$values), 8)
     expect_equal(cropped_data$localities$A2E32$loggers[[1]]$sensors$TMS_T1$states$end, lubridate::ymd_h("2020-10-16 08"))
+    expect_equal(length(cropped_data$localities$A1E05$loggers$Thermo_1$datetime), 0)
     cropped_data <- mc_prep_crop(data, end=as.POSIXct("2020-10-16 08:00", tz="UTC"), end_included=FALSE)
     test_raw_data_format(cropped_data)
     expect_equal(length(cropped_data$localities$A2E32$loggers[[1]]$datetime), 7)
