@@ -4,14 +4,16 @@
 \alias{mc_states_replace}
 \title{Replace values by states with tag}
 \usage{
-mc_states_replace(data, tags, replace_value = NA)
+mc_states_replace(data, tags, replace_value = NA, crop_margins_NA = FALSE)
 }
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
 \item{tags}{specific tag to be replaced.}
 
-\item{replace_value}{(default NA).}
+\item{replace_value}{(default NA)}
+
+\item{crop_margins_NA}{if TRUE function crop start or end NAs (default FALSE)}
 }
 \value{
 myClim object in the same format as input, with replaced values

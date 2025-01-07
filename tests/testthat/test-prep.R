@@ -196,26 +196,10 @@ test_that("mc_prep_crop by localities", {
     expect_error(cropped_data <- mc_prep_crop(data,
                                               start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
                                               end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC")))
-    cropped_data <- mc_prep_crop(data,
-                                 start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
-                                 end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC"),
-                                 localities=c("A1E05", "A2E32"))
-    test_raw_data_format(cropped_data)
-    expect_equal(cropped_data$localities$A1E05$loggers[[1]]$datetime,
-                 as.POSIXct(c("2020-10-28 09:00", "2020-10-28 09:15", "2020-10-28 09:30", "2020-10-28 09:45", "2020-10-28 10:00"), tz="UTC"))
-    expect_equal(cropped_data$localities$A2E32$loggers[[1]]$datetime,
-                 as.POSIXct(c("2020-10-16 07:00", "2020-10-16 07:15", "2020-10-16 07:30", "2020-10-16 07:45", "2020-10-16 08:00"), tz="UTC"))
-    expect_equal(cropped_data$localities$A6W79$loggers[[1]]$datetime, data$localities$A6W79$loggers[[1]]$datetime)
-    cropped_agg_data <- mc_prep_crop(agg_data,
-                                     start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
-                                     end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC"),
-                                     localities=c("A1E05", "A2E32"))
-    test_agg_data_format(cropped_agg_data)
-    expect_equal(cropped_agg_data$localities$A1E05$datetime,
-                 as.POSIXct(c("2020-10-28 09:00", "2020-10-28 09:15", "2020-10-28 09:30", "2020-10-28 09:45", "2020-10-28 10:00"), tz="UTC"))
-    expect_equal(cropped_agg_data$localities$A2E32$datetime,
-                 as.POSIXct(c("2020-10-16 07:00", "2020-10-16 07:15", "2020-10-16 07:30", "2020-10-16 07:45", "2020-10-16 08:00"), tz="UTC"))
-    expect_equal(cropped_agg_data$localities$A6W79$datetime, agg_data$localities$A6W79$datetime)
+    expect_error(cropped_data <- mc_prep_crop(data,
+                                              start=as.POSIXct(c("2020-10-28 09:00", "2020-10-16 07:00"), tz="UTC"),
+                                              end=as.POSIXct(c("2020-10-28 10:00", "2020-10-16 08:00"), tz="UTC"),
+                                              localities=c("A1E05", "A2E32")))
 })
 
 test_that("mc_prep_crop errors", {

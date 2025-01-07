@@ -15,8 +15,7 @@
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
 .prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
-.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- paste0("Start and end datetime can be NULL, ",
-                                                   "single value or vector with same length as localities.")
+.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start and end datetime can be NULL or single value. For advance cropping use crop_table."
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
@@ -569,10 +568,6 @@ mc_prep_solar_tz <- function(data) {
 #' with `start` only and `end` only. When only `start` is provided, then function crops only
 #' the beginning of the tim-series and vice versa with end.
 #'
-#' If `start` or `end` is a single POSIXct value, it is used for all or selected localities (regular crop).
-#' However, if `start` and `end` are vectors of POSIXct values with the same length as the localities vector,
-#' each locality is cropped by its own time window (irregular crop).
-#'
 #' Data can be cropped by `crop_table` which is a table with columns `locality_id`, `logger_name`, `start`, `end`.
 #' If `logger_name` is NA, then all loggers in the locality are cropped. The column `logger_name`
 #' is ignored in agg format. The `start` or `end` can be NA, then the data is not cropped on this side.
@@ -586,8 +581,8 @@ mc_prep_solar_tz <- function(data) {
 #' sometimes it is better to exclude end and crop on 2023-06-14 23:45:00 UTC (15 minutes records).
 #'
 #' @template param_myClim_object
-#' @param start optional; POSIXct datetime **in UTC**; single value or vector; start datetime is included (default NULL)
-#' @param end optional, POSIXct datetime **in UTC**; single value or vector (default NULL)
+#' @param start optional; POSIXct datetime **in UTC** value; start datetime is included (default NULL)
+#' @param end optional; POSIXct datetime **in UTC** value (default NULL)
 #' @param localities vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)
 #' @param end_included if TRUE then end datetime is included (default TRUE), see details
 #' @param crop_table table for advanced cropping; see details
@@ -667,8 +662,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
 }
 
 .prep_crop_is_datetime_correct <- function(datetime, localities) {
-    return(is.null(datetime) || length(datetime) == 1 ||
-        (!is.null(localities) && length(datetime) == length(localities)))
+    return(is.null(datetime) || length(datetime) == 1)
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {

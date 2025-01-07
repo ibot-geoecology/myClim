@@ -16,9 +16,9 @@ mc_prep_crop(
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{start}{optional; POSIXct datetime \strong{in UTC}; single value or vector; start datetime is included (default NULL)}
+\item{start}{optional; POSIXct datetime \strong{in UTC} value; start datetime is included (default NULL)}
 
-\item{end}{optional, POSIXct datetime \strong{in UTC}; single value or vector (default NULL)}
+\item{end}{optional; POSIXct datetime \strong{in UTC} value (default NULL)}
 
 \item{localities}{vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)}
 
@@ -36,10 +36,6 @@ This function crop data by datetime
 Function is able to crop data from \code{start} to \code{end} but works also
 with \code{start} only and \code{end} only. When only \code{start} is provided, then function crops only
 the beginning of the tim-series and vice versa with end.
-
-If \code{start} or \code{end} is a single POSIXct value, it is used for all or selected localities (regular crop).
-However, if \code{start} and \code{end} are vectors of POSIXct values with the same length as the localities vector,
-each locality is cropped by its own time window (irregular crop).
 
 Data can be cropped by \code{crop_table} which is a table with columns \code{locality_id}, \code{logger_name}, \code{start}, \code{end}.
 If \code{logger_name} is NA, then all loggers in the locality are cropped. The column \code{logger_name}
