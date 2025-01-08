@@ -16,10 +16,11 @@
 .prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
 .prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start and end datetime can be NULL or single value. For advance cropping use crop_table parameter."
+.prep_const_MESSAGE_CROP_TABLE_PARAMS <- "Cropping must be defined either as a parameter or as a table."
+.prep_const_MESSAGE_CROP_TABLE_DUPLICATES <- "Crop table contains duplicated items."
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
-.prep_const_MESSAGE_CROP_TABLE_PARAMS <- "Cropping must be defined either as a parameter or as a table."
 
 #' Cleaning datetime series
 #'
@@ -618,46 +619,62 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
     if(!("logger_name" %in% colnames(all_table))){
         all_table$logger_name <- NA_character_
     }
+    all_table <- dplyr::group_by(all_table, .data$locality_id)
 
     crop_bar <- progress::progress_bar$new(format = "crop [:bar] :current/:total localities",
-                                           total=nrow(all_table))
+                                           total=dplyr::n_groups(all_table))
     crop_bar$tick(0)
+
     sensors_item_function <- function(item, start, end) {
-        .prep_crop_data(item, start, end, end_included)
+        if(!is.na(start) || !is.na(end)) {
+            return(.prep_crop_data(item, start, end, end_included))
+        } else {
+            return(item)
+        }
     }
 
-    raw_locality_function <- function(locality_id, logger_name, start, end) {
+    raw_locality_function <- function(locality_table, key_table) {
+        locality_id <- key_table$locality_id[[1]]
         locality <- data$localities[[locality_id]]
-        if(!is.na(start) || !is.na(end)) {
-            if(is.na(logger_name)) {
-                locality$loggers <- purrr::pmap(list(item=locality$loggers,
-                                                     start=start,
-                                                     end=end),
-                                                sensors_item_function)
-            } else {
-                logger <- locality$loggers[[logger_name]]
-                locality$loggers[[logger_name]] <- sensors_item_function(logger, start, end)
-            }
+        if(anyDuplicated(locality_table$logger_name) > 0 ||
+           (nrow(locality_table) > 1 && any(is.na(locality_table$logger_name)))) {
+            stop(.prep_const_MESSAGE_CROP_TABLE_DUPLICATES)
         }
+
+        logger_table <- data.frame(logger_name = names(locality$loggers))
+        if(is.na(locality_table$logger_name[[1]])) {
+            logger_table$start <- locality_table$start[[1]]
+            logger_table$end <- locality_table$end[[1]]
+        } else {
+            logger_table <- dplyr::left_join(logger_table, locality_table, by="logger_name")
+        }
+        
+        locality$loggers <- purrr::pmap(list(item=locality$loggers,
+                                             start=logger_table$start,
+                                             end=logger_table$end), sensors_item_function)
         crop_bar$tick()
         return(locality)
     }
 
-    agg_locality_function <- function(locality_id, logger_name, start, end) {
+    agg_locality_function <- function(locality_table, key_table) {
+        locality_id <- key_table$locality_id[[1]]
         locality <- data$localities[[locality_id]]
-        if(!is.na(start) || !is.na(end)) {
-            locality <- sensors_item_function(locality, start, end)
+        if(nrow(locality_table) > 1) {
+            stop(.prep_const_MESSAGE_CROP_TABLE_DUPLICATES)
         }
+        start <- locality_table$start[[1]]
+        end <- locality_table$end[[1]]
+        locality <- sensors_item_function(locality, start, end)
         crop_bar$tick()
         return(locality)
     }
 
     if(.common_is_agg_format(data)) {
-        data$localities <- purrr::pmap(all_table, agg_locality_function)
+        data$localities <- dplyr::group_map(all_table, agg_locality_function)
     } else {
-        data$localities <- purrr::pmap(all_table, raw_locality_function)
+        data$localities <- dplyr::group_map(all_table, raw_locality_function)
     }
-    names(data$localities) <- all_table$locality_id
+    names(data$localities) <- purrr::map_chr(data$localities, ~ .x$metadata@locality_id)
     return(data)
 }
 

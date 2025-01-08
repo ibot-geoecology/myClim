@@ -236,6 +236,19 @@ test_that("mc_prep_crop crop_table", {
                                      lubridate::ymd_h("2022-04-07 10"),
                                      lubridate::ymd_hm("2020-10-17 00:45"),
                                      lubridate::ymd_h("2020-10-16 10")))
+    crop_table <- as.data.frame(tibble::tribble(
+        ~locality_id,  ~logger_name, ~start, ~end,
+        "A1E05"     ,       "TMS_1", lubridate::ymd_h("2022-04-07 08"), lubridate::ymd_h("2022-04-07 10"),
+        "A1E05"     ,       "TMS_1", lubridate::ymd_h("2022-04-07 09"), lubridate::ymd_h("2022-04-07 10"),
+    ))
+    expect_error(cropped_data <- mc_prep_crop(data, crop_table=crop_table))
+})
+
+test_that("mc_prep_crop crop_table 2", {
+    data <- mc_load("../data/crop/data_cs_1.rds")
+    crop_table <- readRDS("../data/crop/crop_table_cs_1.rds")
+    crop_data <- mc_prep_crop(data, crop_table=crop_table)
+    test_raw_data_format(crop_data)
 })
 
 test_that(".prep_get_loggers_datetime_step_unprocessed", {

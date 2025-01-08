@@ -23,6 +23,7 @@ test_myClimList <- function(data) {
     expect_true(is(data$metadata, "mc_MainMetadata"))
     expect_equal(class(data$localities), "list")
     expect_false(is.null(names(data$localities)))
+    expect_equal(anyDuplicated(names(data$localities)), 0)
 }
 
 test_raw_locality <- function(locality) {
@@ -42,6 +43,7 @@ test_agg_locality <- function(locality) {
     test_locality_metadata(locality$metadata)
     test_datetime(locality$datetime)
     expect_equal(class(locality$sensors), "list")
+    expect_equal(anyDuplicated(names(locality$sensors)), 0)
     test_data_length(locality)
     test_sensors(locality)
 }
@@ -67,6 +69,7 @@ test_logger <- function(logger) {
     test_datetime(logger$datetime)
     expect_equal(class(logger$sensors), "list")
     expect_true(length(logger$sensors) > 0)
+    expect_equal(anyDuplicated(names(logger$sensors)), 0)
     test_data_length(logger)
     test_sensors(logger)
 }
