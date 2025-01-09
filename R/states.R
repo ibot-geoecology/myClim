@@ -419,11 +419,17 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
 #'
 #' @description
 #' This function replace values of sensors by states with tag.
+#' @details
+#' The typical use of this function is for deleting/removing error/compromised 
+#' records from time-series by tagging them and then replacing tagged values with NA. 
+#' Typically, when error/unwanted data appears at the beginning or end of time series, it
+#' can be useful to crop time-series (delete records completely) using `crop_margins_NA`.
+#' 
 #'
 #' @template param_myClim_object
-#' @param tags specific tag to be replaced.
-#' @param replace_value (default NA)
-#' @param crop_margins_NA if TRUE function crop start or end NAs (default FALSE)
+#' @param tags tag assigned to the the sensor values to be replaced. e.g. "error" 
+#' @param replace_value (default NA) The value which will be written into sensor.
+#' @param crop_margins_NA if TRUE function crops NAs on the beginning or end of time-series (default FALSE)
 #' @return myClim object in the same format as input, with replaced values
 #' @export
 #' @examples

@@ -15,7 +15,7 @@
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
 .prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
-.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start and end datetime can be NULL or single value. For advance cropping use crop_table parameter."
+.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start or end can be either NULL or single value. Multiple values are not allowed. For advance cropping use crop_table parameter."
 .prep_const_MESSAGE_CROP_TABLE_PARAMS <- "Cropping must be defined either as a parameter or as a table."
 .prep_const_MESSAGE_CROP_TABLE_DUPLICATES <- "Crop table contains duplicated items."
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
@@ -562,31 +562,37 @@ mc_prep_solar_tz <- function(data) {
 
 #' Crop datetime
 #'
-#' This function crop data by datetime
+#' This function crops data by datetime
 #'
 #' @details
 #' Function is able to crop data from `start` to `end` but works also
-#' with `start` only and `end` only. When only `start` is provided, then function crops only
-#' the beginning of the tim-series and vice versa with end.
+#' with `start` only or `end` only. When only `start` is provided, then function crops only
+#' the beginning of the time-series and vice versa using `end`.
 #'
-#' Data can be cropped by `crop_table` which is a table with columns `locality_id`, `logger_name`, `start`, `end`.
-#' If `logger_name` is NA, then all loggers in the locality are cropped. The column `logger_name`
-#' is ignored in agg format. The `start` or `end` can be NA, then the data is not cropped on this side.
-#' If the `crop_table` is specified, then `start`, `end` and `localities` must be NULL.
+#' For advanced cropping per individual locality and logger use `crop_table` parameter. 
+#' Crop_table is r data.frame containing columns:
+#' * `locality_id` - e.g. Loc_A1
+#' * `logger_name` - e.g. TMS_1 see [mc_info_logger] 
+#' * `start` - POSIXct datetime in UTC
+#' * `end` - POSIXct datetime in UTC
+#' 
+#' If `logger_name` is NA, then all loggers at certain locality are cropped. The column `logger_name`
+#' is ignored in agg-format. The `start` or `end` can be NA, then the data are not cropped.
+#' If the `crop_table` is provided, then `start`, `end` and `localities` parameters must be NULL.
 #'
-#' The `end_included` parameter is used for selecting, whether to return data which contains `end`
+#' The `end_included` parameter is used for specification, whether to return data which contains `end`
 #' time or not. For example when cropping the data to rounded days, typically users use midnight.
 #' 2023-06-15 00:00:00 UTC. But midnight is the last date of ending day and the same
-#' time first date of the next day. Thus, there will be the last day with single record.
-#' This can be confusing in aggregation (e.g. daily mean of single record per day, typically NA) so
-#' sometimes it is better to exclude end and crop on 2023-06-14 23:45:00 UTC (15 minutes records).
+#' time first date of the next day. This will create the last day of time-series containing single record (midnight).
+#' This can be confusing when user performs aggregation with such data (e.g. daily mean of single record per day, typically NA) so
+#' sometimes it is better to use `end_included =  FALSE` excluding end record and crop at 2023-06-14 23:45:00 UTC (15 minutes records).
 #'
 #' @template param_myClim_object
 #' @param start optional; POSIXct datetime **in UTC** value; start datetime is included (default NULL)
 #' @param end optional; POSIXct datetime **in UTC** value (default NULL)
 #' @param localities vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)
 #' @param end_included if TRUE then end datetime is included (default TRUE), see details
-#' @param crop_table table for advanced cropping; see details
+#' @param crop_table data.frame (table) for advanced cropping; see details
 #' @return cropped data in the same myClim format as input.
 #' @export
 #' @examples

@@ -9,17 +9,23 @@ mc_states_replace(data, tags, replace_value = NA, crop_margins_NA = FALSE)
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{tags}{specific tag to be replaced.}
+\item{tags}{tag assigned to the the sensor values to be replaced. e.g. "error"}
 
-\item{replace_value}{(default NA)}
+\item{replace_value}{(default NA) The value which will be written into sensor.}
 
-\item{crop_margins_NA}{if TRUE function crop start or end NAs (default FALSE)}
+\item{crop_margins_NA}{if TRUE function crops NAs on the beginning or end of time-series (default FALSE)}
 }
 \value{
 myClim object in the same format as input, with replaced values
 }
 \description{
 This function replace values of sensors by states with tag.
+}
+\details{
+The typical use of this function is for deleting/removing error/compromised
+records from time-series by tagging them and then replacing tagged values with NA.
+Typically, when error/unwanted data appears at the beginning or end of time series, it
+can be useful to crop time-series (delete records completely) using \code{crop_margins_NA}.
 }
 \examples{
 states <- data.frame(locality_id="A1E05", logger_name="Thermo_1",
