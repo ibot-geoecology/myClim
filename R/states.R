@@ -419,10 +419,17 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
 #'
 #' @description
 #' This function replace values of sensors by states with tag.
+#' @details
+#' The typical use of this function is for deleting/removing error/compromised 
+#' records from time-series by tagging them and then replacing tagged values with NA. 
+#' Typically, when error/unwanted data appears at the beginning or end of time series, it
+#' can be useful to crop time-series (delete records completely) using `crop_margins_NA`.
+#' 
 #'
 #' @template param_myClim_object
-#' @param tags specific tag to be replaced.
-#' @param replace_value (default NA).
+#' @param tags tag assigned to the the sensor values to be replaced. e.g. "error" 
+#' @param replace_value (default NA) The value which will be written into sensor.
+#' @param crop_margins_NA if TRUE function crops NAs on the beginning or end of time-series (default FALSE)
 #' @return myClim object in the same format as input, with replaced values
 #' @export
 #' @examples
@@ -432,7 +439,7 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)
 #' data <- mc_states_replace(data, "error")
-mc_states_replace <- function(data, tags, replace_value=NA) {
+mc_states_replace <- function(data, tags, replace_value=NA, crop_margins_NA=FALSE) {
     is_agg_format <- .common_is_agg_format(data)
     
     states_table <- mc_info_states(data)
@@ -458,7 +465,64 @@ mc_states_replace <- function(data, tags, replace_value=NA) {
         }
     }
     dplyr::group_walk(states_table, group_function)
+    if(crop_margins_NA) {
+        result$data <- .states_crop_margins_NA(result$data, unique(states_table$locality_id))
+    }
     return(result$data)
+}
+
+.states_crop_margins_NA <- function(data, locality_ids) {
+    is_agg_format <- .common_is_agg_format(data)
+
+    sensors_item_function <- function(locality_id, item) {
+        values_table <- .common_sensor_values_as_tibble(item)
+        if(nrow(values_table) == 0) {
+            return(list())
+        }
+        values_na <- purrr::map(values_table[-1], ~ is.na(.))
+        all_values_na <- purrr::reduce(values_na, `&`)
+        rle_values <- rle(all_values_na)
+        start <- NA
+        end <- NA
+        if(length(rle_values$values) == 1) {
+            if(rle_values$values[[1]]) {
+                end <- values_table$datetime[[1]] - lubridate::seconds(1)
+            } else {
+                return(list())
+            }
+        } else {
+            if(dplyr::first(rle_values$values)) {
+                start <- values_table$datetime[[rle_values$lengths[[1]] + 1]]
+            }
+            if(dplyr::last(rle_values$values)) {
+                end <- values_table$datetime[[length(values_table$datetime) - dplyr::last(rle_values$lengths)]]
+            }
+        }
+        logger_name <- NA_character_
+        if(!is_agg_format) {
+            logger_name <- item$metadata@name
+        }
+        return(list(locality_id=locality_id,
+                    logger_name=logger_name,
+                    start=start,
+                    end=end))
+    }
+
+    locality_function <- function(locality_id) {
+        if (!is_agg_format) {
+            result <- purrr::map_dfr(data$localities[[locality_id]]$loggers, ~ sensors_item_function(locality_id, .x))
+            return(result)
+        } else {
+            return(sensors_item_function(locality_id, data$localities[[locality_id]]))
+        }
+    }
+
+    crop_table <- purrr::map_dfr(locality_ids, locality_function)
+    if(nrow(crop_table) == 0) {
+        return(data)
+    }
+    result <- mc_prep_crop(data, crop_table=crop_table)
+    return(result)
 }
 
 #' Convert a sensor to a state

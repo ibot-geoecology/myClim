@@ -9,41 +9,53 @@ mc_prep_crop(
   start = NULL,
   end = NULL,
   localities = NULL,
-  end_included = TRUE
+  end_included = TRUE,
+  crop_table = NULL
 )
 }
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
 
-\item{start}{optional; POSIXct datetime \strong{in UTC}; single value or vector; start datetime is included (default NULL)}
+\item{start}{optional; POSIXct datetime \strong{in UTC} value; start datetime is included (default NULL)}
 
-\item{end}{optional, POSIXct datetime \strong{in UTC}; single value or vector (default NULL)}
+\item{end}{optional; POSIXct datetime \strong{in UTC} value (default NULL)}
 
 \item{localities}{vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)}
 
 \item{end_included}{if TRUE then end datetime is included (default TRUE), see details}
+
+\item{crop_table}{data.frame (table) for advanced cropping; see details}
 }
 \value{
 cropped data in the same myClim format as input.
 }
 \description{
-This function crop data by datetime
+This function crops data by datetime
 }
 \details{
 Function is able to crop data from \code{start} to \code{end} but works also
-with \code{start} only and \code{end} only. When only \code{start} is provided, then function crops only
-the beginning of the tim-series and vice versa with end.
+with \code{start} only or \code{end} only. When only \code{start} is provided, then function crops only
+the beginning of the time-series and vice versa using \code{end}.
 
-If \code{start} or \code{end} is a single POSIXct value, it is used for all or selected localities (regular crop).
-However, if \code{start} and \code{end} are vectors of POSIXct values with the same length as the localities vector,
-each locality is cropped by its own time window (irregular crop).
+For advanced cropping per individual locality and logger use \code{crop_table} parameter.
+Crop_table is r data.frame containing columns:
+\itemize{
+\item \code{locality_id} - e.g. Loc_A1
+\item \code{logger_name} - e.g. TMS_1 see \link{mc_info_logger}
+\item \code{start} - POSIXct datetime in UTC
+\item \code{end} - POSIXct datetime in UTC
+}
 
-The \code{end_included} parameter is used for selecting, whether to return data which contains \code{end}
+If \code{logger_name} is NA, then all loggers at certain locality are cropped. The column \code{logger_name}
+is ignored in agg-format. The \code{start} or \code{end} can be NA, then the data are not cropped.
+If the \code{crop_table} is provided, then \code{start}, \code{end} and \code{localities} parameters must be NULL.
+
+The \code{end_included} parameter is used for specification, whether to return data which contains \code{end}
 time or not. For example when cropping the data to rounded days, typically users use midnight.
 2023-06-15 00:00:00 UTC. But midnight is the last date of ending day and the same
-time first date of the next day. Thus, there will be the last day with single record.
-This can be confusing in aggregation (e.g. daily mean of single record per day, typically NA) so
-sometimes it is better to exclude end and crop on 2023-06-14 23:45:00 UTC (15 minutes records).
+time first date of the next day. This will create the last day of time-series containing single record (midnight).
+This can be confusing when user performs aggregation with such data (e.g. daily mean of single record per day, typically NA) so
+sometimes it is better to use \code{end_included =  FALSE} excluding end record and crop at 2023-06-14 23:45:00 UTC (15 minutes records).
 }
 \examples{
 cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))

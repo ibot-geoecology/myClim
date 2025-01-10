@@ -1,3 +1,9 @@
+# myClim 1.3.7
+* The uninitialsed date_format warning in the `mc_read_data` function has been fixed. 
+* The `cropt_table` parameter has been added to the `mc_prep_crop` function.
+* The `start` and `end` parameters in the `mc_prep_crop` function can be only single value.
+* The `crop_margins_NA` parameter has been added to the `mc_states_replace` function.
+
 # myClim 1.3.6
 * A new function `mc_save_localities` has been added.
 * The function `mc_load` can load multiple files.

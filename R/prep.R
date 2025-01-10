@@ -15,8 +15,9 @@
 .prep_const_MESSAGE_RECLEAN <- "MyClim object is already cleaned. Repeated cleaning overwrite cleaning informations."
 .prep_const_MESSAGE_ALREADY_CALIBRATED <- "It is not possible change calibration parameters in calibrated sensor."
 .prep_const_MESSAGE_DATETIME_WRONG_TYPE <- "Type of datetime column must be POSIXct."
-.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- paste0("Start and end datetime can be NULL, ",
-                                                   "single value or vector with same length as localities.")
+.prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start or end can be either NULL or single value. Multiple values are not allowed. For advance cropping use crop_table parameter."
+.prep_const_MESSAGE_CROP_TABLE_PARAMS <- "Cropping must be defined either as a parameter or as a table."
+.prep_const_MESSAGE_CROP_TABLE_DUPLICATES <- "Crop table contains duplicated items."
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
@@ -290,10 +291,10 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
 
 .prep_clean_round_states <- function(logger) {
     step <- logger$clean_info@step
-    start_datetime <- dplyr::first(logger$datetime)
+    start <- dplyr::first(logger$datetime)
 
     sensor_function <- function(sensor) {
-        return(.states_floor_sensor(sensor, start_datetime, step))
+        return(.states_floor_sensor(sensor, start, step))
     }
 
     logger$sensors <- purrr::map(logger$sensors, sensor_function)
@@ -561,34 +562,42 @@ mc_prep_solar_tz <- function(data) {
 
 #' Crop datetime
 #'
-#' This function crop data by datetime
+#' This function crops data by datetime
 #'
 #' @details
 #' Function is able to crop data from `start` to `end` but works also
-#' with `start` only and `end` only. When only `start` is provided, then function crops only
-#' the beginning of the tim-series and vice versa with end.
+#' with `start` only or `end` only. When only `start` is provided, then function crops only
+#' the beginning of the time-series and vice versa using `end`.
 #'
-#' If `start` or `end` is a single POSIXct value, it is used for all or selected localities (regular crop).
-#' However, if `start` and `end` are vectors of POSIXct values with the same length as the localities vector,
-#' each locality is cropped by its own time window (irregular crop).
+#' For advanced cropping per individual locality and logger use `crop_table` parameter. 
+#' Crop_table is r data.frame containing columns:
+#' * `locality_id` - e.g. Loc_A1
+#' * `logger_name` - e.g. TMS_1 see [mc_info_logger] 
+#' * `start` - POSIXct datetime in UTC
+#' * `end` - POSIXct datetime in UTC
+#' 
+#' If `logger_name` is NA, then all loggers at certain locality are cropped. The column `logger_name`
+#' is ignored in agg-format. The `start` or `end` can be NA, then the data are not cropped.
+#' If the `crop_table` is provided, then `start`, `end` and `localities` parameters must be NULL.
 #'
-#' The `end_included` parameter is used for selecting, whether to return data which contains `end`
+#' The `end_included` parameter is used for specification, whether to return data which contains `end`
 #' time or not. For example when cropping the data to rounded days, typically users use midnight.
 #' 2023-06-15 00:00:00 UTC. But midnight is the last date of ending day and the same
-#' time first date of the next day. Thus, there will be the last day with single record.
-#' This can be confusing in aggregation (e.g. daily mean of single record per day, typically NA) so
-#' sometimes it is better to exclude end and crop on 2023-06-14 23:45:00 UTC (15 minutes records).
+#' time first date of the next day. This will create the last day of time-series containing single record (midnight).
+#' This can be confusing when user performs aggregation with such data (e.g. daily mean of single record per day, typically NA) so
+#' sometimes it is better to use `end_included =  FALSE` excluding end record and crop at 2023-06-14 23:45:00 UTC (15 minutes records).
 #'
 #' @template param_myClim_object
-#' @param start optional; POSIXct datetime **in UTC**; single value or vector; start datetime is included (default NULL)
-#' @param end optional, POSIXct datetime **in UTC**; single value or vector (default NULL)
+#' @param start optional; POSIXct datetime **in UTC** value; start datetime is included (default NULL)
+#' @param end optional; POSIXct datetime **in UTC** value (default NULL)
 #' @param localities vector of locality_ids to be cropped; if NULL then all localities are cropped (default NULL)
 #' @param end_included if TRUE then end datetime is included (default TRUE), see details
+#' @param crop_table data.frame (table) for advanced cropping; see details
 #' @return cropped data in the same myClim format as input.
 #' @export
 #' @examples
 #' cropped_data <- mc_prep_crop(mc_data_example_clean, end=as.POSIXct("2020-02-01", tz="UTC"))
-mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_included=TRUE) {
+mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_included=TRUE, crop_table=NULL) {
     if(!is.null(start) && any(format(start, format="%Z") != "UTC")) {
         warning(stringr::str_glue("start datetime is not in UTC"))
     }
@@ -599,58 +608,84 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
         !.prep_crop_is_datetime_correct(end, localities)) {
         stop(.prep_const_MESSAGE_CROP_DATETIME_LENGTH)
     }
+    .prep_check_parameters_for_crop(start, end, localities, crop_table)
     all_table <- tibble::tibble(locality_id=names(data$localities))
     if(!is.null(localities)) {
         table <- tibble::tibble(locality_id=localities)
-        table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
-        table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
+        table$start <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        table$end <- if(is.null(end)) lubridate::NA_POSIXct_ else end
         all_table <- dplyr::left_join(all_table, table, by="locality_id")
+    } else if(!is.null(crop_table)) {
+        all_table <- dplyr::left_join(all_table, crop_table, by="locality_id")
     }
     else {
-        all_table$start_datetime <- if(is.null(start)) lubridate::NA_POSIXct_ else start
-        all_table$end_datetime <- if(is.null(end)) lubridate::NA_POSIXct_ else end
+        all_table$start <- if(is.null(start)) lubridate::NA_POSIXct_ else start
+        all_table$end <- if(is.null(end)) lubridate::NA_POSIXct_ else end
     }
+    if(!("logger_name" %in% colnames(all_table))){
+        all_table$logger_name <- NA_character_
+    }
+    all_table <- dplyr::group_by(all_table, .data$locality_id)
 
     crop_bar <- progress::progress_bar$new(format = "crop [:bar] :current/:total localities",
-                                           total=nrow(all_table))
+                                           total=dplyr::n_groups(all_table))
     crop_bar$tick(0)
-    sensors_item_function <- function(item, start_datetime, end_datetime) {
-        .prep_crop_data(item, start_datetime, end_datetime, end_included)
+
+    sensors_item_function <- function(item, start, end) {
+        if(!is.na(start) || !is.na(end)) {
+            return(.prep_crop_data(item, start, end, end_included))
+        } else {
+            return(item)
+        }
     }
 
-    raw_locality_function <- function(locality_id, start_datetime, end_datetime) {
+    raw_locality_function <- function(locality_table, key_table) {
+        locality_id <- key_table$locality_id[[1]]
         locality <- data$localities[[locality_id]]
-        if(!is.na(start_datetime) || !is.na(end_datetime)) {
-            locality$loggers <- purrr::pmap(list(item=locality$loggers,
-                                                 start_datetime=start_datetime,
-                                                 end_datetime=end_datetime),
-                                            sensors_item_function)
+        if(anyDuplicated(locality_table$logger_name) > 0 ||
+           (nrow(locality_table) > 1 && any(is.na(locality_table$logger_name)))) {
+            stop(.prep_const_MESSAGE_CROP_TABLE_DUPLICATES)
         }
+
+        logger_table <- data.frame(logger_name = names(locality$loggers))
+        if(is.na(locality_table$logger_name[[1]])) {
+            logger_table$start <- locality_table$start[[1]]
+            logger_table$end <- locality_table$end[[1]]
+        } else {
+            logger_table <- dplyr::left_join(logger_table, locality_table, by="logger_name")
+        }
+        
+        locality$loggers <- purrr::pmap(list(item=locality$loggers,
+                                             start=logger_table$start,
+                                             end=logger_table$end), sensors_item_function)
         crop_bar$tick()
         return(locality)
     }
 
-    agg_locality_function <- function(locality_id, start_datetime, end_datetime) {
+    agg_locality_function <- function(locality_table, key_table) {
+        locality_id <- key_table$locality_id[[1]]
         locality <- data$localities[[locality_id]]
-        if(!is.na(start_datetime) || !is.na(end_datetime)) {
-            locality <- sensors_item_function(locality, start_datetime, end_datetime)
+        if(nrow(locality_table) > 1) {
+            stop(.prep_const_MESSAGE_CROP_TABLE_DUPLICATES)
         }
+        start <- locality_table$start[[1]]
+        end <- locality_table$end[[1]]
+        locality <- sensors_item_function(locality, start, end)
         crop_bar$tick()
         return(locality)
     }
 
     if(.common_is_agg_format(data)) {
-        data$localities <- purrr::pmap(all_table, agg_locality_function)
+        data$localities <- dplyr::group_map(all_table, agg_locality_function)
     } else {
-        data$localities <- purrr::pmap(all_table, raw_locality_function)
+        data$localities <- dplyr::group_map(all_table, raw_locality_function)
     }
-    names(data$localities) <- all_table$locality_id
+    names(data$localities) <- purrr::map_chr(data$localities, ~ .x$metadata@locality_id)
     return(data)
 }
 
 .prep_crop_is_datetime_correct <- function(datetime, localities) {
-    return(is.null(datetime) || length(datetime) == 1 ||
-        (!is.null(localities) && length(datetime) == length(localities)))
+    return(is.null(datetime) || length(datetime) == 1)
 }
 
 .prep_crop_data <- function(item, start, end, end_included) {
@@ -700,6 +735,12 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
 
     item$sensors <- purrr::map(item$sensors, sensor_function)
     item
+}
+
+.prep_check_parameters_for_crop <- function(start, end, localities, crop_table) {
+    if(!is.null(crop_table) && (!is.null(start) || !is.null(end) || !is.null(localities))) {
+        stop(.prep_const_MESSAGE_CROP_TABLE_PARAMS)
+    }
 }
 
 #' Merge myClim objects
