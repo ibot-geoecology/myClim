@@ -461,6 +461,7 @@ mc_plot_raster <- function(data, filename=NULL, sensors=NULL, by_hour=TRUE, png_
 #' * `facet = NULL`, all localities and sensors (max 2 physicals, see details) are plotted in single plot
 #' @param color_by_logger If TRUE, the color is assigned by logger to differentiate individual loggers (random colors)
 #' if false, the color is assigned by physical. (default FALSE)
+#' @param tag hilight states with selected tag. (default NULL)
 #' @return ggplot2 object
 #' @examples
 #' tms.plot <- mc_filter(mc_data_example_agg, localities = "A6W79")
@@ -475,28 +476,32 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
                          start_crop=NULL, end_crop=NULL, use_utc=TRUE,
                          localities=NULL,
                          facet="locality",
-                         color_by_logger=FALSE) {
+                         color_by_logger=FALSE,
+                         tag=NULL) {
     data <- mc_filter(data, localities=localities, sensors=sensors)
     if(!is.null(start_crop) || !is.null(end_crop)) {
         data <- mc_prep_crop(data, start_crop, end_crop)
     }
     sensors_table <- .plot_get_sensors_table(data, facet)
     sensors_table <- .plot_add_coeff_to_sensors_table(sensors_table, scale_coeff, facet)
-    data_table <- .plot_reshape_long(data, use_utc=use_utc)
+    data_long <- .plot_reshape_long(data, use_utc=use_utc)
     plot_settings <- .plot_get_plot_line_settings(data, facet, color_by_logger)
-    data_table <- .plot_line_edit_data_table(data_table, sensors_table, plot_settings, facet)
+    data_table <- .plot_line_edit_data_table(data_long, sensors_table, plot_settings, facet)
 
     plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff, group=.data$series)) +
             ggplot2::geom_line(ggplot2::aes(color=.data$series))
+    if(!is.null(tag)) {
+        states_data_long <- .plot_get_states_data(plot, data, data_long, sensors_table, tag)
+        states_data_table <- .plot_line_edit_data_table(states_data_long, sensors_table, plot_settings, facet)
+        plot <- plot + ggplot2::geom_area(data=states_data_table,
+                                          ggplot2::aes(fill=.data$series),
+                                          alpha=0.5, position="identity")
+    }
     if(!plot_settings$change_colors) {
-        series_table <- dplyr::distinct(data_table, .data$sensor_name, .data$series)
-        temp_color_table <- dplyr::select(sensors_table, "sensor", "color")
-        color_table <- dplyr::left_join(series_table, temp_color_table, by=c("sensor_name"="sensor"))
-        color_values <- color_table$color
-        names(color_values) <- color_table$series
-        plot <- plot + ggplot2::scale_color_manual(values=color_values)
+        plot <- .plot_line_set_sensor_colors(plot, data_table, sensors_table)
     } else {
         plot <- plot + ggplot2::scale_color_manual(values=.plot_const_PALETTE)
+        plot <- plot + ggplot2::scale_fill_manual(values=.plot_const_PALETTE)
     }
     plot <- plot + .plot_set_ggplot_line_theme()
     plot <- plot + .plot_line_set_y_axes(sensors_table)
@@ -631,6 +636,88 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         data_table <- dplyr::left_join(data_table, join_table, by="sensor_name")
     }
     return(data_table)
+}
+
+.plot_get_states_data <- function(plot, data, data_long, sensors_table, tag) {
+    states_table <- .plot_line_get_states_table(data, tag)
+    states_table <- dplyr::select(states_table, "locality_id", "logger_name", "sensor_name", "start", "end")
+    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_name, .data$sensor_name)
+
+    group_filter_function <- function(group_table, key_table) {
+        min_start <- min(group_table$start, na.rm=TRUE)
+        max_end <- max(group_table$end, na.rm=TRUE)
+        result <- data_long$locality_id == key_table$locality_id &
+                  data_long$logger_name == key_table$logger_name &
+                  data_long$sensor_name == key_table$sensor_name &
+                  data_long$datetime >= min_start &
+                  data_long$datetime <= max_end
+        return(result)
+    }
+
+    conditions <- dplyr::group_map(states_table, group_filter_function)
+    condition <- purrr::reduce(conditions, `|`)
+    states_data_long <- dplyr::filter(data_long, condition)
+
+    filter_function <- function(locality_id, logger_name, sensor_name, start, end) {
+        result <- states_data_long$locality_id == locality_id &
+                  states_data_long$logger_name == logger_name &
+                  states_data_long$sensor_name == sensor_name &
+                  states_data_long$datetime >= start &
+                  states_data_long$datetime <= end
+        return(result)
+    }
+
+    conditions <- purrr::pmap(states_table, filter_function)
+    condition <- !purrr::reduce(conditions, `|`)
+    states_data_long$value[condition] <- 0
+
+    return(states_data_long)
+}
+
+.plot_line_get_states_table <- function(data, state_tag) {
+    is_agg <- .common_is_agg_format(data)
+    
+    sensor_function <- function(locality_id, logger_name, sensor) {
+        result <- dplyr::filter(sensor$states, .data$tag == state_tag)
+        result <- dplyr::mutate(result, locality_id=locality_id, logger_name=logger_name, sensor_name=sensor$metadata@name)
+        return(result)
+    }
+
+    logger_function <- function(locality_id, logger) {
+        params <- list(locality_id=locality_id,
+                       logger_name=logger$metadata@name,
+                       sensor=logger$sensors)
+        return(purrr::pmap_dfr(params, sensor_function))
+    }
+
+    locality_function <- function(locality) {
+        if(is_agg) {
+            params <- list(locality_id=locality$metadata@locality_id,
+                           logger_name=NA_character_,
+                           sensor=locality$sensors)
+            result <- purrr::pmap_dfr(params, sensor_function)
+        } else {
+            params <- list(locality_id=locality$metadata@locality_id,
+                           logger=locality$loggers)
+            result <- purrr::pmap_dfr(params, logger_function)
+        }   
+        return(result)   
+    }
+
+    states_table <- purrr::map_dfr(data$localities, locality_function)
+
+    return(states_table)
+}
+
+.plot_line_set_sensor_colors <- function(plot, data_table, sensors_table) {
+    series_table <- dplyr::distinct(data_table, .data$sensor_name, .data$series)
+    temp_color_table <- dplyr::select(sensors_table, "sensor", "color")
+    color_table <- dplyr::left_join(series_table, temp_color_table, by=c("sensor_name"="sensor"))
+    color_values <- color_table$color
+    names(color_values) <- color_table$series
+    plot <- plot + ggplot2::scale_color_manual(values=color_values)
+    plot <- plot + ggplot2::scale_fill_manual(values=color_values)
+    return(plot)
 }
 
 .plot_line_set_y_axes <- function(sensors_table) {

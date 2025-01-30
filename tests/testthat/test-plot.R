@@ -74,3 +74,20 @@ test_that("mc_plot_raster snow", {
     unlink("Rplots.pdf")
     expect_true(TRUE)
 })
+
+test_that("mc_plot_line tags", {
+    data <- mc_read_data("../data/TOMST/files_table2.csv", silent=T)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A2E32"     ,      "TMS_1",     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 8:00"), lubridate::ymd_hm("2020-10-16 10:00"), NA_character_,
+        "A2E32"     ,      "TMS_1",     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 11:00"), lubridate::ymd_hm("2020-10-16 11:30"), NA_character_,
+        "A2E32"     ,      "TMS_1",     "TMS_T2", "error",
+        lubridate::ymd_hm("2020-10-16 8:00"), lubridate::ymd_hm("2020-10-16 11:00"), NA_character_,
+    ))
+    states_data <- mc_states_insert(data, states)
+    mc_plot_line(states_data, localities="A2E32", tag="error")
+    expect_true(TRUE)
+})
