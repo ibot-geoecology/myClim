@@ -488,15 +488,11 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     plot_settings <- .plot_get_plot_line_settings(data, facet, color_by_logger)
     data_table <- .plot_line_edit_data_table(data_long, sensors_table, plot_settings, facet)
 
-    plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff, group=.data$series)) +
+    plot <- ggplot2::ggplot(data=data_table, ggplot2::aes(x=.data$datetime, y=.data$value_coeff,
+                                                          group=.data$series, fill=.data$series,
+                                                          colour=.data$series)) +
             ggplot2::geom_line(ggplot2::aes(color=.data$series))
-    if(!is.null(tag)) {
-        states_data_long <- .plot_get_states_data(plot, data, data_long, sensors_table, tag)
-        states_data_table <- .plot_line_edit_data_table(states_data_long, sensors_table, plot_settings, facet)
-        plot <- plot + ggplot2::geom_area(data=states_data_table,
-                                          ggplot2::aes(fill=.data$series),
-                                          alpha=0.5, position="identity")
-    }
+    plot <- .plot_line_add_states_if_selected(plot, data, data_long, sensors_table, tag, plot_settings, facet)
     if(!plot_settings$change_colors) {
         plot <- .plot_line_set_sensor_colors(plot, data_table, sensors_table)
     } else {
@@ -638,38 +634,57 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     return(data_table)
 }
 
-.plot_get_states_data <- function(plot, data, data_long, sensors_table, tag) {
+.plot_line_add_states_if_selected <- function(plot, data, data_long, sensors_table, tag, plot_settings, facet) {
+    if(is.null(tag)) {
+        return(plot)
+    }
+    states_data_long <- .plot_get_states_data(plot, data, data_long, tag)
+    if(nrow(states_data_long) == 0) {
+        return(plot)
+    }
+    is_point_data <- states_data_long$group == "point"
+    states_data_long_area <- dplyr::filter(states_data_long, !is_point_data)
+    states_data_long_point <- dplyr::filter(states_data_long, is_point_data)
+    if(nrow(states_data_long_area) > 0) {
+        states_data_table_area <- .plot_line_edit_data_table(states_data_long_area, sensors_table, plot_settings, facet)
+        plot <- plot + ggplot2::geom_area(data=states_data_table_area, ggplot2::aes(group=.data$group),
+                                          alpha=0.3, position="identity", show.legend = FALSE)
+    }
+    if(nrow(states_data_long_point) > 0) {
+        states_data_table_point <- .plot_line_edit_data_table(states_data_long_point, sensors_table, plot_settings, facet)
+        plot <- plot + ggplot2::geom_point(data=states_data_table_point, show.legend = FALSE, shape=8)
+    }
+    return(plot)
+}
+
+.plot_get_states_data <- function(plot, data, data_long, tag) {
     states_table <- .plot_line_get_states_table(data, tag)
     states_table <- dplyr::select(states_table, "locality_id", "logger_name", "sensor_name", "start", "end")
-    states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_name, .data$sensor_name)
-
-    group_filter_function <- function(group_table, key_table) {
-        min_start <- min(group_table$start, na.rm=TRUE)
-        max_end <- max(group_table$end, na.rm=TRUE)
-        result <- data_long$locality_id == key_table$locality_id &
-                  data_long$logger_name == key_table$logger_name &
-                  data_long$sensor_name == key_table$sensor_name &
-                  data_long$datetime >= min_start &
-                  data_long$datetime <= max_end
-        return(result)
-    }
-
-    conditions <- dplyr::group_map(states_table, group_filter_function)
-    condition <- purrr::reduce(conditions, `|`)
-    states_data_long <- dplyr::filter(data_long, condition)
 
     filter_function <- function(locality_id, logger_name, sensor_name, start, end) {
-        result <- states_data_long$locality_id == locality_id &
-                  states_data_long$logger_name == logger_name &
-                  states_data_long$sensor_name == sensor_name &
-                  states_data_long$datetime >= start &
-                  states_data_long$datetime <= end
+        result <- data_long$locality_id == locality_id &
+                  data_long$sensor_name == sensor_name &
+                  data_long$datetime >= start &
+                  data_long$datetime <= end
+        if (!is.na(logger_name)) {
+            result <- result & data_long$logger_name == logger_name
+        }         
         return(result)
     }
 
     conditions <- purrr::pmap(states_table, filter_function)
-    condition <- !purrr::reduce(conditions, `|`)
-    states_data_long$value[condition] <- 0
+
+    table_function <- function(condition, i) {
+        result <- dplyr::filter(data_long, condition)
+        if(nrow(result) == 1) {
+            result$group <- "point"
+        } else {
+            result$group <- stringr::str_glue("area_{i}")
+        }
+        return(result)
+    }
+
+    states_data_long <- purrr::imap_dfr(conditions, table_function)
 
     return(states_data_long)
 }

@@ -1,3 +1,6 @@
+# myClim 1.3.8
+* The `tag` parameter has been added to the `mc_plot_line` function.
+
 # myClim 1.3.7
 * The uninitialsed date_format warning in the `mc_read_data` function has been fixed. 
 * The `cropt_table` parameter has been added to the `mc_prep_crop` function.

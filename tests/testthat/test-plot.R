@@ -86,8 +86,17 @@ test_that("mc_plot_line tags", {
         lubridate::ymd_hm("2020-10-16 11:00"), lubridate::ymd_hm("2020-10-16 11:30"), NA_character_,
         "A2E32"     ,      "TMS_1",     "TMS_T2", "error",
         lubridate::ymd_hm("2020-10-16 8:00"), lubridate::ymd_hm("2020-10-16 11:00"), NA_character_,
+        "A2E32"     ,      "TMS_1",  "TMS_moist", "error",
+        lubridate::ymd_hm("2020-10-16 14:00"), lubridate::ymd_hm("2020-10-16 15:00"), NA_character_,
+        "A2E32"     ,      "TMS_1",  "TMS_moist", "error",
+        lubridate::ymd_hm("2020-10-16 16:00"), lubridate::ymd_hm("2020-10-16 16:00"), NA_character_,
     ))
     states_data <- mc_states_insert(data, states)
-    mc_plot_line(states_data, localities="A2E32", tag="error")
+    p <- mc_plot_line(states_data, localities="A2E32", tag="error2")
+    p <- mc_plot_line(states_data, localities="A2E32", tag="error")
+    p <- mc_plot_line(states_data, localities="A2E32", tag="error", facet="physical")
+    p <- mc_plot_line(states_data, localities="A2E32", tag="error", facet=NULL)
+    agg_data <- mc_agg(states_data, fun = "mean", period = "1 hour")
+    p <- mc_plot_line(agg_data, localities="A2E32", tag="error")
     expect_true(TRUE)
 })

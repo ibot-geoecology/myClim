@@ -16,7 +16,8 @@ mc_plot_line(
   use_utc = TRUE,
   localities = NULL,
   facet = "locality",
-  color_by_logger = FALSE
+  color_by_logger = FALSE,
+  tag = NULL
 )
 }
 \arguments{
@@ -60,6 +61,8 @@ in separate plot in R and separate row in PDF if filename.pdf is provided.
 
 \item{color_by_logger}{If TRUE, the color is assigned by logger to differentiate individual loggers (random colors)
 if false, the color is assigned by physical. (default FALSE)}
+
+\item{tag}{hilight states with selected tag. (default NULL)}
 }
 \value{
 ggplot2 object
