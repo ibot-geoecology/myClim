@@ -190,6 +190,8 @@ mc_load <- function(file) {
 #' @return RDS files saved at the output path destination
 #' @examples
 #' tmp_dir <- tempdir()
+#' tmp_dir <- file.path(tmp_dir, "localities")
+#' dir.create(tmp_dir)
 #' mc_save_localities(mc_data_example_agg, tmp_dir)
 #' unlink(tmp_dir, recursive = TRUE)
 #' @export
