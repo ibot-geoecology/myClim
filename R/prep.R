@@ -1158,7 +1158,7 @@ mc_prep_TMSoffsoil <- function(data,
     sdt12 <- t1_sd / t2_sd
     moist <- item$sensors[[moist_sensor]]$values
     minmoist  <- .prep_apply_function_to_window(moist, count_values_per_day + 1, min, na.rm = TRUE)
-    result_values <- ifelse(sdt12 < sd_threshold, 0, ifelse(minmoist >= minmoist_threshold, 0, 1))
+    result_values <- ifelse(sdt12 < sd_threshold & !is.na(sdt12), 0, ifelse(minmoist >= minmoist_threshold, 0, 1))
     if(smooth) {
         result_values <- .prep_smoothing_rolling_mean(result_values, smooth_window * count_values_per_day + 1,
                                                       threshold = smooth_threshold, na.rm = TRUE)
