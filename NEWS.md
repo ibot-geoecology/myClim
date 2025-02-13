@@ -1,3 +1,7 @@
+# myClim 1.3.9
+* The `clean_conflict` states issue in the `mc_prep_clean` function has been fixed.
+* The `NA` values in the `mc_prep_TMSoffsoil` function have been fixed.
+
 # myClim 1.3.8
 * The `tag` parameter has been added to the `mc_plot_line` function.
 

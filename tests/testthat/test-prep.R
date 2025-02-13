@@ -78,9 +78,15 @@ test_that("mc_prep_clean conflicts", {
     differnt_values_warning(data_conflicts <- mc_prep_clean(data, silent=T, resolve_conflicts=FALSE)) %>%
         differnt_values_warning() %>%
         expect_warning("Object not cleaned. The function only tagged \\(states\\) measurements with cleaning conflicts.")
-    states <- data_conflicts$localities$`92201076`$loggers[[1]]$sensors$Dendro_T$states
-    expect_equal(states$start[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT], lubridate::ymd_hm("2023-01-13 23:00"))
-    expect_equal(states$end[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT], lubridate::ymd_hm("2023-01-13 23:00"))
+    states <- data_conflicts$localities$`92201076`$loggers$Dendro_1$sensors$Dendro_T$states
+    expect_equal(states$start[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT],
+        c(lubridate::ymd_hm("2023-01-13 15:30"),
+          lubridate::ymd_hm("2023-01-13 16:30"),
+          lubridate::ymd_hm("2023-01-13 23:00")))
+    expect_equal(states$end[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT],
+        c(lubridate::ymd_hm("2023-01-13 15:30"),
+          lubridate::ymd_hm("2023-01-13 16:45"),
+          lubridate::ymd_hm("2023-01-13 23:00")))
     tolerance <- list()
     tolerance[[.model_const_PHYSICAL_T_C]] <- 0.5
     tolerance[[.model_const_PHYSICAL_radius_raw]] <- 10
@@ -443,4 +449,10 @@ test_that("mc_prep_TMSoffsoil", {
     agg_data <- mc_agg(data)
     agg_data_offsoil <- mc_prep_TMSoffsoil(agg_data, smooth=F)
     test_agg_data_format(agg_data_offsoil)
+})
+
+test_that("mc_prep_TMSoffsoil NA values", {
+    data <- mc_read_files("../data/TMSoffsoil/data_93142790_0.csv", "TOMST", silent=TRUE)
+    data_offsoil <- mc_prep_TMSoffsoil(data, smooth=F)
+    expect_false(any(is.na(data_offsoil$localities$`93142790`$loggers$TMS_1$sensors$off_soil$values)))
 })

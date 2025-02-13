@@ -238,7 +238,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
 .prep_clean_check_different_values_in_duplicated <- function(locality_id, logger_name, sensor_table, serial_number, clean_env, physical){
     duplicated_rows <- duplicated(sensor_table$datetime) | duplicated(sensor_table$datetime, fromLast = TRUE)
     duplicated_table <- dplyr::filter(sensor_table, duplicated_rows)
-    groupped_duplicated <- dplyr::group_by(duplicated_table, .data$datetime)
+    duplicated_table <- dplyr::group_by(duplicated_table, .data$datetime)
     tolerance_value <- NA_real_
     if(!is.null(clean_env$tolerance) && physical %in% names(clean_env$tolerance)) {
         tolerance_value <- clean_env$tolerance[[physical]]
@@ -251,28 +251,32 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
         } else {
             result <- !dplyr::near(min_value, max_value, tol = tolerance_value)
         }
-        return(rep(result, nrow(.x)))
+        return(result)
     }
-    is_different <- as.logical(purrr::flatten(dplyr::group_map(groupped_duplicated, is_different_function)))
-    if(any(is_different)) {
+    different_table <- tibble::tibble(
+        datetime=unique(duplicated_table$datetime),
+        is_different=as.logical(dplyr::group_map(duplicated_table, is_different_function)))
+    if(any(different_table$is_different)) {
         sensor_name <- names(sensor_table)[[2]]
         warning(stringr::str_glue(.prep_const_MESSAGE_VALUES_SAME_TIME))
+        sensor_table <- dplyr::left_join(sensor_table, different_table, by="datetime")
+        sensor_table$is_different[is.na(sensor_table$is_different)] <- FALSE
         if(!clean_env$resolve_conflicts) {
-            .prep_add_conflict_states(locality_id, logger_name, sensor_name, duplicated_table, is_different, clean_env)
+            .prep_add_conflict_states(locality_id, logger_name, sensor_name, sensor_table, clean_env)
         }
     }
 }
 
 .prep_add_conflict_states <- function(locality_id, logger_name, sensor_name,
-                                      duplicated_table, is_different, clean_env) {
-    diff_parts <- rle(is_different)
+                                      sensor_table, clean_env) {
+    diff_parts <- rle(sensor_table$is_different)
     ends <- cumsum(diff_parts$lengths)
     starts <- c(1, ends[-length(ends)] + 1)
     ends <- ends[diff_parts$values]
     starts <- starts[diff_parts$values]
     states_table <- tibble::tibble(locality_id=locality_id, logger_name=logger_name,
                                    sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CLEAN_CONFLICT,
-                                   start=duplicated_table$datetime[starts], end=duplicated_table$datetime[ends],
+                                   start=sensor_table$datetime[starts], end=sensor_table$datetime[ends],
                                    value=NA_character_)
     clean_env$states <- dplyr::bind_rows(clean_env$states, states_table)
 }

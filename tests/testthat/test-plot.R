@@ -77,6 +77,8 @@ test_that("mc_plot_raster snow", {
 
 test_that("mc_plot_line tags", {
     data <- mc_read_data("../data/TOMST/files_table2.csv", silent=T)
+    offsoil_data <- mc_prep_TMSoffsoil(data)
+    p <- mc_plot_line(offsoil_data, localities="A2E32", facet="physical")
     states <- as.data.frame(tibble::tribble(
         ~locality_id, ~logger_name, ~sensor_name,    ~tag,
         ~start,                                 ~end,        ~value,
