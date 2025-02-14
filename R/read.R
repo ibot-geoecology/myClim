@@ -8,10 +8,14 @@
 .read_const_MESSAGE_UNSUPPOERTED_FORMAT <- "{data_format} is not a supported data format. File is skipped."
 .read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not applicable format to {path}. File is skipped."
 .read_const_MESSAGE_USER_DATA_FORMAT_KEY <- "The key in user_data_format must not be the same as the key in mc_data_formats."
-.read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {filename}"
+.read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {filename}. Check mc_read_problems[['{filename}']]."
 .read_const_MESSAGE_FILE_SKIP <- "File {.x} does not exist - skipping."
 
 .read_state <- new.env()
+
+#' Environment for reading problems
+#' @export
+mc_read_problems <- new.env()
 
 #' Reading files or directories
 #'
@@ -481,6 +485,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         problems <- vroom::problems(result)
     }
     if(nrow(problems) > 0) {
+        mc_read_problems[[filename]] <- problems
         warning(stringr::str_glue(.read_const_MESSAGE_VROOM_WARNING))
     }
     return(result)

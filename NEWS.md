@@ -1,3 +1,6 @@
+# myClim 1.3.10
+* The environment `mc_read_problems` with vroom parse problems has been added.
+
 # myClim 1.3.9
 * The `clean_conflict` states issue in the `mc_prep_clean` function has been fixed.
 * The `NA` values in the `mc_prep_TMSoffsoil` function have been fixed.
