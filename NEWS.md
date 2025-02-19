@@ -1,3 +1,6 @@
+# myClim 1.3.11
+* The numbers in the `TOMS_join` format can be in scientific notation.
+
 # myClim 1.3.10
 * The environment `mc_read_problems` with vroom parse problems has been added.
 
