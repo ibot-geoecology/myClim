@@ -1,3 +1,6 @@
+# myClim 1.4.0
+* CRAN version.
+
 # myClim 1.3.11
 * The numbers in the `TOMS_join` format can be in scientific notation.
 
