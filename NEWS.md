@@ -1,4 +1,5 @@
 # myClim 1.4.0
+* The save localities unit test has been fixed.
 * CRAN version.
 
 # myClim 1.3.11

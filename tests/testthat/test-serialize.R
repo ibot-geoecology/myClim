@@ -64,14 +64,14 @@ test_that("save and load separated localities", {
     skip_item <- list("A", "B", "C")
     saveRDS(skip_item, file.path(data_dir, "skip_item.rds"))
     expect_warning(loaded_data <- mc_load(data_dir),
-        regex="Data in file \\/tmp\\/.+\\/data\\/skip_item.rds is not myClim object and will be skipped\\.")
+        regex="Data in file .+skip_item\\.rds is not myClim object and will be skipped\\.")
     test_raw_data_format(loaded_data)
     expect_equal(names(loaded_data$localities), c("A1E05", "A2E32", "A6W79"))
     expect_equal(data, loaded_data)
     new_a1e05_path <- file.path(temp_dir, "A1E05.rds")
     file.rename(file.path(data_dir, "A1E05.rds"), new_a1e05_path)
     expect_warning(loaded_data <- mc_load(c(data_dir, new_a1e05_path)),
-        regex="Data in file \\/tmp\\/.+\\/data\\/skip_item.rds is not myClim object and will be skipped\\.")
+        regex="Data in file .+skip_item\\.rds is not myClim object and will be skipped\\.")
     test_raw_data_format(loaded_data)
     expect_equal(names(loaded_data$localities), c("A2E32", "A6W79", "A1E05"))
     file.remove(new_a1e05_path)
