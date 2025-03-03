@@ -1,3 +1,6 @@
+# myClim 1.4.1
+* The calculated sensor in `mc_states_join` issue has been fixed.
+
 # myClim 1.4.0
 * The save localities unit test has been fixed.
 * CRAN version.

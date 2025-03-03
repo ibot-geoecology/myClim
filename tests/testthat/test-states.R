@@ -426,3 +426,12 @@ test_that("mc_states_join", {
     states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict")
     expect_equal(nrow(states_table), 2)
 })
+
+
+test_that("mc_states_join no states", {
+    data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
+    data <- mc_calc_vwc(data)
+    states_data <- mc_states_join(data)
+    states_table <- mc_info_states(states_data) |> dplyr::filter(tag == "join_conflict")
+    expect_equal(nrow(states_table), 10)
+})

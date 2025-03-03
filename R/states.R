@@ -952,7 +952,12 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
         }
         new_states_table <- .states_get_states_table_from_logical_values(data_table$conflict, data_table$datetime, states_env$tag, value=value)
         current_states_table <- logger1$sensors[[sensor_name]]$states
-        states_env$locality$loggers[[logger1$metadata@name]]$sensors[[sensor_name]]$states <- dplyr::union_all(current_states_table, new_states_table)
+        if(nrow(current_states_table) == 0) {
+            union_states_table <- new_states_table
+        } else {
+            union_states_table <- dplyr::union_all(current_states_table, new_states_table)
+        }
+        states_env$locality$loggers[[logger1$metadata@name]]$sensors[[sensor_name]]$states <- union_states_table
     }
     purrr::walk(sensor_names_table$name, sensor_function)
 }
