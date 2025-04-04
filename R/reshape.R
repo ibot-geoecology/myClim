@@ -1,4 +1,5 @@
 .reshape_const_MESSAGE_UNCLEANED <- "Logger {serial_number} isn't cleaned. I can't detect the last time_to."
+.reshape_const_MESSAGE_WIDE_UNCLEANED <- "Only one logger can be reshaped in uncleaned data."
 
 #' Export values to wide table
 #'
@@ -26,18 +27,30 @@
 #' 
 #' @export
 #' @examples
-#' example_tms_wideformat <- mc_reshape_wide(mc_data_example_raw, c("A6W79", "A2E32"),
+#' example_tms_wideformat <- mc_reshape_wide(mc_data_example_clean, c("A6W79", "A2E32"),
 #'                                           c("TMS_T1", "TMS_T2"))
 mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE, show_logger_name=FALSE) {
     data <- mc_filter(data, localities, sensors)
     if(.common_is_agg_format(data)) {
         use_utc <- .common_check_agg_use_utc(use_utc, data$metadata@period)
     }
-    datetimes <- .reshape_get_all_datetimes(data, use_utc)
-    tables <- c(tibble::tibble(datetimes), .reshape_get_sensor_tables(data, use_utc, show_logger_name))
-    tables[[1]] <- tibble::as_tibble(tables[[1]])
-    colnames(tables[[1]]) <- "datetime"
-    as.data.frame(purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime")))
+    sensor_tables <- .reshape_get_sensor_tables(data, use_utc, show_logger_name)
+    if(length(sensor_tables) == 0) {
+        return(data.frame())
+    }
+    if(!.prep_is_datetime_step_processed_in_object(data) && length(sensor_tables) > 1) {
+        stop(.reshape_const_MESSAGE_WIDE_UNCLEANED)
+    }
+    if(.prep_is_datetime_step_processed_in_object(data)) {
+        datetimes <- .reshape_get_all_datetimes(data, use_utc)
+        tables <- c(tibble::tibble(datetimes), sensor_tables)
+        tables[[1]] <- tibble::as_tibble(tables[[1]])
+        colnames(tables[[1]]) <- "datetime"
+        result <- as.data.frame(purrr::reduce(tables, function(.x, .y) dplyr::left_join(.x, .y, by="datetime")))
+    } else {
+        result <- as.data.frame(sensor_tables[[1]])
+    }
+    return(result)
 }
 
 .reshape_get_all_datetimes <- function(data, use_utc) {
