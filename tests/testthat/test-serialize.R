@@ -46,6 +46,8 @@ test_that("load old versions of object", {
     test_raw_data_format(raw_data)
     raw_data <- mc_load("../data/serialize/raw_data_1.3.2.rds")
     test_raw_data_format(raw_data)
+    raw_data <- mc_load("../data/serialize/raw_data_1.4.1.rds")
+    test_raw_data_format(raw_data)
 })
 
 test_that("save and load separated localities", {

@@ -158,6 +158,13 @@ mc_load <- function(file) {
 }
 
 .serialize_edit_logger_list_before_load <- function(item, original_version) {
+    if(original_version < "1.4.2") {
+        if(is.na(item$clean_info$step)) {
+            item$metadata$raw_index <- seq_along(item$datetime)
+        } else {
+            item$metadata$raw_index <- NA_integer_
+        }
+    }
     if(original_version < "1.1.0") {
         if(item$metadata$type == "HOBO") {
             item$metadata$type <- .model_const_LOGGER_HOBO_U23_001A

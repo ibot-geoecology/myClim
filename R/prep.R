@@ -695,6 +695,10 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
 
 .prep_crop_data <- function(item, start, end, end_included) {
     table <- .common_sensor_values_as_tibble(item)
+    if(inherits(item$metadata, "mc_LoggerMetadata") &&
+        !any(is.na(item$metadata@raw_index))) {
+        table$raw_index__ <- item$metadata@raw_index
+    }
     if(!is.na(start)) {
         table <- dplyr::filter(table, .data$datetime >= start)
     }
@@ -707,6 +711,9 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
         }
     }
     item$datetime <- table$datetime
+    if("raw_index__" %in% colnames(table)) {
+        item$metadata@raw_index <- table$raw_index__
+    }
     item$sensors <- purrr::map(item$sensors, function(sensor) {
         sensor$values <- table[[sensor$metadata@name]]
         sensor})
