@@ -1,5 +1,7 @@
 # myClim 1.4.2
 * Only one logger can be used for uncleaned data in the `mc_reshape_wide` function.
+* The raw indexes are loaded from TOMST files to logger metadata.
+* The new function `mc_prep_delete` has been added.
 
 # myClim 1.4.1
 * The calculated sensor in `mc_states_join` issue has been fixed.
