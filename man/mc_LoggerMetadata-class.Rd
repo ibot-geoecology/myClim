@@ -20,5 +20,7 @@ Class for logger metadata
 \item{\code{step}}{time step of microclimatic time-seris in seconds.
 When provided by user, is used in \code{\link[=mc_prep_clean]{mc_prep_clean()}} function instead of
 automatic step detection}
+
+\item{\code{raw_index}}{indexes of values in uncleaned data. This value is deleted in cleaning process.}
 }}
 

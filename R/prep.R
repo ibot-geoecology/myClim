@@ -21,6 +21,7 @@
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
+.prep_const_MESSAGE_DELETE_FORMAT <- "Function requires uncleaned myClim object in Raw-format."
 
 #' Cleaning datetime series
 #'
@@ -1230,4 +1231,54 @@ mc_prep_TMSoffsoil <- function(data,
     }
     .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
+}
+
+#' Delete values by index
+#'
+#' This function delete values in uncleaned raw myClim object by index.
+#'
+#' @details
+#' Uncleaned logger contains raw indexes in metadata@raw_index. This function
+#' delete values by index_table parameter. This table contains 3 columns:
+#'  * locality_id = id of locality
+#'  * logger_name = name of logger
+#'  * raw_index = index of the value to be deleted
+#'
+#' @template param_myClim_object_raw
+#' @param index_table data.frame (table); see details
+#' @return raw myClim data with deleted values.
+#' @export
+#' @examples
+#' index_table <- data.frame(locality_id = c("A1E05", "A1E05"),
+#'                           logger_name = c("Thermo_1", "Thermo_1"),
+#'                           raw_index = c(1, 2))
+#' data <- mc_prep_delete(mc_data_example_raw, index_table)
+mc_prep_delete <- function(data, index_table) {
+    if(!.common_is_raw_format(data) ||
+        .prep_is_datetime_step_processed_in_object(data)) {
+        stop(.prep_const_MESSAGE_DELETE_FORMAT)
+    }
+
+    result_env <- new.env()
+    result_env$data <- data
+
+    index_table <- dplyr::group_by(index_table, .data$locality_id, .data$logger_name)
+
+    group_function <- function(data_table, key_table) {
+        locality_id <- key_table$locality_id[[1]]
+        logger_name <- key_table$logger_name[[1]]
+        logger <- data$localities[[locality_id]]$loggers[[logger_name]]
+        table <- .common_sensor_values_as_tibble(logger)
+        table$raw_index__ <- logger$metadata@raw_index
+        table <- dplyr::filter(table, !(.data$raw_index__ %in% data_table$raw_index))
+        logger$metadata@raw_index <- table$raw_index__
+        logger$datetime <- table$datetime
+        logger$sensors <- purrr::map(logger$sensors, function(sensor) {
+            sensor$values <- table[[sensor$metadata@name]]
+            return(sensor)})
+        result_env$data$localities[[locality_id]]$loggers[[logger_name]] <- logger
+    }
+
+    dplyr::group_walk(index_table, group_function)
+    return(result_env$data)
 }

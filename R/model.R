@@ -431,6 +431,7 @@ setMethod("initialize",
 #' @slot step time step of microclimatic time-seris in seconds.
 #' When provided by user, is used in [mc_prep_clean()] function instead of
 #' automatic step detection
+#' @slot raw_index indexes of values in uncleaned data. This value is deleted in cleaning process.
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               slots = c(type = "character",
@@ -654,6 +655,7 @@ setMethod(
 #' If the value of the tz_offset parameter is 0, then datetime values are in UTC.
 #' If the time zone offset is defined in the value, e.g., `"2020-10-06 09:00:00+0100"`,
 #' and `date_format` is `"%Y-%m-%d %H:%M:%S%z"`, the value is automatically converted to UTC.
+#' @slot index_column index of column, where is index of values from data file (default NA).
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",

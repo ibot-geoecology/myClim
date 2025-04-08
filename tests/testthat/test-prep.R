@@ -456,3 +456,19 @@ test_that("mc_prep_TMSoffsoil NA values", {
     data_offsoil <- mc_prep_TMSoffsoil(data, smooth=F)
     expect_false(any(is.na(data_offsoil$localities$`93142790`$loggers$TMS_1$sensors$off_soil$values)))
 })
+
+test_that("mc_prep_delete", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", "../data/TOMST/localities_table.csv", clean=FALSE)
+    index_table <- tibble::tribble(
+        ~locality_id,  ~logger_name, ~raw_index,
+        "A1E05"     ,    "Thermo_1",          1,
+        "A1E05"     ,    "Thermo_1",          3,
+        "A2E32"     ,       "TMS_1",         74,
+    )
+    data_delete <- mc_prep_delete(data, index_table)
+    test_raw_data_format(data_delete)
+    expect_equal(length(data_delete$localities$A1E05$loggers$Thermo_1$datetime), length(data$localities$A1E05$loggers$Thermo_1$datetime) - 2)
+    expect_equal(length(data_delete$localities$A2E32$loggers$TMS_1$datetime), length(data$localities$A2E32$loggers$TMS_1$datetime) - 1)
+    expect_equal(length(data_delete$localities$A6W79$loggers$TMS_1$datetime), length(data$localities$A6W79$loggers$TMS_1$datetime))
+    expect_equal(data_delete$localities$A1E05$loggers$Thermo_1$metadata@raw_index[1:3], c(0, 2, 4))
+})

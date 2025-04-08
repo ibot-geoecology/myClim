@@ -46,7 +46,8 @@ This function converts myClim object to the R data.frame with values of sensor i
 }
 \details{
 First column of the output data.frame is datetime followed by the
-columns for every sensor. Name of the column is in format:
+columns for every sensor. For uncleaned data in Raw-format, can be used only for one logger.
+Name of the column is in format:
 \itemize{
 \item localityid_loggerid_serialnumber_sensorname for Raw-format and \code{show_logger_name=FALSE}
 \item localityid_loggername_sensorname for Raw-format and \code{show_logger_name=TRUE}

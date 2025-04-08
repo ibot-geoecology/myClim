@@ -6,7 +6,8 @@
 #' This function converts myClim object to the R data.frame with values of sensor in wide format.
 #'
 #' @details First column of the output data.frame is datetime followed by the
-#' columns for every sensor. Name of the column is in format:
+#' columns for every sensor. For uncleaned data in Raw-format, can be used only for one logger.
+#' Name of the column is in format:
 #' * localityid_loggerid_serialnumber_sensorname for Raw-format and `show_logger_name=FALSE`
 #' * localityid_loggername_sensorname for Raw-format and `show_logger_name=TRUE`
 #' * localityid_sensorname for Agg-format
