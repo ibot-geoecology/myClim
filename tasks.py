@@ -13,8 +13,10 @@ def generate(c):
     """
     Generate source and documentation
     """
-    for data_file in Path("data-raw").glob("mc_data_*.R"):
-        c.run(f"Rscript {str(data_file)}")
+    files = [x for x in Path("data-raw").glob("mc_data_*.R") if x.name != "mc_data_examples.R"]
+    for data_file in files:
+        c.run(f"Rscript {str(data_file)}", pty=True, echo=True)
+    c.run(f"Rscript data-raw/mc_data_examples.R", pty=True, echo=True)
     Path("NAMESPACE").unlink(missing_ok=True)
     generate_documentation(c)
 

@@ -436,7 +436,8 @@ mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               slots = c(type = "character",
                                         name = "character",
                                         serial_number = "character",
-                                        step = "numeric"),
+                                        step = "numeric",
+                                        raw_index = "numeric"),
                               contains = "mc_Serializable")
 
 setMethod("initialize",
@@ -667,7 +668,8 @@ mc_DataFormat <- setClass("mc_DataFormat",
                                     filename_serial_number_pattern = "character",
                                     data_row_pattern = "character",
                                     logger_type = "character",
-                                    tz_offset = "numeric"))
+                                    tz_offset = "numeric",
+                                    index_column = "numeric"))
 
 setMethod("initialize",
           "mc_DataFormat",
@@ -684,6 +686,7 @@ setMethod("initialize",
               .Object@data_row_pattern <- NA_character_
               .Object@logger_type <- NA_character_
               .Object@tz_offset <- NA_integer_
+              .Object@index_column <- NA_integer_
               return(.Object)
           })
 

@@ -66,6 +66,11 @@ test_logger <- function(logger) {
     expect_true(is(logger$metadata, "mc_LoggerMetadata"))
     expect_true(is.na(logger$metadata@type) || logger$metadata@type %in% myClim:::.model_logger_types)
     expect_true(is(logger$clean_info, "mc_LoggerCleanInfo"))
+    if(is.na(logger$clean_info@step)) {
+        expect_equal(length(logger$metadata@raw_index), length(logger$datetime))
+    } else {
+        expect_true(is.na(logger$metadata@raw_index))
+    }
     test_datetime(logger$datetime)
     expect_equal(class(logger$sensors), "list")
     expect_true(length(logger$sensors) > 0)

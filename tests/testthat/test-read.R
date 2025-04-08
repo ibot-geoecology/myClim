@@ -74,6 +74,7 @@ test_that("mc_read_files TOMST directory", {
     expect_equal(length(data$localities[[1]]$loggers), 1)
     expect_equal(data$localities$`92192250`$loggers[["Dendro_1"]]$metadata@type, .model_const_LOGGER_TOMST_DENDROMETER)
     expect_equal(length(data$localities$`92192250`$loggers[["Dendro_1"]]$sensors), 2)
+    expect_equal(data$localities$`94184102`$loggers[["TMS_2"]]$metadata@raw_index[[1]], 8316)
 })
 
 test_that("mc_read_data TOMST 2024 format changes", {
