@@ -21,7 +21,7 @@
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
-.prep_const_MESSAGE_DELETE_FORMAT <- "Function requires uncleaned myClim object in Raw-format."
+.prep_const_MESSAGE_DELETE_FORMAT <- "The function requires uncleaned myClim object in Raw-format."
 
 #' Cleaning datetime series
 #'
