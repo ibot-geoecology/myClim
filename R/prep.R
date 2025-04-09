@@ -1268,17 +1268,27 @@ mc_prep_delete <- function(data, index_table) {
         locality_id <- key_table$locality_id[[1]]
         logger_name <- key_table$logger_name[[1]]
         logger <- data$localities[[locality_id]]$loggers[[logger_name]]
-        table <- .common_sensor_values_as_tibble(logger)
-        table$raw_index__ <- logger$metadata@raw_index
+        table <- .prep_get_logger_table_with_index(logger)
         table <- dplyr::filter(table, !(.data$raw_index__ %in% data_table$raw_index))
-        logger$metadata@raw_index <- table$raw_index__
-        logger$datetime <- table$datetime
-        logger$sensors <- purrr::map(logger$sensors, function(sensor) {
-            sensor$values <- table[[sensor$metadata@name]]
-            return(sensor)})
+        logger <- .prep_load_logger_values_from_table(logger, table)
         result_env$data$localities[[locality_id]]$loggers[[logger_name]] <- logger
     }
 
     dplyr::group_walk(index_table, group_function)
     return(result_env$data)
+}
+
+.prep_get_logger_table_with_index <- function(logger) {
+    table <- .common_sensor_values_as_tibble(logger)
+    table$raw_index__ <- logger$metadata@raw_index
+    return(table)
+}
+
+.prep_load_logger_values_from_table <- function(logger, table) {
+    logger$metadata@raw_index <- table$raw_index__
+    logger$datetime <- table$datetime
+    logger$sensors <- purrr::map(logger$sensors, function(sensor) {
+        sensor$values <- table[[sensor$metadata@name]]
+        return(sensor)})
+    return(logger)
 }
