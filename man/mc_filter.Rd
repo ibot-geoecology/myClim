@@ -10,7 +10,8 @@ mc_filter(
   sensors = NULL,
   reverse = FALSE,
   stop_if_empty = TRUE,
-  logger_types = NULL
+  logger_types = NULL,
+  loggers = NULL
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ mc_filter(
 
 \item{logger_types}{types of logger for filtering data; if NULL then do nothing (default NULL).
 The logger_types parameter can by used only for raw data format see \link{myClim-package}.}
+
+\item{loggers}{logger_names for filtering data; if NULL then do nothing (default NULL).
+The loggers parameter can by used only for raw data format see \link{myClim-package}.}
 }
 \value{
 filtered myClim object
@@ -34,25 +38,30 @@ filtered myClim object
 This function filter data by localities, logger types and sensors.
 }
 \details{
-In default settings it returns the object containing input localities / logger types / sensors.
+In default settings it returns the object containing input localities / loggers / logger types / sensors.
 When you provide vector of localities e.g. \code{localities=c("A6W79", "A2E32")}
 selected localities are filtered with all loggers / sensors on those localities.
+When you provide vector of loggers e.g. \code{loggers=c("TMS_1", "TMS_2")}
+selected loggers are filtered through all localities.
 The same as When you provide vector of logger_types \code{logger_types=c("TMS", "TMS_L45")}
-selected loggers by type are filtered through all localities
-(logger_types criterion is applicable only for raw data format see \link{myClim-package}) and
+selected loggers by type are filtered through all localities.
+(loggers or logger_types criterion is applicable only for raw data format see \link{myClim-package}) and
 the sensors parameter \code{sensors=c("TMS_T1", "TMS_T2")},
 selected sensors are filtered through all localities.
 When you combine localities, logger_types and sensors, then filtering return
 selected sensors in selected loggers on selected localities.
 
-Parameter \code{reverse = TRUE} returns myClim object without listed localities, or logger types or sensors.
-Using  \code{reverse = TRUE} is not allowed for combination of localities and logger types and sensors.
-It is allowed to use \code{reverse} only with single filter criterion either locality, logger type or sensor.
+Parameter \code{reverse = TRUE} returns myClim object without listed localities or loggers or logger types or sensors.
+Using  \code{reverse = TRUE} is not allowed for combination of localities and loggers and logger types and sensors.
+It is allowed to use \code{reverse} only with single filter criterion either locality, logger, logger type or sensor.
 \itemize{
-\item \code{reverse = TRUE} and \code{logger_types} are selected then the listed logger types are removed from all localities.
 \item \code{reverse = TRUE} and \code{localities} are selected then the listed localities are removed from myClim object.
+\item \code{reverse = TRUE} and \code{loggers} are selected then the listed loggers are removed from all localities.
+\item \code{reverse = TRUE} and \code{logger_types} are selected then the listed logger types are removed from all localities.
 \item \code{reverse = TRUE} and \code{sensors} are selected then listed sensors are removed from all loggers / localities.
 }
+
+Only one of parameters loggers or logger_types can be used.
 }
 \examples{
 ## keep only "A6W79", "A2E32" localities with all their sensors

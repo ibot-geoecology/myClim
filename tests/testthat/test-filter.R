@@ -85,3 +85,22 @@ test_that("mc_filter logger_types", {
     expect_error(filtered <- mc_filter(cleaned_data, localities="A1E05", logger_types="TMS", reverse = TRUE))
 })
 
+test_that("mc_filter loggers", {
+    cleaned_data <- mc_read_data("../data/TOMST/files_table.csv", silent=T)
+    agg_data <- mc_agg(cleaned_data)
+    expect_error(filtered <- mc_filter(agg_data, loggers="TMS_1"))
+    expect_error(filtered <- mc_filter(cleaned_data, loggers="TMS_1", logger_types="TMS"))
+    filtered <- mc_filter(cleaned_data, loggers="TMS_1")
+    expect_equal(names(filtered$localities), c("A2E32", "A6W79"))
+    filtered <- mc_filter(cleaned_data, loggers="TMS_1", reverse=TRUE)
+    expect_equal(names(filtered$localities), c("A1E05"))
+    filtered <- mc_filter(cleaned_data, sensors="TMS_T1", loggers="TMS_1")
+    expect_equal(length(filtered$localities), 2)
+    expect_equal(names(filtered$localities$A2E32$loggers[[1]]$sensors), "TMS_T1")
+    expect_error(filtered <- mc_filter(cleaned_data, sensors="TMS_T1", loggers="Thermo_1", reverse = TRUE))
+    expect_error(filtered <- mc_filter(cleaned_data, localities="A1E05", loggers="TMS_1"))
+    expect_error(filtered <- mc_filter(cleaned_data, localities="A1E05", loggers="TMS_1", reverse = TRUE))
+    filtered <- mc_filter(cleaned_data, localities="A2E32", loggers="TMS_1")
+    expect_equal(length(filtered$localities), 1)
+})
+
