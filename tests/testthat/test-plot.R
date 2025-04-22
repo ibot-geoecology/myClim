@@ -98,6 +98,8 @@ test_that("mc_plot_line tags", {
     p <- mc_plot_line(states_data, localities="A2E32", tag="error")
     p <- mc_plot_line(states_data, localities="A2E32", tag="error", facet="physical")
     p <- mc_plot_line(states_data, localities="A2E32", tag="error", facet=NULL)
+    offsoil_data <- mc_prep_TMSoffsoil(states_data)
+    p <- mc_plot_line(offsoil_data, localities="A2E32", tag="error", facet="physical")
     agg_data <- mc_agg(states_data, fun = "mean", period = "1 hour")
     p <- mc_plot_line(agg_data, localities="A2E32", tag="error")
     expect_true(TRUE)
