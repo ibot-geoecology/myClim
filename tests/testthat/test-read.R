@@ -311,3 +311,14 @@ test_that("mc_read_files HOBO logger_format", {
     expect_equal(names(data$localities$A$loggers[["HOBO_U23-001A_1"]]$sensors), c("HOBO_T", "HOBO_RH"))
     expect_equal(names(data$localities$A$loggers[["HOBO_U23-004_1"]]$sensors), c("HOBO_T", "HOBO_extT"))
 })
+
+test_that("mc_read_files joined TOMST logger type", {
+    data <- mc_read_files("../data/joined_TOMST/problems/202310_94218703.csv", "TOMST_join", silent=TRUE)
+    expect_equal(data$localities$`202310_94218703`$loggers[["Thermo_1"]]$metadata@type, "Thermo")
+    expect_equal(names(data$localities$`202310_94218703`$loggers[["Thermo_1"]]$sensors), "Thermo_T")
+    data <- mc_read_files("../data/joined_TOMST/problems/202310_94218703.csv", "TOMST_join",
+                          logger_type="TMS_L45", silent=TRUE)
+    expect_equal(data$localities$`202310_94218703`$loggers[["TMS_L45_1"]]$metadata@type, "TMS_L45")
+    expect_equal(names(data$localities$`202310_94218703`$loggers[["TMS_L45_1"]]$sensors),
+                 c("TMS_T1_L45", "TMS_T2_L45", "TMS_T3_L45", "TMS_moist_L45", "VWC"))
+})

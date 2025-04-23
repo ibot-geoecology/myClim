@@ -870,22 +870,30 @@ setMethod(
     tmsj_columns <- list(5, 6, 7, 8, 9)
     names(tmsj_columns) <- c(mc_const_SENSOR_TMS_T1, mc_const_SENSOR_TMS_T2, mc_const_SENSOR_TMS_T3,
                             mc_const_SENSOR_TMS_moist, mc_const_SENSOR_VWC)
+    if(!is.na(object@logger_type)) {
+        if(object@logger_type == .model_const_LOGGER_TOMST_THERMODATALOGGER) {
+            object@columns <- thermoj_columns
+        } else {
+            object <- .model_set_tomst_join_tms_columns(object, data, tmsj_columns)
+        }
+        return(object)
+    }
     is_T1_NA <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]]))
     is_NA_T2_T3 <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]])) &&
         all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
     is_T1_T2_T3_equals <- (all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]]) &&
         all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
-    if((!is.na(object@logger_type) && object@logger_type == .model_const_LOGGER_TOMST_THERMODATALOGGER) ||
-        (!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals))) {
+    if((!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals))) {
         object@columns <- thermoj_columns
-        if(is.na(object@logger_type)) {
-            object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
-        }
+        object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
         return(object)
     }
-    if(is.na(object@logger_type)) {
-        object@logger_type <- .model_const_LOGGER_TOMST_TMS
-    }
+    object@logger_type <- .model_const_LOGGER_TOMST_TMS
+    object <- .model_set_tomst_join_tms_columns(object, data, tmsj_columns)
+    return(object)
+}
+
+.model_set_tomst_join_tms_columns <- function(object, data, tmsj_columns) {
     moisture <- data[[tmsj_columns[[mc_const_SENSOR_VWC]]]]
     if(!any(is.na(moisture)) && all(moisture == 0)) {
         object@columns <- tmsj_columns[names(tmsj_columns) != mc_const_SENSOR_VWC]
@@ -893,7 +901,7 @@ setMethod(
     }
     object@col_types <- "icccdddid"
     object@columns <- tmsj_columns
-    object
+    return(object)
 }
 
 setMethod(
