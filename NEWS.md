@@ -4,6 +4,7 @@
 * The new function `mc_prep_delete` has been added.
 * The `loggers` parameter has been added to the `mc_filter` function.
 * The sensor without states in the `mc_plot_line` function has been fixed.
+* The missing states in mc_states_join have been fixed.
 
 # myClim 1.4.1
 * The calculated sensor in `mc_states_join` issue has been fixed.

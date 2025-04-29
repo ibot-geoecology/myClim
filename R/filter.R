@@ -35,14 +35,13 @@
 #'
 #' @template param_myClim_object
 #' @param localities locality_ids for filtering data; if NULL then do nothing (default NULL)
-#' @param sensors sensor_names for filtering data; if NULL then do nothing see `names(mc_data_sensors)` (default NULL)
-#' @param reverse if TRUE then input localities and/or sensors are excluded (default FALSE)
-#' @param stop_if_empty if TRUE then error for empty output (default TRUE)
 #' @param logger_types types of logger for filtering data; if NULL then do nothing (default NULL).
 #' The logger_types parameter can by used only for raw data format see [myClim-package].
 #' @param loggers logger_names for filtering data; if NULL then do nothing (default NULL).
 #' The loggers parameter can by used only for raw data format see [myClim-package].
-#'
+#' @param sensors sensor_names for filtering data; if NULL then do nothing see `names(mc_data_sensors)` (default NULL)
+#' @param reverse if TRUE then input localities and/or sensors are excluded (default FALSE)
+#' @param stop_if_empty if TRUE then error for empty output (default TRUE)
 #' @return filtered myClim object
 #' @export
 #' @examples
@@ -64,8 +63,8 @@
 #' ## Remove "Dendro" loggers on all localities
 #' filtered_data <- mc_filter(mc_data_example_raw, logger_types="Dendro", reverse=TRUE)
 
-mc_filter <- function(data, localities=NULL, sensors=NULL, reverse=FALSE, stop_if_empty=TRUE,
-                      logger_types=NULL, loggers=NULL) {
+mc_filter <- function(data, localities=NULL, logger_types=NULL, loggers=NULL,
+                      sensors=NULL, reverse=FALSE, stop_if_empty=TRUE) {
     is_agg_format <- .common_is_agg_format(data)
     if(is_agg_format && !is.null(logger_types)){
         stop(.filter_const_MESSAGE_LOGGER_TYPE_AGG)

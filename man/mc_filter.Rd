@@ -7,11 +7,11 @@
 mc_filter(
   data,
   localities = NULL,
+  logger_types = NULL,
+  loggers = NULL,
   sensors = NULL,
   reverse = FALSE,
-  stop_if_empty = TRUE,
-  logger_types = NULL,
-  loggers = NULL
+  stop_if_empty = TRUE
 )
 }
 \arguments{
@@ -19,17 +19,17 @@ mc_filter(
 
 \item{localities}{locality_ids for filtering data; if NULL then do nothing (default NULL)}
 
-\item{sensors}{sensor_names for filtering data; if NULL then do nothing see \code{names(mc_data_sensors)} (default NULL)}
-
-\item{reverse}{if TRUE then input localities and/or sensors are excluded (default FALSE)}
-
-\item{stop_if_empty}{if TRUE then error for empty output (default TRUE)}
-
 \item{logger_types}{types of logger for filtering data; if NULL then do nothing (default NULL).
 The logger_types parameter can by used only for raw data format see \link{myClim-package}.}
 
 \item{loggers}{logger_names for filtering data; if NULL then do nothing (default NULL).
 The loggers parameter can by used only for raw data format see \link{myClim-package}.}
+
+\item{sensors}{sensor_names for filtering data; if NULL then do nothing see \code{names(mc_data_sensors)} (default NULL)}
+
+\item{reverse}{if TRUE then input localities and/or sensors are excluded (default FALSE)}
+
+\item{stop_if_empty}{if TRUE then error for empty output (default TRUE)}
 }
 \value{
 filtered myClim object

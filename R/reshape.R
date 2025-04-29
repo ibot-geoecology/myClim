@@ -31,7 +31,7 @@
 #' example_tms_wideformat <- mc_reshape_wide(mc_data_example_clean, c("A6W79", "A2E32"),
 #'                                           c("TMS_T1", "TMS_T2"))
 mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE, show_logger_name=FALSE) {
-    data <- mc_filter(data, localities, sensors)
+    data <- mc_filter(data, localities=localities, sensors=sensors)
     if(.common_is_agg_format(data)) {
         use_utc <- .common_check_agg_use_utc(use_utc, data$metadata@period)
     }
@@ -137,7 +137,7 @@ mc_reshape_wide <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE, s
 #' @examples
 #' head(mc_reshape_long(mc_data_example_clean, c("A6W79", "A2E32"), c("TMS_T1", "TMS_T2")), 10)
 mc_reshape_long <- function(data, localities=NULL, sensors=NULL, use_utc=TRUE) {
-    data <- mc_filter(data, localities, sensors)
+    data <- mc_filter(data, localities=localities, sensors=sensors)
     is_raw_format <- .common_is_raw_format(data)
     period <- NULL
     if (!is_raw_format && !(data$metadata@period %in% .agg_const_INTERVAL_PERIODS)) {
