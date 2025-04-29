@@ -440,7 +440,7 @@ test_that("mc_states_join no states", {
 
 test_that("mc_states_join suffix", {
     data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
-    states_data <- mc_states_join(data, age_suffix = TRUE)
+    states_data <- mc_states_join(data, older_newer_suffix = TRUE)
     older_states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict_older")
     newer_states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict_newer")
     expect_equal(nrow(older_states_table), 5)

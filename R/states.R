@@ -887,10 +887,10 @@ mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_
 #' @param tag The tag name (default "join_conflict").
 #' @param by_type for [mc_join] function (default TRUE)
 #' @param tolerance for [mc_join] function (default NULL)
-#' @param age_suffix if true, the suffix `_older`/`_newer` is added to the tag name (default FALSE)
+#' @param older_newer_suffix if true, the suffix `_older`/`_newer` is added to the tag name (default FALSE)
 #' @return Returns a myClim object with added states.
 #' @export
-mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NULL, age_suffix=FALSE) {
+mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NULL, older_newer_suffix=FALSE) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
     states_env <- new.env()
@@ -898,7 +898,7 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
                                   tag=character(), start=as.POSIXct(character()), end=as.POSIXct(character()), value=character())
     states_env$tag <- tag
     states_env$tolerance <- tolerance
-    states_env$age_suffix <- age_suffix
+    states_env$older_newer_suffix <- older_newer_suffix
     join_bar <- progress::progress_bar$new(format = "join states [:bar] :current/:total localities",
                                            total=length(data$localities))
     join_bar$tick(0)
@@ -944,7 +944,7 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
     sensor_names_table <- .join_get_sensor_names_table(logger1, logger2, states_env$tolerance)
     data_table <- .join_get_loggers_data_table(sensor_names_table, logger1, logger2)
     tag_value <- states_env$tag
-    if(states_env$age_suffix) {
+    if(states_env$older_newer_suffix) {
         logger1_last_datetime <- dplyr::last(logger1$datetime)
         logger2_last_datetime <- dplyr::last(logger2$datetime)
         logger1_first_datetime <- dplyr::first(logger1$datetime)

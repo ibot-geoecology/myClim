@@ -5,7 +5,7 @@
 * The `loggers` parameter has been added to the `mc_filter` function.
 * The sensor without states in the `mc_plot_line` function has been fixed.
 * The missing states in mc_states_join have been fixed.
-* The new parameter `age_suffix` has been added to the `mc_states_join` function.
+* The new parameter `older_newer_suffix` has been added to the `mc_states_join` function.
 
 # myClim 1.4.1
 * The calculated sensor in `mc_states_join` issue has been fixed.

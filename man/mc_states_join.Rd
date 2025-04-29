@@ -9,7 +9,7 @@ mc_states_join(
   tag = "join_conflict",
   by_type = TRUE,
   tolerance = NULL,
-  age_suffix = FALSE
+  older_newer_suffix = FALSE
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ mc_states_join(
 
 \item{tolerance}{for \link{mc_join} function (default NULL)}
 
-\item{age_suffix}{if true, the suffix \verb{_older}/\verb{_newer} is added to the tag name (default FALSE)}
+\item{older_newer_suffix}{if true, the suffix \verb{_older}/\verb{_newer} is added to the tag name (default FALSE)}
 }
 \value{
 Returns a myClim object with added states.
