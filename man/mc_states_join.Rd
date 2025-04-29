@@ -4,7 +4,13 @@
 \alias{mc_states_join}
 \title{Create states for join conflicts}
 \usage{
-mc_states_join(data, tag = "join_conflict", by_type = TRUE, tolerance = NULL)
+mc_states_join(
+  data,
+  tag = "join_conflict",
+  by_type = TRUE,
+  tolerance = NULL,
+  age_suffix = FALSE
+)
 }
 \arguments{
 \item{data}{myClim object in Raw-format. see \link{myClim-package}}
@@ -14,6 +20,8 @@ mc_states_join(data, tag = "join_conflict", by_type = TRUE, tolerance = NULL)
 \item{by_type}{for \link{mc_join} function (default TRUE)}
 
 \item{tolerance}{for \link{mc_join} function (default NULL)}
+
+\item{age_suffix}{if true, the suffix \verb{_older}/\verb{_newer} is added to the tag name (default FALSE)}
 }
 \value{
 Returns a myClim object with added states.

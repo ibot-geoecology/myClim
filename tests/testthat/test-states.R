@@ -430,7 +430,6 @@ test_that("mc_states_join", {
     expect_equal(nrow(states_table), 2)
 })
 
-
 test_that("mc_states_join no states", {
     data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
     data <- mc_calc_vwc(data)
@@ -438,3 +437,13 @@ test_that("mc_states_join no states", {
     states_table <- mc_info_states(states_data) |> dplyr::filter(tag == "join_conflict")
     expect_equal(nrow(states_table), 14)
 })
+
+test_that("mc_states_join suffix", {
+    data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
+    states_data <- mc_states_join(data, age_suffix = TRUE)
+    older_states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict_older")
+    newer_states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict_newer")
+    expect_equal(nrow(older_states_table), 5)
+    expect_equal(nrow(newer_states_table), 5)
+})
+
