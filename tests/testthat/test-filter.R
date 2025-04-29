@@ -102,5 +102,13 @@ test_that("mc_filter loggers", {
     expect_error(filtered <- mc_filter(cleaned_data, localities="A1E05", loggers="TMS_1", reverse = TRUE))
     filtered <- mc_filter(cleaned_data, localities="A2E32", loggers="TMS_1")
     expect_equal(length(filtered$localities), 1)
+    files_table <- read.csv("../data/TOMST/files_table.csv")
+    files_table$locality_id[[1]] <- "A2E32"
+    files_table$path <- stringr::str_c("../data/TOMST/", files_table$path)
+    cleaned_data <- mc_read_data(files_table, silent=T)
+    filtered <- mc_filter(cleaned_data, localities="A2E32", loggers="TMS_2")
+    expect_equal(names(filtered$localities$A2E32$loggers), "TMS_2")
+    filtered <- mc_filter(cleaned_data, loggers="TMS_1", reverse=TRUE)
+    expect_equal(names(filtered$localities$A2E32$loggers), "TMS_2")
 })
 
