@@ -15,6 +15,8 @@ test_that("all plots", {
     logger <- data$localities$`94184102`$loggers[["TMS_1"]]
     plot_data <- data
     plot_data$localities$`94184102`$loggers <- list(logger, logger)
+    names(plot_data$localities$`94184102`$loggers) <- c("TMS_1", "TMS_2")
+    plot_data$localities$`94184102`$loggers[["TMS_2"]]$metadata@name <- "TMS_2"
     data_agg <- mc_agg(data)
     tmp_dir <- tempdir()
     plot_dir <- file.path(tmp_dir, "plot")
