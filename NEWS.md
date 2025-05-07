@@ -7,6 +7,7 @@
 * The missing states in mc_states_join have been fixed.
 * The new parameter `older_newer_suffix` has been added to the `mc_states_join` function.
 * The multiple parameters can be combined in the `mc_filter` function, if `reverse` is `TRUE`.
+* The unexistent tag issue in the `mc_states_replace` function has been fixed.
 
 # myClim 1.4.1
 * The calculated sensor in `mc_states_join` issue has been fixed.

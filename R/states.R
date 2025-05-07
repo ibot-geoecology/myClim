@@ -446,6 +446,9 @@ mc_states_replace <- function(data, tags, replace_value=NA, crop_margins_NA=FALS
     
     states_table <- mc_info_states(data)
     states_table <- dplyr::filter(states_table, .data$tag %in% tags)
+    if(nrow(states_table) == 0) {
+        return(data)
+    }
     states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_name, .data$sensor_name)
     
     result <- new.env()
