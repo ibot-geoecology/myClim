@@ -431,12 +431,14 @@ setMethod("initialize",
 #' @slot step time step of microclimatic time-seris in seconds.
 #' When provided by user, is used in [mc_prep_clean()] function instead of
 #' automatic step detection
+#' @slot raw_index index of values in uncleaned data, used for data checking. This value is deleted during cleaning process.
 #' @exportClass mc_LoggerMetadata
 mc_LoggerMetadata <- setClass("mc_LoggerMetadata",
                               slots = c(type = "character",
                                         name = "character",
                                         serial_number = "character",
-                                        step = "numeric"),
+                                        step = "numeric",
+                                        raw_index = "numeric"),
                               contains = "mc_Serializable")
 
 setMethod("initialize",
@@ -653,6 +655,7 @@ setMethod(
 #' If the value of the tz_offset parameter is 0, then datetime values are in UTC.
 #' If the time zone offset is defined in the value, e.g., `"2020-10-06 09:00:00+0100"`,
 #' and `date_format` is `"%Y-%m-%d %H:%M:%S%z"`, the value is automatically converted to UTC.
+#' @slot index_column The index of column, where is index (order) of values used for data checking (default NA).
 #' @exportClass mc_DataFormat
 #' @seealso [mc_data_formats], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
 mc_DataFormat <- setClass("mc_DataFormat",
@@ -667,7 +670,8 @@ mc_DataFormat <- setClass("mc_DataFormat",
                                     filename_serial_number_pattern = "character",
                                     data_row_pattern = "character",
                                     logger_type = "character",
-                                    tz_offset = "numeric"))
+                                    tz_offset = "numeric",
+                                    index_column = "numeric"))
 
 setMethod("initialize",
           "mc_DataFormat",
@@ -684,6 +688,7 @@ setMethod("initialize",
               .Object@data_row_pattern <- NA_character_
               .Object@logger_type <- NA_character_
               .Object@tz_offset <- NA_integer_
+              .Object@index_column <- NA_integer_
               return(.Object)
           })
 
@@ -865,22 +870,30 @@ setMethod(
     tmsj_columns <- list(5, 6, 7, 8, 9)
     names(tmsj_columns) <- c(mc_const_SENSOR_TMS_T1, mc_const_SENSOR_TMS_T2, mc_const_SENSOR_TMS_T3,
                             mc_const_SENSOR_TMS_moist, mc_const_SENSOR_VWC)
+    if(!is.na(object@logger_type)) {
+        if(object@logger_type == .model_const_LOGGER_TOMST_THERMODATALOGGER) {
+            object@columns <- thermoj_columns
+        } else {
+            object <- .model_set_tomst_join_tms_columns(object, data, tmsj_columns)
+        }
+        return(object)
+    }
     is_T1_NA <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]]))
     is_NA_T2_T3 <- all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]])) &&
         all(is.na(data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
     is_T1_T2_T3_equals <- (all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T2]]]]) &&
         all(data[[tmsj_columns[[mc_const_SENSOR_TMS_T1]]]] == data[[tmsj_columns[[mc_const_SENSOR_TMS_T3]]]]))
-    if((!is.na(object@logger_type) && object@logger_type == .model_const_LOGGER_TOMST_THERMODATALOGGER) ||
-        (!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals))) {
+    if((!is_T1_NA && (is_NA_T2_T3 || is_T1_T2_T3_equals))) {
         object@columns <- thermoj_columns
-        if(is.na(object@logger_type)) {
-            object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
-        }
+        object@logger_type <- .model_const_LOGGER_TOMST_THERMODATALOGGER
         return(object)
     }
-    if(is.na(object@logger_type)) {
-        object@logger_type <- .model_const_LOGGER_TOMST_TMS
-    }
+    object@logger_type <- .model_const_LOGGER_TOMST_TMS
+    object <- .model_set_tomst_join_tms_columns(object, data, tmsj_columns)
+    return(object)
+}
+
+.model_set_tomst_join_tms_columns <- function(object, data, tmsj_columns) {
     moisture <- data[[tmsj_columns[[mc_const_SENSOR_VWC]]]]
     if(!any(is.na(moisture)) && all(moisture == 0)) {
         object@columns <- tmsj_columns[names(tmsj_columns) != mc_const_SENSOR_VWC]
@@ -888,7 +901,7 @@ setMethod(
     }
     object@col_types <- "icccdddid"
     object@columns <- tmsj_columns
-    object
+    return(object)
 }
 
 setMethod(

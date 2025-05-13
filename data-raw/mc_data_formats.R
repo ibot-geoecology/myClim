@@ -14,6 +14,7 @@ mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@filename_serial_number_pattern
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@data_row_pattern <- "^\\d+;[\\d.: -/]+;\\d+;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+[.,]?\\d*;-?\\d+;\\d+;\\d+.*$"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@col_types <- "iciccciin"
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@tz_offset <- 0
+mc_data_formats[[.model_const_DATA_FORMAT_TOMST]]@index_column <- 1
 
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]] <- new("mc_TOMSTJoinDataFormat")
 mc_data_formats[[.model_const_DATA_FORMAT_TOMST_join]]@skip <- 0

@@ -93,6 +93,7 @@ $localities | locality[1]                                                       
             |           |             | @name                     |                        ||
             |           |             | @serial_number            |                        ||
             |           |             | @step                     |                        ||
+            |           |             | @raw_index                |                        ||
             |           |             +---------------------------+                        ||
             |           |             +----------------------------+                       ||
             |           | $clean_info | mc_LoggerCleanInfo - class |                       ||

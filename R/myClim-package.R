@@ -89,6 +89,7 @@ if(getRversion() >= "2.15.1")  globalVariables(c(".data"))
 #'             |           |             | @name                     |                        ||
 #'             |           |             | @serial_number            |                        ||
 #'             |           |             | @step                     |                        ||
+#'             |           |             | @raw_index                |                        ||
 #'             |           |             +---------------------------+                        ||
 #'             |           |             +----------------------------+                       ||
 #'             |           | $clean_info | mc_LoggerCleanInfo - class |                       ||

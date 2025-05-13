@@ -39,7 +39,7 @@ mc_plot_loggers <- function(data, directory, localities=NULL, sensors=NULL, crop
     oldpar <- par(no.readonly = TRUE)
     on.exit(suppressWarnings(par(oldpar)))
     .common_stop_if_not_raw_format(data)
-    data <- mc_filter(data, localities, sensors)
+    data <- mc_filter(data, localities=localities, sensors=sensors)
     .prep_check_datetime_step_unprocessed(data)
     loggers <- .common_get_loggers(data)
     dir.create(directory, showWarnings = F)
@@ -594,7 +594,7 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
         if(physical %in% names(myClim::mc_data_physical)) {
             return(myClim::mc_data_physical[[physical]]@scale_coeff)
         }
-        1
+        return(1)
     }
 
     if((is.null(facet) || facet != .plot_const_FACET_PHYSICAL) && is.null(scale_coeff) && nrow(physical_table) > 1) {
@@ -693,6 +693,9 @@ mc_plot_line <- function(data, filename=NULL, sensors=NULL,
     is_agg <- .common_is_agg_format(data)
     
     sensor_function <- function(locality_id, logger_name, sensor) {
+        if(nrow(sensor$states) == 0) {
+            return(tibble::tibble())
+        }
         result <- dplyr::filter(sensor$states, .data$tag == state_tag)
         result <- dplyr::mutate(result, locality_id=locality_id, logger_name=logger_name, sensor_name=sensor$metadata@name)
         return(result)

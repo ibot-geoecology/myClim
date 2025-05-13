@@ -1,3 +1,14 @@
+# myClim 1.4.2
+* Only one logger can be used for uncleaned data in the `mc_reshape_wide` function.
+* The raw indexes are loaded from TOMST files to logger metadata.
+* The new function `mc_prep_delete` has been added.
+* The `loggers` parameter has been added to the `mc_filter` function.
+* The sensor without states in the `mc_plot_line` function has been fixed.
+* The missing states in mc_states_join have been fixed.
+* The new parameter `older_newer_suffix` has been added to the `mc_states_join` function.
+* The multiple parameters can be combined in the `mc_filter` function, if `reverse` is `TRUE`.
+* The unexistent tag issue in the `mc_states_replace` function has been fixed.
+
 # myClim 1.4.1
 * The calculated sensor in `mc_states_join` issue has been fixed.
 

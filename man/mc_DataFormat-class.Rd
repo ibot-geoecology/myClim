@@ -70,6 +70,8 @@ The regular expression. If data_row_pattern is NA, then the file format is not c
 If the value of the tz_offset parameter is 0, then datetime values are in UTC.
 If the time zone offset is defined in the value, e.g., \code{"2020-10-06 09:00:00+0100"},
 and \code{date_format} is \code{"\%Y-\%m-\%d \%H:\%M:\%S\%z"}, the value is automatically converted to UTC.}
+
+\item{\code{index_column}}{The index of column, where is index (order) of values used for data checking (default NA).}
 }}
 
 \seealso{

@@ -18,6 +18,8 @@
 .states_const_COLUMN_START <- "start"
 .states_const_COLUMN_END <- "end"
 .states_const_COLUMN_VALUE <- "value"
+.states_const_OLDER_SUFFIX <- "_older"
+.states_const_NEWER_SUFFIX <- "_newer"
 
 .states_const_COLUMN_MIN_VALUE <- "min_value"
 .states_const_COLUMN_MAX_VALUE <- "max_value"
@@ -444,6 +446,9 @@ mc_states_replace <- function(data, tags, replace_value=NA, crop_margins_NA=FALS
     
     states_table <- mc_info_states(data)
     states_table <- dplyr::filter(states_table, .data$tag %in% tags)
+    if(nrow(states_table) == 0) {
+        return(data)
+    }
     states_table <- dplyr::group_by(states_table, .data$locality_id, .data$logger_name, .data$sensor_name)
     
     result <- new.env()
@@ -879,15 +884,19 @@ mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_
 #' all values that are in conflict in joining process.
 #' 
 #' @details
-#' For more info see details of [mc_join] function. 
+#' For more info see details of [mc_join] function.
+#' Parameter `older_newer_suffix` can be used for easier filtering of tags,
+#' to distinguish whether certain state on overlapping time series is connected
+#' to older or newer record. It can help to decide which value keep and which remove. 
 #'  
 #' @template param_myClim_object_raw
 #' @param tag The tag name (default "join_conflict").
 #' @param by_type for [mc_join] function (default TRUE)
 #' @param tolerance for [mc_join] function (default NULL)
+#' @param older_newer_suffix if true, the suffix `_older`/`_newer` is added to the tag name (default FALSE)
 #' @return Returns a myClim object with added states.
 #' @export
-mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NULL) {
+mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NULL, older_newer_suffix=FALSE) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
     states_env <- new.env()
@@ -895,6 +904,7 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
                                   tag=character(), start=as.POSIXct(character()), end=as.POSIXct(character()), value=character())
     states_env$tag <- tag
     states_env$tolerance <- tolerance
+    states_env$older_newer_suffix <- older_newer_suffix
     join_bar <- progress::progress_bar$new(format = "join states [:bar] :current/:total localities",
                                            total=length(data$localities))
     join_bar$tick(0)
@@ -939,6 +949,22 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
 .states_join_compare_loggers <- function(states_env, logger1, logger2){
     sensor_names_table <- .join_get_sensor_names_table(logger1, logger2, states_env$tolerance)
     data_table <- .join_get_loggers_data_table(sensor_names_table, logger1, logger2)
+    tag_value <- states_env$tag
+    if(states_env$older_newer_suffix) {
+        logger1_last_datetime <- dplyr::last(logger1$datetime)
+        logger2_last_datetime <- dplyr::last(logger2$datetime)
+        logger1_first_datetime <- dplyr::first(logger1$datetime)
+        logger2_first_datetime <- dplyr::first(logger2$datetime)
+        if(logger1_last_datetime < logger2_last_datetime) {
+            tag_value <- paste0(tag_value, .states_const_OLDER_SUFFIX)
+        } else if (logger1_last_datetime > logger2_last_datetime) {
+            tag_value <- paste0(tag_value, .states_const_NEWER_SUFFIX)
+        } else if (logger1_first_datetime < logger2_first_datetime) {
+            tag_value <- paste0(tag_value, .states_const_OLDER_SUFFIX)
+        } else if (logger1_first_datetime > logger2_first_datetime) {
+            tag_value <- paste0(tag_value, .states_const_NEWER_SUFFIX)
+        }
+    }
     sensor_function <- function(sensor_name) {
         columns <- .join_get_compare_columns(sensor_names_table, sensor_name)
         data_table <- .join_add_select_columns(data_table, columns)
@@ -950,8 +976,8 @@ mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NU
         } else {
             value <- logger2$metadata@name
         }
-        new_states_table <- .states_get_states_table_from_logical_values(data_table$conflict, data_table$datetime, states_env$tag, value=value)
-        current_states_table <- logger1$sensors[[sensor_name]]$states
+        new_states_table <- .states_get_states_table_from_logical_values(data_table$conflict, data_table$datetime, tag_value, value=value)
+        current_states_table <- states_env$locality$loggers[[logger1$metadata@name]]$sensors[[sensor_name]]$states
         if(nrow(current_states_table) == 0) {
             union_states_table <- new_states_table
         } else {

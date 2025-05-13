@@ -15,6 +15,8 @@ test_that("all plots", {
     logger <- data$localities$`94184102`$loggers[["TMS_1"]]
     plot_data <- data
     plot_data$localities$`94184102`$loggers <- list(logger, logger)
+    names(plot_data$localities$`94184102`$loggers) <- c("TMS_1", "TMS_2")
+    plot_data$localities$`94184102`$loggers[["TMS_2"]]$metadata@name <- "TMS_2"
     data_agg <- mc_agg(data)
     tmp_dir <- tempdir()
     plot_dir <- file.path(tmp_dir, "plot")
@@ -98,6 +100,8 @@ test_that("mc_plot_line tags", {
     p <- mc_plot_line(states_data, localities="A2E32", tag="error")
     p <- mc_plot_line(states_data, localities="A2E32", tag="error", facet="physical")
     p <- mc_plot_line(states_data, localities="A2E32", tag="error", facet=NULL)
+    offsoil_data <- mc_prep_TMSoffsoil(states_data)
+    p <- mc_plot_line(offsoil_data, localities="A2E32", tag="error", facet="physical")
     agg_data <- mc_agg(states_data, fun = "mean", period = "1 hour")
     p <- mc_plot_line(agg_data, localities="A2E32", tag="error")
     expect_true(TRUE)

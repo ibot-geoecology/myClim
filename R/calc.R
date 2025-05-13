@@ -172,7 +172,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #'                      localities = c("A2E32", "A6W79"))
 #' mc_calc_snow_agg(data, "TMS_T2_snow")
 mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3, use_utc=FALSE) {
-    data <- mc_filter(data, localities, sensors=snow_sensor, stop_if_empty=FALSE)
+    data <- mc_filter(data, localities=localities, sensors=snow_sensor, stop_if_empty=FALSE)
     is_agg <- .common_is_agg_format(data)
     if((is_agg && length(data$localities) == 0) || (!is_agg && length(data) == 0)) {
         stop(.calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES)

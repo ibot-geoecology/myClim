@@ -464,7 +464,11 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     }
     states <- .read_create_source_states(filename, datetime)
     sensors <- .read_get_sensors_from_data_format(data_table, data_format, datetime, states)
-    result <- .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step)
+    raw_index <- NULL
+    if(!is.na(data_format@index_column)) {
+        raw_index <- data_table[[data_format@index_column]]
+    }
+    result <- .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step, raw_index)
     if(!is.null(.read_state$read_bar)) .read_state$read_bar$tick()
     return(result)
 }
@@ -509,11 +513,17 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     result
 }
 
-.read_get_new_logger <- function(datetime, sensors, serial_number=NA_character_, logger_type=NA_character_, step=NA_integer_) {
+.read_get_new_logger <- function(datetime, sensors, serial_number=NA_character_,
+                                 logger_type=NA_character_, step=NA_integer_, raw_index=NULL) {
     metadata <- new("mc_LoggerMetadata")
     metadata@serial_number <- serial_number
     metadata@type <- logger_type
     metadata@step <- step
+    if(is.null(raw_index)) {
+        metadata@raw_index <- seq_along(datetime)
+    } else {
+        metadata@raw_index <- raw_index
+    }
     list(metadata = metadata,
          clean_info = new("mc_LoggerCleanInfo"),
          datetime = datetime,
