@@ -15,16 +15,20 @@ mc_prep_delete(data, index_table)
 raw myClim data with deleted values.
 }
 \description{
-This function delete values in uncleaned raw myClim object by index.
+This function is used to delete values in uncleaned raw myClim object by index.
 }
 \details{
-Uncleaned logger contains raw indexes in metadata@raw_index. This function
-delete values by index_table parameter. This table contains 3 columns:
+Uncleaned logger contains raw indexes in metadata \verb{@raw_index}. This function
+delete values by index_table parameter. This table (data.frame) contains 3 columns:
 \itemize{
 \item locality_id = id of locality
 \item logger_name = name of logger
 \item raw_index = index of the value to be deleted
 }
+
+This function is used for data checking and validating. Especially in cases
+when there are duplicated values for identical time step. This allows you
+to manually (visually) select values to be deleted and delete them by table.
 }
 \examples{
 index_table <- data.frame(locality_id = c("A1E05", "A1E05"),

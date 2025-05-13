@@ -884,7 +884,10 @@ mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_
 #' all values that are in conflict in joining process.
 #' 
 #' @details
-#' For more info see details of [mc_join] function. 
+#' For more info see details of [mc_join] function.
+#' Parameter `older_newer_suffix` can be used for easier filtering of tags,
+#' to distinguish whether certain state on overlapping time series is connected
+#' to older or newer record. It can help to decide which value keep and which remove. 
 #'  
 #' @template param_myClim_object_raw
 #' @param tag The tag name (default "join_conflict").

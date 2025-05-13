@@ -1,18 +1,19 @@
 .reshape_const_MESSAGE_UNCLEANED <- "Logger {serial_number} isn't cleaned. I can't detect the last time_to."
-.reshape_const_MESSAGE_WIDE_UNCLEANED <- "Only one logger can be reshaped in uncleaned data."
+.reshape_const_MESSAGE_WIDE_UNCLEANED <- "Only one logger per locality can be reshaped in uncleaned data."
 
 #' Export values to wide table
 #'
 #' This function converts myClim object to the R data.frame with values of sensor in wide format.
 #'
 #' @details First column of the output data.frame is datetime followed by the
-#' columns for every sensor. For uncleaned data in Raw-format, can be used only for one logger.
+#' columns for every sensor. When reshaping uncleaned data in Raw-format, only one logger
+#' per-locality is allowed to avoid potential confusion of loggers of identical or NA name.
 #' Name of the column is in format:
-#' * localityid_loggerid_serialnumber_sensorname for Raw-format and `show_logger_name=FALSE`
-#' * localityid_loggername_sensorname for Raw-format and `show_logger_name=TRUE`
-#' * localityid_sensorname for Agg-format
+#' * `localityid_loggerid_serialnumber_sensorname` for Raw-format and `show_logger_name=FALSE`
+#' * `localityid_loggername_sensorname`for Raw-format and `show_logger_name=TRUE`
+#' * `localityid_sensorname` for Agg-format
 #' 
-#' The less complex wide table is returned when exporting single sensor ascross localities. 
+#' The less complex wide table is returned when exporting single sensor across localities. 
 #'
 #' @template param_myClim_object
 #' @template param_localities
@@ -24,7 +25,7 @@
 #' * locality1_sensor1
 #' * ...
 #' * ...
-#' * localityn_sensorn
+#' * localityN_sensorN
 #' 
 #' @export
 #' @examples

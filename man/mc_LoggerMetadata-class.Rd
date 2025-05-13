@@ -21,6 +21,6 @@ Class for logger metadata
 When provided by user, is used in \code{\link[=mc_prep_clean]{mc_prep_clean()}} function instead of
 automatic step detection}
 
-\item{\code{raw_index}}{indexes of values in uncleaned data. This value is deleted in cleaning process.}
+\item{\code{raw_index}}{index of values in uncleaned data, used for data checking. This value is deleted during cleaning process.}
 }}
 

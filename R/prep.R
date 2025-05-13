@@ -1235,14 +1235,19 @@ mc_prep_TMSoffsoil <- function(data,
 
 #' Delete values by index
 #'
-#' This function delete values in uncleaned raw myClim object by index.
+#' This function is used to delete values in uncleaned raw myClim object by index.
 #'
 #' @details
-#' Uncleaned logger contains raw indexes in metadata@raw_index. This function
-#' delete values by index_table parameter. This table contains 3 columns:
+#' Uncleaned logger contains raw indexes in metadata `@raw_index`. This function
+#' delete values by index_table parameter. This table (data.frame) contains 3 columns:
+#' 
 #'  * locality_id = id of locality
 #'  * logger_name = name of logger
 #'  * raw_index = index of the value to be deleted
+#' 
+#'  This function is used for data checking and validating. Especially in cases 
+#'  when there are duplicated values for identical time step. This allows you 
+#'  to manually (visually) select values to be deleted and delete them by table.   
 #'
 #' @template param_myClim_object_raw
 #' @param index_table data.frame (table); see details
