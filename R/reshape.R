@@ -1,5 +1,5 @@
 .reshape_const_MESSAGE_UNCLEANED <- "Logger {serial_number} isn't cleaned. I can't detect the last time_to."
-.reshape_const_MESSAGE_WIDE_UNCLEANED <- "Only one logger per locality can be reshaped in uncleaned data."
+.reshape_const_MESSAGE_WIDE_UNCLEANED <- "Only one logger per myClim object can be reshaped in uncleaned data."
 
 #' Export values to wide table
 #'
@@ -7,7 +7,8 @@
 #'
 #' @details First column of the output data.frame is datetime followed by the
 #' columns for every sensor. When reshaping uncleaned data in Raw-format, only one logger
-#' per-locality is allowed to avoid potential confusion of loggers of identical or NA name.
+#' per myClim object is allowed to avoid potential confusion in case, there are 
+#' duplicated values, allowed in uncleaned Raw myClim format.
 #' Name of the column is in format:
 #' * `localityid_loggerid_serialnumber_sensorname` for Raw-format and `show_logger_name=FALSE`
 #' * `localityid_loggername_sensorname`for Raw-format and `show_logger_name=TRUE`

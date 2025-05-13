@@ -47,7 +47,8 @@ This function converts myClim object to the R data.frame with values of sensor i
 \details{
 First column of the output data.frame is datetime followed by the
 columns for every sensor. When reshaping uncleaned data in Raw-format, only one logger
-per-locality is allowed to avoid potential confusion of loggers of identical or NA name.
+per myClim object is allowed to avoid potential confusion in case, there are
+duplicated values, allowed in uncleaned Raw myClim format.
 Name of the column is in format:
 \itemize{
 \item \code{localityid_loggerid_serialnumber_sensorname} for Raw-format and \code{show_logger_name=FALSE}
