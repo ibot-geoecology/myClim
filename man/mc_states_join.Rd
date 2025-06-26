@@ -36,4 +36,6 @@ For more info see details of \link{mc_join} function.
 Parameter \code{older_newer_suffix} can be used for easier filtering of tags,
 to distinguish whether certain state on overlapping time series is connected
 to older or newer record. It can help to decide which value keep and which remove.
+The loggers with same start and end datetimes cannot be marked as older/newer.
+Tag is without suffix in this case.
 }
