@@ -349,7 +349,7 @@ test_that("mc_prep_rename_locality wrong", {
     expect_error(data <- mc_prep_rename_locality(data, list(A1E05="A6W79")))
 })
 
-test_that("mc_prep_calib_load, mc_prep_calib", {
+test_that("mc_prep_calib_load, mc_prep_calib, mc_info_calib", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number,          ~sensor_id,                     ~datetime, ~cor_factor,
@@ -384,12 +384,18 @@ test_that("mc_prep_calib_load, mc_prep_calib", {
     expect_equal(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T2$values[[5]], 9.5 * 1.05 + 0.15)
     expect_true(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T3$metadata@calibrated)
     expect_false(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_moist$metadata@calibrated)
+    info_table <- mc_info_calib(calib_data)
+    expect_equal(colnames(info_table), c("locality_id", "logger_name", "sensor_name", "datetime", "cor_factor", "cor_slope"))
+    expect_equal(nrow(info_table), nrow(calib_table))
     agg_data <- mc_agg(param_data)
     calib_data <- mc_prep_calib(agg_data, sensors = "Thermo_T")
     test_agg_data_format(calib_data)
     expect_true(calib_data$localities$A1E05$sensors$Thermo_T$metadata@calibrated)
     expect_equal(calib_data$localities$A1E05$sensors$Thermo_T$values[[1]], 9.875 + 0.1)
     expect_equal(calib_data$localities$A1E05$sensors$Thermo_T$values[[6]], 6.875 * 0.95)
+    info_table <- mc_info_calib(calib_data)
+    expect_equal(colnames(info_table), c("locality_id", "logger_name", "sensor_name", "datetime", "cor_factor", "cor_slope"))
+    expect_equal(nrow(info_table), nrow(calib_table))
 })
 
 test_that("mc_prep_calib_load wrong type", {

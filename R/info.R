@@ -349,3 +349,61 @@ mc_info_range <- function(data) {
 
     as.data.frame(result)
 }
+
+#' Get calibration info table
+#'
+#' This function return data.frame with calibration parameter of sensors loaded by [myClim::mc_prep_calib_load()].
+#'
+#' @template param_myClim_object
+#' @return data.frame with columns:
+#' * locality_id - when provided by user then locality ID, when not provided identical with serial number
+#' * logger_name - name of logger in myClim object at the locality (e.g., "Thermo_1", "TMS_2")
+#' * sensor_name - sensor name either original (e.g., TMS_T1, T_C), or calculated/renamed (e.g., "TMS_T1_max", "my_sensor01")
+#' * datetime - date and time of calibration
+#' * cor_factor - correction factor applied to the sensor values
+#' * cor_slope - the slope of calibration curve
+#' @export
+#' @examples
+#' mc_info_calib(mc_data_example_clean)
+mc_info_calib <- function(data) {
+    is_raw_format <- .common_is_raw_format(data)
+
+    sensor_function <- function(locality_id, logger_name, sensor) {
+        count <- nrow(sensor$calibration)
+        if(count == 0) {
+            return(tibble::tibble())
+        }
+        result <- tibble::tibble(locality_id=rep(locality_id, count),
+                                 logger_name=rep(logger_name, count),
+                                 sensor_name=rep(sensor$metadata@name),
+                                 datetime=sensor$calibration$datetime,
+                                 cor_factor=sensor$calibration$cor_factor,
+                                 cor_slope=sensor$calibration$cor_slope)
+        return(result)
+    }
+
+    sensors_item_function <- function(locality_id, logger_name, item) {
+        count <- length(item$sensors)
+        purrr::pmap_dfr(list(locality_id=rep(locality_id, count),
+                             logger_name=rep(logger_name, count),
+                             sensor=item$sensors),
+                        sensor_function)
+    }
+
+    raw_locality_function <- function(locality) {
+        purrr::pmap_dfr(list(locality_id=locality$metadata@locality_id,
+                             logger_name=names(locality$loggers),
+                             item=locality$loggers),
+                        sensors_item_function)
+    }
+
+    if(is_raw_format) {
+        result <- purrr::map_dfr(data$localities, raw_locality_function)
+    } else {
+        result <- purrr::pmap_dfr(list(locality_id=names(data$localities),
+                                       logger_name=NA_character_,
+                                       item=data$localities),
+                                  sensors_item_function)
+    }
+    as.data.frame(result)
+}

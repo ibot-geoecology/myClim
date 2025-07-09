@@ -1,3 +1,6 @@
+# myClim 1.4.3
+* The new function `mc_info_calib` has been added to provide an overview of the calibration parameters.
+
 # myClim 1.4.2
 * Only one logger can be used for uncleaned data in the `mc_reshape_wide` function.
 * The raw indexes are loaded from TOMST files to logger metadata.
