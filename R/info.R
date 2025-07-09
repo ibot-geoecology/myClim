@@ -82,6 +82,8 @@ mc_info_clean <- function(data) {
 #' * max_value - maximal recorded value
 #' * count_values - number of non NA records
 #' * count_na - number of NA records
+#' * height - height description of sensor
+#' * calibrated - logical value indicating whether the sensor is calibrated
 #' @export
 #' @examples
 #' mc_info(mc_data_example_agg)
@@ -116,7 +118,10 @@ mc_info <- function(data) {
                        min_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, min)),
                        max_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, max)),
                        count_values=purrr::map_int(item$sensors, function(x) length(x$values[!is.na(x$values)])),
-                       count_na=purrr::map_int(item$sensors, function(x) length(x$values[is.na(x$values)])))
+                       count_na=purrr::map_int(item$sensors, function(x) length(x$values[is.na(x$values)])),
+                       height=purrr::map_chr(item$sensors, ~ .x$metadata@height),
+                       calibrated=purrr::map_lgl(item$sensors, ~ .x$metadata@calibrated)
+                       )
     }
 
     prep_locality_function <- function(locality) {

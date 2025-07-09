@@ -1,5 +1,7 @@
 # myClim 1.4.3
 * The new function `mc_info_calib` has been added to provide an overview of the calibration parameters.
+* The output table of the `mc_info` function has been extended with the `height` and `calibrated` columns.
+* The `mc_prep_calib` function skips sensors that are already calibrated.
 
 # myClim 1.4.2
 * Only one logger can be used for uncleaned data in the `mc_reshape_wide` function.

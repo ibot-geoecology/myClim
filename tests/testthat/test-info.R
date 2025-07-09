@@ -18,7 +18,8 @@ test_that("mc_info_clean", {
 test_that("mc_info", {
     data <- mc_read_files("../data/clean-datetime_step", "TOMST", clean=FALSE)
     info_data <- mc_info(data)
-    expect_equal(colnames(info_data), c("locality_id", "serial_number", "sensor_id", "sensor_name", "start_date", "end_date", "step_seconds", "period", "min_value", "max_value", "count_values", "count_na"))
+    expect_equal(colnames(info_data), c("locality_id", "serial_number", "sensor_id", "sensor_name", "start_date", "end_date",
+                                        "step_seconds", "period", "min_value", "max_value", "count_values", "count_na", "height", "calibrated"))
     expect_equal(nrow(info_data), 17)
     expect_warning(cleaned_data <- mc_prep_clean(data, silent=T))
     info_cleaned_data <- mc_info(cleaned_data)

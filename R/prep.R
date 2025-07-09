@@ -946,6 +946,13 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
         .prep_check_datetime_step_unprocessed(data, stop)
     }
 
+    info_env <- new.env()
+    info_env$count_success <- 0
+    info_env$count_calibrated <- 0
+    info_env$count_no_real <- 0
+    info_env$count_no_params <- 0
+    info_env$raw_moisture <- FALSE
+
     sensor_function <- function(sensor, datetime, locality_id) {
         if(is.null(sensors) && sensor$metadata@sensor_id %in% .model_const_WRONG_CALIBRATION_SENSOR_ID) {
             return(sensor)
@@ -954,17 +961,19 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
             return(sensor)
         }
         if(!is.null(sensors) && nrow(sensor$calibration) == 0) {
-            warning(stringr::str_glue("Calibration parameters are missing in sensor {sensor$metadata@name} in {locality_id}."))
+            info_env$count_no_params <- info_env$count_no_params + 1
             return(sensor)
         }
         if(.model_is_physical_moisture_raw(sensor$metadata)) {
-            warning(stringr::str_glue("Using simple linear correction of raw moisture values in sensor {sensor$metadata@name}, for more precisse correction use function mc_calc_vwc."))
+            info_env$raw_moisture_values <- TRUE
         }
         if(sensor$metadata@calibrated) {
-            stop(stringr::str_glue("Sensor {sensor$metadata@name} was already calibrated. It isn't possible recalibrate sensor."))
+            info_env$count_calibrated <- info_env$count_calibrated + 1
+            return(sensor)
         }
         if(!.model_is_type_real(sensor$metadata)) {
-            stop(stringr::str_glue("Value type of sensor {sensor$metadata@name} isn't real."))
+            info_env$count_no_real <- info_env$count_no_real + 1
+            return(sensor)
         }
 
         values_table <- tibble::tibble(datetime = datetime,
@@ -979,7 +988,8 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
         values <- purrr::pmap(dplyr::select(input_data, "cor_factor", "cor_slope", "data"), data_function)
         sensor$values <- purrr::flatten_dbl(values)
         sensor$metadata@calibrated <- TRUE
-        sensor
+        info_env$count_success <- info_env$count_success + 1
+        return(sensor)
     }
 
     logger_function <- function(logger, locality_id) {
@@ -1000,6 +1010,26 @@ mc_prep_calib <- function(data, localities=NULL, sensors=NULL) {
     }
 
     data$localities <- purrr::map(data$localities, locality_function)
+    no_warning <- TRUE
+    if(info_env$raw_moisture) {
+        warning(stringr::str_glue("Using simple linear correction of raw moisture values, for more precisse correction use function mc_calc_vwc."))
+        no_warning <- FALSE
+    }
+    if(info_env$count_calibrated > 0) {
+        warning(stringr::str_glue("Skipped {info_env$count_calibrated} already calibrated sensors."))
+        no_warning <- FALSE
+    }
+    if(info_env$count_no_params > 0) {
+        warning(stringr::str_glue("Skipped {info_env$count_no_params} sensors without calibration parameters."))
+        no_warning <- FALSE
+    }
+    if(info_env$count_no_real > 0) {
+        warning(stringr::str_glue("Skipped {info_env$count_no_real} sensors with non-real values."))
+        no_warning <- FALSE
+    }
+    if(!no_warning) {
+        warning(stringr::str_glue("Calibrated {info_env$count_success} sensors."))
+    }
     return(data)
 }
 

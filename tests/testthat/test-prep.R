@@ -384,6 +384,7 @@ test_that("mc_prep_calib_load, mc_prep_calib, mc_info_calib", {
     expect_equal(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T2$values[[5]], 9.5 * 1.05 + 0.15)
     expect_true(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_T3$metadata@calibrated)
     expect_false(calib_data$localities$A6W79$loggers[[1]]$sensors$TMS_moist$metadata@calibrated)
+    expect_warning(expect_warning(calib_data <- mc_prep_calib(calib_data)))
     info_table <- mc_info_calib(calib_data)
     expect_equal(colnames(info_table), c("locality_id", "logger_name", "sensor_name", "datetime", "cor_factor", "cor_slope"))
     expect_equal(nrow(info_table), nrow(calib_table))
@@ -396,6 +397,7 @@ test_that("mc_prep_calib_load, mc_prep_calib, mc_info_calib", {
     info_table <- mc_info_calib(calib_data)
     expect_equal(colnames(info_table), c("locality_id", "logger_name", "sensor_name", "datetime", "cor_factor", "cor_slope"))
     expect_equal(nrow(info_table), nrow(calib_table))
+    expect_warning(expect_warning(calib_data <- mc_prep_calib(calib_data)))
 })
 
 test_that("mc_prep_calib_load wrong type", {

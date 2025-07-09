@@ -24,6 +24,8 @@ data.frame with columns:
 \item max_value - maximal recorded value
 \item count_values - number of non NA records
 \item count_na - number of NA records
+\item height - height description of sensor
+\item calibrated - logical value indicating whether the sensor is calibrated
 }
 }
 \description{
