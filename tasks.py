@@ -68,3 +68,8 @@ def install(c, vignette=True):
 def test(c):
     c.run("""R --vanilla --no-multiarch -e 'devtools::test()'""", pty=True)
 
+
+@task
+def push_all(c):
+    c.run("""git push --tags""", pty=True, echo=True)
+    c.run("""git push github --tags""", pty=True, echo=True)

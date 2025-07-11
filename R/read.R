@@ -1,15 +1,16 @@
-.read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It isn't possible to combine files and directories"
+.read_const_MESSAGE_COMBINE_FILES_AND_DIRECTORIES <- "It is not possible to combine files and directories."
 .read_const_MESSAGE_SOURCE_EMPTY_SOURCE_DATA_TABLE <- "Source data table is empty."
-.read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format UTC timezone."
-.read_const_MESSAGE_ANY_FILE <- "There aren't any source file."
-.read_const_MESSAGE_WRONG_DATETIME <- "It isn't possible to read datetimes from {filename}. File is skipped."
-.read_const_MESSAGE_ANY_LOCALITY <- "There aren't any valid localities."
+.read_const_MESSAGE_DATETIME_TYPE <- "Datetime must be in POSIXct format with UTC timezone."
+.read_const_MESSAGE_ANY_FILE <- "There are no source files."
+.read_const_MESSAGE_WRONG_DATETIME <- "It is not possible to read datetimes from {filename}. File is skipped."
+.read_const_MESSAGE_ANY_LOCALITY <- "There are no valid localities."
 .read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL <- "Plot or region must be set."
 .read_const_MESSAGE_UNSUPPOERTED_FORMAT <- "{data_format} is not a supported data format. File is skipped."
-.read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not applicable format to {path}. File is skipped."
+.read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not an applicable format for {path}. File is skipped."
 .read_const_MESSAGE_USER_DATA_FORMAT_KEY <- "The key in user_data_format must not be the same as the key in mc_data_formats."
 .read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {filename}. Check mc_read_problems[['{filename}']]."
 .read_const_MESSAGE_FILE_SKIP <- "File {.x} does not exist - skipping."
+.read_const_MESSAGE_EMPTY_DATA <- "Data file {filename} is empty - skipping."
 
 .read_state <- new.env()
 
@@ -449,6 +450,11 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     data_table <- .read_get_data_from_file(filename, data_format)
     .model_check_format(data_format)
     data_table <- .model_edit_data(data_format, data_table)
+    if(nrow(data_table) == 0) {
+        warning(stringr::str_glue(.read_const_MESSAGE_EMPTY_DATA))
+        if(!is.null(.read_state$read_bar)) .read_state$read_bar$tick()
+        return(NULL)
+    }
     data_table <- .read_fix_decimal_separator_if_need(filename, data_format, data_table)
     datetime <- data_table[[data_format@date_column]]
     if(!lubridate::is.POSIXct(datetime)) {

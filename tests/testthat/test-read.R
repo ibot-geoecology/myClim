@@ -322,3 +322,13 @@ test_that("mc_read_files joined TOMST logger type", {
     expect_equal(names(data$localities$`202310_94218703`$loggers[["TMS_L45_1"]]$sensors),
                  c("TMS_T1_L45", "TMS_T2_L45", "TMS_T3_L45", "TMS_moist_L45", "VWC"))
 })
+
+test_that("mc_read_data HOBO empty", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path, ~locality_id, ~data_format, ~serial_number, ~date_format, ~tz_offset,
+        "../data/HOBO/20847126_empty.txt", "A", "HOBO", NA_character_, "%d.%m.%Y %H:%M:%S", NA_integer_,
+    ))
+    data <- mc_read_data(files_table, clean=FALSE) |>
+        expect_warning("Data file ../data/HOBO/20847126_empty.txt is empty - skipping.") |>
+        expect_error("There are no valid localities.")
+})

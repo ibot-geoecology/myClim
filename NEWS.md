@@ -1,3 +1,7 @@
+# myClim 1.4.4
+* The `mc_read_data` function now skips empty data files.
+* The minimum required R version has been updated to 4.0.
+
 # myClim 1.4.3
 * The new function `mc_info_calib` has been added to provide an overview of the calibration parameters.
 * The output table of the `mc_info` function has been extended with the `height` and `calibrated` columns.

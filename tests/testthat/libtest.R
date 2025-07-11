@@ -1,5 +1,5 @@
 not_applicable_format_warning <- function(x) {
-    expect_warning(x, regexp = ".* is not applicable format to .*\\. File is skipped.")
+    expect_warning(x, regexp = ".* is not an applicable format for .*\\. File is skipped.")
 }
 
 differnt_values_warning <- function(x) {

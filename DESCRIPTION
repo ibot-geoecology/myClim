@@ -1,7 +1,7 @@
 Package: myClim
 Type: Package
 Title: Microclimatic Data Processing
-Version: 1.4.3
+Version: 1.4.4
 URL: http://labgis.ibot.cas.cz/myclim/index.html, https://github.com/ibot-geoecology/myClim
 Authors@R: c(
     person("Matěj", "Man", email = "Matej.Man@ibot.cas.cz", role = "aut"),
@@ -24,7 +24,7 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
 Depends:
-    R (>= 3.5)
+    R (>= 4.0)
 Imports:
     stringr,
     lubridate,
