@@ -143,6 +143,9 @@ test_that("mc_join calibration", {
     ))
     data <- mc_read_data(files_table, silent=TRUE)
     test_raw_data_format(data)
+    joined_data <- mc_join(data)
+    test_raw_data_format(joined_data)
+    expect_equal(nrow(joined_data$localities$A$loggers$Thermo_1$sensors$Thermo_T$calibration), 0)
     calib_table <- as.data.frame(tibble::tribble(
         ~serial_number, ~sensor_id,                         ~datetime, ~cor_factor,
         "91184102",     "Thermo_T", lubridate::ymd_h("2020-10-27 00"),         0.1,

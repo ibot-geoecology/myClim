@@ -259,6 +259,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
     if(is.null(result)) {
         return(loggers)
     }
+    result$sensors <- purrr::map(result$sensors, .join_remove_empty_calibration)
     return(list(result))
 }
 
@@ -613,3 +614,12 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
     as.data.frame(dplyr::bind_rows(l1_sensor_states, l2_sensor_states))
 }
 
+.join_remove_empty_calibration <- function(sensor) {
+    if(nrow(sensor$calibration) == 0) {
+        return(sensor)
+    }
+    if(all(is.na(sensor$calibration$cor_factor)) && all(is.na(sensor$calibration$cor_slope))) {
+        sensor$calibration <- data.frame()
+    }
+    return(sensor)
+}

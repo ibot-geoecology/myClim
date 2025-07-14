@@ -1,6 +1,9 @@
+# myClim 1.4.5
+* Empty calibration parameters are now removed from joined data in the `mc_join` function.
+
 # myClim 1.4.4
 * The `mc_read_data` function now skips empty data files.
-* The minimum required R version has been updated to 4.0.
+* The minimum required R version is now 4.0.
 
 # myClim 1.4.3
 * The new function `mc_info_calib` has been added to provide an overview of the calibration parameters.

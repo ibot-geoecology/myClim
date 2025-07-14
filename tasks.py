@@ -71,5 +71,7 @@ def test(c):
 
 @task
 def push_all(c):
+    c.run("""git push""", pty=True, echo=True)
     c.run("""git push --tags""", pty=True, echo=True)
+    c.run("""git push github""", pty=True, echo=True)
     c.run("""git push github --tags""", pty=True, echo=True)
