@@ -1,3 +1,6 @@
+# myClim 1.5.0
+* The new function `mc_prep_expandtime` has been added to expand time series to shorter steps.
+
 # myClim 1.4.5
 * Empty calibration parameters are now removed from joined data in the `mc_join` function.
 

@@ -480,3 +480,29 @@ test_that("mc_prep_delete", {
     expect_equal(length(data_delete$localities$A6W79$loggers$TMS_1$datetime), length(data$localities$A6W79$loggers$TMS_1$datetime))
     expect_equal(data_delete$localities$A1E05$loggers$Thermo_1$metadata@raw_index[1:3], c(0, 2, 4))
 })
+
+test_that("mc_prep_expandtime", {
+    expect_error(data_expanded <- mc_prep_expandtime(myClim::mc_data_example_raw, 900))
+    data <- mc_load("../data/expandtime/HOSEK_555.rds")
+    expect_error(data_expanded <- mc_prep_expandtime(data, "15 min"))
+    agg_data <-mc_agg(data, fun="mean", period="60 min") |>
+        expect_warning("sensor .*") |>
+        expect_warning("sensor .*") |>
+        expect_warning("sensor .*")
+    expect_error(data_expanded <- mc_prep_expandtime(agg_data, 900))
+    data_expanded <- mc_prep_expandtime(data, 1000) |>
+        expect_warning() |>
+        expect_warning()
+    data_expanded <- mc_prep_expandtime(data, 900)
+    test_raw_data_format(data_expanded)
+    changed_data <- mc_filter(data_expanded, loggers="HOBO_U23-001A_2")
+    changed_info <- mc_info(changed_data)
+    expect_true(all(changed_info$count_values == 30))
+    expect_true(all(changed_info$count_na == 29))
+    data_expanded2 <- mc_prep_expandtime(data, 900, localities = "HOSEK_555", loggers = "HOBO_U23-001A_2")
+    expect_equal(data_expanded, data_expanded2)
+    data_expanded3 <- mc_prep_expandtime(data, 900, from_step = 1600)
+    expect_equal(data, data_expanded3)
+    data_expanded4 <- mc_prep_expandtime(data, 900, from_step = 1800)
+    expect_equal(data_expanded, data_expanded4)
+})

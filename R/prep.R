@@ -22,6 +22,10 @@
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
 .prep_const_MESSAGE_DELETE_FORMAT <- "The function requires uncleaned myClim object in Raw-format."
+.prep_const_MESSAGE_AGG_EXPANDTIME <- "It isn't possible to expandtime myClim object in Agg-format."
+.prep_const_MESSAGE_NOT_MULTIPLE_STEP <- "Logger {logger$metadata@name} step {logger_step} is not multiple of target step {to_step}. skipping"
+.prep_const_MESSAGE_SHORTER_STEP_IN_DATA <- "The minimal step {min_step} seconds in data is shorter than target step {to_step} seconds."
+.prep_const_MESSAGE_EXPANDTIME_TO_STEP <- "Parameter to_step must be positive number."
 
 #' Cleaning datetime series
 #'
@@ -1325,5 +1329,89 @@ mc_prep_delete <- function(data, index_table) {
     logger$sensors <- purrr::map(logger$sensors, function(sensor) {
         sensor$values <- table[[sensor$metadata@name]]
         return(sensor)})
+    return(logger)
+}
+
+#' Expand time steps
+#'
+#' This function is used to expand time step to shorter time step.
+#' Original time step must be multiple of new time step.
+#' The gaps are filled with NA values.
+#'
+#' @template param_myClim_object_cleaned
+#' @param to_step new time step in seconds (e.g. 3600 for one hour)
+#' @param localities vector of locality_ids where to perform expansion, if NULL, then
+#'                   expand time step on all localities (default NULL)
+#' @param loggers vector of logger names where to perform expansion, if NULL, then
+#'                expand time step on all loggers (default NULL)
+#' @param from_step original time step in seconds. Only loggers with this time step are expanded.
+#'                  If NULL, then expand all loggers with time step longer than to_step. 
+#' @return raw myClim data with expanded datetime.
+#' @export
+#' @examples
+#' mc_prep_expandtime(mc_data_example_clean, to_step = 300, localities = "A1E05", loggers = "Thermo_1")
+mc_prep_expandtime <- function(data, to_step, localities=NULL, loggers=NULL, from_step=NULL) {
+    is_agg <- .common_is_agg_format(data)
+    if(is_agg) {
+        stop(.prep_const_MESSAGE_AGG_EXPANDTIME)
+    }
+    .prep_check_datetime_step_unprocessed(data, stop)
+    .prep_warn_if_shorter_step_in_data(data, to_step, localities, loggers)
+    if(!is.numeric(to_step) || to_step <= 0) {
+        stop(.prep_const_MESSAGE_EXPANDTIME_TO_STEP)
+    }
+
+    logger_function <- function (logger) {
+        if(!(is.null(loggers) || logger$metadata@name %in% loggers)) {
+            return(logger)
+        }
+        logger_step <- logger$clean_info@step
+        if(!(is.null(from_step) || logger_step == from_step)) {
+            return(logger)
+        }
+        if(logger_step <= to_step) {
+            return(logger)
+        }
+        if(logger_step %% to_step != 0) {
+            warning(stringr::str_glue(.prep_const_MESSAGE_NOT_MULTIPLE_STEP))
+            return(logger)
+        }
+        logger <- .prep_expandtime_in_logger(logger, to_step)
+
+        return(logger)
+    }
+
+    locality_function <- function (locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        return(locality)
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
+}
+
+.prep_warn_if_shorter_step_in_data <- function(data, to_step, localities, loggers) {
+    filtered_data <- mc_filter(data, localities = localities, loggers = loggers)
+    loggers <- mc_info_logger(filtered_data)
+    min_step <- min(loggers$step)
+    if(min_step < to_step) {
+        warning(stringr::str_glue(.prep_const_MESSAGE_SHORTER_STEP_IN_DATA))
+    }
+}
+
+
+.prep_expandtime_in_logger <- function(logger, to_step) {
+    logger_table <- .common_sensor_values_as_tibble(logger)
+    datetime <- seq(from = min(logger$datetime), to = max(logger$datetime), by = to_step)
+    new_logger_table <- tibble::tibble(datetime = datetime)
+    new_logger_table <- dplyr::left_join(new_logger_table, logger_table, by = "datetime")
+    logger$datetime <- new_logger_table$datetime
+    for(sensor_name in names(logger$sensors)) {
+        logger$sensors[[sensor_name]]$values <- new_logger_table[[sensor_name]]
+    }
+    logger$clean_info@step <- to_step
     return(logger)
 }
