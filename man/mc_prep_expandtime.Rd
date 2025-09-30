@@ -17,22 +17,26 @@ mc_prep_expandtime(
 
 \item{to_step}{new time step in seconds (e.g. 3600 for one hour)}
 
-\item{localities}{vector of locality_ids where to perform expansion, if NULL, then
-expand time step on all localities (default NULL)}
+\item{localities}{IDs of localities to expand. If \code{NULL}, expands all localities (default)}
 
-\item{loggers}{vector of logger names where to perform expansion, if NULL, then
-expand time step on all loggers (default NULL)}
+\item{loggers}{names of loggers to expand. If \code{NULL}, expands all loggers (default).}
 
-\item{from_step}{original time step in seconds. Only loggers with this time step are expanded.
-If NULL, then expand all loggers with time step longer than to_step.}
+\item{from_step}{original time step in seconds to expand.
+If \code{NULL}, expands all loggers with a step longer than \code{to_step}.}
 }
 \value{
 raw myClim data with expanded datetime.
 }
 \description{
-This function is used to expand time step to shorter time step.
-Original time step must be multiple of new time step.
-The gaps are filled with NA values.
+Expands (downscales) time steps in raw myClim objects, e.g. from 1 hour to 15 minutes.
+The original step must be a multiple of the new step (e.g. 15 → 5 minutes works,
+but 15 → 10 minutes does not).
+Newly created gaps in the expanded series are filled with \code{NA}.
+}
+\details{
+Works only with raw myClim objects.
+If \code{from_step} is specified, only loggers with this step are expanded;
+loggers with other steps remain unchanged.
 }
 \examples{
 mc_prep_expandtime(mc_data_example_clean, to_step = 300, localities = "A1E05", loggers = "Thermo_1")
