@@ -33,4 +33,8 @@ mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@skip <- 0
 mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@filename_serial_number_pattern <- "(.+)\\.(?:csv|txt)$"
 mc_data_formats[[.model_const_DATA_FORMAT_HOBO]]@na_strings <- ""
 
+mc_data_formats[[.model_const_DATA_FORMAT_EMSBRNO]] <- new("mc_EMSBrnoDataFormat")
+mc_data_formats[[.model_const_DATA_FORMAT_EMSBRNO]]@separator <- ""
+mc_data_formats[[.model_const_DATA_FORMAT_EMSBRNO]]@filename_serial_number_pattern <- "([A-Z0-9]{2})_\\d{4}_\\d{2}_\\d{2}\\.dcv$"
+
 usethis::use_data(mc_data_formats, overwrite = TRUE)

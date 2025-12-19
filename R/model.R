@@ -151,6 +151,7 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
 .model_const_DATA_FORMAT_HOBO <- "HOBO"
+.model_const_DATA_FORMAT_EMSBRNO <- "EMSBrno"
 
 .model_const_SENSOR_STATE_SOURCE <- "source"
 .model_const_SENSOR_STATE_ERROR <- "error"
@@ -735,34 +736,57 @@ setMethod("initialize",
               return(.Object)
           })
 
+#' Class for reading EMS Brno logger files
+#'
+#' Provides the key for reading the dcv source files.
+#' Dcv file is a binary file format used by EMSBrno loggers.
+#'
+#' @seealso [myClim::mc_DataFormat], [mc_data_formats]
+#' @exportClass mc_EMSBrnoDataFormat
+mc_EMSBrnoDataFormat <- setClass("mc_EMSBrnoDataFormat",
+                              contains = "mc_DataFormat")
+
 # generics ================================================================================
 
 setGeneric(
     ".model_load_data_format_params_from_file",
     function(object, path){
         standardGeneric(".model_load_data_format_params_from_file")
-    }
+    },
+    signature = c("object", "path")
 )
 
 setGeneric(
   ".model_get_serial_number_from_file",
-  function(object, path){
-    standardGeneric(".model_get_serial_number_from_file")
-  }
+    function(object, path){
+        standardGeneric(".model_get_serial_number_from_file")
+    },
+    signature = c("object", "path")
 )
 
 setGeneric(
     ".model_edit_data",
     function(object, data_table){
         standardGeneric(".model_edit_data")
-    }
+    },
+    signature = c("object")
 )
 
 setGeneric(
     ".model_check_format",
     function(object){
         standardGeneric(".model_check_format")
-    }
+    },
+    signature = c("object")
+)
+
+# New generic to read data using a DataFormat specification
+setGeneric(
+    ".model_get_data_from_file",
+    function(object, path, nrows=Inf){
+        standardGeneric(".model_get_data_from_file")
+    },
+    signature = c("object", "path")
 )
 
 # methods ================================================================================
@@ -806,7 +830,7 @@ setMethod(
         if(!.model_is_file_in_right_format(object, path)) {
             return(NULL)
         }
-        data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
+        data <- .model_get_data_from_file(object, path, nrows = .model_const_COUNT_TEST_VALUES)
         object <- .model_change_tomst_columns_and_logger_type(object, data)
         object <- .model_tomst_change_col_type(object, data)
         return(object)
@@ -859,7 +883,7 @@ setMethod(
         if(!.model_is_file_in_right_format(object, path)) {
             return(NULL)
         }
-        data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
+        data <- .model_get_data_from_file(object, path, nrows = .model_const_COUNT_TEST_VALUES)
         .model_change_tomst_join_columns_and_logger_type(object, data)
     }
 )
@@ -915,7 +939,7 @@ setMethod(
             return(NULL)
         }
         object <- .model_hobo_set_skip(object, lines)
-        data <- .read_get_data_from_file(path, object, nrows = .model_const_COUNT_TEST_VALUES)
+        data <- .model_get_data_from_file(object, path, nrows = .model_const_COUNT_TEST_VALUES)
         object@skip <- object@skip + 1
         has_numbers_column <- data[[1]][[1]] == "#"
         object <- .model_hobo_set_date_column(object, data, has_numbers_column)
@@ -1096,7 +1120,7 @@ setMethod(
         changed_object <- object
         changed_object@skip <- object@skip - 1
         changed_object@col_types <- paste0(rep("c", nchar(object@col_types)), collapse="")
-        data <- .read_get_data_from_file(path, changed_object, nrows=1)
+        data <- .model_get_data_from_file(changed_object, path, nrows=1)
         temp_column <- changed_object@columns[[1]]
         parts <- stringr::str_match(data[[temp_column]][[1]], "Temp,? \\(?\u00b0[CF]\\)? \\(?LGR S\\/N: (\\d+),")
         if(is.na(parts[[1, 2]])) {
@@ -1151,3 +1175,28 @@ setMethod(
     }
 )
 
+setMethod(
+    ".model_get_data_from_file",
+    signature("mc_DataFormat"),
+    function(object, path, nrows=Inf) {
+        result <- vroom::vroom(path,
+                               col_names = FALSE,
+                               col_types = object@col_types,
+                               col_select = if(is.na(object@col_types)) vroom::everything() else 1:stringr::str_length(object@col_types),
+                               delim = object@separator,
+                               skip = object@skip,
+                               na = object@na_strings,
+                               n_max = nrows,
+                               show_col_types = FALSE,
+                               progress = FALSE)
+        problems <- data.frame()
+        if("spec_tbl_df" %in% class(result)){
+            problems <- vroom::problems(result)
+        }
+        if(nrow(problems) > 0) {
+            mc_read_problems[[path]] <- problems
+            warning(stringr::str_glue(.read_const_MESSAGE_VROOM_WARNING))
+        }
+        return(result)
+    }
+)
