@@ -21,6 +21,8 @@
 .model_const_PHYSICAL_moisture_raw <- "moisture_raw"
 .model_const_PHYSICAL_radius_raw <- "radius_raw"
 .model_const_PHYSICAL_v <- "v"
+.model_const_PHYSICAL_SWP_neg_bar <- "SWP_neg_bar"
+.model_const_PHYSICAL_PPFD <- "PPFD"
 
 .model_const_VALUE_TYPE_REAL <- "real"
 .model_const_VALUE_TYPE_INTEGER <- "integer"
@@ -70,6 +72,12 @@ mc_const_SENSOR_HOBO_RH <- "HOBO_RH"
 #' Onset HOBO external temperature sensor id
 #' @export
 mc_const_SENSOR_HOBO_EXTT <- "HOBO_extT"
+
+mc_const_SENSOR_EMSBRNO_T <- "Minikin_T"
+mc_const_SENSOR_SP1_SWP <- "SP1_SWP"
+mc_const_SENSOR_QTi_PPFD <- "QTi_PPFD"
+mc_const_SENSOR_TH2_RH <- "TH2_RH"
+
 
 .model_const_WRONG_CALIBRATION_SENSOR_ID <- mc_const_SENSOR_TMS_moist
 
@@ -165,6 +173,7 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_MESSAGE_HOBO_CONVERT_FAHRENHEIT <- "Temperature data in \u00b0F is converted to \u00b0C."
 .model_const_MESSAGE_ERROR_DATA_FORMAT <- "The {parameter_name} parameter is required."
 .model_const_MESSAGE_ERROR_DATA_FORMAT_COLUMNS <- "The column list cannot be empty."
+.model_const_MESSAGE_ERROR_EMSBRNO_FILE_LENGTH <- "{path}: file size does not match the expected size based on header information."
 
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
@@ -1200,3 +1209,66 @@ setMethod(
         return(result)
     }
 )
+
+setMethod(
+    ".model_get_data_from_file",
+    signature("mc_EMSBrnoDataFormat"),
+    function(object, path, nrows=Inf) {
+        DATA_OFFSET <- 64L
+        REC_SIZE <- 16L
+
+        file_size <- file.info(path)$size
+        con <- file(path, "rb")
+        on.exit(close(con))
+
+        header_raw <- readBin(con, what = "raw", n = 64L)
+        n_records <- readBin(header_raw[5:8], what = integer(), size = 4,
+                             n = 1L, endian = "little", signed = TRUE)
+        
+        data_raw_size <- n_records * REC_SIZE
+        if (DATA_OFFSET + data_raw_size > file_size) {
+          stop(stringr::str_glue(.model_const_MESSAGE_ERROR_EMSBRNO_FILE_LENGTH))
+        }
+
+        seek(con, where = DATA_OFFSET, origin = "start")
+        data_raw <- readBin(con, what = "raw", n = data_raw_size)
+        dim(data_raw) <- c(REC_SIZE, n_records)
+        
+        footer_raw_size <- file_size - (DATA_OFFSET + data_raw_size)
+        footer_raw <- readBin(con, what = "raw", n = footer_raw_size)
+        
+        result <- .model_read_emsbrno_data(data_raw, n_records)
+
+        return(result)
+    }
+)
+
+.model_read_emsbrno_data <- function(data_raw, n_records) {
+    datetime <- .model_read_emsbrno_datetime(data_raw, n_records)
+    value1 <- .model_read_emsbrno_values(data_raw, 9, n_records)
+    value2 <- .model_read_emsbrno_values(data_raw, 13, n_records)
+    result <- data.frame(datetime = datetime,
+                         ch1 = value1,
+                         ch2 = value2,
+                         stringsAsFactors = FALSE)
+    return(result)
+}
+
+.model_read_emsbrno_datetime <- function(data_raw, n_records) {
+    origin <- as.POSIXct("1899-12-30", tz = "UTC")
+    time_items <- data_raw[1:8, , drop = FALSE]
+    time_raw <- as.raw(as.vector(time_items))
+    t_days <- readBin(time_raw, what = "double", size = 8, n = n_records, endian = "little")
+    datetime <- origin + t_days * 86400
+    return(datetime)
+}
+
+.model_read_emsbrno_values <- function(data_raw, column_offset, n_records) {
+    sentinel <- readBin(as.raw(c(0x75, 0x82, 0xA5, 0xFE)),
+                        what = "numeric", size = 4, n = 1L, endian = "little")
+    value_items <- data_raw[column_offset:(column_offset+3), , drop = FALSE]
+    value_raw <- as.raw(as.vector(value_items))
+    values <- readBin(value_raw, what = "numeric", size = 4, n = n_records, endian = "little")
+    values[values == sentinel] <- NA_real_
+    return(values)
+}
