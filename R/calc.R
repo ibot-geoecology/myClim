@@ -94,16 +94,26 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     return(data_period > max_period)
 }
 
-
 .calc_snow_values_function <- function(item, sensor_name, range, tmax, days, step) {
     per <- 3600*24*days / step
-    day_max_temp <- data.table::frollapply(item$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x), N = per, align = "left", fill = NA )
-    day_range_temp <- data.table::frollapply(item$sensors[[sensor_name]]$values, FUN = function(x) if(length(x) == 0) NA else max(x) - min(x), N = per, align = "left", fill = NA )
+    day_max_temp_function <- function(x) if(length(x) == 0) NA else max(x)
+    day_max_temp <- data.table::frollapply(item$sensors[[sensor_name]]$values, FUN = day_max_temp_function,
+                                           N = per, align = "left", fill = NA )
+    if(length(day_max_temp) > length(item$datetime)) {
+        day_max_temp <- day_max_temp[1:length(item$datetime)]
+    }
+    day_range_temp_function <- function(x) if(length(x) == 0) NA else max(x) - min(x)
+    day_range_temp <- data.table::frollapply(item$sensors[[sensor_name]]$values, FUN = day_range_temp_function,
+                                             N = per, align = "left", fill = NA )
+    if(length(day_range_temp) > length(item$datetime)) {
+        day_range_temp <- day_range_temp[1:length(item$datetime)]
+    }
     snow_next <- (day_range_temp < range) & (day_max_temp < tmax)
-    snow <- data.table::frollmean(snow_next, n = c(1:min(per,length(snow_next)), rep(per, max(length(snow_next) - per, 0))), fill = NA, na.rm = T, adaptive = T) > 0
+    snow <- data.table::frollmean(snow_next, n = c(1:min(per,length(snow_next)),
+                                  rep(per, max(length(snow_next) - per, 0))),
+                                  fill = NA, na.rm = TRUE, adaptive = TRUE) > 0
     return(snow)
 }
-
 
 .calc_add_sensor_to_item <- function(item, sensor_name, output_sensor_id, output_sensor_name, sensor_physical=NULL, values_function, ...) {
     if(!.calc_check_sensor_in_item(item, sensor_name)){
