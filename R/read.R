@@ -740,6 +740,7 @@ mc_read_long <- function(data_table, sensor_ids=list(), clean=TRUE, silent=FALSE
 mc_read_tubedb <- function(tubedb, region=NULL, plot=NULL,
                            sensor_ids=NULL, clean=TRUE, silent=FALSE,
                            aggregation="raw", quality="no", ...) {
+    find.package("rTubeDB")
     if(is.null(plot) && is.null(region)) {
         stop(.read_const_MESSAGE_TUBEDB_PLOT_REGION_NULL)
     }

@@ -1228,7 +1228,7 @@ mc_prep_TMSoffsoil <- function(data,
     begin <- rep(ifelse(fillNA, NA, dplyr::first(values)), window_width)
     end <- rep(ifelse(fillNA, NA, dplyr::last(values)), window_width )
     frollapply_values <- c(begin, values,  end)
-    result <- data.table::frollapply(frollapply_values, n=window_width, FUN=FUN, na.rm=na.rm, align="center", fill=NA)
+    result <- data.table::frollapply(frollapply_values, N=window_width, FUN=FUN, na.rm=na.rm, align="center", fill=NA)
     return(as.numeric(result[(window_width + 1):(length(values) + window_width)]))
 }
 

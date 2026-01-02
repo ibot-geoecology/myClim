@@ -1,6 +1,10 @@
 from pathlib import Path
 from invoke import task
 
+TUBEDB_SOURCE_PATH = Path("../../tubedb/tubedb_src")
+RTUBEDB_SOURCE_PATH = TUBEDB_SOURCE_PATH / "rTubeDB"
+DRAT_REPO_PATH = Path("../drat")
+
 def generate_documentation(c):
     c.run(f"R -e 'devtools::document()'")
 
@@ -47,18 +51,6 @@ def install(c, vignette=True):
     vignette - generating vignettes default True
     """
     if vignette:
-        build(c)
-        c.run("""R -e 'install.packages("../myClim_latest.tar.gz", lib=Sys.getenv("R_LIBS_USER"), repos=NULL, build_vignettes=TRUE)'""")
-    else:
-        c.run("""R - e 'install.packages(".", repos = NULL)'""")
-
-@task
-def install(c, vignette=True):
-    """
-    install myClim
-    vignette - generating vignettes default True
-    """
-    if vignette:
         c.run("""R -e 'devtools::build(".", path="../myClim_latest.tar.gz")'""")
         c.run("""R -e 'install.packages("../myClim_latest.tar.gz", repos=NULL, build_vignettes=TRUE)'""")
     else:
@@ -75,3 +67,13 @@ def push_all(c):
     c.run("""git push --tags""", pty=True, echo=True)
     c.run("""git push github""", pty=True, echo=True)
     c.run("""git push github --tags""", pty=True, echo=True)
+
+@task
+def update_rtubedb(c):
+    """
+    Update rTubeDB submodule to the latest commit in the source repository
+    """
+    c.run(f"cd {TUBEDB_SOURCE_PATH} && git pull", pty=True, echo=True)
+    c.run(f"cd {RTUBEDB_SOURCE_PATH} && R CMD build .", pty=True, echo=True)
+    package_path = list(RTUBEDB_SOURCE_PATH.glob("rTubeDB_*.tar.gz"))[0]
+    c.run(f"""R -e 'drat::insertPackage("{package_path}", repodir="{DRAT_REPO_PATH}", commit="Add rTubeDB package")'""")

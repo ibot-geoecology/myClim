@@ -1,3 +1,6 @@
+# myClim 1.5.1
+* Fixed compatibility issue with `data.table` 1.8.0.
+
 # myClim 1.5.0
 * The new function `mc_prep_expandtime` has been added to expand time series to shorter steps.
 
