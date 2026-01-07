@@ -156,6 +156,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' If timezone can't be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
 #' Ignored for TOMST TMS data format (they are always in UTC)
+#' EMS loggers require tz_offset definition.
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection. See details. 
 #'

@@ -72,10 +72,17 @@ mc_const_SENSOR_HOBO_RH <- "HOBO_RH"
 #' Onset HOBO external temperature sensor id
 #' @export
 mc_const_SENSOR_HOBO_EXTT <- "HOBO_extT"
-
-mc_const_SENSOR_EMSBRNO_T <- "Minikin_T"
+#' EMS Minikin temperature sensor id
+#' @export
+mc_const_SENSOR_MINIKIN_T <- "Minikin_T"
+#' EMS Minikin SP1 SWP sensor id
+#' @export
 mc_const_SENSOR_SP1_SWP <- "SP1_SWP"
+#' EMS Minikin QTi PPFD sensor id
+#' @export
 mc_const_SENSOR_QTi_PPFD <- "QTi_PPFD"
+#' EMS Minikin TH2 RH sensor id
+#' @export
 mc_const_SENSOR_TH2_RH <- "TH2_RH"
 
 
@@ -145,6 +152,9 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_LOGGER_TOMST_DENDROMETER <- "Dendro"
 .model_const_LOGGER_HOBO_U23_001A <- "HOBO_U23-001A"
 .model_const_LOGGER_HOBO_U23_004 <- "HOBO_U23-004"
+.model_const_LOGGER_EMS_MINIKIN_SP1 <- "Minikin_SP1"
+.model_const_LOGGER_EMS_MINIKIN_QTi <- "Minikin_QTi"
+.model_const_LOGGER_EMS_MINIKIN_TH2 <- "Minikin_TH2"
 .model_const_LOGGER_NA_TYPE_NAME <- "Logger"
 
 .model_logger_types <- list(
@@ -153,13 +163,27 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
     .model_const_LOGGER_TOMST_THERMODATALOGGER,
     .model_const_LOGGER_TOMST_DENDROMETER,
     .model_const_LOGGER_HOBO_U23_001A,
-    .model_const_LOGGER_HOBO_U23_004
+    .model_const_LOGGER_HOBO_U23_004,
+    .model_const_LOGGER_EMS_MINIKIN_SP1,
+    .model_const_LOGGER_EMS_MINIKIN_QTi,
+    .model_const_LOGGER_EMS_MINIKIN_TH2
 )
+
+.model_ems_logger_shortcuts <- list(
+    SP = .model_const_LOGGER_EMS_MINIKIN_SP1,
+    QT = .model_const_LOGGER_EMS_MINIKIN_QTi,
+    TH = .model_const_LOGGER_EMS_MINIKIN_TH2
+)
+
+.model_minikin_logger_sensor <- list()
+.model_minikin_logger_sensor[[.model_const_LOGGER_EMS_MINIKIN_SP1]] <- mc_const_SENSOR_SP1_SWP
+.model_minikin_logger_sensor[[.model_const_LOGGER_EMS_MINIKIN_QTi]] <- mc_const_SENSOR_QTi_PPFD
+.model_minikin_logger_sensor[[.model_const_LOGGER_EMS_MINIKIN_TH2]] <- mc_const_SENSOR_TH2_RH
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
 .model_const_DATA_FORMAT_HOBO <- "HOBO"
-.model_const_DATA_FORMAT_EMSBRNO <- "EMSBrno"
+.model_const_DATA_FORMAT_EMS <- "EMS"
 
 .model_const_SENSOR_STATE_SOURCE <- "source"
 .model_const_SENSOR_STATE_ERROR <- "error"
@@ -173,7 +197,7 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_MESSAGE_HOBO_CONVERT_FAHRENHEIT <- "Temperature data in \u00b0F is converted to \u00b0C."
 .model_const_MESSAGE_ERROR_DATA_FORMAT <- "The {parameter_name} parameter is required."
 .model_const_MESSAGE_ERROR_DATA_FORMAT_COLUMNS <- "The column list cannot be empty."
-.model_const_MESSAGE_ERROR_EMSBRNO_FILE_LENGTH <- "{path}: file size does not match the expected size based on header information."
+.model_const_MESSAGE_ERROR_EMS_FILE_LENGTH <- "{path}: file size does not match the expected size based on header information."
 
 .model_const_FORMAT_RAW <- "raw"
 .model_const_FORMAT_AGG <- "agg"
@@ -748,12 +772,12 @@ setMethod("initialize",
 #' Class for reading EMS Brno logger files
 #'
 #' Provides the key for reading the dcv source files.
-#' Dcv file is a binary file format used by EMSBrno loggers.
+#' Dcv file is a binary file format used by EMS loggers.
 #'
 #' @seealso [myClim::mc_DataFormat], [mc_data_formats]
-#' @exportClass mc_EMSBrnoDataFormat
-mc_EMSBrnoDataFormat <- setClass("mc_EMSBrnoDataFormat",
-                              contains = "mc_DataFormat")
+#' @exportClass mc_EMSDataFormat
+mc_EMSDataFormat <- setClass("mc_EMSDataFormat",
+                                 contains = "mc_DataFormat")
 
 # generics ================================================================================
 
@@ -798,7 +822,7 @@ setGeneric(
     signature = c("object", "path")
 )
 
-# methods ================================================================================
+# mc_DataFormat methods ================================================================================
 
 setMethod(
     ".model_load_data_format_params_from_file",
@@ -831,6 +855,79 @@ setMethod(
         return(stringr::str_detect(line, object@data_row_pattern))
     }
 }
+
+setMethod(
+    ".model_get_serial_number_from_file",
+    signature("mc_DataFormat"),
+    function(object, path) {
+        result <- NA_character_
+        if(!is.na(object@filename_serial_number_pattern)) {
+            result <- stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
+        }
+        if(is.na(result)) {
+            result <- stringr::str_match(basename(path), "(.+)\\.[^.]+")[1, 2]
+            if(is.na(result)) {
+                result <- basename(path)
+            }
+            if(!is.na(object@filename_serial_number_pattern)) {
+                warning(stringr::str_glue("It is not possible identify serial_number from file. Name {result} is used."))
+            }
+        }
+        result
+    }
+)
+
+setMethod(
+    ".model_edit_data",
+    "mc_DataFormat",
+    function(object, data_table) {
+        data_table
+    }
+)
+
+setMethod(
+    ".model_check_format",
+    "mc_DataFormat",
+    function(object) {
+        required_parameters <- c("date_column", "tz_offset")
+        for(parameter_name in required_parameters) {
+            if(is.na(slot(object, parameter_name))){
+                stop(stringr::str_glue(.model_const_MESSAGE_ERROR_DATA_FORMAT))
+            }
+        }
+        if(length(object@columns) == 0) {
+            stop(.model_const_MESSAGE_ERROR_DATA_FORMAT_COLUMNS)
+        }
+    }
+)
+
+setMethod(
+    ".model_get_data_from_file",
+    signature("mc_DataFormat"),
+    function(object, path, nrows=Inf) {
+        result <- vroom::vroom(path,
+                               col_names = FALSE,
+                               col_types = object@col_types,
+                               col_select = if(is.na(object@col_types)) vroom::everything() else 1:stringr::str_length(object@col_types),
+                               delim = object@separator,
+                               skip = object@skip,
+                               na = object@na_strings,
+                               n_max = nrows,
+                               show_col_types = FALSE,
+                               progress = FALSE)
+        problems <- data.frame()
+        if("spec_tbl_df" %in% class(result)){
+            problems <- vroom::problems(result)
+        }
+        if(nrow(problems) > 0) {
+            mc_read_problems[[path]] <- problems
+            warning(stringr::str_glue(.read_const_MESSAGE_VROOM_WARNING))
+        }
+        return(result)
+    }
+)
+
+# mc_TOMSTDataFormat methods ================================================================================
 
 setMethod(
     ".model_load_data_format_params_from_file",
@@ -885,6 +982,8 @@ setMethod(
     return(purrr::map_lgl(object@columns, ~ any(stringr::str_detect(data[[.x]], ","), na.rm=TRUE)))
 }
 
+# mc_TOMSTJoinDataFormat methods ================================================================================
+
 setMethod(
     ".model_load_data_format_params_from_file",
     "mc_TOMSTJoinDataFormat",
@@ -936,6 +1035,8 @@ setMethod(
     object@columns <- tmsj_columns
     return(object)
 }
+
+# mc_HOBODataFormat methods ================================================================================
 
 setMethod(
     ".model_load_data_format_params_from_file",
@@ -1103,27 +1204,6 @@ setMethod(
 
 setMethod(
     ".model_get_serial_number_from_file",
-    signature("mc_DataFormat"),
-    function(object, path) {
-        result <- NA_character_
-        if(!is.na(object@filename_serial_number_pattern)) {
-            result <- stringr::str_match(basename(path), object@filename_serial_number_pattern)[1, 2]
-        }
-        if(is.na(result)) {
-            result <- stringr::str_match(basename(path), "(.+)\\.[^.]+")[1, 2]
-            if(is.na(result)) {
-                result <- basename(path)
-            }
-            if(!is.na(object@filename_serial_number_pattern)) {
-                warning(stringr::str_glue("It is not possible identify serial_number from file. Name {result} is used."))
-            }
-        }
-        result
-    }
-)
-
-setMethod(
-    ".model_get_serial_number_from_file",
     signature("mc_HOBODataFormat"),
     function(object, path) {
         changed_object <- object
@@ -1136,14 +1216,6 @@ setMethod(
             return(callNextMethod())
         }
         return(parts[[1, 2]])
-    }
-)
-
-setMethod(
-    ".model_edit_data",
-    "mc_DataFormat",
-    function(object, data_table) {
-        data_table
     }
 )
 
@@ -1168,85 +1240,79 @@ setMethod(
     }
 )
 
+
+# mc_EMSDataFormat methods ================================================================================
+
 setMethod(
-    ".model_check_format",
-    "mc_DataFormat",
-    function(object) {
-        required_parameters <- c("date_column", "tz_offset")
-        for(parameter_name in required_parameters) {
-            if(is.na(slot(object, parameter_name))){
-                stop(stringr::str_glue(.model_const_MESSAGE_ERROR_DATA_FORMAT))
-            }
-        }
-        if(length(object@columns) == 0) {
-            stop(.model_const_MESSAGE_ERROR_DATA_FORMAT_COLUMNS)
-        }
+    ".model_load_data_format_params_from_file",
+    "mc_EMSDataFormat",
+    function(object, path) {
+        ems_result <- .model_read_ems(object, path, 0, read_logger_type = TRUE)
+        logger_type <- .model_ems_logger_shortcuts[[ems_result$logger_type]]   
+        columns <- list()
+        columns[[.model_minikin_logger_sensor[[logger_type]]]] <- 2
+        columns[[mc_const_SENSOR_MINIKIN_T]] <- 3
+        object@columns <- columns
+        object@logger_type <- logger_type
+        return(object)
     }
 )
 
 setMethod(
     ".model_get_data_from_file",
-    signature("mc_DataFormat"),
+    signature("mc_EMSDataFormat"),
     function(object, path, nrows=Inf) {
-        result <- vroom::vroom(path,
-                               col_names = FALSE,
-                               col_types = object@col_types,
-                               col_select = if(is.na(object@col_types)) vroom::everything() else 1:stringr::str_length(object@col_types),
-                               delim = object@separator,
-                               skip = object@skip,
-                               na = object@na_strings,
-                               n_max = nrows,
-                               show_col_types = FALSE,
-                               progress = FALSE)
-        problems <- data.frame()
-        if("spec_tbl_df" %in% class(result)){
-            problems <- vroom::problems(result)
-        }
-        if(nrow(problems) > 0) {
-            mc_read_problems[[path]] <- problems
-            warning(stringr::str_glue(.read_const_MESSAGE_VROOM_WARNING))
-        }
-        return(result)
+        ems_result <- .model_read_ems(object, path, nrows, read_logger_type = FALSE)
+        data <- ems_result$data
+        return(data)
     }
 )
 
-setMethod(
-    ".model_get_data_from_file",
-    signature("mc_EMSBrnoDataFormat"),
-    function(object, path, nrows=Inf) {
-        DATA_OFFSET <- 64L
-        REC_SIZE <- 16L
+.model_read_ems <- function(object, path, nrows=Inf, read_logger_type=FALSE) {
+    DATA_OFFSET <- 64L
+    LOGGER_TYPE_OFFSET <- 52L
 
-        file_size <- file.info(path)$size
-        con <- file(path, "rb")
-        on.exit(close(con))
+    file_size <- file.info(path)$size
+    con <- file(path, "rb")
+    on.exit(close(con))
 
-        header_raw <- readBin(con, what = "raw", n = 64L)
-        n_records <- readBin(header_raw[5:8], what = integer(), size = 4,
-                             n = 1L, endian = "little", signed = TRUE)
-        
-        data_raw_size <- n_records * REC_SIZE
+    header_raw <- readBin(con, what = "raw", n = 64L)
+    rec_size <- readBin(header_raw[1:4], what = integer(), size = 4,
+                        n = 1L, endian = "little", signed = TRUE)
+    n_records <- readBin(header_raw[5:8], what = integer(), size = 4,
+                         n = 1L, endian = "little", signed = TRUE)
+    count_read <- min(nrows, n_records)
+    data_raw_size <- n_records * rec_size
+
+    result_data <- data.frame()
+    if(count_read > 0) {
+        data_read_size <- count_read * rec_size
         if (DATA_OFFSET + data_raw_size > file_size) {
-          stop(stringr::str_glue(.model_const_MESSAGE_ERROR_EMSBRNO_FILE_LENGTH))
+          stop(stringr::str_glue(.model_const_MESSAGE_ERROR_EMS_FILE_LENGTH))
         }
 
         seek(con, where = DATA_OFFSET, origin = "start")
-        data_raw <- readBin(con, what = "raw", n = data_raw_size)
-        dim(data_raw) <- c(REC_SIZE, n_records)
-        
-        footer_raw_size <- file_size - (DATA_OFFSET + data_raw_size)
-        footer_raw <- readBin(con, what = "raw", n = footer_raw_size)
-        
-        result <- .model_read_emsbrno_data(data_raw, n_records)
-
-        return(result)
+        data_raw <- readBin(con, what = "raw", n = data_read_size)
+        dim(data_raw) <- c(rec_size, count_read)
+        result_data <- .model_read_ems_data(data_raw, count_read)
     }
-)
+    
+    result_logger_type <- NULL
+    if(read_logger_type) {
+        footer_raw_size <- file_size - (DATA_OFFSET + data_raw_size)
+        seek(con, where = DATA_OFFSET + data_raw_size + LOGGER_TYPE_OFFSET, origin = "start")
+        logger_type_raw <- readBin(con, what = "raw", n = 2)
+        result_logger_type <- rawToChar(logger_type_raw)
+    }
 
-.model_read_emsbrno_data <- function(data_raw, n_records) {
-    datetime <- .model_read_emsbrno_datetime(data_raw, n_records)
-    value1 <- .model_read_emsbrno_values(data_raw, 9, n_records)
-    value2 <- .model_read_emsbrno_values(data_raw, 13, n_records)
+    result <- list(data = result_data, logger_type = result_logger_type)
+    return(result)
+}
+
+.model_read_ems_data <- function(data_raw, n_records) {
+    datetime <- .model_read_ems_datetime(data_raw, n_records)
+    value1 <- .model_read_ems_values(data_raw, 9, n_records)
+    value2 <- .model_read_ems_values(data_raw, 13, n_records)
     result <- data.frame(datetime = datetime,
                          ch1 = value1,
                          ch2 = value2,
@@ -1254,7 +1320,7 @@ setMethod(
     return(result)
 }
 
-.model_read_emsbrno_datetime <- function(data_raw, n_records) {
+.model_read_ems_datetime <- function(data_raw, n_records) {
     origin <- as.POSIXct("1899-12-30", tz = "UTC")
     time_items <- data_raw[1:8, , drop = FALSE]
     time_raw <- as.raw(as.vector(time_items))
@@ -1263,7 +1329,7 @@ setMethod(
     return(datetime)
 }
 
-.model_read_emsbrno_values <- function(data_raw, column_offset, n_records) {
+.model_read_ems_values <- function(data_raw, column_offset, n_records) {
     sentinel <- readBin(as.raw(c(0x75, 0x82, 0xA5, 0xFE)),
                         what = "numeric", size = 4, n = 1L, endian = "little")
     value_items <- data_raw[column_offset:(column_offset+3), , drop = FALSE]

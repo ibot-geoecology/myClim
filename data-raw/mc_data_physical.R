@@ -26,7 +26,7 @@ mc_data_physical[[.model_const_PHYSICAL_l_um]]@scale_coeff <- 1/1000
 mc_data_physical[[.model_const_PHYSICAL_VWC]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_VWC]]@name <- .model_const_PHYSICAL_VWC
 mc_data_physical[[.model_const_PHYSICAL_VWC]]@description <- "Volum. soil moisture"
-mc_data_physical[[.model_const_PHYSICAL_VWC]]@units <- "m3/m3"
+mc_data_physical[[.model_const_PHYSICAL_VWC]]@units <- "m³/m³"
 mc_data_physical[[.model_const_PHYSICAL_VWC]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_VWC]]@scale_coeff <- 1
 
@@ -78,5 +78,19 @@ mc_data_physical[[.model_const_PHYSICAL_v]]@description <- "Speed m/s"
 mc_data_physical[[.model_const_PHYSICAL_v]]@units <- "m/s"
 mc_data_physical[[.model_const_PHYSICAL_v]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_v]]@scale_coeff <- 1/10
+
+mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@name <- .model_const_PHYSICAL_SWP_neg_bar
+mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@description <- "SWP -bar"
+mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@units <- "-bar"
+mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@scale_coeff <- 1
+
+mc_data_physical[[.model_const_PHYSICAL_PPFD]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@name <- .model_const_PHYSICAL_PPFD
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@description <- "PPFD μmol/m²/s"
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@units <- "μmol/m²/s"
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@scale_coeff <- 1
 
 usethis::use_data(mc_data_physical, overwrite = TRUE)

@@ -332,3 +332,24 @@ test_that("mc_read_data HOBO empty", {
         expect_warning("Data file ../data/HOBO/20847126_empty.txt is empty - skipping.") |>
         expect_error("There are no valid localities.")
 })
+
+test_that("mc_read_data EMS", {
+    files_table <- as.data.frame(tibble::tribble(
+        ~path, ~locality_id, ~data_format,
+        "../data/EMSBrno/00_2025_11_05.dcv", "A", "EMS",
+        "../data/EMSBrno/18_2025_11_03.dcv", "A", "EMS",
+        "../data/EMSBrno/B4_2025_12_15.dcv", "A", "EMS",
+    ))
+    expect_error(data <- mc_read_data(files_table, clean=FALSE))
+    files_table$tz_offset <- 60
+    data <- mc_read_data(files_table, clean=FALSE)
+    test_raw_data_format(data)
+    expect_equal(names(data$localities), "A")
+    expect_equal(names(data$localities$A$loggers), c("Minikin_SP1_1", "Minikin_QTi_1", "Minikin_TH2_1"))
+    expect_equal(length(data$localities$A$loggers$Minikin_SP1_1$datetime), 100)
+    expect_equal(length(data$localities$A$loggers$Minikin_QTi_1$datetime), 100)
+    expect_equal(length(data$localities$A$loggers$Minikin_TH2_1$datetime), 100)
+    expect_equal(names(data$localities$A$loggers$Minikin_SP1_1$sensors), c("SP1_SWP", "Minikin_T"))
+    expect_equal(names(data$localities$A$loggers$Minikin_QTi_1$sensors), c("QTi_PPFD", "Minikin_T"))
+    expect_equal(names(data$localities$A$loggers$Minikin_TH2_1$sensors), c("TH2_RH", "Minikin_T"))
+})
