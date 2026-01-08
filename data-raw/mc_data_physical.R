@@ -79,18 +79,18 @@ mc_data_physical[[.model_const_PHYSICAL_v]]@units <- "m/s"
 mc_data_physical[[.model_const_PHYSICAL_v]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_v]]@scale_coeff <- 1/10
 
-mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]] <- new("mc_Physical")
-mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@name <- .model_const_PHYSICAL_SWP_neg_bar
-mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@description <- "SWP -bar"
-mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@units <- "-bar"
-mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_SWP_neg_bar]]@scale_coeff <- 1
+mc_data_physical[[.model_const_PHYSICAL_SWP_bar]] <- new("mc_Physical")
+mc_data_physical[[.model_const_PHYSICAL_SWP_bar]]@name <- .model_const_PHYSICAL_SWP_bar
+mc_data_physical[[.model_const_PHYSICAL_SWP_bar]]@description <- "SWP -bar"
+mc_data_physical[[.model_const_PHYSICAL_SWP_bar]]@units <- "-bar"
+mc_data_physical[[.model_const_PHYSICAL_SWP_bar]]@viridis_color_map <- "D"
+mc_data_physical[[.model_const_PHYSICAL_SWP_bar]]@scale_coeff <- 1/20
 
 mc_data_physical[[.model_const_PHYSICAL_PPFD]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_PPFD]]@name <- .model_const_PHYSICAL_PPFD
 mc_data_physical[[.model_const_PHYSICAL_PPFD]]@description <- "PPFD μmol/m²/s"
 mc_data_physical[[.model_const_PHYSICAL_PPFD]]@units <- "μmol/m²/s"
 mc_data_physical[[.model_const_PHYSICAL_PPFD]]@viridis_color_map <- "D"
-mc_data_physical[[.model_const_PHYSICAL_PPFD]]@scale_coeff <- 1
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@scale_coeff <- 1/800
 
 usethis::use_data(mc_data_physical, overwrite = TRUE)

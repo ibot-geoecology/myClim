@@ -121,15 +121,15 @@
 #'
 #' EMS - Minikin SP1
 #' * SP1_SWP = ?
-#' * Minikin_T = ?
+#' * SP1_T = ?
 #' 
 #' EMS - Minikin QTi
 #' * QTi_PPFD = ?
-#' * Minikin_T = ?
+#' * QTi_T = ?
 #' 
 #' EMS - Minikin TH2
+#' * TH2_T = ?
 #' * TH2_RH = ?
-#' * Minikin_T = ?
 #' 
 #' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]
 "mc_data_heights"
@@ -154,16 +154,18 @@
 #' * HOBO_extT - external temperature in HOBO U23-004 logger (°C)
 #' * integer - universal sensor with integer values
 #' * logical - universal sensor with logical values
-#' * Minikin_T - temperature in EMS Minikin loggers (°C)
 #' * precipitation - (mm)
 #' * QTi_PPFD - photosynthetic photon flux density in EMS Minikin QTi (μmol/m²/s)
+#' * QTi_T - temperature in EMS Minikin QTi (°C)
 #' * real - universal sensor with real values
 #' * RH - relative humidity sensor (%)
+#' * TH2_T - temperature in EMS Minikin TH2 (°C)
 #' * TH2_RH - relative humidity in EMS Minikin TH2 (%)
 #' * snow_bool - result of function [myClim::mc_calc_snow()]
 #' * snow_fresh - fresh snow height (cm)
 #' * snow_total - total snow height (cm)
 #' * SP1_SWP - soil water potential in EMS Minikin SP1 (-bar)
+#' * SP1_T - temperature in EMS Minikin SP1 (°C)
 #' * sun_shine - time of sun shine (hours)
 #' * T_C - universal temperature sensor (°C)
 #' * Thermo_T - temperature sensor in Tomst Thermologger (°C)
@@ -190,7 +192,7 @@
 #' * VWC - volumetric moisture in m3/m3
 #' * PPFD - photosynthetic photon flux density in μmol/m²/s
 #' * RH - relative humidity in %
-#' * SWP_neg_bar - soil water potential in negative bar
+#' * SWP_bar - soil water potential in negative bar (-bar)
 #' * T_C - temperature in °C
 #' * t_h - time in hours
 #' * moisture_raw - raw TMS moisture sensor values
@@ -201,7 +203,7 @@
 #' Volumetric water content parameters
 #'
 #' Data frame hosting the coefficients for the conversion of TMS raw moisture units to
-#' volumetric warer content. The coefficients come from laboratory calibration for several
+#' volumetric water content. The coefficients come from laboratory calibration for several
 #' soil types. For the best performance you should specify the soil type in case you know it
 #' and in case it could be approximated to the available calibration e.g sand, loam, loamy sand....
 #' See [myClim::mc_calc_vwc()]

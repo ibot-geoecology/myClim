@@ -349,9 +349,9 @@ test_that("mc_read_data EMS", {
     expect_equal(length(data$localities$A$loggers$Minikin_SP1_1$datetime), 100)
     expect_equal(length(data$localities$A$loggers$Minikin_QTi_1$datetime), 100)
     expect_equal(length(data$localities$A$loggers$Minikin_TH2_1$datetime), 100)
-    expect_equal(names(data$localities$A$loggers$Minikin_SP1_1$sensors), c("SP1_SWP", "Minikin_T"))
-    expect_equal(names(data$localities$A$loggers$Minikin_QTi_1$sensors), c("QTi_PPFD", "Minikin_T"))
-    expect_equal(names(data$localities$A$loggers$Minikin_TH2_1$sensors), c("TH2_RH", "Minikin_T"))
+    expect_equal(names(data$localities$A$loggers$Minikin_SP1_1$sensors), c("SP1_SWP", "SP1_T"))
+    expect_equal(names(data$localities$A$loggers$Minikin_QTi_1$sensors), c("QTi_PPFD", "QTi_T"))
+    expect_equal(names(data$localities$A$loggers$Minikin_TH2_1$sensors), c("TH2_T", "TH2_RH"))
     sp1_csv <- vroom::vroom("../data/EMSBrno/00_2025_11_05.csv", delim = ";", skip = 1,
                             col_names = c("datetime", "swp", "t"), na = c("", "NA"),
                             col_types = vroom::cols(

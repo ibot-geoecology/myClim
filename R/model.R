@@ -21,7 +21,7 @@
 .model_const_PHYSICAL_moisture_raw <- "moisture_raw"
 .model_const_PHYSICAL_radius_raw <- "radius_raw"
 .model_const_PHYSICAL_v <- "v"
-.model_const_PHYSICAL_SWP_neg_bar <- "SWP_neg_bar"
+.model_const_PHYSICAL_SWP_bar <- "SWP_bar"
 .model_const_PHYSICAL_PPFD <- "PPFD"
 
 .model_const_VALUE_TYPE_REAL <- "real"
@@ -72,15 +72,21 @@ mc_const_SENSOR_HOBO_RH <- "HOBO_RH"
 #' Onset HOBO external temperature sensor id
 #' @export
 mc_const_SENSOR_HOBO_EXTT <- "HOBO_extT"
-#' EMS Minikin temperature sensor id
-#' @export
-mc_const_SENSOR_MINIKIN_T <- "Minikin_T"
 #' EMS Minikin SP1 SWP sensor id
 #' @export
 mc_const_SENSOR_SP1_SWP <- "SP1_SWP"
+#' EMS Minikin SP1 temperature sensor id
+#' @export
+mc_const_SENSOR_SP1_T <- "SP1_T"
 #' EMS Minikin QTi PPFD sensor id
 #' @export
 mc_const_SENSOR_QTi_PPFD <- "QTi_PPFD"
+#' EMS Minikin QTi temperature sensor id
+#' @export
+mc_const_SENSOR_QTi_T <- "QTi_T"
+#' EMS Minikin TH2 temperature sensor id
+#' @export
+mc_const_SENSOR_TH2_T <- "TH2_T"
 #' EMS Minikin TH2 RH sensor id
 #' @export
 mc_const_SENSOR_TH2_RH <- "TH2_RH"
@@ -174,11 +180,6 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
     QT = .model_const_LOGGER_EMS_MINIKIN_QTi,
     TH = .model_const_LOGGER_EMS_MINIKIN_TH2
 )
-
-.model_minikin_logger_sensor <- list()
-.model_minikin_logger_sensor[[.model_const_LOGGER_EMS_MINIKIN_SP1]] <- mc_const_SENSOR_SP1_SWP
-.model_minikin_logger_sensor[[.model_const_LOGGER_EMS_MINIKIN_QTi]] <- mc_const_SENSOR_QTi_PPFD
-.model_minikin_logger_sensor[[.model_const_LOGGER_EMS_MINIKIN_TH2]] <- mc_const_SENSOR_TH2_RH
 
 .model_const_DATA_FORMAT_TOMST <- "TOMST"
 .model_const_DATA_FORMAT_TOMST_join <- "TOMST_join"
@@ -1250,14 +1251,21 @@ setMethod(
         ems_result <- .model_read_ems(object, path, 0, read_logger_type = TRUE)
         logger_type <- .model_ems_logger_shortcuts[[ems_result$logger_type]]   
         columns <- list()
-        temperature_column <- 3
-        logger_sensor_column <- 2
-        if(logger_type == .model_const_LOGGER_EMS_MINIKIN_TH2) {
-            temperature_column <- 2
-            logger_sensor_column <- 3
+        if(logger_type == .model_const_LOGGER_EMS_MINIKIN_SP1) {
+            columns[[mc_const_SENSOR_SP1_SWP]] <- 2
+            columns[[mc_const_SENSOR_SP1_T]] <- 3
         }
-        columns[[.model_minikin_logger_sensor[[logger_type]]]] <- logger_sensor_column
-        columns[[mc_const_SENSOR_MINIKIN_T]] <- temperature_column
+        else if(logger_type == .model_const_LOGGER_EMS_MINIKIN_QTi) {
+            columns[[mc_const_SENSOR_QTi_PPFD]] <- 2
+            columns[[mc_const_SENSOR_QTi_T]] <- 3
+        }
+        else if(logger_type == .model_const_LOGGER_EMS_MINIKIN_TH2) {
+            columns[[mc_const_SENSOR_TH2_T]] <- 2
+            columns[[mc_const_SENSOR_TH2_RH]] <- 3
+        } else {
+            return(NULL)
+        }
+        
         object@columns <- columns
         object@logger_type <- logger_type
         return(object)

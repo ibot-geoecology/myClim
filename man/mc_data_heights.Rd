@@ -64,6 +64,24 @@ HOBO - HOBO_U23-004
 \item HOBO_T = air 2 cm
 \item HOBO_extT = soil 8 cm
 }
+
+EMS - Minikin SP1
+\itemize{
+\item SP1_SWP = ?
+\item SP1_T = ?
+}
+
+EMS - Minikin QTi
+\itemize{
+\item QTi_PPFD = ?
+\item QTi_T = ?
+}
+
+EMS - Minikin TH2
+\itemize{
+\item TH2_T = ?
+\item TH2_RH = ?
+}
 }
 \seealso{
 \code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}
