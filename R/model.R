@@ -1250,8 +1250,14 @@ setMethod(
         ems_result <- .model_read_ems(object, path, 0, read_logger_type = TRUE)
         logger_type <- .model_ems_logger_shortcuts[[ems_result$logger_type]]   
         columns <- list()
-        columns[[.model_minikin_logger_sensor[[logger_type]]]] <- 2
-        columns[[mc_const_SENSOR_MINIKIN_T]] <- 3
+        temperature_column <- 3
+        logger_sensor_column <- 2
+        if(logger_type == .model_const_LOGGER_EMS_MINIKIN_TH2) {
+            temperature_column <- 2
+            logger_sensor_column <- 3
+        }
+        columns[[.model_minikin_logger_sensor[[logger_type]]]] <- logger_sensor_column
+        columns[[mc_const_SENSOR_MINIKIN_T]] <- temperature_column
         object@columns <- columns
         object@logger_type <- logger_type
         return(object)
@@ -1325,7 +1331,7 @@ setMethod(
     time_items <- data_raw[1:8, , drop = FALSE]
     time_raw <- as.raw(as.vector(time_items))
     t_days <- readBin(time_raw, what = "double", size = 8, n = n_records, endian = "little")
-    datetime <- origin + t_days * 86400
+    datetime <- origin + round(t_days * 86400)
     return(datetime)
 }
 

@@ -352,4 +352,45 @@ test_that("mc_read_data EMS", {
     expect_equal(names(data$localities$A$loggers$Minikin_SP1_1$sensors), c("SP1_SWP", "Minikin_T"))
     expect_equal(names(data$localities$A$loggers$Minikin_QTi_1$sensors), c("QTi_PPFD", "Minikin_T"))
     expect_equal(names(data$localities$A$loggers$Minikin_TH2_1$sensors), c("TH2_RH", "Minikin_T"))
+    sp1_csv <- vroom::vroom("../data/EMSBrno/00_2025_11_05.csv", delim = ";", skip = 1,
+                            col_names = c("datetime", "swp", "t"), na = c("", "NA"),
+                            col_types = vroom::cols(
+                                datetime = vroom::col_datetime(),
+                                swp = vroom::col_double(),
+                                t = vroom::col_double()
+                            ),
+                            locale = vroom::locale(decimal_mark = ",", tz = "Etc/GMT-1"))
+    expect_true(all(data$localities$A$loggers$Minikin_SP1_1$datetime == lubridate::with_tz(sp1_csv$datetime, "UTC")))
+    data_swp_values <- data$localities$A$loggers$Minikin_SP1_1$sensors$SP1_SWP$values
+    expect_true(all(is.na(data_swp_values) == is.na(sp1_csv$swp)))
+    expect_true(all(dplyr::near(data_swp_values[!is.na(data_swp_values)],
+                                sp1_csv$swp[!is.na(sp1_csv$swp)], tol = 1e-6)))
+    expect_true(all(dplyr::near(data$localities$A$loggers$Minikin_SP1_1$sensors$Minikin_T$values,
+                                sp1_csv$t, tol = 1e-6)))
+    qti_csv <- vroom::vroom("../data/EMSBrno/18_2025_11_03.csv", delim = ";", skip = 1,
+                            col_names = c("datetime", "ppfd", "t"), na = c("", "NA"),
+                            col_types = vroom::cols(
+                                datetime = vroom::col_datetime(),
+                                ppfd = vroom::col_double(),
+                                t = vroom::col_double()
+                            ),
+                            locale = vroom::locale(decimal_mark = ",", tz = "Etc/GMT-1"))
+    expect_true(all(data$localities$A$loggers$Minikin_QTi_1$datetime == lubridate::with_tz(qti_csv$datetime, "UTC")))
+    expect_true(all(dplyr::near(data$localities$A$loggers$Minikin_QTi_1$sensors$QTi_PPFD$values,
+                                qti_csv$ppfd, tol = 1e-6)))
+    expect_true(all(dplyr::near(data$localities$A$loggers$Minikin_QTi_1$sensors$Minikin_T$values,
+                                qti_csv$t, tol = 1e-6)))
+    th2_csv <- vroom::vroom("../data/EMSBrno/B4_2025_12_15.csv", delim = ";", skip = 1,
+                            col_names = c("datetime", "t", "rh"), na = c("", "NA"),
+                            col_types = vroom::cols(
+                                datetime = vroom::col_datetime(),
+                                rh = vroom::col_double(),
+                                t = vroom::col_double()
+                            ),
+                            locale = vroom::locale(decimal_mark = ",", tz = "Etc/GMT-1"))
+    expect_true(all(data$localities$A$loggers$Minikin_TH2_1$datetime == lubridate::with_tz(th2_csv$datetime, "UTC")))
+    expect_true(all(dplyr::near(data$localities$A$loggers$Minikin_TH2_1$sensors$TH2_RH$values,
+                                th2_csv$rh, tol = 1e-2)))
+    expect_true(all(dplyr::near(data$localities$A$loggers$Minikin_TH2_1$sensors$Minikin_T$values,
+                                th2_csv$t, tol = 1e-2)))
 })
