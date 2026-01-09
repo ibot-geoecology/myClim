@@ -7,7 +7,8 @@
 \title{Class for reading EMS Brno logger files}
 \description{
 Provides the key for reading the dcv source files.
-Dcv file is a binary file format used by EMS loggers.
+Dcv file is a binary file format used by EMS loggers as an output of
+EMS downloading software Mini32.
 }
 \seealso{
 \link{mc_DataFormat}, \link{mc_data_formats}
