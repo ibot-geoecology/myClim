@@ -773,7 +773,8 @@ setMethod("initialize",
 #' Class for reading EMS Brno logger files
 #'
 #' Provides the key for reading the dcv source files.
-#' Dcv file is a binary file format used by EMS loggers.
+#' Dcv file is a binary file format used by EMS loggers as an output of 
+#' EMS downloading software Mini32. 
 #'
 #' @seealso [myClim::mc_DataFormat], [mc_data_formats]
 #' @exportClass mc_EMSDataFormat

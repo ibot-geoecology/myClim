@@ -70,7 +70,7 @@
 #'
 #' **EMS**
 #' 
-#' EMS data format is used by EMS (Environmental Monitoring Systems s.r.o.) loggers. MyClim currently supports only
+#' EMS data format is used by EMS devices (Environmental Monitoring Systems s.r.o. - www.emsbrno.cz). myClim currently supports only
 #' binary dcv files from loggers: Minikin SP1, Minikin QTi and Minikin TH2.
 #' Time zone offset (`tz_offset`) must be set manually in myClim reading functions ([mc_read_files()], [mc_read_data()]).
 #'
