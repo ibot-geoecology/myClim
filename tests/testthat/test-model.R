@@ -46,7 +46,7 @@ test_that(".model_edit_data HOBO", {
     hobo_format@skip <- 2
     hobo_format@separator <- ","
     path <- "../data/HOBO/20024354_comma.csv"
-    data_table <- .read_get_data_from_file(path, hobo_format)
+    data_table <- .model_get_data_from_file(hobo_format, path)
     test_function <- if(exists(".model_edit_data")) .model_edit_data else .model_edit_data
     new_data_table <- test_function(hobo_format, data_table)
     expect_equal(nrow(data_table) - nrow(new_data_table), 3)

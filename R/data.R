@@ -68,7 +68,14 @@
 #' Date and time separated in more columns is not supported in myClim reading. If time zone is not defined in header of HOBO txt or csv file
 #' and is not UTC, then `tz_offset` must be filled in while reading. UTF-8 encoding of HOBO file is required for reding to myClim.
 #'
-#' @seealso [myClim::mc_DataFormat], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class]
+#' **EMS**
+#' 
+#' EMS data format is used by EMS devices (Environmental Monitoring Systems s.r.o. - www.emsbrno.cz). myClim currently supports only
+#' binary dcv files from loggers: Minikin SP1, Minikin QTi and Minikin TH2.
+#' Time zone offset (`tz_offset`) must be set manually in myClim reading functions ([mc_read_files()], [mc_read_data()]).
+#'
+#' @seealso [myClim::mc_DataFormat], [mc_TOMSTDataFormat-class], [mc_TOMSTJoinDataFormat-class], [mc_HOBODataFormat-class],
+#' [mc_EMSDataFormat-class]
 "mc_data_formats"
 
 #' Default heights of sensors
@@ -112,6 +119,18 @@
 #' * HOBO_T = air 2 cm
 #' * HOBO_extT = soil 8 cm
 #'
+#' EMS - Minikin SP1
+#' * SP1_SWP = soil 10 cm
+#' * SP1_T = soil 0 cm
+#' 
+#' EMS - Minikin QTi
+#' * QTi_PPFD = air 100 cm
+#' * QTi_T = air 100 cm
+#' 
+#' EMS - Minikin TH2
+#' * TH2_T = air 150 cm
+#' * TH2_RH = air 150 cm
+#' 
 #' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]
 "mc_data_heights"
 
@@ -135,13 +154,18 @@
 #' * HOBO_extT - external temperature in HOBO U23-004 logger (°C)
 #' * integer - universal sensor with integer values
 #' * logical - universal sensor with logical values
-#' * VWC - volumetric water content in soil (m3/m3)
 #' * precipitation - (mm)
+#' * QTi_PPFD - photosynthetic photon flux density in EMS Minikin QTi (μmol/m²/s)
+#' * QTi_T - temperature in EMS Minikin QTi (°C)
 #' * real - universal sensor with real values
 #' * RH - relative humidity sensor (%)
+#' * TH2_T - temperature in EMS Minikin TH2 (°C)
+#' * TH2_RH - relative humidity in EMS Minikin TH2 (%)
 #' * snow_bool - result of function [myClim::mc_calc_snow()]
 #' * snow_fresh - fresh snow height (cm)
 #' * snow_total - total snow height (cm)
+#' * SP1_SWP - soil water potential in EMS Minikin SP1 (-bar)
+#' * SP1_T - temperature in EMS Minikin SP1 (°C)
 #' * sun_shine - time of sun shine (hours)
 #' * T_C - universal temperature sensor (°C)
 #' * Thermo_T - temperature sensor in Tomst Thermologger (°C)
@@ -149,6 +173,7 @@
 #' * TMS_T2 - surface temperature sensor in Tomst TMS (°C)
 #' * TMS_T3 - air temperature sensor in Tomst TMS (°C)
 #' * TMS_moist - soil moisture sensor in Tomst TMS (raw TMS units)
+#' * VWC - volumetric water content in soil (m³/m³)
 #' * wind - wind speed (m/s)
 "mc_data_sensors"
 
@@ -165,7 +190,9 @@
 #' * l_mm - length in mm
 #' * l_um - length in um
 #' * VWC - volumetric moisture in m3/m3
+#' * PPFD - photosynthetic photon flux density in μmol/m²/s
 #' * RH - relative humidity in %
+#' * SWP_bar - soil water potential in negative bar (-bar)
 #' * T_C - temperature in °C
 #' * t_h - time in hours
 #' * moisture_raw - raw TMS moisture sensor values
@@ -176,7 +203,7 @@
 #' Volumetric water content parameters
 #'
 #' Data frame hosting the coefficients for the conversion of TMS raw moisture units to
-#' volumetric warer content. The coefficients come from laboratory calibration for several
+#' volumetric water content. The coefficients come from laboratory calibration for several
 #' soil types. For the best performance you should specify the soil type in case you know it
 #' and in case it could be approximated to the available calibration e.g sand, loam, loamy sand....
 #' See [myClim::mc_calc_vwc()]

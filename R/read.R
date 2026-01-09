@@ -156,6 +156,7 @@ mc_read_files <- function(paths, dataformat_name, logger_type=NA_character_, rec
 #' If timezone can't be detected, then UTC is supposed.
 #' Timezone offset in HOBO format can be defined in header. In this case function try detect offset automatically.
 #' Ignored for TOMST TMS data format (they are always in UTC)
+#' EMS loggers require tz_offset definition.
 #' * step - Time step of microclimatic time-series in seconds. When provided, then used in [mc_prep_clean]
 #' instead of automatic step detection. See details. 
 #'
@@ -447,7 +448,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 }
 
 .read_logger <- function(filename, data_format, serial_number, step) {
-    data_table <- .read_get_data_from_file(filename, data_format)
+    data_table <- .model_get_data_from_file(data_format, filename)
     .model_check_format(data_format)
     data_table <- .model_edit_data(data_format, data_table)
     if(nrow(data_table) == 0) {
@@ -476,28 +477,6 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     }
     result <- .read_get_new_logger(datetime, sensors, serial_number, data_format@logger_type, step, raw_index)
     if(!is.null(.read_state$read_bar)) .read_state$read_bar$tick()
-    return(result)
-}
-
-.read_get_data_from_file <- function(filename, data_format, nrows=Inf) {
-    result <- vroom::vroom(filename,
-                           col_names = FALSE,
-                           col_types = data_format@col_types,
-                           col_select = if(is.na(data_format@col_types)) vroom::everything() else 1:stringr::str_length(data_format@col_types),
-                           delim = data_format@separator,
-                           skip = data_format@skip,
-                           na = data_format@na_strings,
-                           n_max = nrows,
-                           show_col_types = FALSE,
-                           progress = FALSE)
-    problems <- data.frame()
-    if("spec_tbl_df" %in% class(result)){
-        problems <- vroom::problems(result)
-    }
-    if(nrow(problems) > 0) {
-        mc_read_problems[[filename]] <- problems
-        warning(stringr::str_glue(.read_const_MESSAGE_VROOM_WARNING))
-    }
     return(result)
 }
 

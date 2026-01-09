@@ -5,7 +5,7 @@
 \alias{mc_data_formats}
 \title{Formats of source data files}
 \format{
-An object of class \code{environment} of length 3.
+An object of class \code{environment} of length 4.
 }
 \usage{
 mc_data_formats
@@ -39,8 +39,15 @@ detected automatically from header of data.
 Format of date-time (\code{date_format}) must be set manually in myClim reading functions (\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}).
 Date and time separated in more columns is not supported in myClim reading. If time zone is not defined in header of HOBO txt or csv file
 and is not UTC, then \code{tz_offset} must be filled in while reading. UTF-8 encoding of HOBO file is required for reding to myClim.
+
+\strong{EMS}
+
+EMS data format is used by EMS devices (Environmental Monitoring Systems s.r.o. - www.emsbrno.cz). myClim currently supports only
+binary dcv files from loggers: Minikin SP1, Minikin QTi and Minikin TH2.
+Time zone offset (\code{tz_offset}) must be set manually in myClim reading functions (\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}).
 }
 \seealso{
-\link{mc_DataFormat}, \linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}, \linkS4class{mc_HOBODataFormat}
+\link{mc_DataFormat}, \linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}, \linkS4class{mc_HOBODataFormat},
+\linkS4class{mc_EMSDataFormat}
 }
 \keyword{datasets}
