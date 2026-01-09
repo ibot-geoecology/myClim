@@ -159,7 +159,7 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_LOGGER_HOBO_U23_001A <- "HOBO_U23-001A"
 .model_const_LOGGER_HOBO_U23_004 <- "HOBO_U23-004"
 .model_const_LOGGER_EMS_MINIKIN_SP1 <- "Minikin_SP1"
-.model_const_LOGGER_EMS_MINIKIN_QTi <- "Minikin_QTi"
+.model_const_LOGGER_EMS_MINIKIN_QTI <- "Minikin_QTi"
 .model_const_LOGGER_EMS_MINIKIN_TH2 <- "Minikin_TH2"
 .model_const_LOGGER_NA_TYPE_NAME <- "Logger"
 
@@ -171,13 +171,13 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
     .model_const_LOGGER_HOBO_U23_001A,
     .model_const_LOGGER_HOBO_U23_004,
     .model_const_LOGGER_EMS_MINIKIN_SP1,
-    .model_const_LOGGER_EMS_MINIKIN_QTi,
+    .model_const_LOGGER_EMS_MINIKIN_QTI,
     .model_const_LOGGER_EMS_MINIKIN_TH2
 )
 
 .model_ems_logger_shortcuts <- list(
     SP = .model_const_LOGGER_EMS_MINIKIN_SP1,
-    QT = .model_const_LOGGER_EMS_MINIKIN_QTi,
+    QT = .model_const_LOGGER_EMS_MINIKIN_QTI,
     TH = .model_const_LOGGER_EMS_MINIKIN_TH2
 )
 
@@ -1255,7 +1255,7 @@ setMethod(
             columns[[mc_const_SENSOR_SP1_SWP]] <- 2
             columns[[mc_const_SENSOR_SP1_T]] <- 3
         }
-        else if(logger_type == .model_const_LOGGER_EMS_MINIKIN_QTi) {
+        else if(logger_type == .model_const_LOGGER_EMS_MINIKIN_QTI) {
             columns[[mc_const_SENSOR_QTi_PPFD]] <- 2
             columns[[mc_const_SENSOR_QTi_T]] <- 3
         }

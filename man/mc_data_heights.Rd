@@ -5,7 +5,7 @@
 \alias{mc_data_heights}
 \title{Default heights of sensors}
 \format{
-An object of class \code{data.frame} with 15 rows and 4 columns.
+An object of class \code{data.frame} with 21 rows and 4 columns.
 }
 \usage{
 mc_data_heights
@@ -67,20 +67,20 @@ HOBO - HOBO_U23-004
 
 EMS - Minikin SP1
 \itemize{
-\item SP1_SWP = ?
-\item SP1_T = ?
+\item SP1_SWP = soil 10 cm
+\item SP1_T = soil 0 cm
 }
 
 EMS - Minikin QTi
 \itemize{
-\item QTi_PPFD = ?
-\item QTi_T = ?
+\item QTi_PPFD = air 100 cm
+\item QTi_T = air 100 cm
 }
 
 EMS - Minikin TH2
 \itemize{
-\item TH2_T = ?
-\item TH2_RH = ?
+\item TH2_T = air 150 cm
+\item TH2_RH = air 150 cm
 }
 }
 \seealso{

@@ -1,3 +1,6 @@
+# myClim 1.5.2
+* Added EMS data format support for binary .dcv files (Minikin SP1, QTi, TH2).
+
 # myClim 1.5.1
 * Fixed compatibility issue with `data.table` 1.8.0.
 

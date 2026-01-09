@@ -111,7 +111,7 @@ mc_data_sensors[[mc_const_SENSOR_SP1_T]]@plot_color <- "red3"
 
 mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]]@sensor_id <- mc_const_SENSOR_QTi_PPFD
-mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]]@logger <- .model_const_LOGGER_EMS_MINIKIN_QTi
+mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]]@logger <- .model_const_LOGGER_EMS_MINIKIN_QTI
 mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]]@physical <- .model_const_PHYSICAL_PPFD
 mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]]@min_value <- NA_real_
 mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]]@max_value <- NA_real_
@@ -119,7 +119,7 @@ mc_data_sensors[[mc_const_SENSOR_QTi_PPFD]]@plot_color <- "goldenrod1"
 
 mc_data_sensors[[mc_const_SENSOR_QTi_T]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_QTi_T]]@sensor_id <- mc_const_SENSOR_QTi_T
-mc_data_sensors[[mc_const_SENSOR_QTi_T]]@logger <- .model_const_LOGGER_EMS_MINIKIN_QTi
+mc_data_sensors[[mc_const_SENSOR_QTi_T]]@logger <- .model_const_LOGGER_EMS_MINIKIN_QTI
 mc_data_sensors[[mc_const_SENSOR_QTi_T]]@physical <- .model_const_PHYSICAL_T_C
 mc_data_sensors[[mc_const_SENSOR_QTi_T]]@min_value <- -40
 mc_data_sensors[[mc_const_SENSOR_QTi_T]]@max_value <- 60

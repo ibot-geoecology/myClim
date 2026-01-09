@@ -120,16 +120,16 @@
 #' * HOBO_extT = soil 8 cm
 #'
 #' EMS - Minikin SP1
-#' * SP1_SWP = ?
-#' * SP1_T = ?
+#' * SP1_SWP = soil 10 cm
+#' * SP1_T = soil 0 cm
 #' 
 #' EMS - Minikin QTi
-#' * QTi_PPFD = ?
-#' * QTi_T = ?
+#' * QTi_PPFD = air 100 cm
+#' * QTi_T = air 100 cm
 #' 
 #' EMS - Minikin TH2
-#' * TH2_T = ?
-#' * TH2_RH = ?
+#' * TH2_T = air 150 cm
+#' * TH2_RH = air 150 cm
 #' 
 #' @seealso [myClim::mc_read_files()], [myClim::mc_read_data()]
 "mc_data_heights"
