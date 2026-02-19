@@ -18,6 +18,9 @@
 .prep_const_MESSAGE_CROP_DATETIME_LENGTH <- "Start or end can be either NULL or single value. Multiple values are not allowed. For advance cropping use crop_table parameter."
 .prep_const_MESSAGE_CROP_TABLE_PARAMS <- "Cropping must be defined either as a parameter or as a table."
 .prep_const_MESSAGE_CROP_TABLE_DUPLICATES <- "Crop table contains duplicated items."
+.prep_const_MESSAGE_TRIM_N <- "n must be a single positive integer."
+.prep_const_MESSAGE_TRIM_START_END <- "At least one of start or end must be TRUE."
+.prep_const_MESSAGE_TRIM_LOGGER_TYPE_IGNORED <- "logger_type parameter is ignored for myClim objects in Agg-format."
 .prep_const_MESSAGE_VALUES_SAME_TIME <- "In logger {serial_number} are different values of {sensor_name} in same time."
 .prep_const_MESSAGE_STEP_PROBLEM <- "step cannot be detected for logger {logger$metadata@serial_number} - skip"
 .prep_const_MESSAGE_CLEAN_CONFLICT <- "Object not cleaned. The function only tagged (states) measurements with cleaning conflicts."
@@ -751,7 +754,7 @@ mc_prep_crop <- function(data, start=NULL, end=NULL, localities=NULL, end_includ
     }
 
     item$sensors <- purrr::map(item$sensors, sensor_function)
-    item
+    return(item)
 }
 
 .prep_check_parameters_for_crop <- function(start, end, localities, crop_table) {
@@ -1418,4 +1421,101 @@ mc_prep_expandtime <- function(data, to_step, localities=NULL, loggers=NULL, fro
     }
     logger$clean_info@step <- to_step
     return(logger)
+}
+
+#' Trim records from beginning and/or end
+#'
+#' @description
+#' This function removes the first and/or last `n` records from each time-series.
+#' It works for both Raw and Agg formats.
+#'
+#' @details
+#' In Raw-format, trimming can be restricted to selected logger types with `logger_type`.
+#' In Agg-format, `logger_type` is ignored.
+#'
+#' If both `start` and `end` are TRUE, the function trims `n` records from both sides.
+#' When the resulting number of records is negative, the output time-series is empty.
+#'
+#' @template param_myClim_object
+#' @param start logical; trim first `n` records (default TRUE)
+#' @param end logical; trim last `n` records (default FALSE)
+#' @param n number of records to trim from selected side(s); must be positive integer (default 1)
+#' @param logger_type optional filter; vector of logger types to trim in Raw-format (default NULL)
+#' @return myClim object in the same format as input, with trimmed time-series.
+#' @export
+#' @examples
+#' data_trim <- mc_prep_trim(mc_data_example_clean, start=TRUE, end=TRUE,
+#'                           n=1, logger_type=c("Thermo", "TMS"))
+mc_prep_trim <- function(data, start=TRUE, end=FALSE, n=1, logger_type=NULL) {
+    if(!is.logical(start) || length(start) != 1 || is.na(start) ||
+       !is.logical(end) || length(end) != 1 || is.na(end)) {
+        stop(.prep_const_MESSAGE_TRIM_START_END)
+    }
+    if(!start && !end) {
+        stop(.prep_const_MESSAGE_TRIM_START_END)
+    }
+    if(!(is.numeric(n) && length(n) == 1 && !is.na(n) && n > 0 && dplyr::near(n %% 1, 0))) {
+        stop(.prep_const_MESSAGE_TRIM_N)
+    }
+    n <- as.integer(n)
+
+    is_agg_format <- .common_is_agg_format(data)
+    
+    if(is_agg_format && !is.null(logger_type)) {
+        warning(.prep_const_MESSAGE_TRIM_LOGGER_TYPE_IGNORED)
+    }
+
+    trim_function <- function(item) {
+        .prep_trim_item(item, start, end, n)
+    }
+
+    logger_function <- function(logger) {
+        if(!(is.null(logger_type) || logger$metadata@type %in% logger_type)) {
+            return(logger)
+        }
+        trim_function(logger)
+    }
+
+    locality_function <- function(locality) {
+        if(is_agg_format) {
+            return(trim_function(locality))
+        }
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        return(locality)
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
+}
+
+.prep_trim_item <- function(item, start, end, n) {
+    table <- .common_sensor_values_as_tibble(item)
+    if(inherits(item$metadata, "mc_LoggerMetadata") &&
+       !any(is.na(item$metadata@raw_index))) {
+        table$raw_index__ <- item$metadata@raw_index
+    }
+
+    nrows <- nrow(table)
+
+    selected <- rep(TRUE, nrows)
+    if(start) {
+        selected[seq_len(min(n, nrows))] <- FALSE
+    }
+    if(end) {
+        end_n <- min(n, nrows)
+        selected[(nrows - end_n + 1):nrows] <- FALSE
+    }
+
+    table <- table[selected, ]
+    item$datetime <- table$datetime
+    if("raw_index__" %in% colnames(table)) {
+        item$metadata@raw_index <- table$raw_index__
+    }
+
+    item$sensors <- purrr::map(item$sensors, function(sensor) {
+        sensor$values <- table[[sensor$metadata@name]]
+        sensor
+    })
+    item <- .prep_crop_edit_states(item, lubridate::NA_POSIXct_, lubridate::NA_POSIXct_)
+    return(item)
 }

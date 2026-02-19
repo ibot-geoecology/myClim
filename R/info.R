@@ -106,13 +106,16 @@ mc_info <- function(data) {
         }
 
         count <- length(item$sensors)
+        
+        start_date <- if(length(item$datetime) == 0) NA else min(item$datetime)
+        end_date <- if(length(item$datetime) == 0) NA else max(item$datetime)
 
         tibble::tibble(locality_id=rep(locality_id, count),
                        serial_number=rep(serial_number, count),
                        sensor_id=purrr::map_chr(item$sensors, function(x) x$metadata@sensor_id),
                        sensor_name=names(item$sensors),
-                       start_date=rep(min(item$datetime), count),
-                       end_date=rep(max(item$datetime), count),
+                       start_date=rep(start_date, count),
+                       end_date=rep(end_date, count),
                        step_seconds=rep(step, count),
                        period=rep(period, count),
                        min_value=purrr::map_dbl(item$sensors, function(x) function_with_check_empty(x$values, min)),
@@ -201,13 +204,16 @@ mc_info_logger <- function(data) {
     logger_function <- function(locality_id, logger) {
         step <- as.integer(logger$clean_info@step)
 
+        start_date <- if(length(logger$datetime) == 0) NA else min(logger$datetime)
+        end_date <- if(length(logger$datetime) == 0) NA else max(logger$datetime)
+
         return(
              list(locality_id=locality_id,
                   logger_name=logger$metadata@name,
                   serial_number=logger$metadata@serial_number,
                   logger_type=logger$metadata@type,
-                  start_date=min(logger$datetime),
-                  end_date=max(logger$datetime),
+                  start_date=start_date,
+                  end_date=end_date,
                   step_seconds=step))
     }
 

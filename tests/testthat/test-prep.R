@@ -506,3 +506,81 @@ test_that("mc_prep_expandtime", {
     data_expanded4 <- mc_prep_expandtime(data, 900, from_step = 1800)
     expect_equal(data_expanded, data_expanded4)
 })
+
+test_that("mc_prep_trim", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
+    loggers_before <- mc_info_logger(data)
+
+    trimmed <- mc_prep_trim(data, start=TRUE, end=FALSE, n=1)
+    test_raw_data_format(trimmed)
+    loggers_after <- mc_info_logger(trimmed)
+    expect_equal(loggers_after$start_date - lubridate::minutes(15), loggers_before$start_date)
+    expect_equal(loggers_after$end_date, loggers_before$end_date)
+    expect_equal(data$localities$A1E05$loggers$Thermo_1$datetime[-1], trimmed$localities$A1E05$loggers$Thermo_1$datetime)
+    expect_equal(data$localities$A1E05$loggers$Thermo_1$metadata@raw_index[-1], trimmed$localities$A1E05$loggers$Thermo_1$metadata@raw_index)
+
+    trimmed <- mc_prep_trim(data, start=TRUE, end=TRUE, n=2)
+    test_raw_data_format(trimmed)
+    loggers_after <- mc_info_logger(trimmed)
+    expect_equal(loggers_after$start_date - lubridate::minutes(30), loggers_before$start_date)
+    expect_equal(loggers_after$end_date, loggers_before$end_date - lubridate::minutes(30))
+    expect_equal(data$localities$A1E05$loggers$Thermo_1$datetime[3:9], trimmed$localities$A1E05$loggers$Thermo_1$datetime)
+    expect_equal(data$localities$A1E05$loggers$Thermo_1$metadata@raw_index[3:9], trimmed$localities$A1E05$loggers$Thermo_1$metadata@raw_index)
+    
+    states_before <- mc_info_states(data)
+    states_after <- mc_info_states(trimmed)
+    expect_equal(states_after$start, states_before$start + lubridate::minutes(30))
+    expect_equal(states_after$end, states_before$end - lubridate::minutes(30))
+    
+    cleaned_data <- mc_prep_clean(data, silent=T)
+    trimmed <- mc_prep_trim(cleaned_data, start=TRUE, end=TRUE, n=1)
+    test_raw_data_format(trimmed)
+})
+
+test_that("mc_prep_trim logger_type", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
+    loggers_before <- mc_info_logger(data)
+
+    trimmed <- mc_prep_trim(data, start=TRUE, end=TRUE, n=1, logger_type="TMS")
+    loggers_after <- mc_info_logger(trimmed)
+
+    is_tms <- loggers_before$logger_type == "TMS"
+    expect_equal(loggers_after$start_date[is_tms] - lubridate::minutes(15), loggers_before$start_date[is_tms])
+    expect_equal(loggers_after$start_date[!is_tms], loggers_before$start_date[!is_tms])
+    expect_equal(loggers_after$end_date[is_tms], loggers_before$end_date[is_tms] - lubridate::minutes(15))
+    expect_equal(loggers_after$end_date[!is_tms], loggers_before$end_date[!is_tms])
+
+    trimmed <- mc_prep_trim(data, start=TRUE, end=TRUE, n=1, logger_type=c("TMS", "Thermo"))
+    loggers_after <- mc_info_logger(trimmed)
+    expect_equal(loggers_after$start_date - lubridate::minutes(15), loggers_before$start_date)
+    expect_equal(loggers_after$end_date, loggers_before$end_date - lubridate::minutes(15))
+})
+
+test_that("mc_prep_trim agg", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=TRUE, silent=TRUE)
+    agg_data <- mc_agg(data)
+    expect_warning(trimmed <- mc_prep_trim(agg_data, start=TRUE, end=TRUE, n=1, logger_type="TMS"))
+    test_agg_data_format(trimmed)
+    info_before <- mc_info(agg_data)
+    info_after <- mc_info(trimmed)
+    expect_equal(info_after$start_date - lubridate::minutes(15), info_before$start_date)
+    expect_equal(info_after$end_date, info_before$end_date - lubridate::minutes(15))
+})
+
+test_that("mc_prep_trim wrong params", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
+    expect_error(mc_prep_trim(data, start=FALSE, end=FALSE, n=1))
+    expect_error(mc_prep_trim(data, start=TRUE, end=FALSE, n=-1))
+    expect_error(mc_prep_trim(data, start=TRUE, end=FALSE, n=1.5))
+})
+
+test_that("mc_prep_trim empty", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=TRUE, silent=TRUE)
+    trimmed <- mc_prep_trim(data, start=TRUE, end=TRUE, n=6)
+    test_raw_data_format(trimmed)
+    loggers <- mc_info_logger(trimmed)
+    expect_true(is.na(loggers$start_date[[1]]))
+    expect_true(is.na(loggers$end_date[[1]]))
+    expect_true(all(!is.na(loggers$start_date[-1])))
+    expect_true(all(!is.na(loggers$end_date[-1])))
+})

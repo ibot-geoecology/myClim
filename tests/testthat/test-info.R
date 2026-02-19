@@ -29,6 +29,17 @@ test_that("mc_info", {
     expect_equal(nrow(info_agg_data), 12)
 })
 
+test_that("mc_info mc_info_logger empty", {
+    data <- mc_read_files("../data/clean-datetime_step", "TOMST", clean=FALSE)
+    crop_data <- mc_prep_crop(data, end=lubridate::ymd_hm("2018-09-15 00:00"))
+    info <- mc_info(crop_data)
+    expect_equal(sum(is.na(info$start_date)), 16)
+    expect_equal(sum(is.na(info$end_date)), 16)
+    info_logger <- mc_info_logger(crop_data)
+    expect_equal(sum(is.na(info_logger$start_date)), 4)
+    expect_equal(sum(is.na(info_logger$end_date)), 4)
+})
+
 test_that("mc_info no data FIX", {
     data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
     all_data <- mc_agg(data, "mean", "all")

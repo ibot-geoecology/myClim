@@ -1,3 +1,7 @@
+# myClim 1.5.3
+* The functions `mc_info` and `mc_info_logger` now correctly show loggers without data.
+* A new function `mc_prep_trim` has been added to trim values at the start and/or end of time series.
+
 # myClim 1.5.2
 * Added EMS data format support for binary .dcv files (Minikin SP1, QTi, TH2).
 
