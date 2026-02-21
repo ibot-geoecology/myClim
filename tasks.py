@@ -31,7 +31,7 @@ def generate_html(c):
 
 @task
 def check(c):
-    c.run("""R --vanilla --no-multiarch -e 'devtools::check()'""", pty=True)
+    c.run("""R --vanilla -e 'devtools::check()'""", pty=True)
 
 @task
 def check_dev(c):
