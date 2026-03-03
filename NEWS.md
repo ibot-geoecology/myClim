@@ -1,3 +1,6 @@
+# myClim 1.5.4
+* Fixed the display of `vroom` parsing errors.
+
 # myClim 1.5.3
 * The functions `mc_info` and `mc_info_logger` now correctly show loggers without data.
 * A new function `mc_prep_trim` has been added to trim values at the start and/or end of time series.

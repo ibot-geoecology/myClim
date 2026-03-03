@@ -8,7 +8,7 @@
 .read_const_MESSAGE_UNSUPPOERTED_FORMAT <- "{data_format} is not a supported data format. File is skipped."
 .read_const_MESSAGE_UNAPLICABLE_FORMAT <- "{data_format} is not an applicable format for {path}. File is skipped."
 .read_const_MESSAGE_USER_DATA_FORMAT_KEY <- "The key in user_data_format must not be the same as the key in mc_data_formats."
-.read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {filename}. Check mc_read_problems[['{filename}']]."
+.read_const_MESSAGE_VROOM_WARNING <- "Parsing issues in file {path}. Check mc_read_problems[['{path}']]."
 .read_const_MESSAGE_FILE_SKIP <- "File {.x} does not exist - skipping."
 .read_const_MESSAGE_EMPTY_DATA <- "Data file {filename} is empty - skipping."
 
