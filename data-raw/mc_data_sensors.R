@@ -143,6 +143,12 @@ mc_data_sensors[[mc_const_SENSOR_TH2_RH]]@plot_color <- "grey50"
 
 # universal sensors ================================================================================
 
+mc_data_sensors[[mc_const_SENSOR_AVP]] <- new("mc_Sensor")
+mc_data_sensors[[mc_const_SENSOR_AVP]]@sensor_id <- mc_const_SENSOR_AVP
+mc_data_sensors[[mc_const_SENSOR_AVP]]@value_type <- .model_const_VALUE_TYPE_REAL
+mc_data_sensors[[mc_const_SENSOR_AVP]]@physical <- .model_const_PHYSICAL_p_kPa
+mc_data_sensors[[mc_const_SENSOR_AVP]]@description <- "Actual Vapor Pressure"
+
 mc_data_sensors[[mc_const_SENSOR_count]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_count]]@sensor_id <- mc_const_SENSOR_count
 mc_data_sensors[[mc_const_SENSOR_count]]@value_type <- .model_const_VALUE_TYPE_INTEGER
@@ -220,6 +226,12 @@ mc_data_sensors[[mc_const_SENSOR_dendro_l_um]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_dendro_l_um]]@sensor_id <- mc_const_SENSOR_dendro_l_um
 mc_data_sensors[[mc_const_SENSOR_dendro_l_um]]@physical <- .model_const_PHYSICAL_l_um
 mc_data_sensors[[mc_const_SENSOR_dendro_l_um]]@description <- "Radius difference"
+
+mc_data_sensors[[mc_const_SENSOR_SVP]] <- new("mc_Sensor")
+mc_data_sensors[[mc_const_SENSOR_SVP]]@sensor_id <- mc_const_SENSOR_SVP
+mc_data_sensors[[mc_const_SENSOR_SVP]]@value_type <- .model_const_VALUE_TYPE_REAL
+mc_data_sensors[[mc_const_SENSOR_SVP]]@physical <- .model_const_PHYSICAL_p_kPa
+mc_data_sensors[[mc_const_SENSOR_SVP]]@description <- "Saturated Vapor Pressure"
 
 mc_data_sensors[[mc_const_SENSOR_VPD]] <- new("mc_Sensor")
 mc_data_sensors[[mc_const_SENSOR_VPD]]@sensor_id <- mc_const_SENSOR_VPD

@@ -1,3 +1,6 @@
+# myClim 1.5.5
+* Added new functions `mc_calc_svp` and `mc_calc_avp`.
+
 # myClim 1.5.4
 * Fixed the display of `vroom` parsing errors.
 

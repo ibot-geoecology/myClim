@@ -95,6 +95,9 @@ mc_const_SENSOR_TH2_RH <- "TH2_RH"
 .model_const_WRONG_CALIBRATION_SENSOR_ID <- mc_const_SENSOR_TMS_moist
 
 ### universal sensors
+#' Actual Vapor Pressure sensor id see [myClim::mc_calc_avp()]
+#' @export
+mc_const_SENSOR_AVP <- "AVP"
 #' Count sensor id see [myClim::mc_agg()]
 #' @export
 mc_const_SENSOR_count <- "count"
@@ -125,6 +128,9 @@ mc_const_SENSOR_snow_total <- "snow_total"
 #' Time of sun shine sensor id
 #' @export
 mc_const_SENSOR_sun_shine <- "sun_shine"
+#' Saturated Vapor Pressure sensor id see [myClim::mc_calc_svp()]
+#' @export
+mc_const_SENSOR_SVP <- "SVP"
 #' Vapor Pressure Deficit sensor id see [myClim::mc_calc_vpd()]
 #' @export
 mc_const_SENSOR_VPD <- "VPD"
