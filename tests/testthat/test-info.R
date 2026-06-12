@@ -83,6 +83,10 @@ test_that("mc_info_states", {
                                      "tag", "start", "end", "value"))
     expect_equal(nrow(states), 9)
     expect_true(all(is.na(states$logger_name)))
+    data_without_states <- mc_states_delete(data, tags="source")
+    states <- mc_info_states(data_without_states)
+    expect_equal(colnames(states), c("locality_id", "logger_name", "sensor_name",
+                                     "tag", "start", "end", "value"))
 })
 
 test_that("mc_info_range", {
@@ -98,3 +102,4 @@ test_that("mc_info_range", {
     expect_equal(range_table$min_value[range_table$sensor_name == "TMS_T2_mean"], -40)
     expect_equal(range_table$max_value[range_table$sensor_name == "TMS_moist_max"], 4000)
 })
+

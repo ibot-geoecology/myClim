@@ -1,3 +1,6 @@
+# myClim 1.5.5
+* The `mc_info_states` function now returns an empty table with correct column names when no states are present.
+
 # myClim 1.5.4
 * Fixed the display of `vroom` parsing errors.
 

@@ -255,11 +255,17 @@ mc_info_states <- function(data) {
     sensor_function <- function(locality_id, logger_name, sensor) {
         count <- nrow(sensor$states)
         if(count == 0) {
-            return(tibble::tibble())
+            return(tibble::tibble(locality_id=character(),
+                                 logger_name=character(),
+                                 sensor_name=character(),
+                                 tag=character(),
+                                 start=as.POSIXct(character()),
+                                 end=as.POSIXct(character()),
+                                 value=character()))
         }
         result <- tibble::tibble(locality_id=rep(locality_id, count),
                                  logger_name=rep(logger_name, count),
-                                 sensor_name=rep(sensor$metadata@name),
+                                 sensor_name=rep(sensor$metadata@name, count),
                                  tag=sensor$states$tag,
                                  start=sensor$states$start,
                                  end=sensor$states$end,
