@@ -231,6 +231,14 @@ test_that("mc_read_wide", {
     expect_equal(data$localities$B1BLAT01$loggers[["Logger_1"]]$sensors[[1]]$values[[1]], 0.7)
 })
 
+test_that("mc_read_wide character", {
+    data_table <- readRDS("../data/read_table/precip.Rds")
+    dates <- data_table$date
+    data_table$date <- as.POSIXct(lubridate::ymd(dates, tz="UTC"))
+    data_table$B1BLAT01 <- as.character(data_table$B1BLAT01)
+    expect_error(data <- mc_read_wide(data_table, mc_const_SENSOR_precipitation, clean=FALSE))
+})
+
 test_that("mc_read_long", {
     data_table_precip <- readRDS("../data/read_table/precip.Rds")[1:10]
     data_table_precip <- tidyr::gather(data_table_precip, "locality_id", "value", -date)
@@ -245,6 +253,19 @@ test_that("mc_read_long", {
     data <- mc_read_long(data_table, list(precip="precipitation"), clean=FALSE)
     test_raw_data_format(data)
     expect_equal(length(data$localities), 9)
+})
+
+test_that("mc_read_long character value", {
+    data_table <- readRDS("../data/read_table/precip.Rds")[1:10]
+    data_table <- tidyr::gather(data_table, "locality_id", "value", -date)
+    data_table$sensor_name <- "precip"
+    data_table <- dplyr::rename(data_table, datetime=date)
+    data_table <- dplyr::select(data_table, locality_id, sensor_name, datetime, value)
+    data_table$datetime <- as.POSIXct(lubridate::ymd(data_table$datetime, tz="UTC"))
+    data_table$value <- as.character(data_table$value)
+    expect_error(
+        data <- mc_read_long(data_table, list(precip="precipitation"), clean=FALSE)
+    )
 })
 
 test_that("mc_read_files TOMST serial_number", {

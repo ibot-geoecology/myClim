@@ -46,6 +46,15 @@
                                    calibrated=FALSE, calibration=data.frame(), states=data.frame()){
     if(!(sensor_id %in% names(myClim::mc_data_sensors))) {
         warning(stringr::str_glue(.common_const_MESSAGE_UNKNOWN_SENSOR_ID))
+        expected_type <- .model_const_VALUE_TYPE_REAL
+    } else {
+        sensor <- myClim::mc_data_sensors[[sensor_id]]
+        expected_type <- sensor@value_type
+    }
+    if((expected_type == .model_const_VALUE_TYPE_REAL && !is.numeric(values)) ||
+       (expected_type == .model_const_VALUE_TYPE_INTEGER && !is.numeric(values)) ||
+       (expected_type == .model_const_VALUE_TYPE_LOGICAL && !is.logical(values))) {
+        stop(stringr::str_glue("Values for sensor_id {sensor_id} should be of type {expected_type}."))
     }
     metadata <- new("mc_SensorMetadata")
     metadata@sensor_id <- sensor_id

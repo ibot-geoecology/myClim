@@ -444,7 +444,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
 
 .read_get_data_raw_from_localities <- function(localities) {
     metadata <- new("mc_MainMetadata")
-    myClimList(metadata, localities)
+    return(myClimList(metadata, localities))
 }
 
 .read_logger <- function(filename, data_format, serial_number, step) {
