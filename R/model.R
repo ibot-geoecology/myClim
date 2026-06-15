@@ -6,6 +6,7 @@
 
 .model_const_COUNT_TEST_VALUES <- 100
 .model_const_EDITABLE_LOCALITY_METADATA_PARAMETERS <- c("locality_id", "elevation", "lat_wgs84", "lon_wgs84", "tz_offset", "join_serial")
+.model_const_EDITABLE_LOGGER_METADATA_PARAMETERS <- c("type", "name", "serial_number", "step")
 .model_const_EDITABLE_SENSOR_METADATA_PARAMETERS <- c("name", "height")
 .model_const_TOMST_THERMODATALOGGER_VALUE <- 65336
 .model_const_TOMST_DENDROMETER_UM_RANGE <- 8890

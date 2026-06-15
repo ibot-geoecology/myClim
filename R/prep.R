@@ -29,6 +29,10 @@
 .prep_const_MESSAGE_NOT_MULTIPLE_STEP <- "Logger {logger$metadata@name} step {logger_step} is not multiple of target step {to_step}. skipping"
 .prep_const_MESSAGE_SHORTER_STEP_IN_DATA <- "The minimal step {min_step} seconds in data is shorter than target step {to_step} seconds."
 .prep_const_MESSAGE_EXPANDTIME_TO_STEP <- "Parameter to_step must be positive number."
+.prep_const_MESSAGE_META_LOGGER_AGG <- "It isn't possible to edit logger metadata in myClim object in Agg-format."
+.prep_const_MESSAGE_LOGGER_METADATA_WRONG_SLOT <- "It isn't possible to edit logger metadata slot {param_name}."
+.prep_const_MESSAGE_STEP_CLEANED_OBJECT <- "It is not possible to edit step in cleaned object."
+.prep_const_MESSAGE_UNIQUE_LOGGER_NAMES <- "Logger names must be unique."
 
 #' Cleaning datetime series
 #'
@@ -59,8 +63,9 @@
 #' This function guarantee that all time series are in chronological order,
 #' have regular time-step and no duplicated records.
 #' Function `mc_prep_clean` use either time-step provided by user during data import with `mc_read`
-#' (used time-step is permanently stored in logger metadata [myClim::mc_LoggerMetadata];
-#' or if time-step is not provided by the user (NA),than myClim automatically
+#' or set later in logger metadata with [mc_prep_meta_logger()] (used time-step is
+#' permanently stored in logger metadata [myClim::mc_LoggerMetadata]); or if time-step is
+#' not provided by the user (NA),than myClim automatically
 #' detects the time-step from input time series based on the last 100 records.
 #' In case of irregular time series, function returns warning and skip (does not read) the file.
 #'
@@ -449,6 +454,80 @@ mc_prep_meta_locality <- function(data, values, param_name=NULL) {
     return(data)
 }
 
+
+#' Set metadata of loggers
+#'
+#' @description
+#' This function allows you to modify logger metadata in Raw-format myClim object.
+#' See [mc_LoggerMetadata].
+#'
+#' @details
+#' Logger metadata parameter `step` can be changed only in uncleaned myClim object.
+#' If object is already cleaned, changing `step` is not allowed.
+#' The `step` slot is used in the [mc_prep_clean()] function.
+#'
+#' @template param_myClim_object_raw
+#' @param values named list with metadata values; names of items are logger_names e.g.
+#' for changing logger name use `list(TMS_1="TMS_main")`
+#' @param param_name name of the logger metadata parameter you want to change;
+#' You can change `type`, `name`, `serial_number` and `step`.
+#' @param localities optional filter; vector of `locality_id`
+#' where to change logger metadata; if NULL than all localities (default NULL)
+#' @return myClim object in Raw-format, with updated logger metadata
+#' @export
+#' @examples
+#' data <- mc_prep_meta_logger(mc_data_example_raw, list(TMS_1="TMS_main"), param_name="name")
+mc_prep_meta_logger <- function(data, values, param_name, localities=NULL) {
+    is_agg_format <- .common_is_agg_format(data)
+    
+    if(is_agg_format) {
+        stop(.prep_const_MESSAGE_META_LOGGER_AGG)
+    }
+    
+    if(param_name == "step" && .prep_is_datetime_step_processed_in_object(data)) {
+        stop(.prep_const_MESSAGE_STEP_CLEANED_OBJECT)
+    }
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+
+        if(!(param_name %in% .model_const_EDITABLE_LOGGER_METADATA_PARAMETERS)) {
+            stop(stringr::str_glue(.prep_const_MESSAGE_LOGGER_METADATA_WRONG_SLOT))
+        }
+
+        .prep_edit_loggers_metadata_in_locality(locality, param_name, values)
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
+}
+
+.prep_edit_loggers_metadata_in_locality <- function(locality, param_name, values) {
+    if(length(dplyr::intersect(names(locality$loggers), names(values))) == 0) {
+        return(locality)
+    }
+    logger_function <- function(logger) {
+        if(!logger$metadata@name %in% names(values)) {
+            return(logger)
+        }
+        slot(logger$metadata, param_name) <- values[[logger$metadata@name]]
+        return(logger)
+    }
+    locality$loggers <- purrr::map(locality$loggers, logger_function)
+    if(param_name == "name") {
+        names(locality$loggers) <- purrr::map_chr(locality$loggers, function(x) x$metadata@name)
+        unique_names <- unique(names(locality$loggers))
+        if(length(unique_names) != length(names(locality$loggers))) {
+            stop(.prep_const_MESSAGE_UNIQUE_LOGGER_NAMES)
+        }
+    }
+
+    locality$loggers <- purrr::map(locality$loggers, logger_function)
+    return(locality)
+}
+
 #' Set metadata of sensors
 #'
 #' @description
@@ -500,7 +579,7 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
     }
 
     locality$loggers <- purrr::map(locality$loggers, logger_function)
-    locality
+    return(locality)
 }
 
 .prep_edit_sensors_metadata <- function(item, param_name, values) {
@@ -522,7 +601,7 @@ mc_prep_meta_sensor <- function(data, values, param_name, localities=NULL, logge
             stop(.prep_const_MESSAGE_UNIQUE_SENSOR_NAMES)
         }
     }
-    item
+    return(item)
 }
 
 #' Set solar time offset against UTC time

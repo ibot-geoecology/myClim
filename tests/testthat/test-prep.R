@@ -297,6 +297,41 @@ test_that("mc_prep_meta_sensor wrong", {
     expect_error(data <- mc_prep_meta_sensor(data, list(TMS_T1="TMS_T2"), param_name = "name"))
 })
 
+test_that("mc_prep_meta_logger", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
+
+    changed_data <- mc_prep_meta_logger(data, list(TMS_1="TMS_main"), param_name="name", localities="A2E32")
+    test_raw_data_format(changed_data)
+    expect_true("TMS_main" %in% names(changed_data$localities$A2E32$loggers))
+    expect_true("TMS_1" %in% names(changed_data$localities$A6W79$loggers))
+    expect_equal(changed_data$localities$A2E32$loggers$TMS_main$metadata@name, "TMS_main")
+    expect_equal(changed_data$localities$A6W79$loggers$TMS_1$metadata@name, "TMS_1")
+
+    changed_data <- mc_prep_meta_logger(data, list(Thermo_1="90000000"), param_name="serial_number", localities="A1E05")
+    expect_equal(changed_data$localities$A1E05$loggers$Thermo_1$metadata@serial_number, "90000000")
+
+    changed_data <- mc_prep_meta_logger(data, list(TMS_1=3600), param_name="step", localities="A6W79")
+    expect_equal(changed_data$localities$A6W79$loggers$TMS_1$metadata@step, 3600)
+    expect_true(is.na(changed_data$localities$A2E32$loggers$TMS_1$metadata@step))
+
+    changed_data <- mc_prep_meta_logger(data, list(Thermo_1="T1", TMS_1="TMS(lizatko)"), param_name="type")
+    expect_equal(changed_data$localities$A1E05$loggers$Thermo_1$metadata@type, "T1")
+    expect_equal(changed_data$localities$A2E32$loggers$TMS_1$metadata@type, "TMS(lizatko)")
+})
+
+test_that("mc_prep_meta_logger wrong", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
+    cleaned_data <- mc_prep_clean(data, silent=TRUE)
+    agg_data <- mc_agg(cleaned_data)
+
+    expect_error(mc_prep_meta_logger(agg_data, list(TMS_1="TMS_main"), param_name="name"),
+                 "Agg-format")
+    expect_error(mc_prep_meta_logger(cleaned_data, list(TMS_1=3600), param_name="step"),
+                 "not possible to edit step in cleaned object")
+    expect_error(mc_prep_meta_logger(data, list(TMS_1="TMS_main"), param_name="wrong_slot"),
+                 "isn't possible to edit logger metadata slot")
+})
+
 test_that("mc_prep_merge wrong", {
     data <- mc_read_data("../data/TOMST/files_table.csv", clean=FALSE)
     cleaned_data <- mc_prep_clean(data, silent=T)

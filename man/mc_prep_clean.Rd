@@ -55,8 +55,9 @@ required for further data handling in the \code{myClim} library.
 This function guarantee that all time series are in chronological order,
 have regular time-step and no duplicated records.
 Function \code{mc_prep_clean} use either time-step provided by user during data import with \code{mc_read}
-(used time-step is permanently stored in logger metadata \link{mc_LoggerMetadata};
-or if time-step is not provided by the user (NA),than myClim automatically
+or set later in logger metadata with \code{\link[=mc_prep_meta_logger]{mc_prep_meta_logger()}} (used time-step is
+permanently stored in logger metadata \link{mc_LoggerMetadata}); or if time-step is
+not provided by the user (NA),than myClim automatically
 detects the time-step from input time series based on the last 100 records.
 In case of irregular time series, function returns warning and skip (does not read) the file.
 

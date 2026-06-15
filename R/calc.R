@@ -572,7 +572,7 @@ mc_calc_cumsum <- function(data, sensors, output_suffix="_cumsum", localities=NU
             return(item)
         }
         origin_sensor <- item$sensors[[sensor_name]]
-        origin_sensor_type_item <- mc_data_sensors[[origin_sensor$metadata@sensor_id]]
+        origin_sensor_type_item <- myClim::mc_data_sensors[[origin_sensor$metadata@sensor_id]]
         if(origin_sensor_type_item@value_type == .model_const_VALUE_TYPE_REAL) {
             output_sensor_id <- mc_const_SENSOR_real
         } else {

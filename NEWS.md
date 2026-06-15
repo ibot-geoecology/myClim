@@ -1,3 +1,8 @@
+# myClim 1.5.6
+* Added data type checks for values of the new sensor.
+* Added the new function `mc_prep_meta_logger`.
+* The `mc_calc_cumsum` function now sets `sensor_id` to base sensors `mc_const_SENSOR_real` or `mc_const_SENSOR_integer`.
+
 # myClim 1.5.5
 * The `mc_info_states` function now returns an empty table with correct column names when no states are present.
 
