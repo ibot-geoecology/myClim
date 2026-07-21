@@ -6,6 +6,9 @@
 .calc_const_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
 .calc_const_MESSAGE_WRONG_SOILTYPE <- "Soiltype doesn't contain all a, b, c parameters."
 .calc_const_MESSAGE_VPD_AGGREGATED <- "You are attempting to calculate VPD from aggregated temperature / RH values. Due to non-linear relationship between VPD and T/RH, this may produce biased VPD estimates."
+.calc_const_MESSAGE_CUSTOM_RESULT_LENGTH <- "Custom function output length {output_length} does not match expected length {expected_length}."
+.calc_const_MESSAGE_CUSTOM_RESULT_TYPE <- "Custom function output has unsupported type. Use logical, integer, or numeric vector."
+.calc_const_MESSAGE_CUSTOM_AGG_LOGGER_TYPE_IGNORED <- "In agg format, logger_type is ignored."
 
 #' Snow detection from temperature
 #'
@@ -142,6 +145,112 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
     if(output_sensor %in% names(item$sensors)) {
         warning(stringr::str_glue(.calc_const_MESSAGE_OVERWRITE_SENSOR))
     }
+}
+
+#' Calculate custom virtual sensor from user function
+#'
+#' @description
+#' This function creates a new virtual sensor on locality/logger within the myClim object.
+#' Values are computed by a user-defined function that receives a data table with `datetime`
+#' and selected sensor columns, and returns a vector with one value per row.
+#'
+#' @details
+#' The user function must accept the input data table as its first argument and return a
+#' logical/integer/numeric vector with the same length as number of rows in the input table.
+#'
+#' @template param_myClim_object_cleaned 
+#' @param custom_function user-defined function with first argument `data_table`
+#' @param output_sensor name of newly created virtual sensor
+#' @param logger_type optional logger type filter (e.g. "TMS").
+#' In raw format this filters loggers; in agg format it determines default `sensors` when `sensors=NULL`.
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @param sensors optional vector of sensor names. If provided, only loggers/localities that contain all of these sensors are processed. If NULL, the user function may return NULL to skip adding the sensor.
+#' @return The same myClim object as input but with added custom virtual sensor.
+#' @export
+#' @examples
+#' diff_func <- function(data_table) {
+#'     data_table$TMS_T1 - data_table$TMS_T3
+#' }
+#' data_diff <- mc_calc_custom(mc_data_example_clean, diff_func,
+#'                             logger_type = "TMS", output_sensor = "DIFF_T1_T3")
+mc_calc_custom <- function(data, custom_function, output_sensor,
+                           logger_type=NULL,localities=NULL, sensors=NULL) {
+    is_agg <- .common_is_agg_format(data)
+    if(!is_agg) {
+        .prep_check_datetime_step_unprocessed(data, stop)
+    }
+    if(is_agg && !is.null(logger_type)) {
+        warning(.calc_const_MESSAGE_CUSTOM_AGG_LOGGER_TYPE_IGNORED)
+    }
+
+    call_custom <- function(item) {
+        if(!is.null(sensors)) {
+            if(!all(sensors %in% names(item$sensors))) {
+                return(item)
+            }
+        }
+        result <- .calc_add_custom_sensor_to_item(item, output_sensor, custom_function)
+        return(result)
+    }
+
+    logger_function <- function(logger) {
+        if(!is.null(logger_type) && !(logger$metadata@type %in% logger_type)) {
+            return(logger)
+        }
+        call_custom(logger)
+    }
+
+    locality_function <- function(locality) {
+        if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
+            return(locality)
+        }
+        if(is_agg) {
+            return(call_custom(locality))
+        }
+        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        return(locality)
+    }
+
+    data$localities <- purrr::map(data$localities, locality_function)
+    return(data)
+}
+
+.calc_add_custom_sensor_to_item <- function(item, output_sensor, custom_function) {
+    data_table <- .common_sensor_values_as_tibble(item)
+    values <- custom_function(data_table)
+    if(is.null(values)) {
+        return(item)
+    }
+
+    .calc_warn_if_overwriting(item, output_sensor)
+    .calc_check_custom_values(values, nrow(data_table))
+    sensor_id <- .calc_get_sensor_id_from_custom_values(values)
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(sensor_id, output_sensor, values = values)
+    return(item)
+}
+
+.calc_check_custom_values <- function(values, expected_length) {
+    if(length(values) != expected_length) {
+        output_length <- length(values)
+        stop(stringr::str_glue(.calc_const_MESSAGE_CUSTOM_RESULT_LENGTH))
+    }
+    if(is.logical(values) || is.integer(values) || is.numeric(values)) {
+        return()
+    }
+    stop(.calc_const_MESSAGE_CUSTOM_RESULT_TYPE)
+}
+
+.calc_get_sensor_id_from_custom_values <- function(values) {
+    if(is.logical(values)) {
+        return(mc_const_SENSOR_logical)
+    }
+    if(is.integer(values)) {
+        return(mc_const_SENSOR_integer)
+    }
+    if(is.numeric(values)) {
+        return(mc_const_SENSOR_real)
+    }
+    stop(.calc_const_MESSAGE_CUSTOM_RESULT_TYPE)
 }
 
 #' Summary of TRUE/FALSE snow sensor

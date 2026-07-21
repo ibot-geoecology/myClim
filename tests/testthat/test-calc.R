@@ -1,5 +1,78 @@
 source("libtest.R")
 
+test_that("mc_calc_custom", {
+    diff_func <- function(data_table) {
+        data_table$TMS_T1 - data_table$TMS_T3
+    }
+
+    raw_data <- mc_calc_custom(mc_data_example_clean,
+                               custom_function = diff_func,
+                               logger_type = "TMS",
+                               output_sensor = "DIFF_T1_T3")
+    test_raw_data_format(raw_data)
+    tms_logger <- purrr::detect(raw_data$localities$A2E32$loggers, ~ .x$metadata@type == "TMS")
+    thermo_logger <- purrr::detect(raw_data$localities$A2E32$loggers, ~ .x$metadata@type == "Thermo")
+    expect_true("DIFF_T1_T3" %in% names(tms_logger$sensors))
+    expect_false("DIFF_T1_T3" %in% names(thermo_logger$sensors))
+    expect_equal(tms_logger$sensors$DIFF_T1_T3$values,
+                 tms_logger$sensors$TMS_T1$values - tms_logger$sensors$TMS_T3$values)
+
+    agg_data <- mc_agg(mc_data_example_clean)
+    diff_func <- function(data_table) {
+        if(!all(c("TMS_T1", "TMS_T3") %in% names(data_table))) {
+            return(NULL)
+        }
+        return(data_table$TMS_T1 - data_table$TMS_T3)
+    }
+    expect_warning(
+        agg_data <- mc_calc_custom(agg_data,
+                                   custom_function = diff_func,
+                                   logger_type = "TMS",
+                                   output_sensor = "DIFF_T1_T3"),
+        regexp = "logger_type is ignored"
+    )
+    test_agg_data_format(agg_data)
+    expect_true("DIFF_T1_T3" %in% names(agg_data$localities$A2E32$sensors))
+    expect_equal(agg_data$localities$A2E32$sensors$DIFF_T1_T3$values,
+                 agg_data$localities$A2E32$sensors$TMS_T1$values - agg_data$localities$A2E32$sensors$TMS_T3$values)
+    unchanged_data <- mc_calc_custom(mc_data_example_clean,
+                                     custom_function = function(data_table) data_table$TMS_T1,
+                                     logger_type = "UNKNOWN",
+                                     output_sensor = "CUSTOM_WRONG")
+    info_orig <- mc_info(mc_data_example_clean)
+    info <- mc_info(unchanged_data)
+    expect_equal(nrow(info_orig), nrow(info))
+})
+
+test_that("mc_calc_custom respects sensors", {
+    diff_func <- function(data_table) {
+        data_table$TMS_T1 - data_table$TMS_T3
+    }
+
+    raw_data <- mc_calc_custom(mc_data_example_clean,
+                               custom_function = diff_func,
+                               output_sensor = "DIFF_T1_T3",
+                               logger_type = "TMS",
+                               sensors = c("TMS_T1", "TMS_T3"))
+    tms_logger <- purrr::detect(raw_data$localities$A2E32$loggers, ~ .x$metadata@type == "TMS")
+    thermo_logger <- purrr::detect(raw_data$localities$A2E32$loggers, ~ .x$metadata@type == "Thermo")
+    expect_true("DIFF_T1_T3" %in% names(tms_logger$sensors))
+    expect_false("DIFF_T1_T3" %in% names(thermo_logger$sensors))
+})
+
+test_that("mc_calc_custom errors", {
+    wrong_length <- function(data_table) {
+        rep(1, 10)
+    }
+    expect_error(
+        mc_calc_custom(mc_data_example_clean,
+                       custom_function = wrong_length,
+                       logger_type = "TMS",
+                       output_sensor = "CUSTOM_WRONG"),
+        regexp = "output length"
+    )
+})
+
 test_that("mc_calc_snow", {
     cleaned_data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
     snow_raw_data <- mc_calc_snow(cleaned_data, "TMS_T3", output_sensor="T3_snow", range=1.5, tmax=0.5)

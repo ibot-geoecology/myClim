@@ -1,3 +1,6 @@
+# myClim 1.5.7
+* Added the new function `mc_calc_custom` for calculating custom virtual sensors from user-defined functions.
+
 # myClim 1.5.6
 * Added data type checks for values of the new sensor.
 * Added the new function `mc_prep_meta_logger`.
