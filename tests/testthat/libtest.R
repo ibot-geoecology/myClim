@@ -133,7 +133,7 @@ test_states <- function (sensor) {
     expect_false(any(is.na(sensor$states$tag)))
     expect_false(any(is.na(sensor$states$start)))
     expect_false(any(is.na(sensor$states$end)))
-    states <- dplyr::filter(sensor$states, .data$tag == myClim:::.model_const_SENSOR_STATE_SOURCE)
+    states <- dplyr::filter(sensor$states, .data$tag == mc_const_TAG_SOURCE)
     if(length(sensor$values) == 0) {
         expect_equal(nrow(states), 0)
         return()

@@ -414,7 +414,7 @@ mc_join <- function(data, comp_sensors=NULL, by_type=TRUE, tolerance=NULL) {
 }
 
 .join_print_info_logger <- function(logger, sensor_name) {
-    source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, .data$tag == .model_const_SENSOR_STATE_SOURCE)
+    source_states <- dplyr::filter(logger$sensors[[sensor_name]]$states, .data$tag == mc_const_TAG_SOURCE)
     print(tibble::tibble(source_states))
 }
 

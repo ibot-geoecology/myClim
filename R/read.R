@@ -557,7 +557,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
         return(sensor)
     }
     error_intervals <- .common_get_time_series_intervals(datetime, error_filter)
-    error_states <- data.frame(tag = .model_const_SENSOR_STATE_ERROR,
+    error_states <- data.frame(tag = mc_const_TAG_ERROR,
                                start = lubridate::int_start(error_intervals),
                                end = lubridate::int_end(error_intervals),
                                value = as.character(error_value))
@@ -574,7 +574,7 @@ mc_read_data <- function(files_table, localities_table=NULL, clean=TRUE, silent=
     abspath <- normalizePath(path)
     start <- min(datetime)
     end <- max(datetime)
-    result <- data.frame(tag=.model_const_SENSOR_STATE_SOURCE,
+    result <- data.frame(tag=mc_const_TAG_SOURCE,
                          start=start, end=end, value=abspath)
     return(.common_convert_factors_in_dataframe(result))
 }

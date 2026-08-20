@@ -1,3 +1,6 @@
+# myClim 1.5.7
+* Standard constants for tags are now available (`mc_const_TAG_ANOMALY`, `mc_const_TAG_CLEAN_CONFLICT`, `mc_const_TAG_ERROR`, `mc_const_TAG_SOURCE`).
+
 # myClim 1.5.6
 * Added data type checks for values of the new sensor.
 * Added the new function `mc_prep_meta_logger`.
