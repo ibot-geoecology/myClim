@@ -13,8 +13,8 @@ test_that(".common_crop_states_table", {
     out_sensor$states <- .common_crop_states_table(sensor$states,
                                                    lubridate::interval(lubridate::ymd_hm("2022-02-24 07:15"),
                                                                        lubridate::ymd_hm("2022-02-24 16:00")))
-    expect_equal(out_sensor$states$tag, c(myClim:::.model_const_SENSOR_STATE_SOURCE,
-                                          rep(myClim:::.model_const_SENSOR_STATE_ERROR, 5)))
+    expect_equal(out_sensor$states$tag, c(mc_const_TAG_SOURCE,
+                                          rep(mc_const_TAG_ERROR, 5)))
     expect_equal(out_sensor$states$start, c(lubridate::ymd_hm("2022-02-24 07:15"),
                                             lubridate::ymd_hm("2022-02-24 07:15"),
                                             lubridate::ymd_hm("2022-02-24 09:00"),
@@ -30,8 +30,8 @@ test_that(".common_crop_states_table", {
     out_sensor$states <- .common_crop_states_table(sensor$states, 
                                                    c(lubridate::interval(lubridate::ymd_hm("2022-02-24 07:30"), lubridate::ymd_hm("2022-02-24 9:15")),
                                                      lubridate::interval(lubridate::ymd_hm("2022-02-24 12:00"), lubridate::ymd_hm("2022-02-24 16:00"))))
-    expect_equal(out_sensor$states$tag, c(myClim:::.model_const_SENSOR_STATE_SOURCE, rep(myClim:::.model_const_SENSOR_STATE_ERROR, 2),
-                                          myClim:::.model_const_SENSOR_STATE_SOURCE, myClim:::.model_const_SENSOR_STATE_ERROR))
+    expect_equal(out_sensor$states$tag, c(mc_const_TAG_SOURCE, rep(mc_const_TAG_ERROR, 2),
+                                          mc_const_TAG_SOURCE, mc_const_TAG_ERROR))
     expect_equal(out_sensor$states$start, c(lubridate::ymd_hm("2022-02-24 07:30"),
                                             lubridate::ymd_hm("2022-02-24 07:30"),
                                             lubridate::ymd_hm("2022-02-24 09:00"),

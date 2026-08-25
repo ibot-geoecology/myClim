@@ -73,17 +73,17 @@ test_that("mc_prep_clean conflicts", {
         expect_warning("Object not cleaned. The function only tagged \\(states\\) measurements with cleaning conflicts.")
     expect_false(.prep_is_datetime_step_processed_in_object(data_conflicts))
     states <- data_conflicts$localities$`91184133`$loggers[[1]]$sensors$Thermo_T$states
-    expect_true(length(states$tag[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT]) > 0)
+    expect_true(length(states$tag[states$tag == mc_const_TAG_CLEAN_CONFLICT]) > 0)
     data <- mc_read_files("../data/clean-conflict", "TOMST", clean=FALSE)
     differnt_values_warning(data_conflicts <- mc_prep_clean(data, silent=T, resolve_conflicts=FALSE)) %>%
         differnt_values_warning() %>%
         expect_warning("Object not cleaned. The function only tagged \\(states\\) measurements with cleaning conflicts.")
     states <- data_conflicts$localities$`92201076`$loggers$Dendro_1$sensors$Dendro_T$states
-    expect_equal(states$start[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT],
+    expect_equal(states$start[states$tag == mc_const_TAG_CLEAN_CONFLICT],
         c(lubridate::ymd_hm("2023-01-13 15:30"),
           lubridate::ymd_hm("2023-01-13 16:30"),
           lubridate::ymd_hm("2023-01-13 23:00")))
-    expect_equal(states$end[states$tag == .model_const_SENSOR_STATE_CLEAN_CONFLICT],
+    expect_equal(states$end[states$tag == mc_const_TAG_CLEAN_CONFLICT],
         c(lubridate::ymd_hm("2023-01-13 15:30"),
           lubridate::ymd_hm("2023-01-13 16:45"),
           lubridate::ymd_hm("2023-01-13 23:00")))
@@ -211,7 +211,7 @@ test_that("mc_prep_crop by localities", {
 test_that("mc_prep_crop errors", {
     expect_warning(data <- mc_read_files("../data/TOMST-error", "TOMST", clean=FALSE))
     cropped_data <- mc_prep_crop(data, start=lubridate::ymd_hm("2022-02-24 07:45"), end=lubridate::ymd_hm("2022-02-24 10:30"))
-    states <- dplyr::filter(cropped_data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$states, .data$tag == .model_const_SENSOR_STATE_ERROR)
+    states <- dplyr::filter(cropped_data$localities$data_93142777$loggers[[1]]$sensors$TMS_T2$states, .data$tag == mc_const_TAG_ERROR)
     expect_equal(nrow(states), 4)
     expect_equal(states$start, c(lubridate::ymd_hm("2022-02-24 07:45"),
                                  lubridate::ymd_hm("2022-02-24 09:00"),

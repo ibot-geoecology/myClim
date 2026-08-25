@@ -187,9 +187,30 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 .model_const_DATA_FORMAT_HOBO <- "HOBO"
 .model_const_DATA_FORMAT_EMS <- "EMS"
 
-.model_const_SENSOR_STATE_SOURCE <- "source"
-.model_const_SENSOR_STATE_ERROR <- "error"
-.model_const_SENSOR_STATE_CLEAN_CONFLICT <- "clean_conflict"
+#' Data state anomaly tag
+#' @description
+#' Constant used to mark data states as anomalies in sensor data
+#' @export
+mc_const_TAG_ANOMALY <- "anomaly"
+
+#' Data state clean conflict tag
+#' @description
+#' Constant used to mark data states that have clean conflicts
+#' @export
+mc_const_TAG_CLEAN_CONFLICT <- "clean_conflict"
+
+#' Data state error tag
+#' @description
+#' Constant used to mark data states with errors in sensor data.
+#' It is automatically set where the value matches the `mc_DataFormat@error_value` for the specific data format (see [myClim::mc_DataFormat-class]).
+#' @export
+mc_const_TAG_ERROR <- "error"
+
+#' Data state source tag
+#' @description
+#' Constant used to mark the original source data state
+#' @export
+mc_const_TAG_SOURCE <- "source"
 
 .model_const_MESSAGE_NO_DATA <- "There aren't any data in source file."
 .model_const_MESSAGE_SEPARATED_TIME <- "Separated time in source data isn't supported."

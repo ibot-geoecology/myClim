@@ -289,7 +289,7 @@ mc_prep_clean <- function(data, silent=FALSE, resolve_conflicts=TRUE, tolerance=
     ends <- ends[diff_parts$values]
     starts <- starts[diff_parts$values]
     states_table <- tibble::tibble(locality_id=locality_id, logger_name=logger_name,
-                                   sensor_name=sensor_name, tag=.model_const_SENSOR_STATE_CLEAN_CONFLICT,
+                                   sensor_name=sensor_name, tag=mc_const_TAG_CLEAN_CONFLICT,
                                    start=sensor_table$datetime[starts], end=sensor_table$datetime[ends],
                                    value=NA_character_)
     clean_env$states <- dplyr::bind_rows(clean_env$states, states_table)

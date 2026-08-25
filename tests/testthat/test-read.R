@@ -21,7 +21,7 @@ test_that("mc_read_data csv without localities", {
     expect_equal(length(data$localities$A1E05$loggers[["Thermo_1"]]$sensors), 1)
     expect_true(is.na(data$localities$A1E05$loggers[["Thermo_1"]]$metadata@step))
     expect_true(is.na(data$localities$A1E05$metadata@elevation))
-    expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$tag, myClim:::.model_const_SENSOR_STATE_SOURCE)
+    expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$tag, mc_const_TAG_SOURCE)
     expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$start, dplyr::first(data$localities$A1E05$loggers[[1]]$datetime))
     expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$end, dplyr::last(data$localities$A1E05$loggers[[1]]$datetime))
     expect_equal(data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$states$value, normalizePath("../data/TOMST/data_91184101_0.csv"))
@@ -173,7 +173,7 @@ test_that("mc_read_files TOMST comma in number", {
 test_that("mc_read_files TOMST with error in data", {
     expect_warning(data <- mc_read_files("../data/TOMST-error", "TOMST", clean=FALSE))
     expect_true(is.na(data$localities$data_93142777$loggers[["TMS_1"]]$sensors$TMS_T2$values[[7]]))
-    states <- dplyr::filter(data$localities$data_93142777$loggers[["TMS_1"]]$sensors$TMS_T2$states, .data$tag == .model_const_SENSOR_STATE_ERROR)
+    states <- dplyr::filter(data$localities$data_93142777$loggers[["TMS_1"]]$sensors$TMS_T2$states, .data$tag == mc_const_TAG_ERROR)
     expect_equal(nrow(states), 6)
     expect_equal(states$start, c(lubridate::ymd_hm("2022-02-24 06:00"),
                                  lubridate::ymd_hm("2022-02-24 07:15"),
