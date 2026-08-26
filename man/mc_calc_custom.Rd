@@ -8,6 +8,7 @@ mc_calc_custom(
   data,
   custom_function,
   output_sensor,
+  output_sensor_id = NULL,
   logger_type = NULL,
   localities = NULL,
   sensors = NULL
@@ -19,6 +20,10 @@ mc_calc_custom(
 \item{custom_function}{user-defined function with first argument \code{data_table}}
 
 \item{output_sensor}{name of newly created virtual sensor}
+
+\item{output_sensor_id}{optional output sensor_id. If NULL (default),
+sensor_id is inferred from custom function output type (\code{logical}, \code{integer}, \code{real}).
+Must be one of \code{names(mc_data_sensors)} when provided.}
 
 \item{logger_type}{optional logger type filter (e.g. "TMS").
 In raw format this filters loggers; in agg format it determines default \code{sensors} when \code{sensors=NULL}.}

@@ -71,6 +71,26 @@ test_that("mc_calc_custom errors", {
                        output_sensor = "CUSTOM_WRONG"),
         regexp = "output length"
     )
+
+    expect_error(
+        mc_calc_custom(mc_data_example_clean,
+                       custom_function = function(data_table) data_table$TMS_T1,
+                       logger_type = "TMS",
+                       output_sensor = "CUSTOM_WRONG",
+                       output_sensor_id = "NOT_A_SENSOR"),
+        regexp = "output_sensor_id .* is unknown"
+    )
+})
+
+test_that("mc_calc_custom respects output_sensor_id", {
+    raw_data <- mc_calc_custom(mc_data_example_clean,
+                               custom_function = function(data_table) data_table$TMS_T1 - data_table$TMS_T3,
+                               logger_type = "TMS",
+                               output_sensor = "DIFF_T1_T3",
+                               output_sensor_id = mc_const_SENSOR_T_C)
+
+    tms_logger <- purrr::detect(raw_data$localities$A2E32$loggers, ~ .x$metadata@type == "TMS")
+    expect_equal(tms_logger$sensors$DIFF_T1_T3$metadata@sensor_id, mc_const_SENSOR_T_C)
 })
 
 test_that("mc_calc_snow", {

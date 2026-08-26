@@ -9,6 +9,7 @@
 .calc_const_MESSAGE_CUSTOM_RESULT_LENGTH <- "Custom function output length {output_length} does not match expected length {expected_length}."
 .calc_const_MESSAGE_CUSTOM_RESULT_TYPE <- "Custom function output has unsupported type. Use logical, integer, or numeric vector."
 .calc_const_MESSAGE_CUSTOM_AGG_LOGGER_TYPE_IGNORED <- "In agg format, logger_type is ignored."
+.calc_const_MESSAGE_CUSTOM_UNKNOWN_SENSOR_ID <- "output_sensor_id {output_sensor_id} is unknown. Use one of names(mc_data_sensors)."
 
 #' Snow detection from temperature
 #'
@@ -161,6 +162,9 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' @template param_myClim_object_cleaned 
 #' @param custom_function user-defined function with first argument `data_table`
 #' @param output_sensor name of newly created virtual sensor
+#' @param output_sensor_id optional output sensor_id. If NULL (default),
+#' sensor_id is inferred from custom function output type (`logical`, `integer`, `real`).
+#' Must be one of `names(mc_data_sensors)` when provided.
 #' @param logger_type optional logger type filter (e.g. "TMS").
 #' In raw format this filters loggers; in agg format it determines default `sensors` when `sensors=NULL`.
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
@@ -173,12 +177,13 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' }
 #' data_diff <- mc_calc_custom(mc_data_example_clean, diff_func,
 #'                             logger_type = "TMS", output_sensor = "DIFF_T1_T3")
-mc_calc_custom <- function(data, custom_function, output_sensor,
+mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_id=NULL,
                            logger_type=NULL,localities=NULL, sensors=NULL) {
     is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         .prep_check_datetime_step_unprocessed(data, stop)
     }
+    .calc_check_custom_output_sensor_id(output_sensor_id)
     if(is_agg && !is.null(logger_type)) {
         warning(.calc_const_MESSAGE_CUSTOM_AGG_LOGGER_TYPE_IGNORED)
     }
@@ -189,7 +194,7 @@ mc_calc_custom <- function(data, custom_function, output_sensor,
                 return(item)
             }
         }
-        result <- .calc_add_custom_sensor_to_item(item, output_sensor, custom_function)
+        result <- .calc_add_custom_sensor_to_item(item, output_sensor, output_sensor_id, custom_function)
         return(result)
     }
 
@@ -215,7 +220,7 @@ mc_calc_custom <- function(data, custom_function, output_sensor,
     return(data)
 }
 
-.calc_add_custom_sensor_to_item <- function(item, output_sensor, custom_function) {
+.calc_add_custom_sensor_to_item <- function(item, output_sensor, output_sensor_id, custom_function) {
     data_table <- .common_sensor_values_as_tibble(item)
     values <- custom_function(data_table)
     if(is.null(values)) {
@@ -224,7 +229,7 @@ mc_calc_custom <- function(data, custom_function, output_sensor,
 
     .calc_warn_if_overwriting(item, output_sensor)
     .calc_check_custom_values(values, nrow(data_table))
-    sensor_id <- .calc_get_sensor_id_from_custom_values(values)
+    sensor_id <- .calc_get_sensor_id_from_custom_values(values, output_sensor_id)
     item$sensors[[output_sensor]] <- .common_get_new_sensor(sensor_id, output_sensor, values = values)
     return(item)
 }
@@ -240,7 +245,10 @@ mc_calc_custom <- function(data, custom_function, output_sensor,
     stop(.calc_const_MESSAGE_CUSTOM_RESULT_TYPE)
 }
 
-.calc_get_sensor_id_from_custom_values <- function(values) {
+.calc_get_sensor_id_from_custom_values <- function(values, output_sensor_id=NULL) {
+    if(!is.null(output_sensor_id)) {
+        return(output_sensor_id)
+    }
     if(is.logical(values)) {
         return(mc_const_SENSOR_logical)
     }
@@ -251,6 +259,18 @@ mc_calc_custom <- function(data, custom_function, output_sensor,
         return(mc_const_SENSOR_real)
     }
     stop(.calc_const_MESSAGE_CUSTOM_RESULT_TYPE)
+}
+
+.calc_check_custom_output_sensor_id <- function(output_sensor_id) {
+    if(is.null(output_sensor_id)) {
+        return()
+    }
+    if(length(output_sensor_id) != 1 || !is.character(output_sensor_id) || is.na(output_sensor_id)) {
+        stop(stringr::str_glue(.calc_const_MESSAGE_CUSTOM_UNKNOWN_SENSOR_ID))
+    }
+    if(!(output_sensor_id %in% names(myClim::mc_data_sensors))) {
+        stop(stringr::str_glue(.calc_const_MESSAGE_CUSTOM_UNKNOWN_SENSOR_ID))
+    }
 }
 
 #' Summary of TRUE/FALSE snow sensor
