@@ -223,8 +223,9 @@ mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_i
 .calc_add_custom_sensor_to_item <- function(item, output_sensor, output_sensor_id, custom_function) {
     data_table <- .common_sensor_values_as_tibble(item)
     if(is.character(custom_function)) {
-        values <- tryCatch(data_table |> mutate(custom_value = eval(parse(text = custom_function))) |> pull(custom_value),
-         error = function(e) {NULL})
+        values <- tryCatch(with(data_table,eval(parse(text = custom_function))),
+         error = function(e) {warning("Custom function error: ",conditionMessage(e)) 
+         NULL})
     } else {
     values <- custom_function(data_table)
     }
