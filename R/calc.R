@@ -151,32 +151,65 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' Calculate custom virtual sensor from user function
 #'
 #' @description
-#' This function creates a new virtual sensor on locality/logger within the myClim object.
-#' Values are computed by a user-defined function that receives a data table with `datetime`
-#' and selected sensor columns, and returns a vector with one value per row.
+#' Creates a new virtual sensor on locality/logger in the myClim object.
+#' Values are computed by a user-defined function or a character expression evaluated on #' a data table containing `datetime` and sensor columns.
 #'
 #' @details
-#' The user function must accept the input data table as its first argument and return a
-#' logical/integer/numeric vector with the same length as number of rows in the input table.
+#' The user function receives a tibble with columns `datetime` and one column per  
+#' sensor present at each logger(raw format) or locality (agg format). 
+#' It must return a logical/integer/numeric vector with the same length as number of rows. To skip loggers/localities without sensors used in custom function, use the `sensors` parameter.
+#' When custom function is provided as a character string, than it is evaluated with 
+#' `with(data_table, ...)`, so sensor names can be used directly 
+#' (e.g. `"TMS_T1 - 2*TMS_T3"`). Standard R functions
+#' (`mean()`, `lag()`, `abs()`, etc.) are available. If evaluation fails
+#' (e.g. a referenced sensor is missing), a warning is issued and the item is
+#' skipped.
 #'
 #' @template param_myClim_object_cleaned 
-#' @param custom_function user-defined function with first argument `data_table`
-#' @param output_sensor name of newly created virtual sensor
-#' @param output_sensor_id optional output sensor_id. If NULL (default),
+#' @param custom_function Function or character string defining the calculation.
+#'   - **Function**: first argument is `data_table` (tibble with `datetime` and
+#'     sensor columns); must return a vector of `logical`, `integer`, or `numeric`.
+#'     Return `NULL` to skip the item.
+#'   - **Character**: R expression referencing sensor names as variables
+#'     (e.g. `"TMS_T1 - TMS_T3"`, `"mean(TMS_T1)"`). Evaluated per
+#'     locality/logger using `with()`.
+#' @param output_sensor Name of the newly created virtual sensor.
+#' @param output_sensor_id Output sensor_id (optional). If NULL (default),
 #' sensor_id is inferred from custom function output type (`logical`, `integer`, `real`).
 #' Must be one of `names(mc_data_sensors)` when provided.
-#' @param logger_type optional logger type filter (e.g. "TMS").
+#' @param logger_type Logger type filter (optional). Character vector of logger types to process (e.g. `c("TMS","Thermo")`)
 #' In raw format this filters loggers; in agg format it determines default `sensors` when `sensors=NULL`.
-#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @param sensors optional vector of sensor names. If provided, only loggers/localities that contain all of these sensors are processed. If NULL, the user function may return NULL to skip adding the sensor.
-#' @return The same myClim object as input but with added custom virtual sensor.
+#' @param localities Character vector of `locality_id`s to process.
+#'   `NULL` (default) processes all localities.
+#' @param sensors Character vector of sensor names that must all be present in
+#'   a logger/locality for processing to occur. Items missing any of these
+#'   sensors are silently skipped. `NULL` (default) disables this check.
+#' @return The input myClim object with the new virtual sensor added to all
+#'   eligible localities/loggers.
+#' @return The input myClim object with the new virtual sensor `output_sensor` added to 
+#' all eligible localities/loggers.
 #' @export
 #' @examples
+#' # Function form
 #' diff_func <- function(data_table) {
 #'     data_table$TMS_T1 - data_table$TMS_T3
 #' }
-#' data_diff <- mc_calc_custom(mc_data_example_clean, diff_func,
-#'                             logger_type = "TMS", output_sensor = "DIFF_T1_T3")
+#' data_diff <- mc_calc_custom(
+#'     mc_data_example_clean,
+#'     custom_function = diff_func,
+#'     output_sensor = "DIFF_T1_T3",
+#'     logger_type   = "TMS",
+#'     sensors       = c("TMS_T1", "TMS_T3")
+#' )
+#'
+#' # String form — equivalent result
+#' data_diff <- mc_calc_custom(
+#'     mc_data_example_clean,
+#'     custom_function = "TMS_T1 - TMS_T3",
+#'     output_sensor   = "DIFF_T1_T3",
+#'     logger_type     = "TMS",
+#'     sensors         = c("TMS_T1", "TMS_T3")
+#' )
 mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_id=NULL,
                            logger_type=NULL,localities=NULL, sensors=NULL) {
     is_agg <- .common_is_agg_format(data)
