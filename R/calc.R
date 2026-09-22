@@ -190,7 +190,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' all eligible localities/loggers.
 #' @export
 #' @examples
-#' # Function form
+#' # Function form - calculate difference between air and soil temperature
 #' diff_func <- function(data_table) {
 #'     data_table$TMS_T1 - data_table$TMS_T3
 #' }
@@ -210,6 +210,16 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #'     logger_type     = "TMS",
 #'     sensors         = c("TMS_T1", "TMS_T3")
 #' )
+#' 
+#' # String form — identify rain events based on TMS moisture sensor (moisture increase > 50 units within 4 consecutive measurements)
+#' mc_calc_custom(
+#'     mc_data_example_clean,
+#'     custom_function = "ifelse(dplyr::lead(TMS_moist,4) - TMS_moist > 50,1,0)", 
+#'     output_sensor = "RAIN",
+#'     sensors       = c("TMS_moist")
+#'     ) |> mc_plot_line(sensors = c("TMS_moist","RAIN"))
+#' 
+
 mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_id=NULL,
                            logger_type=NULL,localities=NULL, sensors=NULL) {
     is_agg <- .common_is_agg_format(data)
