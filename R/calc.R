@@ -198,27 +198,31 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #'     mc_data_example_clean,
 #'     custom_function = diff_func,
 #'     output_sensor = "DIFF_T1_T3",
+#'     output_sensor_id = "T_C",
 #'     logger_type   = "TMS",
 #'     sensors       = c("TMS_T1", "TMS_T3")
-#' )
-#'
+#' ) |> mc_plot_line(sensors = c("DIFF","TMS_T1","TMS_T3"))
+#' mc_plot_line(data_diff, sensors = c("DIFF","TMS_T1","TMS_T3"))
+#' 
 #' # String form — equivalent result
 #' data_diff <- mc_calc_custom(
 #'     mc_data_example_clean,
 #'     custom_function = "TMS_T1 - TMS_T3",
 #'     output_sensor   = "DIFF_T1_T3",
+#'     output_sensor_id = "T_C",
 #'     logger_type     = "TMS",
 #'     sensors         = c("TMS_T1", "TMS_T3")
-#' )
+#' ) 
+#' mc_plot_line(data_diff, sensors = c("DIFF","TMS_T1","TMS_T3"))
 #' 
 #' # String form — identify rain events based on TMS moisture sensor (moisture increase > 50 units within 4 consecutive measurements)
-#' mc_calc_custom(
+#' rain_event <- mc_calc_custom(
 #'     mc_data_example_clean,
 #'     custom_function = "ifelse(dplyr::lead(TMS_moist,4) - TMS_moist > 50,1,0)", 
 #'     output_sensor = "RAIN",
 #'     sensors       = c("TMS_moist")
-#'     ) |> mc_plot_line(sensors = c("TMS_moist","RAIN"))
-#' 
+#'     ) 
+#' mc_plot_line(rain_event, sensors = c("TMS_moist","RAIN"))
 
 mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_id=NULL,
                            logger_type=NULL,localities=NULL, sensors=NULL) {
