@@ -10,6 +10,8 @@
 .calc_const_MESSAGE_CUSTOM_RESULT_TYPE <- "Custom function output has unsupported type. Use logical, integer, or numeric vector."
 .calc_const_MESSAGE_CUSTOM_AGG_LOGGER_TYPE_IGNORED <- "In agg format, logger_type is ignored."
 .calc_const_MESSAGE_CUSTOM_UNKNOWN_SENSOR_ID <- "output_sensor_id {output_sensor_id} is unknown. Use one of names(mc_data_sensors)."
+.calc_const_MESSAGE_CUSTOM_ERROR_LOCALITY <- "Custom function failed in locality {locality_id}: {error_message}"
+.calc_const_MESSAGE_CUSTOM_ERROR_LOGGER <- "Custom function failed in locality {locality_id}, logger {logger_name}: {error_message}"
 
 .calc_const_FUNC_TYPE <- list(
     "EXPR" = "expression",
@@ -171,8 +173,9 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' names can be used directly (e.g. `TMS_T1 - 2 * TMS_T3`). Pronouns `.data` and `.env`
 #' are available to distinguish sensor columns from variables in the calling environment
 #' (e.g. `.data$TMS_T1 - .env$offset`). Standard R functions
-#' (`mean()`, `dplyr::lag()`, `abs()`, etc.) are available. If evaluation of the expression fails
-#' (e.g. a referenced sensor is missing), a warning is issued and the item is skipped.
+#' (`mean()`, `dplyr::lag()`, `abs()`, etc.) are available. If the calculation fails
+#' (e.g. a referenced sensor is missing), the function stops with an error naming the locality
+#' (and logger in raw format). Use `sensors` parameter to skip loggers/localities without required sensors.
 #'
 #' @template param_myClim_object_cleaned
 #' @param custom_function Function or unquoted expression defining the calculation.
@@ -253,36 +256,44 @@ mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_i
         custom_function <- rlang::eval_tidy(q_custom_function)
     }
 
-    call_custom <- function(item) {
+    call_custom <- function(item, locality_id, logger_name=NULL) {
         if(!is.null(sensors)) {
             if(!all(sensors %in% names(item$sensors))) {
                 return(item)
             }
         }
-        result <- .calc_add_custom_sensor_to_item(item, output_sensor, output_sensor_id, function_type,
-                                                  custom_function, q_custom_function)
+        result <- tryCatch(
+            .calc_add_custom_sensor_to_item(item, output_sensor, output_sensor_id, function_type,
+                                            custom_function, q_custom_function),
+            error = function(e) {
+                error_message <- conditionMessage(e)
+                message_template <- if(is.null(logger_name)) .calc_const_MESSAGE_CUSTOM_ERROR_LOCALITY
+                                    else .calc_const_MESSAGE_CUSTOM_ERROR_LOGGER
+                stop(stringr::str_glue(message_template), call. = FALSE)
+            })
         return(result)
     }
 
-    logger_function <- function(logger) {
+    logger_function <- function(logger, locality_id) {
         if(!is.null(logger_type) && !(logger$metadata@type %in% logger_type)) {
             return(logger)
         }
-        call_custom(logger)
+        call_custom(logger, locality_id, logger$metadata@name)
     }
 
     locality_function <- function(locality) {
         if(!(is.null(localities) || locality$metadata@locality_id %in% localities)) {
             return(locality)
         }
+        locality_id <- locality$metadata@locality_id
         if(is_agg) {
-            return(call_custom(locality))
+            return(call_custom(locality, locality_id))
         }
-        locality$loggers <- purrr::map(locality$loggers, logger_function)
+        locality$loggers <- lapply(locality$loggers, logger_function, locality_id = locality_id)
         return(locality)
     }
 
-    data$localities <- purrr::map(data$localities, locality_function)
+    data$localities <- lapply(data$localities, locality_function)
     return(data)
 }
 
@@ -316,11 +327,7 @@ mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_i
                                             custom_function, q_custom_function) {
     data_table <- .common_sensor_values_as_tibble(item)
     if(function_type == .calc_const_FUNC_TYPE$EXPR) {
-        values <- tryCatch(rlang::eval_tidy(q_custom_function, data = data_table),
-                           error = function(e) {
-                               warning("Custom function error: ", conditionMessage(e))
-                               NULL
-                           })
+        values <- rlang::eval_tidy(q_custom_function, data = data_table)
     } else {
         values <- custom_function(data_table)
     }

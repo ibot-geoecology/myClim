@@ -63,8 +63,9 @@ it is evaluated by \code{\link[rlang:eval_tidy]{rlang::eval_tidy()}} with the da
 names can be used directly (e.g. \code{TMS_T1 - 2 * TMS_T3}). Pronouns \code{.data} and \code{.env}
 are available to distinguish sensor columns from variables in the calling environment
 (e.g. \code{.data$TMS_T1 - .env$offset}). Standard R functions
-(\code{mean()}, \code{dplyr::lag()}, \code{abs()}, etc.) are available. If evaluation of the expression fails
-(e.g. a referenced sensor is missing), a warning is issued and the item is skipped.
+(\code{mean()}, \code{dplyr::lag()}, \code{abs()}, etc.) are available. If the calculation fails
+(e.g. a referenced sensor is missing), the function stops with an error naming the locality
+(and logger in raw format). Use \code{sensors} parameter to skip loggers/localities without required sensors.
 }
 \examples{
 # Function form - calculate difference between air and soil temperature

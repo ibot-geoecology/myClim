@@ -137,17 +137,33 @@ test_that("mc_calc_custom function types", {
                  regexp = "output length")
 })
 
-test_that("mc_calc_custom expression errors", {
-    expect_warning(
-        raw_data <- mc_calc_custom(mc_data_example_clean,
-                                   custom_function = TMS_T1 - TMS_T3,
-                                   logger_type = "Thermo",
-                                   localities = "A1E05",
-                                   output_sensor = "DIFF_T1_T3"),
-        regexp = "Custom function error"
+test_that("mc_calc_custom calculation errors", {
+    expect_error(
+        mc_calc_custom(mc_data_example_clean,
+                       custom_function = TMS_T1 - TMS_T3,
+                       logger_type = "Thermo",
+                       localities = "A1E05",
+                       output_sensor = "DIFF_T1_T3"),
+        regexp = "failed in locality A1E05, logger Thermo.*TMS_T1"
     )
-    thermo_logger <- purrr::detect(raw_data$localities$A1E05$loggers, ~ .x$metadata@type == "Thermo")
-    expect_false("DIFF_T1_T3" %in% names(thermo_logger$sensors))
+
+    expect_error(
+        mc_calc_custom(mc_data_example_clean,
+                       custom_function = function(data_table) stop("boom"),
+                       logger_type = "TMS",
+                       localities = "A2E32",
+                       output_sensor = "CUSTOM_WRONG"),
+        regexp = "failed in locality A2E32, logger TMS.*boom"
+    )
+
+    agg_data <- mc_agg(mc_data_example_clean)
+    expect_error(
+        mc_calc_custom(agg_data,
+                       custom_function = NOT_EXISTS * 2,
+                       localities = "A2E32",
+                       output_sensor = "CUSTOM_WRONG"),
+        regexp = "failed in locality A2E32: .*NOT_EXISTS"
+    )
 })
 
 test_that("mc_calc_snow", {
