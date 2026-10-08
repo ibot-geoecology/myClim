@@ -30,6 +30,7 @@ Imports:
     lubridate,
     tibble,
     dplyr,
+    rlang,
     purrr,
     tidyr,
     ggplot2,

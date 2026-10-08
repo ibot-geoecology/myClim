@@ -11,6 +11,11 @@
 .calc_const_MESSAGE_CUSTOM_AGG_LOGGER_TYPE_IGNORED <- "In agg format, logger_type is ignored."
 .calc_const_MESSAGE_CUSTOM_UNKNOWN_SENSOR_ID <- "output_sensor_id {output_sensor_id} is unknown. Use one of names(mc_data_sensors)."
 
+.calc_const_FUNC_TYPE <- list(
+    "EXPR" = "expression",
+    "FUNC" = "function"
+)
+
 #' Snow detection from temperature
 #'
 #' @description
@@ -152,27 +157,31 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #'
 #' @description
 #' Creates a new virtual sensor on locality/logger in the myClim object.
-#' Values are computed by a user-defined function or a character expression evaluated on #' a data table containing `datetime` and sensor columns.
+#' Values are computed by a user-defined function or an expression evaluated on
+#' a data table containing `datetime` and sensor columns.
 #'
 #' @details
-#' The user function receives a tibble with columns `datetime` and one column per  
-#' sensor present at each logger(raw format) or locality (agg format). 
-#' It must return a logical/integer/numeric vector with the same length as number of rows. To skip loggers/localities without sensors used in custom function, use the `sensors` parameter.
-#' When custom function is provided as a character string, than it is evaluated with 
-#' `with(data_table, ...)`, so sensor names can be used directly 
-#' (e.g. `"TMS_T1 - 2*TMS_T3"`). Standard R functions
-#' (`mean()`, `lag()`, `abs()`, etc.) are available. If evaluation fails
-#' (e.g. a referenced sensor is missing), a warning is issued and the item is
-#' skipped.
+#' The user function receives a tibble with columns `datetime` and one column per
+#' sensor present at each logger (raw format) or locality (agg format).
+#' It must return a logical/integer/numeric vector with the same length as number of rows.
+#' To skip loggers/localities without sensors used in custom function, use the `sensors` parameter.
 #'
-#' @template param_myClim_object_cleaned 
-#' @param custom_function Function or character string defining the calculation.
-#'   - **Function**: first argument is `data_table` (tibble with `datetime` and
+#' When custom function is provided as an unquoted expression (as in [dplyr::mutate()]),
+#' it is evaluated by [rlang::eval_tidy()] with the data table as data mask, so sensor
+#' names can be used directly (e.g. `TMS_T1 - 2 * TMS_T3`). Pronouns `.data` and `.env`
+#' are available to distinguish sensor columns from variables in the calling environment
+#' (e.g. `.data$TMS_T1 - .env$offset`). Standard R functions
+#' (`mean()`, `dplyr::lag()`, `abs()`, etc.) are available. If evaluation of the expression fails
+#' (e.g. a referenced sensor is missing), a warning is issued and the item is skipped.
+#'
+#' @template param_myClim_object_cleaned
+#' @param custom_function Function or unquoted expression defining the calculation.
+#'   - **Function** (named or anonymous): first argument is `data_table` (tibble with `datetime` and
 #'     sensor columns); must return a vector of `logical`, `integer`, or `numeric`.
 #'     Return `NULL` to skip the item.
-#'   - **Character**: R expression referencing sensor names as variables
-#'     (e.g. `"TMS_T1 - TMS_T3"`, `"mean(TMS_T1)"`). Evaluated per
-#'     locality/logger using `with()`.
+#'   - **Expression**: unquoted R expression referencing sensor names as variables
+#'     (e.g. `TMS_T1 - TMS_T3`, `mean(TMS_T1)`). Evaluated per
+#'     locality/logger using [rlang::eval_tidy()].
 #' @param output_sensor Name of the newly created virtual sensor.
 #' @param output_sensor_id Output sensor_id (optional). If NULL (default),
 #' sensor_id is inferred from custom function output type (`logical`, `integer`, `real`).
@@ -184,9 +193,7 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #' @param sensors Character vector of sensor names that must all be present in
 #'   a logger/locality for processing to occur. Items missing any of these
 #'   sensors are silently skipped. `NULL` (default) disables this check.
-#' @return The input myClim object with the new virtual sensor added to all
-#'   eligible localities/loggers.
-#' @return The input myClim object with the new virtual sensor `output_sensor` added to 
+#' @return The input myClim object with the new virtual sensor `output_sensor` added to
 #' all eligible localities/loggers.
 #' @export
 #' @examples
@@ -201,31 +208,38 @@ mc_calc_snow <- function(data, sensor, output_sensor="snow", localities=NULL, ra
 #'     output_sensor_id = "T_C",
 #'     logger_type   = "TMS",
 #'     sensors       = c("TMS_T1", "TMS_T3")
-#' ) |> mc_plot_line(sensors = c("DIFF","TMS_T1","TMS_T3"))
-#' mc_plot_line(data_diff, sensors = c("DIFF","TMS_T1","TMS_T3"))
-#' 
-#' # String form — equivalent result
+#' )
+#' \donttest{
+#' mc_plot_line(data_diff, sensors = c("DIFF_T1_T3","TMS_T1","TMS_T3"))
+#' }
+#'
+#' # Expression form - equivalent result
 #' data_diff <- mc_calc_custom(
 #'     mc_data_example_clean,
-#'     custom_function = "TMS_T1 - TMS_T3",
+#'     custom_function = TMS_T1 - TMS_T3,
 #'     output_sensor   = "DIFF_T1_T3",
 #'     output_sensor_id = "T_C",
 #'     logger_type     = "TMS",
 #'     sensors         = c("TMS_T1", "TMS_T3")
-#' ) 
-#' mc_plot_line(data_diff, sensors = c("DIFF","TMS_T1","TMS_T3"))
-#' 
-#' # String form — identify rain events based on TMS moisture sensor (moisture increase > 50 units within 4 consecutive measurements)
+#' )
+#' \donttest{
+#' mc_plot_line(data_diff, sensors = c("DIFF_T1_T3","TMS_T1","TMS_T3"))
+#' }
+#'
+#' # Expression form - identify rain events based on TMS moisture sensor
+#' # (moisture increase > 50 units within 4 consecutive measurements)
 #' rain_event <- mc_calc_custom(
 #'     mc_data_example_clean,
-#'     custom_function = "ifelse(dplyr::lead(TMS_moist,4) - TMS_moist > 50,1,0)", 
+#'     custom_function = ifelse(dplyr::lead(TMS_moist, 4) - TMS_moist > 50, 1, 0),
 #'     output_sensor = "RAIN",
 #'     sensors       = c("TMS_moist")
-#'     ) 
+#' )
+#' \donttest{
 #' mc_plot_line(rain_event, sensors = c("TMS_moist","RAIN"))
-
+#' }
 mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_id=NULL,
                            logger_type=NULL,localities=NULL, sensors=NULL) {
+    q_custom_function <- rlang::enquo(custom_function)
     is_agg <- .common_is_agg_format(data)
     if(!is_agg) {
         .prep_check_datetime_step_unprocessed(data, stop)
@@ -234,6 +248,10 @@ mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_i
     if(is_agg && !is.null(logger_type)) {
         warning(.calc_const_MESSAGE_CUSTOM_AGG_LOGGER_TYPE_IGNORED)
     }
+    function_type <- .calc_get_function_type(q_custom_function)
+    if(function_type == .calc_const_FUNC_TYPE$FUNC) {
+        custom_function <- rlang::eval_tidy(q_custom_function)
+    }
 
     call_custom <- function(item) {
         if(!is.null(sensors)) {
@@ -241,7 +259,8 @@ mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_i
                 return(item)
             }
         }
-        result <- .calc_add_custom_sensor_to_item(item, output_sensor, output_sensor_id, custom_function)
+        result <- .calc_add_custom_sensor_to_item(item, output_sensor, output_sensor_id, function_type,
+                                                  custom_function, q_custom_function)
         return(result)
     }
 
@@ -267,14 +286,43 @@ mc_calc_custom <- function(data, custom_function, output_sensor, output_sensor_i
     return(data)
 }
 
-.calc_add_custom_sensor_to_item <- function(item, output_sensor, output_sensor_id, custom_function) {
+.calc_get_function_type <- function(q_custom_function) {
+    expr_custom_function <- rlang::get_expr(q_custom_function)
+    env_custom_function <- rlang::get_env(q_custom_function)
+    # function object passed directly (e.g. via do.call)
+    if(is.function(expr_custom_function)) {
+        return(.calc_const_FUNC_TYPE$FUNC)
+    }
+    # anonymous function: function(x) ... or \(x) ...
+    if(rlang::is_call(expr_custom_function, "function")) {
+        return(.calc_const_FUNC_TYPE$FUNC)
+    }
+    # named function: my_function
+    if(rlang::is_symbol(expr_custom_function) &&
+       exists(rlang::as_string(expr_custom_function), envir = env_custom_function, mode = "function")) {
+        return(.calc_const_FUNC_TYPE$FUNC)
+    }
+    # named function from package: pkg::my_function
+    if(rlang::is_call(expr_custom_function, c("::", ":::"))) {
+        value <- tryCatch(rlang::eval_tidy(q_custom_function), error = function(e) NULL)
+        if(is.function(value)) {
+            return(.calc_const_FUNC_TYPE$FUNC)
+        }
+    }
+    return(.calc_const_FUNC_TYPE$EXPR)
+}
+
+.calc_add_custom_sensor_to_item <- function(item, output_sensor, output_sensor_id, function_type,
+                                            custom_function, q_custom_function) {
     data_table <- .common_sensor_values_as_tibble(item)
-    if(is.character(custom_function)) {
-        values <- tryCatch(with(data_table,eval(parse(text = custom_function))),
-         error = function(e) {warning("Custom function error: ",conditionMessage(e)) 
-         NULL})
+    if(function_type == .calc_const_FUNC_TYPE$EXPR) {
+        values <- tryCatch(rlang::eval_tidy(q_custom_function, data = data_table),
+                           error = function(e) {
+                               warning("Custom function error: ", conditionMessage(e))
+                               NULL
+                           })
     } else {
-    values <- custom_function(data_table)
+        values <- custom_function(data_table)
     }
     if(is.null(values)) {
         return(item)

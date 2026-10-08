@@ -17,37 +17,94 @@ mc_calc_custom(
 \arguments{
 \item{data}{cleaned myClim object see \link{myClim-package}}
 
-\item{custom_function}{user-defined function with first argument \code{data_table}}
+\item{custom_function}{Function or unquoted expression defining the calculation.
+\itemize{
+\item \strong{Function} (named or anonymous): first argument is \code{data_table} (tibble with \code{datetime} and
+sensor columns); must return a vector of \code{logical}, \code{integer}, or \code{numeric}.
+Return \code{NULL} to skip the item.
+\item \strong{Expression}: unquoted R expression referencing sensor names as variables
+(e.g. \code{TMS_T1 - TMS_T3}, \code{mean(TMS_T1)}). Evaluated per
+locality/logger using \code{\link[rlang:eval_tidy]{rlang::eval_tidy()}}.
+}}
 
-\item{output_sensor}{name of newly created virtual sensor}
+\item{output_sensor}{Name of the newly created virtual sensor.}
 
-\item{output_sensor_id}{optional output sensor_id. If NULL (default),
+\item{output_sensor_id}{Output sensor_id (optional). If NULL (default),
 sensor_id is inferred from custom function output type (\code{logical}, \code{integer}, \code{real}).
 Must be one of \code{names(mc_data_sensors)} when provided.}
 
-\item{logger_type}{optional logger type filter (e.g. "TMS").
+\item{logger_type}{Logger type filter (optional). Character vector of logger types to process (e.g. \code{c("TMS","Thermo")})
 In raw format this filters loggers; in agg format it determines default \code{sensors} when \code{sensors=NULL}.}
 
-\item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
+\item{localities}{Character vector of \code{locality_id}s to process.
+\code{NULL} (default) processes all localities.}
 
-\item{sensors}{optional vector of sensor names. If provided, only loggers/localities that contain all of these sensors are processed. If NULL, the user function may return NULL to skip adding the sensor.}
+\item{sensors}{Character vector of sensor names that must all be present in
+a logger/locality for processing to occur. Items missing any of these
+sensors are silently skipped. \code{NULL} (default) disables this check.}
 }
 \value{
-The same myClim object as input but with added custom virtual sensor.
+The input myClim object with the new virtual sensor \code{output_sensor} added to
+all eligible localities/loggers.
 }
 \description{
-This function creates a new virtual sensor on locality/logger within the myClim object.
-Values are computed by a user-defined function that receives a data table with \code{datetime}
-and selected sensor columns, and returns a vector with one value per row.
+Creates a new virtual sensor on locality/logger in the myClim object.
+Values are computed by a user-defined function or an expression evaluated on
+a data table containing \code{datetime} and sensor columns.
 }
 \details{
-The user function must accept the input data table as its first argument and return a
-logical/integer/numeric vector with the same length as number of rows in the input table.
+The user function receives a tibble with columns \code{datetime} and one column per
+sensor present at each logger (raw format) or locality (agg format).
+It must return a logical/integer/numeric vector with the same length as number of rows.
+To skip loggers/localities without sensors used in custom function, use the \code{sensors} parameter.
+
+When custom function is provided as an unquoted expression (as in \code{\link[dplyr:mutate]{dplyr::mutate()}}),
+it is evaluated by \code{\link[rlang:eval_tidy]{rlang::eval_tidy()}} with the data table as data mask, so sensor
+names can be used directly (e.g. \code{TMS_T1 - 2 * TMS_T3}). Pronouns \code{.data} and \code{.env}
+are available to distinguish sensor columns from variables in the calling environment
+(e.g. \code{.data$TMS_T1 - .env$offset}). Standard R functions
+(\code{mean()}, \code{dplyr::lag()}, \code{abs()}, etc.) are available. If evaluation of the expression fails
+(e.g. a referenced sensor is missing), a warning is issued and the item is skipped.
 }
 \examples{
+# Function form - calculate difference between air and soil temperature
 diff_func <- function(data_table) {
     data_table$TMS_T1 - data_table$TMS_T3
 }
-data_diff <- mc_calc_custom(mc_data_example_clean, diff_func,
-                            logger_type = "TMS", output_sensor = "DIFF_T1_T3")
+data_diff <- mc_calc_custom(
+    mc_data_example_clean,
+    custom_function = diff_func,
+    output_sensor = "DIFF_T1_T3",
+    output_sensor_id = "T_C",
+    logger_type   = "TMS",
+    sensors       = c("TMS_T1", "TMS_T3")
+)
+\donttest{
+mc_plot_line(data_diff, sensors = c("DIFF_T1_T3","TMS_T1","TMS_T3"))
+}
+
+# Expression form - equivalent result
+data_diff <- mc_calc_custom(
+    mc_data_example_clean,
+    custom_function = TMS_T1 - TMS_T3,
+    output_sensor   = "DIFF_T1_T3",
+    output_sensor_id = "T_C",
+    logger_type     = "TMS",
+    sensors         = c("TMS_T1", "TMS_T3")
+)
+\donttest{
+mc_plot_line(data_diff, sensors = c("DIFF_T1_T3","TMS_T1","TMS_T3"))
+}
+
+# Expression form - identify rain events based on TMS moisture sensor
+# (moisture increase > 50 units within 4 consecutive measurements)
+rain_event <- mc_calc_custom(
+    mc_data_example_clean,
+    custom_function = ifelse(dplyr::lead(TMS_moist, 4) - TMS_moist > 50, 1, 0),
+    output_sensor = "RAIN",
+    sensors       = c("TMS_moist")
+)
+\donttest{
+mc_plot_line(rain_event, sensors = c("TMS_moist","RAIN"))
+}
 }
