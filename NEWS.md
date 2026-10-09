@@ -1,5 +1,6 @@
 # myClim 1.5.5
 * Added new functions `mc_calc_psat` and `mc_calc_pact`.
+* The function `mc_calc_vpd` has new parameters `output_sensor_pact` and `output_sensor_psat` to optionally create p_act and p_sat sensors together with VPD.
 
 # myClim 1.5.4
 * Fixed the display of `vroom` parsing errors.

@@ -676,7 +676,11 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=mc_const_SENSOR_Dendro_raw,
 #' @param elevation value in meters (default 0)
 #' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @return myClim object same as input but with added VPD sensor
+#' @param output_sensor_pact name of new virtual p_act sensor (see [myClim::mc_calc_pact()]);
+#' if NULL then p_act sensor is not created (default NULL)
+#' @param output_sensor_psat name of new virtual p_sat sensor (see [myClim::mc_calc_psat()]);
+#' if NULL then p_sat sensor is not created (default NULL)
+#' @return myClim object same as input but with added VPD sensor (and optionally p_act and p_sat sensors)
 #' @export
 #' @references
 #' Jones H.G. (2014) Plants and Microclimate, Third Edit. Cambridge University Press, Cambridge 
@@ -687,9 +691,17 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=mc_const_SENSOR_Dendro_raw,
 #' agg_data <- mc_calc_vpd(mc_data_example_agg, "HOBO_T", "HOBO_RH", localities="A2E32")
 mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
                         output_sensor="VPD", elevation=0,
-                        metadata_elevation=TRUE, localities=NULL) {
+                        metadata_elevation=TRUE, localities=NULL,
+                        output_sensor_pact=NULL, output_sensor_psat=NULL) {
     call_vpd_function <- function(item, elevation) {
-        .calc_add_vpd_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
+        item <- .calc_add_vpd_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
+        if(!is.null(output_sensor_pact)) {
+            item <- .calc_add_pact_to_item(item, temp_sensor, rh_sensor, output_sensor_pact, elevation)
+        }
+        if(!is.null(output_sensor_psat)) {
+            item <- .calc_add_psat_to_item(item, temp_sensor, output_sensor_psat, elevation)
+        }
+        return(item)
     }
     
     data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_vpd_function)
