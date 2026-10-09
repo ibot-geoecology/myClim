@@ -11,7 +11,9 @@ mc_calc_vpd(
   output_sensor = "VPD",
   elevation = 0,
   metadata_elevation = TRUE,
-  localities = NULL
+  localities = NULL,
+  output_sensor_pact = NULL,
+  output_sensor_psat = NULL
 )
 }
 \arguments{
@@ -28,9 +30,15 @@ mc_calc_vpd(
 \item{metadata_elevation}{if TRUE then elevation from metadata of locality is used (default TRUE)}
 
 \item{localities}{list of locality_ids for calculation; if NULL then all (default NULL)}
+
+\item{output_sensor_pact}{name of new virtual p_act sensor (see \code{\link[=mc_calc_pact]{mc_calc_pact()}});
+if NULL then p_act sensor is not created (default NULL)}
+
+\item{output_sensor_psat}{name of new virtual p_sat sensor (see \code{\link[=mc_calc_psat]{mc_calc_psat()}});
+if NULL then p_sat sensor is not created (default NULL)}
 }
 \value{
-myClim object same as input but with added VPD sensor
+myClim object same as input but with added VPD sensor (and optionally p_act and p_sat sensors)
 }
 \description{
 This function creates a new virtual sensor on locality within the myClim data object.

@@ -1,5 +1,7 @@
 # myClim 1.5.8
 * Added standard constants for tags `join_conflict`, `missing_shield`, `displaced` and `loose_contact` (`mc_const_TAG_JOIN_CONFLICT`, `mc_const_TAG_MISSING_SHIELD`, `mc_const_TAG_DISPLACED`, `mc_const_TAG_LOOSE_CONTACT`).
+* Added new functions `mc_calc_psat` and `mc_calc_pact`.
+* The function `mc_calc_vpd` has new parameters `output_sensor_pact` and `output_sensor_psat` to optionally create p_act and p_sat sensors together with VPD.
 
 # myClim 1.5.7
 * Standard constants for tags are now available (`mc_const_TAG_ANOMALY`, `mc_const_TAG_CLEAN_CONFLICT`, `mc_const_TAG_ERROR`, `mc_const_TAG_SOURCE`).

@@ -5,7 +5,7 @@
 .calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
 .calc_const_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
 .calc_const_MESSAGE_WRONG_SOILTYPE <- "Soiltype doesn't contain all a, b, c parameters."
-.calc_const_MESSAGE_VPD_AGGREGATED <- "You are attempting to calculate VPD from aggregated temperature / RH values. Due to non-linear relationship between VPD and T/RH, this may produce biased VPD estimates."
+.calc_const_MESSAGE_VP_AGGREGATED <- "Calculating VPD/p_sat/p_act from aggregated temperature and RH may introduce bias due to non-linear T-RH relationships."
 
 #' Snow detection from temperature
 #'
@@ -681,7 +681,11 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=mc_const_SENSOR_Dendro_raw,
 #' @param elevation value in meters (default 0)
 #' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @return myClim object same as input but with added VPD sensor
+#' @param output_sensor_pact name of new virtual p_act sensor (see [myClim::mc_calc_pact()]);
+#' if NULL then p_act sensor is not created (default NULL)
+#' @param output_sensor_psat name of new virtual p_sat sensor (see [myClim::mc_calc_psat()]);
+#' if NULL then p_sat sensor is not created (default NULL)
+#' @return myClim object same as input but with added VPD sensor (and optionally p_act and p_sat sensors)
 #' @export
 #' @references
 #' Jones H.G. (2014) Plants and Microclimate, Third Edit. Cambridge University Press, Cambridge 
@@ -692,18 +696,95 @@ mc_calc_tomst_dendro <- function(data, dendro_sensor=mc_const_SENSOR_Dendro_raw,
 #' agg_data <- mc_calc_vpd(mc_data_example_agg, "HOBO_T", "HOBO_RH", localities="A2E32")
 mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
                         output_sensor="VPD", elevation=0,
+                        metadata_elevation=TRUE, localities=NULL,
+                        output_sensor_pact=NULL, output_sensor_psat=NULL) {
+    call_vpd_function <- function(item, elevation) {
+        item <- .calc_add_vpd_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
+        if(!is.null(output_sensor_pact)) {
+            item <- .calc_add_pact_to_item(item, temp_sensor, rh_sensor, output_sensor_pact, elevation)
+        }
+        if(!is.null(output_sensor_psat)) {
+            item <- .calc_add_psat_to_item(item, temp_sensor, output_sensor_psat, elevation)
+        }
+        return(item)
+    }
+    
+    data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_vpd_function)
+
+    return(data)
+}
+
+#' Calculate saturation vapor pressure (in kPa)
+#'
+#' @description
+#' This function creates a new virtual sensor on locality within the myClim data object.
+#' The virtual sensor represents the saturation vapor pressure (in kPa) calculated
+#' from temperature.
+#'
+#' @template param_myClim_object_cleaned
+#' @param temp_sensor name of temperature sensor. Temperature sensor must be in T_C physical.
+#' @param output_sensor name of new virtual p_sat sensor (default "p_sat")
+#' @param elevation value in meters (default 0)
+#' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return myClim object same as input but with added p_sat sensor
+#' @export
+#'
+#' @examples
+#' agg_data <- mc_calc_psat(mc_data_example_agg, "HOBO_T", localities="A2E32")
+mc_calc_psat <- function(data, temp_sensor="HOBO_T", 
+                        output_sensor="p_sat", elevation=0,
                         metadata_elevation=TRUE, localities=NULL) {
+    call_psat_function <- function(item, elevation) {
+        .calc_add_psat_to_item(item, temp_sensor, output_sensor, elevation)
+    }
+    
+    data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_psat_function)
+
+    return(data)
+}
+
+#' Calculate actual vapor pressure (in kPa)
+#'
+#' @description
+#' This function creates a new virtual sensor on locality within the myClim data object.
+#' The virtual sensor represents the actual vapor pressure (in kPa) calculated
+#' from temperature and relative air humidity.
+#'
+#' @template param_myClim_object_cleaned
+#' @param temp_sensor name of temperature sensor. Temperature sensor must be in T_C physical.
+#' @param rh_sensor name of relative air humidity sensor. Humidity sensor must be in RH physical.
+#' @param output_sensor name of new virtual p_act sensor (default "p_act")
+#' @param elevation value in meters (default 0)
+#' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
+#' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
+#' @return myClim object same as input but with added p_act sensor
+#' @export
+#'
+#' @examples
+#' agg_data <- mc_calc_pact(mc_data_example_agg, "HOBO_T", "HOBO_RH", localities="A2E32")
+mc_calc_pact <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
+                        output_sensor = "p_act", elevation=0,
+                        metadata_elevation=TRUE, localities=NULL) {
+    call_pact_function <- function(item, elevation) {
+        .calc_add_pact_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
+    }
+    
+    data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_pact_function)
+
+    return(data)
+}
+
+.calc_vp_common <- function(data, elevation, metadata_elevation, localities, sensor_function)
+{
     is_agg <- .common_is_agg_format(data)
+
     if(!is_agg) {
         .prep_check_datetime_step_unprocessed(data, stop)
     }
 
     if(is_agg && lubridate::period(data$metadata@period) >= lubridate::days(1)) {
-        warning(.calc_const_MESSAGE_VPD_AGGREGATED)
-    }
-
-    call_vpd_function <- function(item, elevation) {
-        .calc_add_vpd_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
+        warning(.calc_const_MESSAGE_VP_AGGREGATED)
     }
 
     locality_function <- function(locality) {
@@ -715,9 +796,9 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
             local_elevation <- locality$metadata@elevation
         }
         if(is_agg) {
-            return(call_vpd_function(locality, local_elevation))
+            return(sensor_function(locality, local_elevation))
         }
-        locality$loggers <- purrr::map2(locality$loggers, local_elevation, call_vpd_function)
+        locality$loggers <- purrr::map2(locality$loggers, local_elevation, sensor_function)
         return(locality)
     }
     data$localities <- purrr::map(data$localities, locality_function)
@@ -725,39 +806,83 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
 }
 
 .calc_add_vpd_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, elevation) {
-    skip <- .calc_vpd_check_sensors_get_skip(item, temp_sensor, rh_sensor, output_sensor)
-    if(skip) {
+    skip_T <- .calc_vp_check_T_output_get_skip(item, temp_sensor, output_sensor)
+    skip_RH <- .calc_vp_check_RH_get_skip(item, rh_sensor)
+    if(skip_T || skip_RH) {
         return(item)
     }
 
     T <- item$sensors[[temp_sensor]]$values
     RH <- item$sensors[[rh_sensor]]$values
-    a <- 0.61121
-    b <- 18.678 - (T / 234.5)
-    c <- 257.14
-    P <- 101300 * exp(- elevation / 8200)
-    f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * T^2)) #enhancement factor
-    values <- f * a * exp(b * T / (c + T)) * (1 - RH / 100)
+    params <- .calc_get_vapor_pressure_parameters(T, elevation)
+    values <- params$f * params$a * exp(params$b * T / (params$c + T)) * (1 - RH / 100)
 
     height <- item$sensors[[rh_sensor]]$metadata@height
     item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_VPD, output_sensor,
-                                                                     height=height, values=values)
+                                                            height=height, values=values)
     return(item)
 }
 
-.calc_vpd_check_sensors_get_skip <- function(item, temp_sensor, rh_sensor, output_sensor){
+.calc_vp_check_T_output_get_skip <- function(item, temp_sensor, output_sensor){
     if(!.calc_check_sensor_in_item(item, temp_sensor)){
         return(TRUE)
     }
     if(!.model_is_physical_T_C(item$sensors[[temp_sensor]]$metadata)){
         .calc_wrong_physical_warning_function(temp_sensor, .model_const_PHYSICAL_T_C)
     }
+    .calc_warn_if_overwriting(item, output_sensor)
+    return(FALSE)
+}
+
+.calc_vp_check_RH_get_skip <- function(item, rh_sensor){
     if(!.calc_check_sensor_in_item(item, rh_sensor)){
         return(TRUE)
     }
     if(!.model_is_physical(item$sensors[[rh_sensor]]$metadata, .model_const_PHYSICAL_RH)){
         .calc_wrong_physical_warning_function(rh_sensor, .model_const_PHYSICAL_RH)
     }
-    .calc_warn_if_overwriting(item, output_sensor)
     return(FALSE)
+}
+
+.calc_get_vapor_pressure_parameters <- function(T, elevation) {
+    a <- 0.61121
+    b <- 18.678 - (T / 234.5)
+    c <- 257.14
+    P <- 101300 * exp(- elevation / 8200)
+    f <- 1.00072 + (10e-7 * P * (0.032 + 5.9 * 10e-6 * T^2)) #enhancement factor
+    return(list(a=a, b=b, c=c, f=f))
+}
+
+.calc_add_psat_to_item <- function(item, temp_sensor, output_sensor, elevation) {
+    skip_T <- .calc_vp_check_T_output_get_skip(item, temp_sensor, output_sensor)
+    if(skip_T) {
+        return(item)
+    }
+
+    T <- item$sensors[[temp_sensor]]$values
+    params <- .calc_get_vapor_pressure_parameters(T, elevation)
+    values <- params$f * params$a * exp(params$b * T / (params$c + T))
+
+    height <- item$sensors[[temp_sensor]]$metadata@height
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_p_sat, output_sensor,
+                                                            height=height, values=values)
+    return(item)
+}
+
+.calc_add_pact_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, elevation) {
+    skip_T <- .calc_vp_check_T_output_get_skip(item, temp_sensor, output_sensor)
+    skip_RH <- .calc_vp_check_RH_get_skip(item, rh_sensor)
+    if(skip_T || skip_RH) {
+        return(item)
+    }
+
+    T <- item$sensors[[temp_sensor]]$values
+    RH <- item$sensors[[rh_sensor]]$values
+    params <- .calc_get_vapor_pressure_parameters(T, elevation)
+    values <- params$f * params$a * exp(params$b * T / (params$c + T)) * (RH / 100)
+
+    height <- item$sensors[[rh_sensor]]$metadata@height
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_p_act, output_sensor,
+                                                            height=height, values=values)
+    return(item)
 }
