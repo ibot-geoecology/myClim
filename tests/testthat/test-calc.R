@@ -153,21 +153,21 @@ test_that("mc_calc_tomst_dendro", {
                  (agg_data$localities$`92192250`$sensors$Dendro_raw$values[[1]] - 1279) * (8890 / (34000 - 1279)))
 })
 
-test_that("mc_calc_vpd mc_calc_svp mc_calc_avp", {
+test_that("mc_calc_vpd mc_calc_psat mc_calc_pact", {
     data <- mc_read_files("../data/HOBO/20024354.txt", "HOBO", date_format = "%d.%m.%Y %H:%M:%S", clean=FALSE, silent=TRUE)
     data <- mc_prep_meta_locality(data, list(`20024354`="LOC"), param_name = "locality_id")
     cleaned_data <- mc_prep_clean(data, silent=T)
     raw_data <- mc_calc_vpd(cleaned_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
-    raw_data <- mc_calc_svp(raw_data, mc_const_SENSOR_HOBO_T)
-    raw_data <- mc_calc_avp(raw_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
+    raw_data <- mc_calc_psat(raw_data, mc_const_SENSOR_HOBO_T)
+    raw_data <- mc_calc_pact(raw_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
     test_raw_data_format(raw_data)
     expect_true("VPD" %in% names(raw_data$localities$LOC$loggers[[1]]$sensors))
-    expect_true("SVP" %in% names(raw_data$localities$LOC$loggers[[1]]$sensors))
-    expect_true("AVP" %in% names(raw_data$localities$LOC$loggers[[1]]$sensors))
+    expect_true("p_sat" %in% names(raw_data$localities$LOC$loggers[[1]]$sensors))
+    expect_true("p_act" %in% names(raw_data$localities$LOC$loggers[[1]]$sensors))
     agg_data <- mc_agg(cleaned_data)
     agg_data <- mc_calc_vpd(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
-    agg_data <- mc_calc_svp(agg_data, mc_const_SENSOR_HOBO_T)
-    agg_data <- mc_calc_avp(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
+    agg_data <- mc_calc_psat(agg_data, mc_const_SENSOR_HOBO_T)
+    agg_data <- mc_calc_pact(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH)
     test_agg_data_format(agg_data)
     vp_martin <- function(t,rh,elev = 0) {
         a <- 0.61121
@@ -176,25 +176,25 @@ test_that("mc_calc_vpd mc_calc_svp mc_calc_avp", {
         P <- 101300*exp(-elev/8200)
         f <- 1.00072 + (10e-7*P*(0.032+5.9*10e-6*t^2)) #enhancement factor
         vpd <- f*a*exp(b*t/(c+t))*(1-rh/100)
-        svp <- f*a*exp(b*t/(c+t))
-        avp <- f*a*exp(b*t/(c+t))*(rh/100)
-        return(list(vpd=vpd, svp=svp, avp=avp))
+        p_sat <- f*a*exp(b*t/(c+t))
+        p_act <- f*a*exp(b*t/(c+t))*(rh/100)
+        return(list(vpd=vpd, p_sat=p_sat, p_act=p_act))
     }
     vp_values <- vp_martin(agg_data$localities$LOC$sensors$HOBO_T$values[[1]],
                             agg_data$localities$LOC$sensors$HOBO_RH$values[[1]])
     expect_equal(vp_values$vpd, agg_data$localities$LOC$sensors$VPD$values[[1]])
-    expect_equal(vp_values$svp, agg_data$localities$LOC$sensors$SVP$values[[1]])
-    expect_equal(vp_values$avp, agg_data$localities$LOC$sensors$AVP$values[[1]])
+    expect_equal(vp_values$p_sat, agg_data$localities$LOC$sensors$p_sat$values[[1]])
+    expect_equal(vp_values$p_act, agg_data$localities$LOC$sensors$p_act$values[[1]])
     agg_data <- mc_prep_meta_locality(agg_data, list(LOC = 500), "elevation")
     agg_data <- mc_calc_vpd(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH,
                              output_sensor = "VPD500")
-    agg_data <- mc_calc_svp(agg_data, mc_const_SENSOR_HOBO_T,
-                             output_sensor = "SVP500", elevation = 500)
-    agg_data <- mc_calc_avp(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH,
-                             output_sensor = "AVP500", elevation = 500)
+    agg_data <- mc_calc_psat(agg_data, mc_const_SENSOR_HOBO_T,
+                             output_sensor = "p_sat500", elevation = 500)
+    agg_data <- mc_calc_pact(agg_data, mc_const_SENSOR_HOBO_T, mc_const_SENSOR_HOBO_RH,
+                             output_sensor = "p_act500", elevation = 500)
     vp_values <- vp_martin(agg_data$localities$LOC$sensors$HOBO_T$values[[1]],
                             agg_data$localities$LOC$sensors$HOBO_RH$values[[1]], elev = 500)
     expect_equal(vp_values$vpd, agg_data$localities$LOC$sensors$VPD500$values[[1]])
-    expect_equal(vp_values$svp, agg_data$localities$LOC$sensors$SVP500$values[[1]])
-    expect_equal(vp_values$avp, agg_data$localities$LOC$sensors$AVP500$values[[1]])
+    expect_equal(vp_values$p_sat, agg_data$localities$LOC$sensors$p_sat500$values[[1]])
+    expect_equal(vp_values$p_act, agg_data$localities$LOC$sensors$p_act500$values[[1]])
 })

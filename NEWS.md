@@ -1,5 +1,5 @@
 # myClim 1.5.5
-* Added new functions `mc_calc_svp` and `mc_calc_avp`.
+* Added new functions `mc_calc_psat` and `mc_calc_pact`.
 
 # myClim 1.5.4
 * Fixed the display of `vroom` parsing errors.

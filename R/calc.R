@@ -5,7 +5,7 @@
 .calc_const_MESSAGE_SENSOR_NOT_EXISTS_IN_LOCALITIES <- "Sensor doesn't exist in any locality."
 .calc_const_MESSAGE_UNKNONW_SIOLTYPE <- "Soiltype {soiltype_value} is unknown."
 .calc_const_MESSAGE_WRONG_SOILTYPE <- "Soiltype doesn't contain all a, b, c parameters."
-.calc_const_MESSAGE_VP_AGGREGATED <- "Calculating VPD/SVP/AVP from aggregated temperature and RH may introduce bias due to non-linear T-RH relationships."
+.calc_const_MESSAGE_VP_AGGREGATED <- "Calculating VPD/p_sat/p_act from aggregated temperature and RH may introduce bias due to non-linear T-RH relationships."
 
 #' Snow detection from temperature
 #'
@@ -706,23 +706,23 @@ mc_calc_vpd <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
 #'
 #' @template param_myClim_object_cleaned
 #' @param temp_sensor name of temperature sensor. Temperature sensor must be in T_C physical.
-#' @param output_sensor name of new virtual SVP sensor (default "SVP")
+#' @param output_sensor name of new virtual p_sat sensor (default "p_sat")
 #' @param elevation value in meters (default 0)
 #' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @return myClim object same as input but with added SVP sensor
+#' @return myClim object same as input but with added p_sat sensor
 #' @export
 #'
 #' @examples
-#' agg_data <- mc_calc_svp(mc_data_example_agg, "HOBO_T", localities="A2E32")
-mc_calc_svp <- function(data, temp_sensor="HOBO_T", 
-                        output_sensor="SVP", elevation=0,
+#' agg_data <- mc_calc_psat(mc_data_example_agg, "HOBO_T", localities="A2E32")
+mc_calc_psat <- function(data, temp_sensor="HOBO_T", 
+                        output_sensor="p_sat", elevation=0,
                         metadata_elevation=TRUE, localities=NULL) {
-    call_svp_function <- function(item, elevation) {
-        .calc_add_svp_to_item(item, temp_sensor, output_sensor, elevation)
+    call_psat_function <- function(item, elevation) {
+        .calc_add_psat_to_item(item, temp_sensor, output_sensor, elevation)
     }
     
-    data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_svp_function)
+    data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_psat_function)
 
     return(data)
 }
@@ -737,23 +737,23 @@ mc_calc_svp <- function(data, temp_sensor="HOBO_T",
 #' @template param_myClim_object_cleaned
 #' @param temp_sensor name of temperature sensor. Temperature sensor must be in T_C physical.
 #' @param rh_sensor name of relative air humidity sensor. Humidity sensor must be in RH physical.
-#' @param output_sensor name of new virtual AVP sensor (default "AVP")
+#' @param output_sensor name of new virtual p_act sensor (default "p_act")
 #' @param elevation value in meters (default 0)
 #' @param metadata_elevation if TRUE then elevation from metadata of locality is used (default TRUE)
 #' @param localities list of locality_ids for calculation; if NULL then all (default NULL)
-#' @return myClim object same as input but with added AVP sensor
+#' @return myClim object same as input but with added p_act sensor
 #' @export
 #'
 #' @examples
-#' agg_data <- mc_calc_avp(mc_data_example_agg, "HOBO_T", "HOBO_RH", localities="A2E32")
-mc_calc_avp <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
-                        output_sensor="AVP", elevation=0,
+#' agg_data <- mc_calc_pact(mc_data_example_agg, "HOBO_T", "HOBO_RH", localities="A2E32")
+mc_calc_pact <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
+                        output_sensor = "p_act", elevation=0,
                         metadata_elevation=TRUE, localities=NULL) {
-    call_avp_function <- function(item, elevation) {
-        .calc_add_avp_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
+    call_pact_function <- function(item, elevation) {
+        .calc_add_pact_to_item(item, temp_sensor, rh_sensor, output_sensor, elevation)
     }
     
-    data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_avp_function)
+    data <- .calc_vp_common(data, elevation, metadata_elevation, localities, call_pact_function)
 
     return(data)
 }
@@ -836,7 +836,7 @@ mc_calc_avp <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
     return(list(a=a, b=b, c=c, f=f))
 }
 
-.calc_add_svp_to_item <- function(item, temp_sensor, output_sensor, elevation) {
+.calc_add_psat_to_item <- function(item, temp_sensor, output_sensor, elevation) {
     skip_T <- .calc_vp_check_T_output_get_skip(item, temp_sensor, output_sensor)
     if(skip_T) {
         return(item)
@@ -847,12 +847,12 @@ mc_calc_avp <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
     values <- params$f * params$a * exp(params$b * T / (params$c + T))
 
     height <- item$sensors[[temp_sensor]]$metadata@height
-    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_SVP, output_sensor,
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_p_sat, output_sensor,
                                                             height=height, values=values)
     return(item)
 }
 
-.calc_add_avp_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, elevation) {
+.calc_add_pact_to_item <- function(item, temp_sensor, rh_sensor, output_sensor, elevation) {
     skip_T <- .calc_vp_check_T_output_get_skip(item, temp_sensor, output_sensor)
     skip_RH <- .calc_vp_check_RH_get_skip(item, rh_sensor)
     if(skip_T || skip_RH) {
@@ -865,7 +865,7 @@ mc_calc_avp <- function(data, temp_sensor="HOBO_T", rh_sensor="HOBO_RH",
     values <- params$f * params$a * exp(params$b * T / (params$c + T)) * (RH / 100)
 
     height <- item$sensors[[rh_sensor]]$metadata@height
-    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_AVP, output_sensor,
+    item$sensors[[output_sensor]] <- .common_get_new_sensor(mc_const_SENSOR_p_act, output_sensor,
                                                             height=height, values=values)
     return(item)
 }
