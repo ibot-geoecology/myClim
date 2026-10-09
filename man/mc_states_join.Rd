@@ -6,7 +6,7 @@
 \usage{
 mc_states_join(
   data,
-  tag = "join_conflict",
+  tag = mc_const_TAG_JOIN_CONFLICT,
   by_type = TRUE,
   tolerance = NULL,
   older_newer_suffix = FALSE

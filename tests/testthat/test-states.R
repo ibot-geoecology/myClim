@@ -417,7 +417,7 @@ test_that("mc_states_outlier NA", {
 test_that("mc_states_join", {
     data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
     states_data <- mc_states_join(data)
-    states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict")
+    states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == mc_const_TAG_JOIN_CONFLICT)
     expect_equal(nrow(states_table), 10)
     expect_true("TMS_1(94184101)" %in% states_table$value)
     expect_true("TMS_2(94184101)" %in% states_table$value)
@@ -426,7 +426,7 @@ test_that("mc_states_join", {
     expect_equal(nrow(filtered_states_table), 2)
     tolerance <- list(T_C=0.5)
     states_data <- mc_states_join(data, tolerance=tolerance)
-    states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == "join_conflict")
+    states_table <- mc_info_states(states_data) %>% dplyr::filter(tag == mc_const_TAG_JOIN_CONFLICT)
     expect_equal(nrow(states_table), 2)
 })
 
@@ -434,7 +434,7 @@ test_that("mc_states_join no states", {
     data <- mc_read_files("../data/join_tolerance", "TOMST", silent=TRUE)
     data <- mc_calc_vwc(data)
     states_data <- mc_states_join(data)
-    states_table <- mc_info_states(states_data) |> dplyr::filter(tag == "join_conflict")
+    states_table <- mc_info_states(states_data) |> dplyr::filter(tag == mc_const_TAG_JOIN_CONFLICT)
     expect_equal(nrow(states_table), 14)
 })
 

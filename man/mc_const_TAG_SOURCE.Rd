@@ -11,6 +11,6 @@ An object of class \code{character} of length 1.
 mc_const_TAG_SOURCE
 }
 \description{
-Constant used to mark the original source data state
+Constant used to mark the original source data state.
 }
 \keyword{datasets}

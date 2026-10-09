@@ -898,7 +898,7 @@ mc_states_outlier <- function(data, table, period=NULL, range_tag="range", jump_
 #' @param older_newer_suffix if true, the suffix `_older`/`_newer` is added to the tag name (default FALSE)
 #' @return Returns a myClim object with added states.
 #' @export
-mc_states_join <- function(data, tag="join_conflict", by_type=TRUE, tolerance=NULL, older_newer_suffix=FALSE) {
+mc_states_join <- function(data, tag=mc_const_TAG_JOIN_CONFLICT, by_type=TRUE, tolerance=NULL, older_newer_suffix=FALSE) {
     .common_stop_if_not_raw_format(data)
     .prep_check_datetime_step_unprocessed(data, stop)
     states_env <- new.env()

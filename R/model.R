@@ -189,15 +189,21 @@ mc_const_SENSOR_logical <- .model_const_VALUE_TYPE_LOGICAL
 
 #' Data state anomaly tag
 #' @description
-#' Constant used to mark data states as anomalies in sensor data
+#' Constant used to mark data states as anomalies in sensor data.
 #' @export
 mc_const_TAG_ANOMALY <- "anomaly"
 
 #' Data state clean conflict tag
 #' @description
-#' Constant used to mark data states that have clean conflicts
+#' Constant used to mark data states that have clean conflicts.
 #' @export
 mc_const_TAG_CLEAN_CONFLICT <- "clean_conflict"
+
+#' Data state displaced tag
+#' @description
+#' Constant used to mark data states where the logger was displaced from its original position (e.g., pulled out of the soil).
+#' @export
+mc_const_TAG_DISPLACED <- "displaced"
 
 #' Data state error tag
 #' @description
@@ -206,9 +212,27 @@ mc_const_TAG_CLEAN_CONFLICT <- "clean_conflict"
 #' @export
 mc_const_TAG_ERROR <- "error"
 
+#' Data state join conflict tag
+#' @description
+#' Constant used to mark data states with conflicts of overlapping time series detected by [myClim::mc_states_join].
+#' @export
+mc_const_TAG_JOIN_CONFLICT <- "join_conflict"
+
+#' Data state loose contact tag
+#' @description
+#' Constant used to mark data states affected by a loose contact of the sensor (e.g., poor contact between the soil moisture sensor and the soil).
+#' @export
+mc_const_TAG_LOOSE_CONTACT <- "loose_contact"
+
+#' Data state missing shield tag
+#' @description
+#' Constant used to mark data states where the radiation shield of the logger was missing.
+#' @export
+mc_const_TAG_MISSING_SHIELD <- "missing_shield"
+
 #' Data state source tag
 #' @description
-#' Constant used to mark the original source data state
+#' Constant used to mark the original source data state.
 #' @export
 mc_const_TAG_SOURCE <- "source"
 

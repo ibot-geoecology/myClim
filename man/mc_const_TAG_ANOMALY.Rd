@@ -11,6 +11,6 @@ An object of class \code{character} of length 1.
 mc_const_TAG_ANOMALY
 }
 \description{
-Constant used to mark data states as anomalies in sensor data
+Constant used to mark data states as anomalies in sensor data.
 }
 \keyword{datasets}
