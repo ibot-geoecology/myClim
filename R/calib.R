@@ -23,12 +23,14 @@ mc_const_CALIB_MOIST_WCOR_T <- 0.64108
 #' from TMS moisture measurements in demineralized water and dry air.
 #'
 #' @details
-#' This function calculate calibration parameters `cor_factor` and `cor_intercept`
-#' accounting for individual differencies in TMS moisture sensor signal in air and in water against reference
+#' This function calculate calibration parameters `cor_slope` and `cor_intercept`
+#' accounting for individual differences in TMS moisture sensor signal in air and in water against reference
 #' loggers which were used for estimation of parameters of soil VWC conversion curves.
 #' These parameters must be loaded into myClim object [myClim::mc_prep_calib_load()]
 #' prior to calling [myClim::mc_calc_vwc()].
-#' Parameters for soils available in my_Clim were derived for TMS3 logger version, with slightly different typical air and water signal.
+#' Parameters for volumetric soil moisture conversion function available in my_Clim were derived for TOMST TMS3 logger version with 
+#' raw moisture signal 114 units in the air and 3634 in water. TOMST TMS4 logger version have different range of moisture signal: 
+#' in the air typically between 250 - 600 units and in water between 3650 and 3800 units.
 #' Correction parameters for TMS4 loggers therefore can be expected in the range of values:
 #' cor_factor = (-150; -450) and cor_slope = (100, 450)
 #'
