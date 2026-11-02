@@ -286,6 +286,68 @@ test_that("mc_states_replace crop_margins_NA", {
                                                             lubridate::ymd_hm("2020-10-28 10:00")))
 })
 
+test_that("mc_states_replace sensors", {
+    data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE, clean=TRUE)
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 9:00"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
+        "A2E32"    ,       "TMS_1",     "TMS_T1", "error",
+        lubridate::ymd_hm("2020-10-16 8:00"), lubridate::ymd_hm("2020-10-16 9:00"), NA_character_,
+        "A2E32"    ,       "TMS_1",     "TMS_T2", "error",
+        lubridate::ymd_hm("2020-10-16 8:00"), lubridate::ymd_hm("2020-10-16 9:00"), NA_character_,
+    ))
+    states_data <- mc_states_insert(data, states)
+    orig_thermo <- data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$values
+    orig_t1 <- data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T1$values
+    orig_t2 <- data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T2$values
+    # one sensor
+    replaced_data <- mc_states_replace(states_data, "error", sensors="TMS_T1")
+    test_raw_data_format(replaced_data)
+    t1 <- replaced_data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T1$values
+    expect_true(all(is.na(t1[8:12])))
+    expect_equal(t1[-(8:12)], orig_t1[-(8:12)])
+    expect_equal(replaced_data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T2$values, orig_t2)
+    expect_equal(replaced_data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$values, orig_thermo)
+    # more sensors
+    replaced_data <- mc_states_replace(states_data, "error", sensors=c("TMS_T1", "Thermo_T"))
+    test_raw_data_format(replaced_data)
+    expect_true(all(is.na(replaced_data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T1$values[8:12])))
+    expect_true(all(is.na(replaced_data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$values[2:4])))
+    expect_equal(replaced_data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T2$values, orig_t2)
+    # NULL - all sensors
+    replaced_data <- mc_states_replace(states_data, "error", sensors=NULL)
+    expect_true(all(is.na(replaced_data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T1$values[8:12])))
+    expect_true(all(is.na(replaced_data$localities$A2E32$loggers[["TMS_1"]]$sensors$TMS_T2$values[8:12])))
+    expect_true(all(is.na(replaced_data$localities$A1E05$loggers[["Thermo_1"]]$sensors$Thermo_T$values[2:4])))
+    # sensor without states or not existing sensor
+    expect_equal(mc_states_replace(states_data, "error", sensors="TMS_T3"), states_data)
+    expect_equal(mc_states_replace(states_data, "error", sensors="not_existing"), states_data)
+    # agg data
+    data_agg <- mc_agg(states_data)
+    replaced_data_agg <- mc_states_replace(data_agg, "error", -200, sensors="TMS_T1")
+    test_agg_data_format(replaced_data_agg)
+    expect_true(all(replaced_data_agg$localities$A2E32$sensors$TMS_T1$values[8:12] == -200))
+    expect_equal(replaced_data_agg$localities$A2E32$sensors$TMS_T2$values,
+                 data_agg$localities$A2E32$sensors$TMS_T2$values)
+    expect_equal(replaced_data_agg$localities$A1E05$sensors$Thermo_T$values,
+                 data_agg$localities$A1E05$sensors$Thermo_T$values)
+    # crop_margins_NA with not selected sensor
+    states <- as.data.frame(tibble::tribble(
+        ~locality_id, ~logger_name, ~sensor_name,    ~tag,
+        ~start,                                 ~end,        ~value,
+        "A1E05"    ,    "Thermo_1",   "Thermo_T", "error",
+        lubridate::ymd_hm("2020-10-28 8:45"), lubridate::ymd_hm("2020-10-28 9:30"), NA_character_,
+    ))
+    states_data <- mc_states_insert(data, states)
+    replaced_data <- mc_states_replace(states_data, "error", crop_margins_NA=TRUE, sensors="TMS_T1")
+    expect_equal(mc_info_logger(replaced_data)$start_date, mc_info_logger(data)$start_date)
+    replaced_data <- mc_states_replace(states_data, "error", crop_margins_NA=TRUE, sensors="Thermo_T")
+    test_raw_data_format(replaced_data)
+    expect_equal(mc_info_logger(replaced_data)$start_date[[1]], lubridate::ymd_hm("2020-10-28 09:45"))
+})
+
 test_that("mc_states_from_sensor", {
     cleaned_data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
     # raw data

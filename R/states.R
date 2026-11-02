@@ -432,6 +432,7 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
 #' @param tags tag assigned to the the sensor values to be replaced. e.g. "error" 
 #' @param replace_value (default NA) The value which will be written into sensor.
 #' @param crop_margins_NA if TRUE function crops NAs on the beginning or end of time-series (default FALSE)
+#' @param sensors sensor names where replace values. If NULL then all. (default NULL)
 #' @return myClim object in the same format as input, with replaced values
 #' @export
 #' @examples
@@ -441,11 +442,14 @@ mc_states_delete <- function(data, localities=NULL, sensors=NULL, tags=NULL) {
 #'                      end=lubridate::ymd_hm("2020-10-28 9:30"))
 #' data <- mc_states_insert(mc_data_example_clean, states)
 #' data <- mc_states_replace(data, "error")
-mc_states_replace <- function(data, tags, replace_value=NA, crop_margins_NA=FALSE) {
+mc_states_replace <- function(data, tags, replace_value=NA, crop_margins_NA=FALSE, sensors=NULL) {
     is_agg_format <- .common_is_agg_format(data)
     
     states_table <- mc_info_states(data)
     states_table <- dplyr::filter(states_table, .data$tag %in% tags)
+    if(!is.null(sensors)) {
+        states_table <- dplyr::filter(states_table, .data$sensor_name %in% sensors)
+    }
     if(nrow(states_table) == 0) {
         return(data)
     }

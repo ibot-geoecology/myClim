@@ -47,7 +47,7 @@ binary dcv files from loggers: Minikin SP1, Minikin QTi and Minikin TH2.
 Time zone offset (\code{tz_offset}) must be set manually in myClim reading functions (\code{\link[=mc_read_files]{mc_read_files()}}, \code{\link[=mc_read_data]{mc_read_data()}}).
 }
 \seealso{
-\link{mc_DataFormat}, \linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}, \linkS4class{mc_HOBODataFormat},
-\linkS4class{mc_EMSDataFormat}
+\link{mc_DataFormat}, \link[=mc_TOMSTDataFormat-class]{mc_TOMSTDataFormat}, \link[=mc_TOMSTJoinDataFormat-class]{mc_TOMSTJoinDataFormat}, \link[=mc_HOBODataFormat-class]{mc_HOBODataFormat},
+\link[=mc_EMSDataFormat-class]{mc_EMSDataFormat}
 }
 \keyword{datasets}

@@ -12,7 +12,7 @@ mc_data_sensors
 }
 \description{
 R object of class environment with the definitions of (micro)climatic sensors.
-see \linkS4class{mc_Sensor}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
+see \link[=mc_Sensor-class]{mc_Sensor}. Similarly as in case of logger format definitions \link[=mc_DataFormat-class]{mc_DataFormat} it is easy
 to add new, sensor here. There is also universal sensor \code{real} where you can store any real values.
 }
 \details{

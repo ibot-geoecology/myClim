@@ -232,6 +232,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Vojtěch Kalčík \email{Vojtech.Kalcik@ibot.cas.cz}
   \item Matěj Man \email{Matej.Man@ibot.cas.cz}
   \item Martin Macek \email{Martin.Macek@ibot.cas.cz}
   \item Josef Brůna \email{Josef.Bruna@ibot.cas.cz}

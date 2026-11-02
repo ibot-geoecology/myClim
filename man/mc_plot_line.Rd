@@ -84,7 +84,7 @@ they are plotted together for \code{facet = "locality"} e.g., when you have
 TMS_T1, TMS_T2, TMS_T3, Thermo_T, and VWC you get plot with 5 lines of different colors and
 two y axes. Secondary y axes are scaled with calculation \code{values * scale_coeff}.
 If scaling coefficient is NULL than function try to detects scale coefficient from
-physical unit of sensors see \linkS4class{mc_Physical}. Scaling is useful when
+physical unit of sensors see \link[=mc_Physical-class]{mc_Physical}. Scaling is useful when
 plotting together e.g. temperature and moisture. For native myClim loggers
 (TOMST, HOBO U-23) scaling coefficients are pre-defined.
 For other cases when plotting two physicals together,

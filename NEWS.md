@@ -1,3 +1,6 @@
+# myClim 1.6.0
+* The function `mc_states_replace` has a new parameter `sensors` to replace values only on selected sensors.
+
 # myClim 1.5.8
 * Added standard constants for tags `join_conflict`, `missing_shield`, `displaced` and `loose_contact` (`mc_const_TAG_JOIN_CONFLICT`, `mc_const_TAG_MISSING_SHIELD`, `mc_const_TAG_DISPLACED`, `mc_const_TAG_LOOSE_CONTACT`).
 * Added new functions `mc_calc_psat` and `mc_calc_pact`.

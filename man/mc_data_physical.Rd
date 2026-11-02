@@ -13,11 +13,11 @@ mc_data_physical
 \description{
 R object of class environment with the definitions of physical elements
 for recording the microclimate e.g. temperature, speed, depth, volumetric water content...
-see \linkS4class{mc_Physical}. Similarly as in case of logger format definitions \linkS4class{mc_DataFormat} it is easy
+see \link[=mc_Physical-class]{mc_Physical}. Similarly as in case of logger format definitions \link[=mc_DataFormat-class]{mc_DataFormat} it is easy
 to add new, physical here.
 }
 \seealso{
-\linkS4class{mc_Physical}
+\link[=mc_Physical-class]{mc_Physical}
 
 Currently supported physical elements:
 \itemize{

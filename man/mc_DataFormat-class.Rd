@@ -75,5 +75,5 @@ and \code{date_format} is \code{"\%Y-\%m-\%d \%H:\%M:\%S\%z"}, the value is auto
 }}
 
 \seealso{
-\link{mc_data_formats}, \linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}, \linkS4class{mc_HOBODataFormat}
+\link{mc_data_formats}, \link[=mc_TOMSTDataFormat-class]{mc_TOMSTDataFormat}, \link[=mc_TOMSTJoinDataFormat-class]{mc_TOMSTJoinDataFormat}, \link[=mc_HOBODataFormat-class]{mc_HOBODataFormat}
 }

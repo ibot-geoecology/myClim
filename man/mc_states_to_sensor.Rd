@@ -19,11 +19,10 @@ mc_states_to_sensor(
 
 \item{to_sensor}{A vector of names for the output sensors.
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{ If `to_sensor` is a single sensor name, the logical sensor is created 
- from the union of states across all sensors with the same tag. If `to_sensor` 
- contains multiple sensor names, the length of the vector must match the length 
- of `source_sensor`.
-}\if{html}{\out{</div>}}}
+If \code{to_sensor} is a single sensor name, the logical sensor is created
+from the union of states across all sensors with the same tag. If \code{to_sensor}
+contains multiple sensor names, the length of the vector must match the length
+of \code{source_sensor}.}
 
 \item{source_sensor}{A vector of sensors containing the states to be converted into a new sensor.
 If NULL, states from all sensors are used. (default is NULL)}

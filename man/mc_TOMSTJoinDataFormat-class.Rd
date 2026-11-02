@@ -14,5 +14,5 @@ The code defining the class is in section methods ./R/model.R
 TMS join file format is the output of IBOT internal post-processing of TOMST logger files.
 }
 \seealso{
-\link{mc_DataFormat},\link{mc_data_formats},\linkS4class{mc_TOMSTDataFormat}, \linkS4class{mc_TOMSTJoinDataFormat}
+\link{mc_DataFormat},\link{mc_data_formats},\link[=mc_TOMSTDataFormat-class]{mc_TOMSTDataFormat}, \link[=mc_TOMSTJoinDataFormat-class]{mc_TOMSTJoinDataFormat}
 }

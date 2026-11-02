@@ -4,7 +4,13 @@
 \alias{mc_states_replace}
 \title{Replace values by states with tag}
 \usage{
-mc_states_replace(data, tags, replace_value = NA, crop_margins_NA = FALSE)
+mc_states_replace(
+  data,
+  tags,
+  replace_value = NA,
+  crop_margins_NA = FALSE,
+  sensors = NULL
+)
 }
 \arguments{
 \item{data}{myClim object see \link{myClim-package}}
@@ -14,6 +20,8 @@ mc_states_replace(data, tags, replace_value = NA, crop_margins_NA = FALSE)
 \item{replace_value}{(default NA) The value which will be written into sensor.}
 
 \item{crop_margins_NA}{if TRUE function crops NAs on the beginning or end of time-series (default FALSE)}
+
+\item{sensors}{sensor names where replace values. If NULL then all. (default NULL)}
 }
 \value{
 myClim object in the same format as input, with replaced values
