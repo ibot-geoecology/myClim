@@ -25,7 +25,7 @@ Currently supported physical elements:
 \item l_mm - length in mm
 \item l_um - length in um
 \item VWC - volumetric moisture in m3/m3
-\item PPFD - photosynthetic photon flux density in μmol/m²/s
+\item PPFD - photosynthetic photon flux density in µmol/m²/s
 \item RH - relative humidity in \%
 \item SWP_bar - soil water potential in negative bar (-bar)
 \item T_C - temperature in °C

@@ -32,7 +32,7 @@ Currently supported sensors:
 \item integer - universal sensor with integer values
 \item logical - universal sensor with logical values
 \item precipitation - (mm)
-\item QTi_PPFD - photosynthetic photon flux density in EMS Minikin QTi (μmol/m²/s)
+\item QTi_PPFD - photosynthetic photon flux density in EMS Minikin QTi (µmol/m²/s)
 \item QTi_T - temperature in EMS Minikin QTi (°C)
 \item real - universal sensor with real values
 \item RH - relative humidity sensor (\%)

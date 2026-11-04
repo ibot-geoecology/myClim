@@ -155,7 +155,7 @@
 #' * integer - universal sensor with integer values
 #' * logical - universal sensor with logical values
 #' * precipitation - (mm)
-#' * QTi_PPFD - photosynthetic photon flux density in EMS Minikin QTi (μmol/m²/s)
+#' * QTi_PPFD - photosynthetic photon flux density in EMS Minikin QTi (µmol/m²/s)
 #' * QTi_T - temperature in EMS Minikin QTi (°C)
 #' * real - universal sensor with real values
 #' * RH - relative humidity sensor (%)
@@ -190,7 +190,7 @@
 #' * l_mm - length in mm
 #' * l_um - length in um
 #' * VWC - volumetric moisture in m3/m3
-#' * PPFD - photosynthetic photon flux density in μmol/m²/s
+#' * PPFD - photosynthetic photon flux density in µmol/m²/s
 #' * RH - relative humidity in %
 #' * SWP_bar - soil water potential in negative bar (-bar)
 #' * T_C - temperature in °C

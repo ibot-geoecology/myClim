@@ -18,8 +18,8 @@ mc_data_physical[[.model_const_PHYSICAL_l_mm]]@scale_coeff <- 1/10
 
 mc_data_physical[[.model_const_PHYSICAL_l_um]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_l_um]]@name <- .model_const_PHYSICAL_l_um
-mc_data_physical[[.model_const_PHYSICAL_l_um]]@description <- "Length μm"
-mc_data_physical[[.model_const_PHYSICAL_l_um]]@units <- "μm"
+mc_data_physical[[.model_const_PHYSICAL_l_um]]@description <- "Length µm"
+mc_data_physical[[.model_const_PHYSICAL_l_um]]@units <- "µm"
 mc_data_physical[[.model_const_PHYSICAL_l_um]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_l_um]]@scale_coeff <- 1/1000
 
@@ -88,8 +88,8 @@ mc_data_physical[[.model_const_PHYSICAL_SWP_bar]]@scale_coeff <- 1/20
 
 mc_data_physical[[.model_const_PHYSICAL_PPFD]] <- new("mc_Physical")
 mc_data_physical[[.model_const_PHYSICAL_PPFD]]@name <- .model_const_PHYSICAL_PPFD
-mc_data_physical[[.model_const_PHYSICAL_PPFD]]@description <- "PPFD μmol/m²/s"
-mc_data_physical[[.model_const_PHYSICAL_PPFD]]@units <- "μmol/m²/s"
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@description <- "PPFD µmol/m²/s"
+mc_data_physical[[.model_const_PHYSICAL_PPFD]]@units <- "µmol/m²/s"
 mc_data_physical[[.model_const_PHYSICAL_PPFD]]@viridis_color_map <- "D"
 mc_data_physical[[.model_const_PHYSICAL_PPFD]]@scale_coeff <- 1/800
 
