@@ -482,22 +482,23 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' Conversion of raw TMS soil moisture values to volumetric water content (VWC)
 #'
 #' @description
-#' This function creates a new virtual sensor on the locality within the myClim data object.
 #' Function converts the raw TMS soil moisture (scaled TDT signal)
-#' to volumetric water content (VWC).
+#' to volumetric water content (VWC). Calculated VWC values are added as new virtual logger.
 #'
 #' @details
-#' This function is suitable for TOMST TMS loggers measuring soil moisture in raw TMS units. 
+#' This function is designed for TOMST TMS loggers. 
 #' The raw TMS units represents inverted and numerically rescaled (1-4095) electromagnetic signal from the moisture sensor working
-#' on Time Domain Transmission principle (Wild et al. 2019). For TMS4 logger, the typical raw TMS moisture values range from cca    
-#' 115 units in dry air to cca 3635 units in distilled water - see [mc_calib_moisture].
+#' on Time Domain Transmission principle (Wild et al. 2019). For TMS3 logger version, the typical raw TMS moisture values ranged from     
+#' cca 115 units in dry air to cca 3635 units in distilled water. TMS4 version has slightly different range of raw values (typically  
+#' 250-700 units for air and 3650-3900 in water, depending on production series) and calibration is needed to comply with 
+#' available calibration curves inferited from Wild et al. 2019 - see [mc_calib_moisture].
 #'
 #' Raw TMS moisture values can be converted to the soil volumetric water content with calibration curves. The function provides 
-#' several experimentally derived calibration curves which were developped at reference temperature. To account for the difference 
-#' between reference and actual temperature, the function uses actual soil temperature values measured by TMS_T1 soil temperature 
-#' sensor.
+#' several experimentally derived calibration curves which were developped at reference temperature. To account for the temperature 
+#' drift, the function uses difference between actual soil temperature measured by TMS_T1 soil and reference temperature (default = 24°C)
 #'
-#' The default calibration curve is "universal", which was designed for mineral soils (see Kopecký et al. 2021). 
+#' The default calibration curve is "universal", which is average of curves derived for different mineral soils 
+#' (see Kopecký et al. 2021). 
 #' Specific calibration curves were developed for several soil types (see Wild et al. 2019) and the user can choose one of these 
 #' or can define its own calibration - see [mc_data_vwc_parameters]
 #' 
@@ -509,8 +510,9 @@ mc_calc_snow_agg <- function(data, snow_sensor="snow", localities=NULL, period=3
 #' It is also possible to define a new calibarion function with custom parameters `a`, `b` and `c`. These can be
 #' derived e.g. from TOMST TMS Calibr utility after entering custom ratio of clay, silt, sand.
 #'
-#' **Warning:** TOMST TMS Calibr utility was developed for TMS3 series of TMS loggers, which have 
-#' different range of raw soil moisture values than TMS4 series. 
+#' **Warning:** TOMST TMS Calibr utility was calibrated using TMS3 series of TMS loggers, which have 
+#' different range of raw soil moisture values than TMS4 series. It is necessary to recalibrate TMS4 loggers using [mc_calib_moisture] 
+#' function for actual range of raw air and water moisture signal.
 #'
 #' The function by default replace the moisture records in frozen soils with NA (param *frozen2NA*),
 #' because the TMS soil moisture sensor was not designed to measure in frozen soils and the returned values are thus not comparable
