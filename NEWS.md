@@ -1,3 +1,7 @@
+# myClim 1.6.1
+* Fixed a bug in `mc_states_from_sensor`: sensors listed in `to_sensor` that are not present in a logger no longer corrupt the data object; they are now ignored.
+* The parameter `to_sensor` of `mc_states_from_sensor` now defaults to `NULL`, which attributes the new states to all sensors of the logger.
+
 # myClim 1.6.0
 * The function `mc_states_replace` has a new parameter `sensors` to replace values only on selected sensors.
 

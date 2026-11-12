@@ -8,7 +8,7 @@ mc_states_from_sensor(
   data,
   source_sensor,
   tag,
-  to_sensor,
+  to_sensor = NULL,
   value = NA,
   inverse = FALSE
 )
@@ -20,7 +20,9 @@ mc_states_from_sensor(
 
 \item{tag}{A tag for the new states, e.g., "snow".}
 
-\item{to_sensor}{A vector of sensor names to which the new states should be attributed.}
+\item{to_sensor}{A vector of sensor names to which the new states should be attributed.
+Sensors that are not present in a logger are ignored. If NULL (default),
+the states are attributed to all sensors of the logger.}
 
 \item{value}{The value of the new states (default is NA)}
 

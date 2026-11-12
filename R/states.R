@@ -554,6 +554,8 @@ mc_states_replace <- function(data, tags, replace_value=NA, crop_margins_NA=FALS
 #' @param source_sensor A logical sensor to be converted to states.
 #' @param tag A tag for the new states, e.g., "snow".
 #' @param to_sensor A vector of sensor names to which the new states should be attributed.
+#' Sensors that are not present in a logger are ignored. If NULL (default),
+#' the states are attributed to all sensors of the logger.
 #' @param value The value of the new states (default is NA)
 #' @param inverse A logical value. If FALSE, states are created for periods when `source_sensor` is TRUE (default is FALSE).
 #' @return Returns a myClim object in the same format as the input, with added states.
@@ -561,7 +563,7 @@ mc_states_replace <- function(data, tags, replace_value=NA, crop_margins_NA=FALS
 #' @examples
 #' data <- mc_calc_snow(mc_data_example_agg, "TMS_T2", output_sensor="snow")
 #' data <- mc_states_from_sensor(data, source_sensor="snow", tag="snow", to_sensor="TMS_T2")
-mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA, inverse=FALSE) {
+mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor=NULL, value=NA, inverse=FALSE) {
     .prep_check_datetime_step_unprocessed(data, stop)
     is_agg_format <- .common_is_agg_format(data)
     
@@ -569,16 +571,21 @@ mc_states_from_sensor <- function(data, source_sensor, tag, to_sensor, value=NA,
         if(!(source_sensor %in% names(item$sensors))) {
             return(item)
         }
-        if(!any(to_sensor %in% names(item$sensors))) {
+        target_sensors <- if(is.null(to_sensor)) names(item$sensors) else intersect(to_sensor, names(item$sensors))
+        if(length(target_sensors) == 0) {
             return(item)
         }
         new_states_table <- .states_get_states_table_from_logical_sensor(item$sensors[[source_sensor]], item$datetime, tag, value, inverse)
         if(nrow(new_states_table) == 0) {
             return(item)
         }
-        for(to_sensor_name in to_sensor) {
+        for(to_sensor_name in target_sensors) {
             to_sensor_item <- item$sensors[[to_sensor_name]]
-            states_table <- dplyr::union(to_sensor_item$states, new_states_table)
+            if(nrow(to_sensor_item$states) == 0) {
+                states_table <- new_states_table
+            } else {
+                states_table <- dplyr::union(to_sensor_item$states, new_states_table)
+            }
             item$sensors[[to_sensor_name]]$states <- states_table
         }
         return(item)

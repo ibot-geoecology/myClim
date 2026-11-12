@@ -375,6 +375,64 @@ test_that("mc_states_from_sensor", {
     expect_equal(nrow(states_table), 3)
 })
 
+test_that("mc_states_from_sensor with to_sensor missing in logger", {
+    cleaned_data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
+    snow_raw_data <- mc_calc_snow(cleaned_data, "TMS_T2", output_sensor="T2_snow")
+    # Thermo_T is not present in the TMS loggers; must be ignored
+    data_with_states <- mc_states_from_sensor(snow_raw_data, "T2_snow", "snow", c("TMS_T2", "Thermo_T"))
+    test_raw_data_format(data_with_states)
+    for(locality in data_with_states$localities) {
+        for(logger in locality$loggers) {
+            expect_false("Thermo_T" %in% names(logger$sensors))
+        }
+    }
+    expect_equal(mc_info_states(data_with_states),
+                 mc_info_states(mc_states_from_sensor(snow_raw_data, "T2_snow", "snow", "TMS_T2")))
+    # agg data
+    snow_agg_data <- mc_agg(snow_raw_data, fun=list(TMS_T2="max", T2_snow="max"), period="day")
+    agg_data_with_states <- mc_states_from_sensor(snow_agg_data, "T2_snow_max", "snow", c("TMS_T2_max", "Thermo_T"))
+    test_agg_data_format(agg_data_with_states)
+    for(locality in agg_data_with_states$localities) {
+        expect_false("Thermo_T" %in% names(locality$sensors))
+    }
+})
+
+test_that("mc_states_from_sensor with to_sensor NULL", {
+    cleaned_data <- mc_read_files("../data/eco-snow", "TOMST", silent=T)
+    snow_raw_data <- mc_calc_snow(cleaned_data, "TMS_T2", output_sensor="T2_snow")
+    data_with_states <- mc_states_from_sensor(snow_raw_data, "T2_snow", "snow")
+    test_raw_data_format(data_with_states)
+    n_states <- 0
+    for(i in seq_along(data_with_states$localities)) {
+        for(j in seq_along(data_with_states$localities[[i]]$loggers)) {
+            logger <- data_with_states$localities[[i]]$loggers[[j]]
+            orig_logger <- snow_raw_data$localities[[i]]$loggers[[j]]
+            expect_equal(names(logger$sensors), names(orig_logger$sensors))
+            if("T2_snow" %in% names(logger$sensors)) {
+                # all sensors share the same new states (logger may have no snow period)
+                n_snow <- function(sensor) sum(sensor$states$tag == "snow")
+                for(sensor in logger$sensors) {
+                    expect_equal(n_snow(sensor), n_snow(logger$sensors$T2_snow))
+                }
+                n_states <- n_states + n_snow(logger$sensors$T2_snow)
+            } else {
+                expect_equal(logger, orig_logger)
+            }
+        }
+    }
+    expect_gt(n_states, 0)
+    # agg data
+    snow_agg_data <- mc_agg(snow_raw_data, fun=list(TMS_T2="max", T2_snow="max"), period="day")
+    agg_data_with_states <- mc_states_from_sensor(snow_agg_data, "T2_snow_max", "snow")
+    test_agg_data_format(agg_data_with_states)
+    for(locality in agg_data_with_states$localities) {
+        for(sensor in locality$sensors) {
+            expect_equal(sum(sensor$states$tag == "snow"), sum(locality$sensors$T2_snow_max$states$tag == "snow"))
+        }
+    }
+    expect_gt(nrow(mc_info_states(agg_data_with_states)), 0)
+})
+
 test_that("mc_states_to_sensor", {
     data <- mc_read_data("../data/TOMST/files_table.csv", silent=TRUE)
     states <- as.data.frame(tibble::tribble(
